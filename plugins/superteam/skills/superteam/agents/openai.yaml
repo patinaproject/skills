@@ -1,6 +1,6 @@
 interface:
   display_name: "Superteam"
-  short_description: "Run issue-driven teammate orchestration from design through finish-state review"
+  short_description: "Build with a team of agents using Superpowers"
   default_prompt: "Use $superteam to route this issue across Team Lead, Brainstormer, Planner, Executor, Reviewer, and Finisher with explicit gates and publish-state follow-through."
 
 policy:

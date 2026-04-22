@@ -1,7 +1,7 @@
 {
   "name": "superteam",
   "version": "0.1.0",
-  "description": "Codex plugin that exposes the superteam orchestration skill for issue-driven multi-agent work.",
+  "description": "Build with a team of agents using Superpowers",
   "author": {
     "name": "Patina Project",
     "url": "https://github.com/patinaproject"
@@ -13,8 +13,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Superteam",
-    "shortDescription": "Run issue-driven multi-agent delivery workflows.",
-    "longDescription": "Install the Superteam plugin to make the superteam skill importable in Codex as a packaged workflow for design, planning, execution, review, and finish stages.",
+    "shortDescription": "Build with a team of agents using Superpowers",
+    "longDescription": "Move a GitHub issue to a testable, demoable outcome as quickly as possible through brainstorm, plan, execute, review, and CI follow-through.",
     "developerName": "Patina Project",
     "category": "Productivity",
     "capabilities": ["Write", "Interactive"],
