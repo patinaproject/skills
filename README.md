@@ -1,6 +1,6 @@
 # Patina Project Skills
 
-This repository is the Codex marketplace for Patina Project plugins.
+This repository carries the Patina Project marketplace catalogs for both Codex and Claude plugins.
 
 It is a marketplace catalog, not the source repo for every plugin. Marketplace entries can point at plugins packaged in this repo, or at Git-backed plugin sources maintained in other Patina Project repositories.
 
@@ -8,9 +8,18 @@ It is a marketplace catalog, not the source repo for every plugin. Marketplace e
 
 - `superteam`: installed from `patinaproject/superteam` using a `git-subdir` source that targets `./plugins/superteam` on `main`
 
+## Install Surfaces
+
+- `patinaproject/skills` owns the marketplace catalogs and contributor docs
+- `patinaproject/superteam` is the source of truth for the upstream plugin package
+- Codex marketplace metadata lives in `.agents/plugins/marketplace.json`
+- Claude marketplace metadata lives in `.claude-plugin/marketplace.json`
+- Codex installs `superteam` through the marketplace entry that targets `./plugins/superteam` in `patinaproject/superteam`
+- The Claude plugin packaging and install surface live in the upstream `patinaproject/superteam` repository through its root `.claude-plugin/plugin.json`
+
 ## How it works
 
-Codex reads the marketplace definition from `.agents/plugins/marketplace.json`.
+Codex reads the marketplace definition from `.agents/plugins/marketplace.json`, and Claude reads the companion marketplace definition from `.claude-plugin/marketplace.json`.
 
 In this repo, the marketplace is named `patinaproject-skills` and exposed in the UI as `Patina Project Skills`.
 
@@ -21,7 +30,7 @@ The current `superteam` entry does not vendor plugin files in this repository. I
 - plugin path: `./plugins/superteam`
 - ref: `main`
 
-That keeps the marketplace isolated while allowing plugin source repos to stay independent.
+That keeps the marketplace catalogs isolated while allowing plugin source repos to stay independent.
 
 ## Install In Codex
 
@@ -65,7 +74,7 @@ Use $superteam to coordinate an implementation plan for issue #123.
 
 ## Maintenance Notes
 
-- Update marketplace entries in `.agents/plugins/marketplace.json`
+- Update marketplace entries in `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json`
 - Keep Git-backed entries pinned to an explicit `ref` or commit
 - Maintain plugin source and packaging in the owning source repository
 - For `superteam`, the source-of-truth repo is `patinaproject/superteam`

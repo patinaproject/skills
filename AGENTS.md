@@ -2,12 +2,20 @@
 
 ## Project Structure & Module Organization
 
-This repo is the marketplace surface for Patina Project Codex plugins.
+This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
-- `.agents/plugins/marketplace.json`: source of truth for plugin registration
-- `plugins/`: optional vendored plugins when the marketplace carries local packaged copies
-- `docs/`: marketplace and maintenance docs
-- root tooling: `pnpm`, Commitizen, commitlint, and Husky
+- `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
+- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth
+- `plugins/`: optional vendored plugin packages when this repo carries local copies
+- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md` and, when present, `docs/superpowers/`
+- If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
+- root config: `package.json`, `commitizen.config.js`, `commitlint.config.js`, and `.husky/`
+
+For Superpowers-generated design and planning artifacts, use issue-based filenames and the following acceptance criteria format:
+
+- `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<issue-title>-design.md`
+- `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<issue-title>-plan.md`
+- Acceptance criteria IDs: `AC-<issue-number>-<integer>`
 
 ## Build, Test, and Development Commands
 
@@ -40,3 +48,13 @@ Commits must use conventional commit types, no scopes, and a required GitHub iss
 Examples:
 - `chore: #1 bootstrap marketplace repo`
 - `feat: #12 add superteam marketplace entry`
+
+For squash-and-merge workflows, PR titles must match the commitlint commit format:
+
+`type: #123 short description`
+
+When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
+
+- Use one `### AC-<issue>-<n>` heading per relevant AC
+- Put a short outcome summary directly under each heading
+- Put verification steps under the AC they validate
