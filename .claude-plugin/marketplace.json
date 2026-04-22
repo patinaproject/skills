@@ -1,0 +1,21 @@
+{
+  "name": "patinaproject-skills",
+  "owner": {
+    "name": "Patina Project",
+    "url": "https://github.com/patinaproject"
+  },
+  "metadata": {
+    "description": "Marketplace catalog for Patina Project Claude Code plugins and skills."
+  },
+  "plugins": [
+    {
+      "name": "superteam",
+      "description": "Claude Code plugin that exposes the superteam orchestration skill for issue-driven multi-agent work.",
+      "category": "productivity",
+      "source": {
+        "source": "github",
+        "repo": "patinaproject/superteam"
+      }
+    }
+  ]
+}
