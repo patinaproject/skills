@@ -1,8 +1,22 @@
 {
-  "name": "patina-project",
+  "name": "patinaproject-skills",
   "interface": {
-    "displayName": "Patina Project"
+    "displayName": "Patina Project Skills"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "superteam",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/patinaproject/superteam.git",
+        "path": "./plugins/superteam",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
 }
-

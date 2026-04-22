@@ -5,7 +5,7 @@
 This repo is the marketplace surface for Patina Project Codex plugins.
 
 - `.agents/plugins/marketplace.json`: source of truth for plugin registration
-- `plugins/`: packaged plugins ready for Codex discovery
+- `plugins/`: optional vendored plugins when the marketplace carries local packaged copies
 - `docs/`: marketplace and maintenance docs
 - root tooling: `pnpm`, Commitizen, commitlint, and Husky
 
@@ -14,18 +14,21 @@ This repo is the marketplace surface for Patina Project Codex plugins.
 - `pnpm install`: install dev tooling and initialize Husky
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
-- `find plugins -maxdepth 5 -type f | sort`: inspect packaged plugin contents
+- `sed -n '1,200p' .agents/plugins/marketplace.json`: inspect marketplace entries
+- `find plugins -maxdepth 5 -type f | sort`: inspect vendored plugin contents when this repo carries local plugin copies
 
 ## Coding Style & Naming Conventions
 
 - Use lowercase names for plugin folders
 - Keep plugin names, manifest names, and marketplace entries aligned
 - Use Markdown for docs and JSON for marketplace/plugin manifests
+- For Git-backed entries, keep `source.path` relative to the remote repo root and pin an explicit `ref` or `sha`
 
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
 - Review manifest files with `sed -n '1,200p' <file>`
+- Review Git-backed marketplace entries in `.agents/plugins/marketplace.json`
 - Run the relevant plugin validator when a packaged skill includes one
 
 ## Commit & Pull Request Guidelines
