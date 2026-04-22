@@ -1,4 +1,4 @@
-# Patina Project Skills
+# Patina Project
 
 This repository carries the Patina Project marketplace catalogs for both Codex and Claude plugins.
 
@@ -21,7 +21,7 @@ It is a marketplace catalog, not the source repo for every plugin. Marketplace e
 
 Codex reads the marketplace definition from `.agents/plugins/marketplace.json`, and Claude reads the companion marketplace definition from `.claude-plugin/marketplace.json`.
 
-In this repo, the marketplace is named `patinaproject-skills` and exposed in the UI as `Patina Project Skills`.
+In this repo, the marketplace is named `patinaproject-skills` and exposed in the UI as `Patina Project`.
 
 The current `superteam` entry does not vendor plugin files in this repository. Instead, it tells Codex to fetch the plugin package from the `patinaproject/superteam` repository:
 
@@ -46,7 +46,7 @@ Refresh tracked marketplaces:
 codex plugin marketplace upgrade
 ```
 
-Then open the Codex Plugin Directory, find `Patina Project Skills`, and install `superteam`.
+Then open the Codex Plugin Directory, find `Patina Project`, and install `superteam`.
 
 ## Install In Claude Code
 
