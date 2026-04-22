@@ -1,6 +1,6 @@
 # Repository File Structure
 
-This repository keeps source skills in `skills/`, packaged plugin content in `plugins/`, and supporting documentation in `docs/`.
+This document is a contributor reference for the repository layout. For user-facing installation and workflow onboarding, start with `README.md`.
 
 ## Top level
 
@@ -40,7 +40,7 @@ Keep skill directories self-contained. Prefer adjacent support files over hidden
 
 The repository supports two plugin surfaces.
 
-Claude Code loads the repository root through `.claude-plugin/plugin.json`, which points at the source skills in `./skills`.
+Claude Code loads the repository root through `.claude-plugin/plugin.json`, which makes the repository root the Claude Code plugin surface and points at the source skills in `./skills`.
 
 Codex consumes the packaged plugin under `plugins/superteam/`.
 
@@ -68,7 +68,7 @@ plugins/
 - `agents/openai.yaml`: optional skill UI metadata for Codex lists and chips
 
 Use `.agents/plugins/marketplace.json` to register repo-local plugins for Codex discovery.
-When publishing `superteam` to an external marketplace, treat `plugins/superteam/` as the Codex install surface and `skills/superteam/` as the authoring source. Refresh the packaged copy with `pnpm sync:plugin`.
+When publishing `superteam` to an external marketplace, treat `plugins/superteam/` as the packaged Codex install surface and `skills/superteam/` as the authoring source. Refresh the packaged copy with `pnpm sync:plugin`.
 
 ## Docs
 

@@ -13,10 +13,10 @@ This repository is organized around reusable skill packages and supporting docum
 
 Keep each skill self-contained. Prefer adjacent support files like `agent-spawn-template.md` or `pr-body-template.md` over hidden tool-specific wrappers unless a runtime requires them.
 
-For Superpowers-generated design and planning artifacts, use the current git branch name as the topic slug. Name files as:
+For Superpowers-generated design and planning artifacts, use the issue number and issue title as the topic slug. Name files as:
 
-- `docs/superpowers/specs/YYYY-MM-DD-<branch-name>-design.md`
-- `docs/superpowers/plans/YYYY-MM-DD-<branch-name>-plan.md`
+- `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<issue-title>-design.md`
+- `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<issue-title>-plan.md`
 
 Use human-readable H1 titles inside those files:
 
