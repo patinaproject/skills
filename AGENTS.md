@@ -6,11 +6,24 @@ This repository is organized around reusable skill packages and supporting docum
 
 - `skills/`: installable skill directories. Each skill should live in its own folder, for example `skills/superteam/`.
 - `plugins/`: Codex plugin packages, for example `plugins/superteam/.codex-plugin/plugin.json`.
+- If `.claude-plugin/plugin.json` exists, the repository root is the Claude plugin install surface.
 - `docs/`: contributor-facing docs plus planning artifacts such as `docs/file-structure.md` and `docs/superpowers/plans/`.
 - `.agents/plugins/marketplace.json`: repo-local plugin catalog for Codex discovery.
 - root config: `package.json`, `commitlint.config.js`, and `.husky/` define local tooling and commit enforcement.
 
 Keep each skill self-contained. Prefer adjacent support files like `agent-spawn-template.md` or `pr-body-template.md` over hidden tool-specific wrappers unless a runtime requires them.
+
+For Superpowers-generated design and planning artifacts, use the current git branch name as the topic slug. Name files as:
+
+- `docs/superpowers/specs/YYYY-MM-DD-<branch-name>-design.md`
+- `docs/superpowers/plans/YYYY-MM-DD-<branch-name>-plan.md`
+
+Use human-readable H1 titles inside those files:
+
+- Design docs: `# Design: <exact issue title> [#<issue>](<issue-url>)`
+- Plan docs: `# Plan: <exact issue title> [#<issue>](<issue-url>)`
+
+Format acceptance criteria IDs as `AC-<issue-number>-<integer>`, for example `AC-5-1`.
 
 ## Build, Test, and Development Commands
 

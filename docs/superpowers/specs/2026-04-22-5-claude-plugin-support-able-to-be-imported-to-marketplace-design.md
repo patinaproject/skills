@@ -1,4 +1,4 @@
-# Claude Marketplace Support Design
+# Design: Claude plugin support (able to be imported to marketplace) [#5](https://github.com/patinaproject/superteam/issues/5)
 
 ## Summary
 
@@ -141,11 +141,11 @@ Both repos need explicit installation guidance:
 
 ## Acceptance Criteria
 
-- AC-1: `patinaproject/superteam` contains the Claude-native package artifacts needed for direct installation
-- AC-2: `patinaproject/superteam` documentation explains Claude-native direct installation
-- AC-3: `patinaproject/skills` marketplace metadata exposes a Claude-compatible installation route for `superteam`
-- AC-4: `patinaproject/skills` documentation explains that its marketplace entry depends on the package maintained in `patinaproject/superteam`
-- AC-5: The implementation does not create two independently maintained copies of the `superteam` package
+- AC-5-1: `patinaproject/superteam` contains the Claude-native package artifacts needed for direct installation
+- AC-5-2: `patinaproject/superteam` documentation explains Claude-native direct installation
+- AC-5-3: `patinaproject/skills` marketplace metadata exposes a Claude-compatible installation route for `superteam`
+- AC-5-4: `patinaproject/skills` documentation explains that its marketplace entry depends on the package maintained in `patinaproject/superteam`
+- AC-5-5: The implementation does not create two independently maintained copies of the `superteam` package
 
 ## Implementation Notes
 

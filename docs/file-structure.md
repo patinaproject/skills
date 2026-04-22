@@ -4,8 +4,9 @@ This repository keeps source skills in `skills/`, packaged plugin content in `pl
 
 ## Top level
 
+- `.claude-plugin/`: Claude Code plugin manifest for the repository root
 - `skills/`: installable or shareable skill packages
-- `plugins/`: Codex plugin packages with `.codex-plugin/plugin.json`
+- `plugins/`: plugin packages for external install surfaces
 - `docs/`: repository docs, design docs, and planning artifacts
 - `.agents/plugins/marketplace.json`: local plugin catalog for Codex discovery
 - `package.json`: minimal repo tooling managed with `pnpm`
@@ -37,11 +38,17 @@ Keep skill directories self-contained. Prefer adjacent support files over hidden
 
 ## Plugins
 
-Codex-importable plugins live under `plugins/`.
+The repository supports two plugin surfaces.
+
+Claude Code loads the repository root through `.claude-plugin/plugin.json`, which points at the source skills in `./skills`.
+
+Codex consumes the packaged plugin under `plugins/superteam/`.
 
 Example:
 
 ```text
+.claude-plugin/
+  plugin.json
 plugins/
   superteam/
     .codex-plugin/
@@ -55,12 +62,13 @@ plugins/
           openai.yaml
 ```
 
-- `.codex-plugin/plugin.json`: plugin manifest and UI metadata
-- `skills/`: packaged skills exposed by the plugin
+- `.claude-plugin/plugin.json`: Claude Code manifest for the repository root
+- `.codex-plugin/plugin.json`: packaged plugin manifest and UI metadata
+- `plugins/superteam/skills/`: packaged skills exposed by the Codex plugin
 - `agents/openai.yaml`: optional skill UI metadata for Codex lists and chips
 
 Use `.agents/plugins/marketplace.json` to register repo-local plugins for Codex discovery.
-When publishing `superteam` to an external marketplace, treat `plugins/superteam/` as the install surface and `skills/superteam/` as the authoring source. Refresh the packaged copy with `pnpm sync:plugin`.
+When publishing `superteam` to an external marketplace, treat `plugins/superteam/` as the Codex install surface and `skills/superteam/` as the authoring source. Refresh the packaged copy with `pnpm sync:plugin`.
 
 ## Docs
 
@@ -73,7 +81,7 @@ docs/
   file-structure.md
   superpowers/
     plans/
-      2026-04-22-superteam-import-plan.md
+      2026-04-22-5-claude-plugin-support-able-to-be-imported-to-marketplace-plan.md
 ```
 
 - `docs/file-structure.md`: contributor-facing layout guide
