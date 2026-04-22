@@ -15,6 +15,9 @@ This repository is the org-level Codex marketplace repo for Patina Project.
 - Register each plugin in `.agents/plugins/marketplace.json`
 - Use `source: "git-subdir"` for plugins that live in subdirectories of other repos
 - Use `source: "url"` for plugins that live at the root of other repos
+- Keep marketplace entries pointed at the owning repository for packaged plugin assets
+- Do not vendor a duplicate Claude plugin package here when the upstream repository already owns that install surface
 - Vendor a plugin under `plugins/<plugin-name>/` only when this repo should carry the package directly
 - Keep plugin names, folder names, and manifest names aligned
 - Use GitHub issue-tagged conventional commits with no scopes
+- Use `AC-<issue>-<n>` headings for issue acceptance criteria in specs, plans, and PR descriptions

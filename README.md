@@ -8,6 +8,13 @@ It is a marketplace catalog, not the source repo for every plugin. Marketplace e
 
 - `superteam`: installed from `patinaproject/superteam` using a `git-subdir` source that targets `./plugins/superteam` on `main`
 
+## Install Surfaces
+
+- `patinaproject/skills` is the marketplace catalog
+- `patinaproject/superteam` is the source-of-truth plugin repository
+- Codex installs `superteam` through the marketplace entry that targets `./plugins/superteam` in `patinaproject/superteam`
+- Claude-compatible installation is owned by the upstream `patinaproject/superteam` repository through its root `.claude-plugin/plugin.json`
+
 ## How it works
 
 Codex reads the marketplace definition from `.agents/plugins/marketplace.json`.
