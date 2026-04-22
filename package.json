@@ -1,0 +1,28 @@
+{
+  "name": "skills",
+  "private": true,
+  "description": "Codex marketplace repo for Patina Project plugins and packaged skills",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "prepare": "./scripts/prepare.sh",
+    "commit": "git-cz",
+    "commit:retry": "git-cz --retry",
+    "commitlint": "commitlint"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-customizable"
+    },
+    "cz-customizable": {
+      "config": "commitizen.config.js"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "commitizen": "^4.3.1",
+    "cz-customizable": "^7.5.1",
+    "husky": "^9.1.7"
+  }
+}
+
