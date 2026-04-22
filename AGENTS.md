@@ -31,6 +31,7 @@ For Superpowers-generated design and planning artifacts, use issue-based filenam
 - Keep plugin names, manifest names, and marketplace entries aligned
 - Use Markdown for docs and JSON for marketplace/plugin manifests
 - For Git-backed entries, keep `source.path` relative to the remote repo root and pin an explicit `ref` or `sha`
+- Issue titles use plain language, not conventional commit formatting. Example: `Update README with Claude Code install instructions`
 
 ## Testing Guidelines
 
@@ -48,8 +49,6 @@ Commits must use conventional commit types, no scopes, and a required GitHub iss
 Examples:
 - `chore: #1 bootstrap marketplace repo`
 - `feat: #12 add superteam marketplace entry`
-
-Issue titles do not use conventional commit formatting. Write issue titles in plain language that describes the work, for example `Update README with Claude Code install instructions`.
 
 For squash-and-merge workflows, PR titles must match the commitlint commit format:
 
