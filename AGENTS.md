@@ -40,3 +40,5 @@ Commits must use conventional commit types, no scopes, and a required GitHub iss
 Examples:
 - `chore: #1 bootstrap marketplace repo`
 - `feat: #12 add superteam marketplace entry`
+
+Issue titles do not use conventional commit formatting. Write issue titles in plain language that describes the work, for example `Update README with Claude Code install instructions`.
