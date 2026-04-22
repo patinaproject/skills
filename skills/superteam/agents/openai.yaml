@@ -1,0 +1,7 @@
+interface:
+  display_name: "Superteam"
+  short_description: "Run issue-driven multi-agent delivery workflows"
+  default_prompt: "Use $superteam to take this issue from design through review-ready execution."
+
+policy:
+  allow_implicit_invocation: true

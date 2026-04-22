@@ -5,7 +5,7 @@ description: Use when taking a GitHub issue from design through execution and me
 
 # superteam
 
-`superteam` is a packaged orchestration skill for running a structured issue workflow across design, planning, execution, review, and finish stages.
+`superteam` is an orchestration skill for running a structured issue workflow across design, planning, execution, review, and finish stages. It uses a public `skills/` and `docs/` artifact layout so the workflow stays portable across repositories.
 
 ## Core workflow
 
@@ -20,7 +20,7 @@ Use `superteam` when a single issue needs coordinated agent work from spec to re
 
 ## Pre-flight
 
-- Prefer the runtime's normal multi-agent capabilities when available.
+- Prefer the host runtime's normal multi-agent capabilities when available.
 - Do not block solely because a preferred team feature is unavailable; fall back to direct subagent dispatch.
 - Keep runtime-specific checks lightweight. Stage semantics and artifact ownership are the important part.
 

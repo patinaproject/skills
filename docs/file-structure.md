@@ -24,11 +24,14 @@ skills/
     SKILL.md
     agent-spawn-template.md
     pr-body-template.md
+    agents/
+      openai.yaml
 ```
 
 - `SKILL.md`: the main skill contract, workflow, and routing rules
 - `agent-spawn-template.md`: reusable spawn guidance for multi-agent roles
 - `pr-body-template.md`: PR checklist and reporting template for finish-stage work
+- `agents/openai.yaml`: skill UI metadata used when packaging the skill into a plugin
 
 Keep skill directories self-contained. Prefer adjacent support files over hidden, tool-specific wrappers unless a runtime requires them.
 
@@ -57,6 +60,7 @@ plugins/
 - `agents/openai.yaml`: optional skill UI metadata for Codex lists and chips
 
 Use `.agents/plugins/marketplace.json` to register repo-local plugins for Codex discovery.
+When publishing `superteam` to an external marketplace, treat `plugins/superteam/` as the install surface and `skills/superteam/` as the authoring source. Refresh the packaged copy with `pnpm sync:plugin`.
 
 ## Docs
 

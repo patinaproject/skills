@@ -5,7 +5,8 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "prepare": "husky",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "sync:plugin": "./scripts/sync-plugin.sh"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

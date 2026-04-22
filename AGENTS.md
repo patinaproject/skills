@@ -15,6 +15,7 @@ Keep each skill self-contained. Prefer adjacent support files like `agent-spawn-
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install local tooling and initialize Husky hooks.
+- `pnpm sync:plugin`: refresh `plugins/superteam/skills/superteam/` from the source skill.
 - `pnpm exec commitlint --edit <path>`: validate a commit message file against repo rules.
 - `.husky/commit-msg <path>`: run the same commit-message validation through the active Git hook.
 - `find skills -maxdepth 2 -type f | sort`: quick structure check for imported skills.
@@ -39,6 +40,7 @@ No formal test suite exists yet. Validate changes with targeted file checks and 
 - Confirm paths with `find` or `rg`
 - Check rewritten references with `rg '<pattern>'`
 - Review rendered content with `sed -n '1,200p' <file>`
+- Run `pnpm sync:plugin` after editing `skills/superteam/` and verify the packaged copy under `plugins/superteam/`
 
 If you add executable tooling later, document the exact verification command in `docs/`.
 
