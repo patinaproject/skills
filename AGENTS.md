@@ -78,3 +78,11 @@ For squash-and-merge workflows, PR titles must exactly match the commitlint and 
 Use the final intended squash commit title as the PR title. Examples:
 - `docs: #12 add superteam skill guide`
 - `chore: #34 bootstrap commit hooks`
+
+When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
+
+- Use one `### AC-<issue>-<n>` heading per relevant AC, with the heading containing only the AC ID.
+- Put a short outcome summary on the line below the heading.
+- Put verification steps directly under the AC they validate.
+- Use checkboxes only for testing or verification steps.
+- If an AC is deferred or out of scope for the repo, say so in the summary text and do not add fake verification checkboxes.

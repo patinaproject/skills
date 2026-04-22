@@ -16,9 +16,19 @@ Examples:
 
 - 
 
+## Acceptance Criteria
+
+### AC-<issue>-<n>
+Short outcome summary.
+
+- [ ] `verification command`
+
+### AC-<issue>-<n>
+Deferred to `<repo-or-follow-up>`.
+
 ## Validation
 
-- 
+- Additional validation not tied to a single AC, if any
 
 ## Docs Updated
 
