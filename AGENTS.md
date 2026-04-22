@@ -5,7 +5,9 @@
 This repository is organized around reusable skill packages and supporting documentation.
 
 - `skills/`: installable skill directories. Each skill should live in its own folder, for example `skills/superteam/`.
+- `plugins/`: Codex plugin packages, for example `plugins/superteam/.codex-plugin/plugin.json`.
 - `docs/`: contributor-facing docs plus planning artifacts such as `docs/file-structure.md` and `docs/superpowers/plans/`.
+- `.agents/plugins/marketplace.json`: repo-local plugin catalog for Codex discovery.
 - root config: `package.json`, `commitlint.config.js`, and `.husky/` define local tooling and commit enforcement.
 
 Keep each skill self-contained. Prefer adjacent support files like `agent-spawn-template.md` or `pr-body-template.md` over hidden tool-specific wrappers unless a runtime requires them.
@@ -16,6 +18,7 @@ Keep each skill self-contained. Prefer adjacent support files like `agent-spawn-
 - `pnpm exec commitlint --edit <path>`: validate a commit message file against repo rules.
 - `.husky/commit-msg <path>`: run the same commit-message validation through the active Git hook.
 - `find skills -maxdepth 2 -type f | sort`: quick structure check for imported skills.
+- `find plugins -maxdepth 5 -type f | sort`: inspect packaged Codex plugin contents.
 
 There is no application build pipeline yet; changes are currently Markdown and repo-tooling focused.
 
@@ -24,6 +27,7 @@ There is no application build pipeline yet; changes are currently Markdown and r
 Use Markdown for skill and docs content. Keep sections short, imperative, and repository-specific.
 
 - Skill directories: lowercase, concise names such as `skills/superteam/`
+- Plugin directories: lowercase names matching the plugin manifest, such as `plugins/superteam/`
 - Main skill file: `SKILL.md`
 - Support files: descriptive kebab-case or clear template names
 - Prefer ASCII unless an existing file already relies on Unicode

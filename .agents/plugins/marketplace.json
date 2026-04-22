@@ -1,0 +1,20 @@
+{
+  "name": "patina-project",
+  "interface": {
+    "displayName": "Patina Project"
+  },
+  "plugins": [
+    {
+      "name": "superteam",
+      "source": {
+        "source": "local",
+        "path": "./plugins/superteam"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

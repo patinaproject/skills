@@ -1,11 +1,13 @@
 # Repository File Structure
 
-This repository keeps installable skill content in `skills/` and supporting documentation in `docs/`.
+This repository keeps source skills in `skills/`, packaged plugin content in `plugins/`, and supporting documentation in `docs/`.
 
 ## Top level
 
 - `skills/`: installable or shareable skill packages
+- `plugins/`: Codex plugin packages with `.codex-plugin/plugin.json`
 - `docs/`: repository docs, design docs, and planning artifacts
+- `.agents/plugins/marketplace.json`: local plugin catalog for Codex discovery
 - `package.json`: minimal repo tooling managed with `pnpm`
 - `commitlint.config.js`: commit message rules
 - `.husky/`: git hooks, including `commit-msg`
@@ -30,6 +32,32 @@ skills/
 
 Keep skill directories self-contained. Prefer adjacent support files over hidden, tool-specific wrappers unless a runtime requires them.
 
+## Plugins
+
+Codex-importable plugins live under `plugins/`.
+
+Example:
+
+```text
+plugins/
+  superteam/
+    .codex-plugin/
+      plugin.json
+    skills/
+      superteam/
+        SKILL.md
+        agent-spawn-template.md
+        pr-body-template.md
+        agents/
+          openai.yaml
+```
+
+- `.codex-plugin/plugin.json`: plugin manifest and UI metadata
+- `skills/`: packaged skills exposed by the plugin
+- `agents/openai.yaml`: optional skill UI metadata for Codex lists and chips
+
+Use `.agents/plugins/marketplace.json` to register repo-local plugins for Codex discovery.
+
 ## Docs
 
 Use `docs/` for durable repository documentation and implementation artifacts.
@@ -50,4 +78,4 @@ docs/
 
 ## Contributor expectation
 
-When adding a new skill, mirror the `skills/superteam/` pattern: create a dedicated directory, keep the main contract in `SKILL.md`, and place supporting templates or references next to it. Update `docs/` when the repository structure or contributor workflow changes.
+When adding a new skill, mirror the `skills/superteam/` pattern. When making that skill importable as a Codex plugin, package it under `plugins/<name>/` with a plugin manifest and marketplace entry, and keep the packaged skill self-contained.
