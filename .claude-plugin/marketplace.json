@@ -10,15 +10,7 @@
   "plugins": [
     {
       "name": "superteam",
-      "version": "0.1.0",
       "description": "Claude Code plugin that exposes the superteam orchestration skill for issue-driven multi-agent work.",
-      "author": {
-        "name": "Patina Project",
-        "url": "https://github.com/patinaproject"
-      },
-      "homepage": "https://github.com/patinaproject/superteam",
-      "repository": "https://github.com/patinaproject/superteam",
-      "license": "MIT",
       "category": "productivity",
       "source": {
         "source": "github",
