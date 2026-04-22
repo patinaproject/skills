@@ -4,7 +4,8 @@
 
 This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
-- `.agents/plugins/marketplace.json`: repo-local marketplace source of truth
+- `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
+- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth
 - `plugins/`: optional vendored plugin packages when this repo carries local copies
 - `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md` and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
