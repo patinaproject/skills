@@ -11,9 +11,9 @@ It is a marketplace catalog, not the source repo for every plugin. Marketplace e
 ## Install Surfaces
 
 - `patinaproject/skills` is the marketplace catalog
-- `patinaproject/superteam` is the source-of-truth plugin repository
+- `patinaproject/superteam` is the source of truth for the upstream plugin package
 - Codex installs `superteam` through the marketplace entry that targets `./plugins/superteam` in `patinaproject/superteam`
-- Claude-compatible installation is owned by the upstream `patinaproject/superteam` repository through its root `.claude-plugin/plugin.json`
+- The Claude plugin packaging and install surface live in the upstream `patinaproject/superteam` repository through its root `.claude-plugin/plugin.json`
 
 ## How it works
 

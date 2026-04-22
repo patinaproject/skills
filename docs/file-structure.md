@@ -20,4 +20,4 @@ This repository is the org-level Codex marketplace repo for Patina Project.
 - Vendor a plugin under `plugins/<plugin-name>/` only when this repo should carry the package directly
 - Keep plugin names, folder names, and manifest names aligned
 - Use GitHub issue-tagged conventional commits with no scopes
-- Use `AC-<issue>-<n>` headings for issue acceptance criteria in specs, plans, and PR descriptions
+- Use `AC-<issue>-<n>` identifiers for issue acceptance criteria in specs and plans, and use `AC-<issue>-<n>` headings in PR descriptions where required
