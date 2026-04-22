@@ -48,6 +48,26 @@ codex plugin marketplace upgrade
 
 Then open the Codex Plugin Directory, find `Patina Project Skills`, and install `superteam`.
 
+## Install In Claude Code
+
+This repository tracks the Claude marketplace catalog entry, but the installable Claude plugin package lives upstream in `patinaproject/superteam`.
+
+For a direct setup in Claude Code today, add `superteam` as a custom subagent. Anthropic's official Claude Code docs describe project subagents in `.claude/agents/` and user subagents in `~/.claude/agents/`.
+
+Create a project subagent file at `.claude/agents/superteam.md` with `/agents`, or create it manually and copy in the contents of:
+
+```text
+https://github.com/patinaproject/superteam/blob/main/plugins/superteam/skills/superteam/SKILL.md
+```
+
+Claude Code loads project subagents from `.claude/agents/`, so after adding that file you can use prompts such as:
+
+```text
+Use the superteam subagent to take issue #123 from design through review-ready execution.
+```
+
+If you want the workflow available across all projects instead, place the file in `~/.claude/agents/superteam.md`.
+
 ## Install From A Local Checkout
 
 If you are working locally in a checkout that contains this repo, add it by path instead:

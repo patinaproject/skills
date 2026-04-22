@@ -31,6 +31,7 @@ For Superpowers-generated design and planning artifacts, use issue-based filenam
 - Keep plugin names, manifest names, and marketplace entries aligned
 - Use Markdown for docs and JSON for marketplace/plugin manifests
 - For Git-backed entries, keep `source.path` relative to the remote repo root and pin an explicit `ref` or `sha`
+- Issue titles use plain language, not conventional commit formatting. Example: `Update README with Claude Code install instructions`
 
 ## Testing Guidelines
 
