@@ -14,7 +14,7 @@ Use teammate names as the primary organizing language across the workflow:
 1. `Team Lead`: owns orchestration, delegation, gates, and loopbacks
 2. `Brainstormer`: owns the design doc in `docs/superpowers/specs/`
 3. `Planner`: owns the implementation plan in `docs/superpowers/plans/`
-4. `Executor`: owns code and tests required by the approved plan
+4. `Executor`: owns ATDD-driven implementation, code, and tests required by the approved plan
 5. `Reviewer`: owns local pre-publish review findings
 6. `Finisher`: owns publish-state follow-through, CI, and external feedback handling
 
@@ -81,11 +81,12 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 
 ### Executor
 
+- Drive implementation from acceptance criteria and approved plan tasks using ATDD, not ad hoc coding first.
 - Implement only the assigned tasks from the approved plan.
 - Report completion against explicit task IDs.
 - Include concrete completion evidence, SHAs, and verification evidence before claiming completion.
 - Never push, rebase, or open a PR.
-- Recommend `superpowers:test-driven-development`.
+- Recommend `superpowers:test-driven-development` as the ATDD execution skill.
 - Recommend `superpowers:systematic-debugging` when debugging or failures appear.
 - Recommend `superpowers:writing-skills` when touching `skills/**/*.md`.
 - Recommend `superpowers:verification-before-completion` before claiming completion.

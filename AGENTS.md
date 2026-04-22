@@ -78,6 +78,8 @@ Use the final intended squash commit title as the PR title. Examples:
 - `docs: #12 add superteam skill guide`
 - `chore: #34 bootstrap commit hooks`
 
+GitHub issue titles are different: write them as plain-language summaries of the problem or request. Do not use conventional-commit prefixes like `docs:` or `feat:` in issue titles.
+
 When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
 
 - Use one `### AC-<issue>-<n>` heading per relevant AC, with the heading containing only the AC ID.

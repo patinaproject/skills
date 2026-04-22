@@ -8,6 +8,8 @@ Examples:
 - `docs: #12 add superteam skill guide`
 - `chore: #34 bootstrap commit hooks`
 
+This title rule applies to pull requests only. GitHub issue titles should stay plain-language and should not use conventional-commit prefixes.
+
 ## Summary
 
 - 
