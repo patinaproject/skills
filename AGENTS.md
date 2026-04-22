@@ -13,8 +13,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 
 For Superpowers-generated design and planning artifacts, use issue-based filenames and the following acceptance criteria format:
 
-- `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<topic>-design.md`
-- `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<topic>-plan.md`
+- `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<issue-title>-design.md`
+- `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<issue-title>-plan.md`
 - Acceptance criteria IDs: `AC-<issue-number>-<integer>`
 
 ## Build, Test, and Development Commands
