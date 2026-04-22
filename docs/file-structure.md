@@ -7,7 +7,7 @@ This document is a contributor reference for the repository layout. For user-fac
 - `.claude-plugin/`: Claude Code plugin manifest for the repository root
 - `skills/`: installable or shareable skill packages
 - `plugins/`: plugin packages for external install surfaces
-- `docs/`: repository docs, design docs, and planning artifacts
+- `docs/`: repository docs, design docs, planning artifacts, and repo-local pressure tests
 - `.agents/plugins/marketplace.json`: local plugin catalog for Codex discovery
 - `package.json`: minimal repo tooling managed with `pnpm`
 - `commitlint.config.js`: commit message rules
@@ -30,8 +30,8 @@ skills/
 ```
 
 - `SKILL.md`: the main skill contract, workflow, and routing rules
-- `agent-spawn-template.md`: reusable spawn guidance for multi-agent roles
-- `pr-body-template.md`: PR checklist and reporting template for finish-stage work
+- `agent-spawn-template.md`: teammate-based delegation guidance that tells spawned teammates to discover repo rules before edits and follow the correct ownership contract
+- `pr-body-template.md`: finish-owned PR reporting template for publish-state follow-through, branch and PR reporting, and external feedback handling
 - `agents/openai.yaml`: skill UI metadata used when packaging the skill into a plugin
 
 Keep skill directories self-contained. Prefer adjacent support files over hidden, tool-specific wrappers unless a runtime requires them.
@@ -80,6 +80,10 @@ Example:
 docs/
   file-structure.md
   superpowers/
+    pressure-tests/
+      superteam-orchestration-contract.md
+    specs/
+      2026-04-22-8-harden-superteam-orchestration-contracts-and-stage-gates-design.md
     plans/
       2026-04-22-5-claude-plugin-support-able-to-be-imported-to-marketplace-plan.md
 ```
@@ -87,6 +91,8 @@ docs/
 - `docs/file-structure.md`: contributor-facing layout guide
 - `docs/superpowers/specs/`: design documents created during brainstorming
 - `docs/superpowers/plans/`: implementation plans created after design approval
+- `docs/superpowers/pressure-tests/`: repo-local orchestration pressure tests that document expected halt and reroute behavior
+- `docs/superpowers/pressure-tests/superteam-orchestration-contract.md`: the current pressure-test doc for teammate contracts, approval gates, review routing, and shutdown checks
 
 ## Contributor expectation
 

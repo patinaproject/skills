@@ -1,7 +1,7 @@
 interface:
   display_name: "Superteam"
-  short_description: "Run issue-driven multi-agent delivery workflows"
-  default_prompt: "Use $superteam to take this issue from design through review-ready execution."
+  short_description: "Run issue-driven teammate orchestration from design through finish-state review"
+  default_prompt: "Use $superteam to route this issue across Team Lead, Brainstormer, Planner, Executor, Reviewer, and Finisher with explicit gates and publish-state follow-through."
 
 policy:
   allow_implicit_invocation: true

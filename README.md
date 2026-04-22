@@ -12,42 +12,47 @@ Without that structure, work gets split across chats, decisions get lost, and th
 
 ## How Superteam works
 
-Superteam runs one issue through a structured sequence so the next agent, or the next human, can continue from durable artifacts instead of chat history alone.
+Superteam runs one issue through a structured teammate workflow so the next agent, subagent, or human can continue from durable artifacts instead of chat history alone.
 
 ```mermaid
 flowchart TD
-    A[/GitHub issue/] --> B[Brainstorm]
-    B --> C[/Design doc/]
-    C --> D[Plan]
-    D --> E[/Implementation plan/]
-    E --> F[Execute]
-    F --> G[Pre-push review]
-    G --> H[/PR and CI follow-through/]
-    H --> I[PR review follow-up]
+    A[/GitHub issue/] --> B[Team Lead]
+    B --> C[Brainstormer]
+    C --> D[/Design doc/]
+    D --> E[Planner]
+    E --> F[/Implementation plan/]
+    F --> G[Executor]
+    G --> H[Reviewer]
+    H --> I[Finisher]
     I --> J[Finished, ready for feedback]
 ```
 
-Each stage owns specific artifacts and verification gates, so work stays understandable across handoffs instead of becoming ad hoc subagent output.
+The workflow stays portable across agent teams and direct subagent handoffs because it is organized around teammate ownership, repo-owned artifacts, and explicit gates rather than one host runtime's mechanics.
+
+Before any teammate edits governed files, the workflow discovers repository rules from the repo itself, starting with `AGENTS.md` and then any local docs that govern the files being touched.
+
+Each teammate owns specific artifacts and verification gates, so work stays understandable across handoffs instead of becoming ad hoc subagent output. `Reviewer` owns local pre-publish findings. `Finisher` owns publish-state follow-through, branch and PR handling, CI, and external review feedback.
 
 ## Agent roster
 
-| Stage | Agent | Superpowers skill |
+| Teammate | Owns | Recommended `superpowers` skills |
 | --- | --- | --- |
-| Brainstorm | Brainstormer | `superpowers:brainstorming` |
-| Plan | Planner | `superpowers:writing-plans` |
-| Execute | Implementer | `superpowers:subagent-driven-development` |
-| Review | Reviewer | `superpowers:requesting-code-review` |
-| Finish | Finisher | `superpowers:finishing-a-development-branch` |
+| Team Lead | Orchestration, delegation, gates, and loopbacks | `superpowers:using-superpowers`; `superpowers:dispatching-parallel-agents` when splitting independent work |
+| Brainstormer | Design doc creation and approval handoff | `superpowers:brainstorming` |
+| Planner | Approved implementation plan creation | `superpowers:writing-plans` |
+| Executor | Code and tests for the approved plan | `superpowers:test-driven-development`; `superpowers:systematic-debugging` when debugging; `superpowers:verification-before-completion`; `superpowers:writing-skills` when editing `skills/**/*.md` |
+| Reviewer | Local pre-publish review findings and loopback classification | `superpowers:requesting-code-review` |
+| Finisher | Publish-state follow-through, branch/PR/CI reporting, and external review feedback handling | `superpowers:finishing-a-development-branch`; `superpowers:receiving-code-review` when handling reviewer findings, PR comments, or bot feedback |
 
 ## Run superteam anytime
 
-Superteam keeps the workflow grounded in explicit stage ownership, written design and plan artifacts, verification before completion, and finish-stage review follow-through. That means you can invoke Superteam at any point in the lifecycle and have it resume from the right stage instead of starting the whole process over.
+Superteam keeps the workflow grounded in explicit teammate ownership, written design and plan artifacts, verification before completion, and finish-owned review follow-through. That means you can invoke Superteam at any point in the lifecycle and have it resume from the right teammate instead of starting the whole process over.
 
 For example:
 
 ```text
-/superteam resume this issue
-/superteam new requirement: ...
+For a resumed issue, invoke Superteam with the same runtime-specific entry point and tell it to continue from the current teammate or artifact state.
+For a new requirement, invoke Superteam with the documented runtime-specific form and include the requirement change in the prompt so it can route back through the right gate.
 ```
 
 ## Install surfaces
@@ -102,7 +107,7 @@ codex plugin marketplace upgrade
 3. Open the relevant GitHub issue in your working context, then invoke:
 
 ```text
-Use $superteam to take this issue from design through review-ready execution.
+Use $superteam to route this issue through teammate-owned design, planning, execution, review, and Finisher-owned publish follow-through.
 ```
 
 ### OpenAI Codex App
@@ -118,12 +123,12 @@ codex plugin marketplace upgrade
 3. Open the relevant GitHub issue in the app context, then invoke:
 
 ```text
-Use $superteam to take this issue from design through review-ready execution.
+Use $superteam to route this issue through teammate-owned design, planning, execution, review, and Finisher-owned publish follow-through.
 ```
 
 ## First use
 
-After setup in any supported tool, start from a GitHub issue and invoke Superteam. The workflow then drives the issue through design, planning, execution, review, and handoff artifacts.
+After setup in any supported tool, start from a GitHub issue and invoke Superteam. The workflow then drives the issue through teammate-owned design, planning, execution, review, and finish handoffs.
 
 ## Inspiration
 
