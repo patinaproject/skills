@@ -26,7 +26,9 @@ The design keeps the issue outcome-focused rather than prescribing a README-only
 
 The primary user is someone landing on the repository to evaluate or install Superteam. That user should not need to understand the repo structure first. They need to understand the product first.
 
-The main problem is that the current landing experience explains install surfaces, but it does not yet explain the product value clearly enough. A new user can discover that there are multiple install surfaces, but still leave without understanding:
+The main problem is that the current landing experience explains install surfaces, but it does not yet explain the product value clearly enough. A new user can discover that there are multiple install surfaces, but still leave without understanding that Superteam is intended to get teams to a real, demoable, testable artifact as quickly as possible.
+
+The failure mode is not just fragmentation. It is that multi-agent work often produces a lot of activity without producing something concrete enough to review. Without stronger structure:
 
 - what Superteam actually does
 - why it exists
@@ -44,7 +46,7 @@ The preferred headline direction is:
 
 `Orchestrate teams of agents with Superpowers`
 
-That positioning should be followed immediately by copy that explains the actual operating model. Superteam is not just generic agent automation. It is a structured issue workflow that lets teams of agents pick up, hand off, and continue work without losing context.
+That positioning should be followed immediately by copy that explains the actual operating model. Superteam is not just generic agent automation. It is a structured issue workflow that builds on Superpowers to get teams to a real, demoable, testable artifact as quickly as possible, with enough structure to review it, iterate on it, and keep moving.
 
 ## Approach Options Considered
 
@@ -225,6 +227,18 @@ Both subsections should explain how the `patinaproject/skills` marketplace fits 
 
 Maintainer-oriented packaging guidance should not sit inside the user-facing runtime setup flow. Instructions such as authoring in `skills/superteam/` or running `pnpm sync:plugin` belong in contributor docs rather than the main install walkthrough.
 
+## Inspiration
+
+Near the end of the README, add a short `Inspiration` section with concise bullets only.
+
+It should include:
+
+- `BMAD-Method`: brief gratitude for introducing the team to agentic frameworks, while noting that earlier quick-dev and TEA experiments helped shape this workflow
+- `Superpowers`: identify it as the foundational skills framework that made Superteam possible
+- `Ken Kocienda's "Creative Selection"`: identify the importance of demo culture as an influence
+
+Keep this section short and appreciative. It should add context without pulling focus from the main workflow and installation story.
+
 ## Inspiration And Constraints
 
 The design may borrow patterns from strong open source landing pages and workflow-first repositories, including:
@@ -250,6 +264,7 @@ Validation for this work should focus on clarity and narrative flow rather than 
 - verify that the README includes separate setup sections for Claude Code, OpenAI Codex CLI, and OpenAI Codex App
 - verify that each runtime section explains the `patinaproject/skills` marketplace setup path
 - verify that the Claude Code install path includes an optional Agent Teams subsection with a brief explanation of how it differs from regular setup
+- verify that the README includes a short Inspiration section near the end
 
 ## Acceptance Criteria
 
@@ -265,6 +280,7 @@ Validation for this work should focus on clarity and narrative flow rather than 
 - AC-7-9: Each runtime section explains how to set up access to the `patinaproject/skills` marketplace before first use
 - AC-7-10: Maintainer-oriented packaging guidance is not mixed into the user-facing runtime setup flow
 - AC-7-11: The README makes Superpowers an explicit prerequisite and links to the Superpowers repository for installation guidance
+- AC-7-13: The README includes a short Inspiration section near the end with BMAD-Method, Superpowers, and Creative Selection
 
 ## Implementation Notes
 
