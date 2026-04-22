@@ -1,7 +1,7 @@
 {
   "name": "patinaproject-skills",
   "interface": {
-    "displayName": "Patina Project Skills"
+    "displayName": "Patina Project"
   },
   "plugins": [
     {
