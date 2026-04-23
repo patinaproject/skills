@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "superteam",
-      "description": "Claude Code plugin that exposes the superteam orchestration skill for issue-driven multi-agent work.",
+      "description": "Claude Code plugin that exposes the Superteam orchestration skill for issue-driven multi-agent work.",
       "category": "productivity",
       "source": {
         "source": "github",
