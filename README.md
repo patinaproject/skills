@@ -128,7 +128,7 @@ For example:
 ## Install surfaces
 
 - The repository root is the local Claude Code plugin surface discovered via `.claude-plugin/plugin.json`.
-- `plugins/superteam/` is the packaged Codex plugin surface for this repository.
+- The repository root is also the Codex plugin surface via `.codex-plugin/plugin.json`.
 
 ## Installation
 
@@ -174,8 +174,8 @@ Agent Teams is optional. If you do not enable it, Superteam still works with the
 
 ### OpenAI Codex CLI
 
-1. After Superpowers is installed, install or enable the packaged `Superteam` Codex plugin from the plugin source you use for Codex.
-2. When working from this repository directly, treat `plugins/superteam/` as the packaged Codex plugin surface.
+1. After Superpowers is installed, install or enable the `Superteam` Codex plugin from the plugin source you use for Codex.
+2. When working from this repository directly, treat the repository root as the Codex plugin surface.
 3. Open the relevant GitHub issue in your working context, then invoke Superteam:
 
 ```text
@@ -184,8 +184,8 @@ Use $superteam to route this issue through teammate-owned design, planning, exec
 
 ### OpenAI Codex App
 
-1. After Superpowers is installed, install or enable the packaged `Superteam` Codex plugin from the plugin source you use for Codex.
-2. When working from this repository directly, treat `plugins/superteam/` as the packaged Codex plugin surface.
+1. After Superpowers is installed, install or enable the `Superteam` Codex plugin from the plugin source you use for Codex.
+2. When working from this repository directly, treat the repository root as the Codex plugin surface.
 3. Open the relevant GitHub issue in the app context, then invoke Superteam:
 
 ```text

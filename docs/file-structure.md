@@ -4,9 +4,9 @@ This document is a contributor reference for the repository layout. For user-fac
 
 ## Top level
 
+- `.codex-plugin/`: Codex plugin manifest for the repository root
 - `.claude-plugin/`: Claude Code plugin manifest for the repository root
 - `skills/`: installable or shareable skill packages
-- `plugins/`: plugin packages for external install surfaces
 - `docs/`: repository docs, design docs, planning artifacts, and repo-local pressure tests
 - `package.json`: minimal repo tooling managed with `pnpm`
 - `commitlint.config.js`: commit message rules
@@ -35,38 +35,36 @@ skills/
 
 Keep skill directories self-contained. Prefer adjacent support files over hidden, tool-specific wrappers unless a runtime requires them.
 
-## Plugins
+## Plugin Metadata
 
 The repository supports two plugin surfaces.
 
 Claude Code loads the repository root through `.claude-plugin/plugin.json`, which makes the repository root the Claude Code plugin surface and points at the source skills in `./skills`.
 
-Codex consumes the packaged plugin under `plugins/superteam/`.
+Codex also uses the repository root through `.codex-plugin/plugin.json`, which points at the same source skills in `./skills`.
 
 Example:
 
 ```text
+.codex-plugin/
+  plugin.json
 .claude-plugin/
   plugin.json
-plugins/
+skills/
   superteam/
-    .codex-plugin/
-      plugin.json
-    skills/
-      superteam/
-        SKILL.md
-        agent-spawn-template.md
-        pr-body-template.md
-        agents/
-          openai.yaml
+    SKILL.md
+    agent-spawn-template.md
+    pr-body-template.md
+    agents/
+      openai.yaml
 ```
 
 - `.claude-plugin/plugin.json`: Claude Code manifest for the repository root
-- `.codex-plugin/plugin.json`: packaged plugin manifest and UI metadata
-- `plugins/superteam/skills/`: packaged skills exposed by the Codex plugin
+- `.codex-plugin/plugin.json`: Codex plugin manifest and UI metadata for the repository root
+- `skills/superteam/`: canonical checked-in `superteam` skill content used by both root plugin surfaces
 - `agents/openai.yaml`: optional skill UI metadata for Codex lists and chips
 
-Treat `plugins/superteam/` as the packaged Codex plugin surface in this repository, and `skills/superteam/` as the authoring source. Refresh the packaged copy with `pnpm sync:plugin`.
+Treat the repository root as the install surface for both `.claude-plugin/` and `.codex-plugin/`, and `skills/superteam/` as the only checked-in `superteam` skill source.
 
 ## Docs
 
@@ -94,4 +92,4 @@ docs/
 
 ## Contributor expectation
 
-When adding a new skill, mirror the `skills/superteam/` pattern. When making that skill importable as a Codex plugin, package it under `plugins/<name>/` with a plugin manifest and keep the packaged skill self-contained.
+When adding a new skill, mirror the `skills/superteam/` pattern. Keep install metadata at the repository root and keep each skill self-contained under `skills/`.

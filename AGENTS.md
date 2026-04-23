@@ -2,10 +2,10 @@
 
 ## Project Structure & Module Organization
 
-This repository is organized around reusable skill packages and supporting documentation.
+This repository is organized around reusable skill packages, root-level plugin metadata, and supporting documentation.
 
 - `skills/`: installable skill directories. Each skill should live in its own folder, for example `skills/superteam/`.
-- `plugins/`: Codex plugin packages, for example `plugins/superteam/.codex-plugin/plugin.json`.
+- `.codex-plugin/`: Codex plugin manifest for the repository root.
 - If `.claude-plugin/plugin.json` exists, the repository root is the Claude plugin install surface.
 - `docs/`: contributor-facing docs plus planning artifacts such as `docs/file-structure.md` and `docs/superpowers/plans/`.
 - root config: `package.json`, `commitlint.config.js`, and `.husky/` define local tooling and commit enforcement.
@@ -27,11 +27,10 @@ Format acceptance criteria IDs as `AC-<issue-number>-<integer>`, for example `AC
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install local tooling and initialize Husky hooks.
-- `pnpm sync:plugin`: refresh `plugins/superteam/skills/superteam/` from the source skill.
 - `pnpm exec commitlint --edit <path>`: validate a commit message file against repo rules.
 - `.husky/commit-msg <path>`: run the same commit-message validation through the active Git hook.
 - `find skills -maxdepth 2 -type f | sort`: quick structure check for imported skills.
-- `find plugins -maxdepth 5 -type f | sort`: inspect packaged Codex plugin contents.
+- `find .codex-plugin skills -maxdepth 5 -type f | sort`: inspect root Codex metadata and skill contents.
 
 There is no application build pipeline yet; changes are currently Markdown and repo-tooling focused.
 
@@ -40,7 +39,7 @@ There is no application build pipeline yet; changes are currently Markdown and r
 Use Markdown for skill and docs content. Keep sections short, imperative, and repository-specific.
 
 - Skill directories: lowercase, concise names such as `skills/superteam/`
-- Plugin directories: lowercase names matching the plugin manifest, such as `plugins/superteam/`
+- Root plugin metadata directories: `.codex-plugin/` and `.claude-plugin/`
 - Main skill file: `SKILL.md`
 - Support files: descriptive kebab-case or clear template names
 - Prefer ASCII unless an existing file already relies on Unicode
@@ -52,7 +51,7 @@ No formal test suite exists yet. Validate changes with targeted file checks and 
 - Confirm paths with `find` or `rg`
 - Check rewritten references with `rg '<pattern>'`
 - Review rendered content with `sed -n '1,200p' <file>`
-- Run `pnpm sync:plugin` after editing `skills/superteam/` and verify the packaged copy under `plugins/superteam/`
+- Verify root install metadata with `sed -n '1,200p' .codex-plugin/plugin.json` and confirm there is no stale `plugins/superteam/` tree
 
 If you add executable tooling later, document the exact verification command in `docs/`.
 
