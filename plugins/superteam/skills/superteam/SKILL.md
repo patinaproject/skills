@@ -20,6 +20,89 @@ Use teammate names as the primary organizing language across the workflow:
 
 The workflow may still reference brainstorm, plan, execute, review, and finish phases, but teammate names are the canonical contract language.
 
+## Workflow Diagrams
+
+The workflow diagrams should stay structurally accurate and easy to read:
+
+- use two Mermaid charts instead of trying to show chronology and orchestration in one diagram
+- use only two block types: teammates and artifacts
+- keep artifact nodes visually lighter with black text for readability
+- keep the chronological chart simple and forward-moving
+- keep the orchestration chart top-to-bottom and make `Team Lead` the routing hub for human feedback
+
+Chronological flow:
+
+```mermaid
+flowchart TD
+    issue["Issue"]:::artifact
+    lead["Team Lead"]
+    brainstormer["Brainstormer"]
+    design["Design Doc"]:::artifact
+    planner["Planner"]
+    plan["Plan Doc"]:::artifact
+    executor["Executor"]
+    implementation["Implementation & Tests"]:::artifact
+    reviewer["Reviewer"]
+    finisher["Finisher"]
+    pr["Pull Request"]:::artifact
+    human["Human Test & Review"]
+
+    issue --> lead
+    lead --> brainstormer
+    brainstormer --> design
+    design --> planner
+    planner --> plan
+    plan --> executor
+    executor --> implementation
+    implementation --> reviewer
+    reviewer --> finisher
+    finisher --> pr
+    pr --> human
+
+    classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
+```
+
+Orchestration flow:
+
+```mermaid
+flowchart TD
+    issue["Issue"]:::artifact
+    lead["Team Lead"]
+    brainstormer["Brainstormer"]
+    design["Design Doc"]:::artifact
+    planner["Planner"]
+    plan["Plan Doc"]:::artifact
+    executor["Executor"]
+    implementation["Implementation & Tests"]:::artifact
+    reviewer["Reviewer"]
+    finisher["Finisher"]
+    pr["Pull Request"]:::artifact
+    human["Human Test & Review"]
+
+    issue --> lead
+    lead --> brainstormer
+    brainstormer --> design
+    design --> planner
+    planner --> plan
+    plan --> executor
+    executor --> implementation
+    implementation --> reviewer
+    reviewer --> finisher
+    finisher --> pr
+    pr --> human
+
+    pr -->|"PR feedback / status"| finisher
+    human -->|"human feedback"| lead
+    reviewer -->|"review findings"| lead
+    finisher -->|"needs reroute"| lead
+
+    lead -->|"route planning work"| planner
+    lead -->|"route implementation work"| executor
+    lead -->|"route publish follow-through"| finisher
+
+    classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
+```
+
 ## Pre-flight
 
 - Prefer the host runtime's normal multi-agent capabilities when available.
@@ -46,6 +129,7 @@ Before asking for approval:
 2. Return the exact artifact path under review.
 3. Include a concise intent summary of what the artifact changes or decides.
 4. Include the full requirement set currently under review.
+5. Surface any remaining approval-relevant concerns that could materially affect the decision to approve, revise, or narrow the design.
 
 If the approval packet is too large to present cleanly, split it into multiple approval requests or sections. Do not collapse it into a vague fallback summary.
 
@@ -71,6 +155,7 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 - Return the exact design doc path.
 - Return the ordered active AC list.
 - Report the concise intent summary and the full requirement set used for approval.
+- Surface any remaining approval-relevant concerns when requesting approval.
 - Recommend `superpowers:brainstorming`.
 
 ### Planner
@@ -96,17 +181,26 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 - Review locally before publish.
 - Validate artifact ownership, required verification, and role-rule compliance.
 - Classify loopbacks explicitly as `implementation-level`, `plan-level`, or `spec-level`.
+- Own receiving and interpreting local pre-publish review findings.
+- Recommend `superpowers:requesting-code-review` for first-pass local review.
+- Also recommend `superpowers:receiving-code-review` when analyzing existing or disputed findings before publish.
+- When reviewing changes to `skills/**/*.md` or workflow-contract docs, invoke `superpowers:writing-skills` and run the relevant pressure-test walkthrough before publish.
+- Report pressure-test pass/fail results and any loopholes found for skill or workflow-contract changes.
 - Keep findings local; do not take ownership of external review feedback.
-- Recommend `superpowers:requesting-code-review`.
 
 ### Finisher
 
 - Own push, branch publication, PR updates, PR body rendering, CI triage, and external review/comment handling.
+- Own receiving and interpreting external post-publish PR feedback.
 - Report pushed SHAs, current branch state on origin, PR state, and CI state.
+- Every `superteam` run is expected to publish a PR; local-only state is never a valid completion, demo, or handoff state.
+- Push the branch and create or update the PR before treating the run as being in publish-state follow-through.
+- Stay in the `Finisher` loop after PR publication until publish-state follow-through is stable enough to hand off cleanly or an explicit blocker is reported.
+- Do not treat PR creation, one status snapshot, restored mergeability, or green CI alone as workflow completion.
 - Verify current branch state before resolving or replying to comments tied to prior state.
 - Route requirement-bearing feedback through `Brainstormer` first, then `Planner`, then `Executor`.
 - Recommend `superpowers:finishing-a-development-branch`.
-- Also recommend `superpowers:receiving-code-review` when handling reviewer findings, PR comments, or bot feedback.
+- Also recommend `superpowers:receiving-code-review` when handling PR comments, review threads, or bot feedback after publish.
 
 ## Missing skill warnings
 
@@ -125,6 +219,12 @@ Loopbacks must be explicit:
 Requirement-bearing feedback does not route straight to implementation. It returns to `Brainstormer`, then to `Planner`, and only then back to `Executor`.
 
 Implementation-detail deltas that preserve requirements, ownership, and acceptance intent may route directly to `Planner`.
+
+Review interpretation happens at the intake point for that feedback:
+
+- `Reviewer` receives and classifies local pre-publish findings
+- `Finisher` receives and classifies external post-publish PR feedback
+- `Brainstormer`, `Planner`, and `Executor` own remediation after routing rather than primary review intake
 
 ## External feedback ownership
 
@@ -155,23 +255,54 @@ Before resolving or replying to comments tied to a prior branch state:
 - Asking for design approval before verifying the cited artifact exists.
 - Approval requests that omit the artifact path, concise intent summary, or full requirement set.
 - Oversized approval requests collapsed into a vague summary instead of split into clean sections.
+- Approval requests that hide real approval-relevant concerns.
 - Replaying already-approved content instead of sending delta-only approval after revisions.
 - Touching governed files without canonical-rule discovery from repository guidance.
 - Delegated teammate prompts that omit expected `superpowers` recommendations or fail to warn when an expected skill is unavailable.
 - `Executor` claiming completion without explicit task IDs, SHAs, or verification evidence.
 - `Reviewer` failing to classify findings as `implementation-level`, `plan-level`, or `spec-level`.
+- Local pre-publish review findings routed through `Finisher` instead of `Team Lead`.
+- Skill or workflow-contract changes reviewed without `superpowers:writing-skills` or a pressure-test walkthrough.
 - Local review findings taking ownership of external PR feedback away from `Finisher`.
 - `Finisher` resolving prior-state comments without checking current branch state first.
-- Shutting down with unresolved review threads or bot findings still open.
+- Treating local-only state as a valid end state for a `superteam` run.
+- Treating PR publication plus a status snapshot as the end of the workflow while `Finisher`-owned work is still active.
+- Shutting down with unresolved review threads or other blocking external PR feedback still open.
 
 ## Shutdown
 
+Shutdown is a success-only action. Do not shut down or present the run as complete unless every required shutdown check passes on the latest pushed PR state.
+
+Every `superteam` run is expected to publish a PR. Local-only state is never a valid complete, demoable, or handoffable result.
+
+PR publication is a milestone, not the end of the workflow. `Finisher` remains active after the PR exists and after any individual status snapshot until the publish-state follow-through is stable or an explicit blocker is reported.
+
+Shutdown readiness is head-relative. After every push, `Finisher` must re-evaluate completion against the latest PR head instead of relying on a prior green or previously-cleared state.
+
 Before shutdown:
 
-1. Check unresolved inline review threads for the active PR after the latest push.
-2. Check recent PR-level bot findings after the latest push.
-3. If either remains, dispatch `Finisher`-owned feedback handling and re-check.
-4. Only request shutdown when unresolved external feedback is cleared or a blocker is reported explicitly.
+1. Verify the current branch has been pushed and the active PR exists.
+2. Verify the active PR and the current branch state after the latest push.
+3. Verify current publish-state blockers for the latest pushed state, including mergeability, required checks, and PR metadata requirements discovered from repository rules.
+4. Check unresolved inline review threads on the latest PR head.
+5. Check recent blocking external PR feedback on the latest pushed state.
+6. Treat the following as blocking:
+   - an unpushed branch or missing PR
+   - broken mergeability or required publish-state follow-through that `Finisher` still owns
+   - required checks that are pending or failing without a clear handoff-ready blocker report
+   - PR metadata or title failures that violate repository rules and still require `Finisher` action
+   - unresolved inline review threads on the latest PR head
+   - unresolved reviewer or bot feedback posted after the latest push that requests a code change, verification rerun, follow-up response, or other concrete corrective action before the PR is ready
+7. Record the final unresolved blocking-feedback counts for the latest pushed state, including:
+   - unresolved inline review threads
+   - unresolved top-level reviewer or bot comments with still-applicable findings or requested corrective action
+8. Treat any nonzero unresolved blocking-feedback count as a blocker.
+9. Only dedupe a top-level comment from the final unresolved count when it is explicitly a summary of specific inline findings already audited on the latest pushed state.
+10. Treat every new push as invalidating prior completeness assumptions. Re-check review state, checks, mergeability, and PR metadata against the latest pushed head before reporting success.
+11. If blocking work remains, continue the `Finisher` loop, dispatch `Finisher`-owned handling, and re-check instead of stopping at a status snapshot.
+12. If the state cannot be determined safely, distinguish branch-caused blockers from likely baseline or unrelated failures when possible, and prompt the operator instead of guessing.
+13. Report the remaining blocking state explicitly, including the final unresolved blocking-feedback counts, before any handoff or halt.
+14. Only request shutdown when every required shutdown check passes on the latest pushed head. Otherwise halt with an explicit blocker.
 
 Use repository placeholders such as `<owner>`, `<repo>`, `<pr>`, and `<branch>` in commands so the workflow stays portable across repositories.
 

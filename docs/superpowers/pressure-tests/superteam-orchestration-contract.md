@@ -26,6 +26,12 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt the revised approval request and resend it with only the changed content and changed requirements.
 - Rule surface: The revision approval prompt should require delta-only resubmission after revisions.
 
+## Approval request omits remaining approval-relevant concerns
+
+- Starting condition: Brainstormer requests approval while real approval-relevant concerns still exist, but the approval packet does not surface them.
+- Required halt or reroute behavior: Halt approval and reissue the packet with the remaining approval-relevant concerns included, unless the concern is severe enough to block approval entirely.
+- Rule surface: The first-stage approval contract should require Brainstormer to surface real approval-relevant concerns when present.
+
 ## Delegated prompts missing expected `superpowers` recommendations
 
 - Starting condition: A delegated teammate prompt omits the expected `superpowers` skill recommendations for that role.
@@ -74,11 +80,65 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt the ownership drift and return external comment handling to the Finisher, with Reviewer findings remaining local pre-publish input only.
 - Rule surface: The review and finish contracts should keep local findings with the Reviewer and PR comment follow-through with the Finisher.
 
+## Local review findings routed through Finisher instead of Team Lead
+
+- Starting condition: Reviewer finds a local pre-publish issue, but the workflow sends it to Finisher to interpret and route instead of classifying it locally and routing it through Team Lead.
+- Required halt or reroute behavior: Halt the ownership drift and return the finding to the normal local-review loop: Reviewer classifies it, Team Lead routes it, and downstream teammates remediate it.
+- Rule surface: The review-intake contract should keep local pre-publish finding interpretation with Reviewer and reserve Finisher for external post-publish review intake.
+
+## Reviewer lacks a path to analyze existing findings before publish
+
+- Starting condition: Reviewer is asked to assess existing or disputed pre-publish findings, but the workflow provides no review-reception discipline for that interpretation step.
+- Required halt or reroute behavior: Reroute to a Reviewer pass that uses the appropriate review-reception discipline before classification and loopback.
+- Rule surface: The Reviewer skill guidance should allow `superpowers:receiving-code-review` when analyzing existing or disputed findings before publish.
+
+## Skill change reviewed without `writing-skills`
+
+- Starting condition: The run changes `skills/**/*.md` or workflow-contract docs, but Reviewer performs only a normal prose review and never invokes `superpowers:writing-skills`.
+- Required halt or reroute behavior: Halt merged-ready review and reroute to a skill-specific review pass that uses `superpowers:writing-skills`.
+- Rule surface: The Reviewer contract and Reviewer prompt should require `superpowers:writing-skills` for skill and workflow-contract review.
+
+## Skill change reviewed without a pressure-test walkthrough
+
+- Starting condition: Reviewer invokes skill-review guidance in name only, but does not run the relevant pressure-test walkthrough for the changed skill or workflow contract.
+- Required halt or reroute behavior: Halt review completion and require the pressure-test walkthrough results before publish.
+- Rule surface: The Reviewer contract should require pressure-test pass/fail reporting for skill and workflow-contract changes.
+
+## Loophole found during skill review but ignored before publish
+
+- Starting condition: A pressure-test walkthrough on a skill or workflow-contract change finds a loophole, but the run still treats review as complete and moves toward publish.
+- Required halt or reroute behavior: Loop back before publish and do not allow merged-ready review until the loophole is addressed or reported as an explicit blocker.
+- Rule surface: The Reviewer prompt should require loopback when the pressure-test walkthrough exposes a loophole.
+
 ## Finisher handling comments without current-branch verification
 
 - Starting condition: The Finisher resolves or replies to comments tied to earlier state without checking the current branch state first.
 - Required halt or reroute behavior: Halt comment handling until current branch state verification is recorded for the comment context.
 - Rule surface: The Finisher comment-handling prompt should require current branch state verification before action.
+
+## Finisher stops at PR publication plus one status snapshot
+
+- Starting condition: The workflow creates or updates the PR, reports a single status snapshot, and then stops even though mergeability, CI, PR metadata correction, or external feedback handling still requires Finisher-owned follow-through.
+- Required halt or reroute behavior: Do not present the run as complete. Continue the Finisher loop until publish-state follow-through is stable enough to hand off cleanly or an explicit blocker is reported.
+- Rule surface: The Finisher contract should state that PR publication is a milestone rather than the end of the workflow.
+
+## Finisher stops with only local commits and no PR
+
+- Starting condition: The run reaches Finisher-owned work with local commits present, but the branch is not pushed and the PR does not exist.
+- Required halt or reroute behavior: Do not present the run as complete, demoable, or handoffable. Keep publication work with Finisher until the branch is pushed and the PR exists, or report an explicit blocker.
+- Rule surface: The Finisher contract should make PR publication mandatory for every superteam run and eliminate local-only completion as a valid end state.
+
+## Top-level finding comment has no inline companion
+
+- Starting condition: A top-level reviewer or bot comment contains still-applicable findings on the latest pushed state, but there are no inline threads for those findings.
+- Required halt or reroute behavior: Count the top-level finding comment as its own blocking finding source and do not allow shutdown while it remains unresolved.
+- Rule surface: The Finisher shutdown contract should account for blocking top-level finding comments, not just inline threads.
+
+## Top-level summary comment is deduped incorrectly
+
+- Starting condition: The workflow drops a top-level comment from the final unresolved count without verifying that it is explicitly a summary of already-audited inline findings on the latest pushed state.
+- Required halt or reroute behavior: Halt the shutdown report and require explicit audit evidence for the dedupe decision. If the comment includes standalone or mixed findings, count it separately.
+- Rule surface: The Finisher shutdown contract should allow dedupe only for explicit summary comments of already-audited inline findings.
 
 ## Requirement-bearing review feedback routed straight to execution
 
@@ -92,8 +152,38 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt the in-flight work, route the change back to Brainstormer so the design becomes authoritative again, then re-plan before execution resumes.
 - Rule surface: The requirements-delta routing contract should require generic requirement changes to return to Brainstormer before downstream stages continue.
 
-## Shutdown attempted with unresolved threads or bot findings
+## Shutdown attempted with unresolved threads or blocking external PR feedback
 
-- Starting condition: The workflow tries to shut down while unresolved review threads or PR bot findings still exist.
-- Required halt or reroute behavior: Halt shutdown, dispatch finish-owned follow-through, and re-check unresolved items before completion.
-- Rule surface: The Finisher shutdown checklist should treat unresolved threads and bot findings as blocking conditions.
+- Starting condition: The workflow tries to shut down after publishing a PR, but unresolved inline review threads still exist on the latest PR head, or unresolved post-latest-push reviewer or bot feedback still requests concrete corrective action.
+- Required halt or reroute behavior: Do not shut down or present the run as complete. Dispatch finish-owned follow-through, re-check the blocking items, and only allow shutdown after the blocking items are cleared.
+- Rule surface: The Finisher shutdown checklist should treat unresolved inline threads and blocking external PR feedback as shutdown blockers.
+
+## Shutdown report omits final unresolved blocking-feedback counts
+
+- Starting condition: The workflow reaches shutdown readiness evaluation but does not report the final unresolved counts for inline threads and top-level blocking finding comments on the latest pushed state.
+- Required halt or reroute behavior: Halt the shutdown report and require explicit final unresolved counts before completion or blocker handoff.
+- Rule surface: The Finisher shutdown contract should make final unresolved blocking-feedback counts mandatory and auditable.
+
+## Shutdown attempted while publish-state blockers are still active
+
+- Starting condition: The workflow reaches a state that looks healthy from partial signals such as PR published, merge conflict resolved, or CI green, but mergeability, required checks, PR metadata requirements, or final external-feedback handling still needs Finisher-owned follow-through.
+- Required halt or reroute behavior: Do not shut down based on partial success signals. Continue the Finisher loop, report the remaining blockers explicitly, and only allow shutdown after the full publish-state follow-through is stable.
+- Rule surface: The shutdown contract should make clear that PR creation, mergeability restoration, or green CI alone are insufficient completion signals.
+
+## Shutdown attempted using stale completeness from an earlier PR head
+
+- Starting condition: Feedback or checks were cleared on one PR head, a newer commit is pushed, and the workflow still treats the earlier green or previously-cleared state as sufficient for completion.
+- Required halt or reroute behavior: Invalidate the earlier completion assumption, re-check review state, required checks, mergeability, and PR metadata on the latest pushed head, and only allow shutdown if that latest head is complete or its remaining blockers are reported explicitly.
+- Rule surface: The Finisher shutdown contract should make completion head-relative and require re-evaluation after every push.
+
+## Shutdown attempted when the external-feedback state cannot be determined safely
+
+- Starting condition: The workflow cannot tell whether review threads or recent reviewer/bot findings still block the latest pushed state.
+- Required halt or reroute behavior: Do not guess and do not present success. Halt with an explicit blocker and prompt the operator.
+- Rule surface: The shutdown contract should require operator escalation when shutdown readiness cannot be determined safely.
+
+## Finisher fails to distinguish branch-caused CI failures from likely baseline failures
+
+- Starting condition: A required check is failing after the latest push, but the workflow reports the failure without attempting to distinguish whether it was introduced by the branch or appears unrelated baseline noise.
+- Required halt or reroute behavior: Keep the issue in the Finisher loop, inspect enough evidence to make the best branch-caused vs baseline distinction available, and report the result explicitly. If the distinction still cannot be made safely, prompt the operator instead of guessing.
+- Rule surface: The Finisher contract should require explicit blocker reporting and branch-aware CI triage before handoff or halt.
