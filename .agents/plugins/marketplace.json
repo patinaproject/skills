@@ -6,10 +6,11 @@
   "plugins": [
     {
       "name": "superteam",
+      "displayName": "Superteam",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/patinaproject/superteam.git",
-        "path": "./plugins/superteam",
+        "path": ".",
         "ref": "main"
       },
       "policy": {
