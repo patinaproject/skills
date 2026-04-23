@@ -111,6 +111,12 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt review completion and require the pressure-test walkthrough results before publish.
 - Rule surface: The Reviewer contract should require pressure-test pass/fail reporting for skill and workflow-contract changes.
 
+## Workflow-contract changes after review do not rerun the pressure-test walkthrough
+
+- Starting condition: Reviewer already completed a pressure-test walkthrough, then later fixes change `skills/**/*.md` or workflow-contract docs again before the next handoff.
+- Required halt or reroute behavior: Halt the publish handoff and rerun the relevant pressure-test walkthrough before the run returns to `Finisher`.
+- Rule surface: The Reviewer contract and delegated prompt should require reruns after later workflow-contract changes, not just the first review pass.
+
 ## Loophole found during skill review but ignored before publish
 
 - Starting condition: A pressure-test walkthrough on a skill or workflow-contract change finds a loophole, but the run still treats review as complete and moves toward publish.
@@ -128,6 +134,13 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Starting condition: The workflow creates or updates the PR, reports a single status snapshot, and then stops even though mergeability, CI, PR metadata correction, or external feedback handling still requires Finisher-owned follow-through.
 - Required halt or reroute behavior: Do not present the run as complete. Continue the Finisher loop until publish-state follow-through is stable enough to hand off cleanly or an explicit blocker is reported.
 - Rule surface: The Finisher contract should state that PR publication is a milestone rather than the end of the workflow.
+
+## Finisher keeps monitoring while required checks on the latest pushed head are pending
+
+- Starting condition: The latest pushed head has no immediate branch-side fix left, but required checks are still pending.
+- Required halt or reroute behavior: Remain in `Finisher`-owned `monitoring` instead of presenting the run as complete.
+- Behavioral check: Judge the workflow by what it would do next on the latest pushed head, not by whether it uses stern wording about follow-through.
+- Rule surface: The canonical skill and delegated prompt should both treat pending required checks as active publish-state follow-through.
 
 ## Finisher stops with only local commits and no PR
 
@@ -177,6 +190,18 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Do not shut down based on partial success signals. Continue the Finisher loop, report the remaining blockers explicitly, and only allow shutdown after the full publish-state follow-through is stable.
 - Rule surface: The shutdown contract should make clear that PR creation, mergeability restoration, or green CI alone are insufficient completion signals.
 
+## Finisher re-enters triage when later required checks fail on the latest pushed head
+
+- Starting condition: `Finisher` is monitoring the latest pushed head, and a required check later transitions from pending to failing.
+- Required halt or reroute behavior: Re-enter `triage` automatically on the latest pushed head and route any needed corrective work through the normal workflow instead of waiting for a user re-prompt.
+- Rule surface: The Finisher contract should make later required-check failures an automatic triage transition while monitoring.
+
+## Finisher allows ready handoff only after later passing checks leave the whole latest-head sweep clear
+
+- Starting condition: `Finisher` is monitoring the latest pushed head, and required checks later transition from pending to passing.
+- Required halt or reroute behavior: Allow `ready` only if the rest of the latest-head sweep is also clear, including mergeability, PR metadata, and unresolved external review state.
+- Rule surface: The Finisher contract should require a full latest-head sweep, not just passing required checks, before a ready handoff.
+
 ## Shutdown attempted using stale completeness from an earlier PR head
 
 - Starting condition: Feedback or checks were cleared on one PR head, a newer commit is pushed, and the workflow still treats the earlier green or previously-cleared state as sufficient for completion.
@@ -188,6 +213,12 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Starting condition: The workflow cannot tell whether review threads or recent reviewer/bot findings still block the latest pushed state.
 - Required halt or reroute behavior: Do not guess and do not present success. Halt with an explicit blocker and prompt the operator.
 - Rule surface: The shutdown contract should require operator escalation when shutdown readiness cannot be determined safely.
+
+## Pending external systems stop the run as an explicit blocker, not a completion summary
+
+- Starting condition: Required checks, manual approvals, or other external publish-state signals remain pending on the latest pushed head, and the workflow cannot safely continue monitoring.
+- Required halt or reroute behavior: Report an explicit blocker tied to the latest pushed head and pending external dependency instead of using completion-style language.
+- Rule surface: The Finisher contract should turn unsafe-to-continue monitoring into a `blocked` state rather than a soft success summary.
 
 ## Finisher fails to distinguish branch-caused CI failures from likely baseline failures
 

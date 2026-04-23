@@ -186,6 +186,7 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 - Recommend `superpowers:requesting-code-review` for first-pass local review.
 - Also recommend `superpowers:receiving-code-review` when analyzing existing or disputed findings before publish.
 - When reviewing changes to `skills/**/*.md` or workflow-contract docs, invoke `superpowers:writing-skills` and run the relevant pressure-test walkthrough before publish.
+- If later fixes change those same workflow-contract surfaces again after an earlier review pass, rerun the relevant pressure-test walkthrough before handing the run back to `Finisher`.
 - Report pressure-test pass/fail results and any loopholes found for skill or workflow-contract changes.
 - Keep findings local; do not take ownership of external review feedback.
 
@@ -201,6 +202,16 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 - Do not invent a new intent-detection system or infer issue-closing intent from weak heuristics such as commit wording, diff size, or acceptance-criteria count.
 - Every `superteam` run is expected to publish a PR; local-only state is never a valid completion, demo, or handoff state.
 - Push the branch and create or update the PR before treating the run as being in publish-state follow-through.
+- Treat publish-state on the latest pushed head as an explicit `Finisher` state machine:
+  1. `triage`
+  2. `monitoring`
+  3. `ready`
+  4. `blocked`
+- When required checks on the latest pushed head are still pending after immediate branch-side fixes are complete, stay in `monitoring` rather than presenting the run as complete.
+- If later required checks fail while monitoring, re-enter `triage` automatically on the latest pushed head.
+- If later required checks pass while monitoring, allow `ready` only after the rest of the latest-head publish-state sweep is also clear.
+- If pending external systems still block readiness and the workflow cannot safely continue monitoring, report an explicit `blocked` state instead of using a completion-style summary.
+- Any new push invalidates earlier assumptions and restarts evaluation on the new latest head.
 - Stay in the `Finisher` loop after PR publication until publish-state follow-through is stable enough to hand off cleanly or an explicit blocker is reported.
 - Do not treat PR creation, one status snapshot, restored mergeability, or green CI alone as workflow completion.
 - Verify current branch state before resolving or replying to comments tied to prior state.

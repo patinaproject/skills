@@ -52,6 +52,9 @@ No formal test suite exists yet. Validate changes with targeted file checks and 
 - Check rewritten references with `rg '<pattern>'`
 - Review rendered content with `sed -n '1,200p' <file>`
 - Verify root install metadata with `sed -n '1,200p' .codex-plugin/plugin.json` and confirm there is no stale `plugins/superteam/` tree
+- For changes to `skills/**/*.md` and workflow-contract guidance, do not claim production readiness from confidence language alone.
+- Readiness claims for those changes must be backed by the required pressure tests, review loops, and role-specific verification that actually ran.
+- If that evidence is incomplete, report the missing evidence or blocker explicitly instead of asserting readiness.
 
 If you add executable tooling later, document the exact verification command in `docs/`.
 
