@@ -125,6 +125,12 @@ Before any teammate touches governed files, discover the canonical repository ru
 
 If canonical guidance cannot be found, halt and surface the blocker instead of guessing.
 
+## Artifact handoff authority
+
+Handoffs that depend on uncommitted durable artifact changes are incomplete unless the run halts explicitly with a blocker.
+
+For artifact-producing handoffs, the workflow should trust committed branch state rather than dirty workspace state. Downstream teammates should be able to rely on inspectable commits instead of inferring intent from uncommitted local changes.
+
 ## Gate 1: Brainstormer approval
 
 Advancement from `Brainstormer` to `Planner` requires explicit approval of the design artifact. Silence, ambiguity, or partial replies are non-approval.
@@ -160,24 +166,29 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 ### Brainstormer
 
 - Own the design doc in `docs/superpowers/specs/`.
+- Commit the design artifact change before reporting done or handing off to `Planner`.
 - Return the exact design doc path.
 - Return the ordered active AC list.
 - Report the concise intent summary and the full requirement set used for approval.
 - Always report `concerns[]` when requesting approval, including an explicit empty result when no approval-relevant concerns remain under the contract.
 - Render the operator-facing no-concerns line exactly as `Remaining concerns: None`.
 - Surface any remaining approval-relevant concerns when requesting approval.
+- Include the handoff commit SHA for the committed design artifact in the done report.
 - Recommend `superpowers:brainstorming`.
 
 ### Planner
 
 - Consume the approved design doc, not ad hoc chat summaries.
+- Commit the implementation plan change before reporting done or handing off to `Executor`.
 - Produce the implementation plan or halt with a blocker.
+- Include the handoff commit SHA for the committed implementation plan in the done report.
 - Recommend `superpowers:writing-plans`.
 
 ### Executor
 
 - Drive implementation from acceptance criteria and approved plan tasks using ATDD, not ad hoc coding first.
 - Implement only the assigned tasks from the approved plan.
+- Commit the completed implementation and test changes before reporting done or handing off to `Reviewer`.
 - Report completion against explicit task IDs.
 - Include concrete completion evidence, SHAs, and verification evidence before claiming completion.
 - `Executor` completion is not workflow completion. After local implementation work is complete, the run must either continue into `Reviewer` and then `Finisher`, or halt explicitly as `superteam halted at <teammate or gate>: <reason>`.
@@ -238,6 +249,33 @@ If revisions are requested after an approval pass, re-fire approval with delta-o
 When `Team Lead` delegates work, the prompt must explicitly recommend the expected `superpowers` skills for that role when relevant. If an expected skill is unavailable in the current environment, say so explicitly in the delegated prompt so both the operator and teammate can see the gap.
 
 Do not silently omit expected skill guidance.
+
+## Done-report contracts
+
+Artifact-producing teammate done reports must anchor on committed handoff state rather than uncommitted workspace state.
+
+### Brainstormer done report
+
+- `design_doc_path`: exact path to the written design doc
+- `ac_ids[]`: ordered list of active AC IDs
+- `intent_summary`: concise summary of what the artifact changes or decides
+- `requirements[]`: full requirement set currently under review
+- `concerns[]`: remaining approval-relevant concerns that could materially affect approval, or an explicit empty result when none exist
+- `handoff_commit_sha`: commit containing the design artifact used for approval and planning
+
+### Planner done report
+
+- `plan_path`: exact path to the written implementation plan
+- `workstreams[]`: short summary of planned batches or workstreams
+- `blockers[]`: any blockers preventing execution, or an explicit empty result when none exist
+- `handoff_commit_sha`: commit containing the approved implementation plan used for execution
+
+### Executor done report
+
+- `completed_task_ids[]`: explicit task IDs completed in this batch
+- `completion_evidence[]`: concrete evidence per completed task
+- `head_sha`: current HEAD SHA for the committed implementation and test state being handed to `Reviewer`
+- `verification[]`: verification commands and outcomes
 
 ## Review and loopback routing
 

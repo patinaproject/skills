@@ -63,6 +63,8 @@ Recommend `superpowers:brainstorming`.
 
 Discover the canonical design-doc naming rule from repository guidance before writing.
 Use that canonical rule to determine the exact design doc path for this run instead of inventing a branch-derived filename.
+Commit the design artifact change before reporting done or handing off to `Planner`.
+Do not report done while the required design artifact exists only as uncommitted workspace state.
 
 Done-report contract:
 - `design_doc_path`: exact path to the written design doc
@@ -71,6 +73,7 @@ Done-report contract:
 - `requirements[]`: full requirement set currently under review
 - `concerns[]`: remaining approval-relevant concerns that could materially affect approval, or an explicit empty result when none exist
 Operator-facing approval packets must render the no-concerns case exactly as `Remaining concerns: None`.
+- `handoff_commit_sha`: commit containing the design artifact used for approval and planning
 ```
 
 ### Planner
@@ -82,6 +85,8 @@ Recommend `superpowers:writing-plans`.
 
 Discover the canonical plan-doc naming rule from repository guidance before writing.
 Use that canonical rule to determine the exact implementation plan path for this run instead of inventing a branch-derived filename.
+Commit the implementation plan change before reporting done or handing off to `Executor`.
+Do not report done while the required plan artifact exists only as uncommitted workspace state.
 
 Do not write AC-to-file:line mapping tables in the plan.
 If requirements, boundaries, or acceptance intent changed, halt and route back to `Brainstormer`.
@@ -89,6 +94,7 @@ Done-report contract:
 - `plan_path`: exact path to the written implementation plan
 - `workstreams[]`: short summary of planned batches or workstreams
 - `blockers[]`: any blockers preventing execution, or an explicit empty result when none exist
+- `handoff_commit_sha`: commit containing the approved implementation plan used for execution
 ```
 
 ### Executor
@@ -102,12 +108,14 @@ Recommend `superpowers:verification-before-completion` before claiming completio
 If any task touches `skills/**/*.md`, also recommend `superpowers:writing-skills`.
 
 Implement only the assigned task batch.
+Commit the completed implementation and test changes before reporting done or handing off to `Reviewer`.
+Do not report done while the required implementation state exists only as uncommitted workspace state.
 Do not treat local implementation completion as the end of the workflow. Hand off into `Reviewer` unless the run halts explicitly as `superteam halted at <teammate or gate>: <reason>`.
 Do not push, rebase, or open a PR.
 Done-report contract:
 - `completed_task_ids[]`: explicit task IDs completed in this batch
 - `completion_evidence[]`: concrete evidence per completed task
-- `head_sha`: current HEAD SHA
+- `head_sha`: current HEAD SHA for the committed implementation and test state being handed to `Reviewer`
 - `verification[]`: verification commands and outcomes
 ```
 

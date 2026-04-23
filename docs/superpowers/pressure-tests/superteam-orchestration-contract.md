@@ -99,6 +99,30 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt the handoff and return it to the owning teammate until the required done-report fields are present in the expected shape.
 - Rule surface: Each teammate-specific done contract should define the minimum stable fields needed for downstream handoff.
 
+## Brainstormer hands off an uncommitted design artifact
+
+- Starting condition: `Brainstormer` writes or updates the design doc, but the artifact exists only as uncommitted workspace state when handoff to `Planner` is attempted.
+- Required halt or reroute behavior: Treat the handoff as incomplete and loop it back to `Brainstormer` until the design artifact is committed, or halt explicitly with a blocker if the run cannot proceed safely.
+- Rule surface: The canonical skill and delegated prompt should require `Brainstormer` to commit the design artifact before reporting done or handing off.
+
+## Planner hands off an uncommitted plan artifact
+
+- Starting condition: `Planner` writes or updates the implementation plan, but the artifact exists only as uncommitted workspace state when handoff to `Executor` is attempted.
+- Required halt or reroute behavior: Treat the handoff as incomplete and loop it back to `Planner` until the implementation plan is committed, or halt explicitly with a blocker if the run cannot proceed safely.
+- Rule surface: The canonical skill and delegated prompt should require `Planner` to commit the implementation plan before reporting done or handing off.
+
+## Executor hands off uncommitted implementation artifacts
+
+- Starting condition: `Executor` completes implementation or test changes, but those artifacts exist only as uncommitted workspace state when handoff to `Reviewer` is attempted.
+- Required halt or reroute behavior: Treat the handoff as incomplete and loop it back to `Executor` until the implementation and test changes are committed, or halt explicitly with a blocker if the run cannot proceed safely.
+- Rule surface: The canonical skill and delegated prompt should require `Executor` to commit the completed implementation and test state before reporting done or handing off.
+
+## Non-artifact-producing stages are not forced into meaningless commits
+
+- Starting condition: `Reviewer` or `Finisher` completes stage responsibilities without materially changing durable artifacts.
+- Required halt or reroute behavior: Do not require a commit solely to satisfy the handoff-commit rule.
+- Rule surface: The artifact-producing handoff rule should apply to artifact-producing roles and artifact-producing changes, not become a ritual for every stage.
+
 ## Reviewer findings missing loopback classification
 
 - Starting condition: Reviewer findings identify problems but do not classify them as implementation-level, plan-level, or spec-level loopbacks.
