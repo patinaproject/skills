@@ -6,7 +6,7 @@ It is a marketplace catalog, not the source repo for every plugin. Marketplace e
 
 ## Current plugin
 
-- `superteam`: installed from `patinaproject/superteam` using a `git-subdir` source that targets `./plugins/superteam` on `main`
+- `superteam`: installed from the root-packaged `patinaproject/superteam` plugin repository on `main`
 
 ## Install Surfaces
 
@@ -14,8 +14,10 @@ It is a marketplace catalog, not the source repo for every plugin. Marketplace e
 - `patinaproject/superteam` is the source of truth for the upstream plugin package
 - Codex marketplace metadata lives in `.agents/plugins/marketplace.json`
 - Claude marketplace metadata lives in `.claude-plugin/marketplace.json`
-- Codex installs `superteam` through the marketplace entry that targets `./plugins/superteam` in `patinaproject/superteam`
+- Codex installs `superteam` from the repository root in `patinaproject/superteam`
+- The upstream Codex manifest lives at `.codex-plugin/plugin.json`
 - The Claude plugin packaging and install surface live in the upstream `patinaproject/superteam` repository through its root `.claude-plugin/plugin.json`
+- The upstream `superteam` skill content lives at `skills/superteam/`
 
 ## How it works
 
@@ -26,9 +28,15 @@ In this repo, the marketplace is named `patinaproject-skills` and exposed in the
 The current `superteam` entry does not vendor plugin files in this repository. Instead, it tells Codex to fetch the plugin package from the `patinaproject/superteam` repository:
 
 - repo: `patinaproject/superteam`
-- source type: `git-subdir`
-- plugin path: `./plugins/superteam`
+- source type: `url`
+- plugin root: `.`
 - ref: `main`
+
+In the upstream repository, the active install surfaces are:
+
+- Codex manifest: `.codex-plugin/plugin.json`
+- Claude manifest: `.claude-plugin/plugin.json`
+- Skill directory: `skills/superteam/`
 
 That keeps the marketplace catalogs isolated while allowing plugin source repos to stay independent.
 
@@ -57,7 +65,7 @@ For a direct setup in Claude Code today, add `superteam` as a custom subagent. A
 Create a project subagent file at `.claude/agents/superteam.md` with `/agents`, or create it manually and copy in the contents of:
 
 ```text
-https://github.com/patinaproject/superteam/blob/main/plugins/superteam/skills/superteam/SKILL.md
+https://github.com/patinaproject/superteam/blob/main/skills/superteam/SKILL.md
 ```
 
 Claude Code loads project subagents from `.claude/agents/`, so after adding that file you can use prompts such as:
