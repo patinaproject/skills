@@ -6,8 +6,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 
 - `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth
-- `plugins/`: optional vendored plugin packages when this repo carries local copies
-- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md` and, when present, `docs/superpowers/`
+- `docs/`: contributor docs plus planning artifacts; use `docs/superpowers/` for Superpowers-generated specs and plans
+- This repo owns marketplace metadata and install documentation; upstream plugin repos own plugin implementation and package internals
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
 - root config: `package.json`, `commitizen.config.js`, `commitlint.config.js`, and `.husky/`
 
