@@ -4,9 +4,14 @@ This repository carries the Patina Project marketplace catalogs for both Codex a
 
 It is a marketplace catalog, not the source repo for every plugin. Marketplace entries can point at plugins packaged in this repo, or at Git-backed plugin sources maintained in other Patina Project repositories.
 
-## Current plugin
+## Current plugins
 
-- `superteam`: installed from the root-packaged `patinaproject/superteam` plugin repository on `main`
+The marketplace only lists plugins that have published a tagged release (`vX.Y.Z`). See [docs/release-flow.md](docs/release-flow.md) for how releases propagate here.
+
+Tracked member plugins:
+
+- `patinaproject/bootstrap` — repo scaffolding skill (pending first tagged release; also consumed by this repo)
+- `patinaproject/superteam` — issue-driven orchestration skill (pending first tagged release, tracked in [patinaproject/superteam#32](https://github.com/patinaproject/superteam/issues/32))
 
 ## Install Surfaces
 
@@ -25,12 +30,7 @@ Codex reads the marketplace definition from `.agents/plugins/marketplace.json`, 
 
 In this repo, the marketplace is named `patinaproject-skills` and exposed in the UI as `Patina Project`.
 
-The current `superteam` entry does not vendor plugin files in this repository. Instead, it tells Codex to fetch the plugin package from the `patinaproject/superteam` repository:
-
-- repo: `patinaproject/superteam`
-- source type: `url`
-- plugin root: `.`
-- ref: `main`
+Plugin entries do not vendor plugin files in this repository. Each entry points at a Git-backed plugin source repo (for example `patinaproject/superteam`) pinned to an explicit release tag (`vX.Y.Z`). Branch refs such as `main` are not allowed — see [docs/release-flow.md](docs/release-flow.md).
 
 In the upstream repository, the active install surfaces are:
 
@@ -103,6 +103,8 @@ Use $superteam to coordinate an implementation plan for issue #123.
 ## Maintenance Notes
 
 - Update marketplace entries in `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json`
-- Keep Git-backed entries pinned to an explicit `ref` or commit
+- Keep Git-backed entries pinned to an explicit tag `ref` (`vX.Y.Z`). Branch refs are not allowed.
 - Maintain plugin source and packaging in the owning source repository
 - For `superteam`, the source-of-truth repo is `patinaproject/superteam`
+- For `bootstrap`, the source-of-truth repo is `patinaproject/bootstrap`
+- See [docs/release-flow.md](docs/release-flow.md) for how plugin releases propagate into the marketplace

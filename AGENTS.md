@@ -7,7 +7,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth
 - `plugins/`: optional vendored plugin packages when this repo carries local copies
-- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md` and, when present, `docs/superpowers/`
+- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`, `docs/release-flow.md`, and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
 - root config: `package.json`, `commitizen.config.js`, `commitlint.config.js`, and `.husky/`
 
@@ -39,6 +39,10 @@ For Superpowers-generated design and planning artifacts, use issue-based filenam
 - Review manifest files with `sed -n '1,200p' <file>`
 - Review Git-backed marketplace entries in `.agents/plugins/marketplace.json`
 - Run the relevant plugin validator when a packaged skill includes one
+
+## Plugin Releases
+
+The marketplace only publishes tagged (`vX.Y.Z`) plugin releases. Every plugin entry in both manifests must pin an explicit tag `ref` — branch refs such as `main` are not allowed. New releases of member plugins (`bootstrap`, `superteam`) propagate here via `repository_dispatch` into `.github/workflows/plugin-release-bump.yml`, which opens a bump PR. See [docs/release-flow.md](./docs/release-flow.md).
 
 ## Commit & Pull Request Guidelines
 
