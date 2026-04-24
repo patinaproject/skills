@@ -1,0 +1,31 @@
+{
+  "name": "bootstrap",
+  "version": "0.1.0",
+  "description": "Scaffold and realign repositories to the Patina Project baseline.",
+  "author": {
+    "name": "Patina Project",
+    "url": "https://github.com/patinaproject"
+  },
+  "homepage": "https://github.com/patinaproject/bootstrap",
+  "repository": "https://github.com/patinaproject/bootstrap",
+  "license": "MIT",
+  "keywords": ["codex", "plugin", "skills", "scaffold", "bootstrap"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bootstrap",
+    "shortDescription": "Scaffold and realign repos to the Patina baseline",
+    "longDescription": "Emit the Patina Project repository baseline into a new or existing repo. Covers commits, PRs, PNPM tooling, agent docs, and plugin surfaces for every supported AI coding tool. Realigns existing repos with the current baseline on rerun.",
+    "developerName": "Patina Project",
+    "category": "Productivity",
+    "capabilities": ["Write", "Interactive"],
+    "websiteURL": "https://github.com/patinaproject/bootstrap",
+    "privacyPolicyURL": "https://github.com/patinaproject/bootstrap",
+    "termsOfServiceURL": "https://github.com/patinaproject/bootstrap",
+    "defaultPrompt": [
+      "Use $bootstrap to scaffold this new repository to the Patina baseline.",
+      "Use $bootstrap to realign this existing repository with the latest baseline.",
+      "Use $bootstrap to add currently-supported AI platform surfaces to this agent plugin."
+    ],
+    "brandColor": "#E6A77E"
+  }
+}

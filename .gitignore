@@ -1,0 +1,6 @@
+node_modules/
+pnpm-debug.log*
+.DS_Store
+dist/
+build/
+.claude/scheduled_tasks.lock

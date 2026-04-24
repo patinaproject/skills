@@ -1,0 +1,96 @@
+# {{repo}}
+
+{{repo-description}}
+
+`{{repo}}` is a Claude Code + Codex plugin. It ships installable skills under `skills/` and is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace.
+
+## What this plugin does
+
+<!-- One-paragraph overview of what the plugin does for the user. -->
+<!-- Keep it concrete. Example: "Takes a GitHub issue and routes it through a -->
+<!-- brainstorm → plan → execute → review → finish workflow across a canonical -->
+<!-- teammate roster, using repo-owned design and plan artifacts." -->
+
+## Installation
+
+### Claude Code
+
+1. Register the Patina marketplace:
+
+   ```text
+   /plugin marketplace add patinaproject/skills
+   ```
+
+2. Install the plugin:
+
+   ```text
+   /plugin install {{repo}}@patinaproject
+   ```
+
+3. Open a target repository (or an issue in one) in Claude Code and invoke:
+
+   ```text
+   /{{repo}}:{{repo}}
+   ```
+
+### OpenAI Codex CLI
+
+1. Register the Patina marketplace:
+
+   ```bash
+   codex plugin marketplace add patinaproject/skills
+   ```
+
+2. Install the plugin (pin to a tag for reproducible installs):
+
+   ```bash
+   codex plugin marketplace add {{owner}}/{{repo}}@v0.1.0
+   ```
+
+3. Invoke from the target repository:
+
+   ```text
+   Use ${{repo}} for the workflow described above.
+   ```
+
+### OpenAI Codex App
+
+1. Install or enable the `{{repo}}` plugin from your Codex plugin source.
+2. Open the target repository in the app.
+3. Invoke:
+
+   ```text
+   Use ${{repo}} for the workflow described above.
+   ```
+
+## Usage
+
+<!-- Example prompts or invocations tailored to this plugin. -->
+<!-- Example: -->
+<!-- /{{repo}}:{{repo}} work on issue 42 -->
+<!-- /{{repo}}:{{repo}} resume from review -->
+
+## Development
+
+This repository is the source for the plugin. Local workflow:
+
+```bash
+pnpm install           # installs dev deps and wires husky
+pnpm lint:md           # markdownlint-cli2
+pnpm check:versions    # enforce package.json ↔ plugin manifests lockstep
+pnpm commitlint        # one-off commit-message validation
+```
+
+Commits and PR titles follow `type: #<issue> short description`.
+
+Releases are driven by [release-please](https://github.com/googleapis/release-please) — merge the standing release PR to cut a new `vX.Y.Z`. See [`RELEASING.md`](./RELEASING.md).
+
+## Contributing
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md).
+
+## Related
+
+- [`skills/{{repo}}/SKILL.md`](./skills/{{repo}}/SKILL.md) — skill contract.
+- [`patinaproject/skills`](https://github.com/patinaproject/skills) — marketplace distributing Patina plugins.
+- [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) — scaffolding skill that emitted this repo's baseline.
