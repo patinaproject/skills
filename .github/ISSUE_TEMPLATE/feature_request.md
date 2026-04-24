@@ -5,6 +5,8 @@ title: ""
 labels: enhancement
 ---
 
+<!-- Title: plain-language summary (no `feat:` prefix). Labels: see .github/LABELS.md. -->
+
 ## Problem
 
 What problem does this solve? Who is affected?
@@ -13,10 +15,21 @@ What problem does this solve? Who is affected?
 
 What should change. Be concrete about behavior, file layout, or user-visible impact.
 
-## Alternatives considered
+## Non-Goals (optional)
 
-Other approaches and why they were rejected.
+What is explicitly out of scope.
 
-## Additional context
+## Implementation Notes (optional)
 
-Links, prior discussions, or related issues.
+Constraints, risks, or pointers that help the implementer.
+
+## Acceptance Criteria
+
+<!-- Use AC-<issue-number>-<n> IDs and Given/When/Then phrasing.
+     See docs/ac-traceability.md for the full convention. -->
+
+- AC-<issue>-1: Given ..., when ..., then ...
+
+## Relationships
+
+Linked issues, PRs, or discussions (e.g. `Relates to #123`, `Blocks #456`).

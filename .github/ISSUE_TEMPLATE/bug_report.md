@@ -5,13 +5,13 @@ title: ""
 labels: bug
 ---
 
+<!-- Title: plain-language summary (no `fix:` prefix). Labels: see .github/LABELS.md. -->
+
 ## Summary
 
-A clear, plain-language description of what's wrong.
+Plain-language description of what's wrong.
 
 ## Reproduction
-
-Minimal steps to reproduce the issue.
 
 1.
 2.
@@ -19,11 +19,9 @@ Minimal steps to reproduce the issue.
 
 ## Expected behavior
 
-What you expected to happen.
-
 ## Actual behavior
 
-What actually happened. Include error messages, logs, or screenshots when relevant.
+Include error messages, logs, or screenshots when relevant.
 
 ## Environment
 
@@ -31,6 +29,6 @@ What actually happened. Include error messages, logs, or screenshots when releva
 - Runtime / tool version:
 - Repo commit or release:
 
-## Additional context
+## Relationships
 
-Anything else that would help diagnose the issue.
+Linked issues, PRs, or prior reports.
