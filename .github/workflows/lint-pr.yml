@@ -12,6 +12,7 @@ jobs:
   title-format:
     name: Validate PR title
     runs-on: ubuntu-latest
+    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Enforce ASCII-only title
         env:
@@ -55,7 +56,7 @@ jobs:
   closing-keyword:
     name: Require closing keyword
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Check for closing keyword in PR body
         env:
@@ -86,6 +87,7 @@ jobs:
   mark-breaking-change:
     name: Mark breaking change
     runs-on: ubuntu-latest
+    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Compare title `!` with body BREAKING CHANGE footer
         env:

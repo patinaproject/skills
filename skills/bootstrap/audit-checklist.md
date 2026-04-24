@@ -43,6 +43,12 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `.github/workflows/lint-actions.yml` | yes | present; runs `actionlint` on PRs touching `.github/workflows/**` |
 | `.github/actionlint.yaml` | yes | present; lists permitted self-hosted-runner labels |
 
+### Reserved GitHub labels
+
+| Label | Required | Check |
+|---|---|---|
+| `autorelease: pending` | yes | present; color `c5def5`; description non-empty and documents that the label is reserved for Release Please automation; confirm via `gh label list --repo <owner>/<repo> --json name,color,description --jq '.[] \| select(.name=="autorelease: pending")'` |
+
 ## Area 3 — Agent + repo docs
 
 | File | Required | Check |

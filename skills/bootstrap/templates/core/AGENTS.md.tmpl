@@ -64,6 +64,8 @@ Verify every label has a non-empty description:
 gh label list --json name,description --jq '.[] | select(.description == "")'
 ```
 
+The `autorelease: pending` and `autorelease: tagged` labels are reserved for Release Please automation. Release Please applies `autorelease: pending` to the open release PR and `autorelease: tagged` after the release tag is cut. Never apply or remove these labels manually; PR-title lint is intentionally skipped while `autorelease: pending` is present so release PRs can keep their `chore: release <version>` title.
+
 ## Working with `.github/` templates
 
 This repo ships canonical templates for issues and pull requests. Agents must use them — do not invent parallel structure.
