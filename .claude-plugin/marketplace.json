@@ -17,6 +17,16 @@
         "repo": "patinaproject/bootstrap",
         "ref": "v1.1.2"
       }
+    },
+    {
+      "name": "superteam",
+      "description": "Patina Project plugin: superteam",
+      "category": "productivity",
+      "source": {
+        "source": "github",
+        "repo": "patinaproject/superteam",
+        "ref": "v1.0.0"
+      }
     }
   ]
 }
