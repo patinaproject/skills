@@ -125,7 +125,7 @@ Aider, Zed, Cline, Codex CLI, and Opencode read `AGENTS.md` natively and are cov
 
 ### Patina organization supplement
 
-When the target repo's owner is `patinaproject`, the skill replaces the agent-plugin `.github/workflows/release.yml` with the supplement at `skills/bootstrap/templates/patinaproject-supplement/.github/workflows/release.yml`. The supplement adds a `notify-patinaproject-skills` job that dispatches `bump-plugin-tags.yml` on `patinaproject/skills` after each release. Non-Patina repos get the clean base workflow without any Patina-specific plumbing.
+When the target repo's owner is `patinaproject`, the skill replaces the agent-plugin `.github/workflows/release.yml` with the supplement at `skills/bootstrap/templates/patinaproject-supplement/.github/workflows/release.yml`. The supplement adds a `notify-patinaproject-skills` job that dispatches `plugin-release-bump.yml` on `patinaproject/skills` after each release. Non-Patina repos get the clean base workflow without any Patina-specific plumbing.
 
 Detection is done at scaffold time from `git remote get-url origin` (or the configured `<owner>` prompt). The base workflow does not carry dead `if:` gates.
 
@@ -159,7 +159,7 @@ The skill does not recommend running any commands postinstall. Plugin enablement
 - **GitHub Actions pinning**: every `uses:` in emitted workflows references a full 40-char commit SHA with a `# <action>@<version>` comment above it, rather than a mutable tag. Documented in `AGENTS.md`.
 - **Labels**: `AGENTS.md` directs contributors to use `gh label list` and the repository's label descriptions as the source of truth when labeling issues and PRs.
 - **Releases (agent-plugin mode)**: [`release-please`](https://github.com/googleapis/release-please) reads conventional commits since the last tag, opens a standing release PR that bumps `package.json` + both plugin manifests + `CHANGELOG.md`, and publishes a GitHub Release on merge. Semver level is derived from commit types; there is no manual patch/minor/major choice.
-- **Distribution via `patinaproject/skills` (agent-plugin mode, auto-detected)**: when the repo owner is `patinaproject`, the emitted release workflow also dispatches `bump-plugin-tags.yml` on `patinaproject/skills` immediately after a release, so the marketplace surfaces the new tag without manual steps. Forks outside the org skip the step automatically. Requires a one-time org-level `PATINA_SKILLS_DISPATCH_TOKEN` secret on `patinaproject` (documented in the emitted `RELEASING.md`).
+- **Distribution via `patinaproject/skills` (agent-plugin mode, auto-detected)**: when the repo owner is `patinaproject`, the emitted release workflow also dispatches `plugin-release-bump.yml` on `patinaproject/skills` immediately after a release, so the marketplace surfaces the new tag without manual steps. Forks outside the org skip the step automatically. The dispatch is authenticated by an org-owned GitHub App (`patinaproject-automation`) installed on `patinaproject/skills` only; org secrets `PATINAPROJECT_AUTOMATION_APP_ID` and `PATINAPROJECT_AUTOMATION_PRIVATE_KEY` are exposed to every plugin repo. Setup is one-time per org and documented in the emitted `RELEASING.md`.
 - **Version canonicalization**: `package.json` is the single source of truth for the plugin version. `scripts/sync-plugin-versions.mjs` rewrites `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to match; `scripts/check-plugin-versions.mjs` enforces the lockstep via husky `pre-commit`.
 
 ## GitHub repository settings

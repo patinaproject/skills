@@ -120,15 +120,22 @@ Determined from commit types — no human choice:
 
 ## Distribution via `patinaproject/skills`
 
-When a release is published **and the repository owner is `patinaproject`**, the release workflow automatically dispatches `bump-plugin-tags.yml` on `patinaproject/skills`. That marketplace repo opens (or updates) a PR bumping this plugin's pinned `ref` across every Patina marketplace manifest.
+When a release is published **and the repository owner is `patinaproject`**, the release workflow automatically dispatches `plugin-release-bump.yml` on `patinaproject/skills`. That marketplace repo opens (or updates) a PR bumping this plugin's pinned `ref` across every Patina marketplace manifest.
 
-No per-repo opt-in is required — the `github.repository_owner == 'patinaproject'` check in the workflow gates this behavior. Forks in other orgs skip the step automatically.
+No per-repo opt-in is required — the `github.repository_owner == 'patinaproject'` check on the `notify-patinaproject-skills` job gates this behavior. Forks in other orgs skip the job entirely and don't need any of the setup below.
 
-Prerequisite (org-level, one-time):
+Prerequisites (org-level, one-time, already configured for `patinaproject`):
 
-- Org secret on `patinaproject`: `PATINA_SKILLS_DISPATCH_TOKEN` — a fine-grained PAT (or GitHub App installation token) with `actions: write` on `patinaproject/skills`. Available to every plugin repo in the org.
+- A GitHub App owned by `patinaproject` named `patinaproject-automation`, with **Actions: Read and write** permission, installed on `patinaproject/skills` only.
+- Two org secrets exposing the App's identity to every plugin repo:
+  - `PATINAPROJECT_AUTOMATION_APP_ID` — the App ID (small integer, not sensitive).
+  - `PATINAPROJECT_AUTOMATION_PRIVATE_KEY` — the App's private key (PEM-encoded; sensitive).
 
-If the token is missing, the dispatch step fails but the release itself still completes (the notify step runs in a separate job). Marketplace bumps can also be kicked off manually from `patinaproject/skills`' Actions tab.
+The release workflow uses [`actions/create-github-app-token`](https://github.com/actions/create-github-app-token) to mint a per-job installation token from the App credentials, then passes that token to `benc-uk/workflow-dispatch` to fire `plugin-release-bump.yml` on `patinaproject/skills`.
+
+Why an org-owned App rather than a personal access token: the App identity isn't tied to any individual user, survives organizational turnover, surfaces as `patinaproject-automation[bot]` in audit logs, and scopes its capabilities to one repo with one permission. Rotation is "regenerate App key", not "regenerate user PAT."
+
+If either secret is missing on a `patinaproject` plugin repo, the `Mint patinaproject-automation App token` step will fail and the `notify-patinaproject-skills` job will surface that failure on the run page. The release itself (the `release-please` job) still completes regardless. To unblock, ensure both org secrets are set; or fire the marketplace bump manually with `gh workflow run plugin-release-bump.yml --repo patinaproject/skills -f plugin=<repo> -f tag=<tag>`.
 
 ## Writing commits for a clean changelog
 
