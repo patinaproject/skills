@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/patinaproject/superteam/compare/v0.2.0...v1.0.0) (2026-04-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* #32 declare v1.0.0 stable api ([#37](https://github.com/patinaproject/superteam/issues/37))
+
+### Features
+
+* [#32](https://github.com/patinaproject/superteam/issues/32) declare v1.0.0 stable api ([#37](https://github.com/patinaproject/superteam/issues/37)) ([d87e259](https://github.com/patinaproject/superteam/commit/d87e259e2df92b6b8add6328c6fc9ae1c9a95b13))
+
 ## [0.2.0](https://github.com/patinaproject/superteam/compare/v0.1.0...v0.2.0) (2026-04-25)
 
 
