@@ -4,13 +4,23 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 
 ## How it works
 
-1. On every push to `main`, the `Release` workflow runs `release-please`. The same workflow can also be triggered manually from **Actions → Release → Run workflow** as an escape hatch — use it to seed the very first release PR before any push to `main`, or to re-run after a transient failure.
-2. `release-please` scans Conventional Commits since the last tag.
-3. It opens (or updates) a standing **"chore: release X.Y.Z"** PR that:
+The `Release` workflow does **not** auto-run on every PR merge. Its triggers are:
+
+- `workflow_dispatch` — for opening or refreshing the standing release PR on demand.
+- `pull_request: types: [closed]` — but the job only runs when the closed PR was **merged** *and* carries the `autorelease: pending` label. Regular feature/fix PR merges therefore produce no Release workflow run.
+
+Cutting a release is a two-step flow:
+
+1. **Open or refresh the release PR (manual).** Trigger the workflow via **Actions → Release → Run workflow** (or `gh workflow run Release --repo <owner>/<repo>`). `release-please` scans Conventional Commits since the last tag and opens — or updates — a standing **"chore: release X.Y.Z"** PR that:
    - Bumps `package.json` version.
    - Syncs `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to the new version (configured in `release-please-config.json`).
    - Appends generated entries to `CHANGELOG.md`.
-4. **Clicking Merge on that PR** is the release action. It tags `vX.Y.Z` and publishes a GitHub Release with notes generated from the same commits.
+
+   Release-please attaches the `autorelease: pending` label to this PR.
+
+2. **Merge the release PR (auto-fires step 3).** Squash-merging the PR closes it with the `autorelease: pending` label still attached. The `pull_request: closed` event fires the `Release` workflow automatically; release-please runs against `main`, sees the merged release PR, creates the tag `vX.Y.Z`, publishes the GitHub Release with the same Conventional-Commit-derived notes, and (on `patinaproject` plugin repos) dispatches the marketplace bump on `patinaproject/skills`. The PR's label flips to `autorelease: tagged`.
+
+The result: regular PRs trigger nothing release-related; the only auto-fire is the release-PR merge that you just authored.
 
 ## Prerequisites (one-time settings)
 

@@ -1,11 +1,16 @@
 name: Release
 
-# release-please requires a run on push to main to cut the tag after
-# the release PR merges. workflow_dispatch is kept as a manual escape hatch.
+# Triggered only when (a) a maintainer manually dispatches the workflow to
+# open or refresh the standing release PR, or (b) a release-please-managed
+# PR (label `autorelease: pending`) is merged — the second event auto-cuts
+# the tag, publishes the release, and dispatches the marketplace bump on
+# patinaproject/skills. Regular PR merges do NOT trigger this workflow.
+# See RELEASING.md.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: write
@@ -14,6 +19,15 @@ permissions:
 
 jobs:
   release-please:
+    # On `pull_request: closed`, only run when the PR was actually merged AND
+    # carries the `autorelease: pending` label that release-please attaches
+    # to its standing release PR. This skips the job for regular feature/fix
+    # PR merges, so no Release workflow run shows up against them. The job
+    # always runs on `workflow_dispatch`.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       contains(github.event.pull_request.labels.*.name, 'autorelease: pending'))
     runs-on: ubuntu-latest
     # Declared at both workflow and job level. The workflow-level block is the
     # upper bound for any job; the job-level block is what the runner actually
