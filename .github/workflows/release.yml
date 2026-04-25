@@ -44,15 +44,15 @@ jobs:
     needs: release-please
     # Only run when a release was actually cut AND we're on a patinaproject-owned
     # repo. Forks outside the org skip this job silently, so they don't need to
-    # provision the `patinaproject-automation` GitHub App secrets.
+    # provision the `patina-project-automation` GitHub App secrets.
     if: needs.release-please.outputs.release_created == 'true' && github.repository_owner == 'patinaproject'
     runs-on: ubuntu-latest
     steps:
-      # Mint a per-job installation token for the org-owned `patinaproject-automation`
+      # Mint a per-job installation token for the org-owned `patina-project-automation`
       # GitHub App. The App is installed only on `patinaproject/skills` and has
       # `Actions: Read and write`, so the resulting token can dispatch the
       # marketplace-bump workflow without a user-tied PAT.
-      - name: Mint patinaproject-automation App token
+      - name: Mint patina-project-automation App token
         id: app-token
         # actions/create-github-app-token@v3.1.1
         uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
