@@ -13,6 +13,7 @@
 ### Task 1: Update the Codex marketplace entry for the root-packaged upstream plugin
 
 **Files:**
+
 - Modify: `/Users/tlmader/.codex/worktrees/0778/skills/.agents/plugins/marketplace.json`
 - Reference only: `/Users/tlmader/.codex/worktrees/0778/skills/docs/file-structure.md`
 - Test: `/Users/tlmader/.codex/worktrees/0778/skills/.agents/plugins/marketplace.json`
@@ -68,6 +69,7 @@ rg -n '"source": "url"|"url": "https://github.com/patinaproject/superteam.git"|"
 ```
 
 Expected:
+
 - one match for `"source": "url"`
 - one match for the upstream GitHub URL
 - one match for `"ref": "main"`
@@ -87,6 +89,7 @@ Expected: the diff shows only the source-model change from `git-subdir` plus `pa
 ### Task 2: Refresh README install guidance to match the upstream root layout
 
 **Files:**
+
 - Modify: `/Users/tlmader/.codex/worktrees/0778/skills/README.md`
 - Reference only: `/Users/tlmader/.codex/worktrees/0778/skills/.claude-plugin/marketplace.json`
 - Test: `/Users/tlmader/.codex/worktrees/0778/skills/README.md`
@@ -136,6 +139,7 @@ rg -n 'patinaproject/superteam|\\.codex-plugin/plugin.json|\\.claude-plugin/plug
 ```
 
 Expected:
+
 - matches for `patinaproject/superteam`, `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, and `skills/superteam`
 - no matches for `plugins/superteam`
 - no matches for `git-subdir`
@@ -153,6 +157,7 @@ Expected: the diff is limited to install-surface wording, the source-of-truth bo
 ### Task 3: Run repository-level verification for stale path removal and catalog consistency
 
 **Files:**
+
 - Verify only: `/Users/tlmader/.codex/worktrees/0778/skills/.agents/plugins/marketplace.json`
 - Verify only: `/Users/tlmader/.codex/worktrees/0778/skills/.claude-plugin/marketplace.json`
 - Verify only: `/Users/tlmader/.codex/worktrees/0778/skills/README.md`
@@ -166,6 +171,7 @@ rg -n './plugins/superteam|plugins/superteam' /Users/tlmader/.codex/worktrees/07
 ```
 
 Expected:
+
 - no matches in `/Users/tlmader/.codex/worktrees/0778/skills/.agents/plugins/marketplace.json`
 - no matches in `/Users/tlmader/.codex/worktrees/0778/skills/README.md`
 - matches may remain in historical design or plan artifacts under `docs/superpowers/`, which are acceptable because they document prior state rather than active instructions
@@ -179,6 +185,7 @@ rg -n 'patinaproject/superteam|\\.codex-plugin/plugin.json|\\.claude-plugin/plug
 ```
 
 Expected:
+
 - `.agents/plugins/marketplace.json` shows `"source": "url"` for `superteam`
 - `.claude-plugin/marketplace.json` still points at `patinaproject/superteam`
 - `README.md` describes the root `.codex-plugin/plugin.json`, root `.claude-plugin/plugin.json`, and `skills/superteam/`

@@ -1,13 +1,23 @@
 {
   "name": "skills",
   "private": true,
-  "description": "Codex marketplace repo for Patina Project plugins and packaged skills",
-  "packageManager": "pnpm@9.15.4",
+  "description": "Marketplace catalog for Patina Project plugins and packaged skills (Codex + Claude)",
+  "author": {
+    "name": "Ted Mader",
+    "email": "ted@patinaproject.com"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
   "scripts": {
-    "prepare": "./scripts/prepare.sh",
+    "prepare": "husky",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\""
   },
   "config": {
     "commitizen": {
@@ -22,7 +32,11 @@
     "@commitlint/config-conventional": "^19.8.1",
     "commitizen": "^4.3.1",
     "cz-customizable": "^7.5.1",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "markdownlint-cli2": "^0.14.0"
+  },
+  "lint-staged": {
+    "*.md": "markdownlint-cli2"
   }
 }
-

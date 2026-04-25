@@ -51,11 +51,13 @@ Owns the marketplace catalog, contributor standards for maintaining the catalog,
 Copy the structure and expectations of the `superteam` standards files into this repo, but keep the content marketplace-specific. Update the catalog and docs to reference the upstream Claude plugin surface.
 
 Pros:
+
 - Keeps the repo-specific truth accurate
 - Avoids copying `superteam`-specific packaging rules that do not belong here
 - Solves both the standards request and issue `#2` without adding duplicate assets
 
 Cons:
+
 - Requires careful wording instead of a direct file transplant
 
 ### Option 2: Near-verbatim standards transplant
@@ -63,9 +65,11 @@ Cons:
 Copy `superteam` standards files almost as-is and replace a few repository names.
 
 Pros:
+
 - Fastest initial edit path
 
 Cons:
+
 - Likely to import incorrect assumptions about local skill authoring and packaged plugin copies
 - Makes this marketplace repo look like a plugin source repo when it is not
 
@@ -74,9 +78,11 @@ Cons:
 Leave current project standards mostly unchanged and only update the marketplace catalog plus minimal docs.
 
 Pros:
+
 - Lowest implementation surface
 
 Cons:
+
 - Does not satisfy the request to copy project standards
 - Leaves contributor guidance inconsistent with the upstream repository pattern
 
