@@ -4,6 +4,14 @@ Generated automatically by [release-please](https://github.com/googleapis/releas
 
 User-facing changelog blocks for each milestone are rendered by the `/github-flows:write-changelog` skill and inserted under the `## [Unreleased]` heading. Released blocks below `## [Unreleased]` are owned by Release Please.
 
+## [1.0.1](https://github.com/patinaproject/github-flows/compare/v1.0.0...v1.0.1) (2026-04-26)
+
+
+### Bug Fixes
+
+* [#5](https://github.com/patinaproject/github-flows/issues/5) correct install matrix invocations ([#12](https://github.com/patinaproject/github-flows/issues/12)) ([6ed270c](https://github.com/patinaproject/github-flows/commit/6ed270c7e7afcb70682614ceda1cc27aa40b38b8))
+* [#9](https://github.com/patinaproject/github-flows/issues/9) improve Codex skill display names ([#10](https://github.com/patinaproject/github-flows/issues/10)) ([2e79c56](https://github.com/patinaproject/github-flows/commit/2e79c561e02f07e2bbb23ba9ea4190a363f19fcf))
+
 ## [1.0.0](https://github.com/patinaproject/github-flows/compare/v0.1.0...v1.0.0) (2026-04-26)
 
 
