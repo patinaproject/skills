@@ -27,6 +27,16 @@
         "repo": "patinaproject/superteam",
         "ref": "v1.0.0"
       }
+    },
+    {
+      "name": "github-flows",
+      "description": "Patina Project plugin: github-flows",
+      "category": "productivity",
+      "source": {
+        "source": "github",
+        "repo": "patinaproject/github-flows",
+        "ref": "v1.0.0"
+      }
     }
   ]
 }
