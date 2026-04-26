@@ -314,10 +314,10 @@ then open a PR with `chore: bump <plugin> to <tag>`.
 Run:
 
 ```bash
-rg -n "Closes the marketplace side|#12 bump|PR title subject must start|must contain a GitHub closing|isTicketNumberRequired: true|ticket-required|feat!: #123" .github AGENTS.md CONTRIBUTING.md docs commitlint.config.js commitizen.config.js
+rg -n "Closes the marketplace side|#12 bump|PR title subject must start|must contain a GitHub closing|isTicketNumberRequired: true|ticket-required|feat!: #123" .github AGENTS.md CONTRIBUTING.md docs/release-flow.md commitlint.config.js commitizen.config.js
 ```
 
-Expected: command exits with no matches, except historical design/plan docs may contain intentional examples if they are outside the active policy surface.
+Expected: command exits with no matches in the active policy surface. Historical design and plan docs are intentionally excluded because they may quote old policy text as context.
 
 - [ ] **Step 6: Verify Markdown formatting**
 
