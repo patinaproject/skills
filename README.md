@@ -63,7 +63,7 @@ The skill drafts the issue, runs duplicate detection, and asks you to confirm be
 3. Open a target repository (or an issue in one) in Claude Code and invoke:
 
    ```text
-   /github-flows:github-flows
+   /github-flows:new-issue patinaproject/github-flows "Tried github-flows install steps"
    ```
 
 ### OpenAI Codex CLI
@@ -74,11 +74,7 @@ The skill drafts the issue, runs duplicate detection, and asks you to confirm be
    codex plugin marketplace add patinaproject/skills
    ```
 
-2. Install the plugin (pin to a tag for reproducible installs):
-
-   ```bash
-   codex plugin marketplace add patinaproject/github-flows@v0.1.0
-   ```
+2. Install the plugin: run `codex` to start a session, type `/plugins` to open the plugin browser, find `github-flows` under the `patinaproject/skills` marketplace, and select **Install plugin**.
 
 3. Invoke from the target repository:
 
