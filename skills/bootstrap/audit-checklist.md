@@ -38,6 +38,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `.github/ISSUE_TEMPLATE/bug_report.md` | yes | present with frontmatter |
 | `.github/ISSUE_TEMPLATE/feature_request.md` | yes | present with frontmatter |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
+| `.github/LABELS.md` | yes | present; contains a `## Labels` heading; the heading is followed by a markdown table whose header row starts with `\| Name \|`; the first data column lists `bug` and `enhancement` and is alphabetically sorted (case-insensitive). When the target repo is an agent plugin, the file additionally contains a `### Release-please (tool-managed)` subsection mentioning both `autorelease: pending` and `autorelease: tagged`. |
 | `.github/workflows/lint-pr.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
 | `.github/workflows/lint-md.yml` | yes | present; runs `DavidAnson/markdownlint-cli2-action` on PRs |
 | `.github/workflows/lint-actions.yml` | yes | present; runs `actionlint` on PRs touching `.github/workflows/**` |

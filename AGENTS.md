@@ -24,6 +24,7 @@ Covered files (any change here must round-trip through a template edit):
 - `.github/ISSUE_TEMPLATE/*`
 - `.github/pull_request_template.md`
 - `.github/copilot-instructions.md`
+- `.github/LABELS.md`
 - `RELEASING.md`
 - `README.md`
 - `AGENTS.md`
