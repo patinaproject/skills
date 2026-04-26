@@ -23,7 +23,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate conventional commits + issue ref
+      - name: Validate conventional commit title
         # amannn/action-semantic-pull-request@v5.5.3
         uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
         env:
@@ -44,26 +44,24 @@ jobs:
           requireScope: false
           disallowScopes: |
             .+
-          subjectPattern: '^#\d+ .+$'
+          subjectPattern: '^.+$'
           subjectPatternError: |
-            PR title subject must start with a GitHub issue reference. Example:
-              feat: #123 add boot timeline
-              fix: #456 restore search
+            PR title subject cannot be empty.
             Scopes are not permitted. See AGENTS.md for conventions.
           ignoreLabels: |
             dependencies
 
-  closing-keyword:
-    name: Require closing keyword
+  linked-issue:
+    name: Validate optional linked issue
     runs-on: ubuntu-latest
     if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
-      - name: Check for closing keyword in PR body
+      - name: Check optional closing keyword syntax
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           if [ -z "$PR_BODY" ]; then
-            echo "::error::PR body is empty. Add a GitHub closing keyword such as 'Closes #<issue>'."
+            echo "::error::PR body is empty. Fill in the PR template."
             exit 1
           fi
           # Strip HTML comments, fenced code blocks, inline code, strikethrough, blockquotes.
@@ -81,8 +79,7 @@ jobs:
             echo "Closing keyword found."
             exit 0
           fi
-          echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
-          exit 1
+          echo "No closing keyword found; linked issues are optional."
 
   mark-breaking-change:
     name: Mark breaking change
@@ -107,7 +104,7 @@ jobs:
             exit 1
           fi
           if [ "$body_has_footer" = true ] && [ "$title_has_bang" = false ]; then
-            echo "::error::PR body has a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: #123 ...\`) so squash-merged commits carry the marker."
+            echo "::error::PR body has a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: add new API\`) so squash-merged commits carry the marker."
             exit 1
           fi
           echo "Breaking change markers are consistent."

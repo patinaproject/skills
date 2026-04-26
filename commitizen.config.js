@@ -27,17 +27,16 @@ module.exports = {
   allowCustomScopes: false,
   allowBreakingChanges: ["feat", "fix"],
   allowTicketNumber: true,
-  isTicketNumberRequired: true,
+  isTicketNumberRequired: false,
   ticketNumberPrefix: "",
   ticketNumberRegExp: "#\\d+",
   prependTicketToHead: false,
   skipQuestions: ["scope", "body", "footer"],
   messages: {
     type: "Select the type of change you're committing:",
-    ticketNumber: "Enter the GitHub issue reference (e.g. #1):\n",
+    ticketNumber: "Enter the GitHub issue reference, if any (e.g. #1):\n",
     subject: "Write a short description of the change:\n",
     confirmCommit: "Are you sure you want to proceed with the commit above?"
   },
   subjectLimit: 72
 };
-
