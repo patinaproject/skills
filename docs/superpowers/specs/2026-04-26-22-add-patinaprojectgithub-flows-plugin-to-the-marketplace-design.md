@@ -32,6 +32,7 @@ When the upstream `release.yml` in `patinaproject/github-flows` fires `plugin-re
 - R2: No manifest change is made until the first tagged release exists.
 - R3: The existing `plugin-release-bump.yml` workflow is verified to handle the new plugin name without modification (its `exists_*=0` branch already constructs new entries with the canonical shape).
 - R4: The PR description records the plan-of-record for the actual marketplace insertion (via the automated bump PR on first release).
+- R5: `package.json` `author` block adds the missing `url` field (`https://github.com/tlmader`), keeping `name` and `email` unchanged. Marketplace manifests remain attributed to Patina Project via the existing top-level `owner` block — no per-plugin or per-marketplace `author` field is added.
 
 ## Acceptance criteria mapping
 
