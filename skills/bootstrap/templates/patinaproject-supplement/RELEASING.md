@@ -4,23 +4,19 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 
 ## How it works
 
-The `Release` workflow does **not** auto-run on every PR merge. Its triggers are:
+The `Release` workflow runs on every push to `main`. There is no manual dispatch. Cutting a release is the natural by-product of merging PRs:
 
-- `workflow_dispatch` — for opening or refreshing the standing release PR on demand.
-- `pull_request: types: [closed]` — but the job only runs when the closed PR was **merged** *and* carries the `autorelease: pending` label. Regular feature/fix PR merges therefore produce no Release workflow run.
+1. **Merge any PR into `main`.** The push event runs `Release`. `release-please` scans Conventional Commits since the last tag and opens — or updates — a standing **"chore: release X.Y.Z"** PR that:
 
-Cutting a release is a two-step flow:
-
-1. **Open or refresh the release PR (manual).** Trigger the workflow via **Actions → Release → Run workflow** (or `gh workflow run Release --repo <owner>/<repo>`). `release-please` scans Conventional Commits since the last tag and opens — or updates — a standing **"chore: release X.Y.Z"** PR that:
    - Bumps `package.json` version.
    - Syncs `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to the new version (configured in `release-please-config.json`).
    - Appends generated entries to `CHANGELOG.md`.
 
-   Release-please attaches the `autorelease: pending` label to this PR.
+   Release-please attaches the `autorelease: pending` label to this PR. If there are no releasable commits since the last tag, the run no-ops.
 
-2. **Merge the release PR (auto-fires step 3).** Squash-merging the PR closes it with the `autorelease: pending` label still attached. The `pull_request: closed` event fires the `Release` workflow automatically; release-please runs against `main`, sees the merged release PR, creates the tag `vX.Y.Z`, publishes the GitHub Release with the same Conventional-Commit-derived notes, and (on `patinaproject` plugin repos) dispatches the marketplace bump on `patinaproject/skills`. The PR's label flips to `autorelease: tagged`.
+2. **Merge the release PR.** Squash-merging the PR is itself a push to `main`, so `Release` runs again. release-please now sees the merged release PR (still labeled `autorelease: pending`), creates the tag `vX.Y.Z`, publishes the GitHub Release with the Conventional-Commit-derived notes, and (on `patinaproject` plugin repos) dispatches the marketplace bump on `patinaproject/skills`. The PR's label flips to `autorelease: tagged`.
 
-The result: regular PRs trigger nothing release-related; the only auto-fire is the release-PR merge that you just authored.
+The result: every merge keeps the standing release PR fresh; merging that PR cuts the release. No `gh workflow run` step is ever required.
 
 ## Prerequisites (one-time settings)
 
