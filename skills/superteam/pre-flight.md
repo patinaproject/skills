@@ -9,14 +9,15 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 ## Detection sequence
 
 1. **Resolve the active issue.** Order: explicit `#<n>` in the operator prompt, then branch name `<n>-<slug>` per the github-flows convention, then operator. If multiple candidates conflict, halt per the halt conditions below.
-2. **Inspect committed artifacts on the active branch.** Look for the design doc at the canonical specs path (`docs/superpowers/specs/YYYY-MM-DD-<issue>-<title>-design.md`) and the plan doc at the canonical plans path (`docs/superpowers/plans/YYYY-MM-DD-<issue>-<title>-plan.md`). Treat only committed state as authoritative.
-3. **Inspect branch state.** Resolve the current branch and its tracking remote; record divergence and uncommitted state for completeness, but do NOT use uncommitted state as the phase signal.
-4. **Inspect PR state.** Determine whether a PR exists for this branch on origin and, if so, whether it is open or merged, and the latest `Finisher` substate signals (CI, review state, mergeability).
-5. **Derive the detected phase** per the phase derivation rules below.
-6. **Classify the operator prompt** per `routing-table.md` `## Prompt-classification heuristic`.
-7. **Probe execution-mode capability** per the `## Execution-mode capability detection` section below.
-8. **Recover the active loopback class** from `git log` per `loopback-trailers.md` `## Recovery algorithm`. The recovered class is part of the pre-flight output.
-9. **Route** per `routing-table.md` using the `(detected_phase, prompt_classification)` pair as the key.
+2. **Auto-switch to issue branch** per `## Auto-switch to issue branch` when its trigger fires.
+3. **Inspect committed artifacts on the active branch.** Look for the design doc at the canonical specs path (`docs/superpowers/specs/YYYY-MM-DD-<issue>-<title>-design.md`) and the plan doc at the canonical plans path (`docs/superpowers/plans/YYYY-MM-DD-<issue>-<title>-plan.md`). Treat only committed state as authoritative.
+4. **Inspect branch state.** Resolve the current branch and its tracking remote; record divergence and uncommitted state for completeness, but do NOT use uncommitted state as the phase signal.
+5. **Inspect PR state.** Determine whether a PR exists for this branch on origin and, if so, whether it is open or merged, and the latest `Finisher` substate signals (CI, review state, mergeability).
+6. **Derive the detected phase** per the phase derivation rules below.
+7. **Classify the operator prompt** per `routing-table.md` `## Prompt-classification heuristic`.
+8. **Probe execution-mode capability** per the `## Execution-mode capability detection` section below.
+9. **Recover the active loopback class** from `git log` per `loopback-trailers.md` `## Recovery algorithm`. The recovered class is part of the pre-flight output.
+10. **Route** per `routing-table.md` using the `(detected_phase, prompt_classification)` pair as the key.
 
 ## Phase derivation rules
 
@@ -26,6 +27,16 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 - PR open or merged -> `finish`, with `Finisher` substate derived from PR / CI / review state
 - artifacts and PR state cannot be reconciled -> halt per the halt conditions below
 
+## Auto-switch to issue branch
+
+Trigger (both MUST hold): issue came from source 1; current branch equals the default branch from `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`.
+
+Algorithm: invoke `/github-flows:new-branch` (`patinaproject/github-flows`, `skills/new-branch/workflow.md`) as authoritative. Do NOT inline kebab, default-branch, dirty-tree, fetch, checkout, or rebase logic. Skip its Step 6 (lockfile install). Re-run step 3 on the new branch.
+
+No-op on `<n>-<slug>` matching the issue, or sources 2/3. Mismatched `<n>` fires halt 3.
+
+Forbidden: auto-stash; `git rebase --abort`; silent fallback on `gh repo view` failure; inline reimplementation.
+
 ## Halt conditions
 
 Halt with the exact blocker string `superteam halted at Team Lead: <reason>` when any of the following hold:
@@ -34,6 +45,10 @@ Halt with the exact blocker string `superteam halted at Team Lead: <reason>` whe
 2. The detected phase is `finish` but no PR exists for the branch on origin.
 3. Multiple candidate active issues are detected and cannot be reconciled (e.g. an explicit `#<n>` in the prompt disagrees with the branch's `<n>-<slug>` and operator does not disambiguate).
 4. Committed artifacts and PR state cannot be reconciled (e.g. a merged PR exists but the branch has no plan doc, or a plan doc references a different issue than the PR).
+5. `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`.
+6. `superteam halted at Team Lead: default-branch lookup failed; cannot determine whether auto-switch is required`.
+7. `superteam halted at Team Lead: rebase conflict on existing issue branch; resolve manually before re-running superteam` (do NOT run `git rebase --abort`).
+8. `superteam halted at Team Lead: active issue could not be resolved against the current repo`.
 
 When any halt fires, surface the blocker explicitly and stop. Do not "pick the most likely interpretation".
 
@@ -46,6 +61,8 @@ Order:
 3. Operator (ask).
 
 If multiple candidates conflict, halt per halt condition 3 above.
+
+On default branch with source 1, run `## Auto-switch to issue branch` before step 3.
 
 ## Loopback-class recovery
 

@@ -414,6 +414,11 @@ Before resolving or replying to comments tied to a prior branch state:
 | "It's simpler to just route through `superpowers:executing-plans` and let it ask the developer." | Execute-phase delegations bind directly to the chosen execution-mode skill per R14. Routing through `superpowers:executing-plans` on default paths surfaces a redundant prompt to the developer and is forbidden when the resolved mode is `team mode` or `subagent-driven`. |
 | "The maintainer already signed off on the direction; I can skip writing-skills and just draft the spec." | Per R25, when the design under brainstorming touches `skills/**/*.md` or any workflow-contract surface, invoking `superpowers:writing-skills` is unconditional on the trigger. Cited authority does not waive the rule. The discipline is required because the design itself must carry loophole-closure language, rationalization-table rows, red-flags bullets, token-efficiency targets, and a RED-phase baseline obligation for any new discipline rule. |
 | "The issue only says workflow contract; I don't know the file yet, so I can draft first and decide later." | Plausible skill or workflow-contract scope is enough to load `superpowers:writing-skills` before authoring requirements. If the intended surface is uncertain, load writing-skills first or halt for clarification. |
+| "The operator is on the default branch on purpose; they clearly meant to start work here." | When the active issue resolves from the operator prompt and the current branch is the repository default branch, pre-flight MUST auto-switch to the per-issue branch before committed-artifact inspection. Operator intent is captured by the `#<n>` reference, not by the branch they happened to be on. Not even when the operator is the maintainer. Not even under deadline pressure. |
+| "Skipping the auto-switch saves a step; we can branch later." | Skipping authors Gate 1 artifacts on the wrong base and forces `Finisher` to rewrite history or push from the default branch. The rule is not optional. |
+| "Dirty working tree? I can stash and continue." | The canonical `/github-flows:new-branch` algorithm refuses on a dirty working tree. `superteam` halts with `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`. Pre-flight does NOT stash on the operator's behalf. |
+| "Rebase conflict on the existing issue branch is fine; I'll abort and try again." | The canonical algorithm forbids `git rebase --abort` on the operator's behalf. `superteam` halts and surfaces the conflict. |
+| "We can re-implement the kebab + checkout + rebase logic inside `superteam` so we don't depend on `github-flows`." | `/github-flows:new-branch` is the authoritative algorithm. `superteam` references it; it does not fork it. Divergence between the two is a contract bug. |
 
 ## Red flags
 
@@ -457,6 +462,12 @@ Before resolving or replying to comments tied to a prior branch state:
 - `Brainstormer` designing a skill or workflow-contract change without loading `superpowers:writing-skills` first.
 - `Brainstormer` drafting requirements for a plausibly skill/workflow-contract issue before determining the intended surface or loading `superpowers:writing-skills`.
 - `Finisher` scheduling a wakeup without a durable resume payload tied to the latest pushed head.
+- `Team Lead` proceeding to committed-artifact inspection while the current branch is the repository default branch and the active issue was resolved from an explicit `#<n>` in the prompt.
+- `Team Lead` performing `git stash` or any auto-stash variant as part of the auto-switch path.
+- `Team Lead` running `git rebase --abort` after a rebase conflict on the existing issue branch.
+- `pre-flight.md` documenting kebab-casing, default-branch resolution, fetch, checkout, or rebase steps inline instead of referencing `/github-flows:new-branch`.
+- `Team Lead` silently continuing on the default branch after `gh repo view` fails to resolve the default branch.
+- A `superteam` run authoring `docs/superpowers/specs/...` on the default branch.
 
 ## Shutdown
 
