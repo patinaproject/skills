@@ -6,6 +6,7 @@ Current member plugins tracked by this flow:
 
 - `patinaproject/bootstrap` — repo scaffolding skill. Also **consumed by this repo** (see [Consuming bootstrap](#consuming-bootstrap) below), so a bootstrap release both updates the marketplace entry and refreshes this repo's own scaffolding.
 - `patinaproject/superteam` — issue-driven orchestration skill.
+- `patinaproject/github-flows` — agent ergonomics for GitHub workflows (`/edit-issue`, `/new-issue`, `/new-branch`).
 
 ## Lifecycle
 

@@ -4,7 +4,8 @@
   "description": "Marketplace catalog for Patina Project plugins and packaged skills (Codex + Claude)",
   "author": {
     "name": "Ted Mader",
-    "email": "ted@patinaproject.com"
+    "email": "ted@patinaproject.com",
+    "url": "https://github.com/tlmader"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.33.2",
