@@ -249,7 +249,7 @@ In realignment mode, report which check path was used (`gh`, `curl`, or `skipped
 
 ### Reserved labels
 
-The `autorelease: pending` and `autorelease: tagged` labels are owned by Release Please. In realignment mode, verify that `autorelease: pending` exists with color `c5def5` and a non-empty description explaining the reservation; if either is missing or divergent, recommend a `gh label edit` fix. Never instruct agents to apply or remove these labels manually.
+The `autorelease: pending` and `autorelease: tagged` labels are owned by Release Please. In realignment mode, verify that `autorelease: pending` exists with color `ededed` (the release-please default) and a non-empty description explaining the reservation; if either is missing or divergent, recommend a `gh label edit` fix. Never instruct agents to apply or remove these labels manually.
 
 ## Verification self-test
 

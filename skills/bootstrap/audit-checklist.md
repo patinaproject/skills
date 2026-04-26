@@ -50,7 +50,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | Label | Required | Check |
 |---|---|---|
-| `autorelease: pending` | yes | present; color `c5def5`; description non-empty and documents that the label is reserved for Release Please automation; confirm via `gh label list --repo <owner>/<repo> --json name,color,description --jq '.[] \| select(.name=="autorelease: pending")'` |
+| `autorelease: pending` | yes | present; color `ededed`; description non-empty and documents that the label is reserved for Release Please automation; confirm via `gh label list --repo <owner>/<repo> --json name,color,description --jq '.[] \| select(.name=="autorelease: pending")'` |
 
 ## Area 3 — Agent + repo docs
 
