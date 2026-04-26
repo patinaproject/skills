@@ -13,6 +13,7 @@
 ### Task 1: Align Root Contributor Standards
 
 **Files:**
+
 - Create: `CLAUDE.md`
 - Modify: `AGENTS.md`
 - Test: `AGENTS.md`
@@ -89,6 +90,7 @@ git commit -m "docs: #2 align project standards with superteam"
 ### Task 2: Update Contributor Docs For Install Surfaces
 
 **Files:**
+
 - Modify: `README.md`
 - Modify: `docs/file-structure.md`
 - Test: `README.md`
@@ -145,6 +147,7 @@ git commit -m "docs: #2 document marketplace and Claude install surfaces"
 ### Task 3: Extend Marketplace Metadata For Claude Compatibility
 
 **Files:**
+
 - Modify: `.agents/plugins/marketplace.json`
 - Test: `.agents/plugins/marketplace.json`
 
@@ -194,6 +197,7 @@ git commit -m "feat: #2 add Claude marketplace metadata for superteam"
 ### Task 4: Verify The Full Change Set
 
 **Files:**
+
 - Modify: none
 - Test: `CLAUDE.md`
 - Test: `AGENTS.md`

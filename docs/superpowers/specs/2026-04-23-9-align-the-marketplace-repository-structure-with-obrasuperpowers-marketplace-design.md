@@ -59,11 +59,13 @@ This issue therefore needs a catalog-and-docs alignment pass, not an upstream pl
 Update the Codex marketplace entry to use the root-package source model for `patinaproject/superteam`, then revise docs so they describe the root manifests and `skills/superteam/` layout.
 
 Pros:
+
 - Directly matches the current upstream structure
 - Keeps the change limited to the catalog repo surfaces that are currently stale
 - Follows the repository's documented rule for root-packaged upstream plugins
 
 Cons:
+
 - Requires careful wording so users understand the plugin is owned upstream while the marketplace catalog remains here
 
 ### Option 2: Documentation-only correction
@@ -71,9 +73,11 @@ Cons:
 Leave marketplace metadata untouched and only revise the docs to explain that the upstream path moved.
 
 Pros:
+
 - Lowest edit surface
 
 Cons:
+
 - Leaves the Codex marketplace entry broken or misleading
 - Fails the core requirement to align the install metadata with the real upstream package surface
 
@@ -82,9 +86,11 @@ Cons:
 Copy or mirror the root-packaged upstream plugin into `patinaproject/skills` so the catalog can continue using a local or vendored package layout.
 
 Pros:
+
 - Could reduce cross-repo install indirection
 
 Cons:
+
 - Conflicts with the current source-of-truth boundary
 - Expands scope into packaging ownership and duplication strategy
 - Unnecessary given the upstream repo already owns the install surface

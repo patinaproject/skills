@@ -21,4 +21,3 @@ The new section explains the Claude-side setup path clearly and points users to 
 ### AC-4-3
 
 The README keeps the existing Codex installation instructions intact.
-

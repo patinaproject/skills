@@ -13,6 +13,7 @@
 ### Task 1: Confirm Codex Marketplace Branding Metadata
 
 **Files:**
+
 - Modify: `.agents/plugins/marketplace.json`
 - Test: `.agents/plugins/marketplace.json`
 
@@ -71,6 +72,7 @@ git commit -m "chore: #6 rename Codex marketplace display name"
 ### Task 2: Preserve Claude Marketplace Branding And Align Description Metadata
 
 **Files:**
+
 - Modify: `.claude-plugin/marketplace.json`
 - Test: `.claude-plugin/marketplace.json`
 
@@ -128,6 +130,7 @@ git commit -m "chore: #6 align Claude marketplace branding metadata"
 ### Task 3: Clarify The Public Name Versus Internal Slug In README
 
 **Files:**
+
 - Modify: `README.md`
 - Test: `README.md`
 
@@ -182,6 +185,7 @@ git commit -m "docs: #6 clarify marketplace display name and slug split"
 ### Task 4: Run Cross-Surface Verification For AC-6
 
 **Files:**
+
 - Modify: none
 - Test: `.agents/plugins/marketplace.json`
 - Test: `.claude-plugin/marketplace.json`

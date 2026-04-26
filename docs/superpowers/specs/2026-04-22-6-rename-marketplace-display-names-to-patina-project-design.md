@@ -50,11 +50,13 @@ This design formalizes that scope so execution stays intentionally narrow:
 Change only the fields that appear as marketplace-facing names or owner labels, and update docs to explain the distinction between display name and slug.
 
 Pros:
+
 - Matches the approved scope exactly
 - Minimizes compatibility risk
 - Avoids accidental downstream effects on install commands or internal identifiers
 
 Cons:
+
 - Leaves the internal slug and public label intentionally different, which needs clear documentation
 
 ### Option 2: Rename public labels and internal slug together
@@ -62,9 +64,11 @@ Cons:
 Change display names and also rename `patinaproject-skills` to `Patina Project`-aligned identifiers everywhere.
 
 Pros:
+
 - Removes the visible mismatch between label and slug
 
 Cons:
+
 - Out of scope for the approved direction
 - Higher compatibility risk for existing references and install surfaces
 - Would require broader validation and likely follow-up migration work
@@ -74,9 +78,11 @@ Cons:
 Keep marketplace metadata unchanged and only explain the intended branding in docs.
 
 Pros:
+
 - Lowest edit surface
 
 Cons:
+
 - Fails to deliver the actual public-facing rename
 - Leaves user-visible marketplace naming inconsistent across surfaces
 
