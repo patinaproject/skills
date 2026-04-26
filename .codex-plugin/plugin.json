@@ -1,6 +1,6 @@
 {
   "name": "github-flows",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Let agents use GitHub more ergonomically",
   "author": {
     "name": "Ted Mader",
@@ -10,7 +10,11 @@
   "homepage": "https://github.com/patinaproject/github-flows",
   "repository": "https://github.com/patinaproject/github-flows",
   "license": "MIT",
-  "keywords": ["codex", "plugin", "skills"],
+  "keywords": [
+    "codex",
+    "plugin",
+    "skills"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "github-flows",
@@ -18,7 +22,10 @@
     "longDescription": "Let agents use GitHub more ergonomically",
     "developerName": "Ted Mader",
     "category": "Productivity",
-    "capabilities": ["Write", "Interactive"],
+    "capabilities": [
+      "Write",
+      "Interactive"
+    ],
     "websiteURL": "https://github.com/patinaproject/github-flows",
     "privacyPolicyURL": "https://github.com/patinaproject/github-flows",
     "termsOfServiceURL": "https://github.com/patinaproject/github-flows",
