@@ -31,10 +31,10 @@
       "category": "Productivity"
     },
     {
-      "name": "github-flows",
+      "name": "using-github",
       "source": {
         "source": "url",
-        "url": "https://github.com/patinaproject/github-flows.git",
+        "url": "https://github.com/patinaproject/using-github.git",
         "ref": "v1.1.0"
       },
       "policy": {

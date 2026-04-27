@@ -28,6 +28,7 @@
 ## Task 1: Add Failing Manifest Verification
 
 **Files:**
+
 - Inspect: `.agents/plugins/marketplace.json`
 - Inspect: `.claude-plugin/marketplace.json`
 
@@ -89,6 +90,7 @@ Expected: FAIL with `Claude marketplace still lists github-flows` or `Claude mar
 ## Task 2: Update Marketplace Manifests
 
 **Files:**
+
 - Modify: `.agents/plugins/marketplace.json`
 - Modify: `.claude-plugin/marketplace.json`
 
@@ -148,6 +150,7 @@ Expected: PASS with no output.
 ## Task 3: Update Release-Flow Documentation
 
 **Files:**
+
 - Modify: `docs/release-flow.md`
 
 - [ ] **Step 1: Run the expected-post-change release-flow assertion**
@@ -195,6 +198,7 @@ Expected: PASS with no output.
 ## Task 4: Audit Remaining References and Run Repository Checks
 
 **Files:**
+
 - Inspect: all repository files
 - Modify if needed: only current install, release, cache, or automation source-of-truth files discovered by the audit
 
