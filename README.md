@@ -10,19 +10,19 @@ The marketplace only lists plugins that have published a tagged release (`vX.Y.Z
 
 Tracked member plugins:
 
-- `patinaproject/bootstrap` — repo scaffolding skill (pending first tagged release; also consumed by this repo)
-- `patinaproject/superteam` — issue-driven orchestration skill (pending first tagged release, tracked in [patinaproject/superteam#32](https://github.com/patinaproject/superteam/issues/32))
+- `patinaproject/bootstrap` — repo scaffolding skill, currently `v1.2.0`
+- `patinaproject/superteam` — issue-driven orchestration skill, currently `v1.1.0`
+- `patinaproject/using-github` — GitHub workflow skill, currently `v2.0.0`
 
 ## Install Surfaces
 
 - `patinaproject/skills` owns the marketplace catalogs and contributor docs
-- `patinaproject/superteam` is the source of truth for the upstream plugin package
+- `patinaproject/bootstrap`, `patinaproject/superteam`, and `patinaproject/using-github` own their upstream plugin packages
 - Codex marketplace metadata lives in `.agents/plugins/marketplace.json`
 - Claude marketplace metadata lives in `.claude-plugin/marketplace.json`
-- Codex installs `superteam` from the repository root in `patinaproject/superteam`
-- The upstream Codex manifest lives at `.codex-plugin/plugin.json`
-- The Claude plugin packaging and install surface live in the upstream `patinaproject/superteam` repository through its root `.claude-plugin/plugin.json`
-- The upstream `superteam` skill content lives at `skills/superteam/`
+- Codex reads upstream package metadata from `.codex-plugin/plugin.json`
+- Claude reads upstream package metadata from `.claude-plugin/plugin.json`
+- Upstream skill content lives under each plugin repo's `skills/` directory
 
 ## How it works
 
@@ -30,13 +30,13 @@ Codex reads the marketplace definition from `.agents/plugins/marketplace.json`, 
 
 In this repo, the marketplace is named `patinaproject-skills` and exposed in the UI as `Patina Project`.
 
-Plugin entries do not vendor plugin files in this repository. Each entry points at a Git-backed plugin source repo (for example `patinaproject/superteam`) pinned to an explicit release tag (`vX.Y.Z`). Branch refs such as `main` are not allowed — see [docs/release-flow.md](docs/release-flow.md).
+Plugin entries do not vendor plugin files in this repository. Each entry points at a Git-backed plugin source repo pinned to an explicit release tag (`vX.Y.Z`). Branch refs such as `main` are not allowed — see [docs/release-flow.md](docs/release-flow.md).
 
-In the upstream repository, the active install surfaces are:
+In each upstream plugin repository, the active install surfaces are:
 
 - Codex manifest: `.codex-plugin/plugin.json`
 - Claude manifest: `.claude-plugin/plugin.json`
-- Skill directory: `skills/superteam/`
+- Skill directory: `skills/`
 
 That keeps the marketplace catalogs isolated while allowing plugin source repos to stay independent.
 
@@ -54,27 +54,39 @@ Refresh tracked marketplaces:
 codex plugin marketplace upgrade
 ```
 
-Then open the Codex Plugin Directory, find `Patina Project`, and install `superteam`.
+Then open the Codex Plugin Directory, find `Patina Project`, and install the plugin you need: `bootstrap`, `superteam`, or `using-github`.
 
 ## Install In Claude Code
 
-This repository tracks the Claude marketplace catalog entry, but the installable Claude plugin package lives upstream in `patinaproject/superteam`.
-
-For a direct setup in Claude Code today, add `superteam` as a custom subagent. Anthropic's official Claude Code docs describe project subagents in `.claude/agents/` and user subagents in `~/.claude/agents/`.
-
-Create a project subagent file at `.claude/agents/superteam.md` with `/agents`, or create it manually and copy in the contents of:
+Register the Patina Project marketplace in Claude Code:
 
 ```text
-https://github.com/patinaproject/superteam/blob/main/skills/superteam/SKILL.md
+/plugin marketplace add patinaproject/skills
 ```
 
-Claude Code loads project subagents from `.claude/agents/`, so after adding that file you can use prompts such as:
+Then install the plugin you need:
 
 ```text
-Use the superteam subagent to take issue #123 from design through review-ready execution.
+/plugin install bootstrap@patinaproject-skills
+/plugin install superteam@patinaproject-skills
+/plugin install using-github@patinaproject-skills
 ```
 
-If you want the workflow available across all projects instead, place the file in `~/.claude/agents/superteam.md`.
+## Use Installed Plugins
+
+After installing a plugin, invoke the relevant skill:
+
+```text
+Use $bootstrap:bootstrap to align this repository with the Patina Project baseline.
+```
+
+```text
+Use $superteam:superteam to take issue #123 from design through review-ready execution.
+```
+
+```text
+Use $using-github for GitHub issue, branch, PR, and changelog work.
+```
 
 ## Install From A Local Checkout
 
@@ -86,25 +98,14 @@ codex plugin marketplace add ./skills
 
 If Codex does not immediately show the updated marketplace catalog, restart Codex and re-open the Plugin Directory.
 
-## Use Superteam
-
-After installing the plugin, invoke the skill in Codex with:
-
-```text
-Use $superteam to take this issue from design through review-ready execution.
-```
-
-You can also use shorter task-specific prompts such as:
-
-```text
-Use $superteam to coordinate an implementation plan for issue #123.
-```
-
 ## Maintenance Notes
 
 - Update marketplace entries in `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json`
 - Keep Git-backed entries pinned to an explicit tag `ref` (`vX.Y.Z`). Branch refs are not allowed.
 - Maintain plugin source and packaging in the owning source repository
-- For `superteam`, the source-of-truth repo is `patinaproject/superteam`
 - For `bootstrap`, the source-of-truth repo is `patinaproject/bootstrap`
+- For `superteam`, the source-of-truth repo is `patinaproject/superteam`
+- For `using-github`, the source-of-truth repo is `patinaproject/using-github`
+- Run `pnpm validate:marketplace` before opening marketplace PRs
+- Run `pnpm validate:marketplace:remote` when validating release identity against upstream tags
 - See [docs/release-flow.md](docs/release-flow.md) for how plugin releases propagate into the marketplace

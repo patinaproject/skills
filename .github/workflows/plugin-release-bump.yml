@@ -99,6 +99,9 @@ jobs:
           fi
           mv "$codex.tmp" "$codex"
 
+      - name: Validate marketplace manifests
+        run: node scripts/validate-marketplace.js
+
       - name: Apply bootstrap scaffolding (when plugin is bootstrap)
         if: steps.inputs.outputs.plugin == 'bootstrap'
         run: |
