@@ -4,20 +4,22 @@ Issue: [patinaproject/skills#35](https://github.com/patinaproject/skills/issues/
 
 ## Intent
 
-Update current marketplace and release-flow surfaces so the `github-flows`
-plugin resolves through the renamed canonical repository,
-`patinaproject/using-github`, while preserving the plugin's marketplace name and
-existing tagged release pin.
+Update current marketplace and release-flow surfaces so the renamed plugin is
+published and resolved as `using-github` from the canonical repository
+`patinaproject/using-github`, removing current install-surface references to
+`github-flows`.
 
 ## Context
 
 - The issue says `patinaproject/github-flows` is being renamed to
   `patinaproject/using-github`.
-- Current marketplace manifests still point the `github-flows` plugin at the old
-  repository slug:
+- Current marketplace manifests still list the old `github-flows` plugin name
+  and repository slug:
   - `.agents/plugins/marketplace.json` uses
+    `name: "github-flows"` and
     `https://github.com/patinaproject/github-flows.git`.
-  - `.claude-plugin/marketplace.json` uses `patinaproject/github-flows`.
+  - `.claude-plugin/marketplace.json` uses `name: "github-flows"` and
+    `patinaproject/github-flows`.
 - `docs/release-flow.md` lists `patinaproject/github-flows` as the member plugin
   repository that dispatches release bumps.
 - Historical Superpowers artifacts for issue #22 describe the original
@@ -26,12 +28,12 @@ existing tagged release pin.
 
 ## Requirements
 
-1. Current marketplace install surfaces must use `patinaproject/using-github` as
-   the canonical repository location for the `github-flows` plugin.
+1. Current marketplace install surfaces must use `using-github` as the plugin
+   name and `patinaproject/using-github` as the canonical repository location.
 2. Current release-flow documentation must identify `patinaproject/using-github`
-   as the member plugin repository that publishes `github-flows` releases.
-3. The marketplace plugin name must remain `github-flows` unless a separate
-   issue explicitly changes the install name.
+   as the member plugin repository that publishes `using-github` releases.
+3. The current marketplace and release-flow surfaces must not retain
+   `github-flows` as the plugin name, repository slug, or member-plugin label.
 4. Existing release pins must remain explicit tagged refs and must not be changed
    unless verification shows the rename requires a different tag.
 5. Historical issue artifacts may keep references to
@@ -42,9 +44,9 @@ existing tagged release pin.
 
 ### AC-35-1
 
-Given a marketplace install surface points at the old GitHub repository slug,
-when the catalog is inspected, then the `github-flows` plugin source resolves to
-`patinaproject/using-github`.
+Given a marketplace install surface currently lists the old plugin identity,
+when the catalog is inspected, then the plugin entry is named `using-github` and
+its source resolves to `patinaproject/using-github`.
 
 ### AC-35-2
 
@@ -55,8 +57,9 @@ Given release-flow documentation names the member plugin repository for
 ### AC-35-3
 
 Given marketplace entries for `github-flows` are updated for the repository
-rename, when the manifests are inspected, then the plugin name remains
-`github-flows` and its source `ref` remains an explicit `vX.Y.Z` tag.
+rename, when the manifests are inspected, then no current marketplace entry is
+named `github-flows` and the replacement `using-github` source `ref` remains an
+explicit `vX.Y.Z` tag.
 
 ### AC-35-4
 
@@ -67,12 +70,12 @@ automation source of truth.
 
 ## Approaches Considered
 
-### Recommended: Update current source-of-truth references only
+### Recommended: Rename current source-of-truth identity surfaces
 
 Change the two marketplace manifests and the release-flow member-plugin list to
-use `patinaproject/using-github`, then audit remaining references and document
-why any old-slug references stay. This directly addresses install and release
-resolution without rewriting historical planning records.
+use `using-github` and `patinaproject/using-github`, then audit remaining
+references and document why any old references stay. This directly addresses
+install and release resolution without rewriting historical planning records.
 
 ### Broad rewrite of all historical artifacts
 
@@ -81,38 +84,41 @@ This would reduce search noise, but it would also make historical records less
 accurate and create unnecessary churn in artifacts that are not current sources
 of truth.
 
-### Rename the plugin itself
+### Preserve the plugin name while changing only the repository
 
-Change the marketplace plugin name from `github-flows` to `using-github`. This
-may eventually be desirable, but it would alter the install interface and is
-larger than the issue's requested repository-slug accommodation.
+Keep the marketplace plugin name as `github-flows` and only update repository
+URLs. This would reduce install-surface churn, but it leaves the old name in the
+current catalog after the user clarified that `github-flows` should be removed.
 
 ## Decision
 
-Use the targeted source-of-truth update. The implementation should update:
+Use the targeted source-of-truth identity update. The implementation should
+update:
 
 - `.agents/plugins/marketplace.json`
 - `.claude-plugin/marketplace.json`
 - `docs/release-flow.md`
 
-It should preserve the plugin name `github-flows`, preserve the pinned tag, and
-leave historical Superpowers artifacts unchanged unless a remaining reference is
-found to affect active install, release, cache, or automation behavior.
+It should remove `github-flows` from current install and release-flow surfaces,
+preserve the pinned tag, and leave historical Superpowers artifacts unchanged
+unless a remaining reference is found to affect active install, release, cache,
+or automation behavior.
 
 ## Verification
 
-- Inspect both marketplace manifests to confirm `github-flows` points to
+- Inspect both marketplace manifests to confirm `using-github` points to
   `patinaproject/using-github` and still pins an explicit `vX.Y.Z` ref.
 - Inspect `docs/release-flow.md` to confirm the current member plugin list uses
   `patinaproject/using-github`.
 - Search the repository for `patinaproject/github-flows` and classify remaining
   matches as historical or actionable.
+- Search current marketplace and release-flow surfaces for `github-flows` to
+  confirm the old name is removed there.
 - Run Markdown lint for edited Markdown files and JSON parsing for edited
   manifests.
 
 ## Out of Scope
 
-- Renaming the marketplace plugin from `github-flows` to `using-github`.
 - Updating old issue #22 planning artifacts that describe the original
   `github-flows` repository before the rename.
 - Cutting or changing upstream plugin releases.
