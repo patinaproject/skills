@@ -469,3 +469,13 @@ git commit -m "docs: #38 record marketplace verification plan"
 ```
 
 Expected: commit succeeds if the plan file changed during execution; skip if it did not change.
+
+## Verification Evidence
+
+- `pnpm validate:marketplace`: passed with `Marketplace validation passed for 3 plugin(s).`
+- `pnpm validate:marketplace:remote`: passed with `Marketplace validation passed for 3 plugin(s).`
+- Active repo-local editor/config surface audit found only `.agents`, `.claude`, and `.claude-plugin`.
+- `rg -n 'github-flows|patinaproject/github-flows' .agents .claude-plugin .claude README.md docs/release-flow.md .github/workflows/plugin-release-bump.yml scripts package.json`: no matches.
+- `pnpm lint:md`: passed, linting 10 tracked non-Superpowers Markdown files.
+- `pnpm exec markdownlint-cli2 docs/superpowers/specs/2026-04-27-38-codex-fails-to-install-using-github-from-marketplace-design.md docs/superpowers/plans/2026-04-27-38-codex-fails-to-install-using-github-from-marketplace-plan.md`: passed.
+- `actionlint .github/workflows/plugin-release-bump.yml`: passed.
