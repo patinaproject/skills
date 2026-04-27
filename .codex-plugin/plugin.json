@@ -1,6 +1,6 @@
 {
   "name": "bootstrap",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Scaffold and realign repositories to the Patina Project baseline.",
   "author": {
     "name": "Ted Mader",

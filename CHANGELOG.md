@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/patinaproject/bootstrap/compare/v1.1.2...v1.2.0) (2026-04-27)
+
+
+### Features
+
+* [#42](https://github.com/patinaproject/bootstrap/issues/42) trigger release-please on every push to main ([#43](https://github.com/patinaproject/bootstrap/issues/43)) ([ee1a907](https://github.com/patinaproject/bootstrap/commit/ee1a9070ad7d6cf01a86a37d58f54b47efc58a36))
+
+
+### Bug Fixes
+
+* [#31](https://github.com/patinaproject/bootstrap/issues/31) run release workflow only on manual dispatch ([#32](https://github.com/patinaproject/bootstrap/issues/32)) ([d6a370b](https://github.com/patinaproject/bootstrap/commit/d6a370bbc48e4583acd2c49efc8e827ae56b4517))
+* [#33](https://github.com/patinaproject/bootstrap/issues/33) set specific description in claude-plugin manifest ([#34](https://github.com/patinaproject/bootstrap/issues/34)) ([5d5063e](https://github.com/patinaproject/bootstrap/commit/5d5063e5ef15c1513e8ec065f8b1d1ec786a6e7b))
+* [#35](https://github.com/patinaproject/bootstrap/issues/35) use author identity in manifests ([#45](https://github.com/patinaproject/bootstrap/issues/45)) ([fa120c5](https://github.com/patinaproject/bootstrap/commit/fa120c539490824b868302080632fb1554e49af4))
+* [#36](https://github.com/patinaproject/bootstrap/issues/36) align markdown lint workflow template ([#37](https://github.com/patinaproject/bootstrap/issues/37)) ([27535e6](https://github.com/patinaproject/bootstrap/commit/27535e6ff287082baa31fd9324c426f0af655079))
+* [#38](https://github.com/patinaproject/bootstrap/issues/38) align autorelease label color with release-please default ([#40](https://github.com/patinaproject/bootstrap/issues/40)) ([96229a8](https://github.com/patinaproject/bootstrap/commit/96229a8ff061635b4559dd3cabdf11b1fba2f384))
+
 ## [1.1.2](https://github.com/patinaproject/bootstrap/compare/v1.1.1...v1.1.2) (2026-04-25)
 
 
