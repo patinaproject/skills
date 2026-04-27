@@ -4,7 +4,7 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 
 ## How it works
 
-The `Release` workflow runs on every push to `main`. There is no manual dispatch. Cutting a release is the natural by-product of merging PRs:
+The `Release` workflow runs on every push to `main`. Cutting a release is the natural by-product of merging PRs:
 
 1. **Merge any PR into `main`.** The push event runs `Release`. `release-please` scans Conventional Commits since the last tag and opens — or updates — a standing **"chore: release X.Y.Z"** PR that:
 
@@ -16,7 +16,21 @@ The `Release` workflow runs on every push to `main`. There is no manual dispatch
 
 2. **Merge the release PR.** Squash-merging the PR is itself a push to `main`, so `Release` runs again. release-please now sees the merged release PR (still labeled `autorelease: pending`), creates the tag `vX.Y.Z`, publishes the GitHub Release with the Conventional-Commit-derived notes, and (when configured) dispatches the marketplace bump. The PR's label flips to `autorelease: tagged`.
 
-The result: every merge keeps the standing release PR fresh; merging that PR cuts the release. No `gh workflow run` step is ever required.
+The result: every merge keeps the standing release PR fresh; merging that PR cuts the release. No manual step is required during the normal flow.
+
+## Manual recovery dispatch
+
+Manual dispatch is an escape hatch, not the normal release path. Use it only when the latest automatic `Release` run was skipped, cancelled, failed for transient reasons, or needs to be retried after permissions or repository settings were fixed.
+
+Start the same workflow from the GitHub Actions UI, or run:
+
+```bash
+gh workflow run Release
+```
+
+The manual run performs the same release-please evaluation as a push-triggered run. If releasable commits exist, it opens or refreshes the standing release PR. If the release PR has already been merged and the repository state calls for a release, it can cut the tag and GitHub Release. If there is nothing to release, it no-ops.
+
+Do not use manual dispatch as the ordinary release process. Do not perform manual version bumps or local release commands.
 
 ## Prerequisites (one-time settings)
 

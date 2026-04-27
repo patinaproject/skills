@@ -1,11 +1,13 @@
 name: Release
 
-# Triggered on every push to `main`. release-please is idempotent: on regular
-# feature/fix merges it opens or refreshes the standing release PR; on the
-# release-PR merge it sees the merged PR (label `autorelease: pending`) and
-# cuts the tag, publishes the release, and dispatches downstream notifications.
-# A single trigger covers both flows. See RELEASING.md.
+# Triggered on every push to `main`, with workflow_dispatch available as a
+# recovery escape hatch. release-please is idempotent: on regular feature/fix
+# merges it opens or refreshes the standing release PR; on the release-PR merge
+# it sees the merged PR (label `autorelease: pending`) and cuts the tag,
+# publishes the release, and dispatches downstream notifications. Manual
+# dispatch runs the same path. See RELEASING.md.
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
