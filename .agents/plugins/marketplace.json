@@ -35,7 +35,7 @@
       "source": {
         "source": "url",
         "url": "https://github.com/patinaproject/github-flows.git",
-        "ref": "v1.0.1"
+        "ref": "v1.1.0"
       },
       "policy": {
         "installation": "AVAILABLE",
