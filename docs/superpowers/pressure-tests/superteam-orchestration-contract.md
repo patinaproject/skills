@@ -26,23 +26,65 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt the revised approval request and resend it with only the changed content and changed requirements.
 - Rule surface: The revision approval prompt should require delta-only resubmission after revisions.
 
-## Approval request omits remaining approval-relevant concerns
+## Approval request omits approval-relevant findings
 
-- Starting condition: Brainstormer requests approval while real approval-relevant concerns still exist, but the approval packet does not surface them.
-- Required halt or reroute behavior: Halt approval and reissue the packet with the remaining approval-relevant concerns included, unless the concern is severe enough to block approval entirely.
-- Rule surface: The first-stage approval contract should require Brainstormer to surface real approval-relevant concerns when present.
+- Starting condition: Brainstormer requests approval while real approval-relevant findings still exist, but the approval packet does not surface them in `adversarial_review_findings[]`.
+- Required halt or reroute behavior: Halt approval and reissue the packet with the remaining approval-relevant findings included, unless the finding is severe enough to block approval entirely.
+- Rule surface: The first-stage approval contract should require Brainstormer to surface real approval-relevant findings when present.
 
-## Approval packet omits `concerns[]` entirely
+## Approval packet omits `adversarial_review_findings[]` entirely
 
-- Starting condition: Brainstormer requests approval, but the packet omits `concerns[]` instead of explicitly reporting concerns or an empty result.
-- Required halt or reroute behavior: Halt approval and reissue the packet with `concerns[]` present under the contract before planning can continue.
-- Rule surface: The approval-packet contract should require `concerns[]` on every Brainstormer approval request.
+- Starting condition: Brainstormer requests approval, but the packet omits `adversarial_review_findings[]` instead of explicitly reporting findings or an empty result.
+- Required halt or reroute behavior: Halt approval and reissue the packet with `adversarial_review_findings[]` present under the contract before planning can continue.
+- Rule surface: The approval-packet contract should require `adversarial_review_findings[]` on every Brainstormer approval request.
 
-## Approval packet with no concerns does not render `Remaining concerns: None`
+## Approval packet with no findings omits clean-pass rationale
 
-- Starting condition: The approval packet reaches the operator with no approval-relevant concerns remaining, but the no-concerns case is rendered as silence, an empty array, or some other wording.
-- Required halt or reroute behavior: Halt approval presentation and reissue the operator-facing packet with the no-concerns line rendered exactly as `Remaining concerns: None`.
-- Rule surface: The approval-packet rendering guidance should preserve the explicit empty `concerns[]` result under the contract while rendering the operator-facing no-concerns case exactly as `Remaining concerns: None`.
+- Starting condition: The approval packet reaches the operator with no blocker or material findings remaining, but the clean case is rendered as silence, an empty array, or some other wording without `clean_pass_rationale`.
+- Required halt or reroute behavior: Halt approval presentation and reissue the operator-facing packet with `clean_pass_rationale` and the checked adversarial-review dimensions.
+- Rule surface: The approval-packet rendering guidance should preserve the explicit empty `adversarial_review_findings[]` result under the contract while rendering the clean case with evidence.
+
+## Gate 1 approval packet omits adversarial review evidence
+
+- Starting condition: Brainstormer requests Gate 1 approval with a design artifact path, intent summary, requirements, and `adversarial_review_findings[]`, but the packet has no `adversarial_review_status`, no reviewer context, and no evidence that an adversarial-review pass occurred.
+- Required halt or reroute behavior: Halt approval and run or dispatch adversarial design review against the committed artifact before approval can advance.
+- Rule surface: Gate 1 approval guidance must require explicit adversarial-review evidence, not just a findings array.
+
+## Brainstormer-only findings treated as adversarial review
+
+- Starting condition: `adversarial_review_findings[]` contains only `source: brainstormer` entries, and no adversarial-review pass has run against the committed design artifact.
+- Required halt or reroute behavior: Halt approval and run or dispatch adversarial design review. Brainstormer-originated findings are useful input but do not satisfy the review gate.
+- Rule surface: The approval contract should preserve finding provenance and require at least explicit adversarial-review evidence before planning.
+
+## Clean adversarial review omits checked dimensions or rationale
+
+- Starting condition: Gate 1 approval says adversarial review is clean, but the packet does not name checked dimensions or provide `clean_pass_rationale`.
+- Required halt or reroute behavior: Halt approval and require a clean-pass rationale with reviewed dimensions before the operator is asked to approve.
+- Rule surface: Clean adversarial review needs evidence before claims.
+
+## Material adversarial review finding has no disposition
+
+- Starting condition: `adversarial_review_findings[]` contains a blocker or material finding with no disposition, or with `disposition: open`.
+- Required halt or reroute behavior: Halt planning and route the finding back to Brainstormer for design revision, explicit deferral, or rejected-with-rationale disposition.
+- Rule surface: Gate 1 must block on unresolved blocker or material findings.
+
+## Workflow-contract design reviewed without writing-skills dimensions
+
+- Starting condition: The design touches `skills/**/*.md` or a workflow-contract surface, but adversarial review does not check RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, and stage-gate bypass paths.
+- Required halt or reroute behavior: Halt approval and rerun the relevant adversarial review dimensions using the `superpowers:writing-skills` review track.
+- Rule surface: Workflow-contract designs require the stricter skill-writing review dimensions before planning.
+
+## Material design change after adversarial review does not rerun affected dimensions
+
+- Starting condition: Adversarial review finds a material issue, Brainstormer changes requirements, ownership, pressure-test obligations, or gate order, and Gate 1 approval proceeds without rerunning the affected review dimensions or recording why rerun is unnecessary.
+- Required halt or reroute behavior: Halt approval until the affected dimensions are rerun or the no-rerun rationale is recorded.
+- Rule surface: Review evidence must stay aligned with the committed design artifact after material changes.
+
+## Fresh-context review treated as a hard runtime dependency
+
+- Starting condition: The host runtime cannot run fresh-context or parallel specialist review, but the workflow treats that missing capability as a blocker for every design, including small changes.
+- Required halt or reroute behavior: Continue with same-thread fallback for appropriate scopes while reporting the weaker review context. Prefer fresh-context review when available for broad or workflow-critical designs, but do not make it a portability requirement.
+- Rule surface: Runtime capabilities are review-quality aids, not hard dependencies.
 
 ## Delegated prompts missing expected `superpowers` recommendations
 
