@@ -245,7 +245,16 @@ pnpm check:versions    # enforce package.json ↔ plugin manifests lockstep
 pnpm commitlint        # one-off commit-message validation
 ```
 
-Commits and PR titles follow the enforced convention: `type: #<issue> short description`.
+Commits and PR titles follow the enforced convention: `type: #<issue> short description`. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full rule; choose the commit type by product impact, not by file extension.
+
+| Change | Type |
+|--------|------|
+| Adds or changes shipped behavior, including behavior expressed in Markdown skill files, workflow gates, prompt contracts, plugin metadata, marketplace behavior, generated agent instructions, or other user-visible configuration | `feat:` |
+| Corrects broken shipped behavior in those same product surfaces | `fix:` |
+| Explains the product without changing shipped behavior or release semantics | `docs:` |
+| Performs maintenance that does not alter user-facing behavior | `chore:` |
+
+Edits to `skills/**/SKILL.md` and adjacent skill workflow contracts are product/runtime changes by default, not documentation edits. Changes that should produce a release must not use non-bumping types such as `docs:` or `chore:`.
 
 ## Contributing
 

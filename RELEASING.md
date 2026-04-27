@@ -121,11 +121,14 @@ When enabled, GitHub refuses to run workflows that `uses:` an action by tag or b
 
 ## Semver decision
 
-Determined from commit types — no human choice:
+Determined from releasable Conventional Commit types — no human choice:
 
 - `fix:` → patch
 - `feat:` → minor
-- `feat!:` or `BREAKING CHANGE:` footer → major
+- `<type>!:` or `BREAKING CHANGE:` footer → major
+- `docs:`, `chore:`, and other non-releasable types → no version bump under this baseline
+
+If a change should produce a release, do not use a non-bumping type. For example, a Markdown-only edit to `skills/**/SKILL.md` that changes installed skill behavior should use `feat:` or `fix:`, not `docs:`.
 
 ## Keeping versions aligned between releases
 
@@ -160,5 +163,6 @@ If either secret is missing on a `patinaproject` plugin repo, the `Mint patina-p
 ## Writing commits for a clean changelog
 
 - Use Conventional Commits: `feat: #<issue> …`, `fix: #<issue> …`, etc.
+- Choose release-triggering types for product changes. Release Please can no-op when product changes are misclassified as `docs:` or `chore:`, which can skip downstream marketplace bump automation.
 - Breaking changes: prefix the type with `!` (e.g. `feat!: #123 rename foo to bar`) **and** include a `BREAKING CHANGE: …` footer in the PR body.
 - Squash-merge flow: PR titles must themselves be conventional-commit-shaped so the squash commit lands with the correct type/scope. Enforced by the `Lint PR` workflow.

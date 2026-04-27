@@ -11,6 +11,7 @@ Key rules:
 
 - Commits use Conventional Commits with no scope and a required GitHub issue tag: `type: #123 short description`. Subject ≤ 72 chars.
 - PR titles match the commit format.
+- Behavior-changing skill, workflow, prompt, plugin metadata, marketplace, and generated-agent-instruction changes must use release-triggering commit types even when the diff is Markdown-only.
 - Markdown must pass `markdownlint-cli2` with `.markdownlint.jsonc` rules.
 - Skills live under `skills/`, one directory per skill, `SKILL.md` as the main contract.
 - Agent plugin surfaces at the repo root: `.claude-plugin/`, `.codex-plugin/`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`.

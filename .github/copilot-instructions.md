@@ -6,5 +6,6 @@ Highlights:
 
 - Commits use Conventional Commits with no scope and a required GitHub issue tag: `type: #123 short description`.
 - PR titles match the commit format so squash merges reuse them verbatim.
+- Behavior-changing skill, workflow, prompt, plugin metadata, marketplace, and generated-agent-instruction changes must use release-triggering commit types even when the diff is Markdown-only.
 - Markdown is linted with `markdownlint-cli2` via a husky `pre-commit` hook.
 - Skills live under `skills/`, one directory per skill, with `SKILL.md` as the main contract.
