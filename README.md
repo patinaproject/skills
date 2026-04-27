@@ -105,7 +105,11 @@ A run is only complete when the published branch state is stable enough to hand 
 
 ## Installation
 
-`superteam` ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files this plugin emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly. Install Superpowers first by following the setup instructions in [`obra/superpowers`](https://github.com/obra/superpowers).
+`superteam` ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files this plugin emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly.
+
+### Prerequisite: Install Superpowers
+
+Superteam depends on the separate [`obra/superpowers`](https://github.com/obra/superpowers) plugin. Install or enable Superpowers in the same runtime where you plan to use Superteam before installing this plugin, then continue with the Superteam steps for your runtime below.
 
 ### Claude Code
 
