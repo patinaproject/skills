@@ -35,7 +35,7 @@
       "source": {
         "source": "url",
         "url": "https://github.com/patinaproject/using-github.git",
-        "ref": "v1.1.0"
+        "ref": "v2.0.0"
       },
       "policy": {
         "installation": "AVAILABLE",
