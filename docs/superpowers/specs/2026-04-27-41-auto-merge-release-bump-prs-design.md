@@ -13,8 +13,15 @@ PR only updates pinned marketplace refs and generated bootstrap scaffolding.
   plugin release-bump workflow.
 - Keep auto-merge constrained to bot-generated `bot/bump-*` PRs that the
   workflow just created or updated.
+- Re-enable auto-merge when the workflow updates an existing bump PR, so the
+  release propagation path remains automatic after reruns or superseding bumps.
+- Include bootstrap release-bump PRs in the auto-merge path, including any
+  workflow-generated scaffold refreshes that land in those PRs.
 - Preserve branch protection and required checks; automation must request
   auto-merge, not bypass checks.
+- Fail with a clear, actionable workflow error if GitHub cannot enable
+  auto-merge, such as when repository-level auto-merge is disabled or token
+  permissions are insufficient.
 - Document the release flow so maintainers understand when bump PRs merge
   automatically and when they remain open.
 
@@ -73,6 +80,29 @@ auto-merge path behind required checks and branch protection. If checks are
 pending, GitHub CLI enables auto-merge for later completion; if checks fail,
 GitHub leaves the PR open.
 
+The auto-merge step should be intentionally loud on setup failures. If the
+repository has not enabled auto-merge, or if the default workflow token cannot
+enable auto-merge for the PR, the step should fail after the bump PR exists. The
+failure is useful because it tells maintainers that repository settings or token
+permissions must be corrected; silently continuing would leave the release flow
+looking automated while still requiring manual merges.
+
+The workflow should enable auto-merge for both newly created and updated bump
+PRs. If a maintainer manually disables auto-merge on an existing bump PR, a later
+workflow update may re-enable it. That is intentional for this issue because the
+trusted `bot/bump-*` branch remains owned by the release-bump workflow, and the
+desired release path is automatic whenever checks pass. Manual intervention
+remains available by closing the PR, fixing the workflow, or changing branch
+protection rather than relying on a disabled auto-merge toggle as persistent
+state.
+
+Bootstrap bump PRs are included in the same behavior. They can eventually carry
+both marketplace ref changes and bootstrap scaffolding refreshes, but the trust
+boundary is still the same release-bump workflow and protected-branch check set.
+If bootstrap-generated scaffold changes become too broad for automatic release
+propagation, that should be handled by a separate policy issue rather than a
+hidden carve-out in this implementation.
+
 The release-flow documentation should update the lifecycle step that currently
 says a maintainer reviews and merges the PR. It should instead say the workflow
 requests auto-merge for trusted bump PRs, while maintainers still inspect PRs
@@ -98,5 +128,8 @@ that fail checks, cannot enable auto-merge, or include unexpected changes.
 - Inspect `.github/workflows/plugin-release-bump.yml` to confirm auto-merge is
   gated on `pull-request-operation` being `created` or `updated` and uses the
   `pull-request-number` output.
+- Inspect the workflow to confirm it does not use `--admin`, does not suppress
+  `gh pr merge` failures, and therefore surfaces missing auto-merge settings or
+  token-permission problems.
 - Inspect `docs/release-flow.md` to confirm the release lifecycle documents the
   auto-merge constraints and maintainer fallback path.
