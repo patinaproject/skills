@@ -23,7 +23,8 @@ jobs:
             exit 1
           fi
 
-      - name: Validate conventional commit title
+      - name: Validate conventional commits + issue ref
+        if: "${{ github.event.pull_request.user.login != 'github-actions[bot]' || !startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
         # amannn/action-semantic-pull-request@v5.5.3
         uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
         env:
@@ -44,24 +45,45 @@ jobs:
           requireScope: false
           disallowScopes: |
             .+
-          subjectPattern: '^.+$'
+          subjectPattern: '^#\d+ .+$'
           subjectPatternError: |
-            PR title subject cannot be empty.
+            PR title subject must start with a GitHub issue reference. Example:
+              feat: #123 add boot timeline
+              fix: #456 restore search
             Scopes are not permitted. See AGENTS.md for conventions.
           ignoreLabels: |
             dependencies
 
+      - name: Validate bot release bump title
+        if: "${{ github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
+        # amannn/action-semantic-pull-request@v5.5.3
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            chore
+          requireScope: false
+          disallowScopes: |
+            .+
+          subjectPattern: '^bump .+$'
+          subjectPatternError: |
+            Bot release bump PR titles must use: chore: bump <plugin> to <tag>
+            Scopes are not permitted. This no-issue exception is only for github-actions[bot] bot/bump-* PRs.
+
   linked-issue:
-    name: Validate optional linked issue
+    name: Require linked issue
     runs-on: ubuntu-latest
     if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
-      - name: Check optional closing keyword syntax
+      - name: Check for closing keyword in PR body
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_USER: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           if [ -z "$PR_BODY" ]; then
-            echo "::error::PR body is empty. Fill in the PR template."
+            echo "::error::PR body is empty. Add a GitHub closing keyword such as 'Closes #<issue>'."
             exit 1
           fi
           # Strip HTML comments, fenced code blocks, inline code, strikethrough, blockquotes.
@@ -79,7 +101,16 @@ jobs:
             echo "Closing keyword found."
             exit 0
           fi
-          echo "No closing keyword found; linked issues are optional."
+          if [ "$PR_USER" = "github-actions[bot]" ]; then
+            case "$PR_HEAD_REF" in
+              bot/bump-*)
+                echo "No closing keyword found; allowed for bot-generated release bump PR."
+                exit 0
+                ;;
+            esac
+          fi
+          echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
+          exit 1
 
   mark-breaking-change:
     name: Mark breaking change
@@ -104,7 +135,7 @@ jobs:
             exit 1
           fi
           if [ "$body_has_footer" = true ] && [ "$title_has_bang" = false ]; then
-            echo "::error::PR body has a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: add new API\`) so squash-merged commits carry the marker."
+            echo "::error::PR body has a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: #123 ...\`) so squash-merged commits carry the marker."
             exit 1
           fi
           echo "Breaking change markers are consistent."
