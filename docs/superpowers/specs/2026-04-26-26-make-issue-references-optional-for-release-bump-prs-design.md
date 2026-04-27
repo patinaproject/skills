@@ -2,10 +2,10 @@
 
 ## Intent
 
-Issue #26 updates the marketplace maintenance workflow so routine plugin release
-bump PRs no longer imply that each release closes a standing marketplace issue.
-The repo should still support issue references when they are meaningful, but the
-automation, lint rules, and contributor guidance should not require them.
+Issue #26 updates the marketplace maintenance workflow so bot-generated plugin
+release bump PRs no longer imply that each release closes a standing
+marketplace issue. The issue-ID exception is limited to bot-created version bump
+PRs; human-authored commits and PRs continue to require issue references.
 
 ## Problem
 
@@ -15,46 +15,44 @@ body says it closes the marketplace side of issue #12 for that release. That
 wording makes routine release publication look like partial issue closure and
 keeps old issue context attached to unrelated future releases.
 
-The surrounding repo policy also reinforces the same requirement: commitlint,
-Commitizen prompts, PR title linting, PR body linting, the PR template, and
-contributor docs expect an issue reference or closing keyword. That creates two
-problems for marketplace maintenance:
+The surrounding repo policy correctly expects issue references for human work:
+commitlint, Commitizen prompts, PR title linting, PR body linting, the PR
+template, and contributor docs expect an issue reference or closing keyword.
+That policy should remain in place for humans, but bot-generated release bump
+PRs need a narrow exception because no issue necessarily applies to every
+version bump.
 
-- Automated release bump PRs need synthetic issue references even when no issue
-  applies.
-- Human-authored maintenance PRs cannot omit issue IDs without fighting local
-  and CI policy.
+- Automated release bump PRs should not need synthetic issue references when no
+  issue applies.
+- Human-authored maintenance PRs should still include issue IDs.
 
 ## Proposal
 
-Adopt a single optional-issue-reference policy:
+Adopt a narrow bot-release-bump exception:
 
 - Generated plugin release bump PRs use titles and commit messages such as
   `chore: bump <plugin> to <tag>`.
 - Generated plugin release bump PR bodies list the plugin, tag, and source repo,
   but omit the release-specific `Closes the marketplace side...` sentence.
 - Commitlint continues to require conventional commits with no scopes and
-  non-empty subjects, but no longer requires subjects to start with `#<issue>`.
-- Commitizen continues to allow issue references, but treats the ticket prompt
-  as optional.
-- PR title linting continues to enforce conventional-commit titles and no
-  scopes, but no longer requires the subject to start with an issue reference.
-- PR body linting still requires a non-empty body, but no longer requires a
-  closing keyword.
-- Contributor docs and the PR template describe issue IDs as optional and show
-  no-issue examples.
-
-The repo can still use `Closes #<issue>` or `Related to #<issue>` when a PR
-genuinely completes or relates to an issue.
+  subjects that start with `#<issue>`.
+- Commitizen continues to require issue references for guided human commits.
+- PR title linting continues to require issue references for normal PRs, but
+  allows bot-authored release bump PRs from `bot/bump-*` branches to use
+  no-issue titles.
+- PR body linting continues to require a closing keyword for normal PRs, but
+  allows bot-authored release bump PR bodies to omit one while remaining
+  non-empty.
+- Contributor docs and the PR template continue to show issue references as
+  required for human PRs, while release-flow docs document the bot bump
+  exception.
 
 ## Non-Goals / Implementation Notes
 
 - Do not change marketplace manifest contents.
-- Do not remove support for issue references from commits, PR titles, or PR
-  bodies.
-- Do not introduce a special policy only for release-bump PRs; the simpler repo
-  policy is that issue references are optional everywhere unless a specific
-  issue relationship is meaningful.
+- Do not make issue references optional for human-authored commits or PRs.
+- Do not remove support for meaningful `Closes #<issue>` or
+  `Related to #<issue>` references from PR bodies.
 - Preserve existing GitHub Actions pinning comments and full SHA action refs.
 
 ## Acceptance Criteria
@@ -68,26 +66,27 @@ side of patinaproject/skills#12 for this release.`
 
 ### AC-26-2
 
-Given a commit message such as `chore: bump bootstrap to v1.2.3`, when
-commitlint runs, then it passes without requiring an issue ID.
+Given a human-authored commit message such as
+`chore: bump bootstrap to v1.2.3`, when commitlint runs, then it fails because
+the subject does not start with an issue ID.
 
 ### AC-26-3
 
-Given a PR title with a conventional-commit type, no scope, and a non-empty
-subject that does not start with an issue reference, when PR title linting runs,
-then the title is accepted.
+Given a bot-authored release bump PR from a `bot/bump-*` branch with a title
+such as `chore: bump bootstrap to v1.2.3`, when PR title linting runs, then the
+title is accepted without an issue ID.
 
 ### AC-26-4
 
-Given a PR body that follows the repository PR template but does not include a
-closing keyword, when PR body linting runs, then the body is accepted as long as
-it is non-empty.
+Given a human-authored PR title or body without an issue reference, when PR
+linting runs, then the PR is rejected.
 
 ### AC-26-5
 
 Given contributors read the repo guidance, PR template, release flow docs, or
-Commitizen prompt, when they create a maintenance commit or PR, then the
-documented examples and prompts make clear that issue references are optional.
+Commitizen prompt, when they create a maintenance commit or PR, then the docs
+make clear that issue references are required for humans and optional only for
+bot-generated release bump PRs.
 
 ## Context
 
