@@ -17,6 +17,8 @@ Current member plugins tracked by this flow:
 
 New plugins are added by the same flow: the workflow inserts an entry if the plugin isn't already listed, so the first tagged release of a plugin is also what publishes it.
 
+The release-bump PR workflow enables commit signing in `peter-evans/create-pull-request`, so commits are expected to be signed and verified as `github-actions[bot]` when the workflow uses the repository's default `GITHUB_TOKEN`. Do not switch this workflow to a PAT while expecting bot signature verification; PAT-created PRs are not the supported path for this signing mode.
+
 ## Required setup in each member plugin repo
 
 Each plugin repo needs a workflow on `release: published` that fires the dispatch:
