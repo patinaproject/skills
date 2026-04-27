@@ -102,18 +102,19 @@ Expected: one match for `other Patina Project plugins` and no match for
 Run:
 
 ```bash
-rg -n '\bPatina\b(?! Project)' docs README.md AGENTS.md CLAUDE.md .agents .claude-plugin package.json
+rg -n 'other Patina plugins' docs/superpowers/specs/2026-04-26-22-add-patinaprojectgithub-flows-plugin-to-the-marketplace-design.md
 ```
 
-Expected: no output. If the local `rg` build does not support look-around, use
-this fallback:
+Expected: no output. Then run this broader audit:
 
 ```bash
 rg -n '\bPatina\b' docs README.md AGENTS.md CLAUDE.md .agents .claude-plugin package.json
 ```
 
-Expected fallback interpretation: every capitalized prose match is either
-`Patina Project` or the phrase in the changed line now reads `Patina Project`.
+Expected broader audit interpretation: capitalized prose matches are either
+complete `Patina Project` wording, issue #33 meta-documentation describing the
+old wording under correction, or already-approved historical design discussion
+whose active target line has been corrected.
 
 - [ ] **Step 3: Confirm identifier uses remain intentionally unchanged**
 
