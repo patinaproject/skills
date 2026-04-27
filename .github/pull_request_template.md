@@ -9,6 +9,8 @@ Examples:
 - `docs: #12 add bootstrap skill guide`
 - `chore: #34 bootstrap commit hooks`
 
+Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
+
 This title rule applies to pull requests only. GitHub issue titles should stay plain-language and should not use conventional-commit prefixes.
 
 ## Summary

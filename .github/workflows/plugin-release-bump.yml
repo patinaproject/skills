@@ -112,14 +112,12 @@ jobs:
         with:
           branch: bot/bump-${{ steps.inputs.outputs.plugin }}-${{ steps.inputs.outputs.tag }}
           base: main
-          title: "chore: #12 bump ${{ steps.inputs.outputs.plugin }} to ${{ steps.inputs.outputs.tag }}"
-          commit-message: "chore: #12 bump ${{ steps.inputs.outputs.plugin }} to ${{ steps.inputs.outputs.tag }}"
+          title: "chore: bump ${{ steps.inputs.outputs.plugin }} to ${{ steps.inputs.outputs.tag }}"
+          commit-message: "chore: bump ${{ steps.inputs.outputs.plugin }} to ${{ steps.inputs.outputs.tag }}"
           body: |
             Automated bump from a new tagged release of `${{ steps.inputs.outputs.plugin }}`.
 
             - Plugin: `${{ steps.inputs.outputs.plugin }}`
             - Tag: `${{ steps.inputs.outputs.tag }}`
             - Source repo: `${{ steps.inputs.outputs.repo }}`
-
-            Closes the marketplace side of patinaproject/skills#12 for this release.
           delete-branch: true
