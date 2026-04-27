@@ -36,7 +36,7 @@ When the upstream `release.yml` in `patinaproject/github-flows` fires `plugin-re
 
 ## Acceptance criteria mapping
 
-- **AC-22-1** (manifest lists `github-flows` alongside other Patina plugins with the same shape): satisfied by the automated bump PR opened when `v0.1.0` is published, **not by this PR**. This PR documents the contract that the bump PR must fulfill.
+- **AC-22-1** (manifest lists `github-flows` alongside other Patina Project plugins with the same shape): satisfied by the automated bump PR opened when `v0.1.0` is published, **not by this PR**. This PR documents the contract that the bump PR must fulfill.
 - **AC-22-2** (release dispatch updates the manifest entry to `v0.1.0`): satisfied by existing `plugin-release-bump.yml` — verified, no change required.
 - **AC-22-3** (`/plugin install github-flows@patinaproject-skills` works after install): satisfied transitively once AC-22-1 is satisfied via the bump PR.
 
