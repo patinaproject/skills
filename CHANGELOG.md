@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/patinaproject/superteam/compare/v1.0.0...v1.1.0) (2026-04-27)
+
+
+### Features
+
+* [#39](https://github.com/patinaproject/superteam/issues/39) add durable routing and exec-mode injection to superteam ([#40](https://github.com/patinaproject/superteam/issues/40)) ([09931c7](https://github.com/patinaproject/superteam/commit/09931c7cc79ccecf2371fae27e91bb7eb9ef98cc))
+* [#44](https://github.com/patinaproject/superteam/issues/44) auto-switch superteam pre-flight to issue branch on default ([#45](https://github.com/patinaproject/superteam/issues/45)) ([37b5e20](https://github.com/patinaproject/superteam/commit/37b5e20c6188a1bd0fe32e013fe3397092fccd48))
+
 ## [1.0.0](https://github.com/patinaproject/superteam/compare/v0.2.0...v1.0.0) (2026-04-25)
 
 
