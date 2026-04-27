@@ -35,16 +35,6 @@
       "source": {
         "source": "github",
         "repo": "patinaproject/using-github",
-        "ref": "v1.1.0"
-      }
-    },
-    {
-      "name": "using-github",
-      "description": "Patina Project plugin: using-github",
-      "category": "productivity",
-      "source": {
-        "source": "github",
-        "repo": "patinaproject/using-github",
         "ref": "v2.0.0"
       }
     }
