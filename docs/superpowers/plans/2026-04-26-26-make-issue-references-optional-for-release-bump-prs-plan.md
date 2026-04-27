@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make issue references optional for release bump PRs and repo commit/PR policy while preserving conventional commit hygiene.
+**Goal:** Limit no-issue PR and commit wording to bot-generated release bump PRs while preserving issue-ID requirements for human commits and PRs.
 
-**Architecture:** Update the release-bump workflow output first, then relax the shared validation paths that currently enforce issue IDs. Finish by aligning contributor-facing docs and templates so humans see the same policy that automation enforces.
+**Architecture:** Keep the release-bump workflow output issue-free, then restore human-facing commit and PR validation to require issue references. Add a narrow PR lint exception keyed to `github-actions[bot]` and `bot/bump-*` branches, and document that exception only in release-bump guidance.
 
 **Tech Stack:** GitHub Actions YAML, `peter-evans/create-pull-request`, `amannn/action-semantic-pull-request`, commitlint, Commitizen, Markdown docs, `pnpm`, `actionlint`.
 
@@ -13,15 +13,15 @@
 ## File Structure
 
 - `.github/workflows/plugin-release-bump.yml`: generated release bump PR title, commit message, and body.
-- `.github/workflows/lint-pr.yml`: PR title/body policy enforced in CI.
-- `commitlint.config.js`: local commit-message policy enforced by Husky and `pnpm exec commitlint`.
-- `commitizen.config.js`: guided commit prompt behavior.
-- `.github/pull_request_template.md`: contributor-facing PR title and linked-issue guidance.
+- `.github/workflows/lint-pr.yml`: PR title/body policy, including the bot bump exception.
+- `commitlint.config.js`: local commit-message policy for human commits.
+- `commitizen.config.js`: guided human commit prompts.
+- `.github/pull_request_template.md`: human PR title and linked-issue guidance.
 - `AGENTS.md`: canonical agent repository rules.
 - `CONTRIBUTING.md`: contributor-facing commit and PR rules.
-- `docs/release-flow.md`: plugin release flow documentation.
+- `docs/release-flow.md`: release-bump exception documentation.
 
-## Task 1: Update Generated Release Bump PR Output
+## Task 1: Keep Bot Release Bump Output Issue-Free
 
 **Files:**
 
@@ -35,13 +35,15 @@ Run:
 sed -n '108,130p' .github/workflows/plugin-release-bump.yml
 ```
 
-Expected: output shows `title`, `commit-message`, and body text containing the hardcoded issue #12 release reference.
+Expected: the `Create PR` block is visible.
 
-- [ ] **Step 2: Remove the generated hardcoded issue references**
+- [ ] **Step 2: Ensure generated bot bump PRs omit issue references**
 
-In `.github/workflows/plugin-release-bump.yml`, replace the `Create PR` `with:` block values so they match:
+In `.github/workflows/plugin-release-bump.yml`, keep the `Create PR` values as:
 
 ```yaml
+          branch: bot/bump-${{ steps.inputs.outputs.plugin }}-${{ steps.inputs.outputs.tag }}
+          base: main
           title: "chore: bump ${{ steps.inputs.outputs.plugin }} to ${{ steps.inputs.outputs.tag }}"
           commit-message: "chore: bump ${{ steps.inputs.outputs.plugin }} to ${{ steps.inputs.outputs.tag }}"
           body: |
@@ -50,10 +52,9 @@ In `.github/workflows/plugin-release-bump.yml`, replace the `Create PR` `with:` 
             - Plugin: `${{ steps.inputs.outputs.plugin }}`
             - Tag: `${{ steps.inputs.outputs.tag }}`
             - Source repo: `${{ steps.inputs.outputs.repo }}`
-          delete-branch: true
 ```
 
-- [ ] **Step 3: Verify AC-26-1 by searching for removed generated text**
+- [ ] **Step 3: Verify AC-26-1**
 
 Run:
 
@@ -63,7 +64,7 @@ rg -n "Closes the marketplace side|#12 bump|patinaproject/skills#12" .github/wor
 
 Expected: command exits with no matches.
 
-- [ ] **Step 4: Commit Task 1**
+- [ ] **Step 4: Commit Task 1 if changed**
 
 Run:
 
@@ -72,113 +73,72 @@ git add .github/workflows/plugin-release-bump.yml
 git commit -m "ci: #26 remove release bump issue reference"
 ```
 
-Expected: commit succeeds.
+Expected: commit succeeds if the workflow changed; skip if already committed.
 
-## Task 2: Relax Commit and PR Validation Policy
+## Task 2: Restore Human Commit Policy
 
 **Files:**
 
 - Modify: `commitlint.config.js`
 - Modify: `commitizen.config.js`
-- Modify: `.github/workflows/lint-pr.yml`
 
-- [ ] **Step 1: Update commitlint to require only conventional commits with non-empty subjects**
+- [ ] **Step 1: Restore commitlint issue-ID enforcement**
 
-Replace the custom `ticket-required` plugin in `commitlint.config.js` with built-in subject validation:
+Set `commitlint.config.js` to:
 
 ```js
 module.exports = {
   extends: ["@commitlint/config-conventional"],
+  plugins: [
+    {
+      rules: {
+        "ticket-required": (parsed) => {
+          const { subject } = parsed;
+          if (!subject) {
+            return [false, "Subject cannot be empty"];
+          }
+
+          if (!/^#\d+\s+/.test(subject)) {
+            return [
+              false,
+              "Subject must start with a GitHub issue reference. Use `type: #123 description`."
+            ];
+          }
+
+          return [true, ""];
+        }
+      }
+    }
+  ],
   rules: {
     "scope-empty": [2, "always"],
     "subject-case": [0],
-    "subject-empty": [2, "never"],
-    "subject-max-length": [2, "always", 72]
+    "subject-max-length": [2, "always", 72],
+    "ticket-required": [2, "always"]
   }
 };
 ```
 
-- [ ] **Step 2: Make Commitizen ticket entry optional**
+- [ ] **Step 2: Restore Commitizen required ticket prompt**
 
-In `commitizen.config.js`, set the ticket requirement to false and update the prompt:
+In `commitizen.config.js`, set:
 
 ```js
   allowTicketNumber: true,
-  isTicketNumberRequired: false,
+  isTicketNumberRequired: true,
   ticketNumberPrefix: "",
   ticketNumberRegExp: "#\\d+",
   prependTicketToHead: false,
   skipQuestions: ["scope", "body", "footer"],
   messages: {
     type: "Select the type of change you're committing:",
-    ticketNumber: "Enter the GitHub issue reference, if any (e.g. #1):\n",
+    ticketNumber: "Enter the GitHub issue reference (e.g. #1):\n",
     subject: "Write a short description of the change:\n",
     confirmCommit: "Are you sure you want to proceed with the commit above?"
   },
 ```
 
-- [ ] **Step 3: Relax PR title linting**
-
-In `.github/workflows/lint-pr.yml`, update the semantic PR title step so the step name and subject pattern no longer require an issue reference:
-
-```yaml
-      - name: Validate conventional commit title
-        # amannn/action-semantic-pull-request@v5.5.3
-        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          types: |
-            feat
-            fix
-            docs
-            chore
-            style
-            refactor
-            perf
-            test
-            build
-            ci
-            revert
-          requireScope: false
-          disallowScopes: |
-            .+
-          subjectPattern: '^.+$'
-          subjectPatternError: |
-            PR title subject cannot be empty.
-            Scopes are not permitted. See AGENTS.md for conventions.
-          ignoreLabels: |
-            dependencies
-```
-
-- [ ] **Step 4: Relax PR body closing-keyword linting**
-
-In `.github/workflows/lint-pr.yml`, rename the closing-keyword job and keep only the non-empty body requirement. The end of the script should say:
-
-```bash
-          if printf '%s' "$sanitized" | grep -qiE \
-            '(^|[^A-Za-z])(close[sd]?|fix(e[sd])?|resolve[sd]?)[ \t]+([A-Za-z0-9._-]+/[A-Za-z0-9._-]+)?#[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
-            echo "Closing keyword found."
-            exit 0
-          fi
-          echo "No closing keyword found; linked issues are optional."
-```
-
-Also change the empty-body error to:
-
-```bash
-            echo "::error::PR body is empty. Fill in the PR template."
-```
-
-- [ ] **Step 5: Update the breaking-change example**
-
-In `.github/workflows/lint-pr.yml`, replace the example `feat!: #123 ...` with:
-
-```bash
-feat!: add new API
-```
-
-- [ ] **Step 6: Verify AC-26-2 with a no-issue commit message**
+- [ ] **Step 3: Verify AC-26-2 human no-issue commits fail**
 
 Run:
 
@@ -187,9 +147,9 @@ printf 'chore: bump bootstrap to v1.2.3\n' >/tmp/skills-commit-msg-no-issue
 pnpm exec commitlint --edit /tmp/skills-commit-msg-no-issue
 ```
 
-Expected: command exits 0.
+Expected: command exits non-zero with `ticket-required`.
 
-- [ ] **Step 7: Verify issue references still work when meaningful**
+- [ ] **Step 4: Verify issue-tagged commits still pass**
 
 Run:
 
@@ -200,7 +160,89 @@ pnpm exec commitlint --edit /tmp/skills-commit-msg-with-issue
 
 Expected: command exits 0.
 
-- [ ] **Step 8: Verify workflow syntax**
+- [ ] **Step 5: Commit Task 2**
+
+Run:
+
+```bash
+git add commitlint.config.js commitizen.config.js
+git commit -m "ci: #26 restore human issue reference commits"
+```
+
+Expected: commit succeeds.
+
+## Task 3: Narrow PR Lint Exception to Bot Bumps
+
+**Files:**
+
+- Modify: `.github/workflows/lint-pr.yml`
+
+- [ ] **Step 1: Restore normal PR title issue-ID enforcement**
+
+In `.github/workflows/lint-pr.yml`, the normal semantic PR step should run unless the PR is from `github-actions[bot]` on a `bot/bump-*` branch:
+
+```yaml
+      - name: Validate conventional commits + issue ref
+        if: "${{ github.event.pull_request.user.login != 'github-actions[bot]' || !startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
+```
+
+Its subject pattern and error should be:
+
+```yaml
+          subjectPattern: '^#\d+ .+$'
+          subjectPatternError: |
+            PR title subject must start with a GitHub issue reference. Example:
+              feat: #123 add boot timeline
+              fix: #456 restore search
+            Scopes are not permitted. See AGENTS.md for conventions.
+```
+
+- [ ] **Step 2: Add the bot release bump title exception**
+
+Add a second semantic PR step:
+
+```yaml
+      - name: Validate bot release bump title
+        if: "${{ github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
+        # amannn/action-semantic-pull-request@v5.5.3
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            chore
+          requireScope: false
+          disallowScopes: |
+            .+
+          subjectPattern: '^bump .+$'
+          subjectPatternError: |
+            Bot release bump PR titles must use: chore: bump <plugin> to <tag>
+            Scopes are not permitted. This no-issue exception is only for github-actions[bot] bot/bump-* PRs.
+```
+
+- [ ] **Step 3: Restore normal PR body closing-keyword enforcement**
+
+The PR body job should reject non-bot-bump PRs without a closing keyword and allow only `github-actions[bot]` `bot/bump-*` PRs to omit one:
+
+```bash
+          if printf '%s' "$sanitized" | grep -qiE \
+            '(^|[^A-Za-z])(close[sd]?|fix(e[sd])?|resolve[sd]?)[ \t]+([A-Za-z0-9._-]+/[A-Za-z0-9._-]+)?#[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
+            echo "Closing keyword found."
+            exit 0
+          fi
+          if [ "$PR_USER" = "github-actions[bot]" ]; then
+            case "$PR_HEAD_REF" in
+              bot/bump-*)
+                echo "No closing keyword found; allowed for bot-generated release bump PR."
+                exit 0
+                ;;
+            esac
+          fi
+          echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
+          exit 1
+```
+
+- [ ] **Step 4: Verify workflow syntax**
 
 Run:
 
@@ -210,18 +252,18 @@ actionlint .github/workflows/lint-pr.yml .github/workflows/plugin-release-bump.y
 
 Expected: command exits 0.
 
-- [ ] **Step 9: Commit Task 2**
+- [ ] **Step 5: Commit Task 3**
 
 Run:
 
 ```bash
-git add commitlint.config.js commitizen.config.js .github/workflows/lint-pr.yml
-git commit -m "ci: #26 make issue references optional"
+git add .github/workflows/lint-pr.yml
+git commit -m "ci: #26 limit issue exception to bot bumps"
 ```
 
 Expected: commit succeeds.
 
-## Task 3: Align Contributor Docs and Templates
+## Task 4: Align Documentation With Narrow Exception
 
 **Files:**
 
@@ -230,96 +272,54 @@ Expected: commit succeeds.
 - Modify: `CONTRIBUTING.md`
 - Modify: `docs/release-flow.md`
 
-- [ ] **Step 1: Update the PR template title examples**
+- [ ] **Step 1: Restore human PR title examples**
 
-In `.github/pull_request_template.md`, make the opening title guidance read:
+In `.github/pull_request_template.md`, use:
 
 ```markdown
-PR title rule for squash merges: use conventional-commit format for the PR title so the squash commit can be reused unchanged. Issue IDs are optional.
-
-`type: short description`
+`type: #123 short description`
 
 Examples:
 
-- `docs: add bootstrap skill guide`
-- `chore: bootstrap commit hooks`
+- `docs: #12 add bootstrap skill guide`
+- `chore: #34 bootstrap commit hooks`
+
+Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 ```
 
-Leave the `## Linked issue` section present and optional with its existing `Omit this section when no issue applies` guidance.
+- [ ] **Step 2: Restore AGENTS.md and CONTRIBUTING.md human issue guidance**
 
-- [ ] **Step 2: Update AGENTS.md commit and PR guidance**
-
-In `AGENTS.md`, update the commit command description and commit/PR examples to:
+Both docs must state that human commits and PR titles require issue tags, and both must mention the only exception:
 
 ```markdown
-- `pnpm commit`: create a guided conventional commit
+Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 ```
+
+- [ ] **Step 3: Document bot bump exception in release flow**
+
+In `docs/release-flow.md`, document that automated release bumps use:
 
 ```markdown
-Commits must use conventional commit types with no scopes. GitHub issue tags are optional:
-
-`type: short description`
-
-Examples:
-
-- `chore: bootstrap marketplace repo`
-- `feat: add superteam marketplace entry`
-
-For squash-and-merge workflows, PR titles must match the commitlint commit format:
-
-`type: short description`
+`chore: bump <plugin> to <tag>`
 ```
 
-- [ ] **Step 3: Update CONTRIBUTING.md commit and PR guidance**
-
-In `CONTRIBUTING.md`, update the commit section to:
-
-````markdown
-Commits must follow Conventional Commits with no scope. GitHub issue tags are optional:
-
-```text
-type: short description
-```
-
-Examples:
-
-- `feat: add a feature`
-- `docs: clarify install steps`
-
-The `commit-msg` hook enforces the conventional-commit format. PR titles follow the same format so the squash commit can be reused verbatim.
-````
-
-Also update the PR bullet to:
+and that manual bumps use:
 
 ```markdown
-- Include an `Acceptance Criteria` section when a linked issue defines ACs.
+`chore: #<issue> bump <plugin> to <tag>`
 ```
 
-- [ ] **Step 4: Update release-flow examples**
-
-In `docs/release-flow.md`, update the automated and manual bump examples to:
-
-```markdown
-opens a bump PR titled `chore: bump <plugin> to <tag>`
-```
-
-and:
-
-```markdown
-then open a PR with `chore: bump <plugin> to <tag>`.
-```
-
-- [ ] **Step 5: Verify removed-policy text is gone from active docs and workflows**
+- [ ] **Step 4: Verify active policy text**
 
 Run:
 
 ```bash
-rg -n "Closes the marketplace side|#12 bump|PR title subject must start|must contain a GitHub closing|isTicketNumberRequired: true|ticket-required|feat!: #123" .github AGENTS.md CONTRIBUTING.md docs/release-flow.md commitlint.config.js commitizen.config.js
+rg -n "Issue IDs are optional|GitHub issue tags are optional|No closing keyword found; linked issues are optional|subjectPattern: '\\^\\.\\+\\$'|isTicketNumberRequired: false" .github AGENTS.md CONTRIBUTING.md docs/release-flow.md commitlint.config.js commitizen.config.js
 ```
 
-Expected: command exits with no matches in the active policy surface. Historical design and plan docs are intentionally excluded because they may quote old policy text as context.
+Expected: command exits with no matches.
 
-- [ ] **Step 6: Verify Markdown formatting**
+- [ ] **Step 5: Verify Markdown formatting**
 
 Run:
 
@@ -329,24 +329,24 @@ pnpm lint:md
 
 Expected: command exits 0.
 
-- [ ] **Step 7: Commit Task 3**
+- [ ] **Step 6: Commit Task 4**
 
 Run:
 
 ```bash
 git add .github/pull_request_template.md AGENTS.md CONTRIBUTING.md docs/release-flow.md
-git commit -m "docs: #26 document optional issue references"
+git commit -m "docs: #26 document bot bump issue exception"
 ```
 
 Expected: commit succeeds.
 
-## Task 4: Final Verification
+## Task 5: Final Verification
 
 **Files:**
 
-- Read: all files changed in Tasks 1-3.
+- Read: all files changed in Tasks 1-4.
 
-- [ ] **Step 1: Run all verification commands together**
+- [ ] **Step 1: Run all verification commands**
 
 Run:
 
@@ -357,9 +357,10 @@ printf 'chore: #26 bump bootstrap to v1.2.3\n' >/tmp/skills-commit-msg-with-issu
 pnpm exec commitlint --edit /tmp/skills-commit-msg-with-issue
 pnpm lint:md
 actionlint .github/workflows/lint-pr.yml .github/workflows/plugin-release-bump.yml
+rg -n "Issue IDs are optional|GitHub issue tags are optional|No closing keyword found; linked issues are optional|subjectPattern: '\\^\\.\\+\\$'|isTicketNumberRequired: false" .github AGENTS.md CONTRIBUTING.md docs/release-flow.md commitlint.config.js commitizen.config.js
 ```
 
-Expected: every command exits 0.
+Expected: no-issue commitlint exits non-zero, issue-tagged commitlint exits 0, lint commands exit 0, and the final `rg` exits with no matches.
 
 - [ ] **Step 2: Inspect final diff for scope**
 
@@ -370,21 +371,10 @@ git diff origin/main...HEAD --stat
 git diff origin/main...HEAD -- .github/workflows/plugin-release-bump.yml .github/workflows/lint-pr.yml commitlint.config.js commitizen.config.js .github/pull_request_template.md AGENTS.md CONTRIBUTING.md docs/release-flow.md
 ```
 
-Expected: diff only changes issue-reference policy, release PR generated text, and related docs/templates.
-
-- [ ] **Step 3: Commit any final verification-only fixes**
-
-If Task 4 discovers formatting or wording fixes, commit them:
-
-```bash
-git add .github/workflows/plugin-release-bump.yml .github/workflows/lint-pr.yml commitlint.config.js commitizen.config.js .github/pull_request_template.md AGENTS.md CONTRIBUTING.md docs/release-flow.md
-git commit -m "chore: #26 finalize optional issue reference policy"
-```
-
-Expected: no commit is needed if Tasks 1-3 were clean.
+Expected: release bump output remains no-issue, and all human-facing policy remains issue-required except the documented bot bump exception.
 
 ## Self-Review
 
-- Spec coverage: Tasks 1-3 cover AC-26-1 through AC-26-5. Task 4 repeats the verification evidence for the Executor handoff.
-- Placeholder scan: the plan uses `<plugin>` and `<tag>` only as literal release-flow documentation examples that must appear in the target docs.
+- Spec coverage: Tasks 1-4 cover AC-26-1 through AC-26-5.
+- Placeholder scan: `<plugin>`, `<tag>`, and `#<issue>` are literal documented examples in release-flow and title guidance.
 - Scope check: the plan does not touch marketplace manifests, release dispatch behavior, dependency installation, or label policy.
