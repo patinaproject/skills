@@ -4,6 +4,13 @@ Generated automatically by [release-please](https://github.com/googleapis/releas
 
 User-facing changelog blocks for each milestone are rendered by the `/github-flows:write-changelog` skill and inserted under the `## [Unreleased]` heading. Released blocks below `## [Unreleased]` are owned by Release Please.
 
+## [1.1.0](https://github.com/patinaproject/github-flows/compare/v1.0.1...v1.1.0) (2026-04-27)
+
+
+### Features
+
+* [#15](https://github.com/patinaproject/github-flows/issues/15) add using-github guide ([#16](https://github.com/patinaproject/github-flows/issues/16)) ([fdbf3e2](https://github.com/patinaproject/github-flows/commit/fdbf3e295344eb8ca4d2313c65d3105f5caee73f))
+
 ## [1.0.1](https://github.com/patinaproject/github-flows/compare/v1.0.0...v1.0.1) (2026-04-26)
 
 
