@@ -12,7 +12,6 @@ jobs:
   title-format:
     name: Validate PR title
     runs-on: ubuntu-latest
-    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Enforce ASCII-only title
         env:
@@ -51,8 +50,6 @@ jobs:
               feat: #123 add boot timeline
               fix: #456 restore search
             Scopes are not permitted. See AGENTS.md for conventions.
-          ignoreLabels: |
-            dependencies
 
       - name: Validate bot release bump title
         if: "${{ github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
@@ -74,7 +71,6 @@ jobs:
   linked-issue:
     name: Require linked issue
     runs-on: ubuntu-latest
-    if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Check for closing keyword in PR body
         env:
@@ -115,7 +111,6 @@ jobs:
   mark-breaking-change:
     name: Mark breaking change
     runs-on: ubuntu-latest
-    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Compare title `!` with body BREAKING CHANGE footer
         env:
