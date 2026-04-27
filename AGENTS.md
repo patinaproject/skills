@@ -34,10 +34,9 @@ Format acceptance criteria IDs as `AC-<issue-number>-<integer>`, for example `AC
 
 ## GitHub Workflow Skill
 
-When GitHub work is requested, start from `/github-flows:using-github`.
+When GitHub work is requested, start from `/using-github`.
 It is the central behavior guide for this repository's GitHub conventions and
-routes task-specific work to `new-issue`, `edit-issue`, `new-branch`, and
-`write-changelog`.
+owns issue, branch, PR, and changelog workflows from the single remaining skill.
 
 ## Coding Style & Naming Conventions
 

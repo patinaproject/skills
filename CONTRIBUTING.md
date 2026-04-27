@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to `github-flows`. Start here for repo rules; everything else lives in [`AGENTS.md`](./AGENTS.md).
+Thanks for contributing to `using-github`. Start here for repo rules; everything else lives in [`AGENTS.md`](./AGENTS.md).
 
 ## Setup
 

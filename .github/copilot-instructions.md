@@ -2,9 +2,9 @@
 
 This repository follows the conventions documented in [`AGENTS.md`](../AGENTS.md). Copilot should prefer guidance from that file for workflow, commit message, and file-layout rules.
 
-For GitHub work, start from `/github-flows:using-github`. It is the central
-behavior guide and routes task-specific work to `new-issue`, `edit-issue`,
-`new-branch`, and `write-changelog`.
+For GitHub work, start from `/using-github`. It is the central behavior guide
+and owns issue, branch, PR, and changelog workflows from the single remaining
+skill.
 
 Highlights:
 

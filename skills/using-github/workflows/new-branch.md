@@ -1,10 +1,10 @@
-# /github-flows:new-branch Workflow
+# issue branch procedure Workflow
 
 **Goal:** From a GitHub issue reference, prepare a clean working branch and ready
 its dependencies — replacing the manual `fetch / checkout -b / rebase / install`
 dance with a single, reproducible procedure.
 
-`/github-flows:new-branch` only operates on the current working directory's
+`issue branch procedure` only operates on the current working directory's
 default `gh` repository.
 
 ---
@@ -194,7 +194,7 @@ If Step 6 was skipped, print `Install: skipped (no lockfile, no package.json)`
 in the install line instead.
 
 Stop after the report. Do not push the branch, open a PR, or run any further
-commands — those are out of scope for `/github-flows:new-branch`.
+commands — those are out of scope for `issue branch procedure`.
 
 ---
 
@@ -210,7 +210,7 @@ Stop and do NOT create or switch branches if:
 4. `gh repo view` cannot resolve the default branch (Step 4).
 5. The user requested operating against a different repository (cross-repo
    `-R other/repo`):
-   > "`/github-flows:new-branch` only operates on the current working
+   > "`issue branch procedure` only operates on the current working
    > directory's default `gh` repository. To branch in another repo, `cd` into
    > that worktree first."
 6. `git rebase` reports conflicts (Step 5) — surface the conflict and stop;

@@ -1,4 +1,0 @@
-interface:
-  display_name: "New Branch"
-  short_description: "Create an issue branch from the default branch"
-  default_prompt: "Use $new-branch to resolve a GitHub issue, create the matching issue branch, rebase it on the default branch, and install dependencies."

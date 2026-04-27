@@ -1,4 +1,4 @@
-# /github-flows:edit-issue Workflow
+# issue edit procedure Workflow
 
 **Goal:** Edit an existing GitHub issue in the current repository, routing each
 field to the right API (REST via `gh issue edit`; GraphQL for relationships,
@@ -44,7 +44,7 @@ Store the result as `$repo` (with `$owner`, `$name`) and `$visibility`.
 as `owner/repo#N` with `owner/repo` not equal to `$repo`, refuse with the
 verbatim message:
 
-> `` `/github-flows:edit-issue` only edits issues in the current working directory's default `gh` repository. To edit in another repo, use `gh issue edit -R <other/repo>` directly. ``
+> `` `issue edit procedure` only edits issues in the current working directory's default `gh` repository. To edit in another repo, use `gh issue edit -R <other/repo>` directly. ``
 
 **Resolve the issue.** Accept any of: `123`, `#123`, or a full
 `https://github.com/<owner>/<repo>/issues/123` URL. Extract the number as `$N`.
@@ -422,7 +422,7 @@ Stop and do NOT mutate if:
    where `owner/repo` is not the resolved repo — emit the verbatim cross-repo
    refusal message:
 
-   > `` `/github-flows:edit-issue` only edits issues in the current working directory's default `gh` repository. To edit in another repo, use `gh issue edit -R <other/repo>` directly. ``
+   > `` `issue edit procedure` only edits issues in the current working directory's default `gh` repository. To edit in another repo, use `gh issue edit -R <other/repo>` directly. ``
 
 2. `gh repo view` returned non-zero or malformed output — emit the repo
    resolution failure message from Step 1.

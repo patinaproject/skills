@@ -1,27 +1,19 @@
-# github-flows
+# using-github
 
-Slash-command skills that let coding agents file issues, start branches, edit issues, and write changelogs in any GitHub repo.
+One GitHub workflow skill for coding agents: file issues, edit issues, start
+branches, write changelogs, and prepare pull requests from repository rules.
 
-[![CI](https://github.com/patinaproject/github-flows/actions/workflows/lint-md.yml/badge.svg)](https://github.com/patinaproject/github-flows/actions/workflows/lint-md.yml)
-[![Latest release](https://img.shields.io/github/v/release/patinaproject/github-flows)](https://github.com/patinaproject/github-flows/releases)
-[![License](https://img.shields.io/github/license/patinaproject/github-flows)](./LICENSE)
+[![CI](https://github.com/patinaproject/using-github/actions/workflows/lint-md.yml/badge.svg)](https://github.com/patinaproject/using-github/actions/workflows/lint-md.yml)
+[![Latest release](https://img.shields.io/github/v/release/patinaproject/using-github)](https://github.com/patinaproject/using-github/releases)
+[![License](https://img.shields.io/github/license/patinaproject/using-github)](./LICENSE)
 
-<!-- Hero asset: replace this comment with an <img src="docs/assets/hero.png" alt="github-flows new-issue running in Claude Code" /> tag once docs/assets/hero.png lands. Tracked as a follow-up. -->
+<!-- Hero asset: replace this comment with an <img src="docs/assets/hero.png" alt="using-github running in Claude Code" /> tag once docs/assets/hero.png lands. Tracked as a follow-up. -->
 
 ## What you get
 
-- **`/using-github`** — Start here for GitHub work. It reads repository rules
-  and routes issue, branch, PR, and changelog tasks to the right workflow.
-- **`/new-issue`** — File a new GitHub issue with smart label selection,
-  duplicate detection, and a public-repo leak guard.
-- **`/edit-issue`** — Edit an existing issue's title, body, labels, assignees,
-  milestone, state, close reason, or relationships, preferring GraphQL where
-  REST falls short.
-- **`/new-branch`** — Start work on an issue: branch from the default branch as
-  `<issue-number>-<kebab-title>`, rebase, and install dependencies via the
-  highest-priority lockfile.
-- **`/write-changelog`** — Render a user-facing changelog from a GitHub
-  milestone, sourced from closed issues and their merging PRs.
+- **`/using-github`** — The single supported entry point for GitHub work. It
+  reads repository rules and applies the issue, branch, PR, and changelog
+  workflows from one skill.
 
 ## Quick start
 
@@ -36,7 +28,7 @@ Get from zero to a real invocation in under a minute (assumes [Claude Code](http
 2. Install the plugin:
 
    ```text
-   /plugin install github-flows@patinaproject-skills
+   /plugin install using-github@patinaproject-skills
    ```
 
 3. Invoke the GitHub behavior guide from a target repository:
@@ -49,15 +41,29 @@ Get from zero to a real invocation in under a minute (assumes [Claude Code](http
    Create a new branch then fix.
    ```
 
-The guide points the agent to the correct workflow for filing issues, starting
-branches, editing issues, writing changelogs, and preparing public-safe PRs.
+The guide applies the correct workflow for filing issues, starting branches,
+editing issues, writing changelogs, and preparing public-safe PRs.
+
+## Breaking change
+
+`using-github` replaces the former `github-flows` plugin identity. Direct
+invocations of the specialized `new-issue`, `edit-issue`, `new-branch`, and
+`write-changelog` skills are removed. Invoke `using-github` instead; it now owns
+those workflows from the single remaining skill.
+
+GitHub redirects old `patinaproject/github-flows` repository URLs after the
+rename, but existing local checkouts should update their remotes:
+
+```bash
+git remote set-url origin git@github.com:patinaproject/using-github.git
+```
 
 ## Install in another editor
 
 <details>
 <summary>Show install steps for Cursor, Windsurf, Copilot, Codex, and others</summary>
 
-`github-flows` ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files this plugin emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly — those tools require no additional plugin install. Pick the section for your tool.
+`using-github` ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files this plugin emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly — those tools require no additional plugin install. Pick the section for your tool.
 
 ### Claude Code
 
@@ -70,7 +76,7 @@ branches, editing issues, writing changelogs, and preparing public-safe PRs.
 2. Install the plugin:
 
    ```text
-   /plugin install github-flows@patinaproject-skills
+   /plugin install using-github@patinaproject-skills
    ```
 
 3. Open a target repository (or an issue in one) in Claude Code and invoke:
@@ -91,12 +97,12 @@ branches, editing issues, writing changelogs, and preparing public-safe PRs.
    codex plugin marketplace add patinaproject/skills
    ```
 
-2. Install the plugin: run `codex` to start a session, type `/plugins` to open the plugin browser, find `github-flows` under the `patinaproject/skills` marketplace, and select **Install plugin**.
+2. Install the plugin: run `codex` to start a session, type `/plugins` to open the plugin browser, find `using-github` under the `patinaproject/skills` marketplace, and select **Install plugin**.
 
 3. Invoke from the target repository:
 
    ```text
-   [$github-flows:using-github]
+   [$using-github:using-github]
 
    New issue: the homepage CTA button is broken.
 
@@ -105,12 +111,12 @@ branches, editing issues, writing changelogs, and preparing public-safe PRs.
 
 ### OpenAI Codex App
 
-1. Install or enable the `github-flows` plugin from your Codex plugin source.
+1. Install or enable the `using-github` plugin from your Codex plugin source.
 2. Open the target repository in the app.
 3. Invoke:
 
    ```text
-   [$github-flows:using-github]
+   [$using-github:using-github]
 
    New issue: the homepage CTA button is broken.
 
@@ -122,23 +128,23 @@ branches, editing issues, writing changelogs, and preparing public-safe PRs.
 No plugin install required. This repo ships `.github/copilot-instructions.md`, which Copilot Chat reads automatically when the repo is open in your editor.
 
 1. Clone the repo and open it.
-2. Invoke `github-flows` from Copilot Chat:
+2. Invoke `using-github` from Copilot Chat:
 
    ```text
-   @workspace Use the github-flows using-github skill for the workflow described above.
+   @workspace Use the using-github skill for the workflow described above.
    ```
 
 Personal Copilot preferences belong in your user-scoped Copilot settings, not in the emitted `.github/copilot-instructions.md`.
 
 ### Cursor
 
-No plugin install required. This repo ships `.cursor/rules/github-flows.mdc`, which Cursor loads as a project rule whenever the repo is open.
+No plugin install required. This repo ships `.cursor/rules/using-github.mdc`, which Cursor loads as a project rule whenever the repo is open.
 
 1. Clone the repo and open it in Cursor.
-2. Ask the Cursor agent to apply `github-flows`:
+2. Ask the Cursor agent to apply `using-github`:
 
    ```text
-   Use the github-flows using-github skill for the workflow described above.
+   Use the using-github skill for the workflow described above.
    ```
 
 Personal Cursor rules belong in your user-scoped Cursor settings, not in the emitted `.cursor/rules/`.
@@ -148,10 +154,10 @@ Personal Cursor rules belong in your user-scoped Cursor settings, not in the emi
 No plugin install required. This repo ships `.windsurfrules`, which Windsurf reads natively when the repo is open.
 
 1. Clone the repo and open it in Windsurf.
-2. Ask Cascade to apply `github-flows`:
+2. Ask Cascade to apply `using-github`:
 
    ```text
-   Use the github-flows using-github skill for the workflow described above.
+   Use the using-github skill for the workflow described above.
    ```
 
 ### Aider
@@ -159,32 +165,32 @@ No plugin install required. This repo ships `.windsurfrules`, which Windsurf rea
 No plugin install required. Aider reads `AGENTS.md` natively.
 
 1. Clone the repo.
-2. Run `aider` from inside the repo and ask it to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
+2. Run `aider` from inside the repo and ask it to apply the `using-github` workflow described in `AGENTS.md`.
 
 ### Zed
 
 No plugin install required. Zed's assistant reads `AGENTS.md` natively.
 
 1. Clone the repo and open it in Zed.
-2. Ask the assistant to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
+2. Ask the assistant to apply the `using-github` workflow described in `AGENTS.md`.
 
 ### Cline
 
 No plugin install required. Cline reads `AGENTS.md` natively when the repo is open in VS Code.
 
 1. Clone the repo and open it in VS Code with the Cline extension active.
-2. Ask Cline to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
+2. Ask Cline to apply the `using-github` workflow described in `AGENTS.md`.
 
 ### Opencode
 
 No plugin install required. Opencode reads `AGENTS.md` natively.
 
 1. Clone the repo and open it in Opencode.
-2. Ask Opencode to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
+2. Ask Opencode to apply the `using-github` workflow described in `AGENTS.md`.
 
 ### Continue.dev
 
-Continue.dev support is opt-in. Add the following entry to your `.continue/config.json` (project-scoped or user-scoped) so Continue picks up the `github-flows` context:
+Continue.dev support is opt-in. Add the following entry to your `.continue/config.json` (project-scoped or user-scoped) so Continue picks up the `using-github` context:
 
 ```jsonc
 {
@@ -199,7 +205,7 @@ Continue.dev support is opt-in. Add the following entry to your `.continue/confi
 }
 ```
 
-Then ask Continue to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
+Then ask Continue to apply the `using-github` workflow described in `AGENTS.md`.
 
 </details>
 

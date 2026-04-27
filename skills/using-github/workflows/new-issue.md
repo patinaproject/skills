@@ -1,4 +1,4 @@
-# /github-flows:new-issue Workflow
+# new issue procedure Workflow
 
 **Goal:** Create a well-structured GitHub issue using
 `docs/issue-filing-style.md` as the single source of truth for issue-filing
@@ -396,7 +396,7 @@ together. After any revision, re-run the Step 7 leak guard.
 
 If the user asks to create the issue in a different repository, refuse:
 
-> `` `/github-flows:new-issue` only creates issues in the current working directory's default `gh` repository. To create in another repo, use `gh issue create -R <other/repo>` directly. ``
+> `` `new issue procedure` only creates issues in the current working directory's default `gh` repository. To create in another repo, use `gh issue create -R <other/repo>` directly. ``
 
 ---
 
@@ -408,13 +408,13 @@ Before calling `gh issue create`, perform these checks in order:
 current working directory's `gh` default. If a user attempts to pass
 `-R other/repo`, refuse with:
 
-> `` `/github-flows:new-issue` only creates issues in the current working directory's default `gh` repository. To create in another repo, use `gh issue create -R <other/repo>` directly. ``
+> `` `new issue procedure` only creates issues in the current working directory's default `gh` repository. To create in another repo, use `gh issue create -R <other/repo>` directly. ``
 
 **Dependabot-reserved label check:** If the user somehow selected `javascript`
 or `github_actions` (e.g., typed it manually), refuse immediately:
 
 > "`{label}` is a Dependabot-only label — not available via
-> `/github-flows:new-issue`. Pick a different label or proceed with none."
+> `new issue procedure`. Pick a different label or proceed with none."
 
 **Remote label existence check:** If any labels were chosen, reuse the Step 1
 remote label inventory. If the inventory needs refreshing, run:
@@ -587,7 +587,7 @@ Stop and do NOT call `gh issue create` if:
 
 1. User requested creation in a different repository (cross-repo attempt) —
    emit:
-   `` `/github-flows:new-issue` only creates issues in the current working directory's default `gh` repository. To create in another repo, use `gh issue create -R <other/repo>` directly. ``
+   `` `new issue procedure` only creates issues in the current working directory's default `gh` repository. To create in another repo, use `gh issue create -R <other/repo>` directly. ``
 2. User selected a Dependabot-reserved label (`javascript` or
    `github_actions`) — emit the Dependabot-only refusal from Step 8.
 3. `gh repo view` returned a non-zero exit code or malformed output — emit

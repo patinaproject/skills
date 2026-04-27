@@ -1,4 +1,0 @@
-interface:
-  display_name: "New Issue"
-  short_description: "File a structured GitHub issue"
-  default_prompt: "Use $new-issue to draft, validate, and file a new GitHub issue with labels, duplicate checks, and public-repo leak protection."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Write Changelog"
-  short_description: "Render release notes from a milestone"
-  default_prompt: "Use $write-changelog to render a user-facing changelog block from a GitHub milestone and its merged pull requests."

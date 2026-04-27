@@ -1,14 +1,14 @@
 {
-  "name": "github-flows",
+  "name": "using-github",
   "version": "1.1.0",
-  "description": "Let agents use GitHub more ergonomically",
+  "description": "Composable skill that lets agents use GitHub ergonomically",
   "author": {
     "name": "Ted Mader",
     "email": "ted@patinaproject.com",
     "url": "https://github.com/tlmader"
   },
-  "homepage": "https://github.com/patinaproject/github-flows",
-  "repository": "https://github.com/patinaproject/github-flows",
+  "homepage": "https://github.com/patinaproject/using-github",
+  "repository": "https://github.com/patinaproject/using-github",
   "license": "MIT",
   "keywords": [
     "codex",
@@ -17,18 +17,18 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "github-flows",
-    "shortDescription": "Let agents use GitHub more ergonomically",
-    "longDescription": "Let agents use GitHub more ergonomically",
+    "displayName": "using-github",
+    "shortDescription": "Composable skill that lets agents use GitHub ergonomically",
+    "longDescription": "Composable skill that lets agents use GitHub ergonomically",
     "developerName": "Ted Mader",
     "category": "Productivity",
     "capabilities": [
       "Write",
       "Interactive"
     ],
-    "websiteURL": "https://github.com/patinaproject/github-flows",
-    "privacyPolicyURL": "https://github.com/patinaproject/github-flows",
-    "termsOfServiceURL": "https://github.com/patinaproject/github-flows",
+    "websiteURL": "https://github.com/patinaproject/using-github",
+    "privacyPolicyURL": "https://github.com/patinaproject/using-github",
+    "termsOfServiceURL": "https://github.com/patinaproject/using-github",
     "defaultPrompt": [
       "Use $using-github for the workflow described in this plugin's README."
     ],

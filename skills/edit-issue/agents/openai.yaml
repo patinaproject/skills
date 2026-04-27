@@ -1,4 +1,0 @@
-interface:
-  display_name: "Edit Issue"
-  short_description: "Edit GitHub issue fields and relationships"
-  default_prompt: "Use $edit-issue to update an existing GitHub issue with validated fields, labels, milestone, state, close reason, or relationships."

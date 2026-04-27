@@ -1,4 +1,4 @@
-# /github-flows:write-changelog Workflow
+# changelog procedure Workflow
 
 **Goal:** Render a user-facing changelog block for a GitHub milestone, sourced
 from the merging PRs of that milestone's closed issues. Output is plain
@@ -9,7 +9,7 @@ live), or — with `--write` — inserted under the `## [Unreleased]` anchor in
 **Inspiration.** This skill adopts the filtering rules, friendly bucket names
 (`New` / `Improved` / `Fixed`), translation rules, and omit-empty-section
 output from the `patinaproject/patinaproject` `/changelog-generator` skill.
-The source of truth diverges: `/github-flows:write-changelog` walks **GitHub
+The source of truth diverges: `changelog procedure` walks **GitHub
 milestones + merging PRs** rather than raw `git log`, which matches the
 release-please flow used by this repo.
 
@@ -315,7 +315,7 @@ Stop and do NOT render or write changelog output if:
    targeted a different repository than the current working directory's `gh`
    default. Refuse with:
 
-   > `` `/github-flows:write-changelog` only renders changelogs for the current working directory's default `gh` repository. To render for another repo, `cd` into a checkout of that repo and re-run. ``
+   > `` `changelog procedure` only renders changelogs for the current working directory's default `gh` repository. To render for another repo, `cd` into a checkout of that repo and re-run. ``
 
 2. **Milestone not found.** No milestone in `$repo` matches the supplied
    title or number. Refuse:

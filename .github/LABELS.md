@@ -1,6 +1,8 @@
 # Labels
 
-This file is the canonical inventory of GitHub issue and PR labels for `patinaproject/github-flows`. The `/github-flows:new-issue` and `/github-flows:edit-issue` skills read this file at runtime and never hardcode label names.
+This file is the canonical inventory of GitHub issue and PR labels for
+`patinaproject/using-github`. The `using-github` skill reads this file at
+runtime and never hardcodes label names.
 
 ## Labels
 
@@ -31,7 +33,9 @@ The `autorelease: pending` and `autorelease: tagged` labels are owned by Release
 - `autorelease: pending` is applied to the open release PR; PR-title lint is intentionally skipped while this label is present so the release PR's `chore: release v<x.y.z>` title can pass.
 - `autorelease: tagged` is applied after the release tag is cut.
 
-Never apply or remove these labels manually. The label inventory in this file describes them so the skills know they exist; the skills will refuse to attach them via `/github-flows:new-issue` or `/github-flows:edit-issue`.
+Never apply or remove these labels manually. The label inventory in this file
+describes them so the skill knows they exist; `using-github` refuses to attach
+them during issue or PR work.
 
 ## Dependabot-reserved labels
 
