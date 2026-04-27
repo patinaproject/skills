@@ -12,18 +12,18 @@ This installs dev tooling and registers the Husky hooks (`commit-msg` + `pre-com
 
 ## Commit messages
 
-Commits must follow Conventional Commits with no scope. GitHub issue tags are optional:
+Commits must follow Conventional Commits with no scope and a required GitHub issue tag:
 
 ```text
-type: short description
+type: #123 short description
 ```
 
 Examples:
 
-- `feat: add a feature`
-- `docs: clarify install steps`
+- `feat: #42 add a feature`
+- `docs: #17 clarify install steps`
 
-The `commit-msg` hook enforces the conventional-commit format. PR titles follow the same format so the squash commit can be reused verbatim.
+The `commit-msg` hook enforces this. PR titles follow the same format so the squash commit can be reused verbatim.
 
 ## Markdown
 
@@ -37,7 +37,8 @@ pnpm lint:md
 
 - Keep the PR title in commitlint format.
 - Fill in the [PR template](./.github/pull_request_template.md).
-- Include an `Acceptance Criteria` section when a linked issue defines ACs.
+- Include an `Acceptance Criteria` section when the linked issue defines ACs.
+- Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 ## Further reading
 

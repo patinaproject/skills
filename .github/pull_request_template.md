@@ -1,13 +1,15 @@
 # Pull Request
 
-PR title rule for squash merges: use conventional-commit format for the PR title so the squash commit can be reused unchanged. Issue IDs are optional.
+PR title rule for squash merges: use the exact commitlint/commitizen format for the PR title so the squash commit can be reused unchanged.
 
-`type: short description`
+`type: #123 short description`
 
 Examples:
 
-- `docs: add bootstrap skill guide`
-- `chore: bootstrap commit hooks`
+- `docs: #12 add bootstrap skill guide`
+- `chore: #34 bootstrap commit hooks`
+
+Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 This title rule applies to pull requests only. GitHub issue titles should stay plain-language and should not use conventional-commit prefixes.
 

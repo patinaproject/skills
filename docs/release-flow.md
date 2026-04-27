@@ -12,7 +12,7 @@ Current member plugins tracked by this flow:
 
 1. A member plugin repo (for example `patinaproject/superteam`) uses `release-please` on its default branch. Merging the standing Release PR tags a new semver release and publishes a GitHub Release.
 2. A workflow in that plugin repo fires a `repository_dispatch` into `patinaproject/skills` with event type `plugin-released` and payload `{ plugin, tag, repo }`.
-3. [`.github/workflows/plugin-release-bump.yml`](../.github/workflows/plugin-release-bump.yml) receives the dispatch, updates both marketplace manifests, and opens a bump PR titled `chore: bump <plugin> to <tag>`.
+3. [`.github/workflows/plugin-release-bump.yml`](../.github/workflows/plugin-release-bump.yml) receives the dispatch, updates both marketplace manifests, and opens a bot-generated bump PR titled `chore: bump <plugin> to <tag>`. These bot-generated `bot/bump-*` PRs are the only PRs that may omit an issue ID.
 4. A marketplace maintainer reviews and merges the PR. The new version becomes the one users get on install.
 
 New plugins are added by the same flow: the workflow inserts an entry if the plugin isn't already listed, so the first tagged release of a plugin is also what publishes it.
@@ -50,7 +50,7 @@ jobs:
 
 If automation is down, a maintainer can run the workflow directly via **Actions → Plugin release bump → Run workflow**, supplying `plugin` and `tag` (and optionally `repo`). The workflow produces the same PR.
 
-For a fully manual bump, edit `source.ref` for the plugin entry in both [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) and [.agents/plugins/marketplace.json](../.agents/plugins/marketplace.json), then open a PR with `chore: bump <plugin> to <tag>`.
+For a fully manual bump, edit `source.ref` for the plugin entry in both [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) and [.agents/plugins/marketplace.json](../.agents/plugins/marketplace.json), then open a PR with `chore: #<issue> bump <plugin> to <tag>`.
 
 ## Consuming bootstrap
 

@@ -20,7 +20,7 @@ For Superpowers-generated design and planning artifacts, use issue-based filenam
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install dev tooling and initialize Husky
-- `pnpm commit`: create a guided conventional commit
+- `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `sed -n '1,200p' .agents/plugins/marketplace.json`: inspect marketplace entries
@@ -82,18 +82,20 @@ The marketplace only publishes tagged (`vX.Y.Z`) plugin releases. Every plugin e
 
 ## Commit & Pull Request Guidelines
 
-Commits must use conventional commit types with no scopes. GitHub issue tags are optional:
+Commits must use conventional commit types, no scopes, and a required GitHub issue tag:
 
-`type: short description`
+`type: #123 short description`
 
 Examples:
 
-- `chore: bootstrap marketplace repo`
-- `feat: add superteam marketplace entry`
+- `chore: #1 bootstrap marketplace repo`
+- `feat: #12 add superteam marketplace entry`
 
 For squash-and-merge workflows, PR titles must match the commitlint commit format:
 
-`type: short description`
+`type: #123 short description`
+
+Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
 
