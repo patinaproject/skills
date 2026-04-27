@@ -35,7 +35,7 @@
       "source": {
         "source": "github",
         "repo": "patinaproject/github-flows",
-        "ref": "v1.0.1"
+        "ref": "v1.1.0"
       }
     }
   ]
