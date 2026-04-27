@@ -4,9 +4,9 @@ Releases are driven by [release-please](https://github.com/googleapis/release-pl
 
 ## How it works
 
-The `Release` workflow runs on every push to `main`. There is no separate UI-triggered release path. Cutting a release is the natural by-product of merging PRs:
+The `Release` workflow runs on every push to `main`. Cutting a release is the natural by-product of merging PRs:
 
-1. **Merge any PR into `main`.** The push event runs `Release`. `release-please` scans Conventional Commits since the last tag and opens, or updates, a standing **"chore: release X.Y.Z"** PR that:
+1. **Merge any PR into `main`.** The push event runs `Release`. `release-please` scans Conventional Commits since the last tag and opens — or updates — a standing **"chore: release X.Y.Z"** PR that:
 
    - Bumps `package.json` version.
    - Syncs `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to the new version (configured in `release-please-config.json`).
@@ -14,9 +14,23 @@ The `Release` workflow runs on every push to `main`. There is no separate UI-tri
 
    Release-please attaches the `autorelease: pending` label to this PR. If there are no releasable commits since the last tag, the run no-ops.
 
-2. **Merge the release PR.** Squash-merging the PR is itself a push to `main`, so `Release` runs again. release-please now sees the merged release PR (still labeled `autorelease: pending`), creates the tag `vX.Y.Z`, publishes the GitHub Release with the Conventional-Commit-derived notes, and dispatches the marketplace bump on `patinaproject/skills`. The PR's label flips to `autorelease: tagged`.
+2. **Merge the release PR.** Squash-merging the PR is itself a push to `main`, so `Release` runs again. release-please now sees the merged release PR (still labeled `autorelease: pending`), creates the tag `vX.Y.Z`, publishes the GitHub Release with the Conventional-Commit-derived notes, and (on `patinaproject` plugin repos) dispatches the marketplace bump on `patinaproject/skills`. The PR's label flips to `autorelease: tagged`.
 
-The result: every merge keeps the standing release PR fresh; merging that PR cuts the release. No `gh workflow run` step is required.
+The result: every merge keeps the standing release PR fresh; merging that PR cuts the release. No manual step is required during the normal flow.
+
+## Manual recovery dispatch
+
+Manual dispatch is an escape hatch, not the normal release path. Use it only when the latest automatic `Release` run was skipped, cancelled, failed for transient reasons, or needs to be retried after permissions or repository settings were fixed.
+
+Start the same workflow from the GitHub Actions UI, or run:
+
+```bash
+gh workflow run Release
+```
+
+The manual run performs the same release-please evaluation as a push-triggered run. If releasable commits exist, it opens or refreshes the standing release PR. If the release PR has already been merged and the repository state calls for a release, it can cut the tag and GitHub Release. If there is nothing to release, it no-ops.
+
+Do not use manual dispatch as the ordinary release process. Do not perform manual version bumps or local release commands.
 
 ## Prerequisites (one-time settings)
 
@@ -107,11 +121,14 @@ When enabled, GitHub refuses to run workflows that `uses:` an action by tag or b
 
 ## Semver decision
 
-Determined from commit types — no human choice:
+Determined from releasable Conventional Commit types — no human choice:
 
 - `fix:` → patch
 - `feat:` → minor
-- `feat!:` or `BREAKING CHANGE:` footer → major
+- `<type>!:` or `BREAKING CHANGE:` footer → major
+- `docs:`, `chore:`, and other non-releasable types → no version bump under this baseline
+
+If a change should produce a release, do not use a non-bumping type. For example, a Markdown-only edit to `skills/**/SKILL.md` that changes installed skill behavior should use `feat:` or `fix:`, not `docs:`.
 
 ## Keeping versions aligned between releases
 
@@ -146,5 +163,6 @@ If either secret is missing on a `patinaproject` plugin repo, the `Mint patina-p
 ## Writing commits for a clean changelog
 
 - Use Conventional Commits: `feat: #<issue> …`, `fix: #<issue> …`, etc.
+- Choose release-triggering types for product changes. Release Please can no-op when product changes are misclassified as `docs:` or `chore:`, which can skip downstream marketplace bump automation.
 - Breaking changes: prefix the type with `!` (e.g. `feat!: #123 rename foo to bar`) **and** include a `BREAKING CHANGE: …` footer in the PR body.
 - Squash-merge flow: PR titles must themselves be conventional-commit-shaped so the squash commit lands with the correct type/scope. Enforced by the `Lint PR` workflow.

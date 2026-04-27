@@ -18,6 +18,8 @@ predictable.
 - Keep GitHub repository settings checks explicit and evidence-backed.
 - Validate all Markdown and plugin-version checks before publish.
 - Use acceptance criteria IDs in the `AC-47-<n>` format.
+- Apply bootstrap `1.3.0` release-flow guidance as the current baseline,
+  including manual recovery dispatch and product-impact commit type guidance.
 
 ## Baseline Findings
 
@@ -41,6 +43,10 @@ Verified drift:
   `patinaproject/superteam@v0.1.0`, even though the repo is at `1.0.0`.
 - `.github/pull_request_template.md` references `docs/ac-traceability.md`, but
   that file is not present and `AGENTS.md` now defines AC ID format directly.
+- Follow-up drift after bootstrap `1.3.0`: the release workflow no longer
+  exposes `workflow_dispatch` as a recovery escape hatch, release docs do not
+  describe the recovery path, and contributor docs do not explain that commit
+  types are selected by product impact rather than file extension.
 
 Verified non-drift:
 
@@ -60,15 +66,21 @@ tool-managed release subsection for `autorelease: pending` and
 `autorelease: tagged`. It should point readers back to `AGENTS.md` and
 `gh label list --json name,description` for the runtime inventory.
 
-Refresh release documentation only where it still describes a manual-dispatch
-release path. The repo should describe release-please as running on pushes to
-`main`, opening or updating the release PR after regular merges, and cutting the
-release after the release PR merge.
+Refresh release documentation to match bootstrap `1.3.0`. The repo should
+describe release-please as running on pushes to `main`, opening or updating the
+release PR after regular merges, and cutting the release after the release PR
+merge. It should also keep `workflow_dispatch` available as a manual recovery
+escape hatch and document that manual dispatch is not the ordinary release path.
 
 Refresh install and contribution guidance where it points to stale or missing
 baseline references. The README should not pin new Codex CLI installs to an old
 plugin version, and the PR template should point AC authors at the existing
 `AGENTS.md` rule rather than a missing traceability document.
+
+Refresh commit-type guidance in `AGENTS.md`, `CONTRIBUTING.md`, and `README.md`
+so product-impact changes use release-triggering commit types even when the diff
+is Markdown-only. This prevents release-please from no-oping on shipped behavior
+changes misclassified as `docs:` or `chore:`.
 
 Avoid broad template replacement. Existing repo-specific examples and
 `superteam` wording should remain unless they conflict with the baseline checks.
@@ -105,10 +117,14 @@ workflow lint CI after publication.
   have non-empty descriptions that explain the reservation.
 - **AC-47-3**: Given the release workflow runs from pushes to `main`, when a
   contributor reads `RELEASING.md` or `.github/workflows/release.yml`, then the
-  documented flow no longer depends on a manual dispatch path.
+  normal flow is push-triggered and `workflow_dispatch` is documented only as a
+  manual recovery escape hatch.
 - **AC-47-4**: Given the repo is being realigned rather than re-scaffolded, when
   contributors read install or PR guidance, then README and PR-template
   references do not point them to stale plugin versions or missing docs.
+- **AC-47-7**: Given release-please derives releases from commit types, when
+  contributors read `AGENTS.md`, `CONTRIBUTING.md`, or `README.md`, then they
+  can tell which product-impact changes require release-triggering commit types.
 - **AC-47-5**: Given the repo is being realigned rather than re-scaffolded, when
   implementation completes, then already-aligned plugin, linting, workflow, and
   agent surfaces remain intentionally preserved.
