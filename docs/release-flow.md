@@ -13,11 +13,22 @@ Current member plugins tracked by this flow:
 1. A member plugin repo (for example `patinaproject/superteam`) uses `release-please` on its default branch. Merging the standing Release PR tags a new semver release and publishes a GitHub Release.
 2. A workflow in that plugin repo fires a `repository_dispatch` into `patinaproject/skills` with event type `plugin-released` and payload `{ plugin, tag, repo }`.
 3. [`.github/workflows/plugin-release-bump.yml`](../.github/workflows/plugin-release-bump.yml) receives the dispatch, updates both marketplace manifests, and opens a bot-generated bump PR titled `chore: bump <plugin> to <tag>`. These bot-generated `bot/bump-*` PRs are the only PRs that may omit an issue ID.
-4. A marketplace maintainer reviews and merges the PR. The new version becomes the one users get on install.
+4. The workflow requests GitHub auto-merge for the trusted bump PR after it is
+   created or updated. GitHub merges it only after required checks and branch
+   protection requirements pass. The new version becomes the one users get on
+   install.
 
 New plugins are added by the same flow: the workflow inserts an entry if the plugin isn't already listed, so the first tagged release of a plugin is also what publishes it.
 
 The release-bump PR workflow enables commit signing in `peter-evans/create-pull-request`, so commits are expected to be signed and verified as `github-actions[bot]` when the workflow uses the repository's default `GITHUB_TOKEN`. Do not switch this workflow to a PAT while expecting bot signature verification; PAT-created PRs are not the supported path for this signing mode.
+
+The workflow also enables GitHub auto-merge for release-bump PRs that it creates
+or updates from `bot/bump-*` branches. This uses
+`gh pr merge --auto --squash` against the PR number returned by
+`peter-evans/create-pull-request`; it does not use admin bypass and does not
+merge unrelated PRs. If repository auto-merge is disabled, token permissions are
+insufficient, required checks fail, or the PR contains unexpected changes,
+maintainers should inspect the open PR and resolve the blocker manually.
 
 ## Required setup in each member plugin repo
 
