@@ -18,7 +18,9 @@
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\""
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\"",
+    "validate:marketplace": "node scripts/validate-marketplace.js",
+    "validate:marketplace:remote": "node scripts/validate-marketplace.js --remote"
   },
   "config": {
     "commitizen": {
