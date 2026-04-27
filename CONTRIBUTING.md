@@ -38,6 +38,7 @@ pnpm lint:md
 - Keep the PR title in commitlint format.
 - Fill in the [PR template](./.github/pull_request_template.md).
 - Include an `Acceptance Criteria` section when the linked issue defines ACs.
+- Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 ## Further reading
 

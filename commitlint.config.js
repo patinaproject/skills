@@ -28,4 +28,3 @@ module.exports = {
     "ticket-required": [2, "always"]
   }
 };
-

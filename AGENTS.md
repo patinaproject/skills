@@ -95,6 +95,8 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 
 `type: #123 short description`
 
+Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
+
 When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
 
 - Use one `### AC-<issue>-<n>` heading per relevant AC

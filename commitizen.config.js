@@ -40,4 +40,3 @@ module.exports = {
   },
   subjectLimit: 72
 };
-
