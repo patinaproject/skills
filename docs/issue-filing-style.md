@@ -1,6 +1,6 @@
 # Issue filing style
 
-This is the canonical guide for filing GitHub issues in `patinaproject/github-flows`. The `/github-flows:new-issue` skill reads this document at runtime and uses it as the single source of truth for body shape, AC format, label/milestone/relationship conventions, and the public-repo leak guard. Contributors filing issues by hand should follow the same rules.
+This is the canonical guide for filing GitHub issues in `patinaproject/github-flows`. For general GitHub work, start from `/github-flows:using-github`; it routes issue filing to `/github-flows:new-issue`. The `/github-flows:new-issue` skill reads this document at runtime and uses it as the single source of truth for body shape, AC format, label/milestone/relationship conventions, and the public-repo leak guard. Contributors filing issues by hand should follow the same rules.
 
 For the label inventory, run `gh label list --json name,description`.
 
@@ -115,5 +115,6 @@ Contributors filing issues by hand should apply the same standard. If a discussi
 
 ## Reference implementations
 
+- [`skills/using-github/SKILL.md`](../skills/using-github/SKILL.md) — the agent-facing entry point for GitHub behavior.
 - [`skills/new-issue/SKILL.md`](../skills/new-issue/SKILL.md) — the agent-facing skill that automates issue filing per this guide.
 - `patinaproject/patinaproject` `.claude/skills/new-issue/workflow.md` — the upstream reference this skill is derived from.

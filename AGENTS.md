@@ -32,6 +32,13 @@ Format acceptance criteria IDs as `AC-<issue-number>-<integer>`, for example `AC
 - `.husky/commit-msg <path>`: run commit-message validation through the active Git hook.
 - `.husky/pre-commit`: run `lint-staged`, which invokes `markdownlint-cli2` on staged `*.md`.
 
+## GitHub Workflow Skill
+
+When GitHub work is requested, start from `/github-flows:using-github`.
+It is the central behavior guide for this repository's GitHub conventions and
+routes task-specific work to `new-issue`, `edit-issue`, `new-branch`, and
+`write-changelog`.
+
 ## Coding Style & Naming Conventions
 
 Use Markdown for skill and docs content. Keep sections short, imperative, and repository-specific.

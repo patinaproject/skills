@@ -30,7 +30,7 @@
     "privacyPolicyURL": "https://github.com/patinaproject/github-flows",
     "termsOfServiceURL": "https://github.com/patinaproject/github-flows",
     "defaultPrompt": [
-      "Use $github-flows for the workflow described in this plugin's README."
+      "Use $using-github for the workflow described in this plugin's README."
     ],
     "brandColor": "#E6A77E"
   }

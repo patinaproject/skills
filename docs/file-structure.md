@@ -15,6 +15,9 @@ Contributor reference for the repository layout. For user-facing install and usa
 ## Skills
 
 Each skill lives in its own directory under `skills/` with `SKILL.md` as the main contract.
+`skills/using-github/` is the umbrella GitHub behavior skill. The other skill
+directories are specialized workflows that it routes to for issue filing,
+issue editing, branch setup, and changelog writing.
 
 ## Docs
 

@@ -10,6 +10,7 @@ Slash-command skills that let coding agents file issues, start branches, edit is
 
 ## What you get
 
+- **`/github-flows:using-github`** — Start here for GitHub work. It centers repository conventions and routes agents to the right specialized workflow.
 - **`/github-flows:new-issue`** — File a new GitHub issue with smart label selection, duplicate detection, and a public-repo leak guard.
 - **`/github-flows:edit-issue`** — Edit an existing issue's title, body, labels, assignees, milestone, state, close reason, or relationships, preferring GraphQL where REST falls short.
 - **`/github-flows:new-branch`** — Start work on an issue: branch from the default branch as `<issue-number>-<kebab-title>`, rebase, and install dependencies via the highest-priority lockfile.
@@ -31,13 +32,14 @@ Get from zero to a real invocation in under a minute (assumes [Claude Code](http
    /plugin install github-flows@patinaproject-skills
    ```
 
-3. File a real issue against this repo to confirm everything works:
+3. Invoke the GitHub behavior guide from a target repository:
 
    ```text
-   /github-flows:new-issue patinaproject/github-flows "Tried github-flows quick start"
+   /github-flows:using-github
    ```
 
-The skill drafts the issue, runs duplicate detection, and asks you to confirm before posting.
+The guide points the agent to the correct workflow for filing issues, starting
+branches, editing issues, writing changelogs, and preparing public-safe PRs.
 
 ## Install in another editor
 
@@ -63,7 +65,7 @@ The skill drafts the issue, runs duplicate detection, and asks you to confirm be
 3. Open a target repository (or an issue in one) in Claude Code and invoke:
 
    ```text
-   /github-flows:new-issue patinaproject/github-flows "Tried github-flows install steps"
+   /github-flows:using-github
    ```
 
 ### OpenAI Codex CLI
@@ -79,7 +81,7 @@ The skill drafts the issue, runs duplicate detection, and asks you to confirm be
 3. Invoke from the target repository:
 
    ```text
-   Use $github-flows for the workflow described above.
+   Use $using-github for the workflow described above.
    ```
 
 ### OpenAI Codex App
@@ -89,7 +91,7 @@ The skill drafts the issue, runs duplicate detection, and asks you to confirm be
 3. Invoke:
 
    ```text
-   Use $github-flows for the workflow described above.
+   Use $using-github for the workflow described above.
    ```
 
 ### GitHub Copilot
@@ -100,7 +102,7 @@ No plugin install required. This repo ships `.github/copilot-instructions.md`, w
 2. Invoke `github-flows` from Copilot Chat:
 
    ```text
-   @workspace Use the github-flows skill for the workflow described above.
+   @workspace Use the github-flows using-github skill for the workflow described above.
    ```
 
 Personal Copilot preferences belong in your user-scoped Copilot settings, not in the emitted `.github/copilot-instructions.md`.
@@ -113,7 +115,7 @@ No plugin install required. This repo ships `.cursor/rules/github-flows.mdc`, wh
 2. Ask the Cursor agent to apply `github-flows`:
 
    ```text
-   Use the github-flows skill for the workflow described above.
+   Use the github-flows using-github skill for the workflow described above.
    ```
 
 Personal Cursor rules belong in your user-scoped Cursor settings, not in the emitted `.cursor/rules/`.
@@ -126,7 +128,7 @@ No plugin install required. This repo ships `.windsurfrules`, which Windsurf rea
 2. Ask Cascade to apply `github-flows`:
 
    ```text
-   Use the github-flows skill for the workflow described above.
+   Use the github-flows using-github skill for the workflow described above.
    ```
 
 ### Aider
@@ -134,28 +136,28 @@ No plugin install required. This repo ships `.windsurfrules`, which Windsurf rea
 No plugin install required. Aider reads `AGENTS.md` natively.
 
 1. Clone the repo.
-2. Run `aider` from inside the repo and ask it to apply the `github-flows` workflow described in `AGENTS.md`.
+2. Run `aider` from inside the repo and ask it to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
 
 ### Zed
 
 No plugin install required. Zed's assistant reads `AGENTS.md` natively.
 
 1. Clone the repo and open it in Zed.
-2. Ask the assistant to apply the `github-flows` workflow described in `AGENTS.md`.
+2. Ask the assistant to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
 
 ### Cline
 
 No plugin install required. Cline reads `AGENTS.md` natively when the repo is open in VS Code.
 
 1. Clone the repo and open it in VS Code with the Cline extension active.
-2. Ask Cline to apply the `github-flows` workflow described in `AGENTS.md`.
+2. Ask Cline to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
 
 ### Opencode
 
 No plugin install required. Opencode reads `AGENTS.md` natively.
 
 1. Clone the repo and open it in Opencode.
-2. Ask Opencode to apply the `github-flows` workflow described in `AGENTS.md`.
+2. Ask Opencode to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
 
 ### Continue.dev
 
@@ -174,7 +176,7 @@ Continue.dev support is opt-in. Add the following entry to your `.continue/confi
 }
 ```
 
-Then ask Continue to apply the `github-flows` workflow described in `AGENTS.md`.
+Then ask Continue to apply the `github-flows` `using-github` workflow described in `AGENTS.md`.
 
 </details>
 
