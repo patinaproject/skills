@@ -22,7 +22,7 @@
       "source": {
         "source": "url",
         "url": "https://github.com/patinaproject/superteam.git",
-        "ref": "v1.2.0"
+        "ref": "v1.3.0"
       },
       "policy": {
         "installation": "AVAILABLE",
