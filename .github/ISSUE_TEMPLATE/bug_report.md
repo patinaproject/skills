@@ -5,7 +5,7 @@ title: ""
 labels: bug
 ---
 
-<!-- Title: plain-language summary (no `fix:` prefix). Labels: see .github/LABELS.md. -->
+<!-- Title: plain-language summary (no `fix:` prefix). -->
 
 ## Summary
 

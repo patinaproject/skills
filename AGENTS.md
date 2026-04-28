@@ -24,7 +24,6 @@ Covered files (any change here must round-trip through a template edit):
 - `.github/ISSUE_TEMPLATE/*`
 - `.github/pull_request_template.md`
 - `.github/copilot-instructions.md`
-- `.github/LABELS.md`
 - `RELEASING.md`
 - `README.md`
 - `AGENTS.md`
@@ -99,7 +98,7 @@ If you add executable tooling later, document the exact verification command in 
 
 ## Issue and PR labels
 
-[.github/LABELS.md](.github/LABELS.md) is the source of truth for when to apply each label. Use `gh label list` for the authoritative runtime inventory and rely on each label's `description` when picking one. Do not invent new labels without updating the repository's label set and `.github/LABELS.md` first.
+Use `gh label list` as the source of truth for the live label inventory; rely on each label's `description` when picking one. Create new labels with `gh label create` (or the GitHub UI) against the live repo — do not track labels in a Markdown file.
 
 Verify every label has a non-empty description:
 

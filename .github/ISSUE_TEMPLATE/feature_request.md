@@ -5,7 +5,7 @@ title: ""
 labels: enhancement
 ---
 
-<!-- Title: plain-language summary (no `feat:` prefix). Labels: see .github/LABELS.md. -->
+<!-- Title: plain-language summary (no `feat:` prefix). -->
 
 ## Problem
 
