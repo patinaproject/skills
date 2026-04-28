@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: Use when scaffolding a new public or private repository to the Patina Project baseline, or when realigning an existing repository with the current baseline. Emits conventions for commits, issues, and PRs, PNPM tooling, agent docs, and plugin surfaces for supported AI coding tools.
+description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, release-please, agent docs (AGENTS.md, CLAUDE.md), or AI agent plugin manifests for Claude Code, Codex, Cursor, Windsurf, and Copilot. Triggers on phrases like "bootstrap this repo", "scaffold a Patina plugin", "realign with the baseline", "audit our repo conventions", "set up commitlint and husky", or "add Codex/Cursor/Windsurf surfaces".
 ---
 
 # bootstrap
@@ -22,7 +22,7 @@ Behavior:
 
 - Emit the full [core baseline](#core-baseline) tree.
 - If the user answers yes to "Is this an AI agent plugin?", additionally emit the [agent-plugin surfaces](#agent-plugin-surfaces).
-- If the user answers yes to "Use the superteam workflow?", additionally emit the `docs/superpowers/specs/.gitkeep` + `docs/superpowers/plans/.gitkeep` scaffolding.
+- If the user answers yes to "Use the superteam workflow?" (the Superpowers-based design + plan flow), additionally emit the `docs/superpowers/specs/.gitkeep` + `docs/superpowers/plans/.gitkeep` scaffolding.
 - Run `pnpm install` to generate `pnpm-lock.yaml` and wire Husky.
 - Leave all emitted files staged but uncommitted so the user owns the first commit.
 
@@ -46,6 +46,7 @@ Behavior:
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `RELEASING.md`.
   5. AI platform surfaces: `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`.
   6. Workflows: `.github/workflows/*` (including `release.yml` with job-level `permissions:`).
+  7. Superpowers scaffolding (only when `<use-superteam>` is yes): `docs/superpowers/specs/`, `docs/superpowers/plans/`.
 
 ## Prompts
 
@@ -93,7 +94,7 @@ AGENTS.md
 CHANGELOG.md
 CLAUDE.md
 CONTRIBUTING.md
-README.md
+README.md                   (core variant; replaced by agent-plugin variant when <is-agent-plugin>=yes)
 RELEASING.md
 SECURITY.md                 (public repos only)
 commitlint.config.js
@@ -122,13 +123,13 @@ skills/.gitkeep
 
 The agent-plugin `README.md.tmpl` is richer than the core one: it includes install steps for Claude Code, Codex CLI, and Codex App, plus usage examples. The core `README.md.tmpl` is emitted only for non-plugin repos.
 
-Aider, Zed, Cline, Codex CLI, and Opencode read `AGENTS.md` natively and are covered by the core baseline — no dedicated surface needed. Continue.dev is available as an opt-in secondary editor (`.continue/config.json`).
+Aider, Zed, Cline, and Opencode read `AGENTS.md` natively and are covered by the core baseline — no dedicated surface needed. Codex CLI also reads `AGENTS.md` natively but additionally consumes `.codex-plugin/plugin.json` in agent-plugin mode. Continue.dev is available as an opt-in secondary editor (`.continue/config.json`).
 
 ### Patina Project organization supplement
 
 When the target repo's owner is `patinaproject`, the skill replaces the agent-plugin `.github/workflows/release.yml` with the supplement at `skills/bootstrap/templates/patinaproject-supplement/.github/workflows/release.yml`. The supplement adds a `notify-patinaproject-skills` job that dispatches `plugin-release-bump.yml` on `patinaproject/skills` after each release. Repos outside Patina Project get the clean base workflow without any Patina Project-specific plumbing.
 
-Detection is done at scaffold time from `git remote get-url origin` (or the configured `<owner>` prompt). The base workflow does not carry dead `if:` gates.
+Detection is done at scaffold time from `git remote get-url origin` (or the configured `<owner>` prompt). When generating the base workflow for non-Patina-Project repos, do not add `if: github.repository_owner == 'patinaproject'` gates; emit the clean workflow without any Patina-Project-specific plumbing.
 
 ## Plugin enablement
 
@@ -189,7 +190,7 @@ The skill picks the check path based on what the user has installed and whether 
 gh api "repos/<owner>/<repo>" --jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch}'
 ```
 
-**Path 2 — `curl` + public REST API (no install, no auth, public repos only):**
+**Path 2 — `curl` + public REST API (no auth, public repos only; requires `jq` for the field projection below — fall back to inspecting raw JSON if `jq` is absent):**
 
 ```bash
 curl -s "https://api.github.com/repos/<owner>/<repo>" \
