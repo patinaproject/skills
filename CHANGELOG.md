@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/patinaproject/superteam/compare/v1.2.0...v1.3.0) (2026-04-28)
+
+
+### Features
+
+* [#58](https://github.com/patinaproject/superteam/issues/58) naturalize Superteam operator output ([#61](https://github.com/patinaproject/superteam/issues/61)) ([e581346](https://github.com/patinaproject/superteam/commit/e5813467f460797ab26d8894264c39ca25ca81db))
+
+
+### Bug Fixes
+
+* [#57](https://github.com/patinaproject/superteam/issues/57) remove loopback trailer state ([#59](https://github.com/patinaproject/superteam/issues/59)) ([2a7b894](https://github.com/patinaproject/superteam/commit/2a7b894ba30a4aa42651492b79c16a090001a9a6))
+
 ## [1.2.0](https://github.com/patinaproject/superteam/compare/v1.1.0...v1.2.0) (2026-04-27)
 
 
