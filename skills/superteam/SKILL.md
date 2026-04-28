@@ -1,11 +1,35 @@
 ---
 name: superteam
 description: Use when the operator runs `/superteam` or asks to take a GitHub issue from design through implementation, review, and merged-ready PR using the canonical Team Lead, Brainstormer, Planner, Executor, Reviewer, and Finisher teammate roster. Triggers on phrases like "run superteam on #N", "take this issue through the teammate workflow", or "drive #N to PR".
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - Task
+  - TodoRead
+  - TodoWrite
 ---
 
 # superteam
 
 `superteam` is an orchestration skill for running a structured issue workflow across a canonical teammate roster. It uses repository-owned artifacts in `skills/` and `docs/` so the workflow stays portable across repositories and runtimes.
+
+## When to Use
+
+- A GitHub issue needs design, planning, implementation, review, PR publication, and publish-state follow-through.
+- An existing `superteam` issue workflow needs to resume from committed artifacts, branch state, or PR state.
+- Operator feedback, review findings, CI state, or PR comments need routing to the correct teammate.
+- Workflow-contract or skill changes need explicit gates, pressure-test evidence, and role-owned handoffs.
+
+## When NOT to Use
+
+- Simple GitHub issue or PR edits: use `using-github:using-github`.
+- Local code changes that do not need the full issue-to-PR workflow: use the relevant `superpowers` implementation or debugging skill directly.
+- One-off code review without teammate orchestration: use `superpowers:requesting-code-review` or `superpowers:receiving-code-review`.
+- General skill architecture review: use `workflow-skill-design:designing-workflow-skills`.
 
 ## Canonical roster
 
@@ -18,90 +42,7 @@ Use teammate names as the primary organizing language across the workflow:
 5. `Reviewer`: owns local pre-publish review findings
 6. `Finisher`: owns publish-state follow-through, CI, and external feedback handling
 
-The workflow may still reference brainstorm, plan, execute, review, and finish phases, but teammate names are the canonical contract language.
-
-## Workflow Diagrams
-
-The workflow diagrams should stay structurally accurate and easy to read:
-
-- use two Mermaid charts instead of trying to show chronology and orchestration in one diagram
-- use only two block types: teammates and artifacts
-- keep artifact nodes visually lighter with black text for readability
-- keep the chronological chart simple and forward-moving
-- keep the orchestration chart top-to-bottom and make `Team Lead` the routing hub for human feedback
-
-Chronological flow:
-
-```mermaid
-flowchart TD
-    issue["Issue"]:::artifact
-    lead["Team Lead"]
-    brainstormer["Brainstormer"]
-    design["Design Doc"]:::artifact
-    planner["Planner"]
-    plan["Plan Doc"]:::artifact
-    executor["Executor"]
-    implementation["Implementation & Tests"]:::artifact
-    reviewer["Reviewer"]
-    finisher["Finisher"]
-    pr["Pull Request"]:::artifact
-    human["Human Test & Review"]
-
-    issue --> lead
-    lead --> brainstormer
-    brainstormer --> design
-    design --> planner
-    planner --> plan
-    plan --> executor
-    executor --> implementation
-    implementation --> reviewer
-    reviewer --> finisher
-    finisher --> pr
-    pr --> human
-
-    classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
-```
-
-Orchestration flow:
-
-```mermaid
-flowchart TD
-    issue["Issue"]:::artifact
-    lead["Team Lead"]
-    brainstormer["Brainstormer"]
-    design["Design Doc"]:::artifact
-    planner["Planner"]
-    plan["Plan Doc"]:::artifact
-    executor["Executor"]
-    implementation["Implementation & Tests"]:::artifact
-    reviewer["Reviewer"]
-    finisher["Finisher"]
-    pr["Pull Request"]:::artifact
-    human["Human Test & Review"]
-
-    issue --> lead
-    lead --> brainstormer
-    brainstormer --> design
-    design --> planner
-    planner --> plan
-    plan --> executor
-    executor --> implementation
-    implementation --> reviewer
-    reviewer --> finisher
-    finisher --> pr
-    pr --> human
-
-    pr -->|"PR feedback / status"| finisher
-    human -->|"human feedback"| lead
-    reviewer -->|"review findings"| lead
-    finisher -->|"needs reroute"| lead
-
-    lead -->|"route planning work"| planner
-    lead -->|"route implementation work"| executor
-    lead -->|"route publish follow-through"| finisher
-
-    classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
-```
+The workflow may still reference brainstorm, plan, execute, review, and finish phases, but teammate names are the canonical contract language. See [workflow-diagrams.md](./workflow-diagrams.md) for the canonical Mermaid diagrams.
 
 ## Pre-flight
 
@@ -130,15 +71,7 @@ When observable state is ambiguous or contradictory per `pre-flight.md` halt con
 
 Execution-mode capability probing is part of this pre-flight. See `pre-flight.md` section `## Execution-mode capability detection` for the deterministic probe order, and `## Execution-mode injection` below for delegation-time injection. Missing execution capability halts only when the selected route requires execute-phase delegation; non-execute routes continue through their owning teammate.
 
-- Prefer the host runtime's normal multi-agent capabilities when available.
-- When the host runtime supports background-agent execution for delegated teammate work, prefer using that capability for bounded, independent work that is unlikely to need live clarification, as an execution aid rather than a correctness dependency.
-- Keep tightly coupled, ambiguity-heavy, or clarification-driven teammate work in the foreground even when background agents are available.
-- When the runtime offers durable follow-up features such as thread heartbeats, monitors, or equivalent wakeups, prefer using them for `Finisher` publish-state follow-through while required checks or external review state remain pending.
-- In Codex app environments, same-thread automations are the native fit when `Finisher` follow-through should stay attached to the current conversation.
-- Treat these runtime capabilities as aids for the existing teammate and `Finisher` loops, not as separate workflows or replacement contracts.
-- Do not block solely because a preferred team feature is unavailable; fall back to direct subagent dispatch.
-- If the host lacks those capabilities, do not stop early; continue using the portable teammate and `Finisher` contracts or report an explicit blocker when follow-through cannot safely continue.
-- Keep runtime-specific checks lightweight. Teammate ownership, gate discipline, and artifact authority are the important parts.
+Runtime capabilities are execution aids for the existing teammate and `Finisher` loops, not separate workflows or replacement contracts. Keep runtime-specific checks lightweight, prefer available team-mode or durable follow-up features only when they fit the current work, and continue through the portable teammate contracts when a preferred capability is unavailable.
 
 ## Execution-mode injection
 
@@ -328,11 +261,7 @@ Headline behaviors:
 - Do not invent a new intent-detection system or infer issue-closing intent from weak heuristics such as commit wording, diff size, or acceptance-criteria count.
 - Every `superteam` run is expected to publish a PR; local-only state is never a valid completion, demo, or handoff state.
 - Push the branch and create or update the PR before treating the run as being in publish-state follow-through.
-- Treat publish-state on the latest pushed head as an explicit `Finisher` state machine:
-  1. `triage`
-  2. `monitoring`
-  3. `ready`
-  4. `blocked`
+- Treat publish-state on the latest pushed head as an explicit `Finisher` state: `triage`, `monitoring`, `ready`, `blocked`, or `merged`.
 - When required checks on the latest pushed head are still pending after immediate branch-side fixes are complete, stay in `monitoring` rather than presenting the run as complete.
 - If later required checks fail while monitoring, re-enter `triage` automatically on the latest pushed head.
 - If later required checks pass while monitoring, allow `ready` only after the rest of the latest-head publish-state sweep is also clear.
@@ -447,9 +376,9 @@ Before resolving or replying to comments tied to a prior branch state:
 | "The issue only says workflow contract; I don't know the file yet, so I can draft first and decide later." | Plausible skill or workflow-contract scope is enough to load `superpowers:writing-skills` before authoring requirements. If the intended surface is uncertain, load writing-skills first or halt for clarification. |
 | "The operator is on the default branch on purpose; they clearly meant to start work here." | When the active issue resolves from the operator prompt and the current branch is the repository default branch, pre-flight MUST auto-switch to the per-issue branch before committed-artifact inspection. Operator intent is captured by the `#<n>` reference, not by the branch they happened to be on. Not even when the operator is the maintainer. Not even under deadline pressure. |
 | "Skipping the auto-switch saves a step; we can branch later." | Skipping authors Gate 1 artifacts on the wrong base and forces `Finisher` to rewrite history or push from the default branch. The rule is not optional. |
-| "Dirty working tree? I can stash and continue." | The canonical `/github-flows:new-branch` algorithm refuses on a dirty working tree. `superteam` halts with `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`. Pre-flight does NOT stash on the operator's behalf. |
-| "Rebase conflict on the existing issue branch is fine; I'll abort and try again." | The canonical algorithm forbids `git rebase --abort` on the operator's behalf. `superteam` halts and surfaces the conflict. |
-| "We can re-implement the kebab + checkout + rebase logic inside `superteam` so we don't depend on `github-flows`." | `/github-flows:new-branch` is the authoritative algorithm. `superteam` references it; it does not fork it. Divergence between the two is a contract bug. |
+| "Dirty working tree? I can stash and continue." | The `superteam` issue-branch procedure refuses on a dirty working tree. `superteam` halts with `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`. Pre-flight does NOT stash on the operator's behalf. |
+| "Rebase conflict on the existing issue branch is fine; I'll abort and try again." | The `superteam` issue-branch procedure forbids `git rebase --abort` on the operator's behalf. `superteam` halts and surfaces the conflict. |
+| "We can skip the self-contained branch procedure because another plugin probably has it." | `superteam` pre-flight is portable and owns its issue-branch procedure. Do not depend on another workflow skill being installed. |
 | "`adversarial_review_findings[]` already has Brainstormer entries, so review happened." | Brainstormer-originated findings are useful but not sufficient. Gate 1 requires an explicit adversarial-review pass against the committed artifact. |
 | "No findings means no review evidence is needed." | A clean adversarial-review result must include `reviewer_context`, checked dimensions, and `clean_pass_rationale`; silence is not evidence. |
 | "This is a workflow-contract design, but a generic review is enough." | Designs touching `skills/**/*.md` or workflow-contract surfaces require the `superpowers:writing-skills` review dimensions: RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, and stage-gate bypass paths. |
@@ -504,7 +433,7 @@ Before resolving or replying to comments tied to a prior branch state:
 - `Team Lead` proceeding to committed-artifact inspection while the current branch is the repository default branch and the active issue was resolved from an explicit `#<n>` in the prompt.
 - `Team Lead` performing `git stash` or any auto-stash variant as part of the auto-switch path.
 - `Team Lead` running `git rebase --abort` after a rebase conflict on the existing issue branch.
-- `pre-flight.md` documenting kebab-casing, default-branch resolution, fetch, checkout, or rebase steps inline instead of referencing `/github-flows:new-branch`.
+- `pre-flight.md` depending on an external branch workflow instead of the self-contained issue-branch procedure.
 - `Team Lead` silently continuing on the default branch after `gh repo view` fails to resolve the default branch.
 - A `superteam` run authoring `docs/superpowers/specs/...` on the default branch.
 - Operator-facing output repeats closed or dispositioned findings when no operator action is required.
@@ -557,6 +486,10 @@ Any unsatisfied gate or failed teammate contract should halt the run and report:
 
 Do not silently continue past failed checks, missing artifacts, ambiguous repository state, or unresolved publish-state feedback.
 
+## Success criteria
+
+A successful run routes from observable state, preserves committed handoffs, publishes a PR, and either reaches latest-head shutdown readiness or halts with an explicit blocker.
+
 ## Supporting files
 
 - [agent-spawn-template.md](./agent-spawn-template.md): teammate-specific spawn guidance
@@ -564,3 +497,4 @@ Do not silently continue past failed checks, missing artifacts, ambiguous reposi
 - [pre-flight.md](./pre-flight.md): phase-detection sequence, execution-mode capability detection, halt conditions
 - [routing-table.md](./routing-table.md): phase x prompt-class routing, classification heuristic, resume vs restart, Gate 1 durability
 - [loopback-trailers.md](./loopback-trailers.md): deprecation note for legacy `Loopback:` commit trailers
+- [workflow-diagrams.md](./workflow-diagrams.md): canonical chronological and orchestration diagrams

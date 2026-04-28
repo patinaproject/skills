@@ -190,7 +190,7 @@ Every `superteam` run is expected to publish a PR. Local-only state is never a v
 Push the branch and create or update the PR before treating the run as being in publish-state follow-through.
 Stay in the `Finisher` loop after PR publication until the publish-state follow-through is stable enough to hand off cleanly or an explicit blocker is reported.
 Do not treat PR creation, one status snapshot, restored mergeability, or green CI alone as workflow completion.
-Treat publish-state on the latest pushed head as explicit `Finisher` state: `triage`, `monitoring`, `ready`, or `blocked`.
+Treat publish-state on the latest pushed head as explicit `Finisher` state: `triage`, `monitoring`, `ready`, `blocked`, or `merged`.
 Treat pending required checks on the latest pushed head as active `Finisher` monitoring work, not as completion.
 If later required checks fail while monitoring, re-enter triage automatically on the latest pushed head.
 If later required checks pass while monitoring, only hand off as ready after the rest of the latest-head publish-state sweep is also clear.
