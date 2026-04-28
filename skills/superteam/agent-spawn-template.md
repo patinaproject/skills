@@ -22,6 +22,7 @@ Agent({
            skill is unavailable in the current environment, state that explicitly in this
            delegated prompt and carry the same warning into your work so the operator and
            teammate can both see the gap at dispatch time.
+           Write operator-facing handoffs in natural prose that satisfies the workflow invariants instead of dumping a fixed status report. Keep required done-report fields, evidence, and review state in durable or explicit handoff data, but only surface the parts the operator needs for the current decision, blocker, or next step.
            HARD RULES:
            1. Write only to the artifact path owned by your teammate role unless the approved plan says otherwise.
            2. Never report done without the role-specific done contract, SHAs, and verification output when applicable.
@@ -54,6 +55,7 @@ Each approval packet must include:
 - `adversarial_review_status`: `clean`, `findings dispositioned`, or `blocked`
 - `reviewer_context`: `fresh subagent`, `parallel specialists`, or `same-thread fallback`
 - `clean_pass_rationale` with checked dimensions when no blocker or material findings remain
+Those approval items are required gate evidence, not a required chat template. Render the operator-facing request naturally, focus on the decision needed, and do not replay closed findings when no operator feedback is required.
 Before Gate 1 approval can advance, run or dispatch adversarial design review against the committed artifact. Brainstormer-originated findings alone do not satisfy this gate.
 For designs that touch `skills/**/*.md` or workflow-contract surfaces, the adversarial review must check the `superpowers:writing-skills` dimensions: RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, and stage-gate bypass paths.
 If the approval packet is too large, split it instead of collapsing it.
@@ -85,6 +87,7 @@ Done-report contract:
 - `clean_pass_rationale`: required with checked dimensions when no blocker or material findings remain
 - Do not treat Brainstormer-originated findings as satisfying the adversarial-review pass. If adversarial review changes the design, commit the revised artifact before handoff.
 - `handoff_commit_sha`: commit containing the design artifact used for approval and planning
+Treat the done-report fields as durable handoff data. The operator-facing handoff may be concise natural prose when it clearly states what is ready and what happens next.
 ```
 
 ### Planner
@@ -106,6 +109,7 @@ Done-report contract:
 - `workstreams[]`: short summary of planned batches or workstreams
 - `blockers[]`: any blockers preventing execution, or an explicit empty result when none exist
 - `handoff_commit_sha`: commit containing the approved implementation plan used for execution
+Treat the done-report fields as durable handoff data. The operator-facing handoff may be concise natural prose when it clearly states what is ready and what happens next.
 ```
 
 ### Executor
@@ -135,6 +139,7 @@ Done-report contract:
 - `completion_evidence[]`: concrete evidence per completed task
 - `head_sha`: current HEAD SHA for the committed implementation and test state being handed to `Reviewer`
 - `verification[]`: verification commands and outcomes
+Do not turn completion evidence or review data into a robotic chat report by default. Preserve the data for downstream teammates, and surface only the active findings, verification gaps, or next actions the operator needs.
 ```
 
 ### Reviewer
@@ -157,6 +162,7 @@ Done-report contract:
   - each finding entry includes `summary`, `feedback_classification` (`implementation-level` | `plan-level` | `spec-level`), and `owner`
 - `verification_gaps[]`: any missing or invalid verification
 - `pressure_test_results[]`: for skill or workflow-contract changes, the scenarios checked and their pass/fail outcomes, or an explicit empty result when not applicable
+Do not turn completion evidence or review data into a robotic chat report by default. Preserve the data for downstream teammates, and surface only the active findings, verification gaps, or next actions the operator needs.
 Do not take ownership of external PR comments or bot feedback.
 ```
 
@@ -200,6 +206,7 @@ If blocking work remains, continue the `Finisher`-owned handling loop and re-che
 If a new push lands while you are monitoring, treat prior completion assumptions as stale and re-check review state, checks, mergeability, and PR metadata on the new head before reporting success.
 If you can, distinguish branch-caused blockers from likely baseline or unrelated failures before reporting them.
 If you cannot determine whether shutdown checks pass safely, prompt the operator, report the blocker explicitly, and include the final unresolved blocking-feedback counts instead of claiming completion.
+Use natural prose for status updates when possible, but never hide latest-head blockers. Pending checks, failed checks, unresolved feedback, mergeability problems, metadata violations, and shutdown blockers must remain clear and inspectable.
 Before resolving or replying to a comment tied to a file, commit, or line, verify it against the current branch state and the prior state the comment referred to.
 If feedback adds or changes requirements, route it through `Brainstormer`, then `Planner`, then `Executor`.
 Done-report contract:

@@ -178,6 +178,20 @@ Handoffs that depend on uncommitted durable artifact changes are incomplete unle
 
 For artifact-producing handoffs, the workflow should trust committed branch state rather than dirty workspace state. Downstream teammates should be able to rely on inspectable commits instead of inferring intent from uncommitted local changes.
 
+## Operator-facing output
+
+Superteam chat output should satisfy workflow invariants rather than render a fixed status-report template by default. Teammates should write the shortest natural response that makes the current state, requested operator action, active blocker, or next step clear.
+
+Structured bullets and headings are allowed when they help the operator act. They are not mandatory report shells.
+
+Separate durable workflow data from chat rendering:
+
+- Keep required evidence, done-report fields, review findings, AC verification, loopback state, PR state, and shutdown evidence in durable artifacts, explicit handoff data, PR surfaces, or other inspectable records when downstream teammates or future sessions depend on them.
+- Do not rely on volatile agent context as the only home for required evidence.
+- Do not dump every durable field into the operator-facing response unless those fields affect the current decision.
+- Surface active blockers, active findings, requested approvals, requested feedback, and next steps clearly.
+- Do not enumerate closed, resolved, or dispositioned findings in normal operator-facing output unless they affect the current operator decision.
+
 ## Gate 1: Brainstormer approval
 
 Advancement from `Brainstormer` to `Planner` requires explicit approval of the design artifact. Silence, ambiguity, or partial replies are non-approval.
@@ -194,6 +208,8 @@ Before asking for approval:
 8. Include `reviewer_context`: `fresh subagent`, `parallel specialists`, or `same-thread fallback`.
 9. Include `clean_pass_rationale` with checked dimensions when no blocker or material findings remain.
 10. Halt approval when any blocker or material finding is still open.
+
+The evidence above is required gate data, not a required chat template. The operator-facing approval request should read naturally and focus on the decision being requested. It may summarize a clean review as no approval-blocking findings remaining instead of replaying closed or dispositioned findings.
 
 Before Gate 1 approval is presented, `Team Lead` must run or dispatch an adversarial design review against the committed design artifact. Fresh-context or parallel specialist review is preferred for workflow-critical or broad designs when the runtime supports it; same-thread review is the portable fallback. Brainstormer-originated findings alone do not satisfy this gate.
 
@@ -232,6 +248,9 @@ Headline behaviors:
 - Before Gate 1 approval can advance, enforce adversarial design review against the committed design artifact.
 - Include `adversarial_review_status`, `reviewer_context`, `adversarial_review_findings[]`, and `clean_pass_rationale` when applicable in Gate 1 approval packets.
 - Treat Brainstormer-originated findings as useful input but not proof that adversarial review occurred.
+- Render operator-facing handoffs as natural prose that satisfies the current workflow invariants instead of dumping every internal field as a status report.
+- Keep required gate and handoff evidence durable even when the chat response is concise.
+- Surface only findings that require current operator feedback; keep resolved finding history in artifacts or explicit handoff data.
 - Recommend `superpowers:using-superpowers`.
 - Also recommend `superpowers:dispatching-parallel-agents` when splitting bounded, independent work, and keep tightly coupled or interactive steps in the foreground.
 - During execute-phase delegation, bind directly to the chosen execution-mode skill (`superpowers:subagent-driven-development` for subagent-driven, or the host's native team-mode capability for team mode). Do NOT route execute-phase delegations through `superpowers:executing-plans` on default paths.
@@ -251,6 +270,7 @@ Headline behaviors:
 - Include reviewer context and checked dimensions in the clean-pass rationale when the adversarial-review result is clean.
 - Commit any design changes caused by self-review or adversarial findings before reporting done or handing off to `Planner`.
 - Include the handoff commit SHA for the committed design artifact in the done report.
+- Separate durable done-report or review data from operator-facing prose; the data must remain inspectable, but the chat handoff should be as natural and decision-focused as the situation allows.
 - Determine the intended surface from the issue before authoring requirements. When the design under brainstorming will touch `skills/**/*.md` or any workflow-contract surface (the `superteam` skill itself, agent-spawn templates, PR-body templates, or other repository-owned workflow contracts), invoke `superpowers:writing-skills` BEFORE authoring requirements. If the issue plausibly targets those surfaces and the exact files are uncertain, invoke `superpowers:writing-skills` first or halt for clarification. This is unconditional on the trigger, not "consider"; once the design touches or plausibly targets a skill or workflow-contract surface, writing-skills is the load-bearing reference for what the design must contain (loophole-closure language, rationalization-table rows, red-flags bullets, token-efficiency targets, RED-phase baseline obligation). A `Brainstormer` who skips writing-skills at design time forces every downstream teammate to re-derive it. Not even when an authority claim is cited. Not even under deadline pressure.
 - Recommend `superpowers:brainstorming`.
 
@@ -260,6 +280,7 @@ Headline behaviors:
 - Commit the implementation plan change before reporting done or handing off to `Executor`.
 - Produce the implementation plan or halt with a blocker.
 - Include the handoff commit SHA for the committed implementation plan in the done report.
+- Separate durable done-report or review data from operator-facing prose; the data must remain inspectable, but the chat handoff should be as natural and decision-focused as the situation allows.
 - Recommend `superpowers:writing-plans`.
 
 ### Executor
@@ -269,6 +290,7 @@ Headline behaviors:
 - Commit the completed implementation and test changes before reporting done or handing off to `Reviewer`.
 - Report completion against explicit task IDs.
 - Include concrete completion evidence, SHAs, and verification evidence before claiming completion.
+- Separate durable done-report or review data from operator-facing prose; the data must remain inspectable, but the chat handoff should be as natural and decision-focused as the situation allows.
 - `Executor` completion is not workflow completion. After local implementation work is complete, the run must either continue into `Reviewer` and then `Finisher`, or halt explicitly as `superteam halted at <teammate or gate>: <reason>`.
 - Never push, rebase, or open a PR.
 - Recommend `superpowers:test-driven-development` as the ATDD execution skill.
@@ -288,6 +310,7 @@ Headline behaviors:
 - If later fixes change those same workflow-contract surfaces again after an earlier review pass, rerun the relevant pressure-test walkthrough before handing the run back to `Finisher`.
 - Report pressure-test pass/fail results and any loopholes found for skill or workflow-contract changes.
 - Report local findings with `feedback_classification` (`implementation-level` | `plan-level` | `spec-level`) and an owner before routing.
+- Separate durable done-report or review data from operator-facing prose; the data must remain inspectable, but the chat handoff should be as natural and decision-focused as the situation allows.
 - Keep findings local; do not take ownership of external review feedback.
 
 ### Finisher
@@ -295,6 +318,8 @@ Headline behaviors:
 - Own push, branch publication, PR updates, PR body rendering, CI triage, and external review/comment handling.
 - Own receiving and interpreting external post-publish PR feedback.
 - Report pushed SHAs, current branch state on origin, PR state, and CI state.
+- Separate durable done-report or review data from operator-facing prose; the data must remain inspectable, but the chat handoff should be as natural and decision-focused as the situation allows.
+- Natural prose must not hide publish-state blockers, pending checks, unresolved review feedback, or shutdown evidence.
 - When a project-owned PR template or PR-body rule exists, satisfy it first and treat the `superteam` PR template as fallback/default guidance rather than as an override.
 - When a real issue number is available for the canonical single-issue workflow and nothing in the current run says the work is partial, follow-up, or otherwise non-closing, render `Closes #<issue-number>` in the PR body.
 - When the issue is related but the run is not issue-completing, render a non-closing issue reference plus a brief explanation.
@@ -428,6 +453,10 @@ Before resolving or replying to comments tied to a prior branch state:
 | "No findings means no review evidence is needed." | A clean adversarial-review result must include `reviewer_context`, checked dimensions, and `clean_pass_rationale`; silence is not evidence. |
 | "This is a workflow-contract design, but a generic review is enough." | Designs touching `skills/**/*.md` or workflow-contract surfaces require the `superpowers:writing-skills` review dimensions: RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, and stage-gate bypass paths. |
 | "A finding changed the design, but the earlier review still applies." | Material requirement, ownership, pressure-test, or gate-order changes require rerunning affected review dimensions or recording why rerun is unnecessary. |
+| "Natural prose means we can omit required Gate 1 evidence." | Natural prose changes rendering, not evidence. Required review status, reviewer context, checked dimensions, and clean-pass rationale must still exist before planning. |
+| "The operator might want audit history, so replay every closed finding." | Audit history stays available in durable artifacts or handoff data. Normal operator-facing output should show actionable findings and current decisions. |
+| "Done-report contracts are status templates, so we can delete them." | Done reports are durable handoff data. The change separates internal data contracts from chat rendering. |
+| "A friendly paragraph is enough even if it hides a blocker." | Operator-facing prose must clearly state blockers, required decisions, and next steps. Vague warmth is still a contract failure. |
 
 ## Red flags
 
@@ -477,6 +506,10 @@ Before resolving or replying to comments tied to a prior branch state:
 - `pre-flight.md` documenting kebab-casing, default-branch resolution, fetch, checkout, or rebase steps inline instead of referencing `/github-flows:new-branch`.
 - `Team Lead` silently continuing on the default branch after `gh repo view` fails to resolve the default branch.
 - A `superteam` run authoring `docs/superpowers/specs/...` on the default branch.
+- Operator-facing output repeats closed or dispositioned findings when no operator action is required.
+- Natural prose omits the artifact, decision, active finding, blocker, or next action the operator needs.
+- A change deletes durable done-report or review evidence instead of separating it from chat rendering.
+- `Finisher` presents a conversational update that hides pending checks, unresolved feedback, mergeability problems, or PR metadata blockers.
 
 ## Shutdown
 

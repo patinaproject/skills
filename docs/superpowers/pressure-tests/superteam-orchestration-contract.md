@@ -68,6 +68,18 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt planning and route the finding back to Brainstormer for design revision, explicit deferral, or rejected-with-rationale disposition.
 - Rule surface: Gate 1 must block on unresolved blocker or material findings.
 
+## Gate 1 clean review rendered as robotic status report
+
+- Starting condition: Gate 1 has a committed design artifact, required adversarial review evidence, and no findings requiring operator feedback. Prior findings were dispositioned and are recorded in the design artifact.
+- Required halt or reroute behavior: Re-render the operator-facing approval request as a natural decision prompt that identifies the artifact and requested approval without enumerating closed findings or dumping every internal review field.
+- Rule surface: Gate evidence remains required, but operator-facing output should satisfy invariants instead of replaying a status-report template.
+
+## Natural prose hides required operator decision or blocker
+
+- Starting condition: A teammate writes a friendly handoff that says the work is "basically ready" but omits an active blocker, requested approval, unresolved finding, or next operator decision.
+- Required halt or reroute behavior: Halt or rerender the handoff so the active blocker, finding, approval request, or next action is explicit.
+- Rule surface: Natural operator-facing prose is allowed only when it preserves the workflow invariants needed for the current decision.
+
 ## Workflow-contract design reviewed without writing-skills dimensions
 
 - Starting condition: The design touches `skills/**/*.md` or a workflow-contract surface, but adversarial review does not check RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, and stage-gate bypass paths.
@@ -141,6 +153,12 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Halt the handoff and return it to the owning teammate until the required done-report fields are present in the expected shape.
 - Rule surface: Each teammate-specific done contract should define the minimum stable fields needed for downstream handoff.
 
+## Done-report fields dumped into operator chat by default
+
+- Starting condition: A role-specific done report contains all required durable fields, but the operator-facing response mechanically dumps every field even though most of them are only needed by downstream teammates.
+- Required halt or reroute behavior: Keep the durable done-report data inspectable, but render the operator-facing handoff as concise prose focused on what is ready, what changed, and what happens next.
+- Rule surface: Done-report contracts are durable handoff data, not mandatory chat templates.
+
 ## Brainstormer hands off an uncommitted design artifact
 
 - Starting condition: `Brainstormer` writes or updates the design doc, but the artifact exists only as uncommitted workspace state when handoff to `Planner` is attempted.
@@ -164,6 +182,12 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Starting condition: `Reviewer` or `Finisher` completes stage responsibilities without materially changing durable artifacts.
 - Required halt or reroute behavior: Do not require a commit solely to satisfy the handoff-commit rule.
 - Rule surface: The artifact-producing handoff rule should apply to artifact-producing roles and artifact-producing changes, not become a ritual for every stage.
+
+## Natural output deletes required durable evidence
+
+- Starting condition: A workflow-contract change removes required review evidence, done-report fields, AC verification, PR state, or shutdown evidence while claiming the chat output is now more natural.
+- Required halt or reroute behavior: Reject the change until required evidence remains in durable artifacts, explicit handoff data, PR surfaces, or other inspectable records.
+- Rule surface: Natural prose changes presentation only; it does not remove evidence required by future teammates, reviewers, or sessions.
 
 ## Reviewer findings missing feedback classification
 
@@ -224,6 +248,12 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Starting condition: The workflow creates or updates the PR, reports a single status snapshot, and then stops even though mergeability, CI, PR metadata correction, or external feedback handling still requires Finisher-owned follow-through.
 - Required halt or reroute behavior: Do not present the run as complete. Continue the Finisher loop until publish-state follow-through is stable enough to hand off cleanly or an explicit blocker is reported.
 - Rule surface: The Finisher contract should state that PR publication is a milestone rather than the end of the workflow.
+
+## Finisher conversational update hides latest-head blocker
+
+- Starting condition: Finisher writes a friendly status update after PR publication, but required checks are pending or failing, mergeability is broken, metadata is invalid, or unresolved review feedback remains.
+- Required halt or reroute behavior: Rerender the update so the latest-head blocker and next Finisher action are explicit, and do not allow shutdown readiness until the normal checks pass.
+- Rule surface: Natural prose must not hide publish-state blockers or shutdown evidence.
 
 ## Finisher keeps monitoring while required checks on the latest pushed head are pending
 
