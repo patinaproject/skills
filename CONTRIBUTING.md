@@ -23,18 +23,29 @@ Examples:
 - `feat: #42 add audit mode`
 - `docs: #17 clarify install steps`
 
-Choose the commit type by product impact, not by file extension.
+Pick the commit type by **path**, not by file extension. If any file in the diff matches one of the product-surface globs below, the commit type is `feat:` or `fix:` — never `docs:` or `chore:`.
+
+**Product-surface globs:**
+
+- `skills/**`
+- `skills/bootstrap/templates/**`
+- `.claude-plugin/**`, `.codex-plugin/**`
+- `.cursor/**`, `.windsurfrules`, `.github/copilot-instructions.md`
+- `.github/workflows/**`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/LABELS.md`
+- `AGENTS.md`, `AGENTS.md.tmpl`, `CONTRIBUTING.md`, `CONTRIBUTING.md.tmpl`, `RELEASING.md`, `RELEASING.md.tmpl`
+
+**Path-first rule:** If any file in the diff is under one of these globs, the commit type is `feat:` or `fix:` — never `docs:` or `chore:`. `docs:` and `chore:` apply if and only if the diff touches **zero** product-surface globs.
 
 | Change | Type |
 |--------|------|
 | Adds or changes shipped behavior, including behavior expressed in Markdown skill files, workflow gates, prompt contracts, plugin metadata, marketplace behavior, generated agent instructions, or other user-visible configuration | `feat:` |
 | Corrects broken shipped behavior in those same product surfaces | `fix:` |
-| Explains the product without changing shipped behavior or release semantics | `docs:` |
-| Performs maintenance that does not alter user-facing behavior | `chore:` |
-
-Edits to `skills/**/SKILL.md` and adjacent skill workflow contracts are product/runtime changes by default, not documentation edits. Use `docs:` for those files only when the change is clearly explanatory-only and does not alter installed skill behavior.
+| Explains the product without changing shipped behavior or release semantics, and touches zero product-surface globs | `docs:` |
+| Performs maintenance that does not alter user-facing behavior, and touches zero product-surface globs | `chore:` |
 
 Changes that should produce a release must not use non-bumping types such as `docs:` or `chore:`. Use the release-triggering type that matches the product impact.
+
+See [`AGENTS.md` "Commit type selection"](./AGENTS.md#commit-type-selection) for the full rationalization table, red flags, and a WRONG → RIGHT worked example.
 
 The `commit-msg` hook enforces this. PR titles follow the same format so the squash commit can be reused verbatim.
 

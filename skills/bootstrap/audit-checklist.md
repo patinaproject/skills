@@ -56,7 +56,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `AGENTS.md` | yes | present; covers project structure, commands, conventions, commits, PRs |
+| `AGENTS.md` | yes | present; covers project structure, commands, conventions, commits, PRs; "Commit type selection" section leads with the product-surface glob list and one-sentence path-first rule BEFORE the type table, contains a rationalization table, a red-flags STOP block, and at least one WRONG → RIGHT pair. Verify with the AC-54-7 parity grep one-liner (see `docs/superpowers/specs/2026-04-28-54-sharpen-commit-type-guidance-for-product-surface-changes-design.md`). |
 | `CLAUDE.md` | yes | present; imports `@AGENTS.md`; Claude-only guidance below |
 | `CONTRIBUTING.md` | yes | present; pointer to `AGENTS.md` |
 | `SECURITY.md` | public only | public repo → present; private → absent |

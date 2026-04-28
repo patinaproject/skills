@@ -130,6 +130,8 @@ Determined from releasable Conventional Commit types — no human choice:
 
 If a change should produce a release, do not use a non-bumping type. For example, a Markdown-only edit to `skills/**/SKILL.md` that changes installed skill behavior should use `feat:` or `fix:`, not `docs:`.
 
+Mistyped commits silently suppress releases. See [`AGENTS.md` "Commit type selection"](AGENTS.md#commit-type-selection) for the path-first rule and the full rationalization table.
+
 ## Keeping versions aligned between releases
 
 `package.json` is the canonical source. `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` are kept in lockstep.

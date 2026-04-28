@@ -150,18 +150,64 @@ Scopes like `feat(repo): ...` are rejected. Keep the subject within 72 character
 
 ### Commit type selection
 
-Choose the commit type by product impact, not by file extension.
+Pick the commit type by **path**, not by file extension or self-judged "intent". If any file in the diff matches one of the product-surface globs below, the commit type is `feat:` or `fix:` — never `docs:` or `chore:`.
+
+**Product-surface globs:**
+
+- `skills/**`
+- `skills/bootstrap/templates/**`
+- `.claude-plugin/**`, `.codex-plugin/**`
+- `.cursor/**`, `.windsurfrules`, `.github/copilot-instructions.md`
+- `.github/workflows/**`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/LABELS.md`
+- `AGENTS.md`, `AGENTS.md.tmpl`, `CONTRIBUTING.md`, `CONTRIBUTING.md.tmpl`, `RELEASING.md`, `RELEASING.md.tmpl`
+
+**Path-first rule:** If any file in the diff is under one of these globs, the commit type is `feat:` or `fix:` — never `docs:` or `chore:`. `docs:` and `chore:` apply if and only if the diff touches **zero** product-surface globs. There is no "explanatory-only" exception, no PR-body call-out, no reviewer override.
+
+The type table below is for reference once the path test has resolved to `feat:` / `fix:` (additive vs. corrective) or — when no product-surface glob is touched — to `docs:` / `chore:`.
 
 | Change | Type |
 |--------|------|
 | Adds or changes shipped behavior, including behavior expressed in Markdown skill files, workflow gates, prompt contracts, plugin metadata, marketplace behavior, generated agent instructions, or other user-visible configuration | `feat:` |
 | Corrects broken shipped behavior in those same product surfaces | `fix:` |
-| Explains the product without changing shipped behavior or release semantics | `docs:` |
-| Performs maintenance that does not alter user-facing behavior | `chore:` |
-
-Edits to `skills/**/SKILL.md` and adjacent skill workflow contracts are product/runtime changes by default, not documentation edits. Use `docs:` for those files only when the change is clearly explanatory-only and does not alter installed skill behavior.
+| Explains the product without changing shipped behavior or release semantics, and touches zero product-surface globs | `docs:` |
+| Performs maintenance that does not alter user-facing behavior, and touches zero product-surface globs | `chore:` |
 
 Changes that should produce a release must not use non-bumping types such as `docs:` or `chore:`. Use the release-triggering type that matches the product impact.
+
+#### Rationalizations the path-first rule overrides
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "It's just Markdown." | Markdown on `skills/**`, plugin manifests, or agent-instruction surfaces is the shipped product. Type by path, not by file extension. |
+| "I'm only aligning wording with the source of truth." | If the source of truth is itself a product surface (skill, template, agent instruction), wording IS behavior. Use `feat:`. |
+| "It's just a template change." | Templates under `skills/bootstrap/templates/**` ship to every bootstrapped repo on the next realignment. They are product. Use `feat:` / `fix:`. |
+| "I'm only adding a non-goal or an example to a skill." | Examples and non-goals on a `SKILL.md` change how the skill is interpreted by agents. Product. `feat:`. |
+| "I'm fixing a typo in a skill body." | Path-only rule: any edit inside `skills/**`, `.claude-plugin/**`, `.codex-plugin/**`, `.cursor/**`, `.windsurfrules`, or `.github/copilot-instructions.md` is `fix:` when correcting wrong shipped content and `feat:` when adding or changing shipped content. Do not assess "whether it affects how the skill is read" — the path test already settled it. `chore:` is only available when the diff touches zero product-surface globs. |
+| "It's a plugin manifest version bump." | Release-please owns version bumps under `chore: release X.Y.Z`. Hand-editing a manifest version outside that flow is a `fix:` (lockstep correction) or a release-PR commit, never `docs:`. Other manifest edits (description, homepage, keywords) are `feat:` because they change marketplace-visible product. |
+| "I'm rewording an agent instruction." | Agent instructions ARE the contract. `feat:`. |
+| "It's a markdown-lint cleanup with no semantic change." | Allowed as `chore:` only if zero product-surface globs are touched. If any product-surface glob is touched, `feat:` (or `fix:` if the lint fix corrected wrong shipped content). |
+| "The change is too small to bump a version." | Version magnitude is release-please's job. Type by intent. Small `feat:` is fine. |
+
+#### Red flags
+
+> **STOP and reconsider if any of these are true:**
+>
+> - You are about to commit `docs:` or `chore:` but `git diff --name-only` shows a file under `skills/**`, `.claude-plugin/**`, `.codex-plugin/**`, `.cursor/**`, `.windsurfrules`, `.github/copilot-instructions.md`, `.github/workflows/**`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/LABELS.md`, `AGENTS.md`, `AGENTS.md.tmpl`, `CONTRIBUTING.md`, `CONTRIBUTING.md.tmpl`, `RELEASING.md`, or `RELEASING.md.tmpl`.
+> - Your commit message says "align", "standardize", "clarify", "rename", "rewrite", or "rework" AND the diff touches a product-surface glob.
+> - You are using `docs:` or `chore:` for any change to `AGENTS.md`, `AGENTS.md.tmpl`, `CONTRIBUTING.md`, `CONTRIBUTING.md.tmpl`, `RELEASING.md`, or `RELEASING.md.tmpl`. These files are agent-facing and contributor-facing contracts — every edit is `feat:` or `fix:`.
+
+#### Worked example (WRONG → RIGHT)
+
+A historical commit on this repository touched a plugin manifest, a skill body, and three templates in one go to standardize wording. It was typed `docs:`, which suppressed a release.
+
+- WRONG: `docs: #46 standardize Patina Project name`
+- RIGHT: `feat: #46 standardize Patina Project name across product surfaces`
+
+The verb "standardize" combined with a diff under `skills/**` and `.codex-plugin/**` is a path-first `feat:` — no judgement call required.
+
+#### Round-trip discipline
+
+On this repo the canonical "Commit type selection" section is shipped through `skills/bootstrap/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `bootstrap` skill in realignment mode. Mistyped commits silently suppress releases — see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping. The AC-54-7 parity grep (a one-liner that checks every per-tool surface for the verbatim glob list) is the verification artifact.
 
 Pull requests should include a short summary, linked issue, validation notes, and any updated docs when structure or workflow changes.
 
