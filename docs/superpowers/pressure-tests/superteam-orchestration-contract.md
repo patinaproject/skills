@@ -165,10 +165,10 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Do not require a commit solely to satisfy the handoff-commit rule.
 - Rule surface: The artifact-producing handoff rule should apply to artifact-producing roles and artifact-producing changes, not become a ritual for every stage.
 
-## Reviewer findings missing loopback classification
+## Reviewer findings missing feedback classification
 
-- Starting condition: Reviewer findings identify problems but do not classify them as implementation-level, plan-level, or spec-level loopbacks.
-- Required halt or reroute behavior: Halt handoff and send the findings back for explicit loopback classification before routing onward.
+- Starting condition: Reviewer findings identify problems but do not classify them as implementation-level, plan-level, or spec-level feedback.
+- Required halt or reroute behavior: Halt handoff and send the findings back for explicit feedback classification before routing onward.
 - Rule surface: The Reviewer findings template should require implementation-level, plan-level, or spec-level classification.
 
 ## Reviewer findings taking PR comment handling away from Finisher
@@ -186,7 +186,7 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 ## Reviewer lacks a path to analyze existing findings before publish
 
 - Starting condition: Reviewer is asked to assess existing or disputed pre-publish findings, but the workflow provides no review-reception discipline for that interpretation step.
-- Required halt or reroute behavior: Reroute to a Reviewer pass that uses the appropriate review-reception discipline before classification and loopback.
+- Required halt or reroute behavior: Reroute to a Reviewer pass that uses the appropriate review-reception discipline before classification and feedback routing.
 - Rule surface: The Reviewer skill guidance should allow `superpowers:receiving-code-review` when analyzing existing or disputed findings before publish.
 
 ## Skill change reviewed without `writing-skills`
@@ -211,7 +211,7 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 
 - Starting condition: A pressure-test walkthrough on a skill or workflow-contract change finds a loophole, but the run still treats review as complete and moves toward publish.
 - Required halt or reroute behavior: Loop back before publish and do not allow merged-ready review until the loophole is addressed or reported as an explicit blocker.
-- Rule surface: The Reviewer prompt should require loopback when the pressure-test walkthrough exposes a loophole.
+- Rule surface: The Reviewer prompt should require feedback routing when the pressure-test walkthrough exposes a loophole.
 
 ## Finisher handling comments without current-branch verification
 
@@ -289,14 +289,14 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 ## Finish-phase operator requirement delta routed past Brainstormer
 
 - Starting condition: Pre-flight detects `finish` because an open PR exists, but the operator gives a normal requirement delta such as "add an acceptance criterion for durable wakeup payloads" that is not phrased as PR feedback.
-- Required halt or reroute behavior: Route the delta to `Brainstormer` as a spec-level loopback, require planning and execution to follow, and block `Finisher` ready/shutdown reporting until the loopback is resolved and latest-head publish-state is rechecked.
+- Required halt or reroute behavior: Route the delta to `Brainstormer` as spec-level feedback, require planning and execution to follow, and block `Finisher` ready/shutdown reporting until the feedback is addressed and latest-head publish-state is rechecked.
 - Rule surface: The finish-phase routing table should treat any requirement-bearing delta as spec-first, regardless of whether it arrived as PR feedback, human test feedback, or a direct operator prompt.
 
 ## Requirement-bearing PR feedback returns to spec authority before publish resumes
 
 - Starting condition: Pre-flight detects `finish` because an open PR exists, and latest PR feedback adds or changes acceptance criteria.
-- Required halt or reroute behavior: Routing must send the feedback to `Brainstormer` as a spec-level loopback, require the resulting commit to carry `Loopback: spec-level`, continue through `Planner` and `Executor`, and block `Finisher` shutdown or publish-ready reporting until the loopback is resolved and latest-head publish-state is rechecked.
-- Rule surface: Finish detection, requirement-bearing feedback routing, loopback trailer persistence, and Finisher latest-head shutdown rules must work as one chain.
+- Required halt or reroute behavior: Routing must send the feedback to `Brainstormer` as spec-level feedback, continue through `Planner` and `Executor`, and block `Finisher` shutdown or publish-ready reporting until the feedback is addressed and latest-head publish-state is rechecked.
+- Rule surface: Finish detection, requirement-bearing feedback routing, and Finisher latest-head shutdown rules must work as one chain.
 
 ## Shutdown attempted with unresolved threads or blocking external PR feedback
 
@@ -376,29 +376,29 @@ Use these repo-local pressure tests to check whether the documented orchestratio
 - Required halt or reroute behavior: Load `superpowers:writing-skills` before authoring requirements, or halt for clarification if the intended surface cannot be determined safely.
 - Rule surface: Brainstormer skill-change guidance should trigger on plausible skill/workflow-contract scope, not only on already-known file paths.
 
-## Pre-flight recovered spec loopback routes through Brainstormer before execution resumes
+## Spec feedback routes through Brainstormer before execution resumes
 
-- Starting condition: The branch has a committed plan doc and no PR, so artifact phase would normally derive as `execute`, but `git log` contains a later unresolved `Loopback: spec-level` trailer. The operator prompt is ambiguous, such as "continue".
-- Required halt or reroute behavior: Pre-flight must recover `active_loopback_class=spec-level`, routing must send the work to `Brainstormer`, and the teammate handoff must preserve the spec-level loopback until a resolving commit includes `Loopback: resolved`. Do not route directly to `Executor` from the artifact-derived execute phase.
-- Rule surface: Loopback recovery, active-loopback routing precedence, and unresolved/resolved trailer semantics must override normal artifact-derived phase routing.
+- Starting condition: The branch has a committed plan doc and no PR, and Reviewer classifies a current requirement-level finding during the same run.
+- Required halt or reroute behavior: Routing must send the work to `Brainstormer` immediately without requiring a commit trailer. Do not route directly to `Executor` while the requirement-level finding is unaddressed.
+- Rule surface: Feedback classification and Team Lead routing must preserve requirement authority without durable trailer state.
 
-## Unresolved implementation loopback blocks publish-state handoff
+## Implementation work without PR reruns local review before publish
 
-- Starting condition: A PR exists, but `git log` on the branch contains an unresolved `Loopback: implementation-level` trailer after the latest `Loopback: resolved`. The operator asks "is it ready to publish/check CI?"
-- Required halt or reroute behavior: Pre-flight must recover the active implementation loopback, routing must send the work back to `Executor` instead of treating the PR state as normal `Finisher` monitoring, and publish-state follow-through must remain halted until the implementation loopback is committed and resolved with `Loopback: resolved`.
-- Rule surface: PR/loopback detection ordering, active-loopback precedence over normal phase routing, trailer recovery, and Finisher publish ownership must work as one chain.
+- Starting condition: A later `/superteam` invocation resumes after implementation commits exist, no PR exists, and prior local review findings cannot be proven resolved from visible state.
+- Required halt or reroute behavior: Route through `Reviewer` to rerun or reconstruct local pre-publish review before `Finisher` can publish. Do not proceed directly to PR creation because no hidden marker exists.
+- Rule surface: Visible-state resume, Reviewer ownership, and Finisher publish ownership must work as one chain.
 
-## Loopback recovery ignores stale trailers outside the active issue range
+## Obsolete `Loopback:` text is ignored during resume
 
-- Starting condition: A branch can reach an older unresolved `Loopback:` trailer from another issue or inherited history, but the current active issue's branch-only commits have no active loopback after their latest `Loopback: resolved`.
-- Required halt or reroute behavior: Do not recover the stale trailer as the active loopback. Scope recovery to commits unique to the active branch and matching the active issue, then route from the resulting active loopback class or normal phase.
-- Rule surface: The loopback recovery algorithm should prevent unrelated historical trailers from overriding the current issue's route.
+- Starting condition: A branch can reach old commit body text or trailers containing `Loopback: spec-level`, either from inherited history or from an obsolete commit message.
+- Required halt or reroute behavior: Do not recover routing state from the text. Route from visible issue, artifact, branch, PR, review, and operator state.
+- Rule surface: Pre-flight and routing should not scan branch-only commits for `Loopback:` state.
 
-## Resolving loopback commit uses unambiguous trailer semantics
+## Resume from visible artifact and PR state without trailer scan
 
-- Starting condition: A terminating loopback commit completes work that originated from `Loopback: plan-level`. Two shapes are exercised: (a) a same-class resolving commit carrying `Loopback: plan-level` + `Loopback: resolved`, and (b) a different-class follow-on resolving commit carrying `Loopback: plan-level` + `Loopback: implementation-level` + `Loopback: resolved`.
-- Required halt or reroute behavior: In both shapes, the resolving commit must include `Loopback: resolved`, and `resolved` wins for that commit. Any other `Loopback:` trailer on the same commit — matching the resolved class or not — is evidence only and must not open or reopen a loopback. For shape (b), recovery must report the active loopback as resolved (no class-B loopback opened from the same commit, assuming no later originating trailers); to actually open a follow-on implementation-level loopback, a separate later commit carrying `Loopback: implementation-level` as the originating trailer is required. The contract must not require both class and resolved trailers in a way that conflicts with the recovery algorithm.
-- Rule surface: `SKILL.md` and `loopback-trailers.md` should agree on resolving-commit trailer semantics, including that follow-on loopbacks of any class require a separate later originating commit.
+- Starting condition: A later `/superteam` invocation resumes on a branch with committed design and plan artifacts, and either no PR or an existing PR.
+- Required halt or reroute behavior: Determine the route from artifact, PR, review, and operator state without scanning branch-only commits for `Loopback:` trailers.
+- Rule surface: Pre-flight and routing use visible state only; no commit trailer recovery is part of phase detection.
 
 ## Missing runtime follow-up support does not permit Finisher to stop early
 

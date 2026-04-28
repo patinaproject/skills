@@ -11,7 +11,7 @@ description: Use when taking a GitHub issue from design through execution and me
 
 Use teammate names as the primary organizing language across the workflow:
 
-1. `Team Lead`: owns orchestration, delegation, gates, and loopbacks
+1. `Team Lead`: owns orchestration, delegation, gates, and feedback routing
 2. `Brainstormer`: owns the design doc in `docs/superpowers/specs/`
 3. `Planner`: owns the implementation plan in `docs/superpowers/plans/`
 4. `Executor`: owns ATDD-driven implementation, code, and tests required by the approved plan
@@ -280,13 +280,14 @@ Headline behaviors:
 
 - Review locally before publish.
 - Validate artifact ownership, required verification, and role-rule compliance.
-- Classify loopbacks explicitly as `implementation-level`, `plan-level`, or `spec-level`.
+- Classify feedback explicitly as `implementation-level`, `plan-level`, or `spec-level`.
 - Own receiving and interpreting local pre-publish review findings.
 - Recommend `superpowers:requesting-code-review` for first-pass local review.
 - Also recommend `superpowers:receiving-code-review` when analyzing existing or disputed findings before publish.
 - When reviewing changes to `skills/**/*.md` or workflow-contract docs, invoke `superpowers:writing-skills` and run the relevant pressure-test walkthrough before publish.
 - If later fixes change those same workflow-contract surfaces again after an earlier review pass, rerun the relevant pressure-test walkthrough before handing the run back to `Finisher`.
 - Report pressure-test pass/fail results and any loopholes found for skill or workflow-contract changes.
+- Report local findings with `feedback_classification` (`implementation-level` | `plan-level` | `spec-level`) and an owner before routing.
 - Keep findings local; do not take ownership of external review feedback.
 
 ### Finisher
@@ -359,9 +360,9 @@ Artifact-producing teammate done reports must anchor on committed handoff state 
 - `head_sha`: current HEAD SHA for the committed implementation and test state being handed to `Reviewer`
 - `verification[]`: verification commands and outcomes
 
-## Review and loopback routing
+## Review and feedback routing
 
-Loopbacks must be explicit:
+Feedback classifications must be explicit:
 
 1. `implementation-level` findings route to `Executor`
 2. `plan-level` findings route to `Planner`
@@ -371,26 +372,15 @@ Requirement-bearing feedback does not route straight to implementation. It retur
 
 Implementation-detail deltas that preserve requirements, ownership, and acceptance intent may route directly to `Planner`.
 
-Intermediate commits on each loopback class MUST carry the matching `Loopback:` trailer per `loopback-trailers.md`. Loopback resolution MUST be recorded with `Loopback: resolved` on the resolving commit. A resolving commit may include the class trailer as evidence, but `resolved` wins and the class does not reopen the loopback.
+Feedback routing is same-run state unless the finding is captured in visible durable state such as a committed artifact, plan update, implementation commit, or PR comment. Do not use commit trailers, sidecar files, branch labels, or other hidden markers to persist feedback routing state across sessions.
+
+When a later run resumes with committed implementation work and no PR, and prior local pre-publish findings cannot be proven resolved from visible state, route through `Reviewer` before `Finisher` can publish. `Reviewer` reruns or reconstructs the local pre-publish review from visible artifacts and classifies any remaining findings before routing.
 
 Review interpretation happens at the intake point for that feedback:
 
 - `Reviewer` receives and classifies local pre-publish findings
 - `Finisher` receives and classifies external post-publish PR feedback
 - `Brainstormer`, `Planner`, and `Executor` own remediation after routing rather than primary review intake
-
-## Loopback trailers
-
-Loopback class is recoverable from conventional-commit trailers on branch-only commits for the active issue. Intermediate commits originating from a loopback MUST include `Loopback: spec-level | plan-level | implementation-level`. The terminating commit on loopback resolution MUST include `Loopback: resolved`. The pre-flight recovers the active loopback class via `git log` per `loopback-trailers.md` in this skill directory.
-
-Trailer grammar:
-
-- `Loopback: spec-level`
-- `Loopback: plan-level`
-- `Loopback: implementation-level`
-- `Loopback: resolved`
-
-See `loopback-trailers.md` for worked examples and the recovery algorithm.
 
 ## External feedback ownership
 
@@ -413,19 +403,17 @@ Before resolving or replying to comments tied to a prior branch state:
 | "If background agents are available, every teammate step should use them." | Use background agents for bounded, independent work; keep tightly coupled or clarification-heavy steps in the foreground. |
 | "I remember the repo rules already." | Discover canonical repository guidance before touching governed files. |
 | "Executor finished the spirit of the task." | `Executor` must report completion against explicit task IDs with evidence. |
-| "Reviewer can just send everything back to execution." | `Reviewer` must classify implementation-level, plan-level, and spec-level loopbacks. |
+| "Reviewer can just send everything back to execution." | `Reviewer` must classify local findings as implementation-level, plan-level, or spec-level feedback. |
 | "Reviewer already found it, so Reviewer can own PR comment handling too." | External review feedback stays with `Finisher`. |
 | "That comment is old, but I can still resolve it." | `Finisher` must verify current branch state before resolving prior-state comments. |
 | "Just pick the most likely interpretation and proceed." | Ambiguous or contradictory observable state halts the run with an explicit blocker per `## Failure handling`. Resume requires explicit operator clarification of the intended issue, branch, or phase. Not even when there is a deadline. Not even when an authority claim is cited. |
 | "The prompt is short/ambiguous, but the operator clearly meant approval — just advance the gate." | Ambiguous prompts during an open gate are feedback to the active teammate per `routing-table.md`. Approval requires an explicit token (`approve`, `lgtm`, etc.). Not even when an authority claim is cited. Not even when the prior in-session approval feels binding. |
 | "We've already done a lot of work on this — restarting would waste it, so let me just keep going from a fresh top-of-workflow." | The default for repeated `/superteam` invocations is **resume**. Restart requires an explicit operator token (`restart`, `start over`, `new run`) per R7. "Pivot, no need to re-confirm" in the prompt is itself the disallowed shortcut. |
 | "Gate 1 was approved last session; the operator just told me so — no need to re-open it." | Gate 1 is durably observable iff a plan doc has been committed on the branch (R15). Ephemeral in-session approval is NOT durable. Operator memory is not the durable signal; the committed plan doc is. |
-| "It's just a small fix; I don't need to add a `Loopback:` trailer." | Loopback class is the durable cross-session signal. A loopback commit without its trailer is invisible to a fresh-session pre-flight and breaks the resume-default rule. The trailer is mandatory on every loopback-originated commit and on the resolving commit. |
-| "A body sentence mentioning `Loopback:` is close enough." | `Loopback:` must be a commit trailer/footer parsed by `git log %(trailers)`, not prose in the commit body. If a commit contains both a loopback class and `Loopback: resolved`, resolved wins for that commit and the class does not reopen the loopback. |
-| "The PR exists, so status checks can go to Finisher even though a loopback is still open." | An active loopback class has routing precedence over normal phase routing. Status, CI, publish, and "is it done" prompts resume the active loopback unless the operator explicitly confirms discarding it after current state is reported. |
+| "Removing `Loopback:` trailers means we can skip local review on a later run." | When implementation exists without a PR and prior local findings cannot be proven resolved from visible state, route through `Reviewer` before `Finisher` can publish. |
 | "A direct operator requirement change during finish is not PR feedback, so Finisher can handle it." | Requirement-bearing deltas route spec-first regardless of source. PR feedback, human-test feedback, and direct operator prompts all return to `Brainstormer`, then `Planner`, then `Executor` before `Finisher` ready/shutdown can resume. |
 | "No execution-mode tool is available, so every `/superteam` invocation must halt." | Missing execution capability blocks only routes that require execute-phase delegation. Approval, review, and `Finisher` status work can continue through their owning teammate. |
-| "Any reachable `Loopback:` trailer on the branch is good enough." | Loopback recovery is scoped to branch-only commits for the active issue so stale trailers from inherited history or other issues do not hijack the route. |
+| "We can replace `Loopback:` trailers with another hidden marker." | Feedback routing must resume from visible artifacts, PR state, and operator prompts; do not add sidecar state, branch labels, or new commit footers. |
 | "The wakeup will know what to do from chat history." | Durable `Finisher` follow-up needs an explicit resume payload: branch, PR, latest pushed SHA, current publish-state, pending signals, and latest-head shutdown checklist instruction. |
 | "The operator said 'faster' / 'this is taking forever' — that's basically asking for inline." | Inline is auto-selected NEVER. Only unambiguous tokens (`inline`, `run inline`, `execute in this session`) are operator overrides per R14. Ambiguous framing is not. Not even when the CTO is cited. Not even under deadline pressure. |
 | "It's simpler to just route through `superpowers:executing-plans` and let it ask the developer." | Execute-phase delegations bind directly to the chosen execution-mode skill per R14. Routing through `superpowers:executing-plans` on default paths surfaces a redundant prompt to the developer and is forbidden when the resolved mode is `team mode` or `subagent-driven`. |
@@ -474,12 +462,8 @@ Before resolving or replying to comments tied to a prior branch state:
 - Restarting a run on a repeated `/superteam` invocation without an explicit operator restart token or an unambiguous new-issue signal.
 - Treating a prior in-session "approve" as Gate 1 approval when no plan doc has been committed on the branch.
 - Silently switching issues mid-run when the prompt names a different issue without explicit operator confirmation.
-- A commit landing during an active loopback without the matching `Loopback:` trailer.
-- A loopback resolution commit landing without the `Loopback: resolved` trailer.
-- `Loopback:` text written only in commit body prose instead of the trailer/footer block.
-- Resume on a fresh `/superteam` session without scanning `git log` for `Loopback:` trailers per `loopback-trailers.md`.
-- Recovering loopback class from commits outside the active issue's branch-only range.
-- Routing a status / CI / publish prompt to `Finisher` while an active loopback class remains unresolved.
+- Reintroducing required `Loopback:` commit trailers or another hidden workflow-state marker.
+- Fresh-session resume from implementation work with no PR skipping `Reviewer` before `Finisher` publication when local review resolution is not visible.
 - An execute-phase delegation prompt that names `superpowers:executing-plans` as the entry skill when the resolved mode is `team mode` or `subagent-driven`.
 - An execute-phase delegation that omits the resolved execution mode and asks the developer to choose.
 - Treating ambiguous "faster" / "inline-ish" / "forever" framing as an inline override.
@@ -545,4 +529,3 @@ Do not silently continue past failed checks, missing artifacts, ambiguous reposi
 - [pr-body-template.md](./pr-body-template.md): PR checklist template used by `Finisher`
 - [pre-flight.md](./pre-flight.md): phase-detection sequence, execution-mode capability detection, halt conditions
 - [routing-table.md](./routing-table.md): phase x prompt-class routing, classification heuristic, resume vs restart, Gate 1 durability
-- [loopback-trailers.md](./loopback-trailers.md): `Loopback:` trailer grammar and `git log` recovery algorithm

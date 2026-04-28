@@ -16,8 +16,7 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 6. **Derive the detected phase** per the phase derivation rules below.
 7. **Classify the operator prompt** per `routing-table.md` `## Prompt-classification heuristic`.
 8. **Probe execution-mode capability** per the `## Execution-mode capability detection` section below.
-9. **Recover the active loopback class** from `git log` per `loopback-trailers.md` `## Recovery algorithm`. The recovered class is part of the pre-flight output.
-10. **Route** per `routing-table.md` using the `(detected_phase, prompt_classification)` pair as the key.
+9. **Route** per `routing-table.md` using the `(detected_phase, prompt_classification)` pair as the key.
 
 ## Phase derivation rules
 
@@ -64,9 +63,9 @@ If multiple candidates conflict, halt per halt condition 3 above.
 
 On default branch with source 1, run `## Auto-switch to issue branch` before step 3.
 
-## Loopback-class recovery
+## Local-review resume safety
 
-Use the `git log` algorithm in `loopback-trailers.md` `## Recovery algorithm` to recover the active loopback class (one of `spec-level`, `plan-level`, `implementation-level`, or none) from conventional-commit `Loopback:` trailers on the active branch. The recovered class is part of the pre-flight output and feeds into routing.
+Pre-flight does not recover workflow state from commit trailers. When committed implementation work exists, no PR exists, and prior local review findings cannot be proven resolved from visible state, route through `Reviewer` before `Finisher` can publish. `Reviewer` reruns or reconstructs the local pre-publish review from visible artifacts instead of relying on hidden state.
 
 ## Execution-mode capability detection
 
@@ -89,7 +88,6 @@ The pre-flight produces this record, which is the input to `routing-table.md`:
   active_issue,
   detected_phase,
   open_gate?,
-  active_loopback_class?,
   execution_mode,
   operator_override?
 }

@@ -27,7 +27,7 @@ Agent({
            2. Never report done without the role-specific done contract, SHAs, and verification output when applicable.
            3. If your work touches `skills/**/*.md`, invoke `superpowers:writing-skills` before editing.
            4. Route requirement-bearing feedback through spec first, then plan, then execution.
-           5. `Reviewer` owns local pre-publish findings and loopback classification. `Finisher` owns publish-state follow-through and external PR feedback.
+           5. `Reviewer` owns local pre-publish findings and feedback classification. `Finisher` owns publish-state follow-through and external PR feedback.
            6. `Executor` completion is not workflow completion. After local implementation work, the run must continue into `Reviewer` and then `Finisher`, or halt explicitly as `superteam halted at <teammate or gate>: <reason>`.
            {role-specific inputs}
            Report back via SendMessage to team-lead plus TaskUpdate."
@@ -41,7 +41,7 @@ Agent({
 Append this block in place of `{role-specific inputs}`:
 
 ```text
-Own orchestration, delegation, gates, and loopbacks.
+Own orchestration, delegation, gates, and feedback routing.
 Recommend `superpowers:using-superpowers`.
 Also recommend `superpowers:dispatching-parallel-agents` when splitting bounded, independent work, and keep tightly coupled or interactive steps in the foreground.
 When requesting Brainstormer approval, verify the cited design artifact exists first.
@@ -151,10 +151,10 @@ Own receiving and interpreting local pre-publish review findings.
 After `Executor` completes local work, `Reviewer` is the next required stage unless the run already halted explicitly with a blocker.
 When the changed scope includes `skills/**/*.md` or workflow-contract docs, run the relevant pressure-test walkthrough and report pass/fail results plus any loopholes found.
 If later fixes change those same workflow-contract surfaces again after an earlier review pass, rerun the relevant pressure-test walkthrough before the next handoff back to `Finisher`.
-If that walkthrough finds a loophole, loop back before publish instead of treating the review as complete.
+If that walkthrough finds a loophole, route the finding before publish instead of treating the review as complete.
 Done-report contract:
 - `findings[]`: local findings, if any, with one entry per issue
-  - each finding entry includes `summary`, `loopback_classification` (`implementation-level` | `plan-level` | `spec-level`), and `owner`
+  - each finding entry includes `summary`, `feedback_classification` (`implementation-level` | `plan-level` | `spec-level`), and `owner`
 - `verification_gaps[]`: any missing or invalid verification
 - `pressure_test_results[]`: for skill or workflow-contract changes, the scenarios checked and their pass/fail outcomes, or an explicit empty result when not applicable
 Do not take ownership of external PR comments or bot feedback.
