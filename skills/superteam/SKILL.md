@@ -95,6 +95,86 @@ Operator override:
 
 An explicit `inline` (or equivalent: `run inline`, `execute in this session`) instruction in the prompt switches the resolved mode to inline for that delegation only, and is the only path that may route through `superpowers:executing-plans`. Ambiguous "inline-ish" / "faster" / "forever" framing is NOT an override.
 
+## Model selection
+
+`Team Lead` resolves an explicit per-role model at delegation time and binds it via the host's model-override mechanism. Silent inheritance of the parent session model is forbidden except where noted.
+
+### Per-teammate model defaults
+
+| Teammate | Default model | Rationale |
+|---|---|---|
+| `Team Lead` | `inherit` | Routing, gate enforcement, and pre-flight benefit from the main session model; `Team Lead` itself usually IS the main session and does not delegate to itself. |
+| `Brainstormer` | `opus` | Design reasoning, requirement framing, adversarial review, loophole-closure synthesis. |
+| `Planner` | `opus` | Plan structuring, workstream decomposition, dependency reasoning. |
+| `Executor` | `sonnet` | Bounded ATDD / implementation grunt work; cost and speed win without sacrificing correctness on tasks that already have explicit AC IDs and a committed plan. |
+| `Reviewer` | `opus` | Owns adversarial pressure-tests for `skills/**/*.md` and workflow-contract changes (per `### Reviewer`, which requires invoking `superpowers:writing-skills` and running the relevant pressure-test walkthrough before publish). That is deep adversarial reasoning, not bounded pattern matching — the same justification that puts `Brainstormer` on Opus. Operators can downshift via `model: sonnet for reviewer` for trivial repo-rule reviews. |
+| `Finisher` | `sonnet` | CI triage, PR ops, status sweeps, mechanical follow-through. |
+
+Notes:
+
+- `inherit` for `Team Lead` is a literal value, not a synonym for "no contract". `Team Lead` is the only role for which inheritance is the default; every other delegation MUST resolve to one of `opus`, `sonnet`, or `haiku`.
+- Defaults are deliberately static. Dynamic per-task complexity scoring is out of scope.
+
+### Operator override grammar
+
+The override grammar mirrors R14's discipline: only unambiguous tokens count. The matching rule is the same as R14 inline override — substring match on the canonical token forms only, no fuzzy interpretation.
+
+Canonical override tokens: the following tokens, when present in the operator prompt, override the per-role default for the next delegation only:
+
+- `model: opus` (canonical) and aliases `use opus`, `with opus`
+- `model: sonnet` (canonical) and aliases `use sonnet`, `with sonnet`
+- `model: haiku` (canonical) and aliases `use haiku`, `with haiku`
+
+Token matching is case-insensitive. Whitespace around the colon is permitted (`model:opus`, `model :opus`). The token applies to the next teammate delegation `Team Lead` performs in response to the prompt; it does NOT persist across `/superteam` invocations and does NOT change the per-role default.
+
+Targeted override: when the operator wants to override a specific teammate role rather than the next delegation, the targeted form is `model: <model> for <role>`, e.g. `model: opus for executor`.
+
+What does NOT count as an override — `Team Lead` MUST resolve to the per-role default and MUST NOT route these through the override path:
+
+- "use the better model"
+- "go cheap" / "go fast" / "go faster"
+- "use the fast model" / "fast model"
+- "use the smart model" / "smart model"
+- "save tokens" / "be efficient"
+- "this is taking too long"
+- Any phrasing that names a model family informally without the canonical token (e.g. "use Claude opus please" without `model:` or `use opus`)
+
+This list mirrors the R14 inline-override discipline: ambiguous "inline-ish" framing is not an override, and ambiguous "model-ish" framing is not an override either.
+
+Override scope: operator override always wins over the per-role default for the delegation it targets. After that delegation completes, subsequent delegations revert to the per-role default. There is no implicit "remember the last override" behavior.
+
+### Binding mechanism
+
+For each teammate delegation, `Team Lead` resolves `{model}` in this order:
+
+1. If the operator prompt contains a canonical override token (per `### Operator override grammar`) targeting this delegation, use the override.
+2. Otherwise, use the per-role default from `### Per-teammate model defaults`.
+3. If the per-role default is `inherit`, do not pass a `model` parameter; inherit from the parent session.
+
+Binding surfaces:
+
+- **Claude Code (`Agent` tool)**: bind by setting the `model` parameter on the `Agent` tool call to one of `sonnet`, `opus`, `haiku`. This is the canonical surface.
+- **Other host runtimes**: when the host's subagent-dispatch surface accepts an analogous model parameter, bind to that surface.
+
+### Capability fallback
+
+Some host runtimes do not expose a model-override mechanism. The fallback rule is inherit-and-warn, not halt:
+
+1. During pre-flight, `Team Lead` probes whether the active subagent-dispatch surface accepts a model-override parameter (per `pre-flight.md` `## Model-override capability detection`).
+2. If model-override capability is unavailable, `Team Lead` records `model_override_capability=unavailable` in the pre-flight output.
+3. For each subsequent delegation, `Team Lead` proceeds without binding a model and surfaces a single warning per run: "host runtime lacks model-override capability; per-role model defaults could not be applied; all delegations will inherit the parent session model."
+4. The run does NOT halt. Model selection is an optimization (cost, speed, fit), not a correctness gate.
+
+This deliberately differs from R14's execution-mode capability rule, which halts execute-phase routes when no execution mode is available. Execution mode is a correctness-of-dispatch gate; model selection is a cost/fit gate.
+
+### Loophole closure
+
+1. **Model selection is binding.** Per-role defaults are not advisory; they are the contract. The only legitimate departures are an explicit operator override (per `### Operator override grammar`) or the inherit-and-warn capability fallback.
+2. **Ambiguous framing is NOT an override.** This mirrors R14. "Go faster", "use the smart model", "save tokens", "this is taking too long" — none of these reach the override path. Only canonical tokens do. The matching rule is substring on canonical token forms; no fuzzy interpretation; no LLM-based intent inference.
+3. **Operator silence is NOT permission to inherit.** "The operator didn't say which model" means "use the per-role default", not "inherit from the parent session". Inheritance is the explicit `inherit` value for `Team Lead` only, plus the inherit-and-warn capability fallback.
+4. **Operator override always wins for its targeted delegation.** `Team Lead` does not override the operator with a per-role default reasoning ("but Brainstormer needs Opus"). The override scope is one delegation; defaults reassert on the next.
+5. **No persistent override memory.** An override targets one delegation. There is no "the operator said opus once so use opus forever" behavior. Each delegation re-resolves from prompt + per-role default.
+
 ## Canonical rule discovery
 
 Before any teammate touches governed files, discover the canonical repository rules from repo guidance instead of relying on hard-coded literals:
@@ -189,6 +269,7 @@ Headline behaviors:
 - During execute-phase delegation, bind directly to the chosen execution-mode skill (`superpowers:subagent-driven-development` for subagent-driven, or the host's native team-mode capability for team mode). Do NOT route execute-phase delegations through `superpowers:executing-plans` on default paths.
 - Inject the pre-selected execution mode (resolved per R17 in pre-flight) into every execute-phase delegation prompt and instruct the teammate not to ask the operator to choose between subagent-driven and inline execution. Carry the same suppression wording into any nested delegation.
 - Treat ambiguous "inline-ish" / "faster" / "forever" framing as NOT an explicit operator override. Inline is reachable only via unambiguous tokens (`inline`, `run inline`, `execute in this session`).
+- Resolve the model per teammate role at delegation time per `## Model selection`. Bind the resolved model via the host's model-override mechanism (e.g. the `Agent` tool's `model` parameter). Do NOT silently inherit the parent session model. The rule is binding, not advisory; the only paths to inheritance are the literal `inherit` default for `Team Lead` itself and the inherit-and-warn capability fallback per `## Model selection` `### Capability fallback`.
 
 ### Brainstormer
 
@@ -374,6 +455,9 @@ Before resolving or replying to comments tied to a prior branch state:
 | "It's simpler to just route through `superpowers:executing-plans` and let it ask the developer." | Execute-phase delegations bind directly to the chosen execution-mode skill per R14. Routing through `superpowers:executing-plans` on default paths surfaces a redundant prompt to the developer and is forbidden when the resolved mode is `team mode` or `subagent-driven`. |
 | "The maintainer already signed off on the direction; I can skip writing-skills and just draft the spec." | Per R25, when the design under brainstorming touches `skills/**/*.md` or any workflow-contract surface, invoking `superpowers:writing-skills` is unconditional on the trigger. Cited authority does not waive the rule. The discipline is required because the design itself must carry loophole-closure language, rationalization-table rows, red-flags bullets, token-efficiency targets, and a RED-phase baseline obligation for any new discipline rule. |
 | "The issue only says workflow contract; I don't know the file yet, so I can draft first and decide later." | Plausible skill or workflow-contract scope is enough to load `superpowers:writing-skills` before authoring requirements. If the intended surface is uncertain, load writing-skills first or halt for clarification. |
+| "The parent model is fine, just inherit." | Per-role defaults are binding (R26). Silent inheritance is forbidden for every role except `Team Lead`. The operator's silence on which model to use is NOT permission to inherit — it means "use the per-role default". The only path to inheritance is the host runtime lacking a model-override mechanism, in which case `Team Lead` inherits-and-warns once per run. |
+| "The operator said 'go faster' — that's basically asking for Sonnet." | Ambiguous framing is NOT an operator override (R26, parallel to R14). Only canonical tokens (`model: opus`, `model: sonnet`, `model: haiku`, or `use <model>` / `with <model>`) override the per-role default. "Go faster" routes to the per-role default; for `Executor` that is already Sonnet. |
+| "Brainstormer's default is Opus, but the operator typed `model: sonnet`, so I'll keep Opus because the design needs reasoning." | Operator override always wins for the delegation it targets. `Team Lead` does not second-guess the operator's explicit token. Override scope is the next delegation only. |
 | "The operator is on the default branch on purpose; they clearly meant to start work here." | When the active issue resolves from the operator prompt and the current branch is the repository default branch, pre-flight MUST auto-switch to the per-issue branch before committed-artifact inspection. Operator intent is captured by the `#<n>` reference, not by the branch they happened to be on. Not even when the operator is the maintainer. Not even under deadline pressure. |
 | "Skipping the auto-switch saves a step; we can branch later." | Skipping authors Gate 1 artifacts on the wrong base and forces `Finisher` to rewrite history or push from the default branch. The rule is not optional. |
 | "Dirty working tree? I can stash and continue." | The `superteam` issue-branch procedure refuses on a dirty working tree. `superteam` halts with `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`. Pre-flight does NOT stash on the operator's behalf. |
@@ -440,6 +524,9 @@ Before resolving or replying to comments tied to a prior branch state:
 - Natural prose omits the artifact, decision, active finding, blocker, or next action the operator needs.
 - A change deletes durable done-report or review evidence instead of separating it from chat rendering.
 - `Finisher` presents a conversational update that hides pending checks, unresolved feedback, mergeability problems, or PR metadata blockers.
+- A teammate delegation that omits a resolved `model` value (or omits the host's model-override parameter on the dispatch surface) when the per-role default is `opus`, `sonnet`, or `haiku`. Inheritance is reserved for `Team Lead` and for the inherit-and-warn capability fallback; every other delegation MUST carry an explicit model on the dispatch surface.
+- Treating "go faster" / "use the cheap model" / "use the better model" / similar fuzzy framing as an operator model override.
+- An execute-phase delegation that resolves `{model}` to the parent session model by default rather than to the per-role `Executor` default (`sonnet`).
 
 ## Shutdown
 

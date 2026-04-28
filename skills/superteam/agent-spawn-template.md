@@ -2,7 +2,7 @@
 
 Model per teammate is dictated by the `superteam` workflow. Inject `{model}` from the active teammate assignment instead of hardcoding it.
 
-Known placeholders include `{model}`, `{role}`, `{N}`, `{slug}`, `{branch}`, `{id}`, `{skill}`, `{effort}`, and `{execution_mode}`. `Team Lead` resolves `{execution_mode}` during pre-flight per `SKILL.md` `## Execution-mode injection` and `pre-flight.md` `## Execution-mode capability detection`.
+Known placeholders include `{model}`, `{role}`, `{N}`, `{slug}`, `{branch}`, `{id}`, `{skill}`, `{effort}`, and `{execution_mode}`. `Team Lead` resolves `{execution_mode}` during pre-flight per `SKILL.md` `## Execution-mode injection` and `pre-flight.md` `## Execution-mode capability detection`. `Team Lead` resolves `{model}` per teammate role at delegation time per `SKILL.md` `## Model selection`, using the per-role default from that section unless an explicit operator override (per `### Operator override grammar`) targets the delegation. When the host runtime lacks model-override capability per `pre-flight.md` `## Model-override capability detection`, `Team Lead` proceeds with inherit-and-warn rather than halting.
 
 ```text
 Agent({

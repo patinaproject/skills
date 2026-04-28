@@ -17,7 +17,8 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 7. **Derive the detected phase** per the phase derivation rules below.
 8. **Classify the operator prompt** per `routing-table.md` `## Prompt-classification heuristic`.
 9. **Probe execution-mode capability** per the `## Execution-mode capability detection` section below.
-10. **Route** per `routing-table.md` using the `(detected_phase, prompt_classification)` pair as the key.
+10. **Probe model-override capability** per `## Model-override capability detection` below.
+11. **Route** per `routing-table.md` using the `(detected_phase, prompt_classification)` pair as the key.
 
 ## Phase derivation rules
 
@@ -95,6 +96,14 @@ Inline mode is NEVER auto-selected at any step. Only an explicit operator overri
 
 If the selected route requires execute-phase delegation and `execution_mode=unavailable`, halt with `superteam halted at Pre-flight: no execution mode available`. Non-execute routes such as Gate 1 feedback, local review interpretation, and `Finisher` status checks continue through their owning teammate instead of halting solely because execution delegation is unavailable.
 
+## Model-override capability detection
+
+Run this probe once per `/superteam` invocation, alongside the execution-mode probe, before routing.
+
+1. Inspect the active subagent-dispatch surface to determine whether it accepts a model-override parameter (e.g. inspect the `Agent` tool schema for a `model` parameter, or a plugin manifest declaration of model-override capability).
+2. If model-override capability is present, record `model_override_capability=available`.
+3. If model-override capability is absent or cannot be confirmed, record `model_override_capability=unavailable`. This is NOT a halt condition. Per `SKILL.md` `## Model selection` `### Capability fallback`, `Team Lead` proceeds with inherit-and-warn: each subsequent delegation proceeds without a bound model parameter, and a single per-run warning is surfaced noting that per-role model defaults could not be applied.
+
 ## Output of pre-flight
 
 The pre-flight produces this record, which is the input to `routing-table.md`:
@@ -113,6 +122,7 @@ The pre-flight produces this record, which is the input to `routing-table.md`:
   pr_state,
   finisher_substate_signals?,
   execution_mode,
+  model_override_capability,
   operator_override?
 }
 ```
@@ -123,3 +133,4 @@ Field value contracts:
 - `local_review_state`: `not_applicable` | `not_visible` | `open_findings` | `resolved`
 - `pr_state`: `absent` | `open` | `merged`
 - `finisher_substate_signals`: `triage` | `monitoring` | `ready` | `blocked` | `merged`
+- `model_override_capability`: `available` | `unavailable`
