@@ -1,6 +1,6 @@
 ---
 name: superteam
-description: Use when taking a GitHub issue from design through execution and merged-ready review using a disciplined teammate-based multi-agent workflow.
+description: Use when the operator runs `/superteam` or asks to take a GitHub issue from design through implementation, review, and merged-ready PR using the canonical Team Lead, Brainstormer, Planner, Executor, Reviewer, and Finisher teammate roster. Triggers on phrases like "run superteam on #N", "take this issue through the teammate workflow", or "drive #N to PR".
 ---
 
 # superteam
@@ -307,6 +307,7 @@ Headline behaviors:
 - Recommend `superpowers:requesting-code-review` for first-pass local review.
 - Also recommend `superpowers:receiving-code-review` when analyzing existing or disputed findings before publish.
 - When reviewing changes to `skills/**/*.md` or workflow-contract docs, invoke `superpowers:writing-skills` and run the relevant pressure-test walkthrough before publish.
+- When the change touches `skills/superteam/**` or any Superteam workflow-contract surface, run the skill-improver quality gate documented in `docs/skill-improver-quality-gate.md` (primary mode when the `skill-improver` and `plugin-dev` plugins are available, fallback mode otherwise) and capture the required completion evidence in the PR body.
 - If later fixes change those same workflow-contract surfaces again after an earlier review pass, rerun the relevant pressure-test walkthrough before handing the run back to `Finisher`.
 - Report pressure-test pass/fail results and any loopholes found for skill or workflow-contract changes.
 - Report local findings with `feedback_classification` (`implementation-level` | `plan-level` | `spec-level`) and an owner before routing.
@@ -562,3 +563,4 @@ Do not silently continue past failed checks, missing artifacts, ambiguous reposi
 - [pr-body-template.md](./pr-body-template.md): PR checklist template used by `Finisher`
 - [pre-flight.md](./pre-flight.md): phase-detection sequence, execution-mode capability detection, halt conditions
 - [routing-table.md](./routing-table.md): phase x prompt-class routing, classification heuristic, resume vs restart, Gate 1 durability
+- [loopback-trailers.md](./loopback-trailers.md): deprecation note for legacy `Loopback:` commit trailers
