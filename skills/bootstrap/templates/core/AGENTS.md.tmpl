@@ -70,7 +70,7 @@ The `autorelease: pending` and `autorelease: tagged` labels are reserved for Rel
 
 This repo ships canonical templates for issues and pull requests. Agents must use them – do not invent parallel structure.
 
-- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`. The PR body must use the template's section headings (`Linked issue`, `What changed`, `Do before merging`, `Test coverage`, `Acceptance criteria`) in the order the template defines, even when the body is passed inline via `--body`.
+- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`. The PR body must use the template's section headings in the order the template defines, even when the body is passed inline via `--body`. Include `Do before merging` only when work-specific operator steps exist; when present, it belongs between `What changed` and `Test coverage`.
 - Issues: `.github/ISSUE_TEMPLATE/bug_report.md` and `.github/ISSUE_TEMPLATE/feature_request.md`. Pick the one that matches the report and reproduce its sections in order.
 
 Recommended `gh` patterns:
@@ -178,7 +178,7 @@ The verb "standardize" combined with a diff under `skills/**` and `.codex-plugin
 
 On this repo the canonical "Commit type selection" section is shipped through `skills/bootstrap/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `bootstrap` skill in realignment mode. Mistyped commits silently suppress releases – see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping. The AC-54-7 parity grep (a one-liner that checks every per-tool surface for the verbatim glob list) is the verification artifact.
 
-Pull requests should include linked issue (`None` when no issue applies), what changed, a `Do before merging` section for work-specific operator pre-merge steps, test coverage matrix, and acceptance-criteria outcomes.
+Pull requests should include linked issue (`None` when no issue applies), what changed, test coverage matrix, and acceptance-criteria outcomes. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
 
 For squash-and-merge workflows, PR titles must exactly match the commit format. Use the final intended squash commit title as the PR title.
 

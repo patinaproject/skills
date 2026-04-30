@@ -21,16 +21,20 @@
 
 -
 
-## Do before merging
-
 <!--
-  Add checklist items only for work-specific operator steps that must happen
-  after review and before merge. Omit this section's checklist when no
-  work-specific pre-merge steps are required.
+  Include this section only when work-specific operator steps must happen after
+  review and before merge:
+
+  ## Do before merging
+
+  - [ ] Rotate the production secret after deploy.
+
+  Keep checklist items concrete and actionable. Do not add this section for
+  placeholders such as `None`, `N/A`, or `No work-specific pre-merge operator
+  steps.`
   Visible unchecked checkboxes are enforced by the `Required template
-  checkboxes` status check. To include an intentionally optional checkbox, put
-  `<!-- pr-checkbox: optional -->` immediately above that checkbox.
-  Example: - [ ] Rotate the production secret after deploy.
+  checkboxes` status check. To include an intentionally optional checkbox, put a
+  `pr-checkbox: optional` HTML comment immediately above that checkbox.
 -->
 
 ## Test coverage
