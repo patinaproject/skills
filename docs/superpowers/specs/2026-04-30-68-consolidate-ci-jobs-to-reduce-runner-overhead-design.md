@@ -15,12 +15,12 @@ workflow files change.
   consistency, Markdown linting, and workflow linting.
 - Consolidate only checks with compatible triggers, permissions, runner needs,
   and failure-reporting expectations.
-- Run Markdown lint against changed Markdown files only while keeping the
-  workflow check merge-safe for repositories that require it.
+- Run Markdown lint through the standalone `markdownlint-cli2-action` against
+  the repository Markdown globs so CI avoids dependency installation.
 - Keep heavier, security-sensitive, or materially independent checks separate
   when job isolation is useful for permissions, reporting, or future extension.
 - Preserve the documented required status check name
-  `Required template checkboxes`, or update every repository guidance surface
+  `Lint`, or update every repository guidance surface
   that tells maintainers which check to require before merge.
 - Preserve full-length SHA pinning and adjacent action/version comments on
   every `uses:` reference.
@@ -35,29 +35,29 @@ workflow files change.
 The core bootstrap template ships three CI workflow files that mirror the root
 workflow files in this repository:
 
-- `lint-pr.yml` runs four jobs for PR title validation, closing keyword
+- `pull-request.yml` runs four jobs for PR title validation, closing keyword
   enforcement, required template checkbox validation, and breaking-change marker
   consistency.
-- `lint-actions.yml` runs `actionlint` for workflow changes.
-- `lint-md.yml` runs Markdown linting against every Markdown file on all pull
+- `actions.yml` runs `actionlint` for workflow changes.
+- `markdown.yml` runs Markdown linting against every Markdown file on all pull
   requests, even when only one Markdown file changed.
 
-The largest immediate runner-overhead opportunity is inside `lint-pr.yml`.
+The largest immediate runner-overhead opportunity is inside `pull-request.yml`.
 The four jobs share the same trigger and broadly compatible read-only
 permissions, but each starts a separate runner. Three of those jobs do not need
 checkout. The checkbox job does need checkout because it runs the repository
 script.
 
-The simplest no-coverage-loss opportunity outside `lint-pr.yml` is teaching
-`lint-md.yml` to pass only changed Markdown files to markdownlint.
+The Markdown workflow should stay simple because repository-wide Markdown lint
+is cheap for this baseline.
 
 ## Approaches Considered
 
-### Recommended: consolidate `lint-pr.yml` while preserving required status
+### Recommended: consolidate `pull-request.yml` while preserving required status
 
 Merge the currently separate PR metadata checks into the existing
-`template-checkboxes` job and keep that job's display name exactly
-`Required template checkboxes`. The consolidated job can contain named
+`lint` job and keep that job's display name exactly
+`Lint`. The consolidated job can contain named
 sequential steps for title validation, closing-keyword enforcement, checkbox
 validation, and breaking-change marker consistency. Preserve the existing
 conditions by applying the release-PR skip at the job level and the Dependabot
@@ -76,18 +76,13 @@ That is acceptable for this baseline because the checks are fast, deterministic
 PR hygiene checks and the runner-overhead reduction is the purpose of the
 change. AC-68-2 requires the failing step and error output to remain clear.
 
-### Lint changed Markdown files
+### Run the Markdown lint action
 
-Keep `lint-md.yml` as a separate workflow that still reports a status on every
-pull request, but add an early changed-files detection step for Markdown files:
-
-- `**/*.md`
-
-When changed Markdown files exist, pass exactly those still-present Markdown
-paths to `markdownlint-cli2-action`. When no Markdown files changed, skip the
-lint action and end the job successfully. This avoids full-repo Markdown lint
-work while avoiding GitHub's required-check trap for workflows skipped by
-`pull_request.paths`.
+Keep `markdown.yml` as a separate workflow that reports a status on every pull
+request. Check out the repository and run `markdownlint-cli2-action` against
+the same Markdown globs used by the local script: `**/*.md`, `#node_modules`,
+and `#CHANGELOG.md`. This avoids dependency installation and avoids a custom
+changed-file detector for a cheap lint operation.
 
 ### Broader consolidation across lint workflows
 
@@ -110,10 +105,9 @@ default directly.
 
 ## Proposed Design
 
-Update the core template `skills/bootstrap/templates/core/.github/workflows/lint-pr.yml`
-to replace the current four-job layout with a single consolidated
-`template-checkboxes` job whose display name remains exactly `Required template
-checkboxes`.
+Update the core template `skills/bootstrap/templates/core/.github/workflows/pull-request.yml`
+to replace the current four-job layout with a single consolidated `lint`
+job whose display name remains exactly `Lint`.
 
 The job should:
 
@@ -136,23 +130,23 @@ triggers, permissions, and runner requirements should prefer named steps within
 an existing job over separate jobs, while required status check names must be
 preserved or migrated deliberately.
 
-Update the core template `skills/bootstrap/templates/core/.github/workflows/lint-md.yml`
-to add changed-files detection and pass only changed, still-present Markdown
-files to `markdownlint-cli2-action`. Do not use `pull_request.paths`, because a
-skipped workflow can leave required checks pending. Realign the root
-`.github/workflows/lint-md.yml` file from the template.
+Update the core template `skills/bootstrap/templates/core/.github/workflows/markdown.yml`
+to run `markdownlint-cli2-action` against the repository Markdown globs on
+every pull request. Do not use `pull_request.paths`, because a skipped workflow
+can leave required checks pending. Realign the root `.github/workflows/markdown.yml`
+file from the template.
 
 After the template changes are made, run the local bootstrap realignment
-workflow so `.github/workflows/lint-pr.yml`, `.github/workflows/lint-md.yml`,
+workflow so `.github/workflows/pull-request.yml`, `.github/workflows/markdown.yml`,
 and updated root guidance match the template output. If the realignment command
 is not available or cannot be run safely, document the blocker instead of
 hand-copying root workflow changes.
 
 ## Acceptance Criteria
 
-- AC-68-1: Given the bootstrap `lint-pr.yml` template contains compatible PR
+- AC-68-1: Given the bootstrap `pull-request.yml` template contains compatible PR
   metadata checks, when the workflow is updated, then those checks run as named
-  steps in the `Required template checkboxes` job without removing existing
+  steps in the `Lint` job without removing existing
   validation behavior.
 - AC-68-2: Given a consolidated PR validation step fails, when a maintainer
   opens the GitHub Actions run, then the first failing validation is
@@ -162,37 +156,36 @@ hand-copying root workflow changes.
   40-character commit SHA with an adjacent comment naming the action and
   version.
 - AC-68-4: Given template changes are complete, when the repo is realigned from
-  `skills/bootstrap/templates/**`, then the root `.github/workflows/lint-pr.yml`,
-  root `.github/workflows/lint-md.yml`, and any updated root guidance match the
+  `skills/bootstrap/templates/**`, then the root `.github/workflows/pull-request.yml`,
+  root `.github/workflows/markdown.yml`, and any updated root guidance match the
   generated template output.
 - AC-68-5: Given maintainers configure branch protection or repository rulesets,
   when they follow repo guidance after the consolidation, then the guidance
-  still names the exact required status check `Required template checkboxes`.
+  still names the exact required status check `Lint`.
 - AC-68-6: Given future bootstrap workflow changes add short-lived checks, when
   contributors read the repo guidance, then it tells them to consolidate
   overhead-bound checks with compatible triggers, permissions, and runner needs
   into named steps instead of separate jobs.
 - AC-68-7: Given a pull request changes no Markdown files, when the Markdown
-  lint workflow runs, then the Markdown lint action step is skipped and the
-  workflow reports success instead of pending.
-- AC-68-8: Given a pull request changes one or more Markdown files that still
-  exist in the PR checkout, when the Markdown lint workflow runs, then the
-  Markdown lint action step executes against only those changed Markdown files.
+  workflow runs, then it still reports a successful required-check-safe status.
+- AC-68-8: Given the Markdown workflow runs, when it reaches the lint step,
+  then it executes `markdownlint-cli2-action` against the repository Markdown
+  globs.
 - AC-68-9: Given implementation is complete, when verification runs, then
   markdown linting and workflow validation either pass or any unavailable check
   is documented as a blocker in the PR.
 
 ## Non-Goals
 
-- Do not consolidate `lint-md.yml` or `lint-actions.yml` into another workflow
+- Do not consolidate `markdown.yml` or `actions.yml` into another workflow
   in this issue.
-  Broadening consolidation beyond `lint-pr.yml` requires a Brainstormer and
+  Broadening consolidation beyond `pull-request.yml` requires a Brainstormer and
   Planner update with revised acceptance criteria.
-- Do not add a `pull_request.paths` filter to `lint-md.yml` unless branch
+- Do not add a `pull_request.paths` filter to `markdown.yml` unless branch
   protection guidance is also changed to ensure skipped workflows cannot leave
   required checks pending.
 - Do not remove, weaken, or bypass PR metadata requirements.
-- Do not rename the required `Required template checkboxes` status check unless
+- Do not rename the required `Lint` status check unless
   guidance and branch-protection migration are made explicit first.
 - Do not change runner vendors, workflow billing settings, or downstream
   repositories.
@@ -206,14 +199,12 @@ hand-copying root workflow changes.
 - Run the checkbox validation script test if workflow changes touch
   `scripts/check-pr-template-checkboxes.mjs` or its invocation.
 - Inspect the final diff to confirm template and root workflow parity for
-  `.github/workflows/lint-pr.yml`, `.github/workflows/lint-md.yml`, and any
+  `.github/workflows/pull-request.yml`, `.github/workflows/markdown.yml`, and any
   updated guidance files.
-- Grep for `Required template checkboxes` across root and template guidance to
+- Grep for `Lint` across root and template guidance to
   confirm every required-check reference remains exact.
-- Inspect `lint-md.yml` to confirm it has no `pull_request.paths` filter, has a
-  changed-files detection step for Markdown files, passes only changed
-  Markdown file paths to the lint action, and skips only the lint action step
-  when no Markdown files changed.
+- Inspect `markdown.yml` to confirm it has no `pull_request.paths` filter and
+  runs `markdownlint-cli2-action` against the repository Markdown globs.
 
 ## Brainstormer Self-Review
 

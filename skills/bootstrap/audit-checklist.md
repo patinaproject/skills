@@ -38,9 +38,9 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `.github/ISSUE_TEMPLATE/bug_report.md` | yes | present with frontmatter |
 | `.github/ISSUE_TEMPLATE/feature_request.md` | yes | present with frontmatter |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
-| `.github/workflows/lint-pr.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
-| `.github/workflows/lint-md.yml` | yes | present; runs `DavidAnson/markdownlint-cli2-action` on PRs |
-| `.github/workflows/lint-actions.yml` | yes | present; runs `actionlint` on PRs touching `.github/workflows/**` |
+| `.github/workflows/pull-request.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
+| `.github/workflows/markdown.yml` | yes | present; runs `DavidAnson/markdownlint-cli2-action` on PRs |
+| `.github/workflows/actions.yml` | yes | present; runs `actionlint` on PRs touching `.github/workflows/**` |
 | `.github/actionlint.yaml` | yes | present; lists permitted self-hosted-runner labels |
 | End-to-end release smoke | yes | After realignment, run `gh workflow run Release --repo <owner>/<repo>` on a repo seeded with at least one `feat:` or `fix:` commit since its last tag. Verify release-please opens/updates a release PR; on merge, a tag and GitHub Release appear, and – when `<owner> == patinaproject` – a `plugin-release-bump.yml` dispatch fires on `patinaproject/skills`. Report a gap if the target has no prior release **and** `gh api repos/<owner>/<repo>/actions/permissions/workflow --jq .default_workflow_permissions` returns `read`. |
 | Default workflow permissions | yes | `gh api repos/<owner>/<repo>/actions/permissions/workflow --jq .default_workflow_permissions` must return `write`. When it returns `read`, emit a realignment-gap warning entry recommending **Settings → Actions → General → Workflow permissions → Read and write permissions**. This check runs regardless of whether the repo has ever cut a release, so the problem surfaces before the first 403. |

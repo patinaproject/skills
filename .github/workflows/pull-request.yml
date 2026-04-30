@@ -1,4 +1,4 @@
-name: Lint PR
+name: Pull Request
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  template-checkboxes:
-    name: Required template checkboxes
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
@@ -23,7 +23,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate conventional commits + issue ref
+      - name: Validate conventional commits
         # amannn/action-semantic-pull-request@v5.5.3
         uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
         env:

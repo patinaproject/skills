@@ -1,4 +1,4 @@
-name: Lint Actions
+name: Actions
 
 on:
   pull_request:
@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  actionlint:
-    name: actionlint
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       # actions/checkout@v4.3.1

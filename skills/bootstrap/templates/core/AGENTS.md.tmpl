@@ -103,11 +103,11 @@ ruleset guidance in the same change.
 
 ## Required PR checks
 
-Require the `Required template checkboxes` status check before merge. This
-check fails when required pull request template checklist rows remain unchecked
-and passes when required rows are checked or unchecked rows are explicitly
-optional. Configure it in branch protection or a repository ruleset alongside
-the other required PR checks.
+Require the `Lint` status check before merge. This check runs pull request
+metadata linting, including required template checkboxes, conventional PR title
+validation, closing-keyword validation, and breaking-change marker consistency.
+Configure it in branch protection or a repository ruleset alongside the other
+required PR checks.
 
 ## Commit & Pull Request Guidelines
 
