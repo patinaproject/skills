@@ -1,6 +1,6 @@
 {
   "name": "bootstrap",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Scaffold or realign repositories to the Patina Project baseline: commits, PRs, PNPM tooling, agent docs, and plugin surfaces.",
   "author": {
     "name": "Ted Mader",

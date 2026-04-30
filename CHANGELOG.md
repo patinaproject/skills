@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/patinaproject/bootstrap/compare/v1.7.0...v1.8.0) (2026-04-30)
+
+
+### Features
+
+* [#79](https://github.com/patinaproject/bootstrap/issues/79) prohibit accidental agent trigger mentions ([#80](https://github.com/patinaproject/bootstrap/issues/80)) ([938f429](https://github.com/patinaproject/bootstrap/commit/938f429fad39e31b21597295ea7c9d80e24ee139))
+
 ## [1.7.0](https://github.com/patinaproject/bootstrap/compare/v1.6.0...v1.7.0) (2026-04-30)
 
 
