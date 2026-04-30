@@ -135,6 +135,14 @@ Pin every action reference to a full 40-character commit SHA, not a tag. Tags ar
 
 Also enable **Settings → Actions → General → Require actions to be pinned to a full-length commit SHA** (at the repo or org level). GitHub then refuses to run any workflow that `uses:` an action by tag or branch, giving a hard gate on top of the CI check.
 
+## CI job shape
+
+Prefer named steps inside an existing job for short-lived checks that share the
+same trigger, permissions, runner, and reporting needs. Do not split such
+checks into separate jobs just to give each command its own status. Preserve
+documented required status check names, or update the branch-protection and
+ruleset guidance in the same change.
+
 ## Required PR checks
 
 Require the `Required template checkboxes` status check before merge. This

@@ -9,8 +9,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  title-format:
-    name: Validate PR title
+  template-checkboxes:
+    name: Required template checkboxes
     runs-on: ubuntu-latest
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
@@ -53,12 +53,8 @@ jobs:
           ignoreLabels: |
             dependencies
 
-  closing-keyword:
-    name: Require closing keyword
-    runs-on: ubuntu-latest
-    if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
-    steps:
       - name: Check for closing keyword in PR body
+        if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' }}"
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
@@ -84,11 +80,6 @@ jobs:
           echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
           exit 1
 
-  template-checkboxes:
-    name: Required template checkboxes
-    runs-on: ubuntu-latest
-    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
-    steps:
       - name: Check out repository
         # actions/checkout@v4.3.1
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -98,11 +89,6 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: node scripts/check-pr-template-checkboxes.mjs
 
-  mark-breaking-change:
-    name: Mark breaking change
-    runs-on: ubuntu-latest
-    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
-    steps:
       - name: Compare title `!` with body BREAKING CHANGE footer
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
