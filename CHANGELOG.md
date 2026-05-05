@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/patinaproject/superteam/compare/v1.4.1...v1.5.0) (2026-05-05)
+
+
+### Features
+
+* [#73](https://github.com/patinaproject/superteam/issues/73) pivot superteam to pure orchestration ([#74](https://github.com/patinaproject/superteam/issues/74)) ([6af1435](https://github.com/patinaproject/superteam/commit/6af1435d696fce299e8c4d52a10f7bc3681089e1))
+
 ## [1.4.1](https://github.com/patinaproject/superteam/compare/v1.4.0...v1.4.1) (2026-05-03)
 
 
