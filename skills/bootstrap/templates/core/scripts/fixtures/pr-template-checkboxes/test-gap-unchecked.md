@@ -4,13 +4,11 @@
 | --- | --- | --- | --- |
 | AC-86-1 | Canonical unresolved gap | ➖ | ⚠️ |
 
-## Acceptance criteria
-
 ### AC-86-1
 
-Canonical unresolved test gap should fail with a gap-specific readiness message.
+Canonical unresolved gap is coverage prose now.
 
-- [ ] ⚠️ Test gap: Linux validation has not rerun after the validator fix.
+- Gap: Linux validation has not rerun after the validator fix.
 
 ## Docs updated
 

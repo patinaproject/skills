@@ -1,11 +1,15 @@
-## Acceptance criteria
+## Test coverage
 
 ### AC-64-1
 
-Required checked evidence row should pass.
+Coverage is documented without checkboxes.
 
-<!-- pr-checkbox: required -->
-- [x] Linux evidence -- runner | env | verifier | 2026-04-29T00:00:00Z
+- Evidence: Linux test: pnpm test, local, verifier.
+- Gap: None.
+
+## Testing steps
+
+- [x] Open the rendered PR body and confirm coverage is readable.
 
 ## Docs updated
 

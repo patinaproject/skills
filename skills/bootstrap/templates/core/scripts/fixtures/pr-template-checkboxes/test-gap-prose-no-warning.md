@@ -4,8 +4,6 @@
 | --- | --- | --- | --- |
 | AC-86-1 | Prose without warning | ➖ | ➖ |
 
-## Acceptance criteria
-
 ### AC-86-1
 
 Blocking validation gap: Linux validation has not rerun after the validator fix.

@@ -13,9 +13,11 @@ const COMMENT_END = /-->\s*$/;
 const AC_HEADING = /^AC-\d+-\d+\b/;
 const TEST_GAP = /^⚠️\s*Test gap:\s*(.+)$/i;
 const NON_BLOCKING_GAP = /^⚠️\s*Non-blocking gap:\s*(.+)$/i;
-const OPERATOR_CHECK = /^Operator check:/i;
 const PROSE_GAP = /^\s*(?:[-*]\s*)?Blocking validation gap:/i;
 const NON_BLOCKING_PROSE = /^\s*(?:[-*]\s*)?Non-blocking gap:/i;
+const GAP_PROSE = /^\s*(?:[-*]\s*)?Gap:\s*(.+)$/i;
+const TEST_COVERAGE = /^Test coverage$/i;
+const ACCEPTANCE_CRITERIA = /^Acceptance criteria$/i;
 
 function ensureAc(acMap, acId, section, lineNumber) {
   const entry = acMap.get(acId) ?? {
@@ -56,6 +58,7 @@ export function validatePrBody(body) {
   let pending = null;
   let section = 'PR body';
   let activeAc = null;
+  let topSection = 'PR body';
   let inComment = false;
 
   for (const [index, line] of lines.entries()) {
@@ -63,8 +66,14 @@ export function validatePrBody(body) {
     const heading = line.match(HEADING);
     if (heading) {
       section = heading[2];
+      if (heading[1].length === 2) topSection = section;
       activeAc = AC_HEADING.test(section) ? section.split(/\s+/)[0] : null;
       if (activeAc) ensureAc(acs, activeAc, section, lineNumber);
+      if (ACCEPTANCE_CRITERIA.test(section)) {
+        errors.push(
+          `line ${lineNumber}: ${section}: merge AC coverage details into ## Test coverage and put tester actions in ## Testing steps`,
+        );
+      }
     }
 
     const matrixAc = readMatrixAc(line);
@@ -93,8 +102,17 @@ export function validatePrBody(body) {
 
     if (PROSE_GAP.test(line)) {
       errors.push(
-        `line ${lineNumber}: ${section}: use canonical ⚠️ Test gap checkbox instead of prose: ${line.trim()}`,
+        `line ${lineNumber}: ${section}: use Gap prose inside ## Test coverage instead of legacy Blocking validation gap wording: ${line.trim()}`,
       );
+      continue;
+    }
+
+    if (GAP_PROSE.test(line) && activeAc) {
+      ensureAc(acs, activeAc, section, lineNumber).testGaps.push({
+        checked: false,
+        lineNumber,
+        text: line.trim(),
+      });
       continue;
     }
 
@@ -106,6 +124,14 @@ export function validatePrBody(body) {
     const checkbox = line.match(CHECKBOX);
     if (!checkbox) continue;
 
+    if (TEST_COVERAGE.test(topSection)) {
+      errors.push(
+        `line ${lineNumber}: ${section}: checkboxes are not allowed in ## Test coverage; move tester actions to ## Testing steps: ${line.trim()}`,
+      );
+      pending = null;
+      continue;
+    }
+
     const checked = checkbox[1].toLowerCase() === 'x';
     const text = checkbox[2].trim();
     const marker = pending ?? { kind: 'required', lineNumber };
@@ -113,32 +139,24 @@ export function validatePrBody(body) {
 
     if (PROSE_GAP.test(text)) {
       errors.push(
-        `line ${lineNumber}: ${section}: use canonical ⚠️ Test gap checkbox instead of prose: ${text}`,
+        `line ${lineNumber}: ${section}: use Gap prose inside ## Test coverage instead of legacy Blocking validation gap wording: ${text}`,
       );
       continue;
     }
 
     const nonBlockingGap = text.match(NON_BLOCKING_GAP);
     if (nonBlockingGap) {
-      const acId = activeAc ?? section;
-      const ac = ensureAc(acs, acId, section, lineNumber);
-      ac.nonBlockingGaps += 1;
-      if (marker.kind === 'optional') continue;
       errors.push(
-        `line ${lineNumber}: ${section}: ⚠️ Non-blocking gap rows must be marked optional with \`<!-- pr-checkbox: optional -->\` immediately above: ${text}`,
+        `line ${lineNumber}: ${section}: use Non-blocking gap prose inside ## Test coverage instead of checkbox rows: ${text}`,
       );
       continue;
     }
 
     const testGap = text.match(TEST_GAP);
     if (testGap) {
-      const acId = activeAc ?? section;
-      const ac = ensureAc(acs, acId, section, lineNumber);
-      ac.testGaps.push({ checked, lineNumber, text });
-      const message = checked
-        ? `test gap checkbox must remain unchecked while unresolved: ${testGap[1]}`
-        : `unresolved validation gap: ${testGap[1]}`;
-      errors.push(`line ${lineNumber}: ${section}: ${message}`);
+      errors.push(
+        `line ${lineNumber}: ${section}: use Gap prose inside ## Test coverage instead of Test gap checkbox rows: ${testGap[1]}`,
+      );
       continue;
     }
 
@@ -147,11 +165,8 @@ export function validatePrBody(body) {
 
     if (marker.kind === 'required') {
       if (!checked) {
-        const label = OPERATOR_CHECK.test(text)
-          ? 'operator check is unchecked'
-          : 'required checklist item is unchecked';
         errors.push(
-          `line ${lineNumber}: ${section}: ${label}: ${text}`,
+          `line ${lineNumber}: ${section}: required checklist item is unchecked: ${text}`,
         );
       }
       continue;
@@ -179,7 +194,7 @@ export function validatePrBody(body) {
   for (const [acId, ac] of acs.entries()) {
     if (ac.hasWarning && ac.testGaps.length === 0 && ac.nonBlockingGaps === 0) {
       errors.push(
-        `line ${ac.lineNumber}: ${acId}: missing ⚠️ Test gap or Non-blocking gap explanation for warning matrix cell`,
+        `line ${ac.lineNumber}: ${acId}: missing Gap or Non-blocking gap explanation for warning matrix cell`,
       );
     }
   }

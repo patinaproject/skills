@@ -78,7 +78,7 @@ Recommended `gh` patterns:
 - PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered body must already follow the template. If you pass `--body` inline, copy every template section name and order verbatim before filling them in.
 - Issues: `gh issue create --template bug_report.md` or `--template feature_request.md` lets `gh` start from the canonical file. If you pass `--body` inline, mirror the template's headings the same way.
 
-Do not invent alternative section names when the template uses different ones – extend an existing section instead, or open a follow-up to update the template itself. The PR-body acceptance-criteria rules under [Commit & Pull Request Guidelines](#commit--pull-request-guidelines) are a refinement of the template's `Acceptance criteria` section, not a replacement for it.
+Do not invent alternative section names when the template uses different ones – extend an existing section instead, or open a follow-up to update the template itself. The PR-body acceptance-criteria rules under [Commit & Pull Request Guidelines](#commit--pull-request-guidelines) are a refinement of the template's `Test coverage` and `Testing steps` sections, not a replacement for them.
 
 ## GitHub Actions pinning
 
@@ -174,10 +174,11 @@ For squash-and-merge workflows, PR titles must exactly match the commit format. 
 
 GitHub issue titles are different: write them as plain-language summaries of the problem or request. Do not use conventional-commit prefixes like `docs:` or `feat:` in issue titles.
 
-When an issue defines acceptance criteria, include an `Acceptance criteria` section in the PR description.
+When an issue defines acceptance criteria, include matching AC entries in the PR description's `Test coverage` section and put human tester actions in `Testing steps`.
 
-- Use one `### AC-<issue>-<n>` heading per relevant AC, with the heading containing only the AC ID.
-- Put a short outcome summary on the line below the heading.
-- Put verification steps directly under the AC they validate.
-- Use checkboxes only for operator actions that must happen before merge.
-- If an AC is deferred or out of scope for the repo, say so in the summary text and do not add fake checkboxes.
+- Use one `### AC-<issue>-<n>` heading per relevant AC inside `Test coverage`, with the heading containing only the AC ID.
+- Put only tester-useful coverage context under each AC: what was validated, where it ran, evidence, gaps or caveats, and whether manual testing is still needed.
+- Do not use checkboxes in `Test coverage`.
+- Use checkboxes for human tester actions only in `Testing steps`, and for pre-merge operator actions only in `Do before merging`.
+- Make `Testing steps` cover any `❌` or `⚠️` coverage gaps when a human can close or evaluate the gap.
+- If an AC is deferred or out of scope for the repo, say so under its `Test coverage` heading and do not add fake checkboxes.

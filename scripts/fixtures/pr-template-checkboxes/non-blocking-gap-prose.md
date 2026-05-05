@@ -4,8 +4,6 @@
 | --- | --- | --- | --- |
 | AC-87-4 | Non-blocking gap | ➖ | ⚠️ |
 
-## Acceptance criteria
-
 ### AC-87-4
 
 Chrome validation is enough to merge; Safari is a known non-blocking gap.

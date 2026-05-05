@@ -4,8 +4,6 @@
 | --- | --- | --- | --- |
 | AC-86-1 | Checked unresolved gap | ➖ | ⚠️ |
 
-## Acceptance criteria
-
 ### AC-86-1
 
 Checked test gap should fail because unresolved gaps are not completion tasks.

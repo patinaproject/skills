@@ -4,11 +4,9 @@
 | --- | --- | --- | --- |
 | AC-86-1 | Prose workaround | ➖ | ⚠️ |
 
-## Acceptance criteria
-
 ### AC-86-1
 
-Blocking validation gap: Linux validation has not rerun after the validator fix.
+Missing canonical Gap prose for the warning matrix cell.
 
 ## Docs updated
 

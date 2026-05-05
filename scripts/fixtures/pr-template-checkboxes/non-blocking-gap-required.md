@@ -4,11 +4,9 @@
 | --- | --- | --- | --- |
 | AC-87-4 | Non-blocking gap missing optional marker | ➖ | ⚠️ |
 
-## Acceptance criteria
-
 ### AC-87-4
 
-Author forgot the optional marker so the row is treated as required.
+Non-blocking gap checkbox should fail because Test coverage is checkbox-free.
 
 - [ ] ⚠️ Non-blocking gap: Safari persistence was not verified.
 

@@ -20,19 +20,24 @@ ACs describe observable behavior, not implementation steps. Prefer "the template
 
 ## From issue to PR
 
-The PR body mirrors the issue's ACs using the `### AC-<issue>-<n>` heading-per-AC format specified in [`AGENTS.md`](../AGENTS.md). One heading per relevant AC, a short outcome summary, and checkboxes only for operator actions that must happen before merge. Do not restate those rules here – extend `AGENTS.md` if they need to change.
+The PR body mirrors the issue's ACs using the
+`### AC-<issue>-<n>` heading-per-AC format specified in
+[`AGENTS.md`](../AGENTS.md). One heading per relevant AC lives inside
+`## Test coverage`, where it carries only tester-useful coverage context:
+what was validated, where it ran, evidence, gaps or caveats, and whether
+manual testing is still needed. Human tester action items live in
+`## Testing steps`, not under the AC coverage entries.
 
-Test coverage and per-AC verification rows – a `## Test coverage` matrix with
-`Unit` plus the affected supported-platform columns, symbol-only status cells,
-compact colon-style platform test rows (`- <Platform> test: <command, workflow
-job, tool, or harness>, <environment>[, <link, verifier, or ISO>]`), required
-gap checkboxes for merge-blocking missing/failing/pending validation, and prose
-or explicitly optional checkbox explanations for known non-blocking gaps – are
+Test coverage details – a `## Test coverage` matrix with `Unit` plus the
+affected supported-platform columns, symbol-only status cells, compact
+colon-style evidence rows
+(`- Evidence: <Platform> test: <command, workflow job, tool, or harness>,
+<environment>[, <link, verifier, or ISO>]`), prose gap explanations for
+missing/failing/pending or non-blocking validation, and no checkboxes – are
 defined by the canonical PR template at
 [`.github/pull_request_template.md`](../.github/pull_request_template.md).
 The template comments are the source of truth for the coverage matrix,
-slim-test grammar, per-AC unit-test detail rule, per-AC content order,
-operator-check rule, checkbox imperative-style rule, status-symbol rule, matrix
-consistency rule, platform-evidence-or-gap rule, observable test-gap rule,
-optional non-blocking gap rule, placeholder deletion rule, and
-gap-acknowledgement rule; do not duplicate that grammar here.
+evidence-row grammar, per-AC coverage order, testing-step rule, checkbox
+section rule, status-symbol rule, matrix consistency rule,
+platform-evidence-or-gap rule, placeholder deletion rule, and gap explanation
+rule; do not duplicate that grammar here.

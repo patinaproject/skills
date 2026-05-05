@@ -1,8 +1,6 @@
-## Acceptance criteria
+## Testing steps
 
-### AC-64-2
-
-Optional unchecked row should pass.
+Optional unchecked row should pass outside Test coverage.
 
 <!-- pr-checkbox: optional -->
 - [ ] Optional reviewer note

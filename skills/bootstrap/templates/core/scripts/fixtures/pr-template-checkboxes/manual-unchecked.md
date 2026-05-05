@@ -1,12 +1,12 @@
-## Acceptance criteria
+## Test coverage
 
 ### AC-64-1
 
-Manual test row should fail while unchecked.
+- Evidence: Linux test: pnpm test, local, verifier.
+- Gap: None.
 
-<!-- pr-checkbox: required -->
-- [x] Linux evidence -- runner | env | verifier | 2026-04-29T00:00:00Z
-<!-- pr-checkbox: required -->
+## Testing steps
+
 - [ ] Manual test: 1. Open the PR; 2. Confirm the gate fails.
 
 ## Docs updated
