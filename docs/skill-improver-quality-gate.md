@@ -1,8 +1,8 @@
 # Superteam skill-improver quality gate
 
 Repeatable quality gate for changes to `skills/superteam/SKILL.md` and adjacent
-workflow-contract files (`agent-spawn-template.md`, `pre-flight.md`,
-`routing-table.md`, `pr-body-template.md`, `loopback-trailers.md`).
+workflow-contract files (`pre-flight.md`, `routing-table.md`,
+`project-deltas.md`, `workflow-diagrams.md`).
 
 The gate runs the Trail of Bits `skill-improver` loop against the live skill
 directory. It produces explicit completion evidence that maintainers can attach

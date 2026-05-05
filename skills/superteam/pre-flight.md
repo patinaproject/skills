@@ -1,6 +1,6 @@
 # Pre-flight
 
-Heavy reference for the deterministic phase-detection and execution-mode capability detection that `Team Lead` runs at the top of every `/superteam` invocation. See `SKILL.md` `## Pre-flight` for the concise summary.
+Heavy reference for the deterministic phase-detection and execution-mode capability detection that `Team Lead` runs at the top of every `/superteam` invocation. See `SKILL.md` `## Pre-flight` for the concise summary. The active-host probe order and orphan-delta scan procedure are defined in `project-deltas.md` `## Active-host probe order`; the step list that invokes them is in `SKILL.md` `## Pre-flight`.
 
 ## Trigger
 

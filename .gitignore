@@ -4,3 +4,4 @@ pnpm-debug.log*
 dist/
 build/
 .claude/scheduled_tasks.lock
+.claude/skill-improver.*.local.md

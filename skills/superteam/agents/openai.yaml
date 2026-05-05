@@ -1,3 +1,7 @@
+# Plugin-level metadata only. Per-role config lives at:
+#   skills/superteam/agents/<role>.openai.yaml  (one per role)
+# See skills/superteam/SKILL.md for the orchestration contract.
+
 interface:
   display_name: "Superteam"
   short_description: "Build with a team of agents using Superpowers"

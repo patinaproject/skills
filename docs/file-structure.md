@@ -18,7 +18,7 @@ Contributor reference for the repository layout. For user-facing install and usa
 
 ## Skills
 
-Each skill lives in its own directory under `skills/` with `SKILL.md` as the main contract. Support files (e.g. `agent-spawn-template.md`, `pr-body-template.md`) sit alongside `SKILL.md`.
+Each skill lives in its own directory under `skills/` with `SKILL.md` as the main contract. Support files (e.g. `pre-flight.md`, `routing-table.md`) sit alongside `SKILL.md`.
 
 ## Docs
 
