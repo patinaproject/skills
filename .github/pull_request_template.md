@@ -106,6 +106,10 @@ including unresolved blockers or pending validation when present.
   validation concern, not to restate a code-review finding, duplicate an
   operator action, or explain tests that should exist but are missing. Test gaps
   must be about observable behavior or validation that cannot yet be trusted.
+  Test-gap checkboxes are intentionally unchecked while unresolved. Do not
+  convert a real gap to prose or mark it optional to satisfy PR validation; the
+  readiness check reports unresolved validation gaps separately from operator
+  action checkboxes.
   Treat CI that must rerun after a fix as a test gap unless the operator must
   manually trigger or inspect a specific job. Delete unused placeholder checkbox
   rows.
@@ -127,10 +131,12 @@ including unresolved blockers or pending validation when present.
   the operator can validate. Keep manual product or workflow validation as an
   operator check when a human must exercise observable behavior after a gap is
   fixed. Do not add CI-rerun operator checks unless the operator must manually
-  trigger or inspect a specific job. When updating an existing PR body,
-  preserve every existing manual-review or manual-test instruction under its AC
-  in this checkbox form. Phrase checkbox text in imperative style. Delete
-  unused placeholder checkbox rows.
+  trigger or inspect a specific job. Operator-check checkboxes are completion
+  tasks. Unchecked operator checks remain readiness blockers unless explicitly
+  optional. When updating an existing PR body, preserve every existing
+  manual-review or manual-test instruction under its AC in this checkbox form.
+  Phrase checkbox text in imperative style. Delete unused placeholder checkbox
+  rows.
 -->
 - [ ] Operator check: <imperative operator action and expected decision or result>
 

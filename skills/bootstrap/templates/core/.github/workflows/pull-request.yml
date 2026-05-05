@@ -84,7 +84,7 @@ jobs:
         # actions/checkout@v4.3.1
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - name: Validate required template checkboxes
+      - name: Validate PR readiness gaps
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: node scripts/check-pr-template-checkboxes.mjs

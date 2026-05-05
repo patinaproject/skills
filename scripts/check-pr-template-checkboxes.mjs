@@ -10,19 +10,64 @@ const CHECKBOX = /^\s*-\s+\[( |x|X)\]\s+(.+)$/;
 const HEADING = /^\s{0,3}(#{2,6})\s+(.+?)\s*$/;
 const COMMENT_START = /^\s*<!--/;
 const COMMENT_END = /-->\s*$/;
+const AC_HEADING = /^AC-\d+-\d+\b/;
+const TEST_GAP = /^⚠️\s*Test gap:\s*(.+)$/i;
+const OPERATOR_CHECK = /^Operator check:/i;
+const PROSE_GAP = /^\s*(?:[-*]\s*)?Blocking validation gap:/i;
+
+function ensureAc(acMap, acId, section, lineNumber) {
+  const entry = acMap.get(acId) ?? {
+    section,
+    lineNumber,
+    hasWarning: false,
+    testGaps: [],
+  };
+  if (section) entry.section = section;
+  if (lineNumber && !entry.lineNumber) entry.lineNumber = lineNumber;
+  acMap.set(acId, entry);
+  return entry;
+}
+
+function readMatrixAc(line) {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('|')) return null;
+
+  const cells = trimmed
+    .split('|')
+    .slice(1, -1)
+    .map((cell) => cell.trim());
+  const acId = cells[0];
+  if (!AC_HEADING.test(acId)) return null;
+
+  return {
+    acId,
+    hasWarning: cells.slice(2).some((cell) => cell === '⚠️'),
+  };
+}
 
 export function validatePrBody(body) {
   const errors = [];
   const choices = new Map();
+  const acs = new Map();
   const lines = String(body ?? '').split(/\r?\n/);
   let pending = null;
   let section = 'PR body';
+  let activeAc = null;
   let inComment = false;
 
   for (const [index, line] of lines.entries()) {
     const lineNumber = index + 1;
     const heading = line.match(HEADING);
-    if (heading) section = heading[2];
+    if (heading) {
+      section = heading[2];
+      activeAc = AC_HEADING.test(section) ? section.split(/\s+/)[0] : null;
+      if (activeAc) ensureAc(acs, activeAc, section, lineNumber);
+    }
+
+    const matrixAc = readMatrixAc(line);
+    if (matrixAc?.hasWarning) {
+      ensureAc(acs, matrixAc.acId, matrixAc.acId, lineNumber).hasWarning = true;
+    }
 
     const choiceMarker = line.match(CHOICE_MARKER);
     if (choiceMarker) {
@@ -43,6 +88,13 @@ export function validatePrBody(body) {
       continue;
     }
 
+    if (PROSE_GAP.test(line)) {
+      errors.push(
+        `line ${lineNumber}: ${section}: use canonical ⚠️ Test gap checkbox instead of prose: ${line.trim()}`,
+      );
+      continue;
+    }
+
     const checkbox = line.match(CHECKBOX);
     if (!checkbox) continue;
 
@@ -51,13 +103,35 @@ export function validatePrBody(body) {
     const marker = pending ?? { kind: 'required', lineNumber };
     pending = null;
 
+    if (PROSE_GAP.test(text)) {
+      errors.push(
+        `line ${lineNumber}: ${section}: use canonical ⚠️ Test gap checkbox instead of prose: ${text}`,
+      );
+      continue;
+    }
+
+    const testGap = text.match(TEST_GAP);
+    if (testGap) {
+      const acId = activeAc ?? section;
+      const ac = ensureAc(acs, acId, section, lineNumber);
+      ac.testGaps.push({ checked, lineNumber, text });
+      const message = checked
+        ? `test gap checkbox must remain unchecked while unresolved: ${testGap[1]}`
+        : `unresolved validation gap: ${testGap[1]}`;
+      errors.push(`line ${lineNumber}: ${section}: ${message}`);
+      continue;
+    }
+
     if (!marker) continue;
     if (marker.kind === 'optional') continue;
 
     if (marker.kind === 'required') {
       if (!checked) {
+        const label = OPERATOR_CHECK.test(text)
+          ? 'operator check is unchecked'
+          : 'required checklist item is unchecked';
         errors.push(
-          `line ${lineNumber}: ${section}: required checklist item is unchecked: ${text}`,
+          `line ${lineNumber}: ${section}: ${label}: ${text}`,
         );
       }
       continue;
@@ -82,6 +156,14 @@ export function validatePrBody(body) {
     }
   }
 
+  for (const [acId, ac] of acs.entries()) {
+    if (ac.hasWarning && ac.testGaps.length === 0) {
+      errors.push(
+        `line ${ac.lineNumber}: ${acId}: missing ⚠️ Test gap for warning matrix cell`,
+      );
+    }
+  }
+
   return { ok: errors.length === 0, errors };
 }
 
@@ -99,7 +181,7 @@ function readBodyFromArgs() {
 
 function emitGithubError(message) {
   const escaped = message.replaceAll('%', '%25').replaceAll('\n', '%0A');
-  console.error(`::error title=Required template checkbox::${escaped}`);
+  console.error(`::error title=PR readiness validation::${escaped}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -108,5 +190,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     for (const error of result.errors) emitGithubError(error);
     process.exit(1);
   }
-  console.log('Required template checkboxes are satisfied.');
+  console.log('PR readiness validation passed.');
 }
