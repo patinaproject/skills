@@ -27,6 +27,27 @@ test('passes explicitly optional unchecked checklist rows', () => {
   assert.equal(validatePrBody(fixture('optional-unchecked.md')).ok, true);
 });
 
+test('passes optional non-blocking gap checkbox rows', () => {
+  assert.equal(validatePrBody(fixture('non-blocking-gap-optional.md')).ok, true);
+});
+
+test('passes ⚠️ matrix cell satisfied by Non-blocking gap prose', () => {
+  assert.equal(validatePrBody(fixture('non-blocking-gap-prose.md')).ok, true);
+});
+
+test('passes ⚠️ matrix cell satisfied by optional Non-blocking gap checkbox', () => {
+  assert.equal(
+    validatePrBody(fixture('non-blocking-gap-optional-with-warning.md')).ok,
+    true,
+  );
+});
+
+test('fails Non-blocking gap checkbox missing the optional marker', () => {
+  const result = validatePrBody(fixture('non-blocking-gap-required.md'));
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join('\n'), /Non-blocking gap rows must be marked optional/i);
+});
+
 test('fails docs choice group when no option is checked', () => {
   const result = validatePrBody(fixture('docs-choice-none.md'));
   assert.equal(result.ok, false);

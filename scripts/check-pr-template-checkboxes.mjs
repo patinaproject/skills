@@ -12,8 +12,10 @@ const COMMENT_START = /^\s*<!--/;
 const COMMENT_END = /-->\s*$/;
 const AC_HEADING = /^AC-\d+-\d+\b/;
 const TEST_GAP = /^⚠️\s*Test gap:\s*(.+)$/i;
+const NON_BLOCKING_GAP = /^⚠️\s*Non-blocking gap:\s*(.+)$/i;
 const OPERATOR_CHECK = /^Operator check:/i;
 const PROSE_GAP = /^\s*(?:[-*]\s*)?Blocking validation gap:/i;
+const NON_BLOCKING_PROSE = /^\s*(?:[-*]\s*)?Non-blocking gap:/i;
 
 function ensureAc(acMap, acId, section, lineNumber) {
   const entry = acMap.get(acId) ?? {
@@ -21,6 +23,7 @@ function ensureAc(acMap, acId, section, lineNumber) {
     lineNumber,
     hasWarning: false,
     testGaps: [],
+    nonBlockingGaps: 0,
   };
   if (section) entry.section = section;
   if (lineNumber && !entry.lineNumber) entry.lineNumber = lineNumber;
@@ -95,6 +98,11 @@ export function validatePrBody(body) {
       continue;
     }
 
+    if (NON_BLOCKING_PROSE.test(line) && activeAc) {
+      ensureAc(acs, activeAc, section, lineNumber).nonBlockingGaps += 1;
+      continue;
+    }
+
     const checkbox = line.match(CHECKBOX);
     if (!checkbox) continue;
 
@@ -106,6 +114,18 @@ export function validatePrBody(body) {
     if (PROSE_GAP.test(text)) {
       errors.push(
         `line ${lineNumber}: ${section}: use canonical ⚠️ Test gap checkbox instead of prose: ${text}`,
+      );
+      continue;
+    }
+
+    const nonBlockingGap = text.match(NON_BLOCKING_GAP);
+    if (nonBlockingGap) {
+      const acId = activeAc ?? section;
+      const ac = ensureAc(acs, acId, section, lineNumber);
+      ac.nonBlockingGaps += 1;
+      if (marker.kind === 'optional') continue;
+      errors.push(
+        `line ${lineNumber}: ${section}: ⚠️ Non-blocking gap rows must be marked optional with \`<!-- pr-checkbox: optional -->\` immediately above: ${text}`,
       );
       continue;
     }
@@ -157,9 +177,9 @@ export function validatePrBody(body) {
   }
 
   for (const [acId, ac] of acs.entries()) {
-    if (ac.hasWarning && ac.testGaps.length === 0) {
+    if (ac.hasWarning && ac.testGaps.length === 0 && ac.nonBlockingGaps === 0) {
       errors.push(
-        `line ${ac.lineNumber}: ${acId}: missing ⚠️ Test gap for warning matrix cell`,
+        `line ${ac.lineNumber}: ${acId}: missing ⚠️ Test gap or Non-blocking gap explanation for warning matrix cell`,
       );
     }
   }

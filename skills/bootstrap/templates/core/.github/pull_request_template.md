@@ -54,19 +54,21 @@
   summarized in the AC section without a matrix row, but every relevant AC
   still needs an AC heading. Each cell summarizes the required-validation state
   for that AC and column. Use only these symbols in status cells:
-  ✅ = required validation passed, with no blocking gap for this column
-  ❌ = tests that should exist are missing
-  ⚠️ = required validation has an acknowledged gap, warning, unresolved
-       concern, or failing/pending state that needs reviewer attention
+  ✅ = required validation passed, with no known relevant gap for this column
+  ⚠️ = validation exists and is sufficient to merge, with a known non-blocking
+       gap documented under this AC
+  ❌ = required validation is missing, failing, pending, or blocked by a
+       merge-blocking gap
   ➖ = not relevant to this AC
 
   Use `➖` only when that verification type is not relevant to the AC. If an AC
-  includes evidence, a test gap, or an operator check that clearly maps to a
-  matrix column, that cell must not be `➖`. Every `⚠️` matrix cell must have
-  one or more corresponding `⚠️ Test gap:` checkboxes under that AC. If required
-  validation is failing, pending, blocked by an unresolved concern, or otherwise
-  cannot yet be trusted, use `⚠️` and add a test-gap checkbox until that
-  validation passes.
+  includes evidence, a gap, or an operator check that clearly maps to a matrix
+  column, that cell must not be `➖`. If a known non-blocking gap remains after
+  sufficient validation, use `⚠️` and document the gap under the AC in prose or
+  with an explicitly optional checkbox. If required validation is missing,
+  failing, pending, blocked by an unresolved concern, or otherwise cannot yet
+  be trusted for merge, use `❌` and add a required gap or operator-check
+  checkbox when pre-merge action is needed.
 -->
 | AC | Title | Unit | <Platform> |
 | --- | --- | --- | --- |
@@ -87,37 +89,37 @@ including unresolved blockers or pending validation when present.
 
 <!--
   For each supported platform that is relevant to this AC, include one evidence
-  row, summarize missing tests in the outcome, or report an acknowledged
-  validation gap as a test-gap checkbox. Keep evidence rows compact and use a
-  colon after the evidence label:
+  row, summarize missing tests in the outcome, or document a known gap below.
+  Keep evidence rows compact and use a colon after the evidence label:
   `<Platform> test: <command, workflow job, tool, or harness>, <environment>[, <link, verifier, or ISO>]`.
   Name the concrete command, workflow job, tool, or harness when known. Use a
   neutral verifier value, such as a person, role, or run identifier. Add a unit
   evidence row only when unit evidence is the meaningful validation for this AC;
   otherwise keep unit details in the matrix or CI summary.
   If an unresolved critical or major review finding affects validation for this
-  AC, describe the missing observable behavior or validation as a test-gap
+  AC, describe the missing observable behavior or validation as a required gap
   checkbox unless it belongs in Do before merging.
 -->
 - <Platform> test: <command, workflow job, tool, or harness>, <environment>[, <link, verifier, or ISO>]
 <!--
-  Include every known Test gap that the operator must consciously review. Use
-  `Test gap:` to describe an acknowledged coverage gap or an unresolved
-  validation concern, not to restate a code-review finding, duplicate an
-  operator action, or explain tests that should exist but are missing. Test gaps
-  must be about observable behavior or validation that cannot yet be trusted.
-  Test-gap checkboxes are intentionally unchecked while unresolved. Do not
-  convert a real gap to prose or mark it optional to satisfy PR validation; the
-  readiness check reports unresolved validation gaps separately from operator
-  action checkboxes.
-  Treat CI that must rerun after a fix as a test gap unless the operator must
-  manually trigger or inspect a specific job. Delete unused placeholder checkbox
-  rows.
-  Every `⚠️ Test gap:` that maps to a matrix column must have a corresponding
-  `⚠️` cell in that AC's matrix row.
-  Example: - [ ] ⚠️ Test gap: <observable behavior or validation not verified>
+  Include every known blocking gap that the operator must consciously review
+  or resolve before merge. Use `Test gap:` to describe missing coverage or an
+  unresolved validation concern that keeps the matrix cell at `❌`. Do not use
+  required unchecked `Test gap:` rows for non-blocking caveats. Treat CI that
+  must rerun after a fix as a required test gap unless the operator must
+  manually trigger or inspect a specific job. Delete unused placeholder
+  checkbox rows.
+  Example: - [ ] ⚠️ Test gap: <blocking observable behavior or validation not verified>
 -->
-- [ ] ⚠️ Test gap: <observable behavior, missing coverage, or unresolved validation concern>
+- [ ] ⚠️ Test gap: <blocking observable behavior, missing coverage, or unresolved validation concern>
+<!--
+  For a non-blocking gap represented by a `⚠️` matrix cell, use prose or an
+  explicitly optional checkbox. Optional checkboxes must include
+  `pr-checkbox: optional` immediately above the row. For example, write prose
+  like `Non-blocking gap: <known caveat accepted for this PR>.` Or, when a
+  visible acknowledgement row is useful, put `pr-checkbox: optional` in an
+  HTML comment immediately above an unchecked `⚠️ Non-blocking gap:` checkbox.
+-->
 <!--
   Include every known operator action below any test-gap checkboxes for this
   AC. Use the literal prefix `Operator check:` for product testing, diff
@@ -131,12 +133,10 @@ including unresolved blockers or pending validation when present.
   the operator can validate. Keep manual product or workflow validation as an
   operator check when a human must exercise observable behavior after a gap is
   fixed. Do not add CI-rerun operator checks unless the operator must manually
-  trigger or inspect a specific job. Operator-check checkboxes are completion
-  tasks. Unchecked operator checks remain readiness blockers unless explicitly
-  optional. When updating an existing PR body, preserve every existing
-  manual-review or manual-test instruction under its AC in this checkbox form.
-  Phrase checkbox text in imperative style. Delete unused placeholder checkbox
-  rows.
+  trigger or inspect a specific job. When updating an existing PR body,
+  preserve every existing manual-review or manual-test instruction under its AC
+  in this checkbox form. Phrase checkbox text in imperative style. Delete
+  unused placeholder checkbox rows.
 -->
 - [ ] Operator check: <imperative operator action and expected decision or result>
 
