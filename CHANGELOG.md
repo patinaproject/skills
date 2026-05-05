@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://github.com/patinaproject/bootstrap/compare/v1.9.0...v1.10.0) (2026-05-05)
+
+
+### Features
+
+* [#87](https://github.com/patinaproject/bootstrap/issues/87) clarify non-blocking coverage warnings ([#88](https://github.com/patinaproject/bootstrap/issues/88)) ([9b67518](https://github.com/patinaproject/bootstrap/commit/9b675187ddca9cc52ac9c3dc050ebbccb2b11057))
+* [#90](https://github.com/patinaproject/bootstrap/issues/90) render PR template review context ([#92](https://github.com/patinaproject/bootstrap/issues/92)) ([7cce907](https://github.com/patinaproject/bootstrap/commit/7cce90748e647caf682d1870711624aa9b49c397))
+
+
+### Bug Fixes
+
+* [#86](https://github.com/patinaproject/bootstrap/issues/86) restore honest PR validation gaps ([#89](https://github.com/patinaproject/bootstrap/issues/89)) ([ebcd10c](https://github.com/patinaproject/bootstrap/commit/ebcd10cafebbd991327bcd6cb8dd4613b4b00ad4))
+
 ## [1.9.0](https://github.com/patinaproject/bootstrap/compare/v1.8.0...v1.9.0) (2026-05-03)
 
 
