@@ -149,10 +149,10 @@ Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visua
 No plugin install required. Bootstrap-scaffolded repos ship `.github/copilot-instructions.md`, which Copilot Chat reads automatically when the repo is open in your editor.
 
 1. Clone the bootstrap-scaffolded repo and open it.
-2. Invoke Bootstrap from Copilot Chat:
+2. Invoke scaffold-repository from Copilot Chat:
 
    ```text
-   @workspace Use the bootstrap skill to scaffold or realign this repository.
+   @workspace Use the scaffold-repository skill to scaffold or realign this repository.
    ```
 
 Personal Copilot preferences belong in your user-scoped Copilot settings, not in the emitted `.github/copilot-instructions.md`.
@@ -162,10 +162,10 @@ Personal Copilot preferences belong in your user-scoped Copilot settings, not in
 No plugin install required. Bootstrap emits `.cursor/rules/<repo>.mdc`, which Cursor loads as a project rule whenever the repo is open.
 
 1. Clone the bootstrap-scaffolded repo and open it in Cursor.
-2. Ask the Cursor agent to apply Bootstrap:
+2. Ask the Cursor agent to apply scaffold-repository:
 
    ```text
-   Use the bootstrap skill to scaffold or realign this repository.
+   Use the scaffold-repository skill to scaffold or realign this repository.
    ```
 
 Personal Cursor rules belong in your user-scoped Cursor settings, not in the emitted `.cursor/rules/`.
@@ -175,10 +175,10 @@ Personal Cursor rules belong in your user-scoped Cursor settings, not in the emi
 No plugin install required. Bootstrap emits `.windsurfrules`, which Windsurf reads natively when the repo is open.
 
 1. Clone the bootstrap-scaffolded repo and open it in Windsurf.
-2. Ask Cascade to apply Bootstrap:
+2. Ask Cascade to apply scaffold-repository:
 
    ```text
-   Use the bootstrap skill to scaffold or realign this repository.
+   Use the scaffold-repository skill to scaffold or realign this repository.
    ```
 
 ### Aider
@@ -186,28 +186,28 @@ No plugin install required. Bootstrap emits `.windsurfrules`, which Windsurf rea
 No plugin install required. Aider reads `AGENTS.md` natively.
 
 1. Clone the bootstrap-scaffolded repo.
-2. Run `aider` from inside the repo and ask it to apply the bootstrap workflow described in `AGENTS.md`.
+2. Run `aider` from inside the repo and ask it to apply the scaffold-repository workflow described in `AGENTS.md`.
 
 ### Zed
 
 No plugin install required. Zed's assistant reads `AGENTS.md` natively.
 
 1. Clone the bootstrap-scaffolded repo and open it in Zed.
-2. Ask the assistant to apply the bootstrap workflow described in `AGENTS.md`.
+2. Ask the assistant to apply the scaffold-repository workflow described in `AGENTS.md`.
 
 ### Cline
 
 No plugin install required. Cline reads `AGENTS.md` natively when the repo is open in VS Code.
 
 1. Clone the bootstrap-scaffolded repo and open it in VS Code with the Cline extension active.
-2. Ask Cline to apply the bootstrap workflow described in `AGENTS.md`.
+2. Ask Cline to apply the scaffold-repository workflow described in `AGENTS.md`.
 
 ### Opencode
 
 No plugin install required. Opencode reads `AGENTS.md` natively.
 
 1. Clone the bootstrap-scaffolded repo and open it in Opencode.
-2. Ask Opencode to apply the bootstrap workflow described in `AGENTS.md`.
+2. Ask Opencode to apply the scaffold-repository workflow described in `AGENTS.md`.
 
 ### Continue.dev
 
@@ -226,7 +226,7 @@ Continue.dev support is opt-in. Add the following entry to your `.continue/confi
 }
 ```
 
-Then ask Continue to apply the bootstrap workflow described in `AGENTS.md`.
+Then ask Continue to apply the scaffold-repository workflow described in `AGENTS.md`.
 
 ## First use
 
