@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 # verify-dogfood.sh — Asserts that all five in-repo skills are discoverable
-# through the canonical .agents/skills overlay and the .claude/skills symlink
-# layer. Covers AC-58-3 check d.
+# via the flat skills/<name>/ layout and the dogfood overlay symlinks.
+# Covers AC-58-3 check c.
 #
 # Exit 0: all five skills pass all assertions.
 # Exit 1: at least one assertion failed (with a clear FAIL message).
+#
+# Dependencies: bash 3+, realpath (macOS via coreutils) or python3 as fallback.
 
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+SKILLS=(scaffold-repository superteam using-github find-skills office-hours)
 FAIL_COUNT=0
 
 fail() {
@@ -18,136 +21,89 @@ fail() {
   FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
-# Plugin-scoped skills traverse a two-hop symlink chain:
-#   .claude/skills/<name>  ->  .agents/skills/<name>  ->  plugins/<name>/skills/<name>
-PLUGIN_SCOPED_SKILLS=(scaffold-repository superteam using-github)
+# Portable realpath: try realpath (GNU coreutils / macOS coreutils via Homebrew),
+# then readlink -f (GNU), then python3 as a final fallback.
+_realpath() {
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$1"
+  elif readlink -f "$1" >/dev/null 2>&1; then
+    readlink -f "$1"
+  else
+    python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$1"
+  fi
+}
 
-# Standalone skills have a one-hop chain at the Claude layer and a real file
-# at the canonical layer:
-#   .claude/skills/<name>  ->  .agents/skills/<name>/<SKILL.md>  (real file)
-STANDALONE_SKILLS=(find-skills office-hours)
+for name in "${SKILLS[@]}"; do
+  CANONICAL="skills/$name/SKILL.md"
+  CLAUDE_LINK=".claude/skills/$name/SKILL.md"
+  AGENTS_LINK=".agents/skills/$name/SKILL.md"
 
-ALL_SKILLS=("${PLUGIN_SCOPED_SKILLS[@]}" "${STANDALONE_SKILLS[@]}")
-
-for name in "${ALL_SKILLS[@]}"; do
-  CLAUDE_PATH=".claude/skills/$name"
-  AGENTS_PATH=".agents/skills/$name"
-  SKILL_FILE=".claude/skills/$name/SKILL.md"
-
-  # 1. Assert the Claude overlay path exists and is not a broken symlink
-  if [ -L "$CLAUDE_PATH" ] && [ ! -e "$CLAUDE_PATH" ]; then
-    fail "$CLAUDE_PATH is a broken symlink"
+  # 1. Assert skills/<name>/SKILL.md is a regular file (not a symlink, not missing).
+  if [ ! -f "$CANONICAL" ]; then
+    fail "$CANONICAL missing or not a regular file"
     continue
   fi
-  if [ ! -e "$CLAUDE_PATH" ]; then
-    fail "$CLAUDE_PATH does not exist"
-    continue
-  fi
-
-  # 2. Assert SKILL.md is readable (resolving through symlinks)
-  if [ ! -e "$SKILL_FILE" ]; then
-    fail "$SKILL_FILE does not exist (symlink resolution failed)"
-    continue
-  fi
-  if [ ! -r "$SKILL_FILE" ]; then
-    fail "$SKILL_FILE is not readable"
+  if [ -L "$CANONICAL" ]; then
+    fail "$CANONICAL is a symlink — expected a real file"
     continue
   fi
 
-  # 3. Assert frontmatter has name: and description: fields
+  # 2. Parse YAML frontmatter name: field and assert it equals <name>.
   FRONTMATTER_NAME=""
-  IN_FRONTMATTER=0
+  IN_FM=0
   while IFS= read -r line; do
     if [ "$line" = "---" ]; then
-      if [ "$IN_FRONTMATTER" -eq 0 ]; then
-        IN_FRONTMATTER=1
+      if [ "$IN_FM" -eq 0 ]; then
+        IN_FM=1
       else
         break
       fi
       continue
     fi
-    if [ "$IN_FRONTMATTER" -eq 1 ]; then
+    if [ "$IN_FM" -eq 1 ]; then
       if [[ "$line" =~ ^name:[[:space:]]*(.+)$ ]]; then
         FRONTMATTER_NAME="${BASH_REMATCH[1]}"
+        # Trim trailing whitespace / carriage return
+        FRONTMATTER_NAME="${FRONTMATTER_NAME%%[[:space:]]}"
+        break
       fi
     fi
-  done < "$SKILL_FILE"
+  done < "$CANONICAL"
 
   if [ -z "$FRONTMATTER_NAME" ]; then
-    fail "$name SKILL.md frontmatter is missing 'name:' field"
+    fail "$name: SKILL.md frontmatter missing 'name:' field"
     continue
   fi
-
-  # 4. Assert the name: value matches the skill directory name
   if [ "$FRONTMATTER_NAME" != "$name" ]; then
-    fail "$name SKILL.md frontmatter 'name: $FRONTMATTER_NAME' does not match expected '$name'"
+    fail "$name: SKILL.md frontmatter 'name: $FRONTMATTER_NAME' != expected '$name'"
     continue
   fi
 
-  # 5. Branch verification by skill shape
-  IS_PLUGIN_SCOPED=0
-  for ps in "${PLUGIN_SCOPED_SKILLS[@]}"; do
-    if [ "$ps" = "$name" ]; then
-      IS_PLUGIN_SCOPED=1
-      break
-    fi
-  done
-
-  if [ "$IS_PLUGIN_SCOPED" -eq 1 ]; then
-    # Plugin-scoped: verify two-hop symlink chain
-    # Hop 1: .claude/skills/<name> -> .agents/skills/<name>
-    if [ ! -L "$CLAUDE_PATH" ]; then
-      fail "$CLAUDE_PATH should be a symlink (plugin-scoped)"
-      continue
-    fi
-    CLAUDE_TARGET=$(readlink "$CLAUDE_PATH")
-    if [[ "$CLAUDE_TARGET" != *".agents/skills/$name" ]]; then
-      fail "$CLAUDE_PATH symlink target '$CLAUDE_TARGET' does not point into .agents/skills/$name"
-      continue
-    fi
-
-    # Hop 2: .agents/skills/<name> -> plugins/<name>/skills/<name>
-    if [ ! -L "$AGENTS_PATH" ]; then
-      fail "$AGENTS_PATH should be a symlink (plugin-scoped)"
-      continue
-    fi
-    AGENTS_TARGET=$(readlink "$AGENTS_PATH")
-    EXPECTED_PLUGIN_PATH="plugins/$name/skills/$name"
-    if [[ "$AGENTS_TARGET" != *"$EXPECTED_PLUGIN_PATH" ]]; then
-      fail "$AGENTS_PATH symlink target '$AGENTS_TARGET' does not point into $EXPECTED_PLUGIN_PATH"
-      continue
-    fi
-
-    # Final resolution: the plugin's SKILL.md must exist as a real file
-    RESOLVED=$(realpath "$SKILL_FILE" 2>/dev/null)
-    if [ -z "$RESOLVED" ] || [ ! -f "$RESOLVED" ]; then
-      fail "$name SKILL.md does not resolve to a real file via realpath"
-      continue
-    fi
-
-    echo "OK: $name (plugin-scoped, two-hop chain verified)"
-
-  else
-    # Standalone: one symlink hop at Claude layer, real file at canonical layer
-    # .claude/skills/<name> -> .agents/skills/<name>  (symlink)
-    # .agents/skills/<name>/SKILL.md                  (real file)
-    if [ ! -L "$CLAUDE_PATH" ]; then
-      fail "$CLAUDE_PATH should be a symlink (standalone)"
-      continue
-    fi
-
-    CANONICAL_SKILLMD="$AGENTS_PATH/SKILL.md"
-    if [ ! -f "$CANONICAL_SKILLMD" ]; then
-      fail "$CANONICAL_SKILLMD does not exist as a real file"
-      continue
-    fi
-    if [ -L "$CANONICAL_SKILLMD" ]; then
-      fail "$CANONICAL_SKILLMD should be a real file, not a symlink"
-      continue
-    fi
-
-    echo "OK: $name (standalone, real file at canonical layer)"
+  # 3. Assert .claude/skills/<name>/SKILL.md resolves to the same real path as
+  #    skills/<name>/SKILL.md via symlink traversal.
+  if [ ! -e "$CLAUDE_LINK" ]; then
+    fail "$CLAUDE_LINK does not resolve (broken symlink or missing)"
+    continue
   fi
+  CANONICAL_REAL="$(_realpath "$CANONICAL")"
+  CLAUDE_REAL="$(_realpath "$CLAUDE_LINK")"
+  if [ "$CLAUDE_REAL" != "$CANONICAL_REAL" ]; then
+    fail "$CLAUDE_LINK resolves to '$CLAUDE_REAL', expected '$CANONICAL_REAL'"
+    continue
+  fi
+
+  # 4. Same assertion for .agents/skills/<name>/SKILL.md.
+  if [ ! -e "$AGENTS_LINK" ]; then
+    fail "$AGENTS_LINK does not resolve (broken symlink or missing)"
+    continue
+  fi
+  AGENTS_REAL="$(_realpath "$AGENTS_LINK")"
+  if [ "$AGENTS_REAL" != "$CANONICAL_REAL" ]; then
+    fail "$AGENTS_LINK resolves to '$AGENTS_REAL', expected '$CANONICAL_REAL'"
+    continue
+  fi
+
+  echo "OK: $name"
 done
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
@@ -157,5 +113,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all five skills discoverable via canonical overlay and Claude symlink layer"
+echo "OK: all five skills discoverable via flat layout"
 exit 0
