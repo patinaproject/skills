@@ -18,7 +18,7 @@
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#plugins/**\"",
     "validate:marketplace": "node scripts/validate-marketplace.js",
     "validate:marketplace:remote": "node scripts/validate-marketplace.js --remote"
   },
@@ -38,8 +38,5 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "markdownlint-cli2": "^0.14.0"
-  },
-  "lint-staged": {
-    "*.md": "markdownlint-cli2"
   }
 }

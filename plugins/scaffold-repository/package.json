@@ -1,5 +1,5 @@
 {
-  "name": "bootstrap",
+  "name": "scaffold-repository",
   "version": "1.10.0",
   "private": true,
   "description": "Scaffold new projects ready for structured commits, issues, and pull requests",
@@ -28,8 +28,5 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "markdownlint-cli2": "^0.14.0"
-  },
-  "lint-staged": {
-    "*.md": "markdownlint-cli2"
   }
 }

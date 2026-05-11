@@ -1,11 +1,11 @@
 ---
-name: bootstrap
-description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, release-please, agent docs (AGENTS.md, CLAUDE.md), or AI agent plugin manifests for Claude Code, Codex, Cursor, Windsurf, and Copilot. Triggers on phrases like "bootstrap this repo", "scaffold a Patina plugin", "realign with the baseline", "audit our repo conventions", "set up commitlint and husky", or "add Codex/Cursor/Windsurf surfaces".
+name: scaffold-repository
+description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, release-please, agent docs (AGENTS.md, CLAUDE.md), or AI agent plugin manifests for Claude Code, Codex, Cursor, Windsurf, and Copilot. Triggers on phrases like "scaffold this repo", "scaffold a Patina plugin", "realign with the baseline", "audit our repo conventions", "set up commitlint and husky", or "add Codex/Cursor/Windsurf surfaces".
 ---
 
-# bootstrap
+# scaffold-repository
 
-`bootstrap` scaffolds a repository – new or existing – to the Patina Project baseline. The baseline mirrors [`patinaproject/superteam`](https://github.com/patinaproject/superteam): a dual-plugin repository root, a self-contained `skills/` directory, conventional-commits-with-issue-ref enforcement, a PR template, `AGENTS.md` + `CLAUDE.md`, a human-readable `README.md`, a `docs/file-structure.md` contributor reference, and PNPM + Husky + markdownlint tooling.
+`scaffold-repository` scaffolds a repository – new or existing – to the Patina Project baseline. The baseline mirrors [`patinaproject/superteam`](https://github.com/patinaproject/superteam): a dual-plugin repository root, a self-contained `skills/` directory, conventional-commits-with-issue-ref enforcement, a PR template, `AGENTS.md` + `CLAUDE.md`, a human-readable `README.md`, a `docs/file-structure.md` contributor reference, and PNPM + Husky + markdownlint tooling.
 
 ## Modes
 
@@ -127,7 +127,7 @@ Aider, Zed, Cline, and Opencode read `AGENTS.md` natively and are covered by the
 
 ### Patina Project organization supplement
 
-When the target repo's owner is `patinaproject`, the skill replaces the agent-plugin `.github/workflows/release.yml` with the supplement at `skills/bootstrap/templates/patinaproject-supplement/.github/workflows/release.yml`. The supplement adds a `notify-patinaproject-skills` job that dispatches `plugin-release-bump.yml` on `patinaproject/skills` after each release. Repos outside Patina Project get the clean base workflow without any Patina Project-specific plumbing.
+When the target repo's owner is `patinaproject`, the skill replaces the agent-plugin `.github/workflows/release.yml` with the supplement at `skills/scaffold-repository/templates/patinaproject-supplement/.github/workflows/release.yml`. The supplement adds a `notify-patinaproject-skills` job that dispatches `plugin-release-bump.yml` on `patinaproject/skills` after each release. Repos outside Patina Project get the clean base workflow without any Patina Project-specific plumbing.
 
 Detection is done at scaffold time from `git remote get-url origin` (or the configured `<owner>` prompt). When generating the base workflow for non-Patina-Project repos, do not add `if: github.repository_owner == 'patinaproject'` gates; emit the clean workflow without any Patina-Project-specific plumbing.
 
@@ -270,7 +270,7 @@ Run `pnpm exec markdownlint-cli2 --fix "**/*.md" "#node_modules"` to auto-fix co
 
 ## Reference implementation
 
-This repository – [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) – is the canonical reference for every file this skill emits. The `templates/` directory under `skills/bootstrap/` mirrors these files with placeholders.
+This repository – [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) – is the canonical reference for every file this skill emits. The `templates/` directory under `skills/scaffold-repository/` mirrors these files with placeholders.
 
 ## Related documents
 

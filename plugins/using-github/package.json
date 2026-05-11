@@ -28,7 +28,4 @@
     "lint-staged": "^15.2.10",
     "markdownlint-cli2": "^0.14.0"
   },
-  "lint-staged": {
-    "*.md": "markdownlint-cli2"
-  }
 }

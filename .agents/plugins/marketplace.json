@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "bootstrap",
+      "name": "scaffold-repository",
       "source": {
         "source": "url",
-        "url": "https://github.com/patinaproject/bootstrap.git",
+        "url": "https://github.com/patinaproject/skills.git",
         "ref": "v1.10.0"
       },
       "policy": {
@@ -21,7 +21,7 @@
       "name": "superteam",
       "source": {
         "source": "url",
-        "url": "https://github.com/patinaproject/superteam.git",
+        "url": "https://github.com/patinaproject/skills.git",
         "ref": "v1.5.0"
       },
       "policy": {
@@ -34,7 +34,7 @@
       "name": "using-github",
       "source": {
         "source": "url",
-        "url": "https://github.com/patinaproject/using-github.git",
+        "url": "https://github.com/patinaproject/skills.git",
         "ref": "v2.0.0"
       },
       "policy": {

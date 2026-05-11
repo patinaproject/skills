@@ -1,5 +1,5 @@
 {
-  "name": "bootstrap",
+  "name": "scaffold-repository",
   "version": "1.10.0",
   "description": "Scaffold or realign repositories to the Patina Project baseline: commits, PRs, PNPM tooling, agent docs, and plugin surfaces.",
   "author": {
@@ -15,7 +15,7 @@
     "plugin",
     "skills",
     "scaffold",
-    "bootstrap"
+    "scaffold-repository"
   ],
   "skills": "./skills"
 }

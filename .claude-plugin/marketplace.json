@@ -9,12 +9,12 @@
   },
   "plugins": [
     {
-      "name": "bootstrap",
-      "description": "Patina Project plugin: bootstrap",
+      "name": "scaffold-repository",
+      "description": "Patina Project plugin: scaffold-repository",
       "category": "productivity",
       "source": {
         "source": "github",
-        "repo": "patinaproject/bootstrap",
+        "repo": "patinaproject/skills",
         "ref": "v1.10.0"
       }
     },
@@ -24,7 +24,7 @@
       "category": "productivity",
       "source": {
         "source": "github",
-        "repo": "patinaproject/superteam",
+        "repo": "patinaproject/skills",
         "ref": "v1.5.0"
       }
     },
@@ -34,7 +34,7 @@
       "category": "productivity",
       "source": {
         "source": "github",
-        "repo": "patinaproject/using-github",
+        "repo": "patinaproject/skills",
         "ref": "v2.0.0"
       }
     }
