@@ -78,7 +78,11 @@ Also enable **Settings → Actions → General → Require actions to be pinned 
 
 ## Plugin Releases
 
-The marketplace only publishes tagged (`vX.Y.Z`) plugin releases. Every plugin entry in both manifests must pin an explicit tag `ref` — branch refs such as `main` are not allowed. New releases of member plugins (`bootstrap`, `superteam`) propagate here via `repository_dispatch` into `.github/workflows/plugin-release-bump.yml`, which opens a bump PR. See [docs/release-flow.md](./docs/release-flow.md).
+The marketplace only publishes tagged (`vX.Y.Z`) plugin releases. Every plugin entry in both manifests must pin an explicit tag `ref` — branch refs such as `main` are not allowed.
+
+This repo's `plugins/<name>/` owns the package for `name ∈ {scaffold-repository, superteam, using-github}`. Standalone skills (currently `office-hours`, `find-skills`) own themselves at `.agents/skills/<name>/` and are not marketplace entries.
+
+Releases are driven by `release-please` via `.github/workflows/release-please.yml`, which maintains a standing per-package Release PR for each plugin with unreleased commits. Merging a Release PR tags the commit, rewrites the manifest `source.ref`, and publishes a GitHub Release. The release-please workflow also auto-merges Release PRs after required checks pass. See [docs/release-flow.md](./docs/release-flow.md).
 
 ## Commit & Pull Request Guidelines
 
@@ -95,7 +99,7 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 
 `type: #123 short description`
 
-Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
+Bot-generated release-please PRs from `release-please--*` branches and bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
 When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
 

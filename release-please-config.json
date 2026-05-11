@@ -1,0 +1,57 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "separate-pull-requests": true,
+  "packages": {
+    "plugins/scaffold-repository": {
+      "release-type": "node",
+      "tag-name-prefix": "scaffold-repository-",
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name == 'scaffold-repository')].source.ref"
+        },
+        {
+          "type": "json",
+          "path": ".agents/plugins/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name == 'scaffold-repository')].source.ref"
+        }
+      ]
+    },
+    "plugins/superteam": {
+      "release-type": "node",
+      "tag-name-prefix": "superteam-",
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name == 'superteam')].source.ref"
+        },
+        {
+          "type": "json",
+          "path": ".agents/plugins/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name == 'superteam')].source.ref"
+        }
+      ]
+    },
+    "plugins/using-github": {
+      "release-type": "node",
+      "tag-name-prefix": "using-github-",
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name == 'using-github')].source.ref"
+        },
+        {
+          "type": "json",
+          "path": ".agents/plugins/marketplace.json",
+          "jsonpath": "$.plugins[?(@.name == 'using-github')].source.ref"
+        }
+      ]
+    }
+  }
+}

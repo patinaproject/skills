@@ -1,0 +1,5 @@
+{
+  "plugins/scaffold-repository": "1.10.0",
+  "plugins/superteam": "1.5.0",
+  "plugins/using-github": "2.0.0"
+}

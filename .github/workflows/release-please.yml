@@ -1,0 +1,101 @@
+name: Release please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Open or update release PRs
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
+      scaffold-repository--release_created: ${{ steps.release.outputs['plugins/scaffold-repository--release_created'] }}
+      scaffold-repository--pr: ${{ steps.release.outputs['plugins/scaffold-repository--pr'] }}
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      # googleapis/release-please-action@v4.1.3
+      - uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ github.token }}
+
+  validate-manifests:
+    name: Validate manifests after release-please mutation
+    needs: release-please
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      # actions/setup-node@v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+
+      - name: Validate marketplace manifests (release mode)
+        run: node scripts/validate-marketplace.js
+
+  apply-scaffold-repository:
+    name: Apply scaffold-repository scaffolding on scaffold-repository release
+    needs: release-please
+    if: needs.release-please.outputs['scaffold-repository--release_created'] == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ needs.release-please.outputs['scaffold-repository--pr'] }}
+          fetch-depth: 0
+
+      # actions/setup-node@v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+
+      - name: Apply scaffold-repository scaffolding
+        run: node scripts/apply-scaffold-repository.js plugins/scaffold-repository
+
+      - name: Commit scaffolding changes (if any)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -S -m "chore: apply scaffold-repository scaffolding refresh"
+            git push
+          else
+            echo "No scaffolding changes to commit"
+          fi
+
+  auto-merge:
+    name: Enable auto-merge on release PRs
+    needs: release-please
+    if: needs.release-please.outputs.releases_created != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Enable auto-merge on open release PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Enable auto-merge on any open release-please PRs
+          prs=$(gh pr list --label "autorelease: pending" --json number --jq '.[].number')
+          for pr in $prs; do
+            gh pr merge "$pr" --auto --squash || true
+          done
