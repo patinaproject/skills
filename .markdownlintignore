@@ -4,6 +4,6 @@ dist/
 build/
 docs/superpowers/plans/
 docs/superpowers/specs/
-plugins/
+skills/
 .agents/skills/
 .claude/skills/

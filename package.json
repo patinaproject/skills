@@ -18,7 +18,7 @@
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#plugins/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
     "validate:marketplace": "node scripts/validate-marketplace.js",
     "validate:marketplace:dev": "node scripts/validate-marketplace.js --dev",
     "validate:marketplace:remote": "node scripts/validate-marketplace.js --remote",
