@@ -17,8 +17,8 @@ jobs:
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
       paths_released: ${{ steps.release.outputs.paths_released }}
-      scaffold-repository--release_created: ${{ steps.release.outputs['plugins/scaffold-repository--release_created'] }}
-      scaffold-repository--pr: ${{ steps.release.outputs['plugins/scaffold-repository--pr'] }}
+      scaffold-repository--release_created: ${{ steps.release.outputs['skills/scaffold-repository--release_created'] }}
+      scaffold-repository--pr: ${{ steps.release.outputs['skills/scaffold-repository--pr'] }}
     steps:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -30,23 +30,6 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ github.token }}
-
-  validate-manifests:
-    name: Validate manifests after release-please mutation
-    needs: release-please
-    if: needs.release-please.outputs.releases_created == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      # actions/checkout@v4.3.1
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
-      # actions/setup-node@v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: "24"
-
-      - name: Validate marketplace manifests (release mode)
-        run: node scripts/validate-marketplace.js
 
   apply-scaffold-repository:
     name: Apply scaffold-repository scaffolding on scaffold-repository release
@@ -66,7 +49,7 @@ jobs:
           node-version: "24"
 
       - name: Apply scaffold-repository scaffolding
-        run: node scripts/apply-scaffold-repository.js plugins/scaffold-repository
+        run: node scripts/apply-scaffold-repository.js skills/scaffold-repository
 
       - name: Push scaffold refresh via GitHub API
         env:
