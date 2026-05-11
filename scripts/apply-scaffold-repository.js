@@ -59,9 +59,13 @@ const repoRoot = process.cwd();
 const STATIC_FILES = [
   // Commitlint
   { src: "commitlint.config.js", dest: "commitlint.config.js" },
-  // Husky hooks
+  // Husky hooks.
+  // NOTE: .husky/pre-commit is intentionally excluded from self-apply.
+  // The template hook calls `pnpm check:versions` (for single-package plugin repos),
+  // but this marketplace repo is a monorepo root without a `version` in package.json.
+  // The existing .husky/pre-commit (lint-staged only) is correct for this repo.
+  // Downstream bootstrapped repos that are single-package plugins apply this hook normally.
   { src: ".husky/commit-msg", dest: ".husky/commit-msg", mode: 0o755 },
-  { src: ".husky/pre-commit", dest: ".husky/pre-commit", mode: 0o755 },
   // Markdown lint config
   { src: ".markdownlint.jsonc", dest: ".markdownlint.jsonc" },
   // Editor config
@@ -100,6 +104,11 @@ const STATIC_FILES = [
     src: ".github/workflows/pull-request.yml",
     dest: ".github/workflows/pull-request.yml",
   },
+  // PR template checkboxes validator — required by pull-request.yml
+  {
+    src: "scripts/check-pr-template-checkboxes.mjs",
+    dest: "scripts/check-pr-template-checkboxes.mjs",
+  },
 ];
 
 // .markdownlintignore is a static file in core templates (non-.tmpl)
@@ -107,6 +116,14 @@ const STATIC_FILES = [
 // We skip it to avoid overwriting the repo's customized ignore list.
 // The SKILL.md lists it as part of the baseline, but for self-apply the
 // in-repo version is intentionally extended and must not be reverted.
+
+// .husky/pre-commit in the template calls `pnpm check:versions`, which runs
+// scripts/check-plugin-versions.mjs. That script checks that .claude-plugin/plugin.json
+// and .codex-plugin/plugin.json versions match package.json. This marketplace repo is a
+// monorepo root with no `version` field in its root package.json, so the script would
+// always fail. We skip .husky/pre-commit for the self-apply case and keep the existing
+// hook that only runs lint-staged. Downstream bootstrapped repos (which do have a single
+// package.json version) apply this hook without skipping it.
 
 // ---------------------------------------------------------------------------
 // Helpers

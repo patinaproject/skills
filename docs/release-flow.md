@@ -109,6 +109,20 @@ from the local `plugins/scaffold-repository/skills/scaffold-repository/templates
 `node scripts/apply-scaffold-repository.js plugins/scaffold-repository --check` to preview
 what would change.
 
+**Intentional divergences from the template:** This marketplace repo is a monorepo root; it
+does not have a single root `package.json` `version` field. As a result, two template items
+are not applied by the self-apply script:
+
+- `.husky/pre-commit` — the template hook calls `pnpm check:versions`, which runs
+  `scripts/check-plugin-versions.mjs`. That script checks `.claude-plugin/plugin.json` and
+  `.codex-plugin/plugin.json` version alignment with `package.json`. This repo has no root
+  plugin manifests and no root `version` field, so the hook is skipped for self-apply.
+  Downstream bootstrapped plugin repos apply it normally.
+- `scripts/check-plugin-versions.mjs` is not in STATIC_FILES for the same reason.
+
+The apply script documents these exclusions inline. Running `--check` exits 0 after excluding
+these two items.
+
 ## Invariants
 
 - Every plugin entry in both manifests has an explicit `ref` matching `vX.Y.Z`. Branches
