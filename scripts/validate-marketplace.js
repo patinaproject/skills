@@ -1,18 +1,48 @@
 #!/usr/bin/env node
+// validate-marketplace.js — Validates Patina Project marketplace manifests.
+//
+// Modes:
+//   (default)  Release mode: validates .agents/plugins/marketplace.json and
+//              .claude-plugin/marketplace.json. Enforces vX.Y.Z refs, rejects
+//              the pre-rename "bootstrap" slug, and rejects standalone-skill
+//              slugs in released manifests.
+//   --dev      Dev mode: validates *.local.json overlays. Asserts path sources
+//              resolve to plugin directories; skips vX.Y.Z check.
+//   --remote   Remote mode: additionally reads in-tree plugin manifests to
+//              assert each plugin's name and version match the marketplace ref.
+//              Network-free (reads HEAD files, not upstream).
 
 const fs = require("node:fs");
-const { execFileSync } = require("node:child_process");
+const path = require("node:path");
 
-const remote = process.argv.includes("--remote");
+const devMode = process.argv.includes("--dev");
+const remoteMode = process.argv.includes("--remote");
+
 const semverTag = /^v(\d+\.\d+\.\d+)$/;
 
-function readJson(path) {
-  return JSON.parse(fs.readFileSync(path, "utf8"));
+// Slugs that must NEVER appear as marketplace plugin entries.
+// These are standalone skills distributed via .agents/skills/ directly.
+const STANDALONE_SKILL_SLUGS = ["office-hours", "find-skills"];
+
+// The pre-rename slug must never appear in a released manifest.
+// Defense-in-depth: catches accidental revert of the W9 rename.
+const BANNED_RELEASED_SLUGS = ["bootstrap"];
+
+function readJson(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (err) {
+    fail(`Cannot read/parse ${filePath}: ${err.message}`);
+  }
 }
 
 function fail(message) {
   throw new Error(message);
 }
+
+// ---------------------------------------------------------------------------
+// Source normalizers
+// ---------------------------------------------------------------------------
 
 function normalizeCodexRepo(plugin) {
   const source = plugin.source || {};
@@ -40,6 +70,32 @@ function normalizeClaudeRepo(plugin) {
   return source.repo;
 }
 
+function normalizeCodexPath(plugin) {
+  const source = plugin.source || {};
+  if (source.source !== "path") {
+    fail(`Codex dev plugin ${plugin.name} must use source=path`);
+  }
+  if (!source.path) {
+    fail(`Codex dev plugin ${plugin.name} missing source.path`);
+  }
+  return source.path;
+}
+
+function normalizeClaudePath(plugin) {
+  const source = plugin.source || {};
+  if (source.source !== "path") {
+    fail(`Claude dev plugin ${plugin.name} must use source=path`);
+  }
+  if (!source.path) {
+    fail(`Claude dev plugin ${plugin.name} missing source.path`);
+  }
+  return source.path;
+}
+
+// ---------------------------------------------------------------------------
+// Shared assertions
+// ---------------------------------------------------------------------------
+
 function assertNoDuplicates(kind, plugins) {
   const counts = new Map();
   for (const plugin of plugins) {
@@ -65,101 +121,223 @@ function assertRefs(kind, plugins) {
   }
 }
 
-function apiJson(repo, ref, path) {
-  const content = execFileSync(
-    "gh",
-    [
-      "api",
-      "-X",
-      "GET",
-      `repos/${repo}/contents/${path}`,
-      "-f",
-      `ref=${ref}`,
-      "--jq",
-      ".content"
-    ],
-    { encoding: "utf8" }
-  );
-  return JSON.parse(
-    Buffer.from(content.replace(/\s/g, ""), "base64").toString("utf8")
-  );
+function assertNoBannedReleasedSlugs(kind, plugins) {
+  for (const plugin of plugins) {
+    if (BANNED_RELEASED_SLUGS.includes(plugin.name)) {
+      fail(
+        `${kind} released manifest contains banned slug "${plugin.name}". ` +
+          `This slug was renamed (bootstrap -> scaffold-repository). ` +
+          `Check for an accidental revert.`
+      );
+    }
+  }
 }
 
-function assertRemoteManifest(plugin, repo, manifestPath, expectedVersion) {
-  const manifest = apiJson(repo, plugin.source.ref, manifestPath);
+function assertNoStandaloneSkillSlugs(kind, plugins) {
+  for (const plugin of plugins) {
+    if (STANDALONE_SKILL_SLUGS.includes(plugin.name)) {
+      fail(
+        `${kind} released manifest contains standalone-skill slug "${plugin.name}". ` +
+          `Standalone skills are distributed via .agents/skills/, not as marketplace entries.`
+      );
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Remote (in-tree) verification helpers
+// ---------------------------------------------------------------------------
+
+function assertInTreeManifest(plugin, pluginsDir, manifestRelPath, expectedVersion) {
+  const manifestPath = path.join(pluginsDir, plugin.name, manifestRelPath);
+  if (!fs.existsSync(manifestPath)) {
+    fail(`In-tree manifest not found: ${manifestPath}`);
+  }
+  const manifest = readJson(manifestPath);
   if (manifest.name !== plugin.name) {
     fail(
-      `${repo}@${plugin.source.ref} ${manifestPath} name=${manifest.name}; expected ${plugin.name}`
+      `${manifestPath} name="${manifest.name}"; expected "${plugin.name}"`
     );
   }
   if (manifest.version !== expectedVersion) {
     fail(
-      `${repo}@${plugin.source.ref} ${manifestPath} version=${manifest.version}; expected ${expectedVersion}`
+      `${manifestPath} version="${manifest.version}"; expected "${expectedVersion}" ` +
+        `(from marketplace ref ${plugin.source.ref})`
     );
   }
 }
 
-function assertRemotePackage(plugin, repo, expectedVersion) {
-  const pkg = apiJson(repo, plugin.source.ref, "package.json");
+function assertInTreePackage(plugin, pluginsDir, expectedVersion) {
+  const pkgPath = path.join(pluginsDir, plugin.name, "package.json");
+  if (!fs.existsSync(pkgPath)) {
+    fail(`In-tree package.json not found: ${pkgPath}`);
+  }
+  const pkg = readJson(pkgPath);
   if (pkg.name !== plugin.name) {
     fail(
-      `${repo}@${plugin.source.ref} package.json name=${pkg.name}; expected ${plugin.name}`
+      `${pkgPath} name="${pkg.name}"; expected "${plugin.name}"`
     );
   }
   if (pkg.version !== expectedVersion) {
     fail(
-      `${repo}@${plugin.source.ref} package.json version=${pkg.version}; expected ${expectedVersion}`
+      `${pkgPath} version="${pkg.version}"; expected "${expectedVersion}" ` +
+        `(from marketplace ref ${plugin.source.ref})`
     );
   }
 }
 
-const codex = readJson(".agents/plugins/marketplace.json").plugins;
-const claude = readJson(".claude-plugin/marketplace.json").plugins;
+// ---------------------------------------------------------------------------
+// Dev-mode validation
+// ---------------------------------------------------------------------------
 
-assertNoDuplicates("Codex", codex);
-assertNoDuplicates("Claude", claude);
-assertRefs("Codex", codex);
-assertRefs("Claude", claude);
+function validateDevOverlays() {
+  const codexPath = ".agents/plugins/marketplace.local.json";
+  const claudePath = ".claude-plugin/marketplace.local.json";
 
-const codexByName = new Map(codex.map((plugin) => [plugin.name, plugin]));
-const claudeByName = new Map(claude.map((plugin) => [plugin.name, plugin]));
-
-for (const name of new Set([...codexByName.keys(), ...claudeByName.keys()])) {
-  const codexPlugin = codexByName.get(name);
-  const claudePlugin = claudeByName.get(name);
-  if (!codexPlugin || !claudePlugin) {
-    fail(`Plugin ${name} must be present in both Codex and Claude marketplaces`);
+  if (!fs.existsSync(codexPath)) {
+    fail(`Dev overlay not found: ${codexPath}`);
+  }
+  if (!fs.existsSync(claudePath)) {
+    fail(`Dev overlay not found: ${claudePath}`);
   }
 
-  const codexRepo = normalizeCodexRepo(codexPlugin);
-  const claudeRepo = normalizeClaudeRepo(claudePlugin);
-  if (codexRepo !== claudeRepo) {
-    fail(
-      `Plugin ${name} repo mismatch: Codex=${codexRepo}, Claude=${claudeRepo}`
-    );
-  }
-  if (codexPlugin.source.ref !== claudePlugin.source.ref) {
-    fail(
-      `Plugin ${name} ref mismatch: Codex=${codexPlugin.source.ref}, Claude=${claudePlugin.source.ref}`
-    );
+  const codex = readJson(codexPath).plugins;
+  const claude = readJson(claudePath).plugins;
+  const codexDir = path.dirname(path.resolve(codexPath));
+  const claudeDir = path.dirname(path.resolve(claudePath));
+
+  assertNoDuplicates("Codex dev", codex);
+  assertNoDuplicates("Claude dev", claude);
+
+  // Validate each Codex path source resolves to a dir with .codex-plugin/plugin.json
+  // Path is relative to the manifest file's directory.
+  for (const plugin of codex) {
+    const relPath = normalizeCodexPath(plugin);
+    const absPath = path.resolve(codexDir, relPath);
+    if (!fs.existsSync(absPath) || !fs.statSync(absPath).isDirectory()) {
+      fail(
+        `Codex dev plugin ${plugin.name}: path "${relPath}" does not resolve to a directory`
+      );
+    }
+    const codexManifest = path.join(absPath, ".codex-plugin", "plugin.json");
+    if (!fs.existsSync(codexManifest)) {
+      fail(
+        `Codex dev plugin ${plugin.name}: no .codex-plugin/plugin.json at "${absPath}"`
+      );
+    }
   }
 
-  if (remote) {
-    const expectedVersion = codexPlugin.source.ref.match(semverTag)[1];
-    assertRemoteManifest(
-      codexPlugin,
-      codexRepo,
-      ".codex-plugin/plugin.json",
-      expectedVersion
-    );
-    assertRemoteManifest(
-      claudePlugin,
-      claudeRepo,
-      ".claude-plugin/plugin.json",
-      expectedVersion
-    );
-    assertRemotePackage(codexPlugin, codexRepo, expectedVersion);
+  // Validate each Claude path source resolves to a dir with .claude-plugin/plugin.json
+  // Path is relative to the manifest file's directory.
+  for (const plugin of claude) {
+    const relPath = normalizeClaudePath(plugin);
+    const absPath = path.resolve(claudeDir, relPath);
+    if (!fs.existsSync(absPath) || !fs.statSync(absPath).isDirectory()) {
+      fail(
+        `Claude dev plugin ${plugin.name}: path "${relPath}" does not resolve to a directory`
+      );
+    }
+    const claudeManifest = path.join(absPath, ".claude-plugin", "plugin.json");
+    if (!fs.existsSync(claudeManifest)) {
+      fail(
+        `Claude dev plugin ${plugin.name}: no .claude-plugin/plugin.json at "${absPath}"`
+      );
+    }
   }
+
+  console.log(`Dev overlay validation passed for ${codex.length} Codex + ${claude.length} Claude plugin(s).`);
 }
 
-console.log(`Marketplace validation passed for ${codex.length} plugin(s).`);
+// ---------------------------------------------------------------------------
+// Release-mode validation
+// ---------------------------------------------------------------------------
+
+function validateRelease() {
+  const codex = readJson(".agents/plugins/marketplace.json").plugins;
+  const claude = readJson(".claude-plugin/marketplace.json").plugins;
+
+  assertNoDuplicates("Codex", codex);
+  assertNoDuplicates("Claude", claude);
+
+  // Release-mode deny rules
+  assertNoBannedReleasedSlugs("Codex", codex);
+  assertNoBannedReleasedSlugs("Claude", claude);
+  assertNoStandaloneSkillSlugs("Codex", codex);
+  assertNoStandaloneSkillSlugs("Claude", claude);
+
+  assertRefs("Codex", codex);
+  assertRefs("Claude", claude);
+
+  // Defense-in-depth: reject if any *.local.json is placed where released manifests live
+  const localCodex = ".agents/plugins/marketplace.local.json";
+  const localClaude = ".claude-plugin/marketplace.local.json";
+  // These are allowed at their canonical paths (they're tracked for dev use).
+  // The leak risk is if someone copies them into a release-eligible location
+  // like plugins/<name>/marketplace.local.json. We can't enumerate all possible
+  // leak targets here, but the .gitattributes export-ignore rules and the
+  // release-please extra-files config provide the primary defense.
+  // This validator checks the most obvious risk: that the released manifest
+  // files themselves don't have 'local' content (path sources).
+  const codexSources = codex.map((p) => p.source?.source);
+  const claudeSources = claude.map((p) => p.source?.source);
+  if (codexSources.includes("path")) {
+    fail(
+      'Codex released manifest contains a "path" source — dev overlay leaked into release manifest.'
+    );
+  }
+  if (claudeSources.includes("path")) {
+    fail(
+      'Claude released manifest contains a "path" source — dev overlay leaked into release manifest.'
+    );
+  }
+
+  const codexByName = new Map(codex.map((plugin) => [plugin.name, plugin]));
+  const claudeByName = new Map(claude.map((plugin) => [plugin.name, plugin]));
+
+  for (const name of new Set([...codexByName.keys(), ...claudeByName.keys()])) {
+    const codexPlugin = codexByName.get(name);
+    const claudePlugin = claudeByName.get(name);
+    if (!codexPlugin || !claudePlugin) {
+      fail(`Plugin ${name} must be present in both Codex and Claude marketplaces`);
+    }
+
+    const codexRepo = normalizeCodexRepo(codexPlugin);
+    const claudeRepo = normalizeClaudeRepo(claudePlugin);
+    if (codexRepo !== claudeRepo) {
+      fail(
+        `Plugin ${name} repo mismatch: Codex=${codexRepo}, Claude=${claudeRepo}`
+      );
+    }
+    if (codexPlugin.source.ref !== claudePlugin.source.ref) {
+      fail(
+        `Plugin ${name} ref mismatch: Codex=${codexPlugin.source.ref}, Claude=${claudePlugin.source.ref}`
+      );
+    }
+
+    if (remoteMode) {
+      const expectedVersion = codexPlugin.source.ref.match(semverTag)[1];
+      const pluginsDir = "plugins";
+      assertInTreeManifest(codexPlugin, pluginsDir, ".codex-plugin/plugin.json", expectedVersion);
+      assertInTreeManifest(claudePlugin, pluginsDir, ".claude-plugin/plugin.json", expectedVersion);
+      assertInTreePackage(codexPlugin, pluginsDir, expectedVersion);
+    }
+  }
+
+  const modeLabel = remoteMode ? " (with --remote in-tree checks)" : "";
+  console.log(`Marketplace validation passed${modeLabel} for ${codex.length} plugin(s).`);
+}
+
+// ---------------------------------------------------------------------------
+// Entry point
+// ---------------------------------------------------------------------------
+
+try {
+  if (devMode) {
+    validateDevOverlays();
+  } else {
+    validateRelease();
+  }
+} catch (err) {
+  console.error(`Validation FAILED: ${err.message}`);
+  process.exit(1);
+}

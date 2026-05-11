@@ -1,0 +1,39 @@
+{
+  "name": "patinaproject-skills-local",
+  "owner": {
+    "name": "Patina Project",
+    "url": "https://github.com/patinaproject"
+  },
+  "metadata": {
+    "description": "Local dev overlay for Patina Project plugins (path sources)."
+  },
+  "plugins": [
+    {
+      "name": "scaffold-repository",
+      "description": "Patina Project plugin: scaffold-repository (local dev)",
+      "category": "productivity",
+      "source": {
+        "source": "path",
+        "path": "../plugins/scaffold-repository"
+      }
+    },
+    {
+      "name": "superteam",
+      "description": "Patina Project plugin: superteam (local dev)",
+      "category": "productivity",
+      "source": {
+        "source": "path",
+        "path": "../plugins/superteam"
+      }
+    },
+    {
+      "name": "using-github",
+      "description": "Patina Project plugin: using-github (local dev)",
+      "category": "productivity",
+      "source": {
+        "source": "path",
+        "path": "../plugins/using-github"
+      }
+    }
+  ]
+}

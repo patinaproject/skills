@@ -4,3 +4,7 @@
 # They must not leak into release tarballs produced by git archive.
 .agents/skills/** export-ignore
 .claude/skills/** export-ignore
+
+# Developer marketplace overlays (path sources) must not leak into releases.
+.agents/plugins/marketplace.local.json export-ignore
+.claude-plugin/marketplace.local.json export-ignore
