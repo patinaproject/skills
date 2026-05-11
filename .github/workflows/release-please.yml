@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   release-please:
@@ -67,19 +68,29 @@ jobs:
       - name: Apply scaffold-repository scaffolding
         run: node scripts/apply-scaffold-repository.js plugins/scaffold-repository
 
-      - name: Commit scaffolding changes (if any)
+      - name: Push scaffold refresh via GitHub API
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet; then
-            git add -A
-            git commit -S -m "chore: apply scaffold-repository scaffolding refresh"
-            git push
-          else
+          # Commit each changed file via the Contents API so the commit is
+          # auto-verified by GitHub (satisfies issue #29 intent without a
+          # local GPG/SSH signing key).
+          BRANCH="${{ needs.release-please.outputs['scaffold-repository--pr'] }}"
+          REPO="${{ github.repository }}"
+          changed=$(git diff --name-only)
+          if [ -z "$changed" ]; then
             echo "No scaffolding changes to commit"
+            exit 0
           fi
+          for file in $changed; do
+            sha=$(gh api "repos/$REPO/contents/$file?ref=$BRANCH" --jq '.sha')
+            content=$(base64 -w0 < "$file")
+            gh api -X PUT "repos/$REPO/contents/$file" \
+              -f message="chore: apply scaffold-repository scaffolding refresh" \
+              -f content="$content" \
+              -f sha="$sha" \
+              -f branch="$BRANCH"
+          done
 
   auto-merge:
     name: Enable auto-merge on release PRs
