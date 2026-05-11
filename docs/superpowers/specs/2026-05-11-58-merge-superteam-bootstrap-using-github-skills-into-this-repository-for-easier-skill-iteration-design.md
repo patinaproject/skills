@@ -26,7 +26,7 @@ Consolidate the `superteam`, `bootstrap`, and `using-github` skills into `patina
 
 ### AC-58-1
 
-After consolidation, `plugins/bootstrap/`, `plugins/superteam/`, and `plugins/using-github/` exist in this repository, each containing a complete plugin package equivalent to the corresponding tagged upstream release at the time of merge. Each package retains both manifest surfaces (`.codex-plugin/plugin.json` and `.claude-plugin/plugin.json`) and its `skills/<plugin-name>/` directory verbatim, so existing consumers see no semantic change in the skill content.
+After consolidation, `plugins/bootstrap/`, `plugins/superteam/`, and `plugins/using-github/` exist in this repository, each containing a complete plugin package equivalent to the corresponding tagged upstream release at the time of merge. Each package retains both manifest surfaces (`.codex-plugin/plugin.json` and `.claude-plugin/plugin.json`) and its `skills/<plugin-name>/` directory verbatim, so existing consumers see no semantic change in the skill content. The canonical workspace overlay at `.agents/skills/<name>/` (see "Canonical skill layout" below) points at the in-package `plugins/<name>/skills/<name>/` tree so the package directory remains the byte-for-byte source of truth.
 
 ### AC-58-2
 
@@ -34,11 +34,26 @@ Both marketplace manifests (`.agents/plugins/marketplace.json` and `.claude-plug
 
 ### AC-58-3
 
-A contributor can clone `patinaproject/skills`, run a documented bootstrap command (e.g. `pnpm install`), and exercise any of the three skills against this repository itself without first publishing or installing from the marketplace. Specifically, the `superteam` skill can drive an issue workflow in this repo using its own in-repo copy, the `bootstrap` skill can apply its scaffolding to this repo without reaching the network, and the `using-github` skill's slash commands can be exercised from this clone. Local resolution is documented in `README.md` or `docs/`. Falsifiable checks: (a) a documented `npx skills --dev` invocation (or equivalent) registers the in-repo overlay against the active host and exits 0 on a fresh clone, (b) `node scripts/validate-marketplace.js` accepts the dev overlay and rejects it in release mode, and (c) `scripts/apply-bootstrap.js plugins/bootstrap` runs against this repo without network access and exits 0.
+A contributor can clone `patinaproject/skills`, run a documented bootstrap command (e.g. `pnpm install`), and exercise any of the three skills against this repository itself without first publishing or installing from the marketplace. Specifically, the `superteam` skill can drive an issue workflow in this repo using its own in-repo copy, the `bootstrap` skill can apply its scaffolding to this repo without reaching the network, and the `using-github` skill's slash commands can be exercised from this clone. Local resolution is documented in `README.md` or `docs/`. Falsifiable checks: (a) `node scripts/validate-marketplace.js` accepts the dev overlay and rejects it in release mode, (b) `scripts/apply-bootstrap.js plugins/bootstrap` runs against this repo without network access and exits 0, and (c) the dogfood verification below passes.
+
+#### AC-58-3 dogfood verification
+
+A fresh `claude` session opened at the repo root must discover all four in-repo skills (`bootstrap`, `superteam`, `using-github`, `find-skills`) via Claude's own skill loader without any user action beyond `git clone`.
+
+Claude Code does not expose a public "list installed skills" CLI command, so this check is mechanized as a file-presence + frontmatter check against the canonical workspace overlay that the loader scans. The check script (`scripts/verify-dogfood.sh`) exits 0 if and only if all four conditions hold:
+
+1. Each path `.claude/skills/<name>/SKILL.md` exists for `name` in `{bootstrap, superteam, using-github, find-skills}` and resolves (via symlink chain) to a real file. (Test with `test -e` which follows symlinks; reject broken links with `test -L && ! test -e` returning true.)
+2. Each resolved file begins with a YAML frontmatter block whose first two non-delimiter keys include `name:` and `description:`, matching the skill loader's contract documented in Claude Code's skill format.
+3. The `name:` value in each frontmatter matches the directory name (`name: bootstrap` under `.claude/skills/bootstrap/`, etc.).
+4. For the three in-repo plugin skills, the symlink target resolves under `.agents/skills/<name>/SKILL.md`, which itself resolves under `plugins/<name>/skills/<name>/SKILL.md`; for `find-skills`, the symlink target resolves under `.agents/skills/find-skills/SKILL.md` (where the vercel-labs CLI copied or symlinked it, per "Canonical skill layout" below).
+
+Pass criterion: `scripts/verify-dogfood.sh` exits 0. The check is mechanical and runs in CI on every PR that touches `.claude/skills/**`, `.agents/skills/**`, or `plugins/*/skills/**`.
 
 ### AC-58-4
 
-`npx skills` is the primary documented install entry point. Running it adds or refreshes the Patina Project marketplace registration in the user's active host (Claude Code or Codex). `README.md` and both marketplace manifest descriptions point at `npx skills` for first-time install, with the existing `/plugin marketplace add` and `codex plugin marketplace add` paths kept as documented fallbacks. The `npx skills` package is published from this repository and pinned to a `vX.Y.Z` semver line so users get the same version as the marketplace they install.
+The primary documented install entry point is `npx skills add patinaproject/skills@<skill>` against the vercel-labs `skills` CLI on npm (Gate G6 resolved CLOSED — this repo publishes no CLI of its own; see Gate G6 disposition). `README.md` and both marketplace manifest descriptions document `npx skills add` as the first-time install path for each of the three skills, alongside the existing `/plugin marketplace add` and `codex plugin marketplace add` paths kept as host-specific fallbacks. The release process pins a tested version range of the upstream `skills` CLI in install instructions (initially `skills@^1.5.6`, the version observed during this design); the docs include the CLI's homepage (`https://github.com/vercel-labs/skills`) and a `package.json` `engines` or equivalent record so install commands remain reproducible.
+
+Falsifiable check: from a fresh temp directory, `npx skills add patinaproject/skills@bootstrap --agent claude-code -y` (and equivalents for `superteam`, `using-github`, `find-skills`) against this repo's current branch resolves the skill, writes `skills-lock.json`, and produces an installed skill discoverable by Claude Code's loader. The Executor records the command, the resolved lock entries, and the SHA of the branch the install resolved against in the PR body. CI exercises the same install from a clean working directory against the tagged release once it exists.
 
 ### AC-58-5
 
@@ -94,13 +109,25 @@ Inline the three skills directly under a top-level `skills/` directory and drop 
 patinaproject/skills/
   .agents/plugins/marketplace.json         # released: vX.Y.Z refs (unchanged schema)
   .claude-plugin/marketplace.json          # released: vX.Y.Z refs (unchanged schema)
-  .agents/plugins/marketplace.local.json   # dev overlay: path-based, gitignored from packaged releases
-  .claude-plugin/marketplace.local.json    # dev overlay: path-based, gitignored from packaged releases
+  .agents/plugins/marketplace.local.json   # dev overlay: path-based, excluded from packaged releases
+  .claude-plugin/marketplace.local.json    # dev overlay: path-based, excluded from packaged releases
+  .agents/skills/                          # CANONICAL workspace overlay (symlink targets; not packaged)
+    bootstrap        -> ../../plugins/bootstrap/skills/bootstrap
+    superteam        -> ../../plugins/superteam/skills/superteam
+    using-github     -> ../../plugins/using-github/skills/using-github
+    find-skills/                           # installed via `npx skills add vercel-labs/skills@find-skills`
+      SKILL.md
+  .claude/skills/                          # Claude Code skill loader path (symlinks into .agents/skills/)
+    bootstrap        -> ../../.agents/skills/bootstrap
+    superteam        -> ../../.agents/skills/superteam
+    using-github     -> ../../.agents/skills/using-github
+    find-skills      -> ../../.agents/skills/find-skills
+  skills-lock.json                         # committed; produced by vercel-labs skills CLI for reproducible re-installs
   plugins/
     bootstrap/
       .codex-plugin/plugin.json
       .claude-plugin/plugin.json
-      skills/bootstrap/...
+      skills/bootstrap/...                 # PACKAGE SOURCE OF TRUTH (shipped to consumers)
       package.json                         # name: bootstrap, version: managed by release-please
       CHANGELOG.md                         # managed by release-please
     superteam/
@@ -121,20 +148,17 @@ patinaproject/skills/
       skills/using-github/...
       package.json
       CHANGELOG.md
-  packages/
-    skills-cli/                            # `npx skills` entry point
-      package.json                         # name: skills, bin: { skills: ./bin/skills.mjs }
-      bin/skills.mjs
-      README.md
   release-please-config.json
   .release-please-manifest.json
   scripts/
-    validate-marketplace.js                # extended: also lints marketplace.local.json schema when present
+    validate-marketplace.js                # extended: also lints marketplace.local.json schema when present and
+                                           # asserts overlay symlinks are absent from release-mode publish paths
     apply-bootstrap.js                     # replaces the TODO step in plugin-release-bump.yml; in-repo invocation of plugins/bootstrap
+    verify-dogfood.sh                      # AC-58-3 dogfood check (file-presence + frontmatter)
   docs/
     AGENTS.md
-    release-flow.md                        # rewritten for release-please
-    file-structure.md                      # rewritten for the new layout
+    release-flow.md                        # rewritten for release-please; documents vercel-labs CLI version pin
+    file-structure.md                      # rewritten for the new layout and canonical overlay
     superpowers/specs/...
     superpowers/plans/...
   .github/workflows/
@@ -142,9 +166,42 @@ patinaproject/skills/
     lint-md.yml                            # unchanged
     lint-pr.yml                            # unchanged
     lint-actions.yml                       # unchanged
+    verify-iteration.yml                   # runs validator (--dev / release), apply-bootstrap, verify-dogfood.sh
 ```
 
+Note the absence of a `packages/skills-cli/` directory: Gate G6 (CLOSED) removed it. The vercel-labs CLI is consumed via `npx`, not republished.
+
 The wiki carries everything that used to live in per-plugin `README.md` install walkthroughs, user-facing troubleshooting, and any non-design tutorial content.
+
+## Canonical skill layout
+
+This repo has three concentric surfaces for skill content. The package source of truth lives inside each plugin. Two top-level overlays project it onto the surfaces this repo's own Claude and Codex sessions actually scan:
+
+```text
+plugins/<name>/skills/<name>/SKILL.md   <-- package source of truth (shipped to consumers)
+  ^
+  | symlink (workspace overlay; not packaged)
+  |
+.agents/skills/<name>/SKILL.md          <-- canonical workspace overlay (single source for both hosts)
+  ^
+  | symlink
+  |
+.claude/skills/<name>/SKILL.md          <-- Claude Code skill loader path (local-iteration only)
+```
+
+Rationale:
+
+- `plugins/<name>/skills/<name>/` is what marketplace consumers receive when they install via `npx skills add patinaproject/skills@<name>` or via either host's `/plugin marketplace add` command. It must remain byte-equivalent to the upstream tag content per AC-58-7.
+- `.agents/skills/<name>/` is the **canonical workspace overlay**. The directory name uses `.agents` with the `s` (matching `.agents/plugins/marketplace.json` already in the repo). This is the layer the design treats as the single overlay surface; Codex stays under `.agents/` per repo convention. Both `bootstrap`, `superteam`, `using-github`, and `find-skills` get an entry here.
+- `.claude/skills/<name>/` is a thin symlink layer pointing into `.agents/skills/<name>/`. Claude Code's skill loader scans `.claude/skills/**/SKILL.md`, so this layer exists solely so this repo's own Claude sessions discover the four in-repo skills without any user action beyond `git clone`. Codex's loader does not require a parallel `.codex/skills/` directory because `.agents/skills/` already lives under a Codex-prefixed root.
+- Symlinks are **dev-time iteration aids only**. They are excluded from the packaged release surface (see Risks; see Workstream 4 in the plan). The `release-please` `extra-files` rewrites and the `npm` `files` allowlists must not include these overlay paths.
+
+The vercel-labs `skills` CLI defaults to copying skill content when `--agent <agent>` is passed and to symlinking otherwise. For the dogfood overlay we want the symlink behavior because it keeps `plugins/<name>/skills/<name>/SKILL.md` as the sole edit target. The `find-skills` skill installed via `npx skills add vercel-labs/skills@find-skills --agent claude-code -y` produced a copy plus a `skills-lock.json`; the canonical-layout reconciliation step (Plan W2.x) moves the copied content into `.agents/skills/find-skills/` and replaces the CLI-created `.claude/skills/find-skills/` directory with a symlink into the canonical path. `skills-lock.json` stays at the repo root (its CLI-chosen location) and is committed so subsequent `npx skills` operations are reproducible.
+
+For Codex the overlay is consumed in two ways:
+
+1. As a marketplace dev overlay (`marketplace.local.json`) declaring `path:` sources pointing at `plugins/<name>` (per Gate G2). This is the install-equivalent path.
+2. As a directory `.agents/skills/<name>/` containing the same SKILL.md, so Codex's skill discovery sees the in-repo content without going through the marketplace at all.
 
 ## In-repo iteration: local-path marketplace resolution
 
@@ -155,17 +212,29 @@ The two manifests in their released form continue to declare `vX.Y.Z` refs again
 
 For the `superteam` skill specifically, in-repo iteration must not introduce path drift inside a single `/superteam` run. The CLI's `--dev` mode registers a stable absolute path resolved at registration time, and `superteam`'s pre-flight host-probe order is unchanged: probing remains a runtime aid, not a substitute for the locked SKILL.md at the registered path. `Team Lead`'s `resolve_role_config` SHA-256 prefix is computed against the SKILL.md at that path, identical to a marketplace-installed copy.
 
-## `npx skills` installer
+## `npx skills` installer (adopted from vercel-labs)
 
-A new package `packages/skills-cli/` ships as `skills` on npm with a `bin` entry. Its behavior:
+Gate G6 is **CLOSED**: the bare npm name `skills` is taken by `vercel-labs/skills` (`skills@1.5.6` at design time), a fully capable CLI that already supports `add <owner/repo@skill>`, `init`, `find`, `experimental_sync`, and per-agent (`--agent claude-code`, `--agent codex`, etc.) install. This repo therefore **does not author or publish its own `skills` CLI.** Workstream 5 in the prior plan is replaced by an integration workstream covering manifest descriptions, README, and documentation updates — no new package, no new `bin`.
 
-- `npx skills` -> detects the active host. For Claude Code, runs `claude plugin marketplace add patinaproject/skills` (or the equivalent slash-command stub printed to stdout if no CLI is detected). For Codex, runs `codex plugin marketplace add patinaproject/skills --ref vX.Y.Z`, where `X.Y.Z` matches the CLI's own `package.json` version.
-- `npx skills --dev` -> registers the dev overlay against the active host using an absolute path to the clone.
-- The CLI's version line is the same `vX.Y.Z` as the marketplace, because `release-please` updates it in the same release PR.
+User-facing install pattern:
 
-The CLI is small (single binary file, no runtime dependencies). It is the documented primary install path and is published on every tagged release.
+```sh
+npx skills add patinaproject/skills@bootstrap     --agent claude-code -y
+npx skills add patinaproject/skills@superteam     --agent claude-code -y
+npx skills add patinaproject/skills@using-github  --agent claude-code -y
+npx skills add patinaproject/skills@find-skills   --agent claude-code -y   # already installed pre-delta; documented for fresh clones
+```
 
-The bare npm name `skills` may already be taken on the public registry. If unavailable, the fallback name is `@patinaproject/skills` (scoped, published under the Patina Project npm org), with `npx @patinaproject/skills` as the documented install command. The Planner must resolve name availability before publishing the CLI; AC-58-4's "primary documented install path" applies to whichever name is published, but the design refuses to ship without a confirmed name.
+The `<owner/repo@skill>` syntax resolves against the published GitHub repository. The CLI walks the repo's plugin structure, finds the named skill, and either symlinks (no `--agent`) or copies (with `--agent`) the content into the agent's expected skill directory. `skills-lock.json` records the resolved SHA so subsequent re-installs reproduce.
+
+**Supply-chain considerations (raised during delta review):**
+
+- The CLI is a third-party dependency. The README install instructions pin a tested **version range** (`skills@^1.5.6` initially), and the docs include both the upstream repo URL (`https://github.com/vercel-labs/skills`) and the version's published-to-npm date so a contributor verifying the install can confirm they're pulling the same artifact this design exercised.
+- `npx skills add` should be run with `--ignore-scripts` where the host shell supports it (`npm_config_ignore_scripts=true npx skills add ...`). The README documents this as the default-recommended invocation and explains the trade-off (it disables postinstall scripts; the vercel-labs CLI currently has none, but this is defense-in-depth).
+- The marketplace manifests continue to pin `vX.Y.Z` refs for the repo itself. A user who distrusts the npm-distributed CLI can fall back entirely to `/plugin marketplace add patinaproject/skills` (Claude Code) or `codex plugin marketplace add patinaproject/skills --ref vX.Y.Z` (Codex). The vercel-labs CLI is the **primary** documented path, not the only one.
+- If the upstream `vercel-labs/skills` package is unpublished or rewritten in a way that breaks the documented install pattern, the fallback is the marketplace-add path above. The repo's `docs/release-flow.md` records this as the documented rollback.
+
+Host detection / auto-invocation: out of scope here (Planner's Gate G4 carried this; with the vercel-labs CLI doing the heavy lifting, host detection is the CLI's concern, not ours).
 
 ## Migration approach: history preservation
 
@@ -206,13 +275,29 @@ Marketplace manifest descriptions link the wiki landing page for each plugin so 
 1. **Per-plugin tag prefix vs. unified tag line.** `release-please` monorepo mode emits prefixed tags by default (`bootstrap-v1.11.0`). The existing manifest validator regex is `^v(\d+\.\d+\.\d+)$`. The plan must extend the validator or strip the prefix when writing manifests. Either is fine; flagging so the Planner picks one explicitly rather than the Executor improvising.
 2. **Codex `path:` source support.** Confirm Codex's marketplace manifest accepts a path-style source equivalent to Claude's. If it does not, the dev overlay for Codex may need to fall back to a `git+file://` URL or a `--ref local` convention; the Planner should validate against the current Codex release before locking in the overlay schema.
 3. **Bootstrap self-apply during release.** Today the bootstrap self-apply is a TODO step. The plan must decide whether `scripts/apply-bootstrap.js` runs every release or only on `plugins/bootstrap/` releases, and whether the result is committed to the release-please PR branch or to a follow-up PR.
-4. **CLI host detection robustness.** `npx skills` needs a stable detection strategy for "am I being run in a shell that already has Claude Code / Codex available." A safe default is to print the host-specific marketplace-add command and let the user copy-paste; auto-invocation is a stretch goal.
+4. **CLI host detection robustness.** Resolved by adopting the vercel-labs `skills` CLI (Gate G6 closed). Host detection is the upstream CLI's concern. Auto-invocation from this repo is not in scope.
 5. **Wiki content ownership.** Wikis are not branch-protected. The plan should decide whether wiki content has an "owner of record" in `docs/` (e.g. a `docs/wiki-sources/` folder that the wiki mirrors from), or whether the wiki is the canonical surface. Recommendation: canonical wiki, with a single doc in `docs/` listing the wiki pages that exist so review of wiki link-rot stays in-repo.
+
+## Gates resolved in-design
+
+### Gate G6 — `npx skills` package name (CLOSED)
+
+**Resolution:** the bare npm name `skills` is owned by `vercel-labs/skills` (`skills@1.5.6` at the time of this design). The vercel-labs CLI already implements `add <owner/repo@skill>`, `init`, `find`, `experimental_sync`, and per-agent install via `--agent claude-code` / `--agent codex`. It does what we would have built. **Integration, not invention.**
+
+**Rationale:**
+
+- Publishing `@patinaproject/skills` as a competing scoped CLI would split user intuition (`npx skills` vs. `npx @patinaproject/skills`) and put us on the hook for maintaining a CLI that duplicates an actively-developed upstream.
+- The upstream's `<owner/repo@skill>` install syntax already targets exactly the granularity we need (per-plugin install against `patinaproject/skills`).
+- Marketplace-add (`/plugin marketplace add` / `codex plugin marketplace add`) remains a host-native fallback if a user distrusts npm-distributed tooling.
+
+**Consequence:** Workstream 5 in the previous plan (build and publish our own CLI) is **replaced** by a documentation/integration workstream. No new package directory under `packages/`, no new `bin`, no `npm publish` step in the release workflow. AC-58-4 is rewritten to reflect this (see above).
 
 ## Risks
 
 - **Workflow-contract drift in `superteam`.** Moving SKILL.md changes its path and may inadvertently change line endings, trailing newlines, or YAML key order, which would shift the non-negotiable-rules SHA-256 prefix. Mitigation: AC-58-7 explicitly asserts the SHA-256 prefix round-trips, and the merge uses `git subtree add` rather than a fresh copy so byte content is preserved.
-- **Local-path overlay leaking into a release.** If `marketplace.local.json` ever lands in a published release artifact, downstream users get an install that points at a path that does not exist on their machine. Mitigation: `release-please` and the npm `files` allowlist for `packages/skills-cli/` both exclude `*.local.json`; the validator's release-mode check refuses to publish if either overlay file is present at the path it would resolve from.
+- **Local-path overlay leaking into a release.** If `marketplace.local.json` ever lands in a published release artifact, downstream users get an install that points at a path that does not exist on their machine. Mitigation: `release-please` and the marketplace manifest published surface both exclude `*.local.json`; the validator's release-mode check refuses to publish if either overlay file is present at the path it would resolve from.
+- **Canonical-layout symlinks leaking into a release.** `.agents/skills/<name>/` and `.claude/skills/<name>/` are symlinks into `plugins/<name>/skills/<name>/`. They are workspace-iteration aids and must not appear in the package payload consumers receive via `npx skills add` or marketplace install. Mitigations: (a) the `release-please` `extra-files` configuration only targets the marketplace manifests, not the overlay directories; (b) the overlay directories are listed in `.gitattributes` `export-ignore` so `git archive`-derived tarballs strip them; (c) the validator's release-mode check refuses to publish if a `.agents/skills/<name>/SKILL.md` or `.claude/skills/<name>/SKILL.md` entry is not a symlink whose target resolves under `plugins/`. The dogfood check (AC-58-3) verifies the symlinks point at the right place; the release-mode validator inverts that to refuse the publish if the layout drifts.
+- **Vercel-labs CLI supply-chain.** Adopting an upstream CLI for the primary install path means an unpublish or compromise upstream affects our docs. Mitigations: (a) pin a tested version range in install docs (`skills@^1.5.6` initially); (b) recommend `npm_config_ignore_scripts=true` as the default invocation; (c) document the marketplace-add fallback so a contributor can avoid the npm-distributed CLI entirely; (d) record the upstream repo URL and tested version in `docs/release-flow.md`.
 - **Cross-host install asymmetry.** Codex and Claude Code differ in how their marketplace manifests resolve `path:` sources. If only one host supports the overlay, in-repo iteration for the other host falls back to "publish a dev tag." Mitigation: open question (2) above must resolve before plan handoff.
 - **History-preservation cost.** `git subtree add` adds repo size proportional to the three source histories. Combined, this is small (the three repos are <50 MB), but it does mean `pnpm install` clone-time grows. Acceptable.
 - **Single-release blast radius.** Once consolidated, a bad merge can break all three skills at once. Mitigation: `release-please`'s per-package versioning still produces three independent tags, so a single bad release can be rolled back per-plugin; combined with the existing `vX.Y.Z` validator, this matches the current rollback story.
@@ -247,3 +332,32 @@ Non-material observations recorded but not dispositioned into AC changes:
 ### Reviewer context
 
 Same-thread fallback reviewer pass. No fresh subagent or parallel specialist was available in this teammate context; findings above are this teammate's adversarial pass against the committed design, applied with the writing-skills and general design dimensions enumerated in the role contract. Brainstormer-originated concerns are explicitly tagged as such above, separate from the dispositioned findings.
+
+## Delta history
+
+This appendix records design revisions made after Gate 1 first approved. Each entry is a discrete delta with a date and a source attribution.
+
+### 2026-05-11 — Operator delta revision
+
+Source: operator prompt opening a Gate-1 re-review during the `/superteam` delta run, supplied to the Brainstormer in this thread. The operator-binding deltas absorbed in this revision are:
+
+1. **Canonical skill layout introduced.** `.agents/skills/` becomes the canonical workspace overlay; `.claude/skills/` is a symlink layer into it; `plugins/<name>/skills/<name>/` remains the package source of truth shipped to consumers. New "Canonical skill layout" section added. AC-58-1 amended to mention the overlay relationship. The original Workstream 5 (build/publish our own CLI) is removed from the implementation surface.
+
+2. **Gate G6 closed by adoption, not by name resolution.** The bare npm name `skills` is taken by `vercel-labs/skills@1.5.6`, which already implements the install surface this repo intended to build. AC-58-4 rewritten so the primary install path is `npx skills add patinaproject/skills@<skill>` against the upstream CLI. Supply-chain notes added (version pinning, `--ignore-scripts`, marketplace-add fallback). The "`npx skills` installer" section rewritten as "(adopted from vercel-labs)" with no new package authored in this repo.
+
+3. **Dogfood verification mechanized as AC-58-3 sub-check.** AC-58-3 extended with a "dogfood verification" sub-section. The check is mechanized as `scripts/verify-dogfood.sh` — file-presence + YAML-frontmatter assertions against the canonical overlay paths, because Claude Code does not expose a public "list installed skills" CLI command that this design can pin against. The four in-repo skills (`bootstrap`, `superteam`, `using-github`, `find-skills`) must all be discoverable.
+
+4. **`find-skills` artifacts reconciled with canonical layout.** The `npx skills add vercel-labs/skills@find-skills --agent claude-code -y` install placed content under `.claude/skills/find-skills/` and produced `skills-lock.json` at the repo root. The canonical-layout reconciliation moves the copied content under `.agents/skills/find-skills/` and replaces `.claude/skills/find-skills/` with a symlink. `skills-lock.json` is committed in place at the repo root.
+
+5. **Release-please / overlay symlink separation made explicit.** New Risks bullet records that the overlay symlinks (`.agents/skills/`, `.claude/skills/`) must not appear in the packaged release surface. The validator's release-mode check is extended to enforce this.
+
+No prior acceptance criterion was weakened. No non-negotiable rule was removed. The byte-equivalence requirement for the `superteam` workflow-contract surfaces (AC-58-7) is reinforced by the canonical-layout decision (symlinks preserve byte content), not relaxed.
+
+### 2026-05-11 — Adversarial review (delta-only)
+
+The brainstormer ran a separate adversarial review against the four delta dimensions named in the operator prompt:
+
+1. **Dogfood AC falsifiability.** Original delta draft asserted "a fresh `claude` session discovers four skills" without specifying the check mechanism. Revised to specify `scripts/verify-dogfood.sh` doing file-presence + frontmatter assertions; the test is now reproducible without invoking the Claude binary.
+2. **Vercel-labs supply-chain.** Added explicit mitigations: pinned version range (`skills@^1.5.6`), `npm_config_ignore_scripts=true` recommendation, marketplace-add fallback as a CLI-free path, upstream repo URL recorded in `docs/release-flow.md`.
+3. **Release-please / overlay symlink interaction.** Added a Risks bullet making the rule explicit: overlay symlinks are workspace-only; the validator's release-mode check refuses publishes that include them. `.gitattributes` `export-ignore` is documented as a secondary mitigation.
+4. **SKILL.md frontmatter sufficiency.** Verified by inspection at design time that each of the three in-repo plugin SKILL.md files already carries the `name:` / `description:` frontmatter Claude's skill loader requires (`plugins/bootstrap/skills/bootstrap/SKILL.md`, `plugins/superteam/skills/superteam/SKILL.md`, `plugins/using-github/skills/using-github/SKILL.md`). No frontmatter rewrite is required for the canonical-overlay symlinks to be discoverable. Recorded as a clean-pass dimension, not a defect.
