@@ -5,3 +5,5 @@ build/
 docs/superpowers/plans/
 docs/superpowers/specs/
 plugins/
+.agents/skills/
+.claude/skills/

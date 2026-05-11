@@ -6,22 +6,80 @@ This repository carries the Patina Project marketplace catalogs and contributor 
 
 - `.agents/plugins/marketplace.json`: the Codex marketplace catalog
 - `.claude-plugin/marketplace.json`: the Claude marketplace catalog
-- `plugins/`: optional packaged Codex plugins when this repo vendors local plugin copies
+- `.agents/plugins/marketplace.local.json`: dev-overlay Codex catalog (path sources; not released)
+- `.claude-plugin/marketplace.local.json`: dev-overlay Claude catalog (path sources; not released)
+- `.agents/skills/`: canonical workspace overlay — one directory per skill
+- `.claude/skills/`: Claude Code skill-loader layer — relative symlinks into `.agents/skills/`
+- `plugins/`: vendored plugin packages carrying their own SKILL.md trees
+- `skills-lock.json`: vercel-labs CLI install lockfile (auto-generated; commit it)
 - `docs/`: contributor-facing docs for marketplace maintenance
 - `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
+- `.lintstagedrc.cjs`: lint-staged config that excludes vendored plugin files from root lint
 
 ## Marketplace workflow
 
 - Register each plugin in `.agents/plugins/marketplace.json` for Codex and `.claude-plugin/marketplace.json` for Claude
-- Use `source: "git-subdir"` for plugins that live in subdirectories of other repos
-- Use `source: "url"` for plugins that live at the root of other repos
-- Keep marketplace entries pointed at the owning repository for packaged plugin assets
-- Do not vendor a duplicate Claude plugin package here when the upstream repository already owns that install surface
-- Vendor a plugin under `plugins/<plugin-name>/` only when this repo should carry the package directly
+- All three plugin entries point at this repo (`patinaproject/skills`) with a `vX.Y.Z` ref
+- For local iteration, use the dev overlays: `.agents/plugins/marketplace.local.json` and
+  `.claude-plugin/marketplace.local.json` with `source: "path"` entries
 - Keep plugin names, folder names, and manifest names aligned
 - Use GitHub issue-tagged conventional commits with no scopes
-- Use `AC-<issue>-<n>` identifiers for issue acceptance criteria in specs and plans, and use an `Acceptance Criteria` section with one `### AC-<issue>-<n>` heading per relevant AC in PR descriptions
+- Use `AC-<issue>-<n>` identifiers for issue acceptance criteria in specs and plans, and use an
+  `Acceptance Criteria` section with one `### AC-<issue>-<n>` heading per relevant AC in PR descriptions
+
+## Canonical skill overlay layout
+
+Five skills are registered in the in-repo canonical overlay:
+
+| Skill | Shape | Canonical path | Claude path |
+| --- | --- | --- | --- |
+| scaffold-repository | Plugin-scoped | `.agents/skills/scaffold-repository` → `plugins/scaffold-repository/skills/scaffold-repository` | `.claude/skills/scaffold-repository` → `.agents/skills/scaffold-repository` |
+| superteam | Plugin-scoped | `.agents/skills/superteam` → `plugins/superteam/skills/superteam` | `.claude/skills/superteam` → `.agents/skills/superteam` |
+| using-github | Plugin-scoped | `.agents/skills/using-github` → `plugins/using-github/skills/using-github` | `.claude/skills/using-github` → `.agents/skills/using-github` |
+| find-skills | Standalone | `.agents/skills/find-skills/SKILL.md` (real file) | `.claude/skills/find-skills` → `.agents/skills/find-skills` |
+| office-hours | Standalone | `.agents/skills/office-hours/SKILL.md` (real file) | `.claude/skills/office-hours` → `.agents/skills/office-hours` |
+
+Standalone skills (`find-skills`, `office-hours`) are NOT marketplace entries. They are installed
+directly into the canonical overlay and are not distributed as plugins.
+
+## Symlink hygiene
+
+All symlinks under `.agents/skills/` and `.claude/skills/` are relative (not absolute), so they
+resolve correctly regardless of clone location.
+
+Requirements:
+
+- `git config --get core.symlinks` must return `true` (macOS default). If it returns `false`
+  (common on Windows/WSL with misconfigured git), run `git config core.symlinks true` to fix.
+- Symlinks are tracked as mode `120000` entries. Verify with:
+  `git ls-files -s .agents/skills/ .claude/skills/`
+- The `.gitattributes` rules `export-ignore` both directories so `git archive` release tarballs
+  do not include the overlay surface.
+
+### Gate G2 (Codex dev overlay source mode)
+
+The Codex dev overlay uses `"source": "path"` with a repo-relative `path` field in
+`.agents/plugins/marketplace.local.json`. If live Codex verification rejects `source: path`,
+the fallback is `git+file://` URLs against the local clone. Record which mode is in effect here
+when verification runs.
+
+**Current status:** `source: "path"` is the declared mode; live Codex verification against
+the path overlay has not been run in this worktree. Update this section after W3.4 verification.
+
+## Developer overlays
+
+`marketplace.local.json` files declare path-based plugin sources for local iteration:
+
+```json
+{
+  "source": "path",
+  "path": "../../plugins/<slug>"
+}
+```
+
+These files are excluded from `git archive` via `.gitattributes` `export-ignore` rules and
+must never appear in a released manifest. The release-mode validator enforces this.
 
 ## Migration history
 
