@@ -1,5 +1,13 @@
 # using-github
 
+> **Full usage guide:** [github.com/patinaproject/skills/wiki/Skill-using-github-usage](https://github.com/patinaproject/skills/wiki/Skill-using-github-usage)
+>
+> **Install:** `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@using-github --agent claude-code -y`
+
+<!-- The content below is preserved for npm and Codex marketplace listings. -->
+
+
+
 One GitHub workflow skill for coding agents: file issues, edit issues, start
 branches, write changelogs, and prepare pull requests from repository rules.
 

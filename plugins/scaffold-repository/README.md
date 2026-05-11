@@ -1,4 +1,12 @@
-# Bootstrap
+# scaffold-repository
+
+> **Full usage guide:** [github.com/patinaproject/skills/wiki/Skill-scaffold-repository-usage](https://github.com/patinaproject/skills/wiki/Skill-scaffold-repository-usage)
+>
+> **Install:** `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code -y`
+
+<!-- The content below is preserved for npm and Codex marketplace listings. -->
+
+# Bootstrap (upstream)
 
 Scaffold a new repository – or realign an existing one – to the Patina Project baseline. One invocation, consistent conventions, portable across every major AI coding tool.
 

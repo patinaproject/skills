@@ -1,4 +1,12 @@
-# Superteam
+# superteam
+
+> **Full usage guide:** [github.com/patinaproject/skills/wiki/Skill-superteam-usage](https://github.com/patinaproject/skills/wiki/Skill-superteam-usage)
+>
+> **Install:** `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@superteam --agent claude-code -y`
+
+<!-- The content below is preserved for npm and Codex marketplace listings. -->
+
+# Superteam (upstream)
 
 Build with a team of agents using Superpowers.
 

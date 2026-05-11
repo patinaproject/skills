@@ -6,6 +6,7 @@
   "plugins": [
     {
       "name": "scaffold-repository",
+      "description": "Scaffold or realign a repo to the Patina Project baseline. Install: npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent codex -y",
       "source": {
         "source": "url",
         "url": "https://github.com/patinaproject/skills.git",
@@ -19,6 +20,7 @@
     },
     {
       "name": "superteam",
+      "description": "Issue-driven orchestration: design → plan → execute → review. Install: npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@superteam --agent codex -y",
       "source": {
         "source": "url",
         "url": "https://github.com/patinaproject/skills.git",
@@ -32,6 +34,7 @@
     },
     {
       "name": "using-github",
+      "description": "GitHub workflow skill: issues, branches, PRs, and changelogs. Install: npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@using-github --agent codex -y",
       "source": {
         "source": "url",
         "url": "https://github.com/patinaproject/skills.git",
