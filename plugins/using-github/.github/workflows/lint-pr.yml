@@ -1,0 +1,113 @@
+name: Lint PR
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  title-format:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
+    steps:
+      - name: Enforce ASCII-only title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if printf '%s' "$PR_TITLE" | LC_ALL=C grep -qP '[^\x00-\x7F]'; then
+            echo "::error::PR title contains non-ASCII characters. Use ASCII only (no emoji, smart quotes, em-dashes, etc.)."
+            exit 1
+          fi
+
+      - name: Validate conventional commits + issue ref
+        # amannn/action-semantic-pull-request@v5.5.3
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            chore
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            revert
+          requireScope: false
+          disallowScopes: |
+            .+
+          subjectPattern: '^#\d+ .+$'
+          subjectPatternError: |
+            PR title subject must start with a GitHub issue reference. Example:
+              feat: #123 add boot timeline
+              fix: #456 restore search
+            Scopes are not permitted. See AGENTS.md for conventions.
+          ignoreLabels: |
+            dependencies
+
+  closing-keyword:
+    name: Require closing keyword
+    runs-on: ubuntu-latest
+    if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
+    steps:
+      - name: Check for closing keyword in PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ -z "$PR_BODY" ]; then
+            echo "::error::PR body is empty. Add a GitHub closing keyword such as 'Closes #<issue>'."
+            exit 1
+          fi
+          # Strip HTML comments, fenced code blocks, inline code, strikethrough, blockquotes.
+          BT=$(printf '\x60')
+          # shellcheck disable=SC2016
+          sanitized=$(printf '%s' "$PR_BODY" \
+            | sed -E 's/<!--([^-]|-[^-])*-->//g' \
+            | awk -v bt="$BT" 'BEGIN{fence=bt bt bt} $0 ~ "^" fence {toggle=!toggle; next} !toggle' \
+            | sed -E "s/${BT}[^${BT}]*${BT}//g" \
+            | sed -E 's/~~[^~]*~~//g')
+          sanitized=$(printf '%s' "$sanitized" | grep -vE '^[[:space:]]*>' || true)
+          # shellcheck disable=SC2016
+          if printf '%s' "$sanitized" | grep -qiE \
+            '(^|[^A-Za-z])(close[sd]?|fix(e[sd])?|resolve[sd]?)[ \t]+([A-Za-z0-9._-]+/[A-Za-z0-9._-]+)?#[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
+            echo "Closing keyword found."
+            exit 0
+          fi
+          echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
+          exit 1
+
+  mark-breaking-change:
+    name: Mark breaking change
+    runs-on: ubuntu-latest
+    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
+    steps:
+      - name: Compare title `!` with body BREAKING CHANGE footer
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          title_has_bang=false
+          if echo "$PR_TITLE" | grep -qE '^[a-z]+(\([^)]*\))?!:'; then
+            title_has_bang=true
+          fi
+          body_has_footer=false
+          if printf '%s' "$PR_BODY" | grep -qE '^BREAKING[ -]CHANGE:'; then
+            body_has_footer=true
+          fi
+          if [ "$title_has_bang" = true ] && [ "$body_has_footer" = false ]; then
+            echo "::error::PR title declares a breaking change (\`!\` in prefix) but the body has no \`BREAKING CHANGE:\` footer. Explain the break in the body or drop the \`!\`."
+            exit 1
+          fi
+          if [ "$body_has_footer" = true ] && [ "$title_has_bang" = false ]; then
+            echo "::error::PR body has a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: #123 ...\`) so squash-merged commits carry the marker."
+            exit 1
+          fi
+          echo "Breaking change markers are consistent."

@@ -1,0 +1,75 @@
+name: Release
+
+# release-please requires a run on push to main to cut the tag after
+# the release PR merges. workflow_dispatch is kept as a manual escape hatch.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    # Declared at both workflow and job level. The workflow-level block is the
+    # upper bound for any job; the job-level block is what the runner actually
+    # presents to GitHub when release-please calls POST /repos/.../releases.
+    # Some org policies cap the workflow default below the workflow-level
+    # declaration, so setting job-level permissions explicitly removes the
+    # ambiguity that caused issue #18. `issues: write` is required because PR
+    # labels are on the Issues API: release-please relabels the release PR from
+    # `autorelease: pending` to `autorelease: tagged` as part of release
+    # creation, and without this scope the whole step 403s.
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        # googleapis/release-please-action@v4.4.1
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  notify-patinaproject-skills:
+    needs: release-please
+    # Only run when a release was actually cut AND we're on a patinaproject-owned
+    # repo. Forks outside the org skip this job silently, so they don't need to
+    # provision the `patina-project-automation` GitHub App secrets.
+    if: needs.release-please.outputs.release_created == 'true' && github.repository_owner == 'patinaproject'
+    runs-on: ubuntu-latest
+    steps:
+      # Mint a per-job installation token for the org-owned `patina-project-automation`
+      # GitHub App. The App is installed only on `patinaproject/skills` and has
+      # `Actions: Read and write`, so the resulting token can dispatch the
+      # marketplace-bump workflow without a user-tied PAT.
+      - name: Mint patina-project-automation App token
+        id: app-token
+        # actions/create-github-app-token@v3.1.1
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
+        with:
+          app-id: ${{ secrets.PATINAPROJECT_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.PATINAPROJECT_AUTOMATION_PRIVATE_KEY }}
+          owner: patinaproject
+          repositories: skills
+      - name: Dispatch marketplace bump on patinaproject/skills
+        # benc-uk/workflow-dispatch@v1.3.1
+        uses: benc-uk/workflow-dispatch@7a027648b88c2413826b6ddd6c76114894dc5ec4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repo: patinaproject/skills
+          workflow: plugin-release-bump.yml
+          inputs: |
+            {
+              "plugin": "${{ github.event.repository.name }}",
+              "tag": "${{ needs.release-please.outputs.tag_name }}"
+            }

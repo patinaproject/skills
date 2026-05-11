@@ -1,0 +1,19 @@
+{
+  "name": "using-github",
+  "version": "2.0.0",
+  "description": "Composable skill that lets agents use GitHub ergonomically",
+  "author": {
+    "name": "Ted Mader",
+    "email": "ted@patinaproject.com",
+    "url": "https://github.com/tlmader"
+  },
+  "homepage": "https://github.com/patinaproject/using-github",
+  "repository": "https://github.com/patinaproject/using-github",
+  "license": "MIT",
+  "keywords": [
+    "claude",
+    "plugin",
+    "skills"
+  ],
+  "skills": "./skills"
+}

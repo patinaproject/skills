@@ -1,0 +1,37 @@
+{
+  "name": "using-github",
+  "version": "2.0.0",
+  "description": "Composable skill that lets agents use GitHub ergonomically",
+  "author": {
+    "name": "Ted Mader",
+    "email": "ted@patinaproject.com",
+    "url": "https://github.com/tlmader"
+  },
+  "homepage": "https://github.com/patinaproject/using-github",
+  "repository": "https://github.com/patinaproject/using-github",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "plugin",
+    "skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "using-github",
+    "shortDescription": "Composable skill that lets agents use GitHub ergonomically",
+    "longDescription": "Composable skill that lets agents use GitHub ergonomically",
+    "developerName": "Ted Mader",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/patinaproject/using-github",
+    "privacyPolicyURL": "https://github.com/patinaproject/using-github",
+    "termsOfServiceURL": "https://github.com/patinaproject/using-github",
+    "defaultPrompt": [
+      "Use $using-github for the workflow described in this plugin's README."
+    ],
+    "brandColor": "#E6A77E"
+  }
+}
