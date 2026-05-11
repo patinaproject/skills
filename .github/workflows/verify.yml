@@ -1,13 +1,10 @@
-name: Verify iteration
+name: Verify
 
 on:
   pull_request:
     paths:
-      - "plugins/**"
-      - "packages/**"
+      - "skills/**"
       - "scripts/**"
-      - ".agents/plugins/**"
-      - ".claude-plugin/**"
       - ".agents/skills/**"
       - ".claude/skills/**"
 
@@ -16,7 +13,7 @@ permissions:
 
 jobs:
   verify:
-    name: Verify marketplace and skill overlay
+    name: Verify skill overlay
     runs-on: ubuntu-latest
     steps:
       # actions/checkout@v4.3.1
@@ -30,47 +27,28 @@ jobs:
       - name: Install dependencies
         run: npm_config_ignore_scripts=true npx -y pnpm@10 install --frozen-lockfile
 
-      # Check b (part 1): validator accepts dev overlay
-      - name: "Check b — validate dev overlay (must exit 0)"
-        run: node scripts/validate-marketplace.js --dev
+      # Check b: scaffold-repository apply, no network (exit 0)
+      - name: "Check b — apply-scaffold-repository.js exits 0 (no-network)"
+        run: node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 
-      # Check b (part 2): validator rejects overlay in release-eligible path
-      - name: "Check b — validate release mode rejects misplaced overlay (must exit non-zero)"
-        run: |
-          cp .claude-plugin/marketplace.local.json plugins/scaffold-repository/marketplace.local.json
-          if node scripts/validate-marketplace.js; then
-            echo "FAIL: validator should have rejected misplaced overlay but exited 0" >&2
-            rm plugins/scaffold-repository/marketplace.local.json
-            exit 1
-          fi
-          rm plugins/scaffold-repository/marketplace.local.json
-          echo "OK: release-mode validator correctly rejected misplaced overlay"
-
-      # Check b (part 3): validator in release mode passes the released manifests
-      - name: "Check b — validate release manifests (must exit 0)"
-        run: node scripts/validate-marketplace.js
-
-      # Check c: apply-scaffold-repository exits 0, no network
-      - name: "Check c — apply-scaffold-repository.js exits 0 (no-network)"
-        run: node scripts/apply-scaffold-repository.js plugins/scaffold-repository
-
-      # Check d: dogfood verification covers all five skills
-      - name: "Check d — verify-dogfood.sh exits 0 (all five skills)"
+      # Check c: dogfood verification covers all five skills
+      - name: "Check c — verify-dogfood.sh exits 0 (all five skills)"
         run: bash scripts/verify-dogfood.sh
 
       # Check a (representative sample): CLI resolves skills from local paths
       # Using local path sources because the branch may not be published to
       # remote at CI time. Post-merge, consumers use:
-      #   npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@<plugin> --agent claude-code -y
+      #   npm_config_ignore_scripts=true npx skills@1.5.6 \
+      #     add patinaproject/skills@<name> --agent claude-code -y
       # The local-path form proves the SKILL.md shape is CLI-compatible.
       - name: "Check a — CLI resolves scaffold-repository from local path (must exit 0)"
         run: |
           npm_config_ignore_scripts=true npx skills@1.5.6 \
-            add ./plugins/scaffold-repository --list
+            add ./skills/scaffold-repository --list
           echo "exit=$?"
 
-      - name: "Check a — CLI resolves office-hours standalone from local path (must exit 0)"
+      - name: "Check a — CLI resolves office-hours from local path (must exit 0)"
         run: |
           npm_config_ignore_scripts=true npx skills@1.5.6 \
-            add ./.agents/skills/office-hours --list
+            add ./skills/office-hours --list
           echo "exit=$?"
