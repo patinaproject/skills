@@ -1,0 +1,41 @@
+{
+  "name": "superteam",
+  "version": "1.5.0",
+  "description": "Build with a team of agents using Superpowers",
+  "author": {
+    "name": "Ted Mader",
+    "email": "ted@patinaproject.com",
+    "url": "https://github.com/tlmader"
+  },
+  "homepage": "https://github.com/patinaproject/superteam",
+  "repository": "https://github.com/patinaproject/superteam",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "plugin",
+    "skills",
+    "orchestration",
+    "superteam"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Superteam",
+    "shortDescription": "Build with a team of agents using Superpowers",
+    "longDescription": "Move a GitHub issue to a testable, demoable outcome as quickly as possible through brainstorm, plan, execute, review, and CI follow-through.",
+    "developerName": "Patina Project",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/patinaproject/superteam",
+    "privacyPolicyURL": "https://github.com/patinaproject/superteam",
+    "termsOfServiceURL": "https://github.com/patinaproject/superteam",
+    "defaultPrompt": [
+      "Use $superteam to take issue #1 from design through review-ready execution.",
+      "Use $superteam to coordinate a multi-agent implementation plan for this issue.",
+      "Use $superteam to resume an issue workflow from planning or execution."
+    ],
+    "brandColor": "#1F4D3A"
+  }
+}
