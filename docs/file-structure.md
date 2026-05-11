@@ -128,6 +128,41 @@ The `plugins/superteam/skills/superteam/SKILL.md` and the `executor.openai.yaml`
 | SKILL.md | `87867b66` | `87867b66` | MATCH |
 | executor non-negotiable-rules block | `448fac05` | `448fac05` | MATCH |
 
+### bootstrap → scaffold-repository rename (Workstream 9)
+
+After the three subtree imports, the in-tree copy of the `bootstrap` plugin was renamed to
+`scaffold-repository` in a single reviewable diff. The upstream `patinaproject/bootstrap`
+repository is unchanged and retains its `v1.10.0` tag as the byte-for-byte reference for
+pre-rename audits.
+
+| Event | Commit SHA | Description |
+| --- | --- | --- |
+| W9 rename | `5f60d65` | `refactor: #58 rename bootstrap plugin to scaffold-repository` — `git mv plugins/bootstrap plugins/scaffold-repository`, SKILL.md frontmatter name updated, plugin.json names updated |
+
+The rename covers only the in-tree copy and its consumer-visible surfaces in this repo
+(marketplace manifests, release-please config, apply script, canonical overlay symlinks,
+dogfood script). The upstream `patinaproject/bootstrap` repository name is preserved because
+it is an independent archived repo.
+
+### office-hours standalone skill port (Workstream 10)
+
+The `office-hours` standalone skill was ported byte-for-byte from
+`patinaproject/patinaproject` PR #1143 at head SHA
+`02e6ebbdbef123bbeb211fad06aa86bd5e33528a`. It is installed as a real file at
+`.agents/skills/office-hours/SKILL.md` (not a symlink), with a one-hop symlink at
+`.claude/skills/office-hours` pointing into the canonical overlay.
+
+#### Ported skills catalog
+
+| Skill | Source repo | Source PR | Source head SHA | Target path | Port commit |
+| --- | --- | --- | --- | --- | --- |
+| `office-hours` | `patinaproject/patinaproject` | #1143 | `02e6ebbdbef123bbeb211fad06aa86bd5e33528a` | `.agents/skills/office-hours/SKILL.md` | `fab5458` |
+
 ### Archival timeline
 
-The three upstream repositories (`patinaproject/bootstrap`, `patinaproject/superteam`, `patinaproject/using-github`) are to be archived (not deleted) at least one full release cycle after consolidation ships. Archiving is tracked as a post-merge action on issue #58. The repos remain readable for older marketplace consumers and as a recovery path if a botched merge must be unwound. Do not archive until release-please has shipped at least one independent per-plugin release from this repository.
+The three upstream repositories (`patinaproject/bootstrap`, `patinaproject/superteam`,
+`patinaproject/using-github`) are to be archived (not deleted) at least one full release
+cycle after consolidation ships. Archiving is tracked as a post-merge action on issue #58.
+The repos remain readable for older marketplace consumers and as a recovery path if a
+botched merge must be unwound. Do not archive until release-please has shipped at least one
+independent per-plugin release from this repository.
