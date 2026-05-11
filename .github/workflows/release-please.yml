@@ -16,9 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
-      paths_released: ${{ steps.release.outputs.paths_released }}
-      scaffold-repository--release_created: ${{ steps.release.outputs['skills/scaffold-repository--release_created'] }}
-      scaffold-repository--pr: ${{ steps.release.outputs['skills/scaffold-repository--pr'] }}
     steps:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -32,16 +29,13 @@ jobs:
           token: ${{ github.token }}
 
   apply-scaffold-repository:
-    name: Apply scaffold-repository scaffolding on scaffold-repository release
+    name: Apply scaffold-repository scaffolding on release
     needs: release-please
-    if: needs.release-please.outputs['scaffold-repository--release_created'] == 'true'
+    if: needs.release-please.outputs.releases_created == 'true'
     runs-on: ubuntu-latest
     steps:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          ref: ${{ needs.release-please.outputs['scaffold-repository--pr'] }}
-          fetch-depth: 0
 
       # actions/setup-node@v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -58,7 +52,7 @@ jobs:
           # Commit each changed file via the Contents API so the commit is
           # auto-verified by GitHub (satisfies issue #29 intent without a
           # local GPG/SSH signing key).
-          BRANCH="${{ needs.release-please.outputs['scaffold-repository--pr'] }}"
+          BRANCH="main"
           REPO="${{ github.repository }}"
           changed=$(git diff --name-only)
           if [ -z "$changed" ]; then

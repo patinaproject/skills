@@ -154,7 +154,7 @@ dogfood overlay symlinks replaced the prior two-hop chain.
 The upstream `patinaproject/bootstrap`, `patinaproject/superteam`, and
 `patinaproject/using-github` repos remain archived as the byte-for-byte references for
 pre-flatten audits. Do not archive them until release-please has shipped at least one
-independent per-skill release from this repository.
+`v<X.Y.Z>` release from this repository.
 
 ### Archival timeline
 

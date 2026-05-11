@@ -1,5 +1,3 @@
 {
-  "skills/scaffold-repository": "1.10.0",
-  "skills/superteam": "1.5.0",
-  "skills/using-github": "2.0.0"
+  ".": "1.0.0"
 }

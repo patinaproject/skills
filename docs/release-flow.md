@@ -1,20 +1,13 @@
 # Skill Release Flow
 
-The Patina Project skills repo releases three packaged skills via `release-please`
-with `release-type: simple`. Tag shape: `<component>-v<X.Y.Z>`.
+The Patina Project skills repo releases via `release-please` with a single root package
+(`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-Current packaged skills tracked by this flow:
-
-- `scaffold-repository` — repo scaffolding skill. Also **consumed by this repo**
-  (see [Scaffold-repository self-apply](#scaffold-repository-self-apply) below).
-- `superteam` — issue-driven orchestration skill.
-- `using-github` — agent ergonomics for GitHub workflows.
-
-Two standalone skills (`find-skills`, `office-hours`) are not release-please packages.
-They are versioned outside release-please; consumers wanting a pinned version pass
-`patinaproject/skills@<name>#<git-ref>`.
-
-All five skills live under `skills/<name>/` in this repository.
+All five skills live under `skills/<name>/` in this repository. The three packaged skills
+(`scaffold-repository`, `superteam`, `using-github`) are versioned together as a single
+marketplace surface. The two standalone skills (`find-skills`, `office-hours`) are not
+release-please packages; consumers install them from the default branch or a specific
+`#<git-ref>`.
 
 ## Install via vercel-labs skills CLI
 
@@ -57,14 +50,16 @@ and copy `skills/<name>/` directly into the agent's skill directory. No build st
 1. A contributor opens a PR against `main` with changes under `skills/<name>/` (bug fix,
    new feature, content update). The PR merges via squash merge.
 2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main`
-   and maintains a standing per-skill Release PR for each packaged skill with an unreleased
-   commit. When a Release PR is merged, release-please:
-   - Tags the commit with `<component>-v<X.Y.Z>` (e.g. `scaffold-repository-v1.10.1`).
+   and maintains a standing Release PR for the root package. When a Release PR is merged,
+   release-please:
+   - Tags the commit with `v<X.Y.Z>` (e.g. `v1.1.0`).
    - Publishes a GitHub Release.
-3. For `scaffold-repository` releases, the `apply-scaffold-repository` job additionally runs
+   - Updates the root `CHANGELOG.md`.
+3. On every release, the `apply-scaffold-repository` job additionally runs
    `node scripts/apply-scaffold-repository.js skills/scaffold-repository` and commits any
-   resulting scaffolding changes onto the same release PR branch (see
-   [Scaffold-repository self-apply](#scaffold-repository-self-apply)).
+   resulting scaffolding changes back to `main` (see
+   [Scaffold-repository self-apply](#scaffold-repository-self-apply)). The apply script is
+   idempotent — it exits 0 with no changes when there is no scaffolding drift.
 4. Auto-merge (`gh pr merge --auto --squash`) is enabled on each open release-please PR
    after required checks pass.
 
@@ -73,33 +68,35 @@ may omit a GitHub issue ID in the commit subject.
 
 ## Tag shape
 
-`release-please` emits prefixed tags:
+`release-please` emits a single root tag per release:
 
-- `scaffold-repository-v1.11.0`
-- `superteam-v1.6.0`
-- `using-github-v2.1.0`
+- `v1.0.0` (initial release)
+- `v1.1.0` (minor bump from `feat:` commits)
+- `v1.0.1` (patch bump from `fix:` commits)
 
-Config knobs that produce this shape: `release-type: simple`, `tag-separator: "-v"`,
-`include-component-in-tag: true`, `include-v-in-tag: true`, `component: "<name>"`.
-
-The vercel-labs CLI consumer passes the full prefixed tag as `#<git-ref>`:
+The vercel-labs CLI consumer pins a specific tag via `#<git-ref>`:
 
 ```sh
 npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@scaffold-repository#scaffold-repository-v1.10.0 \
+  add patinaproject/skills@scaffold-repository#v1.0.0 \
   --agent claude-code -y
 ```
 
+The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all five
+skills live under `skills/<name>/SKILL.md` in the same repo, one tag pins the full set.
+`skills-lock.json`'s `computedHash` records per-skill content provenance for reproducible
+re-installs within a given tag.
+
 ## Scaffold-repository self-apply
 
-This repo dogfoods `scaffold-repository`: the same tag that releases scaffold-repository
-also drives an update of this repo's own scaffolding (commitlint config, husky hooks,
-issue templates, etc.). On a scaffold-repository release, the scaffolding refresh lands
-on the same release PR branch in the same workflow run.
+This repo dogfoods `scaffold-repository`: every release drives an update of this repo's own
+scaffolding (commitlint config, husky hooks, issue templates, etc.). On each release-please
+run that produces a tag, the scaffolding refresh runs unconditionally. The apply script is
+idempotent — it writes nothing and exits 0 when there is no scaffolding diff.
 
-`node scripts/apply-scaffold-repository.js skills/scaffold-repository` is idempotent and
-makes no outbound network calls. The script applies the scaffold-repository baseline files
-from the local `skills/scaffold-repository/templates/` tree. Run
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository` makes no outbound
+network calls. The script applies the scaffold-repository baseline files from the local
+`skills/scaffold-repository/templates/` tree. Run
 `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to preview
 what would change.
 
@@ -116,8 +113,8 @@ items are not applied by the self-apply script:
 
 ## Invariants
 
-- An untagged skill is not released. The first tagged release is what introduces it to
-  the install path with a pinned `#<ref>`.
+- An untagged skill is not pinnable. The first `v<X.Y.Z>` tag is what introduces the repo
+  to the install path with a pinnable `#<ref>`.
 - Standalone skills (`office-hours`, `find-skills`) are not release-please packages.
   They are installed from the default branch or a specific `#<git-ref>`.
 - `skills-lock.json` must be committed after any `npx skills add` invocation. The lockfile

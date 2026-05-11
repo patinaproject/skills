@@ -100,15 +100,14 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 This repo's `skills/<name>/` owns each skill for
 `name ∈ {scaffold-repository, superteam, using-github, find-skills, office-hours}`.
 
-The three packaged skills (`scaffold-repository`, `superteam`, `using-github`) are released
-via `release-please` with `release-type: simple`. Tag shape: `<component>-v<X.Y.Z>`
-(e.g. `scaffold-repository-v1.10.1`). See [docs/release-flow.md](./docs/release-flow.md).
+Releases are driven by `release-please` via `.github/workflows/release-please.yml`, which
+maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y.Z>` — no
+component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
+[docs/release-flow.md](./docs/release-flow.md).
 
 The two standalone skills (`find-skills`, `office-hours`) are not release-please packages.
 Consumers install them from the default branch or a specific `#<git-ref>`.
 
-Releases are driven by `release-please` via `.github/workflows/release-please.yml`, which
-maintains a standing per-skill Release PR for each packaged skill with unreleased commits.
 Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
 auto-merges Release PRs after required checks pass.
 
