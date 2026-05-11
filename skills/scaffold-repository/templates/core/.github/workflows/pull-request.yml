@@ -9,16 +9,6 @@ permissions:
   pull-requests: read
 
 jobs:
-  marketplace-catalog:
-    name: Validate marketplace catalog
-    runs-on: ubuntu-latest
-    steps:
-      # actions/checkout@v4.3.1
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
-      - name: Validate marketplace manifests
-        run: node scripts/validate-marketplace.js
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
