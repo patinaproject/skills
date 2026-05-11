@@ -24,3 +24,4 @@ jobs:
             **/*.md
             #node_modules
             #CHANGELOG.md
+            #docs/superpowers/**
