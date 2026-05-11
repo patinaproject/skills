@@ -61,10 +61,10 @@ const STATIC_FILES = [
   { src: "commitlint.config.js", dest: "commitlint.config.js" },
   // Husky hooks.
   // NOTE: .husky/pre-commit is intentionally excluded from self-apply.
-  // The template hook calls `pnpm check:versions` (for single-package plugin repos),
-  // but this marketplace repo is a monorepo root without a `version` in package.json.
-  // The existing .husky/pre-commit (lint-staged only) is correct for this repo.
-  // Downstream bootstrapped repos that are single-package plugins apply this hook normally.
+  // The template hook calls `pnpm check:versions`, but this skills repo is a
+  // monorepo root without a `version` in its root package.json, so the script
+  // would always fail. The existing .husky/pre-commit (lint-staged only) is
+  // correct for this repo. Downstream bootstrapped repos apply this hook normally.
   { src: ".husky/commit-msg", dest: ".husky/commit-msg", mode: 0o755 },
   // Markdown lint config
   { src: ".markdownlint.jsonc", dest: ".markdownlint.jsonc" },
@@ -123,8 +123,8 @@ const STATIC_FILES = [
 // versions match package.json. This skills repo is a monorepo root with no
 // `version` field in its root package.json, so the script would always fail.
 // We skip .husky/pre-commit for the self-apply case and keep the existing
-// hook that only runs lint-staged. Downstream bootstrapped repos (which do
-// have a single package.json version) apply this hook without skipping it.
+// hook that only runs lint-staged. Downstream bootstrapped repos apply this
+// hook without skipping it.
 
 // ---------------------------------------------------------------------------
 // Helpers
