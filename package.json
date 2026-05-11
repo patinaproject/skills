@@ -22,7 +22,9 @@
     "validate:marketplace": "node scripts/validate-marketplace.js",
     "validate:marketplace:dev": "node scripts/validate-marketplace.js --dev",
     "validate:marketplace:remote": "node scripts/validate-marketplace.js --remote",
-    "verify:dogfood": "bash scripts/verify-dogfood.sh"
+    "verify:dogfood": "bash scripts/verify-dogfood.sh",
+    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js plugins/scaffold-repository",
+    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js plugins/scaffold-repository --check"
   },
   "config": {
     "commitizen": {
