@@ -1,0 +1,21 @@
+{
+  "name": "bootstrap",
+  "version": "1.10.0",
+  "description": "Scaffold or realign repositories to the Patina Project baseline: commits, PRs, PNPM tooling, agent docs, and plugin surfaces.",
+  "author": {
+    "name": "Ted Mader",
+    "email": "ted@patinaproject.com",
+    "url": "https://github.com/tlmader"
+  },
+  "homepage": "https://github.com/patinaproject/bootstrap",
+  "repository": "https://github.com/patinaproject/bootstrap",
+  "license": "MIT",
+  "keywords": [
+    "claude",
+    "plugin",
+    "skills",
+    "scaffold",
+    "bootstrap"
+  ],
+  "skills": "./skills"
+}
