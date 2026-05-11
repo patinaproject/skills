@@ -34,7 +34,7 @@ Both marketplace manifests (`.agents/plugins/marketplace.json` and `.claude-plug
 
 ### AC-58-3
 
-A contributor can clone `patinaproject/skills`, run a documented bootstrap command (e.g. `pnpm install`), and exercise any of the three skills against this repository itself without first publishing or installing from the marketplace. Specifically, the `superteam` skill can drive an issue workflow in this repo using its own in-repo copy, the `bootstrap` skill can apply its scaffolding to this repo without reaching the network, and the `using-github` skill's slash commands can be exercised from this clone. Local resolution is documented in `README.md` or `docs/`.
+A contributor can clone `patinaproject/skills`, run a documented bootstrap command (e.g. `pnpm install`), and exercise any of the three skills against this repository itself without first publishing or installing from the marketplace. Specifically, the `superteam` skill can drive an issue workflow in this repo using its own in-repo copy, the `bootstrap` skill can apply its scaffolding to this repo without reaching the network, and the `using-github` skill's slash commands can be exercised from this clone. Local resolution is documented in `README.md` or `docs/`. Falsifiable checks: (a) a documented `npx skills --dev` invocation (or equivalent) registers the in-repo overlay against the active host and exits 0 on a fresh clone, (b) `node scripts/validate-marketplace.js` accepts the dev overlay and rejects it in release mode, and (c) `scripts/apply-bootstrap.js plugins/bootstrap` runs against this repo without network access and exits 0.
 
 ### AC-58-4
 
@@ -42,7 +42,7 @@ A contributor can clone `patinaproject/skills`, run a documented bootstrap comma
 
 ### AC-58-5
 
-A `release-please` configuration manages versions for the marketplace itself and for each vendored plugin. The configuration is the single source of truth for what `vX.Y.Z` ends up in both marketplace manifests' `ref` fields, and merging the standing release PR is the only path that publishes a new tag. The pre-existing `plugin-release-bump.yml` workflow and the cross-repo `repository_dispatch` step in `docs/release-flow.md` are removed in the same change, with `docs/release-flow.md` rewritten to describe the new flow. Bot-generated `release-please--*` PRs are the documented exception to the issue-tag rule that already covers `bot/bump-*` PRs in AGENTS.md.
+A `release-please` configuration manages versions for the marketplace itself and for each vendored plugin. The configuration is the single source of truth for what `vX.Y.Z` ends up in both marketplace manifests' `ref` fields, and merging the standing release PR is the only path that publishes a new tag. The pre-existing `plugin-release-bump.yml` workflow and the cross-repo `repository_dispatch` step in `docs/release-flow.md` are removed in the same change, with `docs/release-flow.md` rewritten to describe the new flow. Bot-generated `release-please--*` PRs are the documented exception to the issue-tag rule that already covers `bot/bump-*` PRs in AGENTS.md. The bootstrap self-apply step that currently exists as a TODO in `plugin-release-bump.yml` is either implemented as `scripts/apply-bootstrap.js` invoked from the new release workflow when `plugins/bootstrap/` is part of the release, or explicitly deferred in `docs/release-flow.md` with a tracked follow-up issue — the design forbids leaving it as an undocumented TODO.
 
 ### AC-58-6
 
@@ -165,6 +165,8 @@ A new package `packages/skills-cli/` ships as `skills` on npm with a `bin` entry
 
 The CLI is small (single binary file, no runtime dependencies). It is the documented primary install path and is published on every tagged release.
 
+The bare npm name `skills` may already be taken on the public registry. If unavailable, the fallback name is `@patinaproject/skills` (scoped, published under the Patina Project npm org), with `npx @patinaproject/skills` as the documented install command. The Planner must resolve name availability before publishing the CLI; AC-58-4's "primary documented install path" applies to whichever name is published, but the design refuses to ship without a confirmed name.
+
 ## Migration approach: history preservation
 
 History is preserved via `git subtree add --prefix=plugins/<name> <upstream-remote> <tag>` for each of the three source repos at their current tagged versions (`bootstrap@v1.10.0`, `superteam@v1.5.0`, `using-github@v2.0.0`). This keeps per-file blame intact across the move and gives the SHA-256 round-trip check a defensible base. The three upstream repos are archived (not deleted) on completion and their `README.md` is updated to point at this repo. Archiving rather than deleting protects against link-rot from older marketplace consumers and lets the issue's plan recover from a botched merge if needed.
@@ -229,4 +231,19 @@ This design touches `skills/**/*.md` and the workflow-contract surfaces of `supe
 
 ## Adversarial review (post-commit pass)
 
-Findings from a second pass focused on the writing-skills review dimensions plus general design dimensions are recorded inline in the commit history rather than reopened here; if any material change results from the review, this document is re-committed with an explicit `## Revisions` section before handoff.
+A second pass against the `superpowers:writing-skills` review dimensions (RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, stage-gate bypass paths) plus general design dimensions (testable ACs, assumption surfacing, completeness, reversibility, naming) surfaced three material findings, dispositioned below.
+
+### Revisions
+
+- **AC-58-3 falsifiability.** Original AC said "exercise any skill" without a concrete check. Revised to require three documented exit-0 invocations (overlay registration, validator dev/release modes, bootstrap apply against this repo).
+- **AC-58-5 bootstrap self-apply coverage.** Original AC removed `plugin-release-bump.yml` but did not say what becomes of the TODO bootstrap self-apply step. Revised to require either implementation or explicit deferral with a tracked follow-up issue; leaving the TODO undocumented is forbidden.
+- **npm-name lock-in.** Original `npx skills` section assumed the bare name was available. Added scoped fallback `@patinaproject/skills` and made name resolution a Planner gate.
+
+Non-material observations recorded but not dispositioned into AC changes:
+
+- AC-58-7's SHA-256 check is verification, not a behavioral test. Acceptable because the move is byte-equivalent (no SKILL.md edits in scope per writing-skills section).
+- "What happens if the dev overlay drifts from the released manifest during a release-please run" is a Planner-implementation concern, not a design defect.
+
+### Reviewer context
+
+Same-thread fallback reviewer pass. No fresh subagent or parallel specialist was available in this teammate context; findings above are this teammate's adversarial pass against the committed design, applied with the writing-skills and general design dimensions enumerated in the role contract. Brainstormer-originated concerns are explicitly tagged as such above, separate from the dispositioned findings.
