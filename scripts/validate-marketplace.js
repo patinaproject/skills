@@ -291,6 +291,47 @@ function validateRelease() {
     );
   }
 
+  // Scan the working tree for any marketplace.local.json placed outside the two
+  // canonical overlay paths. A stray overlay at e.g. plugins/<name>/marketplace.local.json
+  // would be included in a release artifact and could override production marketplace
+  // entries for consumers who happen to land on an overlaid path.
+  const CANONICAL_OVERLAY_PATHS = new Set([
+    path.normalize(".agents/plugins/marketplace.local.json"),
+    path.normalize(".claude-plugin/marketplace.local.json"),
+  ]);
+  const SCAN_DIRS = ["plugins", "packages", ".agents", ".claude-plugin", "scripts", "docs", ".github"];
+  function findMisplacedOverlays(dirs) {
+    const found = [];
+    for (const dir of dirs) {
+      if (!fs.existsSync(dir)) continue;
+      function walk(current) {
+        const entries = fs.readdirSync(current, { withFileTypes: true });
+        for (const entry of entries) {
+          const full = path.join(current, entry.name);
+          if (entry.isDirectory()) {
+            walk(full);
+          } else if (entry.isFile() && entry.name === "marketplace.local.json") {
+            const normalized = path.normalize(full);
+            if (!CANONICAL_OVERLAY_PATHS.has(normalized)) {
+              found.push(normalized);
+            }
+          }
+        }
+      }
+      walk(dir);
+    }
+    return found;
+  }
+  const misplacedOverlays = findMisplacedOverlays(SCAN_DIRS);
+  if (misplacedOverlays.length > 0) {
+    fail(
+      `Release mode detected marketplace.local.json outside canonical overlay paths:\n` +
+        misplacedOverlays.map((p) => `  ${p}`).join("\n") +
+        `\nCanonical paths: .agents/plugins/marketplace.local.json, .claude-plugin/marketplace.local.json\n` +
+        `Remove the stray overlay(s) before releasing.`
+    );
+  }
+
   const codexByName = new Map(codex.map((plugin) => [plugin.name, plugin]));
   const claudeByName = new Map(claude.map((plugin) => [plugin.name, plugin]));
 

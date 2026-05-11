@@ -82,18 +82,18 @@ commit subject.
 - `superteam-v1.6.0`
 - `using-github-v2.1.0`
 
-The `extra-files` JSONPath rewrites write the **full prefixed tag** into the manifest `ref`
-fields. The release-mode validator enforces that each `ref` matches `^v\d+\.\d+\.\d+$`, so
-the release-please workflow must strip the per-package prefix before writing the `ref`.
+The `extra-files` JSONPath rewrites use `release-please`'s `GenericJson` updater, which
+applies a semver regex replacement against the **existing field value** rather than writing
+the full tag string. Because the current `source.ref` values are already `v-prefixed`
+(e.g., `v1.10.0`), the updater replaces only the numeric portion — producing `v1.11.0`,
+not `scaffold-repository-v1.11.0`.
 
-Strip rule (longest-match alternation, no ambiguity):
+No post-step prefix-strip is needed. The `validate-manifests` job runs after release-please
+and confirms that every `ref` still matches `^v\d+\.\d+\.\d+$` before auto-merge fires.
 
-```text
-^(scaffold-repository|superteam|using-github)-v(\d+\.\d+\.\d+)$
-```
-
-Extract group 2 and write `v<group2>` into `source.ref`. The validator rejects any `ref` that
-does not match `vX.Y.Z`.
+**Invariant:** As long as the canonical marketplace manifests always carry `v-prefixed` refs
+(which the release-mode validator enforces), each release-please bump will produce the
+correct `vX.Y.Z` ref automatically.
 
 ## Scaffold-repository self-apply
 

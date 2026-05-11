@@ -88,9 +88,14 @@ Register the marketplace, then install by plugin name:
 ### Codex
 
 ```sh
-codex plugin marketplace add patinaproject/skills --ref main
+codex plugin marketplace add patinaproject/skills --ref <MARKETPLACE_TAG>
 codex plugin marketplace upgrade
 ```
+
+Replace `<MARKETPLACE_TAG>` with the latest marketplace release tag (e.g.
+`scaffold-repository-v1.10.0`). Branch refs such as `main` are not allowed per
+`AGENTS.md`. The canonical tag will be pinned here after the first release-please release
+lands. See [docs/release-flow.md](docs/release-flow.md) for how tags are cut.
 
 Then open the Codex Plugin Directory and install `scaffold-repository`, `superteam`, or
 `using-github`.
