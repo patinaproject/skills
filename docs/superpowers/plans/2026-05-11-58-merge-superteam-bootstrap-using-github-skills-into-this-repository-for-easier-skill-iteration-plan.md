@@ -3,545 +3,550 @@
 ## Source design
 
 - Approved design: [`docs/superpowers/specs/2026-05-11-58-merge-superteam-bootstrap-using-github-skills-into-this-repository-for-easier-skill-iteration-design.md`](../specs/2026-05-11-58-merge-superteam-bootstrap-using-github-skills-into-this-repository-for-easier-skill-iteration-design.md)
-- Approved-design head: `1d9b8ea` (post Gate-1 delta-final; includes the canonical-layout / vercel-labs CLI / scaffold-repository rename / office-hours port deltas)
-- Selected approach: Option A (per-package release-please monorepo with canonical workspace overlay, local-path dev overlay, and vercel-labs CLI integration — no in-repo CLI)
+- Approved-design head: `0b000f9` (Brainstormer delta 4 — flat `skills/<name>/` layout, no marketplace catalog, `release-type: simple` per skill, dogfood overlay D1 with committed symlinks, `verify-iteration.yml` → `verify.yml`)
+- Selected approach: Option F1 (flat `skills/<name>/` at the repo root, vercel-labs `vercel-labs/skills` shape, per-skill `release-type: simple`, dogfood overlay symlinks committed)
 - ACs in scope: `AC-58-1` through `AC-58-8`
 
 ## Plan revision history
 
-The previous plan (`d74e236`) was written against the pre-delta design. It has been **rewritten in place** rather than carried forward as a delta, because three deltas substantively re-shaped the implementation surface:
+This plan was previously revised twice on top of the original Gate-1 approval:
 
-1. **Canonical workspace overlay** (`.agents/skills/<name>/` and `.claude/skills/<name>/` symlinked into `plugins/<name>/skills/<name>/`) replaces the original "in-repo skills live only under `plugins/`" mental model. New workstream **W10** owns this layout.
-2. **vercel-labs CLI adoption** (Gate G6 closed) removes the original Workstream 5 (build a CLI under `packages/skills-cli/`). The replacement W5 is documentation/integration work pointing at `npx skills@1.5.6 add patinaproject/skills@<plugin>`.
-3. **`bootstrap` → `scaffold-repository` rename** (the in-tree copy only; upstream repo unchanged). New workstream **W9** owns the rename, sequenced after W1 (subtree import) and before W2 (manifests) so manifest edits land against the renamed slug once.
-4. **office-hours standalone-skill port** (new file at `.agents/skills/office-hours/SKILL.md`, byte-for-byte from `patinaproject/patinaproject` PR #1143 head `02e6ebbdbef123bbeb211fad06aa86bd5e33528a`) is folded into W10 (canonical-layout setup) and W7 (wiki migration).
-5. **AC-58-3 dogfood verification** is mechanized as `scripts/verify-dogfood.sh` covering five skills (`scaffold-repository`, `superteam`, `using-github`, `find-skills`, `office-hours`). New workstream **W11** owns the script and the CI wiring.
+1. **Revision @ `d74e236`** (pre-canonical-layout / pre-CLI-adoption / pre-rename plan): assumed marketplace catalog + per-plugin `package.json` + an in-repo CLI under `packages/skills-cli/`. Obsolete.
+2. **Revision @ `794e199`** (current `main`-ward HEAD until this rewrite): added W9 (rename), W10 (canonical workspace overlay with two-hop symlink chain), W11 (dogfood verification harness branching on plugin-scoped vs. standalone shape); kept the plugin-wrappers + marketplace-catalog + per-plugin `package.json` layout. Mostly obsolete after delta 4.
 
-Gate decisions that survive from the pre-delta plan (Gates G1, G2, G3, G5) are reaffirmed below; Gate G4 is dispositioned as "out of scope (delegated to vercel-labs CLI)"; Gate G6 is closed with the design's resolution.
+Delta 4 (Brainstormer commit `0b000f9` against design HEAD) is the binding restructure: flat `skills/<name>/` at the repo root, marketplace catalog deleted, plugin wrappers deleted, per-plugin `package.json` deleted, dogfood overlay collapsed to one-hop symlinks, `release-type: simple` everywhere. This plan rewrites in place rather than carrying forward as deltas because the structural surface is materially different from `794e199`.
 
-### Pending W2 stash disposition
+Workstream IDs continue from the prior `W1`–`W11`. The new workstreams are `W12`–`W19`. Prior workstreams are dispositioned at the top of "Sequenced workstreams" below.
 
-`git stash list` shows `wip-w2-pre-brainstormer-delta` from the prior Executor batch. The stashed diff edits both marketplace manifests to repoint `bootstrap` / `superteam` / `using-github` entries at `patinaproject/skills` and extends `scripts/validate-marketplace.js`. **All three plugin-entry edits target the pre-rename slug `bootstrap`**, which W9 renames to `scaffold-repository`. **Recommendation: discard the stash and redo W2 from scratch.** The stashed validator extension may also be obsolete because W2 below changes which fields the dev-mode validator asserts (renamed surfaces in `marketplace.local.json`, plus the new W11 dogfood symlink invariants the release-mode validator must also gate). Re-deriving W2 against the renamed plugin and the canonical-layout requirements is faster than rebasing the stashed diff. Executor's first action in W2: `git stash drop stash@{0}` after confirming no other in-flight stashes are queued.
+## Disposition of prior workstreams (W1–W11)
 
-## Planner gates (resolve before Executor starts)
+- **W1 (subtree imports):** DONE on this branch. Commits `912d6d9` (bootstrap), `028165e` (superteam), `54157bc` (using-github). Recorded as historical context; no rework. Verification artifacts under `docs/superpowers/plans/.artifacts/` survive intact (`sha256-pre.txt` records the `superteam/SKILL.md` SHA-256 `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356` — the post-flatten value at `skills/superteam/SKILL.md` must match).
+- **W2 (marketplace + validator):** OBSOLETE. Both marketplace manifests and the validator are deleted in W12.6. Nothing carries forward.
+- **W3 (AC-58-3 docs):** PARTIALLY ABSORBED. Check b (validator dev mode) is gone. Check a (CLI install dry-run), check c (apply script), check d (dogfood script) are documented in W18 (README sweep) and verified in W19 (final pass).
+- **W4 (release-please node):** OBSOLETE. Replaced by W15 (release-please simple).
+- **W5 (vercel-labs CLI integration):** OBSOLETE as a standalone workstream. Folded into W18 (README install commands) and W12.6 (validator deletion).
+- **W6 (`apply-scaffold-repository.js`):** PARTIALLY DONE. The script exists at `scripts/apply-scaffold-repository.js` (commit `4a69ef3`, plus follow-ups). W17 updates the script's internal path references from `plugins/scaffold-repository/` to `skills/scaffold-repository/`.
+- **W7 (wiki migration):** DEFERRED. Wiki publication remains a post-merge action per Gate G5. W18's documentation sweep updates the in-repo `docs/wiki-index.md` and `README.md` so they reference the new flat paths; actually publishing wiki content is out of this PR's scope (recorded in AC-58-6 as a post-merge step).
+- **W8 (migration history record):** ABSORBED into W18 (migration history entry under `docs/file-structure.md`).
+- **W9 (bootstrap → scaffold-repository rename):** DONE on this branch. Commit `794e199` (rename `git mv` + plugin manifest edits) and follow-up `fix:` commits (`adb0505`, `392a7b5`) that adjusted README references.
+- **W10 (canonical workspace overlay):** OBSOLETE. The two-hop chain (`.claude/skills/<name>` → `.agents/skills/<name>` → `plugins/<name>/skills/<name>`) is replaced by one-hop symlinks from both overlay directories into `skills/<name>/` (W13). The office-hours port (W10.4, commit `fab5458`) is kept and is re-routed: `git mv .agents/skills/office-hours skills/office-hours` (W12.5).
+- **W11 (verify-dogfood script + CI wiring):** PARTIALLY ABSORBED. The script exists at `scripts/verify-dogfood.sh` (commit `bdc390d`) and CI wiring exists at `.github/workflows/verify-iteration.yml` (commit `eee1df4`). W14 rewrites the script for the flat layout (drop the plugin-scoped vs. standalone branching). W16 renames the workflow file and display name.
 
-These are decisions the design left to the Planner. Each is committed below so the Executor follows them without revisiting.
+## Target layout (binding, from design delta 4)
 
-### Gate G1: Per-plugin tag prefix mapping (open question 1) — REAFFIRMED
+```text
+skills/
+  scaffold-repository/    # git mv from plugins/scaffold-repository/skills/scaffold-repository/
+    SKILL.md
+    (templates/, scripts/, audit-checklist.md, README.md as needed)
+  superteam/              # git mv from plugins/superteam/skills/superteam/
+    SKILL.md
+    (agents/, pre-flight.md, routing-table.md, project-deltas.md, workflow-diagrams.md)
+  using-github/           # git mv from plugins/using-github/skills/using-github/
+    SKILL.md
+    (workflows/, agents/, etc.)
+  find-skills/            # git mv from .agents/skills/find-skills/
+    SKILL.md
+  office-hours/           # git mv from .agents/skills/office-hours/
+    SKILL.md
+.claude/skills/<name>/    # symlinks to ../../skills/<name>/ (5 entries, dogfood overlay)
+.agents/skills/<name>/    # symlinks to ../../skills/<name>/ (5 entries, dogfood overlay)
+.gitignore                # ignores .claude/skills/* and .agents/skills/* EXCEPT the 5 in-repo overlay symlinks
+scripts/
+  apply-scaffold-repository.js  # path-updated for skills/ layout (W17)
+  verify-dogfood.sh             # simplified: 5 skills × skills/<name>/SKILL.md + overlay resolve (W14)
+release-please-config.json      # rewritten: release-type: simple per skill (W15)
+.release-please-manifest.json   # rewritten: 3 packages keyed by skills/<name> (W15)
+.github/workflows/
+  verify.yml                    # renamed from verify-iteration.yml; display name "Verify" (W16)
+  release-please.yml            # updated: no marketplace.json rewrites; manifest-only bumps (W15)
+  markdown.yml, actions.yml, pull-request.yml  # mostly unchanged (markdown.yml glob excludes updated in W18)
+docs/
+  release-flow.md, file-structure.md, wiki-index.md  # rewritten in W18
+  superpowers/specs/, plans/
+AGENTS.md, README.md, CLAUDE.md  # rewritten in W18
+```
 
-`release-please` monorepo mode emits prefixed tags (`scaffold-repository-v1.11.0`, `superteam-v1.6.0`, `using-github-v2.1.0`). The existing manifest validator regex is `^v(\d+\.\d+\.\d+)$`.
+**Deleted entirely:**
 
-**Decision (unchanged from previous plan, retargeted at renamed plugin):** Strip the per-package prefix when writing manifest `ref` values; do **not** weaken the validator. The release-please workflow extracts the semver portion from each prefixed tag and writes `vX.Y.Z` into both marketplace manifests' `source.ref` fields. The longest-match strip rule against the alternation `^(scaffold-repository|superteam|using-github)-v(\d+\.\d+\.\d+)$` (per design's tag-prefix-collision-check bullet) keeps each prefix unambiguous. No `packages/skills-cli` row exists in this regex because the CLI is consumed via `npx`, not republished from this repo (Gate G6).
-
-### Gate G2: Codex dev-overlay source mode (open question 2) — REAFFIRMED
-
-The dev overlay must use a manifest source mode Codex accepts. The Planner has not been able to run a live Codex against a path source from this worktree.
-
-**Decision (unchanged):** Use `"source": "path"` with a repo-relative `path` field for the Codex dev overlay (`marketplace.local.json`), mirroring the Claude convention. If Executor verification (W11 / W3) shows Codex rejects `source: path`, fall back to `git+file://` URLs against the local clone, recorded in the same overlay file. Executor must record which fallback is in effect in `docs/file-structure.md` so it does not silently drift.
-
-### Gate G3: Scaffold-repository self-apply ownership (open question 3, AC-58-5) — REAFFIRMED AND RENAMED
-
-The script formerly named `apply-bootstrap.js` is renamed to `apply-scaffold-repository.js` (per the rename delta).
-
-**Decision (substance unchanged, retargeted):** `scripts/apply-scaffold-repository.js` is invoked from the release-please workflow **only when a release-please release manifest mutates `plugins/scaffold-repository/`** (detected by inspecting the release-please job output `paths_released`). The result of running it is committed onto the same release-please PR branch in the same workflow run, preserving the existing "scaffold bump and scaffolding refresh land in one PR" property documented in `docs/release-flow.md`. On non-scaffold-repository releases the step is skipped. The TODO in the legacy `plugin-release-bump.yml` is therefore *implemented*, not deferred — AC-58-5's "explicit deferral with tracked follow-up" path is rejected.
-
-### Gate G4: CLI host detection (open question 4) — DISPOSITIONED (delegated to upstream CLI)
-
-Per the design's closing line on this question: "Host detection / auto-invocation: out of scope here (Planner's Gate G4 carried this; with the vercel-labs CLI doing the heavy lifting, host detection is the CLI's concern, not ours)."
-
-**Decision:** This repo does not implement host detection. `npx skills@1.5.6 add patinaproject/skills@<plugin> --agent <agent> -y` requires the user to pass `--agent claude-code` or `--agent codex` explicitly per the vercel-labs CLI's documented interface. `README.md` documents both invocations side-by-side. No work product in this plan ships a host-detection capability; if a future contributor wants one, it is a follow-up issue against the upstream CLI, not this repo.
-
-### Gate G5: Wiki ownership of record (open question 5) — REAFFIRMED, OFFICE-HOURS EXTENDS THE PAGE LIST
-
-The wiki is the canonical surface. The repo carries one file, `docs/wiki-index.md`, listing every wiki page name and its purpose. The Executor publishes wiki pages before deleting any source `README.md` content from the upstream packages.
-
-The wiki page list is extended by one entry for `office-hours` (per the design's AC-58-6 amendment); see W7 below.
-
-### Gate G6: `npx skills` package name — CLOSED (adopt vercel-labs)
-
-**Resolution (per design):** The bare npm name `skills` is owned by `vercel-labs/skills`. This repo does **not** author or publish its own `skills` CLI. The primary documented install path is `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@<plugin> --agent <agent> -y` against the upstream CLI (CLI version pinned at invocation, `--ignore-scripts` defense-in-depth as the default form).
-
-**Consequence:** Workstream 5 in the previous plan (build/publish our own CLI) is **replaced** by W5 below (CLI integration: install commands, README, marketplace manifest descriptions; no new package directory, no `npm publish` step, no `bin`).
+- `plugins/` (the entire tree — three wrapper directories with their `.codex-plugin/`, `.claude-plugin/`, `package.json`, `README.md`, `audit-checklist.md`, scaffolding files)
+- `.agents/plugins/` (Codex marketplace tree, including `marketplace.json` and `marketplace.local.json`)
+- `.claude-plugin/` (Claude Code marketplace tree, including `marketplace.json` and `marketplace.local.json`)
+- `scripts/validate-marketplace.js` (no marketplace to validate)
+- `.gitattributes` `export-ignore` rules for now-deleted overlay paths
+- Carry-over per-plugin `release-please-config.json` and `.release-please-manifest.json` files under `plugins/<name>/` (subtree-import noise — never live)
+- The previous `release-please-config.json` and `.release-please-manifest.json` at the repo root (replaced by W15's rewrites)
 
 ## Sequenced workstreams
 
-The workstreams are ordered. Tasks within a workstream may be parallelized only when explicitly noted.
+Ordering: **W12 (flat-mv) is the foundation.** Everything else depends on it. W13 (overlay symlinks + .gitignore), W17 (apply-scaffold paths), and W15 (release-please) each depend only on W12 and may run in parallel. W14 (verify-dogfood rewrite) depends on W12 + W13. W16 (workflow rename) is independent of W12. W18 (docs sweep) depends on W12–W17 because it references their final shapes. W19 (final verification) depends on everything.
 
-Ordering: **W1 → W9 → W2 → (W3 ‖ W4 ‖ W6 ‖ W10 ‖ W11) → W5 → W7 → W8.** The rename (W9) lands after the subtree imports (W1) and before manifest edits (W2) so the marketplace, scripts, release-please config, and dev overlays are written against the renamed slug once. Canonical-overlay setup (W10) depends on W9 because the symlinks reference `plugins/scaffold-repository/skills/scaffold-repository/`.
+### Workstream 12 — Flat-skills restructure (`git mv` chain) (AC-58-1, AC-58-2, AC-58-7, AC-58-8)
 
-### Workstream 1 — Subtree-merge import (AC-58-1, AC-58-7, AC-58-8) — ALREADY ON BRANCH
+**Goal:** Move every skill to `skills/<name>/` at the repo root and delete the plugin-wrapper, marketplace-catalog, and per-plugin-`package.json` scaffolding in the same commit. `git mv` preserves blob SHAs and per-file blame.
 
-**Goal:** Bring `plugins/bootstrap/`, `plugins/superteam/`, `plugins/using-github/` into this repo from their tagged upstream releases, with history preserved and byte-equivalent content.
-
-**Status:** The three subtree merges already exist on this branch as commits `912d6d9` (`bootstrap@v1.10.0`), `028165e` (`superteam@v1.5.0`), `54157bc` (`using-github@v2.0.0`). The byte-equivalence SHA-256 receipts already live under `docs/superpowers/plans/.artifacts/` (`sha256-pre.txt`, `sha256-pre-skillmd.txt`, `sha256-pre-nonneg.txt`, `sha256-post.txt`). No further import work is needed.
-
-**Tag bases imported:** `bootstrap@v1.10.0`, `superteam@v1.5.0`, `using-github@v2.0.0` (matches the current marketplace pins; see the migration record commit `89d8f1c`).
-
-**Verification already done (do not re-run unless rolling back):**
-
-- 1.1 (DONE) SHA-256 of upstream `superteam@v1.5.0` SKILL.md + non-negotiable-rules block captured pre-merge. (AC-58-7)
-- 1.2 (DONE) Three `git subtree add` commands ran in order; each produced a merge commit; none was rebased or squashed.
-- 1.3 (DONE) SHA-256 recomputed against `plugins/superteam/skills/superteam/SKILL.md` post-merge; receipts are byte-equal. (AC-58-7)
-- 1.4 (DONE) Each `plugins/<name>/` contains both `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` and the `skills/<name>/` tree. (AC-58-1)
-- 1.5 (DONE) Temporary upstream remotes are no longer in `git remote`.
-
-**Risks/rollback:** If a downstream workstream finds that subtree content drifted, `git reset --hard 54157bc` (or `028165e` / `912d6d9`) recovers earlier import state. Upstream repos remain archived per the design.
-
-### Workstream 9 — Rename `plugins/bootstrap/` to `plugins/scaffold-repository/` (AC-58-1, AC-58-7 exemption, AC-58-8; depends on W1)
-
-**Goal:** Rename the in-tree copy of the `bootstrap` plugin to `scaffold-repository` in a single reviewable diff. Upstream `patinaproject/bootstrap` repository keeps its name and `v1.10.0` tag; only the in-tree copy and its consumer-visible surfaces in this repo are renamed.
-
-**Order rationale:** W9 lands **after W1** (so the rename happens against imported content, preserving per-file blame across the `git mv`) and **before W2** (so marketplace manifests are edited once against the renamed slug, not twice). All downstream workstreams (W4 release-please config, W6 apply script, W10 canonical overlay, W11 dogfood script) reference the renamed slug.
+**Order rationale:** W12 is foundational. Every other delta-4 workstream depends on the flat layout being in place. The single commit lands as one reviewable diff so reviewers see the structural change atomically and `git mv` rename detection keeps the diff readable on GitHub's PR UI.
 
 **Tasks:**
 
-- 9.1 Run `git mv plugins/bootstrap plugins/scaffold-repository` and `git mv plugins/scaffold-repository/skills/bootstrap plugins/scaffold-repository/skills/scaffold-repository`. Git's rename detection preserves per-file blame; do not delete-and-recreate.
-- 9.2 Edit `plugins/scaffold-repository/skills/scaffold-repository/SKILL.md`:
-  - Frontmatter `name: bootstrap` → `name: scaffold-repository`.
-  - Frontmatter `description:` trigger phrase rewrite: `"bootstrap this repo"` → `"scaffold this repo"`. The upstream phrase `"scaffold a Patina plugin"` stays. Other trigger phrases (`"realign with the baseline"`, `"audit our repo conventions"`, `"set up commitlint and husky"`, `"add Codex/Cursor/Windsurf surfaces"`) are unchanged.
-  - H1 heading `# bootstrap` → `# scaffold-repository`.
-  - Body references to the plugin name (e.g. opening sentence `` `bootstrap` scaffolds a repository... `` → `` `scaffold-repository` scaffolds a repository... ``). Use `rg -F 'bootstrap'` over the SKILL.md to enumerate occurrences, then triage each per the design's "Out of scope for the rename" subsection (preserve generic English usage like "bootstrap command" or "bootstrap hook").
-  - References to the upstream repo URL `https://github.com/patinaproject/bootstrap` are **preserved** (still resolves to the archived upstream).
-- 9.3 Edit `plugins/scaffold-repository/.claude-plugin/plugin.json`:
-  - `name: "bootstrap"` → `"scaffold-repository"`.
-  - `keywords`: drop the `bootstrap` keyword in favor of `scaffold-repository`; the existing `scaffold` keyword stays.
-  - `homepage` / `repository`: preserved (continue to point at `patinaproject/bootstrap` while it exists as the archived upstream).
-- 9.4 Edit `plugins/scaffold-repository/.codex-plugin/plugin.json`:
-  - `name`, `keywords`: same edits as 9.3.
-  - `interface.displayName`: `Bootstrap` → `Scaffold Repository`.
-  - `interface.shortDescription`, `interface.longDescription`: rewrite the plugin-name occurrences; preserve generic English.
-  - `interface.defaultPrompt`: rewrite `$bootstrap` → `$scaffold-repository` in each prompt string.
-  - `homepage` / `repository`: preserved.
-- 9.5 If `plugins/scaffold-repository/package.json` exists, edit `name` to `scaffold-repository`. (Verify presence at execution time — the upstream `bootstrap` package may not ship a top-level `package.json` separate from the marketplace's.)
-- 9.6 Search-and-replace blast-radius triage: run `rg -F 'bootstrap'` over the renamed plugin directory and over the repo root files that W2/W4/W6 will touch (marketplace manifests, release-please config, AGENTS.md, README, docs/release-flow.md, docs/file-structure.md). For each hit, decide: is this a plugin-name reference (rename) or generic English (preserve)? The design's "Out of scope for the rename" subsection lists the canonical preserved-English cases (`pnpm install` as a "bootstrap command", Husky bootstrap hooks, `chore: bootstrap commit hooks` commit-message examples). **Do not use `sed -i 's/bootstrap/scaffold-repository/g'`** — the renames are listed in the design's Plugin rename catalog and must be applied surface-by-surface.
-- 9.7 Commit with: `refactor: #58 rename bootstrap plugin to scaffold-repository`. This is the rename commit referenced in AC-58-8's migration history entry.
+- 12.1 `git mv plugins/scaffold-repository/skills/scaffold-repository skills/scaffold-repository`. The directory's interior (SKILL.md plus any supporting files like `templates/`, `scripts/`, `audit-checklist.md`, `README.md`) moves with rename detection.
+- 12.2 `git mv plugins/superteam/skills/superteam skills/superteam`. Carries `SKILL.md`, `agents/`, `pre-flight.md`, `routing-table.md`, `project-deltas.md`, `workflow-diagrams.md`.
+- 12.3 `git mv plugins/using-github/skills/using-github skills/using-github`. Carries `SKILL.md`, any `workflows/`, `agents/`, slash-command surfaces.
+- 12.4 `git mv .agents/skills/find-skills skills/find-skills`. The committed real-file `SKILL.md` plus any sub-content moves; rename detection preserves blame.
+- 12.5 `git mv .agents/skills/office-hours skills/office-hours`. Single `SKILL.md` real file (the port that landed at commit `fab5458`) moves into the canonical home.
+- 12.6 **Deletions** (all in the same commit as 12.1–12.5):
+  - `rm -r plugins/` — the three wrapper directories and everything inside them (including `.codex-plugin/`, `.claude-plugin/`, `package.json`, `README.md`, `audit-checklist.md`, scaffold-managed files, and the carry-over `release-please-config.json` / `.release-please-manifest.json` at `plugins/<name>/`).
+  - `rm -r .agents/plugins/` — Codex marketplace tree and both `marketplace.json` / `marketplace.local.json`.
+  - `rm -r .claude-plugin/` — Claude Code marketplace tree and both `marketplace.json` / `marketplace.local.json`.
+  - `rm scripts/validate-marketplace.js` — validator targets a file that no longer exists.
+  - Edit `.gitattributes` — remove any `export-ignore` rules that referenced `plugins/`, `.agents/plugins/`, `.claude-plugin/`, the prior `.claude/skills/<name>` two-hop overlay, or the pre-flatten `.agents/skills/<name>` overlay paths. Keep unrelated rules.
+- 12.7 **AC-58-7 SHA round-trip verification.** Compute `sha256sum skills/superteam/SKILL.md` and confirm the digest equals `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356` (recorded in `docs/superpowers/plans/.artifacts/sha256-pre.txt` and in the PR #59 body). Record the post-flatten value at `docs/superpowers/plans/.artifacts/sha256-post.txt` (update the existing file — it currently records the post-subtree-add value, which equals the post-flatten value because `git mv` preserves blobs). If the digests do not match, halt: an editor touched the file between the moves and the design's GREEN baseline is broken.
+- 12.8 **Internal-link sweep within moved files.** Run `rg -F 'plugins/scaffold-repository' skills/scaffold-repository/`, `rg -F 'plugins/superteam' skills/superteam/`, `rg -F 'plugins/using-github' skills/using-github/`. For each match, decide: is this a path reference (rewrite to `skills/<name>/`) or generic English / a URL pointing at the archived upstream `patinaproject/bootstrap` repo (preserve)? The upstream URL references stay. Do **not** use `sed -i` blast-radius rewrites — triage surface-by-surface.
+- 12.9 Commit with: `refactor: #58 flatten skills layout to skills/<name>/ per PR comments`. Single commit covering 12.1–12.8.
 
-**Files touched in W9:** `plugins/scaffold-repository/**` (whole directory via `git mv`), `plugins/scaffold-repository/skills/scaffold-repository/SKILL.md`, `plugins/scaffold-repository/.claude-plugin/plugin.json`, `plugins/scaffold-repository/.codex-plugin/plugin.json`, `plugins/scaffold-repository/package.json` (if present).
-
-**Files NOT touched in W9** (deferred to the workstream that owns each surface): marketplace manifests (W2), release-please config (W4), `scripts/apply-scaffold-repository.js` (W6), AGENTS.md / README / docs (W2 / W4 / W7), canonical overlay symlinks (W10), dogfood script (W11). W9 is scoped to the renamed plugin's interior plus the `git mv` itself.
+**Files touched in W12:** `plugins/**` (deleted via the `git mv`s and the `rm -r`), `.agents/plugins/**` (deleted), `.claude-plugin/**` (deleted), `scripts/validate-marketplace.js` (deleted), `.gitattributes` (edited), `skills/scaffold-repository/**` (new path from `git mv`), `skills/superteam/**` (new path), `skills/using-github/**` (new path), `skills/find-skills/SKILL.md` (new path), `skills/office-hours/SKILL.md` (new path), `docs/superpowers/plans/.artifacts/sha256-post.txt` (verification receipt).
 
 **Verification:**
 
-- `test -d plugins/scaffold-repository && ! test -d plugins/bootstrap` confirms the directory rename.
-- `grep -l '"name": "scaffold-repository"' plugins/scaffold-repository/.{codex,claude}-plugin/plugin.json` returns both manifest paths.
-- `head -10 plugins/scaffold-repository/skills/scaffold-repository/SKILL.md` shows `name: scaffold-repository` in the frontmatter.
-- `rg -F 'bootstrap' plugins/scaffold-repository/` reveals only surviving English-as-generic-verb uses (acceptable) and `https://github.com/patinaproject/bootstrap` URL references (acceptable per design).
+- `find . -name plugin.json -not -path './node_modules/*' -not -path './.git/*'` returns empty (AC-58-1 falsifiable check a).
+- `find skills -maxdepth 2 -name SKILL.md | sort` returns exactly five paths (AC-58-1 check b).
+- `git log --follow --format=%H skills/superteam/SKILL.md | tail -1` resolves to the same commit and blob as the pre-flatten path (AC-58-1 check c — verify per-file blame survives).
+- `find . -name 'marketplace*.json' -not -path './node_modules/*' -not -path './.git/*'` returns empty (AC-58-2 falsifiable check).
+- `sha256sum skills/superteam/SKILL.md` equals `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356` (AC-58-7).
+- `test ! -d plugins && test ! -d .agents/plugins && test ! -d .claude-plugin && test ! -f scripts/validate-marketplace.js` exits 0.
 
-**Definition of done:** Renamed plugin is internally consistent; the renamed-plugin SKILL.md `name:` matches the directory name; conventional commit landed.
+**Definition of done:** All deletions and moves landed in one commit; SHA round-trip verified; conventional commit message references issue #58.
 
-**Risks/rollback:** If the rename diff turns out to be larger than expected (e.g. a body-text rewrite slipped beyond the rename surface), revert the commit and re-do with a tighter scope. The `git mv` is reversible.
+**Risks/rollback:** If an internal-link sweep miss surfaces post-commit, follow up with a focused `fix:` commit. The `git mv` chain itself is reversible (revert the commit); no destructive operation occurs against the archived upstream repos.
 
-### Workstream 2 — Marketplace manifests, dev overlay, and validator extension (AC-58-2, AC-58-3 check b; depends on W9)
+### Workstream 13 — Dogfood overlay symlinks + `.gitignore` allowlist (AC-58-3 dogfood preconditions)
 
-**Goal:** Manifests in released form pin `vX.Y.Z` against `patinaproject/skills` itself with the renamed `scaffold-repository` slug; dev overlays declare path-based sources for in-repo iteration; validator gains a dev-mode that accepts the overlay and a release-mode that rejects both overlay leaks and canonical-overlay symlink leaks.
+**Goal:** Create five committed symlinks at `.claude/skills/<name>/` → `../../skills/<name>/` and the parallel five at `.agents/skills/<name>/` → `../../skills/<name>/`. Update `.gitignore` so CLI-installed third-party skills (the 14 superpowers skills currently sitting untracked under `.agents/skills/<name>/` and `.claude/skills/<name>/` from the prior `npx skills add` invocation) are ignored while the five in-repo overlay symlinks remain tracked.
 
-**W2 stash disposition:** Drop `stash@{0}` (`wip-w2-pre-brainstormer-delta`) before starting. Its diff is stale relative to the renamed plugin and the new release-mode invariants. Executor's first command: `git stash drop stash@{0}` after `git stash show --name-only stash@{0}` to confirm it is the pre-delta W2 stash and not something else queued in the meantime.
+**Order rationale:** W13 depends on W12 because the symlink targets reference `../../skills/<name>/`. The 14 third-party superpowers skills currently sit at `.agents/skills/<name>/` (real files) and `.claude/skills/<name>` (symlinks into the real files); after W12 the `.agents/skills/{find-skills,office-hours}` real files are gone (moved to `skills/`), so there is no name collision when W13 introduces overlay symlinks for the five in-repo skills. Confirmed no name overlap: the 14 third-party skills are `brainstorming`, `dispatching-parallel-agents`, `executing-plans`, `finishing-a-development-branch`, `receiving-code-review`, `requesting-code-review`, `subagent-driven-development`, `systematic-debugging`, `test-driven-development`, `using-git-worktrees`, `using-superpowers`, `verification-before-completion`, `writing-plans`, `writing-skills`; the five in-repo overlay names are `scaffold-repository`, `superteam`, `using-github`, `find-skills`, `office-hours`. No collision.
 
 **Tasks:**
 
-- 2.1 Update `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json`:
-  - All three plugin entries' `source` field points at this repo: Claude `repo: patinaproject/skills`; Codex `url: https://github.com/patinaproject/skills.git`.
-  - The Bootstrap entry's `slug` / `name` / `displayName` is `scaffold-repository`; the entry's `description` removes the standalone word "Bootstrap" as plugin label (English elsewhere preserved).
-  - The `ref` for each entry is `vX.Y.Z` taken from the most recent per-plugin release-please tag (initially the same as the upstream tags: `v1.10.0` for scaffold-repository, `v1.5.0` for superteam, `v2.0.0` for using-github). (AC-58-2)
-- 2.2 Create `.agents/plugins/marketplace.local.json` and `.claude-plugin/marketplace.local.json` declaring each plugin entry with a path source per Gate G2:
-  - Claude: `"source": { "source": "path", "path": "../../plugins/<slug>" }`.
-  - Codex: `"source": { "source": "path", "path": "../../plugins/<slug>" }` (with Gate G2 fallback recorded in `docs/file-structure.md` if verification rejects).
-  - Slugs are `scaffold-repository`, `superteam`, `using-github`. The dev overlay does **not** carry an `office-hours` entry (standalone skill — design's "Standalone skills" subsection: standalone skills are not marketplace entries).
-- 2.3 Extend `scripts/validate-marketplace.js`:
-  - Default (release) mode: existing `vX.Y.Z` regex check. Additionally fail if either `marketplace.local.json` is present at release-eligible paths covered by the `release-please` extra-files / `git archive` `export-ignore` allowlist (defense-in-depth against the leak risk in the design's Risks section).
-  - Release mode also fails if any of the three plugin entries' `slug` / `name` is `bootstrap` (defense-in-depth against an accidental revert that re-introduces the pre-rename slug into a released manifest). The check is a literal-string deny on `"name": "bootstrap"` and `"slug": "bootstrap"` in the published manifest files.
-  - Release mode also fails if the marketplace manifests carry an entry whose slug or name is one of the known standalone skills (`office-hours`). The deny list is a small literal-string array, expandable as new standalone skills are added. Defense-in-depth: the design explicitly states standalone skills are **not** marketplace entries; this check prevents an accidental promotion that would leak the standalone skill into a release.
-  - `--dev` mode: validate the two `marketplace.local.json` files instead of the released manifests; assert each `path` resolves to a directory containing `.codex-plugin/plugin.json` (for the Codex overlay) or `.claude-plugin/plugin.json` (for the Claude overlay); skip the `vX.Y.Z` rule.
-  - Preserve the existing `--remote` mode but update it to consult `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json` *at the tagged ref on this repo* rather than at the upstream repo. (Network-free: read the in-tree files at the current branch HEAD and assert their `version` fields match the manifest `ref` semver.)
-- 2.4 Add npm script entries: `validate:marketplace`, `validate:marketplace:dev`, `validate:marketplace:remote`.
+- 13.1 Create five relative symlinks at `.claude/skills/`:
+  - `ln -sf ../../skills/scaffold-repository .claude/skills/scaffold-repository`
+  - `ln -sf ../../skills/superteam .claude/skills/superteam`
+  - `ln -sf ../../skills/using-github .claude/skills/using-github`
+  - `ln -sf ../../skills/find-skills .claude/skills/find-skills`
+  - `ln -sf ../../skills/office-hours .claude/skills/office-hours`
+  - The pre-existing `.claude/skills/find-skills` and `.claude/skills/office-hours` symlinks under the prior two-hop layout pointed at `.agents/skills/<name>`; the `ln -sf` retargets them to the new canonical `../../skills/<name>` path. The other three `.claude/skills/<name>` directories do not exist pre-W13 (those were two-hop symlinks pointing into `plugins/<name>/skills/<name>/` and the `plugins/` tree is gone after W12), so `ln -sf` creates fresh.
+- 13.2 Create five relative symlinks at `.agents/skills/`:
+  - `ln -sf ../../skills/scaffold-repository .agents/skills/scaffold-repository`
+  - `ln -sf ../../skills/superteam .agents/skills/superteam`
+  - `ln -sf ../../skills/using-github .agents/skills/using-github`
+  - `ln -sf ../../skills/find-skills .agents/skills/find-skills`
+  - `ln -sf ../../skills/office-hours .agents/skills/office-hours`
+  - Pre-existing real-file directories `.agents/skills/find-skills/` and `.agents/skills/office-hours/` are gone after W12.4 / W12.5; the `ln -sf` creates fresh symlinks. The other three `.agents/skills/<name>` entries did not exist pre-W12.
+- 13.3 Update `.gitignore` to allow the five in-repo overlay symlinks while ignoring everything else under `.claude/skills/` and `.agents/skills/`. Insert the following block (replacing any prior overlay-related rules):
 
-**Files touched:** `.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.local.json` (new), `.claude-plugin/marketplace.local.json` (new), `scripts/validate-marketplace.js`, `package.json`.
+  ```gitignore
+  # Dogfood overlay: track the 5 in-repo skill symlinks; ignore third-party CLI installs.
+  .claude/skills/*
+  !.claude/skills/scaffold-repository
+  !.claude/skills/superteam
+  !.claude/skills/using-github
+  !.claude/skills/find-skills
+  !.claude/skills/office-hours
+  .agents/skills/*
+  !.agents/skills/scaffold-repository
+  !.agents/skills/superteam
+  !.agents/skills/using-github
+  !.agents/skills/find-skills
+  !.agents/skills/office-hours
+  ```
+
+  Note: `*` matches direct children; the negated `!.claude/skills/<name>` entries cover the symlink children we want tracked. The 14 third-party superpowers skills (currently untracked) become explicitly gitignored, which is the desired end state.
+
+- 13.4 Verify gitignore behavior:
+  - `git check-ignore -v .agents/skills/brainstorming` reports a hit on the `.agents/skills/*` rule.
+  - `git check-ignore -v .agents/skills/scaffold-repository` reports no match (the negated allowlist entry shadows the `*` rule).
+  - `git status --ignored | grep '\.agents/skills/'` lists the 14 third-party skills under "Ignored files" and none of the five overlay symlinks.
+- 13.5 Confirm symlinks are tracked as symlinks (mode `120000`) in the Git index: `git ls-files -s .claude/skills/ .agents/skills/` should show ten entries (5 + 5) all with mode `120000`.
+- 13.6 Commit with: `feat: #58 add dogfood overlay symlinks for in-repo skills`.
+
+**Files touched in W13:** `.claude/skills/{scaffold-repository,superteam,using-github,find-skills,office-hours}` (new symlinks), `.agents/skills/{scaffold-repository,superteam,using-github,find-skills,office-hours}` (new symlinks), `.gitignore`.
 
 **Verification:**
 
-- `node scripts/validate-marketplace.js` exits 0 against the released manifests.
-- `node scripts/validate-marketplace.js --dev` exits 0 against the overlays.
-- `node scripts/validate-marketplace.js` exits non-zero if a `marketplace.local.json` is moved into the would-be-released payload (smoke this by temporarily placing it in a release-eligible spot).
-- `node scripts/validate-marketplace.js` exits non-zero if a manifest entry's `name` is reverted to `bootstrap` (smoke by temporary edit + revert).
-- `node scripts/validate-marketplace.js` exits non-zero if a standalone-skill slug (`office-hours`) is injected into either manifest (smoke by temporary edit + revert).
+- Ten symlink entries in `git ls-files -s .claude/skills/ .agents/skills/`, all mode `120000`.
+- For each of the ten symlinks, `readlink <link>` returns `../../skills/<name>`.
+- For each of the ten symlinks, `test -e <link>/SKILL.md` exits 0 (target resolves through the symlink).
+- 14 third-party skills appear under `git status --ignored`'s ignored-files section.
 
-**Definition of done:** All validator modes exit as expected; conventional commit `feat: #58 wire marketplace to in-repo scaffold-repository plugin and dev overlay`.
+**Definition of done:** Five overlay symlinks at each of `.claude/skills/` and `.agents/skills/`; `.gitignore` allowlist shape correct; third-party skills are ignored; conventional commit landed.
 
-### Workstream 10 — Canonical workspace overlay (AC-58-1, AC-58-3 dogfood preconditions; depends on W9)
+**Risks/rollback:** Revert the commit to remove all ten symlinks and the `.gitignore` block. Symlinks not committed before revert do not require cleanup beyond what `git revert` already does.
 
-**Goal:** Establish `.agents/skills/<name>/` as the canonical workspace overlay surface and `.claude/skills/<name>/` as the Claude Code skill-loader symlink layer pointing into it. All five in-repo skills (`scaffold-repository`, `superteam`, `using-github`, `find-skills`, `office-hours`) are reachable through the canonical layout by the end of this workstream.
+### Workstream 14 — `verify-dogfood.sh` simplified for flat layout (AC-58-3 dogfood check)
 
-**Order rationale:** W10 lands **after W9** so all symlinks reference the renamed `plugins/scaffold-repository/skills/scaffold-repository/` path. W10 can run in parallel with W2 / W3 / W4 / W6 / W11 because none of those workstreams touch `.agents/skills/` or `.claude/skills/` directly (W11 reads but does not write them).
+**Goal:** Rewrite `scripts/verify-dogfood.sh` for the flat layout. The prior script branched on plugin-scoped (two-hop symlink chain) vs. standalone (real file at `.agents/skills/<name>/`); after the flatten every skill is a real file at `skills/<name>/SKILL.md` and the overlay paths are one-hop symlinks. The check becomes uniform across all five.
+
+**Order rationale:** W14 depends on W12 (real files at `skills/<name>/SKILL.md` must exist) and W13 (overlay symlinks must exist). Independent of W15, W16, W17.
 
 **Tasks:**
 
-- 10.1 Create `.agents/skills/` directory at the repo root.
-- 10.2 Create plugin-scoped symlinks (relative symlinks for portability across clones):
-  - `.agents/skills/scaffold-repository` → `../../plugins/scaffold-repository/skills/scaffold-repository`
-  - `.agents/skills/superteam` → `../../plugins/superteam/skills/superteam`
-  - `.agents/skills/using-github` → `../../plugins/using-github/skills/using-github`
-  - Use `ln -s ../../plugins/<name>/skills/<name> .agents/skills/<name>` from the `.agents/skills/` directory so the symlink target is a relative path (works on every clone regardless of clone location).
-- 10.3 Install `find-skills` if not already present in this worktree, then reconcile to canonical layout. The operator prompt notes the install already happened in another context; if this worktree lacks `.claude/skills/find-skills/SKILL.md` and `skills-lock.json`, run the command `npm_config_ignore_scripts=true npx skills@1.5.6 add vercel-labs/skills@find-skills --agent claude-code -y`. Then reconcile (whether the install happened just now or previously):
-  - Create directory `.agents/skills/find-skills/`.
-  - Move the real file: `git mv .claude/skills/find-skills/SKILL.md .agents/skills/find-skills/SKILL.md` (preserves blame; the CLI wrote a real file or a symlink into a copied tree depending on `--agent`; if it is itself a symlink, dereference and commit the real file content under `.agents/skills/find-skills/`).
-  - Replace `.claude/skills/find-skills/` (if present) with a relative symlink: `.claude/skills/find-skills` → `../../.agents/skills/find-skills`.
-  - Confirm `skills-lock.json` at the repo root is committed (its CLI-chosen location; do not move it).
-- 10.4 Port `office-hours` standalone skill from `patinaproject/patinaproject` PR #1143 at head SHA `02e6ebbdbef123bbeb211fad06aa86bd5e33528a`. Source path in the upstream PR: `office-hours/SKILL.md` (or wherever the PR places the file; Executor fetches the PR head and records the exact source path in the commit message). Target path in this repo: `.agents/skills/office-hours/SKILL.md` (real file, not a symlink). The port is byte-for-byte. Sequence:
-  - `mkdir .agents/skills/office-hours/`.
-  - Fetch the upstream file content via `gh api` against the PR head SHA (so the port is reproducible). Record the URL fetched in the commit message body.
-  - Write the file content verbatim. Verify `sha256sum` of the local file matches the upstream PR head SHA's blob.
-  - Commit with: `feat: #58 port office-hours standalone skill from patinaproject/patinaproject PR #1143 @ 02e6ebbd`. This commit SHA is the value Executor records in the design's Ported skills catalog (AC-58-8).
-- 10.5 Create the Claude Code skill-loader symlinks for all five skills (one hop each per design, no two-hop chains for the Claude layer):
-  - `.claude/skills/scaffold-repository` → `../../.agents/skills/scaffold-repository`
-  - `.claude/skills/superteam` → `../../.agents/skills/superteam`
-  - `.claude/skills/using-github` → `../../.agents/skills/using-github`
-  - `.claude/skills/find-skills` → `../../.agents/skills/find-skills`
-  - `.claude/skills/office-hours` → `../../.agents/skills/office-hours`
-  Use `ln -s` from `.claude/skills/` so each link target is a relative path.
-- 10.6 Confirm `git` tracks symlinks. macOS and Linux track symlinks by default; if `git config --get core.symlinks` returns `false` on a contributor machine, document the override in `docs/file-structure.md` (`git config core.symlinks true`). The Executor's verification step `git ls-files -s .claude/skills/ .agents/skills/` should show mode `120000` for each symlink entry. Add to `docs/file-structure.md` a "Symlink hygiene" subsection covering the `core.symlinks` requirement, the relative-target convention, and the rule that symlinks are workspace-only and must not leak into a release.
-- 10.7 Update `.gitignore` if necessary so the canonical overlay is **tracked** (the current `.gitignore` only excludes `node_modules/` and `docs/superpowers/plans/.artifacts/`; no change should be required, but Executor verifies). Add `.gitattributes` rules to set `.agents/skills/** export-ignore` and `.claude/skills/** export-ignore` so `git archive` produces release tarballs without the overlay surface. The design's Risks bullet on "Canonical-layout symlinks leaking into a release" requires this defense-in-depth.
-- 10.8 Commit the canonical-layout work in two commits to keep review surface small:
-  - `feat: #58 establish canonical skill overlay layout under .agents/skills`
-  - `feat: #58 port office-hours standalone skill ...` (the W10.4 commit above)
+- 14.1 Rewrite `scripts/verify-dogfood.sh`. Algorithm (bash 4+, no Python/Node dependency):
+  - Define `SKILLS=(scaffold-repository superteam using-github find-skills office-hours)`.
+  - For each `name` in `SKILLS`:
+    1. Assert `skills/<name>/SKILL.md` exists and is a regular file (not a symlink): `test -f skills/<name>/SKILL.md && ! test -L skills/<name>/SKILL.md`. If false, print `FAIL: skills/<name>/SKILL.md missing or is a symlink` and exit non-zero.
+    2. Parse the YAML frontmatter (between the first two `---` delimiter lines). Use `awk` / `sed` to extract `name:` and `description:` values from the first ten or so non-delimiter lines. Assert both keys are present and `name:` value equals `<name>`. (For `scaffold-repository`, this catches a regression that ports the post-flatten file but leaves the frontmatter `name:` as `bootstrap`.)
+    3. Assert `.claude/skills/<name>/SKILL.md` resolves through the symlink to the same underlying blob as `skills/<name>/SKILL.md`: `[ "$(readlink -f .claude/skills/<name>/SKILL.md)" = "$(readlink -f skills/<name>/SKILL.md)" ]`. (Note: `readlink -f` is GNU; on macOS the equivalent is `realpath` from coreutils or a portable pattern. The script must handle both — fall back to `realpath` if `readlink -f` is unavailable, or use `python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' <path>` as a portable third-party fallback if neither is present. Document the dependency in the script header.)
+    4. Same assertion for `.agents/skills/<name>/SKILL.md`.
+  - On all assertions passing, print `OK: all five skills discoverable via flat layout` and exit 0. On any failure, print the failing condition and exit non-zero.
+- 14.2 Drop the previous script's plugin-scoped vs. standalone branching, the `plugins/<name>/skills/<name>/` target-path assertion, and the symlink-chain readlink dance. Replace with the simple shape above.
+- 14.3 `chmod +x scripts/verify-dogfood.sh` (the file is already executable from the prior commit; verify and re-set if needed).
+- 14.4 Smoke-test from the command line: `bash scripts/verify-dogfood.sh && echo OK`. Exit code 0.
+- 14.5 Smoke-test negative-path: temporarily edit `skills/office-hours/SKILL.md` frontmatter `name: office-hours` → `name: wrong-name`, run the script, confirm non-zero exit; revert.
+- 14.6 Update the pnpm script alias in `package.json` — confirm `verify:dogfood` points at `bash scripts/verify-dogfood.sh` (this alias already exists from commit `bdc390d`; no edit needed unless the path moved).
+- 14.7 Commit with: `feat: #58 simplify verify-dogfood for flat skills layout`.
 
-**Files touched:** `.agents/skills/{scaffold-repository,superteam,using-github,find-skills,office-hours}/` (new entries; some symlinks, some real files), `.claude/skills/{scaffold-repository,superteam,using-github,find-skills,office-hours}` (new symlinks), `.gitattributes`, `docs/file-structure.md` (Symlink-hygiene subsection).
+**Files touched in W14:** `scripts/verify-dogfood.sh` (rewritten).
 
 **Verification:**
 
-- All five `.claude/skills/<name>/SKILL.md` resolve to a real file via `test -e .claude/skills/<name>/SKILL.md`.
-- For the three plugin-scoped skills, the symlink chain follows `.claude/skills/<name> -> .agents/skills/<name> -> plugins/<name>/skills/<name>` (`readlink` shows the expected target at each hop).
-- For `find-skills`, the chain follows `.claude/skills/find-skills -> .agents/skills/find-skills`, and `.agents/skills/find-skills/SKILL.md` is a real file.
-- For `office-hours`, the chain follows `.claude/skills/office-hours -> .agents/skills/office-hours`, and `.agents/skills/office-hours/SKILL.md` is a real file whose SHA-256 matches the upstream PR head SHA's blob.
-- `git ls-files -s .claude/skills/ .agents/skills/` shows mode `120000` for every symlink entry and `100644` for real-file entries (`find-skills/SKILL.md` and `office-hours/SKILL.md`).
-- `git archive HEAD --format=tar | tar -tf - | grep -E '^.agents/skills/|^.claude/skills/'` returns empty (confirming `export-ignore` is in effect).
+- `bash scripts/verify-dogfood.sh` exits 0 against the post-W12 + post-W13 tree.
+- Negative-path smoke (described in 14.5) confirms non-zero exit.
 
-**Definition of done:** All five skills are discoverable via the canonical overlay; `git archive` excludes the overlay paths; two commits landed.
+**Definition of done:** Script returns 0 for the five flat-layout skills; uniform shape per skill; conventional commit landed.
 
-**Risks/rollback:** If a contributor's `core.symlinks` is `false` on Windows or a misconfigured WSL, symlinks materialize as plain files containing the target path string. Mitigation: `docs/file-structure.md` Symlink-hygiene subsection documents the `git config core.symlinks true` override; the dogfood script (W11) catches the breakage in CI.
+**Risks/rollback:** Revert the script commit to restore the prior plugin-scoped/standalone branching script (which would then fail because it points at deleted paths). Effective rollback requires reverting W12 first, so the rollback chain is W14 → W13 → W12.
 
-### Workstream 3 — Verification harness for AC-58-3 checks a/b/c/d (depends on W2, W6, W11)
+### Workstream 15 — Release-please reconfigure (`release-type: simple`) (AC-58-5)
 
-**Goal:** Four falsifiable exit-0 invocations exist and are documented in `README.md`. The dogfood check (new check d) is split into W11 below; W3 is the integration / documentation layer.
+**Goal:** Rewrite `release-please-config.json` and `.release-please-manifest.json` for three packages at `skills/scaffold-repository`, `skills/superteam`, `skills/using-github` with `release-type: simple`. No `extra-files` block (no marketplace.json to rewrite). Tag shape `<component>-v<X.Y.Z>` matching the prior shape (`scaffold-repository-v1.10.0`, etc.). Update `.github/workflows/release-please.yml` so it drops the marketplace-rewrite step, keeps the scaffold-repository self-apply step (Gate G3), and keeps auto-merge.
+
+**Order rationale:** W15 depends on W12 (the package directories must be at their new flat paths). Independent of W13, W14, W16, W17. The release-please config rewrite is mechanical once the paths are settled.
 
 **Tasks:**
 
-- 3.1 (DEFERRED to W6) `scripts/apply-scaffold-repository.js` (skeleton invoked by AC-58-3 check c) is implemented in W6 below. W3 references the W6 deliverable.
-- 3.2 (REMOVED) The previous plan's W3.2 ("`--dev` mode in `packages/skills-cli/bin/skills.mjs`") is removed. Gate G6 closed; no in-repo CLI exists. AC-58-3 check a's new form is below.
-- 3.3 Document the four checks in `README.md` under "Local iteration":
-  - **Check a** (replaces overlay-registration): `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code --dry-run` (or the closest falsifiable equivalent the CLI supports — Executor inspects `skills --help` against the pinned `1.5.6` version and picks the most deterministic falsifiable form. If `--dry-run` is unavailable, the documented form becomes the actual install against a scratch `--prefix /tmp/skills-dryrun` so it does not mutate the working tree.). The CLI must resolve `scaffold-repository` and exit 0. Executor records the chosen command form in `README.md` and `docs/release-flow.md`. The same pattern is exercisable against `superteam`, `using-github`, `find-skills`, and (because standalone-skill resolution is the same CLI surface per the design's "Standalone skills" section) `office-hours`.
-  - **Check b** (unchanged from previous plan): `node scripts/validate-marketplace.js --dev` (accept) and `node scripts/validate-marketplace.js` with the overlay misplaced (reject): exit 0 / non-zero.
-  - **Check c** (renamed): `node scripts/apply-scaffold-repository.js plugins/scaffold-repository`: exit 0 with no network calls.
-  - **Check d** (new): `bash scripts/verify-dogfood.sh`: exit 0 (per AC-58-3 dogfood verification; full implementation in W11).
-- 3.4 **Gate G2 verification.** Executor manually exercises the Codex CLI's `marketplace add` against the path overlay from a fresh clone of this branch. If Codex rejects `source: path`, switch to `git+file://` URLs and update `marketplace.local.json` accordingly. Record the result in `docs/file-structure.md`.
+- 15.1 Rewrite `release-please-config.json` to the following exact shape:
 
-**Files touched:** `README.md`, `docs/file-structure.md`.
+  ```json
+  {
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "packages": {
+      "skills/scaffold-repository": {
+        "release-type": "simple",
+        "tag-separator": "-v",
+        "include-component-in-tag": true,
+        "component": "scaffold-repository"
+      },
+      "skills/superteam": {
+        "release-type": "simple",
+        "tag-separator": "-v",
+        "include-component-in-tag": true,
+        "component": "superteam"
+      },
+      "skills/using-github": {
+        "release-type": "simple",
+        "tag-separator": "-v",
+        "include-component-in-tag": true,
+        "component": "using-github"
+      }
+    },
+    "separate-pull-requests": true,
+    "include-v-in-tag": true
+  }
+  ```
 
-**Verification:** Four exit-0 invocations all succeed on a fresh clone. CI runs the validator modes, the apply script, the CLI install dry-run, and the dogfood script. Executor records exit codes in the PR body.
+  **Tag shape verification.** With `"include-component-in-tag": true`, `"component": "scaffold-repository"`, `"tag-separator": "-v"`, and `"include-v-in-tag": true`, release-please produces tags of the form `<component><tag-separator><version>`, i.e. `scaffold-repository-v1.10.1`. This matches the prior `release-type: node` config's `tag-name-prefix: scaffold-repository-` shape exactly. Verify by dry-run (15.4 below). If the tag shape comes out different from `<component>-v<X.Y.Z>`, **halt and report**: the design's Gate G1 disposition (full prefixed tag passed to `npx skills add patinaproject/skills@<name>#<full-tag>`) assumes this exact shape, and the operator must redirect.
 
-**Definition of done:** AC-58-3 checks a/b/c/d all green; conventional commit `docs: #58 document AC-58-3 falsifiable checks`.
+- 15.2 Rewrite `.release-please-manifest.json` to:
 
-### Workstream 4 — `release-please` configuration (AC-58-5; depends on W1, W2, W9)
+  ```json
+  {
+    "skills/scaffold-repository": "1.10.0",
+    "skills/superteam": "1.5.0",
+    "skills/using-github": "2.0.0"
+  }
+  ```
 
-**Goal:** Replace `plugin-release-bump.yml` with `release-please`-driven releases. The release-please config is the single source of truth for what `vX.Y.Z` lands in both marketplace manifests.
+  These seeds match the upstream tags imported via `git subtree add` in W1 and the version that the prior marketplace manifests pinned. The next conventional `feat:` / `fix:` commit under `skills/<name>/**` will bump the matching package's version to `1.10.1` (or `1.11.0`, etc.) on the next release-please run.
+
+- 15.3 Update `.github/workflows/release-please.yml`:
+  - Remove any step that rewrote `marketplace.json` `source.ref` fields (the previous workflow had a post-step like this; with the catalog gone, the step must be deleted).
+  - Keep the scaffold-repository self-apply step (Gate G3): `node scripts/apply-scaffold-repository.js skills/scaffold-repository` (path-updated by W17). The step's trigger condition is "`paths_released` from the release-please-action output contains `skills/scaffold-repository`." Adjust the conditional path-check from `plugins/scaffold-repository` to `skills/scaffold-repository`.
+  - Preserve the existing auto-merge logic (`gh pr merge --auto --squash` against each open release-please PR) and the existing `github-actions[bot]` signing config.
+  - Verify every `uses:` line remains pinned to a full-length commit SHA with the action+version comment above (AGENTS.md GitHub-Actions-pinning rule).
+- 15.4 Dry-run release-please locally to validate the rewritten config:
+
+  ```sh
+  npx -y release-please@16 release-pr --dry-run \
+    --token "$(gh auth token)" \
+    --repo-url=https://github.com/patinaproject/skills \
+    --config-file release-please-config.json \
+    --manifest-file .release-please-manifest.json
+  ```
+
+  Expected output: three per-package PR plans (one per package), each producing a tag of the form `<component>-v<X.Y.Z>` (`scaffold-repository-v1.10.1`, etc., assuming there's a `feat:`/`fix:` commit under each path; otherwise the dry-run reports "no release needed" for each, which is also acceptable as a config-validation pass). Record the dry-run output. **If any package's projected tag shape deviates from `<component>-v<X.Y.Z>`, halt and report.**
+
+- 15.5 Commit with: `feat: #58 reconfigure release-please for simple release-type per skill`.
+
+**Files touched in W15:** `release-please-config.json` (rewritten), `.release-please-manifest.json` (rewritten), `.github/workflows/release-please.yml` (edited).
+
+**Verification:**
+
+- `actionlint .github/workflows/release-please.yml` passes.
+- Dry-run output (recorded in W19's verification log) shows three packages, all `release-type: simple`, projected tag shape `<component>-v<X.Y.Z>`.
+- Grep confirms no marketplace.json reference remains in the workflow: `rg -F 'marketplace' .github/workflows/release-please.yml` returns empty.
+
+**Definition of done:** Three-package release-please config in place; manifest seeded; workflow path-updated; dry-run validates; commit landed.
+
+**Risks/rollback:** If the dry-run reveals the tag shape is wrong (e.g. `scaffold-repository-1.10.1` without the `v`, or `scaffold-repository/v1.10.1` instead of the dash), reconfigure the four config knobs until the shape matches. The supplied combination (`tag-separator: "-v"` + `include-component-in-tag: true` + `include-v-in-tag: true` + `component: "<name>"`) is the documented combination that produces `<component>-v<X.Y.Z>`; if release-please's behavior changed between version 16 and a later release, pin the action to an earlier version that emits the expected shape. Rollback: revert the W15 commit to restore the prior `release-type: node` config; the release-please workflow will then fail because `plugins/<name>/package.json` paths no longer exist, so the rollback is effectively chained with W12 revert.
+
+### Workstream 16 — Verify workflow rename (AC-58-3 CI surface; Comment 3220071994)
+
+**Goal:** Rename `.github/workflows/verify-iteration.yml` to `.github/workflows/verify.yml` and update the workflow's top-level `name:` field to `Verify`. The operator's PR #59 comment requested the simpler display name.
+
+**Order rationale:** W16 is independent of W12–W15 (the workflow file location is unrelated to the skills-tree restructure). Runs in parallel.
 
 **Tasks:**
 
-- 4.1 Create `release-please-config.json` describing **three** packages (down from four in the previous plan — no `packages/skills-cli`):
-  - `plugins/scaffold-repository` — release-type `node`, tag prefix `scaffold-repository-`, initial version `1.10.0`.
-  - `plugins/superteam` — release-type `node`, tag prefix `superteam-`, initial version `1.5.0`.
-  - `plugins/using-github` — release-type `node`, tag prefix `using-github-`, initial version `2.0.0`.
+- 16.1 `git mv .github/workflows/verify-iteration.yml .github/workflows/verify.yml`. Rename detection is automatic.
+- 16.2 Edit the workflow's top-level `name:` field. Current value is likely `Verify iteration` (from commit `eee1df4`); rewrite to `Verify`.
+- 16.3 If the workflow body has any internal job names or display strings referencing "verify iteration", clean those up to match. Triage via `rg -F 'verify-iteration' .github/workflows/verify.yml` and `rg -F 'Verify iteration' .github/workflows/verify.yml`.
+- 16.4 Confirm `actionlint .github/workflows/verify.yml` passes.
+- 16.5 If any other workflow references `verify-iteration.yml` by name (e.g. as a `workflow_run` trigger or in a comment), update those references. Check via `rg -F 'verify-iteration' .github/`.
+- 16.6 Update branch-protection settings if applicable: the new workflow's check name may differ from the old one, which can affect required-check rules. Recording this as a post-merge follow-up note (not in scope of the PR itself; the maintainer adjusts branch protection after the rename lands).
+- 16.7 Commit with: `refactor: #58 rename verify-iteration workflow to verify`.
 
-  Top-level options: `"separate-pull-requests": true`, `"plugins": ["node-workspace"]` is **not** required (no workspace deps). Each package declares `extra-files` for the two marketplace manifests so a release for `plugins/<name>` rewrites the matching plugin entry's `ref` to the new `vX.Y.Z` (with the per-package prefix stripped per Gate G1). Use release-please's `json` extra-files schema with a JSONPath like `$.plugins[?(@.name == "<name>")].source.ref`.
-- 4.2 Create `.release-please-manifest.json` with the three packages and their initial versions.
-- 4.3 Create `.github/workflows/release-please.yml`:
-  - Trigger: `push` on `main`.
-  - Step 1: `googleapis/release-please-action` (SHA-pinned per AGENTS.md GitHub-Actions-pinning rule) with the manifest config. Sign commits as `github-actions[bot]`.
-  - Step 2 (only when `scaffold-repository` is among `paths_released`): checkout the release PR branch, run `node scripts/apply-scaffold-repository.js plugins/scaffold-repository`, commit any resulting scaffolding changes onto the same release PR branch with a `chore: #<skip> apply scaffold-repository scaffolding refresh` message (or equivalent under release-please conventions). Push back. (AC-58-5, Gate G3)
-  - Step 3: enable auto-merge with `gh pr merge --auto --squash` on each open release-please PR.
-  - Step 4: run `node scripts/validate-marketplace.js` after release-please mutates manifests and before auto-merge enables.
-- 4.4 Delete `.github/workflows/plugin-release-bump.yml`.
-- 4.5 Rewrite `docs/release-flow.md`:
-  - New lifecycle: release-please opens standing per-package PRs; merging publishes the tag and updates the manifest `ref` via release-please's extra-files step; the scaffold-repository scaffolding refresh continues to land in the same PR for scaffold-repository releases.
-  - Document Gate G1 (tag prefix stripping for manifest writes).
+**Files touched in W16:** `.github/workflows/verify-iteration.yml` (renamed to `verify.yml`), possibly other files under `.github/` that referenced the old name.
+
+**Verification:**
+
+- `test -f .github/workflows/verify.yml && test ! -f .github/workflows/verify-iteration.yml` exits 0.
+- `actionlint` passes on the renamed file.
+- `head -5 .github/workflows/verify.yml` shows `name: Verify`.
+- `rg -F 'verify-iteration' .github/` returns empty (or only matches benign comments that survived).
+
+**Definition of done:** Workflow renamed; display name `Verify`; actionlint clean; commit landed.
+
+**Risks/rollback:** Branch-protection rules pinned to the old check name may temporarily flag the new check as unrecognized; this is a configuration-only follow-up and does not block the PR. Rollback: revert the commit, restoring `verify-iteration.yml`.
+
+### Workstream 17 — scaffold-repository apply script path updates (AC-58-3 check c, AC-58-5 Gate G3)
+
+**Goal:** Update `scripts/apply-scaffold-repository.js` so internal path references switch from `plugins/scaffold-repository/` to `skills/scaffold-repository/`. The script's logic is unchanged; only the source path it reads from updates.
+
+**Order rationale:** W17 depends on W12 (the new path must exist). Independent of W13, W14, W15, W16. Can run in parallel with the others.
+
+**Tasks:**
+
+- 17.1 Inspect `scripts/apply-scaffold-repository.js` for any string literal referencing `plugins/scaffold-repository` or `plugins/scaffold-repository/skills/scaffold-repository`. Use `rg -F 'plugins/scaffold-repository' scripts/apply-scaffold-repository.js`.
+- 17.2 For each match, decide: is this the source-of-truth path the script reads (rewrite to `skills/scaffold-repository`) or a generic reference for documentation purposes (preserve only if explicitly historical)? Replace each path literal with `skills/scaffold-repository`.
+- 17.3 If the script accepts a CLI argument for the package directory (e.g. `node apply-scaffold-repository.js <path>`), confirm the default value updates from `plugins/scaffold-repository` to `skills/scaffold-repository`. Update the `--help` text accordingly.
+- 17.4 Update pnpm scripts in root `package.json` if they hard-code the old path. The relevant scripts are `apply:scaffold-repository` and `apply:scaffold-repository:check`. Rewrite each from `node scripts/apply-scaffold-repository.js plugins/scaffold-repository` (or similar) to `node scripts/apply-scaffold-repository.js skills/scaffold-repository`.
+- 17.5 Verify by running: `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check`. Exit 0 means the apply is idempotent against the current tree (which has already absorbed the prior self-apply baseline in commit `8ec0a33` plus follow-ups). If the exit is non-zero, the script may have legitimate scaffolding drift to land — read the script output and decide whether to apply (re-run without `--check`) or to investigate. In normal cases the `--check` exits 0.
+- 17.6 Update `.github/workflows/release-please.yml` reference to the script's input path. This was started in W15.3 but is the executor's natural co-edit with W17: confirm the workflow's invocation reads `node scripts/apply-scaffold-repository.js skills/scaffold-repository` (matching the pnpm script).
+- 17.7 Commit with: `fix: #58 update scaffold-repository apply paths for flat layout`.
+
+**Files touched in W17:** `scripts/apply-scaffold-repository.js`, `package.json` (script aliases), `.github/workflows/release-please.yml` (if not already covered by W15).
+
+**Verification:**
+
+- `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` exits 0.
+- `pnpm apply:scaffold-repository:check` exits 0 (same effect via the alias).
+- `rg -F 'plugins/scaffold-repository' scripts/apply-scaffold-repository.js package.json .github/workflows/release-please.yml` returns empty.
+
+**Definition of done:** Script accepts the new path; `--check` mode exits 0; pnpm aliases updated; commit landed.
+
+**Risks/rollback:** If `--check` reveals drift, the script may want to write to the new path with content that differs from what the prior self-apply baseline (against the old path) committed. Triage on a case-by-case basis. The expected case is that the scaffold-managed files moved with the directory (W12) and the script sees them as identical post-rewrite. Rollback: revert the commit to restore the old path references; the release-please workflow then fails on the path-check (chain rollback with W15 and W12).
+
+### Workstream 18 — Documentation sweep (AC-58-1, AC-58-2, AC-58-4, AC-58-6, AC-58-8)
+
+**Goal:** Rewrite `README.md`, `AGENTS.md`, `CLAUDE.md`, `docs/release-flow.md`, `docs/file-structure.md`, and `docs/wiki-index.md` for the flat layout. Update markdownlint glob excludes if any pointed at deleted paths. Remove all references to plugin wrappers, marketplace catalogs, per-skill `package.json`, and the host-native marketplace-add install path. Add a migration history entry under `docs/file-structure.md` recording delta 4.
+
+**Order rationale:** W18 depends on W12–W17 because it references the final shapes those workstreams establish. Sequencing W18 last in the per-workstream commit chain keeps each prior workstream commit reviewable in isolation; W18 then sweeps the docs in one coherent pass.
+
+**Tasks:**
+
+- 18.1 Rewrite `README.md`:
+  - Install section: only documented install path is `npx skills@1.5.6 add patinaproject/skills@<name> --agent <agent> -y`. Show one command per skill (five total). Use the `npm_config_ignore_scripts=true` env-var prefix as the default form. Document the pinned vercel-labs CLI version (`1.5.6`) and the upstream URL (`https://github.com/vercel-labs/skills`).
+  - Remove the host-native marketplace fallback section entirely (the `/plugin marketplace add patinaproject/skills` and `codex plugin marketplace add` paths). The marketplace catalog is gone.
+  - Document the clone-and-copy fallback for users who distrust the npm-distributed CLI: clone the repo, copy `skills/<name>/SKILL.md` (plus any supporting files) into the agent's skill directory. This is the supply-chain rollback recorded in the design's Risks section.
+  - Document the `#<git-ref>` tag-pin syntax: `npx skills@1.5.6 add patinaproject/skills@scaffold-repository#scaffold-repository-v1.10.1 ...` for users who want a pinned version. Note that consumers pass the full prefixed tag (per Gate G1's removal — no stripping).
+  - Add a "Local iteration" subsection pointing at `scripts/verify-dogfood.sh` and `scripts/apply-scaffold-repository.js --check` as the contributor verification commands.
+- 18.2 Rewrite `AGENTS.md` "Plugin Releases" section (currently it documents the marketplace + dispatch flow):
+  - Rename the section to "Skill Releases" (the term "plugin" is obsolete here since we don't carry plugin wrappers anymore).
+  - Describe release-please with `release-type: simple` per skill, tag shape `<component>-v<X.Y.Z>`, three packaged skills (`scaffold-repository`, `superteam`, `using-github`), two standalone skills (`find-skills`, `office-hours`) that are versioned outside release-please. Reference the rewritten `docs/release-flow.md` for the full detail.
+  - Remove references to plugin wrappers, marketplace.json, plugin manifests (`.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`).
+  - Update the "source-of-truth boundary" line to: "This repo's `skills/<name>/` owns each skill for `name ∈ {scaffold-repository, superteam, using-github, find-skills, office-hours}`. Standalone skills (`find-skills`, `office-hours`) are not release-please packages."
+  - Update the "Plugin folder lowercase names" rule if any text in AGENTS.md is now wrong (we removed plugin wrappers, so this rule is moot — but the related rule about "Use lowercase names for skill folders" should remain, just rephrased).
+  - Keep the GitHub Actions pinning rule, the issue-tag rule, the commitlint rule, the labels rule, the `.github/` templates rule, the testing-guidelines rule.
+- 18.3 Update `CLAUDE.md`:
+  - Confirm it still imports `AGENTS.md` correctly. The current `CLAUDE.md` reads `@AGENTS.md` plus project-Claude-specific guidance below. Verify the import line survives any prior delta.
+  - Update any path references (e.g. `.claude/skills/` references to in-repo skill locations) if present.
+- 18.4 Rewrite `docs/release-flow.md` for the new release model:
+  - Replace the prior content (release-please node + marketplace rewrites + dispatch workflow) with:
+    1. Release model: per-skill release-please with `release-type: simple`.
+    2. Tag shape: `<component>-v<X.Y.Z>` for the three packaged skills.
+    3. Consumer pin syntax: `npx skills@1.5.6 add patinaproject/skills@<name>#<full-tag>`.
+    4. Standalone-skill resolution: `npx skills add patinaproject/skills@<name>` (no `@<ref>` qualifier) resolves to default-branch HEAD; consumers wanting a pinned version pass `#<git-ref>`. This applies to `find-skills` and `office-hours`.
+    5. The vercel-labs CLI version pin (`1.5.6` at time of writing); bumping the CLI version requires re-running `bash scripts/verify-dogfood.sh` plus a representative `npx skills add` smoke before the bump merges.
+    6. Auto-merge: release-please PRs auto-merge after required CI checks pass; preserve the existing `github-actions[bot]` signing and the AGENTS.md `release-please--*` no-issue exemption (already in place).
+    7. Scaffold self-apply (Gate G3): the release-please workflow invokes `node scripts/apply-scaffold-repository.js skills/scaffold-repository` when `paths_released` contains `skills/scaffold-repository`; the resulting scaffolding refresh lands on the same release-please PR branch in the same workflow run.
+    8. Supply-chain fallback: clone-and-copy from `skills/<name>/SKILL.md` if the upstream CLI is unavailable or distrusted.
   - Remove the cross-repo dispatch section and the "required setup in each member plugin repo" section entirely.
-  - Add `release-please--*` to the no-issue-tag exemption list alongside `bot/bump-*`.
-  - Document the vercel-labs CLI version pin (`skills@1.5.6` at the time of this revision) and the rule that bumping the CLI version requires re-running `scripts/verify-dogfood.sh` and the W3 check-a `npx skills` install before merging.
-  - Document the standalone-skill resolution behavior per design's "Standalone skills" subsection: `npx skills add patinaproject/skills@<name>` (no `@<ref>` qualifier) resolves to default-branch HEAD; consumers wanting a pinned version pass `#<git-ref>`.
-- 4.6 Update `AGENTS.md`:
-  - Add `release-please--*` to the no-issue PR exemption list.
-  - Update the "Plugin Releases" section to describe release-please as the mechanism (replace the `repository_dispatch` paragraph) and to enumerate the renamed plugin (`scaffold-repository`, not `bootstrap`).
-  - Update the source-of-truth boundary to "this repo's `plugins/<name>/` owns the package for `name ∈ {scaffold-repository, superteam, using-github}`; standalone skills (currently `office-hours`) own themselves at `.agents/skills/<name>/`."
+- 18.5 Rewrite `docs/file-structure.md` for the flat layout:
+  - Top-level layout diagram matches the design's "Proposed file layout" section.
+  - Document the dogfood overlay: `.claude/skills/<name>/` and `.agents/skills/<name>/` are committed symlinks pointing at `../../skills/<name>/`; the five overlay symlinks are tracked via the `.gitignore` allowlist pattern.
+  - Document the clone-time symlink requirement on Windows: `git config core.symlinks true` (admin shell required); fall back to WSL for contributors who can't enable it. Note that POSIX hosts (Linux, macOS) handle this transparently.
+  - Add a "Migration history" section recording the three events for `scaffold-repository`, the two events for `superteam` and `using-github`, and the two events for `office-hours`:
+    - Subtree imports (commits `912d6d9`, `028165e`, `54157bc`).
+    - Rename for the scaffold skill (commit `794e199`).
+    - Flatten for the three packaged skills + the two standalone skills (the W12.9 commit SHA, recorded by Executor at the time the commit lands).
+    - office-hours port (commit `fab5458`, source `patinaproject/patinaproject` PR #1143 head SHA `02e6ebbdbef123bbeb211fad06aa86bd5e33528a`, post-flatten path `skills/office-hours/SKILL.md`).
+    - Note that the upstream `patinaproject/bootstrap`, `patinaproject/superteam`, and `patinaproject/using-github` repos remain archived as the byte-for-byte references for pre-flatten audits.
+- 18.6 Rewrite `docs/wiki-index.md` for the flat layout:
+  - Update path references from `plugins/<name>/skills/<name>/SKILL.md` (and from pre-flatten `.agents/skills/<name>/SKILL.md`) to `skills/<name>/SKILL.md` throughout.
+  - Remove any "plugin marketplace add" install instructions; replace with `npx skills` invocations.
+  - Add the `Skill-office-hours-usage` page entry if it isn't already there from prior deltas (commit `cc77a14` added the initial wiki-index; verify the office-hours row is present, add if missing).
+  - The actual wiki publication is deferred to post-merge (per Gate G5). The in-repo `wiki-index.md` documents the wiki's canonical surface.
+- 18.7 Update `.github/workflows/markdown.yml` if its glob excludes reference deleted paths. Commit `2291f02` restored vendor-ignore patterns for the prior plugin scaffolding; review and trim any patterns that now point at deleted paths (`plugins/*/.husky`, `plugins/*/node_modules`, etc.). Add patterns for any new ignored locations if needed.
+- 18.8 Commit with: `docs: #58 sweep documentation for flat-skills layout`.
 
-**Files touched:** `release-please-config.json` (new), `.release-please-manifest.json` (new), `.github/workflows/release-please.yml` (new), `.github/workflows/plugin-release-bump.yml` (deleted), `docs/release-flow.md` (rewritten), `AGENTS.md` (updated).
-
-**Verification:**
-
-- `actionlint` passes on the new workflow.
-- Dry-run release-please locally: `npx release-please --dry-run release-pr --config-file release-please-config.json --manifest-file .release-please-manifest.json` lists the expected three per-package PRs (no `packages/skills-cli` row).
-- The validator runs at the right step and the workflow is pinned with SHA + comment per AGENTS.md GitHub-Actions-pinning rule.
-
-**Definition of done:** New workflow file landed with SHA-pinned actions, old workflow removed, docs updated, conventional commit `feat: #58 replace dispatch workflow with release-please releases`.
-
-**Risks/rollback:** If release-please mis-rewrites a `ref`, manifests are caught by `validate-marketplace.js` in CI. Manual rollback: revert the workflow change commit and restore `plugin-release-bump.yml` from `e97f4eb` (the most recent main commit that has it).
-
-### Workstream 5 — vercel-labs `skills` CLI integration (AC-58-4; depends on W2, W10)
-
-**Goal:** Document `npx skills@1.5.6 add patinaproject/skills@<plugin>` as the primary install entry point for each of the four marketplace-distributed skills (`scaffold-repository`, `superteam`, `using-github`, plus `find-skills` which uses the same CLI against `vercel-labs/skills`) and for the standalone `office-hours` skill. Update README and both marketplace manifest descriptions. **No new package, no `bin`, no `npm publish` step.**
-
-**Gate G6 is closed** (per design's resolution). No `npm view skills` check is required; the vercel-labs CLI is already adopted by name.
-
-**Tasks:**
-
-- 5.1 Update root `README.md`:
-  - "Install" section: list the pinned `npx skills@1.5.6 add patinaproject/skills@<plugin> --agent <agent> -y` invocation as the primary path, with `--ignore-scripts` via env var (`npm_config_ignore_scripts=true`) as the default form per design's supply-chain bullet (b). Show one command per plugin and one for `office-hours` standalone.
-  - Keep host-native fallbacks documented (`/plugin marketplace add patinaproject/skills` for Claude, `codex plugin marketplace add patinaproject/skills --ref vX.Y.Z` for Codex).
-  - Add a "Local iteration" subsection pointing at W3's check a (CLI dry-run / install-to-scratch), check b (validator dev mode), check c (`apply-scaffold-repository.js`), check d (dogfood script).
-  - Document the vercel-labs CLI upstream URL (`https://github.com/vercel-labs/skills`) and the pinned version (`1.5.6`) per the supply-chain notes.
-  - Document the standalone-skill resolution behavior (no `@<ref>` → default-branch HEAD; `#<git-ref>` → pinned).
-- 5.2 Update both marketplace manifest descriptions (the three plugin-entry `description` fields in each manifest) to point at `npx skills@1.5.6 add patinaproject/skills@<slug>` for first-time install and to link the wiki page (W7) for the per-plugin usage walkthrough. Match the slug exactly: `scaffold-repository` / `superteam` / `using-github`.
-- 5.3 No `packages/skills-cli/` directory is created. No `bin` is added. No `npm publish` step is added to the release-please workflow. The release-please config in W4 has three packages; this workstream does not modify it.
-- 5.4 Record the CLI version pin in `docs/release-flow.md` (covered by W4.5 above; W5 references that as the source of truth so the README and the release-flow doc do not drift). The release-flow doc gates a CLI-version bump on re-running W3 check a and W11's dogfood script.
-
-**Files touched:** `README.md`, `.agents/plugins/marketplace.json` (description-field edits only), `.claude-plugin/marketplace.json` (description-field edits only).
+**Files touched in W18:** `README.md`, `AGENTS.md`, `CLAUDE.md`, `docs/release-flow.md`, `docs/file-structure.md`, `docs/wiki-index.md`, `.github/workflows/markdown.yml`.
 
 **Verification:**
 
-- `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code --dry-run` (or the chosen falsifiable form from W3.3 check a) exits 0 against this branch.
-- The same against `superteam`, `using-github`, `find-skills`, and `office-hours` all exit 0. (For `find-skills`, the source repo is `vercel-labs/skills`, not `patinaproject/skills` — Executor verifies the README command line is correct for that case.)
-- README's install snippet copy-pastes cleanly into a fresh shell (no broken backticks, correct env-var prefix order).
+- `pnpm lint:md` passes against the rewritten docs.
+- `rg -F 'plugins/scaffold-repository' README.md AGENTS.md CLAUDE.md docs/` returns empty (or only matches historical migration-history rows, which is intended).
+- `rg -F 'marketplace.json' README.md AGENTS.md docs/` returns empty.
+- `rg -F '/plugin marketplace add' README.md AGENTS.md docs/` returns empty (host-native install path removed).
+- The migration history section in `docs/file-structure.md` lists all the commits referenced in the design's "Migration approach" section.
 
-**Definition of done:** Install docs match the design; conventional commit `docs: #58 adopt vercel-labs skills CLI as primary install path`.
+**Definition of done:** Docs sweep covers all six files; markdownlint clean; commit landed.
 
-### Workstream 6 — `scripts/apply-scaffold-repository.js` (AC-58-3 check c, AC-58-5; depends on W9)
+**Risks/rollback:** Docs drift is a soft failure (CI lint catches it). Rollback: revert the commit; prior versions of these docs remain on `main` history.
 
-The skeleton from Workstream 3 (previous plan W3.1) is fleshed out here into the production version invoked by release-please. **Renamed throughout** from `apply-bootstrap.js`.
+### Workstream 19 — Final verification pass (cross-AC verification + final commit)
 
-**Tasks:**
+**Goal:** Run the canonical pre-publish verification suite against the post-W12-through-W18 tree and record evidence. Cover every AC's falsifiable check.
 
-- 6.1 Read `plugins/scaffold-repository/skills/scaffold-repository/SKILL.md` to derive the apply steps the scaffold-repository skill itself defines.
-- 6.2 Implement each apply step against the current repo (commitlint config, husky hooks, issue/PR templates, etc.) without making outbound network calls. Use only local file operations and `pnpm` invocations that hit the local store.
-- 6.3 Add a `--check` mode that diffs the apply result against the current tree and exits non-zero if there are changes (useful for CI assertion that scaffolding is in sync).
-- 6.4 Add `pnpm` script: `apply:scaffold-repository` and `apply:scaffold-repository:check`. **Do not preserve** the prior `apply:bootstrap` / `apply:bootstrap:check` shorthands; the rename is complete.
-
-**Files touched:** `scripts/apply-scaffold-repository.js` (new), `package.json`.
-
-**Verification:** `node scripts/apply-scaffold-repository.js plugins/scaffold-repository` exits 0 with no network calls (the script asserts it never spawns `git`/`curl`/`fetch` / network-bound `npm install`). `--check` exits 0 when scaffolding is in sync.
-
-**Definition of done:** Script works locally and from CI; release-please workflow invokes it on scaffold-repository releases; conventional commit `feat: #58 implement scaffold-repository self-apply script`.
-
-### Workstream 11 — `scripts/verify-dogfood.sh` and CI wiring (AC-58-3 check d; depends on W10)
-
-**Goal:** Implement the AC-58-3 dogfood verification as a deterministic bash script covering all five in-repo skills (`scaffold-repository`, `superteam`, `using-github`, `find-skills`, `office-hours`) with a branch on plugin-scoped (symlink-traversed) versus standalone (real-file) shape.
-
-**Order rationale:** W11 depends on W10 (the canonical overlay must exist before the script can verify it). W11 is wired into the CI workflow added in W4 (`release-please.yml` runs the validator; the dogfood script joins the same verification surface).
+**Order rationale:** W19 depends on every prior workstream. The final commit (if any work product is produced beyond verification logs) is small and documentary.
 
 **Tasks:**
 
-- 11.1 Implement `scripts/verify-dogfood.sh` with a POSIX-shell-compatible body (use `#!/usr/bin/env bash` and rely on bash 4+ for arrays). Algorithm:
-  - Define the five skill names in an array: `SKILLS=(scaffold-repository superteam using-github find-skills office-hours)`.
-  - For each skill `<name>`:
-    1. Assert `.claude/skills/<name>/SKILL.md` exists and resolves through symlinks: `test -e .claude/skills/<name>/SKILL.md || fail`. Reject broken symlinks explicitly: `if [ -L "$f" ] && [ ! -e "$f" ]; then fail; fi`.
-    2. Read the first ~20 lines of the resolved file and assert the YAML frontmatter has `name:` and `description:` keys among the first two non-delimiter keys. Use `awk` or `sed` to parse — no Python/Node dependency.
-    3. Assert the `name:` value matches `<name>` (so `name: scaffold-repository` under `.claude/skills/scaffold-repository/`, etc.). This catches the rename-correctness end-to-end.
-    4. Branch on shape:
-       - For `name ∈ {scaffold-repository, superteam, using-github}` (plugin-scoped): assert the symlink chain `.claude/skills/<name>` → `.agents/skills/<name>` → `plugins/<name>/skills/<name>` resolves at each hop. Use `readlink` for the per-hop target and `realpath` for the final resolution.
-       - For `name == find-skills`: assert `.claude/skills/find-skills` → `.agents/skills/find-skills` and `.agents/skills/find-skills/SKILL.md` is a real file (not a symlink). Use `test -L` on the canonical entry and assert the negation: `! test -L .agents/skills/find-skills/SKILL.md`.
-       - For `name == office-hours`: same as `find-skills` — one symlink hop at the Claude layer, real file at the canonical layer. Use `! test -L .agents/skills/office-hours/SKILL.md`.
-  - On any assertion failure, print a clear `FAIL: <reason>` line and exit non-zero. On full success, print `OK: all five skills discoverable` and exit 0.
-- 11.2 Make the script executable (`chmod +x scripts/verify-dogfood.sh`).
-- 11.3 Add a `pnpm` script alias: `verify:dogfood` → `bash scripts/verify-dogfood.sh`.
-- 11.4 Wire into CI alongside the other AC-58-3 checks. The most natural home is a new workflow `.github/workflows/verify-iteration.yml` (referenced in the design's "Proposed file layout") that runs on PRs touching `.claude/skills/**`, `.agents/skills/**`, or `plugins/*/skills/**`. The workflow runs:
-  1. `node scripts/validate-marketplace.js` (release mode).
-  2. `node scripts/validate-marketplace.js --dev`.
-  3. `node scripts/apply-scaffold-repository.js plugins/scaffold-repository` (smoke).
-  4. `bash scripts/verify-dogfood.sh`.
-  5. The W3 check-a CLI install dry-run for one representative skill (`scaffold-repository`) and one standalone (`office-hours`), as a budget-conscious sample of the install surface. (Running the dry-run against all five every PR is unnecessary churn; the dogfood script already proves discoverability of all five.)
-- 11.5 SHA-pin every action `uses:` line in `verify-iteration.yml` per AGENTS.md.
+- 19.1 `pnpm install` — exits 0; Husky hooks initialized.
+- 19.2 `pnpm lint:md` — exits 0; markdownlint clean against the rewritten docs.
+- 19.3 `actionlint .github/workflows/*.yml` — exits 0; every workflow valid.
+- 19.4 `bash scripts/verify-dogfood.sh` — exits 0; AC-58-3 dogfood check passes for all five skills.
+- 19.5 `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` — exits 0; AC-58-3 falsifiable check (a) (scaffold idempotent against current tree).
+- 19.6 SHA round-trip evidence: `sha256sum skills/superteam/SKILL.md` equals `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356` (AC-58-7). Confirm `docs/superpowers/plans/.artifacts/sha256-post.txt` records the same value (W12.7 should have already updated this).
+- 19.7 AC-58-1 falsifiable checks: `find . -name plugin.json -not -path './node_modules/*' -not -path './.git/*'` returns empty; `find skills -maxdepth 2 -name SKILL.md | sort` returns exactly five paths; `git log --follow skills/superteam/SKILL.md` shows blame survives.
+- 19.8 AC-58-2 falsifiable check: `find . -name 'marketplace*.json' -not -path './node_modules/*' -not -path './.git/*'` returns empty.
+- 19.9 AC-58-4 falsifiable check: dry-run an `npx skills add` against the current branch from a temporary directory. This requires the repo's branch to be either pushed to the remote, or the CLI's `git+file://` source mode to be used; document the chosen form. If the CLI doesn't support a falsifiable dry-run for unreleased branches, defer the live install verification to post-merge (when the tag exists) and record this in the PR body. The pre-merge confidence comes from W14's dogfood script proving the canonical-home `SKILL.md` files exist with the right frontmatter — which is exactly what the CLI's `<owner/repo@skill>` resolver consults.
+- 19.10 AC-58-5 falsifiable check: re-run W15.4's release-please dry-run; confirm it lists three packages and projected tag shapes `<component>-v<X.Y.Z>`.
+- 19.11 If any verification step reveals a missed edit (e.g. a stray plugin-wrapper reference in a doc, a path mismatch in `package.json`, a markdownlint failure), land the fix as part of this workstream's commit. Examples of edits the executor may need to land here:
+  - Re-running `pnpm install` to refresh `pnpm-lock.yaml` if the package.json script edits in W17 perturbed it (no-op in the common case).
+  - Adjusting any test or CI step that referenced the deleted `validate-marketplace.js` script (verify CI on the renamed `verify.yml` doesn't try to invoke it).
+- 19.12 Commit any needed fixes plus the verification-log artifact (if Executor wants to record the dry-run output for posterity) with: `chore: #58 final verification pass for flat-skills restructure`. If no fixes are needed, the verification log alone is the commit body (referenced from the PR body).
 
-**Files touched:** `scripts/verify-dogfood.sh` (new), `package.json` (script alias), `.github/workflows/verify-iteration.yml` (new).
+**Files touched in W19:** Whatever the verification surfaces. In the no-issue case, only the verification log is added (Executor's discretion whether to commit it as an artifact under `docs/superpowers/plans/.artifacts/` or to record output in the PR body).
 
-**Verification:**
+**Verification:** Itself — the entire workstream is verification. Pass criterion: every command above exits 0 (or the deferred-verification path is documented for AC-58-4's live-install case).
 
-- `bash scripts/verify-dogfood.sh` exits 0 against the post-W10 tree.
-- Temporarily break a symlink (e.g. `rm .claude/skills/scaffold-repository && ln -s /nonexistent .claude/skills/scaffold-repository`) and assert the script exits non-zero. Restore.
-- Temporarily edit `.agents/skills/office-hours/SKILL.md` frontmatter `name: office-hours` → `name: wrong-name` and assert non-zero exit. Restore.
-- `actionlint` passes on the new workflow.
+**Definition of done:** All pre-publish checks pass; any incidental fixes committed; PR is ready for Reviewer → Finisher.
 
-**Definition of done:** Script handles plugin-scoped and standalone cases; CI workflow exercises all four AC-58-3 checks; conventional commit `feat: #58 add dogfood verification script and CI wiring`.
-
-### Workstream 7 — Wiki migration and docs trim (AC-58-6; depends on W4, W5, W10)
-
-**Goal:** Publish wiki pages first, then trim repo docs. Provide redirects via links so no content disappears.
-
-**Order is load-bearing — publish before delete.**
-
-**Tasks:**
-
-- 7.1 Inventory content slated to move (from the upstream `README.md`s for each plugin, plus install walkthroughs and troubleshooting). List in `docs/wiki-index.md` with target wiki page names.
-- 7.2 Publish each wiki page on `patinaproject/skills.wiki` with the content from the upstream `README.md`s and the design's "Move to wiki" list:
-  - `Install-Claude-Code`
-  - `Install-Codex`
-  - `Skill-scaffold-repository-usage` (renamed from the pre-delta plan's `Skill-bootstrap-usage`)
-  - `Skill-superteam-usage`
-  - `Skill-using-github-usage`
-  - `Skill-office-hours-usage` (new — standalone skill; per AC-58-6 amendment, this page covers Startup-mode vs. Builder-mode entry points, lifts the trigger summary from the SKILL.md description, and links to `.agents/skills/office-hours/SKILL.md` as the source of truth. The wiki page does **not** repeat the SKILL.md body.)
-  - `Troubleshooting`
-  - `How-Superteam-Runs-End-To-End`
-- 7.3 Update `README.md` to point at the wiki pages.
-- 7.4 Update both marketplace manifest descriptions to link to the relevant wiki page per plugin. Standalone-skill pages (office-hours) are linked from `README.md` only — marketplace manifests don't carry an office-hours entry per W2.
-- 7.5 Trim `docs/` to: `AGENTS.md`-related content stays in root (`AGENTS.md`, `CLAUDE.md`), `docs/release-flow.md` (rewritten in W4), `docs/file-structure.md` (rewritten — new layout, canonical overlay, symlink hygiene, Gate G2 result), `docs/wiki-index.md`, `docs/superpowers/specs/`, `docs/superpowers/plans/`.
-- 7.6 Update each `plugins/<name>/README.md` so it is a thin pointer to the relevant wiki page rather than carrying duplicate content. Keep the file present so npm/codex marketplace listings don't 404 on README lookups. For `scaffold-repository`, the pointer references the renamed wiki page.
-
-**Files touched:** `README.md`, `docs/wiki-index.md` (new), `docs/file-structure.md`, `docs/release-flow.md`, `plugins/*/README.md`, marketplace manifests.
-
-**Verification:**
-
-- `markdownlint-cli2` passes (`pnpm lint:md`).
-- Every wiki page named in `docs/wiki-index.md` exists on the published wiki (manual check by Executor; record URLs in PR body).
-- `README.md` links to the wiki and to the pinned `npx skills@1.5.6` install commands.
-- The office-hours wiki page links to `.agents/skills/office-hours/SKILL.md` rather than duplicating its body.
-
-**Definition of done:** Wiki published, repo docs trimmed, conventional commit `docs: #58 migrate user docs to wiki and trim docs/`.
-
-### Workstream 8 — Migration history record (AC-58-8; depends on W1, W9, W10)
-
-**Goal:** Record the merge choice and upstream-archive plan in-repo so future contributors can recover the source history. Cover **both** the subtree imports and the in-tree rename / standalone-skill port events.
-
-**Tasks:**
-
-- 8.1 Add (or update — commit `89d8f1c` already added some content) a `Migration history` section in `docs/file-structure.md` recording:
-  - The `git subtree add` command sequence used (W1).
-  - The three upstream tags imported (`bootstrap@v1.10.0`, `superteam@v1.5.0`, `using-github@v2.0.0`) and the three import commit SHAs (`912d6d9`, `028165e`, `54157bc`).
-  - **The bootstrap → scaffold-repository rename event**: the `git mv plugins/bootstrap plugins/scaffold-repository` commit (W9.7) recorded with its SHA. Note that upstream `patinaproject/bootstrap` is unchanged and remains the byte-for-byte reference for pre-rename audits.
-  - **The office-hours port event**: source repo `patinaproject/patinaproject`, source PR #1143, source head SHA `02e6ebbdbef123bbeb211fad06aa86bd5e33528a`, target path `.agents/skills/office-hours/SKILL.md`, port commit SHA (recorded by Executor at W10.4 land). Mirror the design's "Ported skills" catalog table for in-repo cross-reference.
-  - The decision to archive (not delete) the upstream repos.
-  - The expected archival timeline ("at least one release cycle after consolidation," per design).
-- 8.2 Open a tracking issue (or annotate the existing #58) noting which upstream repos still need to be archived and when. Executor does this *after* the PR for #58 merges; do not pre-archive.
-
-**Files touched:** `docs/file-structure.md`.
-
-**Verification:** Migration history section present; lists three subtree-import commits + one rename commit + one port commit; names the merge mechanism per source.
-
-**Definition of done:** Conventional commit `docs: #58 record subtree-merge, rename, and office-hours port migration history`.
+**Risks/rollback:** A failure in W19 indicates a missed edit earlier in the chain. Rollback the offending workstream, fix, re-run W19. If a failure is structural (e.g. release-please dry-run reveals the tag shape is wrong), halt and escalate — the design's Gate G1 assumption is broken and the operator must redirect.
 
 ## Workstream dependency graph
 
 ```text
-W1 (subtree merge; DONE)
-   │
-   v
-W9 (rename bootstrap -> scaffold-repository)
-   │
-   v
-W2 (manifests + validator)
-   │
-   ├──> W3 (AC-58-3 docs)
-   │
-   ├──> W4 (release-please) ──> W7 (wiki migration)
-   │       (uses W6)               │
-   │                               v
-   ├──> W6 (apply-scaffold-repository)   W8 (migration record)
-   │
-   ├──> W10 (canonical overlay) ──> W11 (verify-dogfood + CI)
-   │       (uses W9; ports office-hours)
-   │
-   └──> W5 (vercel-labs CLI integration; uses W10)
+W12 (flat-mv, deletions, SHA round-trip) ─┬─> W13 (overlay symlinks + .gitignore) ─┬─> W14 (verify-dogfood rewrite) ─┐
+                                          │                                         │                                  │
+                                          ├─> W17 (apply-scaffold path updates) ────┤                                  │
+                                          │                                         │                                  │
+                                          └─> W15 (release-please simple) ──────────┤                                  ├─> W19 (final verify)
+                                                                                    │                                  │
+            W16 (verify.yml rename) ──────────────────────────────────────────────  │                                  │
+                                                                                    │                                  │
+            W18 (docs sweep) ───────────────────────────────────────────────────────┘                                  │
+                                                                                                                       │
+                                                                                                                       └─> Reviewer → Finisher
 ```
 
-W3, W4, W6, W10, W11 may proceed in parallel once W2 lands (W9 is a hard prerequisite for W2). W5 depends on W10 because the install commands assume the canonical overlay exists for fresh-clone dogfood. W7 depends on W4 (release-please publishes the renamed slug; wiki must mirror) and on W5 (README install commands referenced from the wiki).
+W13, W15, W16, W17 can proceed in parallel once W12 lands. W14 depends on W13 (overlay symlinks must exist). W18 sweeps last among the per-workstream commits because it references every prior shape. W19 is the cross-cutting verification.
 
 ## AC traceability
 
-| AC | Workstreams |
+| AC | Workstreams (post-delta-4) |
 | --- | --- |
-| AC-58-1 | W1 (DONE; subtree imports), W9 (rename), W10 (canonical overlay + office-hours port) |
-| AC-58-2 | W2.1, W2.2 |
-| AC-58-3 | W3.3, W3.4 (check b Codex verification), W6 (check c), W11 (check d dogfood); check a is documented in W3.3 and verified in W11's CI wiring (W11.4 step 5) |
-| AC-58-4 | W5.1–W5.4 |
-| AC-58-5 | W4.1–W4.6, W6.1–W6.4 (Gate G3 path) |
-| AC-58-6 | W7.1–W7.6, Gate G5 (extended with the office-hours wiki page) |
-| AC-58-7 | W1 (DONE; SHA-256 round-trip for `superteam` already recorded under `docs/superpowers/plans/.artifacts/`); W9 explicit exemption for `scaffold-repository` SKILL.md |
-| AC-58-8 | W1 mechanism choice (DONE), W9.7 rename commit recorded, W10.4 office-hours port commit recorded, W8.1 narrative |
+| AC-58-1 | W12.1–W12.6 (flat `skills/`, plugin wrappers + marketplace catalog + per-plugin `package.json` deleted) |
+| AC-58-2 | W12.6 (marketplace catalog + validator deletion) |
+| AC-58-3 | W13 (overlay symlinks) + W14 (verify-dogfood rewrite); AC-58-3 check (a) ATDD live-install is W18 README documentation + W19.9 falsifiable check |
+| AC-58-4 | W18.1 (README rewrite — `npx skills` only, no marketplace fallback) |
+| AC-58-5 | W15 (release-please `release-type: simple`); W17 (scaffold apply path updates); W19.10 (release-please dry-run) |
+| AC-58-6 | W18.5 (`docs/file-structure.md` rewrite) + W18.6 (`docs/wiki-index.md` rewrite); actual wiki publication remains post-merge per Gate G5 |
+| AC-58-7 | W12.7 (SHA-256 round-trip; pre-flatten value `87867b66...` must equal post-flatten value) |
+| AC-58-8 | W12.1–W12.5 (`git mv` chain preserves blame and SHA) + W18.5 (migration history entry under `docs/file-structure.md`) |
 
-## ATDD verification (AC-58-3 falsifiable checks)
+## ATDD verification (AC-58-3 falsifiable checks, post-delta-4 shape)
 
-The Executor must include the following commands in CI (`.github/workflows/verify-iteration.yml`, established by W11.4):
+The four AC-58-3 falsifiable checks collapse to two after delta 4 (the validator dev/release modes go away with the marketplace catalog). Recorded in `README.md` and exercised in CI via the renamed `verify.yml` workflow.
 
-### Check a — vercel-labs CLI resolves an in-repo skill (exit 0)
+### Check a — vercel-labs CLI install (live, deferred to post-merge for the published tag)
 
 ```sh
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code --dry-run
+npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code -y
 echo "exit=$?"
 ```
 
-Pass criterion: exit code 0. The chosen falsifiable form (`--dry-run`, or `--prefix /tmp/scratch`, or whichever the pinned CLI version actually supports) is documented in `README.md`; Executor selects the most deterministic form during W3.3 and locks it into both the README and the CI workflow.
+Pass criterion: exit code 0. The chosen falsifiable form (`-y` against a tag; or `--dry-run` if the pinned CLI version supports it; or against `--prefix /tmp/skills-dryrun` to avoid mutating the host's skill dir) is documented in `README.md`. Pre-merge, the W14 dogfood script provides indirect confidence: the canonical-home `SKILL.md` files exist with the right frontmatter, which is exactly what the CLI's resolver consults.
 
-### Check b — validator accepts dev overlay and rejects it in release mode
-
-```sh
-node scripts/validate-marketplace.js --dev    # must exit 0
-# Move overlay to a release-eligible path and assert non-zero:
-cp .claude-plugin/marketplace.local.json plugins/scaffold-repository/marketplace.local.json
-! node scripts/validate-marketplace.js        # expect non-zero
-rm plugins/scaffold-repository/marketplace.local.json
-```
-
-Pass criterion: first command exits 0; the second exits non-zero (negated with `!`).
-
-### Check c — scaffold-repository apply against this repo without network
+### Check b — scaffold-repository apply idempotent (CI on every PR via verify.yml)
 
 ```sh
-node scripts/apply-scaffold-repository.js plugins/scaffold-repository
+node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 echo "exit=$?"
 ```
 
-Pass criterion: exit code 0; the script must not call `git fetch`, `npm install` against the remote registry, or any `curl`/`fetch`. Enforced by the script's own outbound-call guard.
+Pass criterion: exit code 0. The script asserts no outbound network calls (no `git fetch`, no remote `npm install`, no `curl`/`fetch`). Enforced by the script's outbound-call guard.
 
-### Check d — dogfood verification (five skills, branch on shape)
+### Check c — dogfood verification (CI on every PR via verify.yml)
 
 ```sh
 bash scripts/verify-dogfood.sh
 echo "exit=$?"
 ```
 
-Pass criterion: exit code 0. All five skills (`scaffold-repository`, `superteam`, `using-github`, `find-skills`, `office-hours`) must satisfy the four dogfood conditions (file presence, frontmatter shape, name match, target-path correctness for plugin-scoped vs. standalone).
+Pass criterion: exit code 0. All five skills (`scaffold-repository`, `superteam`, `using-github`, `find-skills`, `office-hours`) satisfy the uniform shape: real file at `skills/<name>/SKILL.md`, well-formed YAML frontmatter with `name:` matching `<name>`, and the symlinks at `.claude/skills/<name>/SKILL.md` and `.agents/skills/<name>/SKILL.md` resolve to the same blob.
 
-All four checks must run in CI on every PR that touches `plugins/`, `scripts/`, `.agents/skills/`, `.claude/skills/`, or the manifest files.
+## Risks and blockers (cross-workstream, delta-4 shape)
 
-## Risks and blockers (cross-workstream)
-
-- **G6 closed — supply-chain on vercel-labs CLI.** Adopting an upstream CLI for the primary install path means an unpublish or compromise upstream affects our docs. Mitigations (from design): pin CLI version at invocation; `npm_config_ignore_scripts=true` default; marketplace-add fallback documented; upstream URL recorded in `docs/release-flow.md`. The fallback is an open contractual surface — Executor verifies it works during W3 / W7.
-- **G2 unresolved at runtime against the live Codex CLI.** Could force a manifest schema change late in the flow. Mitigation: W3.4 verifies before W7's wiki content references the path-source convention.
-- **SHA-256 round-trip already passed.** W1.3's check is recorded under `docs/superpowers/plans/.artifacts/` from the prior Executor batch. If a future commit on this branch perturbs `plugins/superteam/skills/superteam/SKILL.md`, the AC-58-7 round-trip would need to be re-asserted. The byte-equivalence guarantee binds `superteam` only; `scaffold-repository`'s SKILL.md is explicitly exempt per the rename (design's AC-58-7 rewrite).
-- **release-please tag-prefix interaction with the validator regex.** Gate G1's choice (strip prefix when writing manifests) means a misconfigured release-please `extra-files` JSONPath could write `scaffold-repository-v1.11.0` into a `ref` field, which the validator would catch. Treat this as fail-fast, not silent.
-- **Canonical-overlay symlinks leaking into a release.** Mitigated by `.gitattributes` `export-ignore` (W10.7), by the release-mode validator's negative check (W2.3), and by the absence of `npm publish` from this repo (Gate G6). Triple defense in depth.
-- **Wiki link rot.** Per Gate G5, the wiki is canonical and `docs/wiki-index.md` is the in-repo index. A future reviewer can run a link-check against the wiki index as a follow-up; not in scope here.
-- **office-hours upstream PR mutation.** The port (W10.4) is byte-for-byte against PR head SHA `02e6ebbdbef123bbeb211fad06aa86bd5e33528a`. If that PR is rebased or force-pushed upstream, the SHA pin survives because Executor records it in the commit message and in W8.1's history record. Re-port (if ever needed) would compare against a new upstream SHA.
-- **Pending W2 stash staleness.** Resolved by the "Pending W2 stash disposition" section above: discard `stash@{0}`, redo W2 from scratch against the renamed plugin.
+- **Release-please `release-type: simple` tag-shape assumption.** The plan assumes the four config knobs (`tag-separator: "-v"` + `include-component-in-tag: true` + `include-v-in-tag: true` + `component: "<name>"`) produce `<component>-v<X.Y.Z>` tags. If release-please version 16 (or whichever version the workflow pins) emits a different shape, halt at W15.4 and report — the design's Gate G1 disposition (consumers pass the full prefixed tag) depends on this exact shape.
+- **SHA-256 round-trip integrity.** W12.7's check is the AC-58-7 GREEN gate. If any editor touched `skills/superteam/SKILL.md` between the `git mv` and the post-flatten SHA check, the round-trip fails and the writing-skills baseline is broken. Mitigation: W12.2 is a pure `git mv` with no follow-on edits; W12.8's internal-link sweep operates on the other two skills' files.
+- **Dogfood symlink portability on Windows.** Committed symlinks require `git config core.symlinks true` on Windows clones. POSIX hosts handle this transparently. Documented in `docs/file-structure.md` (W18.5).
+- **Vercel-labs CLI supply chain.** With the marketplace-add fallback removed (AC-58-2), the npm-distributed CLI is the only documented install path. Mitigations: pin the CLI version at invocation (`skills@1.5.6`); document `npm_config_ignore_scripts=true` as the default; document the clone-and-copy fallback in `README.md` (W18.1).
+- **CI check-name drift after `verify-iteration.yml` → `verify.yml` rename.** Branch-protection rules pinned to the old check name may flag the new check as unrecognized. Recorded in W16.6 as a post-merge configuration follow-up; not in scope of the PR itself.
+- **Third-party skill installs polluting the overlay directories.** The 14 superpowers skills currently sitting untracked become explicitly gitignored after W13.3's allowlist pattern. A future contributor who installs additional third-party skills (e.g. more obra/superpowers entries) sees the CLI write to `.claude/skills/<name>/` and `.agents/skills/<name>/`; those become gitignored by the same pattern automatically. The five in-repo overlay symlinks are explicitly tracked via the negated allowlist entries.
+- **`skills-lock.json` state.** The working tree shows `M skills-lock.json` — the CLI bumped the lockfile during the most recent superpowers install batch. Executor should stage this lockfile update as part of W13's commit (or as a separate small `chore:` commit) so the committed state matches the CLI's expectations after the dogfood overlays are in place. Confirm via `git diff skills-lock.json` what changed before committing.
 
 ## Rollback approach per workstream
 
-- **W1:** (DONE) `git reset --hard` to the pre-merge SHA, recorded in commit `89d8f1c`'s history. Subtree adds remain on the branch; this is the rollback target if any downstream workstream reveals subtree corruption.
-- **W9 (rename):** `git revert` the rename commit. The directory returns to `plugins/bootstrap/`; all downstream workstreams that landed against the renamed slug also revert. Order-sensitive: if W2/W4/W6/W10/W11 have landed, revert them first in reverse order.
-- **W2:** revert the manifest + validator commit; both marketplace manifests still resolve against the upstream tags from the previous main commit if W1 is also reverted, or against `patinaproject/skills` tags (with the renamed slug) if only W2 is reverted.
-- **W3:** revert commit; AC-58-3 doc references revert with it.
-- **W4:** revert the workflow commit and restore `plugin-release-bump.yml` from commit `e97f4eb`. The cross-repo dispatch in the three upstream repos continues to function until those repos are archived.
-- **W5:** revert README and marketplace-description edits. The `npx skills@1.5.6 add patinaproject/skills@<plugin>` command still works against the repo (it is the upstream CLI; we are only the docs vendor) — rollback is purely a docs revert.
-- **W6:** revert the script commit; the release-please workflow's scaffold-apply step becomes a no-op (the conditional fails the file-exists check).
-- **W7:** wiki content is recoverable from wiki history; repo docs are recoverable via `git revert`. Order is enforced (publish before delete) so a partial rollback never leaves users without docs.
-- **W8:** trivial revert.
-- **W10 (canonical overlay):** revert the symlink commits. The office-hours port commit reverts as a separate revert (W10.4 is its own commit). `git ls-files -s` after revert shows no entries under `.agents/skills/` or `.claude/skills/`.
-- **W11:** revert the script + CI commit; AC-58-3 check d falls back to manual verification.
+- **W12 (flat-mv chain):** revert the single commit. `plugins/`, `.agents/plugins/`, `.claude-plugin/`, the marketplace files, and the validator are all restored. Every downstream workstream (W13–W19) is broken without W12 in place; their reverts must chain.
+- **W13 (overlay symlinks + `.gitignore`):** revert the commit. The ten symlinks disappear; `.gitignore` returns to the pre-W13 state. The 14 third-party superpowers skills become untracked again.
+- **W14 (verify-dogfood rewrite):** revert restores the prior plugin-scoped/standalone branching script, which then fails because it points at deleted paths. Effective rollback requires reverting W12 first.
+- **W15 (release-please simple):** revert restores the `release-type: node` config; release-please then fails on missing `plugins/<name>/package.json` paths. Chain rollback with W12.
+- **W16 (verify.yml rename):** revert restores `verify-iteration.yml`. Branch-protection rules return to recognizing the old check name automatically.
+- **W17 (apply-scaffold paths):** revert restores the prior path. Script then fails on missing `plugins/scaffold-repository/`. Chain rollback with W12.
+- **W18 (docs sweep):** revert restores prior docs. CI lint may complain about path references; manually retrim if needed.
+- **W19 (final verification):** if W19 is its own commit (verification log artifact), revert removes the artifact. No structural rollback effect.
 
 ## Out of scope (called out so Executor does not gold-plate)
 
-- Rewriting any plugin's `SKILL.md` content beyond the rename surface enumerated in W9. The `superteam` and `using-github` SKILL.md files are byte-equivalent to the upstream tags. Any behavioral edit to any SKILL.md is its own issue with its own `AC-<issue>-<n>` IDs.
-- Authoring a Patina Project `skills` CLI (Gate G6 — closed; vercel-labs CLI is adopted).
-- Auto-invoking host CLIs from the install command (Gate G4 — out of scope, delegated to the upstream CLI).
-- Building a public registry beyond what GitHub Releases provide.
-- Archiving the upstream repos. Recorded in W8.2 as a post-merge action.
-- Promoting `office-hours` to a plugin-scoped skill. The design explicitly permits the standalone shape; promotion is documented as reversible but not part of this issue's scope.
+- Behavioral edits to any `SKILL.md`. The `superteam` and `using-github` `SKILL.md` content is byte-equivalent to the upstream tags (preserved across the flatten by `git mv`). The `scaffold-repository` SKILL.md edits already landed in commit `794e199` (W9 — the rename); no further edits in this delta. The `office-hours` SKILL.md is byte-for-byte from the upstream PR head SHA (port commit `fab5458`); no edits in this delta. Any behavioral edit to any SKILL.md is its own issue with its own AC-IDs.
+- Authoring a Patina Project `skills` CLI. Gate G6 closed; vercel-labs CLI adopted.
+- Auto-invoking host CLIs from the install command. Gate G4 closed; the vercel-labs CLI handles host detection via `--agent`.
+- Wiki publication. Gate G5 stays; the wiki pages are published post-merge as a separate operator action against `patinaproject/skills.wiki`. The in-repo `docs/wiki-index.md` documents the canonical wiki surface.
+- Archiving the upstream `patinaproject/bootstrap`, `patinaproject/superteam`, `patinaproject/using-github` repos. Recorded in the design as a post-merge action with a one-release-cycle delay; not in scope of this PR.
+- Promoting `office-hours` or `find-skills` to release-please packages. Standalone skills resolve to default-branch HEAD by default; consumers wanting a pinned version pass `#<git-ref>`. Promotion would be a future issue.
+- Building a public skills registry beyond what GitHub Releases provide via release-please.
+- Updating branch-protection rules for the renamed CI check. Operator-managed post-merge action.
 
 ## Done-report mapping
 
-The Finisher will reference this plan's workstream IDs (`W1`–`W11`) and Gate IDs (`G1`–`G6`) in the eventual PR body's `Acceptance Criteria` section so each `AC-58-<n>` heading has verification steps anchored to specific tasks.
+The Finisher references this plan's workstream IDs (`W12`–`W19`) plus the historical IDs (`W1`–`W11`) in the eventual PR body's `Acceptance Criteria` section so each `AC-58-<n>` heading has verification steps anchored to specific tasks. The PR template's section ordering is preserved (per AGENTS.md's `.github/` templates rule).
