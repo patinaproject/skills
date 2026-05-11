@@ -19,12 +19,9 @@
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
-    "validate:marketplace": "node scripts/validate-marketplace.js",
-    "validate:marketplace:dev": "node scripts/validate-marketplace.js --dev",
-    "validate:marketplace:remote": "node scripts/validate-marketplace.js --remote",
     "verify:dogfood": "bash scripts/verify-dogfood.sh",
-    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js plugins/scaffold-repository",
-    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js plugins/scaffold-repository --check"
+    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
+    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js skills/scaffold-repository --check"
   },
   "config": {
     "commitizen": {
