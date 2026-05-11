@@ -1,26 +1,25 @@
-# Plugin Release Flow
+# Skill Release Flow
 
-The Patina Project marketplace only publishes **tagged releases** (`vX.Y.Z`) of member plugins.
-The manifests in this repo never reference a branch — every plugin entry pins an explicit `ref`.
+The Patina Project skills repo releases three packaged skills via `release-please`
+with `release-type: simple`. Tag shape: `<component>-v<X.Y.Z>`.
 
-Current member plugins tracked by this flow:
+Current packaged skills tracked by this flow:
 
-- `scaffold-repository` — repo scaffolding skill. Also **consumed by this repo** (see
-  [Scaffold-repository self-apply](#scaffold-repository-self-apply) below), so a
-  scaffold-repository release both updates the marketplace entry and refreshes this repo's own
-  scaffolding.
+- `scaffold-repository` — repo scaffolding skill. Also **consumed by this repo**
+  (see [Scaffold-repository self-apply](#scaffold-repository-self-apply) below).
 - `superteam` — issue-driven orchestration skill.
-- `using-github` — agent ergonomics for GitHub workflows (`/edit-issue`, `/new-issue`,
-  `/new-branch`).
+- `using-github` — agent ergonomics for GitHub workflows.
 
-All three plugins live under `plugins/<name>/` in this repository. This repo is the
-source-of-truth for packaging; upstream repos (`patinaproject/bootstrap`,
-`patinaproject/superteam`, `patinaproject/using-github`) are archived.
+Two standalone skills (`find-skills`, `office-hours`) are not release-please packages.
+They are versioned outside release-please; consumers wanting a pinned version pass
+`patinaproject/skills@<name>#<git-ref>`.
+
+All five skills live under `skills/<name>/` in this repository.
 
 ## Install via vercel-labs skills CLI
 
-The primary install path for end users is the [vercel-labs/skills](https://github.com/vercel-labs/skills)
-CLI, pinned at invocation time:
+The primary install path for end users is the
+[vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, pinned at invocation:
 
 ```sh
 # Install scaffold-repository
@@ -41,40 +40,38 @@ npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@office-
 ```
 
 **Supply-chain note:** `npm_config_ignore_scripts=true` is the default prefix for all install
-commands in documentation. Do not omit it. The CLI version (`skills@1.5.6`) is pinned at
-invocation — pass `--yes` or `-y` to avoid the interactive prompt. Bumping the pinned CLI
-version requires re-running `bash scripts/verify-dogfood.sh` and the
+commands. Do not omit it. The CLI version (`skills@1.5.6`) is pinned at invocation — pass
+`--yes` or `-y` to avoid the interactive prompt. Bumping the pinned CLI version requires
+re-running `bash scripts/verify-dogfood.sh` and the
 [check-a local-path verification](../README.md#local-iteration) before merging.
 
 **Standalone-skill resolution:** `npx skills add patinaproject/skills@<name>` (no `#<ref>`
 qualifier) resolves to the default branch HEAD. Consumers wanting a pinned version pass
 `patinaproject/skills@<name>#<git-ref>`.
 
+**Supply-chain fallback:** If the upstream CLI is unavailable or distrusted, clone the repo
+and copy `skills/<name>/` directly into the agent's skill directory. No build step required.
+
 ## Lifecycle
 
-1. A contributor opens a PR against `main` with changes under `plugins/<name>/` (bug fix,
-   new feature, dependency bump). The PR merges via squash merge.
-2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main` and
-   maintains a standing per-package Release PR for each plugin with an unreleased commit. When a
-   Release PR is merged, release-please:
-   - Tags the commit with `<prefix>-vX.Y.Z` (see [Gate G1](#gate-g1-tag-prefix-stripping) below).
-   - Rewrites the matching plugin entry's `source.ref` in both marketplace manifests via
-     `extra-files` JSONPath.
+1. A contributor opens a PR against `main` with changes under `skills/<name>/` (bug fix,
+   new feature, content update). The PR merges via squash merge.
+2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main`
+   and maintains a standing per-skill Release PR for each packaged skill with an unreleased
+   commit. When a Release PR is merged, release-please:
+   - Tags the commit with `<component>-v<X.Y.Z>` (e.g. `scaffold-repository-v1.10.1`).
    - Publishes a GitHub Release.
-3. The `validate-manifests` job runs after each release to confirm the new `ref` satisfies the
-   `vX.Y.Z` validator before auto-merge fires.
-4. For `scaffold-repository` releases, the `apply-scaffold-repository` job additionally runs
-   `node scripts/apply-scaffold-repository.js plugins/scaffold-repository` and commits any
+3. For `scaffold-repository` releases, the `apply-scaffold-repository` job additionally runs
+   `node scripts/apply-scaffold-repository.js skills/scaffold-repository` and commits any
    resulting scaffolding changes onto the same release PR branch (see
    [Scaffold-repository self-apply](#scaffold-repository-self-apply)).
-5. Auto-merge (`gh pr merge --auto --squash`) is enabled on each open release-please PR after
-   required checks pass.
+4. Auto-merge (`gh pr merge --auto --squash`) is enabled on each open release-please PR
+   after required checks pass.
 
-Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only PRs that may omit a GitHub issue ID in the
-commit subject.
+Bot-generated release-please PRs from `release-please--*` branches are the only PRs that
+may omit a GitHub issue ID in the commit subject.
 
-## Gate G1: tag-prefix stripping
+## Tag shape
 
 `release-please` emits prefixed tags:
 
@@ -82,64 +79,55 @@ commit subject.
 - `superteam-v1.6.0`
 - `using-github-v2.1.0`
 
-The `extra-files` JSONPath rewrites use `release-please`'s `GenericJson` updater, which
-applies a semver regex replacement against the **existing field value** rather than writing
-the full tag string. Because the current `source.ref` values are already `v-prefixed`
-(e.g., `v1.10.0`), the updater replaces only the numeric portion — producing `v1.11.0`,
-not `scaffold-repository-v1.11.0`.
+Config knobs that produce this shape: `release-type: simple`, `tag-separator: "-v"`,
+`include-component-in-tag: true`, `include-v-in-tag: true`, `component: "<name>"`.
 
-No post-step prefix-strip is needed. The `validate-manifests` job runs after release-please
-and confirms that every `ref` still matches `^v\d+\.\d+\.\d+$` before auto-merge fires.
+The vercel-labs CLI consumer passes the full prefixed tag as `#<git-ref>`:
 
-**Invariant:** As long as the canonical marketplace manifests always carry `v-prefixed` refs
-(which the release-mode validator enforces), each release-please bump will produce the
-correct `vX.Y.Z` ref automatically.
+```sh
+npm_config_ignore_scripts=true npx skills@1.5.6 \
+  add patinaproject/skills@scaffold-repository#scaffold-repository-v1.10.0 \
+  --agent claude-code -y
+```
 
 ## Scaffold-repository self-apply
 
-This repo dogfoods `scaffold-repository`: the same tag that publishes scaffold-repository to
-the marketplace also drives an update of this repo's own scaffolding (commitlint config, husky
-hooks, issue templates, etc.). On a scaffold-repository release, the marketplace manifest
-update and the scaffolding refresh land in the same PR so the review covers both changes at
-once.
+This repo dogfoods `scaffold-repository`: the same tag that releases scaffold-repository
+also drives an update of this repo's own scaffolding (commitlint config, husky hooks,
+issue templates, etc.). On a scaffold-repository release, the scaffolding refresh lands
+on the same release PR branch in the same workflow run.
 
-`node scripts/apply-scaffold-repository.js plugins/scaffold-repository` is idempotent and
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository` is idempotent and
 makes no outbound network calls. The script applies the scaffold-repository baseline files
-from the local `plugins/scaffold-repository/skills/scaffold-repository/templates/` tree. Run
-`node scripts/apply-scaffold-repository.js plugins/scaffold-repository --check` to preview
+from the local `skills/scaffold-repository/templates/` tree. Run
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to preview
 what would change.
 
-**Intentional divergences from the template:** This marketplace repo is a monorepo root; it
-does not have a single root `package.json` `version` field. As a result, two template items
-are not applied by the self-apply script:
+**Intentional divergences from the template:** This skills repo is a monorepo root; it
+does not have a single root `package.json` `version` field. As a result, two template
+items are not applied by the self-apply script:
 
-- `.husky/pre-commit` — the template hook calls `pnpm check:versions`, which runs
-  `scripts/check-plugin-versions.mjs`. That script checks `.claude-plugin/plugin.json` and
-  `.codex-plugin/plugin.json` version alignment with `package.json`. This repo has no root
-  plugin manifests and no root `version` field, so the hook is skipped for self-apply.
-  Downstream bootstrapped plugin repos apply it normally.
-- `scripts/check-plugin-versions.mjs` is not in STATIC_FILES for the same reason.
-
-The apply script documents these exclusions inline. Running `--check` exits 0 after excluding
-these two items.
+- `.husky/pre-commit` — the template hook calls `pnpm check:versions`, which checks
+  plugin manifest versions against `package.json`. This repo has no root plugin manifests
+  and no root `version` field, so the hook is skipped for self-apply.
+- `.github/workflows/markdown.yml` — the template excludes `#plugins/**` for plugin
+  wrapper directories, but this repo uses `#skills/**` for the flat skill layout.
+  The in-repo version is intentionally customized and must not be reverted.
 
 ## Invariants
 
-- Every plugin entry in both manifests has an explicit `ref` matching `vX.Y.Z`. Branches
-  (`main`, `trunk`, etc.) are not allowed.
-- An untagged plugin is not listed in the marketplace at all. The first tagged release is what
-  introduces it.
-- The pre-rename slug `bootstrap` must never appear in a released manifest. The release-mode
-  validator enforces this.
-- Standalone skills (`office-hours`, `find-skills`) are NOT marketplace entries. They are
-  installed directly into `.agents/skills/<name>/` and distributed via the skills CLI without
-  a marketplace entry.
-- `marketplace.local.json` dev overlays must never appear in the released payload. The
-  release-mode validator and `.gitattributes` export-ignore rules enforce this.
+- An untagged skill is not released. The first tagged release is what introduces it to
+  the install path with a pinned `#<ref>`.
+- Standalone skills (`office-hours`, `find-skills`) are not release-please packages.
+  They are installed from the default branch or a specific `#<git-ref>`.
+- `skills-lock.json` must be committed after any `npx skills add` invocation. The lockfile
+  records provenance for vercel-labs CLI-managed installs.
 
-## Manual fallback
+## CLI version pinning
 
-For a fully manual bump, edit `source.ref` for the plugin entry in both
-[.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) and
-[.agents/plugins/marketplace.json](../.agents/plugins/marketplace.json), then open a PR with
-`chore: #<issue> bump <plugin> to <tag>`.
+The vercel-labs CLI is pinned at `skills@1.5.6` in all documentation. To bump:
+
+1. Update the version in `README.md`, `AGENTS.md`, and `docs/release-flow.md`.
+2. Re-run `bash scripts/verify-dogfood.sh` — exits 0.
+3. Run the [check-a local-path verification](../README.md#local-iteration) — exits 0.
+4. Open a PR with the version bump.

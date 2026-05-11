@@ -2,16 +2,18 @@
 
 ## Project Structure & Module Organization
 
-This repository is the marketplace surface for Patina Project plugins and related install documentation.
+This repository is the source of truth for Patina Project agent skills.
 
-- `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
-- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth
-- `plugins/`: optional vendored plugin packages when this repo carries local copies
-- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`, `docs/release-flow.md`, and, when present, `docs/superpowers/`
+- `skills/`: one directory per skill; each contains a `SKILL.md` plus supporting files
+- `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
+- `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
+- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`,
+  `docs/release-flow.md`, and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
 - root config: `package.json`, `commitizen.config.js`, `commitlint.config.js`, and `.husky/`
 
-For Superpowers-generated design and planning artifacts, use issue-based filenames and the following acceptance criteria format:
+For Superpowers-generated design and planning artifacts, use issue-based filenames and the
+following acceptance criteria format:
 
 - `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<issue-title>-design.md`
 - `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<issue-title>-plan.md`
@@ -23,27 +25,30 @@ For Superpowers-generated design and planning artifacts, use issue-based filenam
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
-- `sed -n '1,200p' .agents/plugins/marketplace.json`: inspect marketplace entries
-- `find plugins -maxdepth 5 -type f | sort`: inspect vendored plugin contents when this repo carries local plugin copies
+- `pnpm verify:dogfood`: assert all five skills are discoverable via flat layout
+- `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
+- `find skills -maxdepth 2 -name SKILL.md | sort`: inspect the five skill entry points
 
 ## Coding Style & Naming Conventions
 
-- Use lowercase names for plugin folders
-- Keep plugin names, manifest names, and marketplace entries aligned
-- Use Markdown for docs and JSON for marketplace/plugin manifests
-- For Git-backed entries, keep `source.path` relative to the remote repo root and pin an explicit `ref` or `sha`
-- Issue titles use plain language, not conventional commit formatting. Example: `Update README with Claude Code install instructions`
+- Use lowercase names for skill folders
+- Keep skill names and folder names aligned
+- Use Markdown for docs and JSON for manifests
+- Issue titles use plain language, not conventional commit formatting. Example:
+  `Update README with Claude Code install instructions`
 
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
-- Review manifest files with `sed -n '1,200p' <file>`
-- Review Git-backed marketplace entries in `.agents/plugins/marketplace.json`
-- Run the relevant plugin validator when a packaged skill includes one
+- Run `bash scripts/verify-dogfood.sh` to confirm all five skills pass the flat-layout check
+- Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
+  confirm the scaffold baseline is idempotent against the current tree
 
 ## Issue and PR labels
 
-Use `gh label list` to see the repository's canonical label set. Each label's `description` documents when to apply it. Rely on those descriptions when selecting labels for issues and PRs — do not invent new labels without updating the repository's label set first.
+Use `gh label list` to see the repository's canonical label set. Each label's `description`
+documents when to apply it. Rely on those descriptions when selecting labels for issues and
+PRs — do not invent new labels without updating the repository's label set first.
 
 Verify every label has a non-empty description:
 
@@ -53,36 +58,62 @@ gh label list --json name,description --jq '.[] | select(.description == "")'
 
 ## Working with `.github/` templates
 
-This repo ships canonical templates for issues and pull requests. Agents must use them — do not invent parallel structure.
+This repo ships canonical templates for issues and pull requests. Agents must use them — do
+not invent parallel structure.
 
-- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`. The PR body must use the template's section headings in the order the template defines, even when the body is passed inline via `--body`.
-- Issues: `.github/ISSUE_TEMPLATE/bug_report.md` and `.github/ISSUE_TEMPLATE/feature_request.md`. Pick the one that matches the report and reproduce its sections in order.
+- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`.
+  The PR body must use the template's section headings in the order the template defines,
+  even when the body is passed inline via `--body`.
+- Issues: `.github/ISSUE_TEMPLATE/bug_report.md` and
+  `.github/ISSUE_TEMPLATE/feature_request.md`. Pick the one that matches the report and
+  reproduce its sections in order.
 
 Recommended `gh` patterns:
 
-- PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered body must already follow the template. If you pass `--body` inline, copy every template section name and order verbatim before filling them in.
-- Issues: `gh issue create --template bug_report.md` or `--template feature_request.md` lets `gh` start from the canonical file. If you pass `--body` inline, mirror the template's headings the same way.
+- PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered
+  body must already follow the template. If you pass `--body` inline, copy every template
+  section name and order verbatim before filling them in.
+- Issues: `gh issue create --template bug_report.md` or `--template feature_request.md`
+  lets `gh` start from the canonical file. If you pass `--body` inline, mirror the
+  template's headings the same way.
 
 ## GitHub Actions pinning
 
-Pin every action reference to a full 40-character commit SHA, not a tag. Tags are mutable; SHAs are not. Above each `uses:` line, leave a comment naming the action and version the SHA corresponds to, so updates remain reviewable.
+Pin every action reference to a full 40-character commit SHA, not a tag. Tags are mutable;
+SHAs are not. Above each `uses:` line, leave a comment naming the action and version the SHA
+corresponds to, so updates remain reviewable.
 
 ```yaml
 # actions/checkout@v4.3.1
 - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 ```
 
-`actionlint` runs in CI on `.github/workflows/**` changes and enforces workflow hygiene as part of its other checks.
+`actionlint` runs in CI on `.github/workflows/**` changes and enforces workflow hygiene as
+part of its other checks.
 
-Also enable **Settings → Actions → General → Require actions to be pinned to a full-length commit SHA** (at the repo or org level). GitHub then refuses to run any workflow that `uses:` an action by tag or branch, giving a hard gate on top of the CI check.
+Also enable **Settings → Actions → General → Require actions to be pinned to a full-length
+commit SHA** (at the repo or org level). GitHub then refuses to run any workflow that `uses:`
+an action by tag or branch, giving a hard gate on top of the CI check.
 
-## Plugin Releases
+## Skill Releases
 
-The marketplace only publishes tagged (`vX.Y.Z`) plugin releases. Every plugin entry in both manifests must pin an explicit tag `ref` — branch refs such as `main` are not allowed.
+This repo's `skills/<name>/` owns each skill for
+`name ∈ {scaffold-repository, superteam, using-github, find-skills, office-hours}`.
 
-This repo's `plugins/<name>/` owns the package for `name ∈ {scaffold-repository, superteam, using-github}`. Standalone skills (currently `office-hours`, `find-skills`) own themselves at `.agents/skills/<name>/` and are not marketplace entries.
+The three packaged skills (`scaffold-repository`, `superteam`, `using-github`) are released
+via `release-please` with `release-type: simple`. Tag shape: `<component>-v<X.Y.Z>`
+(e.g. `scaffold-repository-v1.10.1`). See [docs/release-flow.md](./docs/release-flow.md).
 
-Releases are driven by `release-please` via `.github/workflows/release-please.yml`, which maintains a standing per-package Release PR for each plugin with unreleased commits. Merging a Release PR tags the commit, rewrites the manifest `source.ref`, and publishes a GitHub Release. The release-please workflow also auto-merges Release PRs after required checks pass. See [docs/release-flow.md](./docs/release-flow.md).
+The two standalone skills (`find-skills`, `office-hours`) are not release-please packages.
+Consumers install them from the default branch or a specific `#<git-ref>`.
+
+Releases are driven by `release-please` via `.github/workflows/release-please.yml`, which
+maintains a standing per-skill Release PR for each packaged skill with unreleased commits.
+Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
+auto-merges Release PRs after required checks pass.
+
+Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
+bump PRs from `bot/bump-*` branches are the only no-issue exceptions to the issue-tag rule.
 
 ## Commit & Pull Request Guidelines
 
@@ -93,15 +124,17 @@ Commits must use conventional commit types, no scopes, and a required GitHub iss
 Examples:
 
 - `chore: #1 bootstrap marketplace repo`
-- `feat: #12 add superteam marketplace entry`
+- `feat: #12 add superteam skill entry`
 
 For squash-and-merge workflows, PR titles must match the commitlint commit format:
 
 `type: #123 short description`
 
-Bot-generated release-please PRs from `release-please--*` branches and bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
+Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
+bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the PR description.
+When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the
+PR description.
 
 - Use one `### AC-<issue>-<n>` heading per relevant AC
 - Put a short outcome summary directly under each heading
