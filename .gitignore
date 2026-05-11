@@ -1,17 +1,2 @@
 node_modules/
 docs/superpowers/plans/.artifacts/
-
-# CLI-installed third-party skills (managed by `npx skills add ...`)
-# Track only the 5 in-repo dogfood overlay symlinks; ignore everything else.
-.claude/skills/*
-!.claude/skills/scaffold-repository
-!.claude/skills/superteam
-!.claude/skills/using-github
-!.claude/skills/find-skills
-!.claude/skills/office-hours
-.agents/skills/*
-!.agents/skills/scaffold-repository
-!.agents/skills/superteam
-!.agents/skills/using-github
-!.agents/skills/find-skills
-!.agents/skills/office-hours
