@@ -3,7 +3,7 @@
 ## Source design
 
 - Approved design: [`docs/superpowers/specs/2026-05-11-58-merge-superteam-bootstrap-using-github-skills-into-this-repository-for-easier-skill-iteration-design.md`](../specs/2026-05-11-58-merge-superteam-bootstrap-using-github-skills-into-this-repository-for-easier-skill-iteration-design.md)
-- Approved-design head: `0b000f9` (Brainstormer delta 4 — flat `skills/<name>/` layout, no marketplace catalog, `release-type: simple` per skill, dogfood overlay D1 with committed symlinks, `verify-iteration.yml` → `verify.yml`)
+- Approved-design head: `5b751ef` (Brainstormer delta 5 — flat `skills/<name>/` layout, no marketplace catalog, single root `release-type: simple` with `v<X.Y.Z>` tags, dogfood overlay D1 with committed symlinks, `verify-iteration.yml` → `verify.yml`)
 - Selected approach: Option F1 (flat `skills/<name>/` at the repo root, vercel-labs `vercel-labs/skills` shape, per-skill `release-type: simple`, dogfood overlay symlinks committed)
 - ACs in scope: `AC-58-1` through `AC-58-8`
 
@@ -55,8 +55,8 @@ skills/
 scripts/
   apply-scaffold-repository.js  # path-updated for skills/ layout (W17)
   verify-dogfood.sh             # simplified: 5 skills × skills/<name>/SKILL.md + overlay resolve (W14)
-release-please-config.json      # rewritten: release-type: simple per skill (W15)
-.release-please-manifest.json   # rewritten: 3 packages keyed by skills/<name> (W15)
+release-please-config.json      # rewritten: single root package "." release-type: simple (W15)
+.release-please-manifest.json   # rewritten: single entry ".": "1.0.0" (W15)
 .github/workflows/
   verify.yml                    # renamed from verify-iteration.yml; display name "Verify" (W16)
   release-please.yml            # updated: no marketplace.json rewrites; manifest-only bumps (W15)
@@ -215,11 +215,13 @@ Ordering: **W12 (flat-mv) is the foundation.** Everything else depends on it. W1
 
 **Risks/rollback:** Revert the script commit to restore the prior plugin-scoped/standalone branching script (which would then fail because it points at deleted paths). Effective rollback requires reverting W12 first, so the rollback chain is W14 → W13 → W12.
 
-### Workstream 15 — Release-please reconfigure (`release-type: simple`) (AC-58-5)
+### Workstream 15 — Release-please reconfigure (single root `release-type: simple`) (AC-58-5)
 
-**Goal:** Rewrite `release-please-config.json` and `.release-please-manifest.json` for three packages at `skills/scaffold-repository`, `skills/superteam`, `skills/using-github` with `release-type: simple`. No `extra-files` block (no marketplace.json to rewrite). Tag shape `<component>-v<X.Y.Z>` matching the prior shape (`scaffold-repository-v1.10.0`, etc.). Update `.github/workflows/release-please.yml` so it drops the marketplace-rewrite step, keeps the scaffold-repository self-apply step (Gate G3), and keeps auto-merge.
+**Goal:** Rewrite `release-please-config.json` and `.release-please-manifest.json` to a **single root package** — one entry at `"."` with `release-type: simple`, seeded at `1.0.0`. Tag form is plain `v<X.Y.Z>` (no component prefix). Update `.github/workflows/release-please.yml` so the scaffold-repository self-apply step runs **unconditionally** on every release-please run (the script is idempotent — exits 0 when there is no diff). Drop any `paths_released` filtering logic that gated the step on a per-skill release.
 
-**Order rationale:** W15 depends on W12 (the package directories must be at their new flat paths). Independent of W13, W14, W16, W17. The release-please config rewrite is mechanical once the paths are settled.
+**Delta from prior W15 (Brainstormer delta 4 → delta 5):** The prior plan called for three packages keyed by `skills/scaffold-repository`, `skills/superteam`, `skills/using-github`, producing `<component>-v<X.Y.Z>` tags. Delta 5 collapses this to one root package (`"."`), seeded at `1.0.0`, with plain `v<X.Y.Z>` tags. Gate G1 (consumer strips component prefix when passing `#<git-ref>` to `npx skills add`) is now **OBSOLETE** — there is no component prefix to strip. The per-skill seeds (`scaffold-repository: 1.10.0`, `superteam: 1.5.0`, `using-github: 2.0.0`) are dropped; migration history records the upstream version provenance instead.
+
+**Order rationale:** W15 depends on W12 (the package directories must be at their new flat paths). Independent of W13, W14, W16, W17. Mechanical once the layout is settled.
 
 **Tasks:**
 
@@ -229,74 +231,62 @@ Ordering: **W12 (flat-mv) is the foundation.** Everything else depends on it. W1
   {
     "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
     "packages": {
-      "skills/scaffold-repository": {
+      ".": {
         "release-type": "simple",
-        "tag-separator": "-v",
-        "include-component-in-tag": true,
-        "component": "scaffold-repository"
-      },
-      "skills/superteam": {
-        "release-type": "simple",
-        "tag-separator": "-v",
-        "include-component-in-tag": true,
-        "component": "superteam"
-      },
-      "skills/using-github": {
-        "release-type": "simple",
-        "tag-separator": "-v",
-        "include-component-in-tag": true,
-        "component": "using-github"
+        "package-name": "patinaproject-skills"
       }
-    },
-    "separate-pull-requests": true,
-    "include-v-in-tag": true
+    }
   }
   ```
 
-  **Tag shape verification.** With `"include-component-in-tag": true`, `"component": "scaffold-repository"`, `"tag-separator": "-v"`, and `"include-v-in-tag": true`, release-please produces tags of the form `<component><tag-separator><version>`, i.e. `scaffold-repository-v1.10.1`. This matches the prior `release-type: node` config's `tag-name-prefix: scaffold-repository-` shape exactly. Verify by dry-run (15.4 below). If the tag shape comes out different from `<component>-v<X.Y.Z>`, **halt and report**: the design's Gate G1 disposition (full prefixed tag passed to `npx skills add patinaproject/skills@<name>#<full-tag>`) assumes this exact shape, and the operator must redirect.
+  No `separate-pull-requests`, no `tag-separator`, no `include-component-in-tag`, no `component` fields. Release-please with `release-type: simple` and a root package produces tags of the form `v<X.Y.Z>` by default.
 
 - 15.2 Rewrite `.release-please-manifest.json` to:
 
   ```json
   {
-    "skills/scaffold-repository": "1.10.0",
-    "skills/superteam": "1.5.0",
-    "skills/using-github": "2.0.0"
+    ".": "1.0.0"
   }
   ```
 
-  These seeds match the upstream tags imported via `git subtree add` in W1 and the version that the prior marketplace manifests pinned. The next conventional `feat:` / `fix:` commit under `skills/<name>/**` will bump the matching package's version to `1.10.1` (or `1.11.0`, etc.) on the next release-please run.
+  One entry. The seed version `1.0.0` is the canonical "first stable release of this surface" per the design's rationale (upstream per-skill versions are preserved in the migration history, not encoded in the repo-wide initial version).
 
 - 15.3 Update `.github/workflows/release-please.yml`:
-  - Remove any step that rewrote `marketplace.json` `source.ref` fields (the previous workflow had a post-step like this; with the catalog gone, the step must be deleted).
-  - Keep the scaffold-repository self-apply step (Gate G3): `node scripts/apply-scaffold-repository.js skills/scaffold-repository` (path-updated by W17). The step's trigger condition is "`paths_released` from the release-please-action output contains `skills/scaffold-repository`." Adjust the conditional path-check from `plugins/scaffold-repository` to `skills/scaffold-repository`.
-  - Preserve the existing auto-merge logic (`gh pr merge --auto --squash` against each open release-please PR) and the existing `github-actions[bot]` signing config.
-  - Verify every `uses:` line remains pinned to a full-length commit SHA with the action+version comment above (AGENTS.md GitHub-Actions-pinning rule).
-- 15.4 Dry-run release-please locally to validate the rewritten config:
+  - Drop the `scaffold-repository--release_created` and `scaffold-repository--pr` outputs from the `release-please` job (they were keyed to the per-skill package path; they do not exist in the root-package shape).
+  - Rewrite the `apply-scaffold-repository` job's `if:` condition from `needs.release-please.outputs['scaffold-repository--release_created'] == 'true'` to `needs.release-please.outputs.releases_created == 'true'`. The step now runs unconditionally on every release. The apply script is idempotent — it writes nothing and exits 0 when there is no scaffolding diff (the existing "No scaffolding changes to commit" branch already handles this).
+  - Remove the `ref:` and `fetch-depth:` checkout overrides that pointed at the scaffold-repository release PR branch. With a single root release, the release-please action's default behaviour (checking out the release commit on `main` after tagging) is the correct target. The checkout should use the default branch ref.
+  - Preserve the existing auto-merge logic and action SHA pins.
+  - Verify every `uses:` line remains pinned to a full 40-character SHA with the action+version comment above it (AGENTS.md GitHub Actions pinning rule).
+
+- 15.4 Verification step W15.5 (dry-run):
 
   ```sh
   npx -y release-please@16 release-pr --dry-run \
     --token "$(gh auth token)" \
     --repo-url=https://github.com/patinaproject/skills \
     --config-file release-please-config.json \
-    --manifest-file .release-please-manifest.json
+    --manifest-file .release-please-manifest.json 2>&1 | head -50
   ```
 
-  Expected output: three per-package PR plans (one per package), each producing a tag of the form `<component>-v<X.Y.Z>` (`scaffold-repository-v1.10.1`, etc., assuming there's a `feat:`/`fix:` commit under each path; otherwise the dry-run reports "no release needed" for each, which is also acceptable as a config-validation pass). Record the dry-run output. **If any package's projected tag shape deviates from `<component>-v<X.Y.Z>`, halt and report.**
+  Confirm the proposed tag matches `^v\d+\.\d+\.\d+$` (no component prefix). If the dry-run produces a tag like `scaffold-repository-v...` or any other prefixed form, **halt and report** — the config is wrong.
 
-- 15.5 Commit with: `feat: #58 reconfigure release-please for simple release-type per skill`.
+- 15.5 Commit with: `feat: #58 switch release-please to single marketplace version`.
 
 **Files touched in W15:** `release-please-config.json` (rewritten), `.release-please-manifest.json` (rewritten), `.github/workflows/release-please.yml` (edited).
 
 **Verification:**
 
 - `actionlint .github/workflows/release-please.yml` passes.
-- Dry-run output (recorded in W19's verification log) shows three packages, all `release-type: simple`, projected tag shape `<component>-v<X.Y.Z>`.
-- Grep confirms no marketplace.json reference remains in the workflow: `rg -F 'marketplace' .github/workflows/release-please.yml` returns empty.
+- `release-please-config.json` has exactly one key under `packages` and that key is `"."`.
+- `.release-please-manifest.json` has exactly one entry: `".": "1.0.0"`.
+- Dry-run output shows proposed tag matching `^v\d+\.\d+\.\d+$` with no component prefix.
+- `rg -F 'scaffold-repository--release_created' .github/workflows/release-please.yml` returns empty.
 
-**Definition of done:** Three-package release-please config in place; manifest seeded; workflow path-updated; dry-run validates; commit landed.
+**Gate G1: OBSOLETE.** Per-skill tag prefixes (`<component>-v<X.Y.Z>`) do not exist in the single-version model. No stripping logic is required. Consumers pin via `patinaproject/skills@<name>#v<X.Y.Z>` and the `<ref>` is the plain `v<X.Y.Z>` tag.
 
-**Risks/rollback:** If the dry-run reveals the tag shape is wrong (e.g. `scaffold-repository-1.10.1` without the `v`, or `scaffold-repository/v1.10.1` instead of the dash), reconfigure the four config knobs until the shape matches. The supplied combination (`tag-separator: "-v"` + `include-component-in-tag: true` + `include-v-in-tag: true` + `component: "<name>"`) is the documented combination that produces `<component>-v<X.Y.Z>`; if release-please's behavior changed between version 16 and a later release, pin the action to an earlier version that emits the expected shape. Rollback: revert the W15 commit to restore the prior `release-type: node` config; the release-please workflow will then fail because `plugins/<name>/package.json` paths no longer exist, so the rollback is effectively chained with W12 revert.
+**Definition of done:** Single-root config in place; manifest seeded at `1.0.0`; workflow updated with unconditional scaffold apply; dry-run confirms `v<X.Y.Z>` tag shape; commit landed.
+
+**Risks/rollback:** If the dry-run reveals release-please does not support the single-root shape or emits a wrong tag, reconfigure and re-run. Rollback: revert the W15 commit; the three-package config is restored (though it will fail on the flat layout paths until W12 is also reverted).
 
 ### Workstream 16 — Verify workflow rename (AC-58-3 CI surface; Comment 3220071994)
 
@@ -479,7 +469,7 @@ W13, W15, W16, W17 can proceed in parallel once W12 lands. W14 depends on W13 (o
 | AC-58-2 | W12.6 (marketplace catalog + validator deletion) |
 | AC-58-3 | W13 (overlay symlinks) + W14 (verify-dogfood rewrite); AC-58-3 check (a) ATDD live-install is W18 README documentation + W19.9 falsifiable check |
 | AC-58-4 | W18.1 (README rewrite — `npx skills` only, no marketplace fallback) |
-| AC-58-5 | W15 (release-please `release-type: simple`); W17 (scaffold apply path updates); W19.10 (release-please dry-run) |
+| AC-58-5 | W15 (single-root release-please `release-type: simple`, `v<X.Y.Z>` tags, unconditional scaffold apply, seed `1.0.0`); W19.10 (release-please dry-run confirms `^v\d+\.\d+\.\d+$` shape) |
 | AC-58-6 | W18.5 (`docs/file-structure.md` rewrite) + W18.6 (`docs/wiki-index.md` rewrite); actual wiki publication remains post-merge per Gate G5 |
 | AC-58-7 | W12.7 (SHA-256 round-trip; pre-flatten value `87867b66...` must equal post-flatten value) |
 | AC-58-8 | W12.1–W12.5 (`git mv` chain preserves blame and SHA) + W18.5 (migration history entry under `docs/file-structure.md`) |
