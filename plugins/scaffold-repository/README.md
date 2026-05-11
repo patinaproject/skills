@@ -6,19 +6,19 @@
 
 <!-- The content below is preserved for npm and Codex marketplace listings. -->
 
-# Bootstrap (upstream)
+# scaffold-repository (upstream)
 
 Scaffold a new repository – or realign an existing one – to the Patina Project baseline. One invocation, consistent conventions, portable across every major AI coding tool.
 
-Bootstrap is a Claude Code + Codex plugin distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, plugin manifests, release flow, GitHub repo settings) and keeps existing repos aligned with the latest baseline on rerun.
+`scaffold-repository` is a Claude Code + Codex plugin distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, plugin manifests, release flow, GitHub repo settings) and keeps existing repos aligned with the latest baseline on rerun.
 
-## How bootstrap works
+## How scaffold-repository works
 
 Bootstrap operates in one of two modes based on what it finds in the target repository.
 
 ```mermaid
 flowchart TD
-    invoke["/bootstrap:bootstrap"]:::artifact
+    invoke["/scaffold-repository:scaffold-repository"]:::artifact
     detect["Detect mode"]
     newrepo["New repo"]
     realign["Realignment"]
@@ -43,7 +43,7 @@ flowchart TD
     classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
 ```
 
-## What bootstrap enforces
+## What scaffold-repository enforces
 
 ### Core baseline – every repo
 
@@ -67,7 +67,7 @@ For plugins, bootstrap wires a complete [release-please](https://github.com/goog
 
 ### GitHub repository settings
 
-Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./skills/bootstrap/SKILL.md#github-repository-settings).
+Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./skills/scaffold-repository/SKILL.md#github-repository-settings).
 
 ## Modes
 
@@ -92,7 +92,7 @@ Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visua
 
 ## Installation
 
-Bootstrap ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files bootstrap emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly – those tools require no additional plugin install. Pick the section for your tool.
+`scaffold-repository` ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files the skill emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly – those tools require no additional plugin install. Pick the section for your tool.
 
 ### Claude Code
 
@@ -102,16 +102,16 @@ Bootstrap ships as a Claude Code + Codex plugin. Other supported editors read th
    /plugin marketplace add patinaproject/skills
    ```
 
-2. Install Bootstrap:
+2. Install scaffold-repository:
 
    ```text
-   /plugin install bootstrap@patinaproject-skills
+   /plugin install scaffold-repository@patinaproject-skills
    ```
 
 3. Open the target repo in Claude Code (or a GitHub issue in the target repo) and invoke:
 
    ```text
-   /bootstrap:bootstrap
+   /scaffold-repository:scaffold-repository
    ```
 
 ### OpenAI Codex CLI
@@ -125,23 +125,23 @@ Bootstrap ships as a Claude Code + Codex plugin. Other supported editors read th
 2. Install the plugin pinned to a tag (recommended):
 
    ```bash
-   codex plugin marketplace add patinaproject/bootstrap@v0.1.0
+   codex plugin marketplace add patinaproject/skills@scaffold-repository-v1.10.0
    ```
 
 3. Open the target repo and invoke:
 
    ```text
-   Use $bootstrap to scaffold or realign this repository.
+   Use $scaffold-repository to scaffold or realign this repository.
    ```
 
 ### OpenAI Codex App
 
-1. Install or enable the Bootstrap plugin from your Codex plugin source.
+1. Install or enable the scaffold-repository plugin from your Codex plugin source.
 2. Open the target repo in the app.
 3. Invoke:
 
    ```text
-   Use $bootstrap to scaffold or realign this repository.
+   Use $scaffold-repository to scaffold or realign this repository.
    ```
 
 ### GitHub Copilot
@@ -242,7 +242,7 @@ Author name, author email, and `SECURITY.md` contact default from `git config us
 
 ## Development
 
-This repository is its own reference implementation. Every file bootstrap emits is present either at the repo root or under `skills/bootstrap/templates/`. Running realignment mode against this repo must report zero gaps.
+This repository is its own reference implementation. Every file the skill emits is present either at the repo root or under `skills/scaffold-repository/templates/`. Running realignment mode against this repo must report zero gaps.
 
 Local workflow:
 
@@ -270,8 +270,8 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md). The r
 
 ## Related
 
-- [`skills/bootstrap/SKILL.md`](./skills/bootstrap/SKILL.md) – skill contract, modes, placeholders, emitted tree.
-- [`skills/bootstrap/audit-checklist.md`](./skills/bootstrap/audit-checklist.md) – realignment checklist.
+- [`skills/scaffold-repository/SKILL.md`](./skills/scaffold-repository/SKILL.md) – skill contract, modes, placeholders, emitted tree.
+- [`skills/scaffold-repository/audit-checklist.md`](./skills/scaffold-repository/audit-checklist.md) – realignment checklist.
 - [`docs/file-structure.md`](./docs/file-structure.md) – layout reference.
-- [`patinaproject/superteam`](https://github.com/patinaproject/superteam) – sibling plugin whose layout bootstrap enforces.
+- [`patinaproject/superteam`](https://github.com/patinaproject/superteam) – sibling plugin whose layout scaffold-repository enforces.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) – marketplace distributing Patina Project plugins.
