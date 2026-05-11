@@ -25,3 +25,6 @@ jobs:
             #node_modules
             #CHANGELOG.md
             #docs/superpowers/**
+            #plugins/**
+            #.agents/skills/**
+            #.claude/skills/**
