@@ -4,7 +4,7 @@
 
 Build with a team of agents using Superpowers.
 
-`superteam` is a Claude Code + Codex plugin. It ships an installable orchestration skill under `skills/engineering/superteam/` and is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace.
+`superteam` is a Claude Code + Codex plugin. It ships an installable orchestration skill under `skills/superteam/` and is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace.
 
 Spend less time managing implementation loops and babysitting CI. Superteam builds on Superpowers to get you to a real, demoable, testable artifact as quickly as possible, with enough structure to review it, iterate on it, and keep moving.
 
@@ -155,6 +155,6 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md).
 
 ## Related
 
-- [`skills/engineering/superteam/SKILL.md`](./SKILL.md) — skill contract.
+- [`skills/superteam/SKILL.md`](./SKILL.md) — skill contract.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) — marketplace distributing Patina Project plugins.
 - [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) — scaffolding skill that emitted this repo's baseline.

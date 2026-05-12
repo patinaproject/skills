@@ -54,7 +54,7 @@ jobs:
           node-version: "24"
 
       - name: Apply scaffold-repository scaffolding
-        run: node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository
+        run: node scripts/apply-scaffold-repository.js skills/scaffold-repository
 
       - name: Push scaffold refresh via GitHub API
         env:

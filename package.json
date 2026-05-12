@@ -21,8 +21,8 @@
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
     "verify:dogfood": "bash scripts/verify-dogfood.sh",
     "verify:marketplace": "bash scripts/verify-marketplace.sh",
-    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository",
-    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository --check"
+    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
+    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js skills/scaffold-repository --check"
   },
   "config": {
     "commitizen": {

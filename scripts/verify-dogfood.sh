@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # verify-dogfood.sh — Asserts that all four in-repo skills are discoverable
-# via the skills/<name>/ layout and the dogfood overlay symlinks.
+# via the flat skills/<name>/ layout and the dogfood overlay symlinks.
 # (find-skills is a third-party vendored skill, not an in-repo skill.)
 # Covers AC-58-3 check c.
 #
-# Exit 0: all five skills pass all assertions.
+# Exit 0: all four skills pass all assertions.
 # Exit 1: at least one assertion failed (with a clear FAIL message).
 #
 # Dependencies: bash 3+, realpath (macOS via coreutils) or python3 as fallback.
@@ -14,12 +14,11 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-# Each entry is "name:category"
 SKILLS=(
-  scaffold-repository:engineering
-  superteam:engineering
-  using-github:engineering
-  office-hours:productivity
+  scaffold-repository
+  superteam
+  using-github
+  office-hours
 )
 FAIL_COUNT=0
 
@@ -40,14 +39,12 @@ _realpath() {
   fi
 }
 
-for entry in "${SKILLS[@]}"; do
-  name="${entry%%:*}"
-  category="${entry##*:}"
-  CANONICAL="skills/$category/$name/SKILL.md"
+for name in "${SKILLS[@]}"; do
+  CANONICAL="skills/$name/SKILL.md"
   CLAUDE_LINK=".claude/skills/$name/SKILL.md"
   AGENTS_LINK=".agents/skills/$name/SKILL.md"
 
-  # 1. Assert skills/<category>/<name>/SKILL.md is a regular file (not a symlink, not missing).
+  # 1. Assert skills/<name>/SKILL.md is a regular file (not a symlink, not missing).
   if [ ! -f "$CANONICAL" ]; then
     fail "$CANONICAL missing or not a regular file"
     continue
@@ -89,7 +86,7 @@ for entry in "${SKILLS[@]}"; do
   fi
 
   # 3. Assert .claude/skills/<name>/SKILL.md resolves to the same real path as
-  #    skills/<category>/<name>/SKILL.md via symlink traversal.
+  #    skills/<name>/SKILL.md via symlink traversal.
   if [ ! -e "$CLAUDE_LINK" ]; then
     fail "$CLAUDE_LINK does not resolve (broken symlink or missing)"
     continue
@@ -112,7 +109,7 @@ for entry in "${SKILLS[@]}"; do
     continue
   fi
 
-  echo "OK: $name ($category)"
+  echo "OK: $name"
 done
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
@@ -122,5 +119,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all four in-repo skills discoverable via category layout"
+echo "OK: all four in-repo skills discoverable via flat layout"
 exit 0

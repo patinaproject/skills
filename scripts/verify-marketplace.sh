@@ -9,8 +9,12 @@ mp_name=$(jq -r '.plugins[0].name' .claude-plugin/marketplace.json)
 test "$m_name" = "patinaproject-skills"
 test "$p_name" = "patinaproject-skills"
 test "$mp_name" = "patinaproject-skills"
-# Assert all skill paths in plugin.json exist
+# Assert all skill paths in plugin.json are flat (no category subdir) and exist
 for path in $(jq -r '.skills[]' .claude-plugin/plugin.json); do
+  if ! echo "$path" | grep -qE '^\./skills/[a-z-]+$'; then
+    echo "FAIL: skill path '$path' does not match flat form './skills/<name>'" >&2
+    exit 1
+  fi
   test -f "${path#./}/SKILL.md"
 done
 # Assert find-skills is NOT in plugin.json skills[] (it is a third-party vendored skill)

@@ -1,7 +1,7 @@
 # Skills used by the Patina Project team
 
-Five installable agent skills for repository scaffolding, multi-teammate
-orchestration, GitHub workflows, product design, and skill discovery — available
+Four installable agent skills for repository scaffolding, multi-teammate
+orchestration, GitHub workflows, and product design — available
 across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
@@ -47,7 +47,7 @@ handoff artifact and restarts are expensive. `superteam` routes a GitHub issue
 through a six-teammate workflow — Team Lead, Brainstormer, Planner, Executor,
 Reviewer, Finisher — producing durable repo-owned artifacts at every gate.
 
-See [./skills/engineering/superteam/](./skills/engineering/superteam/) for the
+See [./skills/superteam/](./skills/superteam/) for the
 full README and skill contract.
 
 ### using-github
@@ -59,7 +59,7 @@ produces inconsistent output. `using-github` is a single skill that reads
 repository rules and applies the correct workflow for each task, so every
 GitHub action in a repo is consistent and auditable.
 
-See [./skills/engineering/using-github/](./skills/engineering/using-github/)
+See [./skills/using-github/](./skills/using-github/)
 for the full README and skill contract.
 
 ### office-hours
@@ -72,7 +72,7 @@ Startup mode asks six forcing questions that expose whether the idea is
 genuinely worth building; Builder mode is an enthusiastic design partner for
 hackathons and side projects. Output is always a design doc, never code.
 
-See [./skills/productivity/office-hours/](./skills/productivity/office-hours/)
+See [./skills/office-hours/](./skills/office-hours/)
 for the skill contract.
 
 ### scaffold-repository
@@ -85,17 +85,17 @@ Patina Project baseline and keeps it aligned on rerun. It handles both new
 repos and realignment of existing ones, so convention drift gets caught before
 it accumulates.
 
-See [./skills/engineering/scaffold-repository/](./skills/engineering/scaffold-repository/)
+See [./skills/scaffold-repository/](./skills/scaffold-repository/)
 for the full README and skill contract.
 
 ## Skills
 
-| Skill | Description | Category |
-|---|---|---|
-| [superteam](./skills/engineering/superteam/) | Orchestrate a GitHub issue from design through merged PR | engineering |
-| [using-github](./skills/engineering/using-github/) | Patina Project GitHub workflow conventions | engineering |
-| [office-hours](./skills/productivity/office-hours/) | YC-style design partner; runs forcing questions | productivity |
-| [scaffold-repository](./skills/engineering/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline | engineering |
+| Skill | Description |
+|---|---|
+| [superteam](./skills/superteam/) | Orchestrate a GitHub issue from design through merged PR |
+| [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
+| [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
+| [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
 
@@ -105,17 +105,17 @@ change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
 ### Check a — CLI resolves skills from local paths
 
 ```sh
-npx skills@latest add ./skills/engineering/scaffold-repository --list
-npx skills@latest add ./skills/productivity/office-hours --list
+npx skills@latest add ./skills/scaffold-repository --list
+npx skills@latest add ./skills/office-hours --list
 ```
 
 ### Check b — scaffold-repository apply, no network
 
 ```sh
-node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository --check
+node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 ```
 
-### Check c — dogfood verification, all five skills
+### Check c — dogfood verification, all four skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -125,15 +125,12 @@ bash scripts/verify-dogfood.sh
 
 ```text
 skills/
-  engineering/
-    scaffold-repository/
-    superteam/
-    using-github/
-  productivity/
-    office-hours/
-    find-skills/
-.agents/skills/<name>/               Symlinks to ../../skills/<category>/<name>/
-.claude/skills/<name>/               Symlinks to ../../skills/<category>/<name>/
+  scaffold-repository/
+  superteam/
+  using-github/
+  office-hours/
+.agents/skills/<name>/               Symlinks to ../../skills/<name>/
+.claude/skills/<name>/               Symlinks to ../../skills/<name>/
 .claude-plugin/
   marketplace.json                   Claude marketplace catalog
   plugin.json                        Claude plugin manifest
