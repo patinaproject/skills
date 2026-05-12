@@ -11,7 +11,6 @@ documentation. Five skills live under `skills/<category>/<name>/` organized by c
 - `.claude/skills/<name>/`: committed symlinks into `../../skills/<category>/<name>/` (five in-repo)
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog (plugin slug: `patinaproject-skills`)
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all 5 skill paths
-- `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `skills-lock.json`: vercel-labs CLI install lockfile (auto-generated; commit it)
 - `docs/`: contributor-facing docs for skill maintenance
 - `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling

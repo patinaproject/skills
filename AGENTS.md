@@ -8,10 +8,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/productivity/`: productivity skills (`office-hours`, `find-skills`)
 - `.agents/skills/<name>/`: symlinks into `../../skills/<category>/<name>/` (dogfood overlay)
 - `.claude/skills/<name>/`: symlinks into `../../skills/<category>/<name>/` (Claude Code overlay)
-- `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all 5 skill paths
-- `plugins/`: optional vendored plugin packages when this repo carries local copies
 - `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`,
   `docs/release-flow.md`, and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`

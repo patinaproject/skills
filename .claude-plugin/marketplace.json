@@ -5,14 +5,14 @@
     "url": "https://github.com/patinaproject"
   },
   "metadata": {
-    "description": "Productivity skills used by the Patina Project team — repository scaffolding, multi-teammate orchestration, GitHub workflows, design partner, and skill discovery.",
+    "description": "Skills used by the Patina Project team",
     "version": "1.0.0",
     "repository": "https://github.com/patinaproject/skills"
   },
   "plugins": [
     {
       "name": "patinaproject-skills",
-      "description": "Productivity skills used by the Patina Project team — repository scaffolding, multi-teammate orchestration, GitHub workflows, design partner, and skill discovery.",
+      "description": "Skills used by the Patina Project team — scaffold-repository, superteam, using-github, office-hours, find-skills",
       "source": "./"
     }
   ]
