@@ -14,7 +14,7 @@ The `Release` workflow runs on every push to `main`. Cutting a release is the na
 
    Release-please attaches the `autorelease: pending` label to this PR. If there are no releasable commits since the last tag, the run no-ops.
 
-2. **Merge the release PR.** Squash-merging the PR is itself a push to `main`, so `Release` runs again. release-please now sees the merged release PR (still labeled `autorelease: pending`), creates the tag `vX.Y.Z`, publishes the GitHub Release with the Conventional-Commit-derived notes, and (on `patinaproject` plugin repos) dispatches the marketplace bump on `patinaproject/skills`. The PR's label flips to `autorelease: tagged`.
+2. **Merge the release PR.** Squash-merging the PR is itself a push to `main`, so `Release` runs again. release-please now sees the merged release PR (still labeled `autorelease: pending`), creates the tag `vX.Y.Z`, and publishes the GitHub Release with the Conventional-Commit-derived notes. The PR's label flips to `autorelease: tagged`.
 
 The result: every merge keeps the standing release PR fresh; merging that PR cuts the release. No manual step is required during the normal flow.
 
@@ -143,22 +143,9 @@ If a change should produce a release, do not use a non-bumping type. For example
 
 ## Distribution via `patinaproject/skills`
 
-When a release is published **and the repository owner is `patinaproject`**, the release workflow automatically dispatches `plugin-release-bump.yml` on `patinaproject/skills`. That marketplace repo opens (or updates) a PR bumping this plugin's pinned `ref` across every Patina Project marketplace manifest.
+Patina Project plugins are distributed by being vendored directly into the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace repository via `git subtree`. The marketplace tags its own combined release; individual plugin repos no longer dispatch cross-repo workflows after their release.
 
-No per-repo opt-in is required – the `github.repository_owner == 'patinaproject'` check on the `notify-patinaproject-skills` job gates this behavior. Forks in other orgs skip the job entirely and don't need any of the setup below.
-
-Prerequisites (org-level, one-time, already configured for `patinaproject`):
-
-- A GitHub App owned by `patinaproject` named `patina-project-automation`, with **Actions: Read and write** permission, installed on `patinaproject/skills` only.
-- Two org secrets exposing the App's identity to every plugin repo:
-  - `PATINAPROJECT_AUTOMATION_APP_ID` – the App ID (small integer, not sensitive).
-  - `PATINAPROJECT_AUTOMATION_PRIVATE_KEY` – the App's private key (PEM-encoded; sensitive).
-
-The release workflow uses [`actions/create-github-app-token`](https://github.com/actions/create-github-app-token) to mint a per-job installation token from the App credentials, then passes that token to `benc-uk/workflow-dispatch` to fire `plugin-release-bump.yml` on `patinaproject/skills`.
-
-Why an org-owned App rather than a personal access token: the App identity isn't tied to any individual user, survives organizational turnover, surfaces as `patina-project-automation[bot]` in audit logs, and scopes its capabilities to one repo with one permission. Rotation is "regenerate App key", not "regenerate user PAT."
-
-If either secret is missing on a `patinaproject` plugin repo, the `Mint patina-project-automation App token` step will fail and the `notify-patinaproject-skills` job will surface that failure on the run page. The release itself (the `release-please` job) still completes regardless. To unblock, ensure both org secrets are set; or fire the marketplace bump manually with `gh workflow run plugin-release-bump.yml --repo patinaproject/skills -f plugin=<repo> -f tag=<tag>`.
+Earlier revisions of this supplement emitted a `notify-patinaproject-skills` job that dispatched a `plugin-release-bump.yml` workflow on `patinaproject/skills` (gated on `github.repository_owner == 'patinaproject'`) and required the `PATINAPROJECT_AUTOMATION_APP_ID` + `PATINAPROJECT_AUTOMATION_PRIVATE_KEY` org secrets. That cross-repo automation has been retired; the secrets and GitHub App are no longer required for the release flow.
 
 ## Writing commits for a clean changelog
 
