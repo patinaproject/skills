@@ -57,4 +57,16 @@ if [ "$claude_skills" != "$codex_skills" ]; then
   exit 1
 fi
 
-echo "OK: marketplace catalogs validated (Claude + Codex)"
+# Assert the two version fields stay in lockstep. Each host stores the
+# marketplace version in a different file per its own schema:
+#   Claude: .claude-plugin/marketplace.json metadata.version
+#   Codex:  .codex-plugin/plugin.json version
+# release-please bumps both via extra-files; this check catches manual drift.
+claude_version=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+codex_version=$(jq -r '.version' .codex-plugin/plugin.json)
+if [ "$claude_version" != "$codex_version" ]; then
+  echo "FAIL: Claude metadata.version ($claude_version) != Codex plugin.json version ($codex_version)" >&2
+  exit 1
+fi
+
+echo "OK: marketplace catalogs validated (Claude + Codex), version $claude_version"
