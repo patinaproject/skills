@@ -1,13 +1,17 @@
 # Repository File Structure
 
-This repository is the source of truth for Patina Project agent skills.
-Five skills live under `skills/<name>/` at the repo root.
+This repository is the marketplace surface for Patina Project plugins and related install
+documentation. Five skills live under `skills/<category>/<name>/` organized by category.
 
 ## Top level
 
-- `skills/`: one directory per skill; each contains a `SKILL.md` plus supporting files
-- `.agents/skills/<name>/`: committed symlinks into `../../skills/<name>/` (five in-repo)
-- `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/` (five in-repo)
+- `skills/engineering/`: engineering skills (`scaffold-repository`, `superteam`, `using-github`)
+- `skills/productivity/`: productivity skills (`office-hours`, `find-skills`)
+- `.agents/skills/<name>/`: committed symlinks into `../../skills/<category>/<name>/` (five in-repo)
+- `.claude/skills/<name>/`: committed symlinks into `../../skills/<category>/<name>/` (five in-repo)
+- `.claude-plugin/marketplace.json`: Claude marketplace catalog (plugin slug: `patinaproject-skills`)
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all 5 skill paths
+- `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `skills-lock.json`: vercel-labs CLI install lockfile (auto-generated; commit it)
 - `docs/`: contributor-facing docs for skill maintenance
 - `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling
@@ -15,31 +19,36 @@ Five skills live under `skills/<name>/` at the repo root.
 - `.lintstagedrc.cjs`: lint-staged config that excludes vendored skill files and
   superpowers artifacts from root lint
 
-## Flat skill layout
+## Category skill layout
 
 Five skills are owned by this repository:
 
-| Skill | Canonical path | Description |
-| --- | --- | --- |
-| `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
-| `superteam` | `skills/superteam/` | Issue-driven orchestration |
-| `using-github` | `skills/using-github/` | GitHub workflow skill |
-| `find-skills` | `skills/find-skills/` | Helps users discover and install agent skills |
-| `office-hours` | `skills/office-hours/` | YC-style office hours for product ideation |
+| Skill | Canonical path | Category | Description |
+| --- | --- | --- | --- |
+| `scaffold-repository` | `skills/engineering/scaffold-repository/` | engineering | Scaffold or realign a repo to the Patina Project baseline |
+| `superteam` | `skills/engineering/superteam/` | engineering | Issue-driven orchestration |
+| `using-github` | `skills/engineering/using-github/` | engineering | GitHub workflow skill |
+| `find-skills` | `skills/productivity/find-skills/` | productivity | Helps users discover and install agent skills |
+| `office-hours` | `skills/productivity/office-hours/` | productivity | YC-style office hours for product ideation |
 
-Each `skills/<name>/` directory contains at minimum a `SKILL.md` with YAML frontmatter
-including `name: <name>` and `description:` fields. Supporting files (templates, agents,
-workflow docs) live alongside `SKILL.md` in the same directory.
+Each `skills/<category>/<name>/` directory contains at minimum a `SKILL.md` with YAML
+frontmatter including `name: <name>` and `description:` fields. Supporting files (templates,
+agents, workflow docs) live alongside `SKILL.md` in the same directory.
+
+Per-skill READMEs for the three engineering skills are now maintained in-repo at
+`skills/engineering/<name>/README.md`, imported from upstream with source headers and
+install-block reframes.
 
 ## Dogfood overlay layout
 
 The five in-repo skills are also accessible through two overlay directories via one-hop
-committed symlinks:
+committed symlinks. The symlinks use the flat `<name>` key so agent runtimes see a
+consistent namespace regardless of the on-disk category layout:
 
 | Overlay path | Symlink target | Mode |
 | --- | --- | --- |
-| `.agents/skills/<name>` | `../../skills/<name>` | `120000` |
-| `.claude/skills/<name>` | `../../skills/<name>` | `120000` |
+| `.agents/skills/<name>` | `../../skills/<category>/<name>` | `120000` |
+| `.claude/skills/<name>` | `../../skills/<category>/<name>` | `120000` |
 
 These symlinks allow the agent runtime to discover the in-repo skills alongside any
 third-party skills installed by the vercel-labs CLI.
@@ -160,3 +169,17 @@ pre-flatten audits. Do not archive them until release-please has shipped at leas
 
 The three upstream repositories are to be archived (not deleted) at least one full release
 cycle after consolidation ships. Archiving is tracked as a post-merge action on issue #58.
+
+### Delta 6 — mattpocock structure (Workstreams W20–W25)
+
+The flat `skills/<name>/` layout was reorganized into a category layout to match the
+mattpocock plugin structure and enable a host-native install path via `.claude-plugin/`.
+
+| Event | Description |
+| --- | --- |
+| W20 category restructure | `git mv skills/<name>/ skills/<category>/<name>/` for all 5 skills; overlay symlinks updated to three-segment paths |
+| W21 marketplace catalog | `.claude-plugin/marketplace.json` and `.claude-plugin/plugin.json` added; `release-please-config.json` updated with `extra-files` for `metadata.version` |
+| W22 per-skill READMEs | `skills/engineering/<name>/README.md` imported from upstream repos with source headers and install-block reframes |
+| W23 root README | `README.md` rewritten in mattpocock format (100–200 lines, quickstart-first, per-skill blurbs, skills table) |
+| W24 doc sweep | `AGENTS.md`, `docs/release-flow.md`, `docs/file-structure.md`, `docs/wiki-index.md` updated for category paths and plugin slug |
+| W25 final verification | Full suite passed: `pnpm lint:md`, `actionlint`, `verify-dogfood.sh`, `verify-marketplace.sh`, SHA round-trip |

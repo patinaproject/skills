@@ -2,11 +2,16 @@
 
 ## Project Structure & Module Organization
 
-This repository is the source of truth for Patina Project agent skills.
+This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
-- `skills/`: one directory per skill; each contains a `SKILL.md` plus supporting files
-- `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
-- `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
+- `skills/engineering/`: engineering skills (`scaffold-repository`, `superteam`, `using-github`)
+- `skills/productivity/`: productivity skills (`office-hours`, `find-skills`)
+- `.agents/skills/<name>/`: symlinks into `../../skills/<category>/<name>/` (dogfood overlay)
+- `.claude/skills/<name>/`: symlinks into `../../skills/<category>/<name>/` (Claude Code overlay)
+- `.agents/plugins/marketplace.json`: repo-local Codex marketplace source of truth
+- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all 5 skill paths
+- `plugins/`: optional vendored plugin packages when this repo carries local copies
 - `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`,
   `docs/release-flow.md`, and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
@@ -25,9 +30,10 @@ following acceptance criteria format:
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
-- `pnpm verify:dogfood`: assert all five skills are discoverable via flat layout
+- `pnpm verify:dogfood`: assert all five skills are discoverable via category layout
+- `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
-- `find skills -maxdepth 2 -name SKILL.md | sort`: inspect the five skill entry points
+- `find skills -mindepth 3 -maxdepth 3 -name SKILL.md | sort`: inspect the five skill entry points
 
 ## Coding Style & Naming Conventions
 
@@ -40,8 +46,9 @@ following acceptance criteria format:
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
-- Run `bash scripts/verify-dogfood.sh` to confirm all five skills pass the flat-layout check
-- Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
+- Run `bash scripts/verify-dogfood.sh` to confirm all five skills pass the category-layout check
+- Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
+- Run `node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository --check` to
   confirm the scaffold baseline is idempotent against the current tree
 
 ## Issue and PR labels
@@ -97,8 +104,10 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo's `skills/<name>/` owns each skill for
-`name ∈ {scaffold-repository, superteam, using-github, find-skills, office-hours}`.
+This repo's `skills/engineering/<name>/` owns the package for
+`name ∈ {scaffold-repository, superteam, using-github}`.
+Standalone skills (`office-hours`, `find-skills`) own themselves at
+`skills/productivity/<name>/` and are not marketplace entries.
 
 Releases are driven by `release-please` via `.github/workflows/release-please.yml`, which
 maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y.Z>` — no
