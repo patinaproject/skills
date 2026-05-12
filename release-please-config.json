@@ -3,7 +3,14 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "patinaproject-skills"
+      "package-name": "patinaproject-skills",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.metadata.version"
+        }
+      ]
     }
   }
 }
