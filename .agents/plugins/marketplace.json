@@ -1,0 +1,20 @@
+{
+  "name": "patinaproject-skills",
+  "interface": {
+    "displayName": "Patina Project Skills"
+  },
+  "plugins": [
+    {
+      "name": "patinaproject-skills",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

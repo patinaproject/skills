@@ -12,19 +12,25 @@ npx skills@latest add patinaproject/skills
 
 The CLI prompts you to pick which skills to install and auto-detects your agent.
 
-### Install via the Claude Code host marketplace (alternative)
+### Install via the host marketplace (alternative)
+
+Claude Code:
 
 ```text
 /plugin marketplace add patinaproject/skills
 /plugin install patinaproject-skills@patinaproject-skills
 ```
 
-> **Codex users:** use the `npx skills` command above; there is no Codex
-> host-marketplace path in this repo.
->
+Codex:
+
+```text
+/marketplace add patinaproject/skills
+/install patinaproject-skills
+```
+
 > **Security note:** For environments where you want to prevent install scripts
-> from running during CLI execution, prefix the command with
-> `npm_config_ignore_scripts=true`. This is not required for standard use.
+> from running during CLI execution, prefix the `npx` command above with
+> `npm_config_ignore_scripts=true`. Not required for standard use.
 
 ### Related skills
 
