@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# verify-dogfood.sh — Asserts that all five in-repo skills are discoverable
-# via the category-based skills/<category>/<name>/ layout and the dogfood
-# overlay symlinks.
+# verify-dogfood.sh — Asserts that all four in-repo skills are discoverable
+# via the skills/<name>/ layout and the dogfood overlay symlinks.
+# (find-skills is a third-party vendored skill, not an in-repo skill.)
 # Covers AC-58-3 check c.
 #
 # Exit 0: all five skills pass all assertions.
@@ -20,7 +20,6 @@ SKILLS=(
   superteam:engineering
   using-github:engineering
   office-hours:productivity
-  find-skills:productivity
 )
 FAIL_COUNT=0
 
@@ -123,5 +122,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all five skills discoverable via category layout"
+echo "OK: all four in-repo skills discoverable via category layout"
 exit 0

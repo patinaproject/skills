@@ -26,20 +26,16 @@ The CLI prompts you to pick which skills to install and auto-detects your agent.
 > from running during CLI execution, prefix the command with
 > `npm_config_ignore_scripts=true`. This is not required for standard use.
 
+### Related skills
+
+For skill discovery and catalog navigation, install `find-skills` from the
+[vercel-labs/skills](https://github.com/vercel-labs/skills) catalog:
+
+```bash
+npx skills@latest add vercel-labs/skills@find-skills
+```
+
 ## Why these skills exist
-
-### scaffold-repository
-
-Teams spend disproportionate time on repo plumbing — commit conventions,
-markdown linting, PR templates, Husky hooks, release-please wiring, AI agent
-plugin manifests — and every new repo starts that conversation from scratch.
-`scaffold-repository` collapses that into one invocation that emits the full
-Patina Project baseline and keeps it aligned on rerun. It handles both new
-repos and realignment of existing ones, so convention drift gets caught before
-it accumulates.
-
-See [./skills/engineering/scaffold-repository/](./skills/engineering/scaffold-repository/)
-for the full README and skill contract.
 
 ### superteam
 
@@ -79,26 +75,27 @@ hackathons and side projects. Output is always a design doc, never code.
 See [./skills/productivity/office-hours/](./skills/productivity/office-hours/)
 for the skill contract.
 
-### find-skills
+### scaffold-repository
 
-As the skills ecosystem grows, discovering the right skill for a task gets
-harder. `find-skills` helps users and agents navigate the catalog — searching
-for skills by capability, explaining what each does, and walking through the
-install steps — so the answer to "how do I do X?" is a concrete skill
-reference rather than a general response.
+Teams spend disproportionate time on repo plumbing — commit conventions,
+markdown linting, PR templates, Husky hooks, release-please wiring, AI agent
+plugin manifests — and every new repo starts that conversation from scratch.
+`scaffold-repository` collapses that into one invocation that emits the full
+Patina Project baseline and keeps it aligned on rerun. It handles both new
+repos and realignment of existing ones, so convention drift gets caught before
+it accumulates.
 
-See [./skills/productivity/find-skills/](./skills/productivity/find-skills/)
-for the skill contract.
+See [./skills/engineering/scaffold-repository/](./skills/engineering/scaffold-repository/)
+for the full README and skill contract.
 
 ## Skills
 
 | Skill | Description | Category |
 |---|---|---|
-| [scaffold-repository](./skills/engineering/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline | engineering |
 | [superteam](./skills/engineering/superteam/) | Orchestrate a GitHub issue from design through merged PR | engineering |
 | [using-github](./skills/engineering/using-github/) | Patina Project GitHub workflow conventions | engineering |
 | [office-hours](./skills/productivity/office-hours/) | YC-style design partner; runs forcing questions | productivity |
-| [find-skills](./skills/productivity/find-skills/) | Discover and install agent skills | productivity |
+| [scaffold-repository](./skills/engineering/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline | engineering |
 
 ## Local iteration
 

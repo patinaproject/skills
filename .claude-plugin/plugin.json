@@ -4,7 +4,6 @@
     "./skills/engineering/scaffold-repository",
     "./skills/engineering/superteam",
     "./skills/engineering/using-github",
-    "./skills/productivity/office-hours",
-    "./skills/productivity/find-skills"
+    "./skills/productivity/office-hours"
   ]
 }

@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "patinaproject-skills",
-      "description": "Skills used by the Patina Project team — scaffold-repository, superteam, using-github, office-hours, find-skills",
+      "description": "Skills used by the Patina Project team — scaffold-repository, superteam, using-github, office-hours",
       "source": "./"
     }
   ]
