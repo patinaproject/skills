@@ -145,20 +145,39 @@ function applyFile(srcPath, destPath, mode) {
   const srcContent = readFile(srcPath);
   const destExists = fs.existsSync(destPath);
   const destContent = destExists ? readFile(destPath) : null;
+  const contentInSync = srcContent === destContent;
 
-  if (srcContent === destContent) {
-    // Already in sync
+  // For mode-bearing entries (e.g. .husky/commit-msg at 0o755), content
+  // equality is not enough: a target whose perms have been stripped (Windows
+  // checkout, plain `cp` instead of `cp -p`, editor that resets +x) will
+  // silently bypass enforcement when the hook can't execute. Compare modes
+  // too and treat a mismatch as a diff that needs writing.
+  let modeInSync = true;
+  if (mode !== undefined && destExists) {
+    const destMode = fs.statSync(destPath).mode & 0o777;
+    modeInSync = destMode === (mode & 0o777);
+  }
+
+  if (contentInSync && modeInSync) {
     return;
   }
 
   if (checkMode) {
     diffCount++;
-    changes.push(`DIFF: ${path.relative(repoRoot, destPath)}`);
+    const reason =
+      !contentInSync && !modeInSync
+        ? "DIFF (content + mode)"
+        : !contentInSync
+          ? "DIFF"
+          : "DIFF (mode)";
+    changes.push(`${reason}: ${path.relative(repoRoot, destPath)}`);
     return;
   }
 
   ensureDir(path.dirname(destPath));
-  fs.writeFileSync(destPath, srcContent, "utf8");
+  if (!contentInSync) {
+    fs.writeFileSync(destPath, srcContent, "utf8");
+  }
   if (mode !== undefined) {
     fs.chmodSync(destPath, mode);
   }
