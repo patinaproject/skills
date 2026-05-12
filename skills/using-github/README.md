@@ -17,9 +17,22 @@ branches, write changelogs, and prepare pull requests from repository rules.
   reads repository rules and applies the issue, branch, PR, and changelog
   workflows from one skill.
 
-## Quick start
+## Install
 
-> Install via the patinaproject-skills marketplace — see the [root README](../../../README.md) for Quickstart.
+Install just this skill via the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI:
+
+```bash
+npx skills@latest add patinaproject/skills --skill using-github
+```
+
+Or install the full `patinaproject-skills` plugin via your host's marketplace:
+
+- Claude Code: `/plugin marketplace add patinaproject/skills` then `/plugin install patinaproject-skills@patinaproject-skills`
+- Codex: `/marketplace add patinaproject/skills` then `/install patinaproject-skills`
+
+See the [root README](../../README.md) for the full install guide.
+
+## Quick start
 
 Invoke the GitHub behavior guide from a target repository:
 

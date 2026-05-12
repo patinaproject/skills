@@ -105,7 +105,20 @@ A run is only complete when the published branch state is stable enough to hand 
 | Reviewer | Local pre-publish review intake, finding classification, loopback routing | `superpowers:requesting-code-review`; `superpowers:receiving-code-review`; `superpowers:writing-skills` when reviewing `skills/**/*.md` |
 | Finisher | Publish-state follow-through, branch/PR/CI reporting, external post-publish review feedback | `superpowers:finishing-a-development-branch`; `superpowers:receiving-code-review` |
 
-> Install via the patinaproject-skills marketplace — see the [root README](../../../README.md) for Quickstart.
+## Install
+
+Install just this skill via the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI:
+
+```bash
+npx skills@latest add patinaproject/skills --skill superteam
+```
+
+Or install the full `patinaproject-skills` plugin via your host's marketplace:
+
+- Claude Code: `/plugin marketplace add patinaproject/skills` then `/plugin install patinaproject-skills@patinaproject-skills`
+- Codex: `/marketplace add patinaproject/skills` then `/install patinaproject-skills`
+
+See the [root README](../../README.md) for the full install guide.
 
 ## Usage
 
