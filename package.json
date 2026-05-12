@@ -15,10 +15,12 @@
   },
   "scripts": {
     "prepare": "husky",
+    "postinstall": "bash scripts/install-third-party-skills.sh",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
+    "skills:install": "bash scripts/install-third-party-skills.sh",
     "verify:dogfood": "bash scripts/verify-dogfood.sh",
     "verify:marketplace": "bash scripts/verify-marketplace.sh",
     "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
