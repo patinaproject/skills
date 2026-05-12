@@ -2,24 +2,26 @@
 
 ## Summary
 
-Consolidate the `superteam`, `bootstrap`, and `using-github` skills into `patinaproject/skills` as a flat tree of skills under `skills/<name>/` at the repo root, renaming the in-tree `bootstrap` copy to `scaffold-repository` so the directory and skill name match the skill's own description ("Use when scaffolding a new repository..."). Replace the cross-repo `repository_dispatch` bump flow with in-repo `release-please` releases (a single root package with `release-type: simple`, no per-skill `package.json` required), document `npx skills add patinaproject/skills@<name>` (the vercel-labs CLI) as the single primary install path, and migrate non-essential contributor and user docs to the repo's GitHub wiki. After this change, all five skills iterate side-by-side, can be exercised locally from a clone via a thin `.claude/skills/<name>/` symlink overlay without publishing, and ship through a single repo-wide release surface tagged `v<X.Y.Z>`.
+Consolidate the `superteam`, `bootstrap`, and `using-github` skills into `patinaproject/skills` as a category-organized tree of skills under `skills/<category>/<name>/` at the repo root (mattpocock/skills shape; categories `engineering/` and `productivity/`), renaming the in-tree `bootstrap` copy to `scaffold-repository` so the directory and skill name match the skill's own description ("Use when scaffolding a new repository..."). Replace the cross-repo `repository_dispatch` bump flow with in-repo `release-please` releases (a single root package with `release-type: simple`, no per-skill `package.json` required), document `npx skills add patinaproject/skills@<name>` (the vercel-labs CLI) as the single primary install path **alongside the host-native `/plugin marketplace add patinaproject/skills` path** (re-enabled by the mattpocock-style `.claude-plugin/` catalog), and migrate non-essential contributor and user docs to the repo's GitHub wiki. After this change, all five skills iterate side-by-side, can be exercised locally from a clone via a thin `.claude/skills/<name>/` symlink overlay without publishing, and ship through a single repo-wide release surface tagged `v<X.Y.Z>`.
 
-**Layout is flat — no plugin wrappers, no marketplace catalog, no per-skill `package.json`.** This is the vercel-labs `vercel-labs/skills` shape: a repository whose `skills/<name>/SKILL.md` paths are the canonical addresses the vercel-labs CLI resolves against. The host-native `/plugin marketplace add` install path is removed because it requires a marketplace catalog (`marketplace.json`) we no longer maintain.
+**Layout follows the mattpocock/skills hybrid pattern: category-organized skill tree at `skills/<category>/<name>/`, a small `.claude-plugin/` catalog (`marketplace.json` + `plugin.json`) for host-native installation, per-skill `README.md` for the three ex-plugin skills (imported from upstream), and a rewritten root `README.md` framed around "skills used by the Patina Project team."** Two install paths are supported in parallel — the vercel-labs CLI (`npx skills@1.5.6 add patinaproject/skills@<name>`) for granular per-skill install, and the host-native marketplace path (`/plugin marketplace add patinaproject/skills` then `/plugin install patinaproject-skills@patinaproject-skills`) for the user who prefers the in-host flow. No per-skill `package.json` (release-please uses `release-type: simple`). No `plugins/` wrappers (those were deleted in delta 4).
 
 ## Goals
 
 - Single repository for the three Patina Project skills (plus two standalone skills) with a single PR review surface for changes that touch multiple skills at once.
 - Local-first iteration: a fresh clone is sufficient to exercise every skill against itself (the `superteam` orchestration skill must be able to drive a workflow in this repo using the in-repo copy of itself).
-- Flat skill layout: every skill is reachable at `skills/<name>/SKILL.md` from the repo root. No plugin wrappers, no marketplace catalog, no per-skill `package.json` — the same shape `vercel-labs/skills` ships and the same shape the vercel-labs CLI resolves against without extra metadata.
-- `npx skills@<pinned> add patinaproject/skills@<name>` is the documented primary (and only) install path for both Codex and Claude users; the CLI handles host detection and per-agent install destinations.
-- A `release-please`-driven release flow with a single root `release-type: simple` package replaces `plugin-release-bump.yml` and the cross-repo dispatch in `docs/release-flow.md`. Tags (`v<X.Y.Z>`) exist as repo-wide version markers consumers can pin via `npx skills add patinaproject/skills@<name>#v<X.Y.Z>`; no manifest `ref` field is rewritten because no manifest exists.
-- The contributor and user surface in `docs/` shrinks to what must live in the repo (AGENTS.md, release-flow notes, superpowers design/plan artifacts); everything else moves to the repo wiki and is linked from `README.md`.
+- Mattpocock-style category-organized layout: every skill is reachable at `skills/<category>/<name>/SKILL.md` from the repo root, with two categories (`engineering/` for `scaffold-repository`, `superteam`, `using-github`; `productivity/` for `office-hours`, `find-skills`). No `plugins/` wrappers and no per-skill `package.json`, but a small `.claude-plugin/` catalog (`marketplace.json` + `plugin.json`) is present so host-native install (`/plugin marketplace add patinaproject/skills`) works alongside the vercel-labs CLI install path.
+- Two parallel install paths are supported:
+  - `npx skills@1.5.6 add patinaproject/skills@<name>` against the vercel-labs CLI for per-skill granular install (Codex and Claude users; the CLI handles host detection).
+  - `/plugin marketplace add patinaproject/skills` followed by `/plugin install patinaproject-skills@patinaproject-skills` for the host-native Claude Code flow, made possible by the `.claude-plugin/marketplace.json` re-introduced in delta 6.
+- A `release-please`-driven release flow with a single root `release-type: simple` package replaces `plugin-release-bump.yml` and the cross-repo dispatch in `docs/release-flow.md`. Tags (`v<X.Y.Z>`) exist as repo-wide version markers consumers can pin via `npx skills add patinaproject/skills@<name>#v<X.Y.Z>`; release-please does **not** rewrite a `source.ref` field on the marketplace.json because the mattpocock-style marketplace.json points its single plugin entry at `./` (the repo root), not at an externally-versioned source.
+- The contributor and user surface in `docs/` shrinks to what must live in the repo (AGENTS.md, release-flow notes, superpowers design/plan artifacts); per-skill READMEs travel with the skill folders (`skills/<category>/<name>/README.md` for the three ex-plugin skills); user-facing onboarding lives in the rewritten root `README.md` (mattpocock-format, framed around "skills used by the Patina Project team").
 - Workflow-contract surfaces in `superteam` (SKILL.md, agents/, pre-flight, routing-table, project-deltas, workflow-diagrams) remain bit-for-bit equivalent across the move so existing `docs/superpowers/<role>.md` deltas and `AC-<issue>-<n>` patterns keep working.
 
 ## Non-Goals
 
 - Redesigning the `superteam`, `bootstrap`, or `using-github` skills themselves. Behavior changes outside what consolidation forces (paths, install commands) are out of scope.
-- Maintaining a marketplace catalog. The two `marketplace.json` files and their `marketplace.local.json` dev overlays are removed; host-native `/plugin marketplace add` install instructions are removed with them. The vercel-labs CLI is the install surface.
+- Maintaining a **Codex** marketplace catalog. `.agents/plugins/marketplace.json` and `.agents/plugins/marketplace.local.json` stay deleted; Codex install resolves through `npx skills add ... --agent codex` only. The **Claude Code** marketplace catalog is **reintroduced in delta 6** at `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json` (mattpocock/skills shape) so the host-native `/plugin marketplace add patinaproject/skills` path becomes available again as a parallel install surface. This reverses delta 4's blanket "no marketplace catalog" decision for the Claude Code surface only (Codex remains catalog-free).
 - Rewriting the `obra/superpowers` workflow contract or the SKILL.md `## Done-report contracts`. Those remain authoritative.
 - Promoting Claude Code or Codex specifics that are not already in scope of these three skills. (For example, no Cowork integration work.)
 - Building a public `npx skills` registry of our own. The vercel-labs CLI is consumed via `npx`; Gate G6 stays CLOSED.
@@ -28,19 +30,75 @@ Consolidate the `superteam`, `bootstrap`, and `using-github` skills into `patina
 
 ### AC-58-1
 
-After consolidation, the canonical home of every in-repo skill is `skills/<name>/SKILL.md` at the repo root, where `<name>` is one of `{scaffold-repository, superteam, using-github, find-skills, office-hours}`. There are no `plugins/<name>/` wrapper directories, no `.codex-plugin/plugin.json` or `.claude-plugin/plugin.json` files anywhere in the tree, and no per-skill `package.json`. The in-tree `bootstrap` skill is renamed to `scaffold-repository` (directory and `SKILL.md` frontmatter `name:`); `superteam` and `using-github` names are unchanged. The three plugin-scoped skills' content moves from `plugins/<name>/skills/<name>/` to `skills/<name>/` via `git mv` so blob SHAs are preserved (Git tracks content by hash, not by path; `git mv` is rename detection plus index update, not a new write). The two standalone skills move from `.agents/skills/<name>/` to `skills/<name>/` the same way.
+After consolidation, the canonical home of every in-repo skill is `skills/<category>/<name>/SKILL.md` at the repo root, where `<category>` is `engineering` or `productivity` and `<name>` is one of `{scaffold-repository, superteam, using-github, find-skills, office-hours}`. The category assignment is:
 
-Falsifiable checks: (a) `find . -path ./node_modules -prune -o -name plugin.json -print -o -name package.json -print` returns at most the repo-root `package.json` and zero plugin manifests under any directory in the tree; (b) `find skills -maxdepth 2 -name SKILL.md | sort` returns exactly the five expected paths; (c) `git log --follow --format=%H skills/superteam/SKILL.md | tail -1` resolves to the same commit and tree-blob that `git log --follow --format=%H plugins/superteam/skills/superteam/SKILL.md` resolved to before the rename.
+- `engineering/`: `scaffold-repository`, `superteam`, `using-github`
+- `productivity/`: `office-hours`, `find-skills`
+
+There are no `plugins/<name>/` wrapper directories anywhere in the tree, no `.codex-plugin/plugin.json`, and no per-skill `package.json`. The repo does carry **one** `.claude-plugin/plugin.json` and **one** `.claude-plugin/marketplace.json` at the repo root (mattpocock/skills shape; see AC-58-2 for the explicit content shape); these are the only plugin manifests in the tree. The in-tree `bootstrap` skill is renamed to `scaffold-repository` (directory and `SKILL.md` frontmatter `name:`); `superteam` and `using-github` names are unchanged. The three plugin-scoped skills' content moves from `skills/<name>/` (delta-4 home) to `skills/engineering/<name>/` via `git mv` so blob SHAs are preserved (Git tracks content by hash, not by path; `git mv` is rename detection plus index update, not a new write). The two standalone skills move from `skills/<name>/` to `skills/productivity/<name>/` the same way. This is the **fourth** `git mv` chain in the consolidation sequence (subtree-add → bootstrap→scaffold-repository rename → plugins/<name>/skills/<name>→skills/<name> flatten → skills/<name>→skills/<category>/<name> categorize); each step has been pure-`git mv` so per-file blame survives the chain.
+
+Falsifiable checks: (a) `find . -path ./node_modules -prune -o -name plugin.json -print -o -name package.json -print -o -name marketplace.json -print` returns at most three results: the repo-root `package.json`, `./.claude-plugin/plugin.json`, and `./.claude-plugin/marketplace.json`; (b) `find skills -mindepth 3 -maxdepth 3 -name SKILL.md | sort` returns exactly the five expected paths (`skills/engineering/scaffold-repository/SKILL.md`, `skills/engineering/superteam/SKILL.md`, `skills/engineering/using-github/SKILL.md`, `skills/productivity/find-skills/SKILL.md`, `skills/productivity/office-hours/SKILL.md`); (c) `git log --follow --format=%H skills/engineering/superteam/SKILL.md | tail -1` resolves to the same commit and tree-blob that `git log --follow --format=%H plugins/superteam/skills/superteam/SKILL.md` resolved to before the rename chain.
 
 ### AC-58-2
 
-There are no marketplace manifests in this repository. `.agents/plugins/marketplace.json`, `.agents/plugins/marketplace.local.json`, `.claude-plugin/marketplace.json`, `.claude-plugin/marketplace.local.json`, and the `.agents/plugins/` and `.claude-plugin/` directories themselves are deleted in the same delta as the flatten. The vercel-labs CLI resolves install requests against the skill directories directly (it walks the repo tree for `SKILL.md` files whose frontmatter `name:` matches the requested slug); it does not require or read a marketplace catalog. The host-native `/plugin marketplace add patinaproject/skills` install path is removed from documentation and is no longer a supported install surface.
+The repository carries exactly **one** marketplace catalog directory (`.claude-plugin/`) containing exactly **two** files (`marketplace.json` and `plugin.json`), in the mattpocock/skills shape verified at design time against the operator's reference (`fuleinist/skills-1` PR introducing the pattern to mattpocock/skills, plus mattpocock/skills HEAD which ships the same `plugin.json` shape under `.claude-plugin/`). The Codex catalog (`.agents/plugins/`) and its `marketplace.local.json` dev overlays stay deleted from delta 4 — Codex installs go through the vercel-labs CLI only.
 
-Falsifiable check: `find . -name 'marketplace*.json' -not -path './node_modules/*' -not -path './.git/*'` returns empty. The pre-existing `scripts/validate-marketplace.js` is deleted (it validates a file that no longer exists) and removed from `package.json` scripts, CI workflows, and AGENTS.md.
+**Required `.claude-plugin/marketplace.json` shape (one plugin entry, source `./`)**:
+
+```json
+{
+  "name": "patinaproject-skills",
+  "owner": {
+    "name": "Patina Project",
+    "url": "https://github.com/patinaproject"
+  },
+  "metadata": {
+    "description": "Skills used by the Patina Project team",
+    "version": "1.0.0",
+    "repository": "https://github.com/patinaproject/skills"
+  },
+  "plugins": [
+    {
+      "name": "patinaproject-skills",
+      "description": "Skills used by the Patina Project team — scaffold-repository, superteam, using-github, office-hours, find-skills",
+      "source": "./"
+    }
+  ]
+}
+```
+
+**Required `.claude-plugin/plugin.json` shape (ordered skill paths)**:
+
+```json
+{
+  "name": "patinaproject-skills",
+  "skills": [
+    "./skills/engineering/scaffold-repository",
+    "./skills/engineering/superteam",
+    "./skills/engineering/using-github",
+    "./skills/productivity/office-hours",
+    "./skills/productivity/find-skills"
+  ]
+}
+```
+
+The plugin slug `patinaproject-skills` appears in three places: `marketplace.json`'s top-level `name`, `marketplace.json`'s `plugins[0].name`, and `plugin.json`'s top-level `name`. All three must match.
+
+The host-native install path is re-enabled: `/plugin marketplace add patinaproject/skills` followed by `/plugin install patinaproject-skills@patinaproject-skills` registers the marketplace and installs all five skills (the plugin scope name and the plugin name are the same — they form the marketplace-qualified handle). The vercel-labs CLI install path remains available for per-skill granular install (`npx skills add patinaproject/skills@<name>`) and is documented as the **first-listed** install path in `README.md` (mattpocock-style quickstart). Both paths resolve to the same underlying skill content under `skills/<category>/<name>/`.
+
+The `scripts/validate-marketplace.js` script — deleted in delta 4 — stays deleted; the mattpocock-style marketplace.json has no `source.ref` field for any tag-shape regex to validate, and the `plugins[0].source` value is the literal string `"./"` (not a tag-pinned upstream). A lighter marketplace-shape sanity check (one plugin entry, name matches plugin.json, source is `"./"`) is mechanized as a new `scripts/verify-marketplace.sh` step in `.github/workflows/verify.yml`; full specification is a Planner implementation detail.
+
+Falsifiable checks:
+
+- `find . -path ./node_modules -prune -o -name 'marketplace*.json' -print` returns exactly `./.claude-plugin/marketplace.json` (and nothing under `.agents/plugins/`).
+- `jq -r '.name, .plugins[0].name' .claude-plugin/marketplace.json` returns `patinaproject-skills` twice.
+- `jq -r '.name' .claude-plugin/plugin.json` returns `patinaproject-skills`.
+- `jq -r '.plugins[0].source' .claude-plugin/marketplace.json` returns `./`.
+- `jq -r '.skills[]' .claude-plugin/plugin.json | sort` matches the five `./skills/<category>/<name>` paths in AC-58-1.
 
 ### AC-58-3
 
-A contributor can clone `patinaproject/skills`, run `pnpm install` to initialize Husky and dev tooling, and exercise any of the five skills against this repository itself without first publishing or installing from any registry. Specifically, the `superteam` skill can drive an issue workflow in this repo using its own in-repo copy, the `scaffold-repository` skill can apply its scaffolding to this repo without reaching the network, and the `using-github` skill's slash commands can be exercised from this clone. Local resolution is documented in `README.md`. Falsifiable checks: (a) `scripts/apply-scaffold-repository.js skills/scaffold-repository` runs against this repo without network access and exits 0, and (b) the dogfood verification below passes.
+A contributor can clone `patinaproject/skills`, run `pnpm install` to initialize Husky and dev tooling, and exercise any of the five skills against this repository itself without first publishing or installing from any registry. Specifically, the `superteam` skill can drive an issue workflow in this repo using its own in-repo copy, the `scaffold-repository` skill can apply its scaffolding to this repo without reaching the network, and the `using-github` skill's slash commands can be exercised from this clone. Local resolution is documented in `README.md`. Falsifiable checks: (a) `scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository` runs against this repo without network access and exits 0 (path updated for the category subdir), and (b) the dogfood verification below passes.
 
 #### AC-58-3 dogfood verification
 
@@ -48,20 +106,47 @@ A fresh `claude` session opened at the repo root must discover all five in-repo 
 
 Claude Code does not expose a public "list installed skills" CLI command, so this check is mechanized as a file-presence + frontmatter check. The check script (`scripts/verify-dogfood.sh`) exits 0 if and only if all four conditions hold:
 
-1. Each path `skills/<name>/SKILL.md` exists as a real file (no symlink chain to dereference) for `name` in `{scaffold-repository, superteam, using-github, find-skills, office-hours}`.
-2. Each `skills/<name>/SKILL.md` begins with a YAML frontmatter block whose first two non-delimiter keys include `name:` and `description:`, matching the skill loader's contract documented in Claude Code's skill format.
-3. The `name:` value in each frontmatter matches the directory name (`name: scaffold-repository` under `skills/scaffold-repository/`, `name: office-hours` under `skills/office-hours/`, etc.). For `scaffold-repository` this verifies that the rename touched the SKILL.md frontmatter, not only the directory path.
-4. Each thin overlay path `.claude/skills/<name>/SKILL.md` resolves (via symlink) to the matching `skills/<name>/SKILL.md` real file. (Test with `readlink -f .claude/skills/<name>/SKILL.md` and assert the result equals the absolute path of `skills/<name>/SKILL.md`; reject broken or wrong-targeted links explicitly.) The committed overlay symlinks at `.claude/skills/<name>/` -> `../../skills/<name>/` are what give a fresh clone discoverable skills in Claude Code without any post-clone install step (Option D1, see Gate G7). Codex sees the same content via its `.agents/skills/` scan, which the overlay also satisfies (committed `.agents/skills/<name>/` -> `../../skills/<name>/` symlinks).
+1. Each path `skills/<category>/<name>/SKILL.md` exists as a real file (no symlink chain to dereference) for the five `(category, name)` pairs enumerated in AC-58-1.
+2. Each `SKILL.md` begins with a YAML frontmatter block whose first two non-delimiter keys include `name:` and `description:`, matching the skill loader's contract documented in Claude Code's skill format.
+3. The `name:` value in each frontmatter matches the **leaf** directory name (`name: scaffold-repository` under `skills/engineering/scaffold-repository/`, `name: office-hours` under `skills/productivity/office-hours/`, etc.). For `scaffold-repository` this verifies that the rename touched the SKILL.md frontmatter, not only the directory path. The category segment (`engineering/`, `productivity/`) is **not** part of the frontmatter `name:` — only the leaf name is.
+4. Each thin overlay path `.claude/skills/<name>/SKILL.md` resolves (via symlink) to the matching `skills/<category>/<name>/SKILL.md` real file. (Test with `readlink -f .claude/skills/<name>/SKILL.md` and assert the result equals the absolute path of `skills/<category>/<name>/SKILL.md`; reject broken or wrong-targeted links explicitly.) The committed overlay symlinks at `.claude/skills/<name>/` -> `../../skills/<category>/<name>/` are what give a fresh clone discoverable skills in Claude Code without any post-clone install step (Option D1, see Gate G7). Codex sees the same content via its `.agents/skills/` scan, which the overlay also satisfies (committed `.agents/skills/<name>/` -> `../../skills/<category>/<name>/` symlinks). The overlay link target updates from `../../skills/<name>/` (delta 4) to `../../skills/<category>/<name>/` (delta 6) — one extra `..` segment is **not** required because the overlay directory `.claude/skills/<name>/` is two segments deep, the target `skills/<category>/<name>/` is also two segments deep relative to the repo root, and the symlink is computed relative to the symlink's own parent directory.
 
-Pass criterion: `scripts/verify-dogfood.sh` exits 0. The check is mechanical and runs in CI on every PR that touches `skills/**` or `.claude/skills/**` or `.agents/skills/**`. The standalone-vs-plugin-scoped branching in the previous design's check is gone: every skill now has the same flat shape at `skills/<name>/SKILL.md`, so the check is uniform across all five.
+   **Worked example for `superteam`** (category `engineering`): the symlink lives at `.claude/skills/superteam`. Its parent is `.claude/skills/`. To reach `skills/engineering/superteam` from `.claude/skills/`, the relative path is `../../skills/engineering/superteam`. This works because `.claude/skills/` and `skills/` are siblings at depth 1; the `../..` ascends to the repo root, then descends into `skills/engineering/superteam`. The delta-4 overlay (when target was `skills/superteam`) used `../../skills/superteam`; delta-6 inserts `engineering/` (or `productivity/`) between `skills/` and `<name>/`, so the new target is `../../skills/<category>/<name>`. Same depth on both sides; the symlink remains valid.
+
+Pass criterion: `scripts/verify-dogfood.sh` exits 0. The check is mechanical and runs in CI on every PR that touches `skills/**` or `.claude/skills/**` or `.agents/skills/**` or `.claude-plugin/**`. The standalone-vs-plugin-scoped branching in the pre-delta-4 check is gone: every skill now has the same shape at `skills/<category>/<name>/SKILL.md`, so the check is uniform across all five.
+
+A new condition 5 is **deferred** to a Planner follow-up: validate that `.claude-plugin/plugin.json`'s `skills[]` array matches the canonical home paths exactly. The verify script's structure should add this check during delta-6 execution; the design records it as a binding requirement but defers the script-author exact-shape to the Planner.
 
 ### AC-58-4
 
-The single documented install entry point is `npx skills@<pinned> add patinaproject/skills@<name> --agent <agent>` against the vercel-labs `skills` CLI on npm (Gate G6 resolved CLOSED — this repo publishes no CLI of its own; see Gate G6 disposition). `README.md` documents this command as the first-time install path for each of the five skills. No host-native marketplace fallback is documented because the marketplace catalog is deleted (see AC-58-2). The release process pins a tested CLI version at the invocation site (initially `skills@1.5.6`, the version observed during this design); the docs include the CLI's homepage (`https://github.com/vercel-labs/skills`) and the pinned version's published-to-npm date.
+Two documented install entry points are supported in parallel; both must work against the same underlying skill content under `skills/<category>/<name>/`.
 
-Falsifiable check: from a fresh temp directory, `npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code -y` (CLI version pinned at invocation; equivalents for `superteam`, `using-github`, `find-skills`, `office-hours`) against this repo's current branch resolves the skill from `skills/scaffold-repository/SKILL.md` (where the CLI finds the matching frontmatter `name: scaffold-repository`), writes `skills-lock.json`, and produces an installed skill discoverable by Claude Code's loader. The Executor records the command (with the pinned CLI version), the resolved lock entries, and the SHA of the branch the install resolved against in the PR body. CI exercises the same install from a clean working directory against the tagged release once it exists, using the same pinned CLI version recorded in `docs/release-flow.md`.
+**Primary path — vercel-labs CLI (per-skill granular install):**
 
-**How the CLI resolves `@<name>` without a marketplace catalog (verified at design time, recorded in adversarial review).** The vercel-labs CLI's `<owner/repo@skill>` resolver walks the cloned repository's tree for `SKILL.md` files and matches the requested `<skill>` against either the directory name or the frontmatter `name:` field of each `SKILL.md` it finds. It does not require or consult a `marketplace.json`. Reference: `vercel-labs/skills@1.5.6` README and source. This is the same shape `vercel-labs/skills` itself uses (no marketplace.json in that repo), and `npx skills add vercel-labs/skills@find-skills` already exercises this resolution path in this very repo's `skills-lock.json` (entry under `skills.find-skills`, `source: vercel-labs/skills`).
+```sh
+npm_config_ignore_scripts=true npx skills@1.5.6 \
+  add patinaproject/skills@<name> --agent <agent> -y
+```
+
+This is the first-listed install path in `README.md` (mattpocock-style quickstart) for both Claude Code (`--agent claude-code`) and Codex (`--agent codex`) users. The release process pins a tested CLI version at the invocation site (`skills@1.5.6` — the version observed during this design); the docs include the CLI's homepage (`https://github.com/vercel-labs/skills`) and the pinned version's published-to-npm date. The deliberate deviation from mattpocock's `@latest` in the upstream reference is recorded in the Delta 6 history appendix (supply-chain hardening over reference fidelity).
+
+**Secondary path — Claude Code host-native marketplace (all-five-skills install):**
+
+```text
+/plugin marketplace add patinaproject/skills
+/plugin install patinaproject-skills@patinaproject-skills
+```
+
+Re-enabled in delta 6 by the `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json` re-introduction (AC-58-2). The host-native path installs all five skills as one plugin (`patinaproject-skills`), which is the granularity the mattpocock-shape `plugin.json` exposes. Users who want per-skill granular install use the primary path. Codex has no equivalent host-native install path against this repo's catalog (the Codex marketplace catalog stays deleted from delta 4); Codex users always use the primary path with `--agent codex`.
+
+`README.md` lists both paths in the Quickstart section. The vercel-labs CLI version is pinned at `skills@1.5.6`; the host-native path version is the version of the consumer's Claude Code install at install time.
+
+Falsifiable checks:
+
+- **Primary path.** From a fresh temp directory, `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code -y` (equivalents for each of `superteam`, `using-github`, `find-skills`, `office-hours`) against this repo's current branch resolves the skill from `skills/<category>/<name>/SKILL.md` (where the CLI finds the matching frontmatter `name:`), writes `skills-lock.json`, and produces an installed skill discoverable by Claude Code's loader. The Executor records the command (with the pinned CLI version), the resolved lock entries, and the SHA of the branch the install resolved against in the PR body.
+- **Secondary path.** In a Claude Code session, `/plugin marketplace add patinaproject/skills` registers the marketplace (using `.claude-plugin/marketplace.json`), and `/plugin install patinaproject-skills@patinaproject-skills` installs the plugin and exposes all five skills as commands/slash entries to the host. CI exercises this manually during release verification; full mechanization is a Planner follow-up.
+
+**How the CLI resolves `@<name>` (verified at design time, recorded in adversarial review).** The vercel-labs CLI's `<owner/repo@skill>` resolver walks the cloned repository's tree for `SKILL.md` files and matches the requested `<skill>` against either the leaf directory name or the frontmatter `name:` field of each `SKILL.md` it finds. The category subdir (`engineering/`, `productivity/`) does not affect resolution — the CLI walks recursively and matches against the leaf segment / frontmatter. Reference: `vercel-labs/skills@1.5.6` README and source. Confirmed by the existing `skills-lock.json` entry under `skills.find-skills` (`source: vercel-labs/skills`), where `vercel-labs/skills` itself uses a flat `skills/<name>/` layout — the resolver does not depend on the layout being flat.
 
 ### AC-58-5
 
@@ -75,9 +160,9 @@ Falsifiable check: from a fresh temp directory, `npx skills@1.5.6 add patinaproj
 
 The CLI constraint reinforces the choice: `npx skills add patinaproject/skills@<name>#<ref>` resolves **one** Git ref per repo. The CLI clones the repo at `<ref>` and walks for `SKILL.md` files matching the requested slug, so any per-skill tag (`superteam-v1.5.0`, etc.) would resolve to "the entire repo at that tag's commit," not "just the superteam skill at v1.5.0 with everything else at HEAD." Per-skill tags were never independently consumable in this layout — they only selected commits. `skills-lock.json`'s `computedHash` already records per-skill content provenance for reproducible re-installs; per-skill version tags would duplicate that signal without adding pin granularity.
 
-**`release-type: simple` is chosen explicitly** (over `node`) because the new layout has no `package.json` carrying a `version` field that release-please should rewrite. The `simple` strategy reads the current version from `.release-please-manifest.json`, bumps it based on conventional-commit types across the repo (`feat:` → minor, `fix:` → patch, breaking → major), and writes the new version back to the manifest. The marketplace manifests are deleted (AC-58-2), so the previous config's `extra-files` block (which rewrote `source.ref` in each `marketplace.json`) is removed; the rewritten config declares no `extra-files`, and the only artifacts of a release-please run are the `v<X.Y.Z>` tag, the manifest bump, and the root `CHANGELOG.md` entry.
+**`release-type: simple` is chosen explicitly** (over `node`) because the new layout has no `package.json` carrying a `version` field that release-please should rewrite. The `simple` strategy reads the current version from `.release-please-manifest.json`, bumps it based on conventional-commit types across the repo (`feat:` → minor, `fix:` → patch, breaking → major), and writes the new version back to the manifest. **The mattpocock-style `.claude-plugin/marketplace.json` re-introduced in delta 6 carries a `metadata.version` field** (per AC-58-2's shape). Release-please's `extra-files` block is configured to rewrite **this single field** (`metadata.version` in `.claude-plugin/marketplace.json`) on each release so host-native install consumers see the same version the Git tag advertises. The `plugins[0].source` value stays as the literal `"./"` (no `ref` field to rewrite — the plugin's source is the repo itself, not an externally-versioned tag). The Codex marketplace stays deleted, so no Codex-side rewrite is configured. The only artifacts of a release-please run are: the `v<X.Y.Z>` tag, the manifest bump in `.release-please-manifest.json`, the root `CHANGELOG.md` entry, and the `metadata.version` rewrite in `.claude-plugin/marketplace.json`.
 
-**Scaffold-repository self-apply trigger.** With one release per repo, the previous "tag matches `scaffold-repository-*` prefix" gate no longer fits. The trigger condition in `.github/workflows/release-please.yml` is rewritten to check whether the release scope includes any path under `skills/scaffold-repository/`. The mechanism is `release-please-action`'s `paths_released` output (a JSON array of package paths that were released in the run) — though with a single root package the output's shape is different, so the trigger falls back to either (a) inspecting the `release-please-action`'s commit-list output for paths matching `skills/scaffold-repository/**`, or (b) running the apply step unconditionally on every release-please run and relying on `scripts/apply-scaffold-repository.js` being idempotent (it writes a no-op commit when there are no scaffolding changes — already verified in the existing workflow's "No scaffolding changes to commit" branch). Option (b) is the simpler default; the Planner picks the exact mechanism during execution. The signing and auto-merge guarantees described in `docs/release-flow.md` are preserved either way.
+**Scaffold-repository self-apply trigger.** With one release per repo, the previous "tag matches `scaffold-repository-*` prefix" gate no longer fits. The trigger condition in `.github/workflows/release-please.yml` is rewritten to check whether the release scope includes any path under `skills/engineering/scaffold-repository/` (path updated for delta-6 category subdir). The mechanism is `release-please-action`'s `paths_released` output (a JSON array of package paths that were released in the run) — though with a single root package the output's shape is different, so the trigger falls back to either (a) inspecting the `release-please-action`'s commit-list output for paths matching `skills/engineering/scaffold-repository/**`, or (b) running the apply step unconditionally on every release-please run and relying on `scripts/apply-scaffold-repository.js` being idempotent (it writes a no-op commit when there are no scaffolding changes — already verified in the existing workflow's "No scaffolding changes to commit" branch). Option (b) is the simpler default; the Planner picks the exact mechanism during execution. The signing and auto-merge guarantees described in `docs/release-flow.md` are preserved either way. The script's input path argument updates from `skills/scaffold-repository` (delta 4) to `skills/engineering/scaffold-repository` (delta 6); the script itself doesn't change shape.
 
 **Conventional-commit grouping in the CHANGELOG.** This repo's commitlint config forbids scopes (per AGENTS.md: "Commits must use conventional commit types, no scopes, and a required GitHub issue tag"). Per-skill grouping inside a single CHANGELOG release-section therefore cannot be driven by scopes (`feat(superteam): …`) without amending the commit convention, and amending the commit convention is out of scope for this delta. The accepted trade-off: each commit message already references the issue and identifies the changed paths via the diff, so readers cross-reference per-skill attribution via the linked issue rather than via a scope token in the changelog header. This information-loss is recorded as a non-blocking trade-off, not a regression.
 
@@ -93,19 +178,82 @@ The pre-existing per-plugin `release-please-config.json` files imported by `git 
 
 ### AC-58-6
 
-Contributor and user documentation that does not need to live in the repository is migrated to the repository's GitHub wiki. `docs/` retains AGENTS.md (root), the rewritten `docs/release-flow.md`, `docs/file-structure.md`, `docs/wiki-index.md`, and the `superpowers/` design and plan artifacts. `README.md` links the wiki for install walkthroughs, troubleshooting, and per-skill usage notes. The wiki migration is documented in this design and tracked through `docs/wiki-index.md`. Path references throughout the wiki index — and through the wiki itself after publication — point at `skills/<name>/SKILL.md` (the new canonical home), not at the deleted `plugins/<name>/skills/<name>/` or the pre-flatten `.agents/skills/<name>/` paths. The `office-hours` standalone skill gets its own wiki page following the same per-skill pattern as the other four: a usage walkthrough (covering Startup-mode vs. Builder-mode entry points for office-hours; the corresponding entry points for the other skills), a "when to invoke" trigger summary lifted from the SKILL.md description, and a pointer back to `skills/<name>/SKILL.md` as the source of truth. Wiki pages do **not** repeat SKILL.md bodies — they link to them — so the SKILL.md files remain authoritative and the wiki pages are free to evolve as user-facing onboarding material.
+The wiki's role in the user-facing surface is reduced in delta 6: **per-skill `README.md` files now travel in-repo at `skills/<category>/<name>/README.md`** (for the three ex-plugin skills that have substantial upstream README content — see AC-58-9), and the rewritten root `README.md` (mattpocock-format, AC-58-9) carries the quickstart and the linked table of all five skills. The wiki retains a smaller scope:
+
+- **Wiki keeps:** longer-form troubleshooting (`npx skills` failure modes, CLI version-pinning rationale, Windows-symlink hosts), Cowork install walkthroughs that exceed README scope, the multi-step "how superteam runs end-to-end" narrative.
+- **Wiki drops (moves to in-repo `README.md` files):** the per-skill usage walkthroughs that were planned to live on the wiki. Each ex-plugin skill's wiki page is replaced by its in-repo `skills/<category>/<name>/README.md` imported from upstream. The wiki index records this as a "moved to in-repo README" line per skill rather than maintaining duplicate content.
+
+`docs/` retains AGENTS.md (root), the rewritten `docs/release-flow.md`, `docs/file-structure.md`, `docs/wiki-index.md`, and the `superpowers/` design and plan artifacts. The root `README.md` links per-skill in-repo READMEs (preferred); the wiki is linked from `README.md` only for the longer-form troubleshooting topics enumerated above. Path references throughout in-repo docs point at `skills/<category>/<name>/SKILL.md` and `skills/<category>/<name>/README.md` (the new canonical homes).
+
+Standalone skills without an imported upstream README (`office-hours`, `find-skills`) do **not** get a per-skill `README.md` — their `SKILL.md` is comprehensive on its own (matching mattpocock's pattern for per-skill folders that ship only `SKILL.md` plus optional companion `.md` files). The wiki entry for `office-hours` and `find-skills` is dropped entirely in favor of the SKILL.md being self-contained; the linked table in root `README.md` is the entry point.
 
 ### AC-58-7
 
-The workflow-contract surfaces in `skills/superteam/` (SKILL.md, agents/, `pre-flight.md`, `routing-table.md`, `project-deltas.md`, `workflow-diagrams.md`) are present at the new flat path and reachable by both hosts under the dogfood overlay, so an in-repo `/superteam` run on this repo resolves the same SKILL.md it would after an `npx skills add` install. The non-negotiable-rules SHA-256 prefix computed by `Team Lead` during `resolve_role_config` for each shipped role matches between the pre-flatten path (`plugins/superteam/skills/superteam/SKILL.md`) and the post-flatten path (`skills/superteam/SKILL.md`), demonstrating no silent edit slipped in during the `git mv`.
+The workflow-contract surfaces in `skills/engineering/superteam/` (SKILL.md, agents/, `pre-flight.md`, `routing-table.md`, `project-deltas.md`, `workflow-diagrams.md`) are present at the new category-organized path and reachable by both hosts under the dogfood overlay, so an in-repo `/superteam` run on this repo resolves the same SKILL.md it would after an `npx skills add` install. The non-negotiable-rules SHA-256 prefix computed by `Team Lead` during `resolve_role_config` for each shipped role matches between the pre-flatten path (`plugins/superteam/skills/superteam/SKILL.md`), the post-flatten / pre-categorize path (`skills/superteam/SKILL.md`), and the post-categorize path (`skills/engineering/superteam/SKILL.md`), demonstrating no silent edit slipped in during the `git mv` chain.
 
-**Scope of the SHA-256 round-trip:** the byte-equivalence assertion in this AC covers `skills/superteam/SKILL.md` (and the `agents/`, `pre-flight.md`, `routing-table.md`, `project-deltas.md`, `workflow-diagrams.md` surfaces alongside it) **only**. The `scaffold-repository` SKILL.md at `skills/scaffold-repository/SKILL.md` is **exempt** from any SHA-256 round-trip assertion: the rename delta (now landed) rewrites the in-tree SKILL.md frontmatter and body bytes as cataloged in the "Plugin rename" section, so its post-flatten SHA-256 will differ from the upstream `patinaproject/bootstrap@v1.10.0` reference; the rename diff itself is the audit surface. The same exemption applies to `skills/using-github/SKILL.md` — only `superteam` is bound by the SHA-256 round-trip rule because only `superteam`'s `Team Lead` consumes that hash as a runtime contract.
+**Scope of the SHA-256 round-trip:** the byte-equivalence assertion in this AC covers `skills/engineering/superteam/SKILL.md` (and the `agents/`, `pre-flight.md`, `routing-table.md`, `project-deltas.md`, `workflow-diagrams.md` surfaces alongside it) **only**. The `scaffold-repository` SKILL.md at `skills/engineering/scaffold-repository/SKILL.md` is **exempt** from any SHA-256 round-trip assertion: the rename delta (now landed) rewrites the in-tree SKILL.md frontmatter and body bytes as cataloged in the "Plugin rename" section, so its post-flatten SHA-256 will differ from the upstream `patinaproject/bootstrap@v1.10.0` reference; the rename diff itself is the audit surface. The same exemption applies to `skills/engineering/using-github/SKILL.md` — only `superteam` is bound by the SHA-256 round-trip rule because only `superteam`'s `Team Lead` consumes that hash as a runtime contract.
 
-**Why `git mv` preserves the SHA:** Git stores file content as blobs hashed by SHA-1 (legacy) and SHA-256 (with the `--object-format=sha256` setting; this repo uses SHA-1 for its own object store but the file-content SHA-256 used by `Team Lead`'s `resolve_role_config` is computed independently on the file's bytes). `git mv` updates the index path of an existing blob without rewriting the blob, and rename detection in `git log --follow` and `git diff -M` tracks the path change. The file-content SHA-256 we audit is therefore identical before and after `git mv plugins/superteam/skills/superteam skills/superteam` so long as no editor touched the file between the moves. Verification: a pre-move `sha256sum plugins/superteam/skills/superteam/SKILL.md` and a post-move `sha256sum skills/superteam/SKILL.md` must produce identical hexdigests. The PR body's "Test coverage" table records the hex against AC-58-7 (the pre-flatten value is recorded in PR #59 as `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356`; the post-flatten value must match).
+**Why `git mv` preserves the SHA:** Git stores file content as blobs hashed by SHA-1 (legacy) and SHA-256 (with the `--object-format=sha256` setting; this repo uses SHA-1 for its own object store but the file-content SHA-256 used by `Team Lead`'s `resolve_role_config` is computed independently on the file's bytes). `git mv` updates the index path of an existing blob without rewriting the blob, and rename detection in `git log --follow` and `git diff -M` tracks the path change. The file-content SHA-256 we audit is therefore identical before and after each `git mv` in the chain (`plugins/superteam/skills/superteam` → `skills/superteam` → `skills/engineering/superteam`) so long as no editor touched the file between the moves. Verification: `sha256sum skills/engineering/superteam/SKILL.md` must match the pre-flatten value recorded in PR #59 (`87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356`).
 
 ### AC-58-8
 
-The merge approach for the three source repositories is explicitly chosen and documented: Git history is preserved via `git subtree add --prefix=plugins/<name>` per source repo. The plan derived from this design follows the choice without revisiting it. The three source repos remain readable as archived references for at least one release cycle after consolidation. The migration history record produced by this AC notes the **three** events for the scaffold skill in order: (a) `git subtree add --prefix=plugins/bootstrap patinaproject/bootstrap v1.10.0` import (commit `912d6d9`); (b) `git mv plugins/bootstrap plugins/scaffold-repository` rename (commit `794e199`); (c) `git mv plugins/scaffold-repository/skills/scaffold-repository skills/scaffold-repository` flatten (the delta-4 commit landed during execution after this design absorbs operator PR #59 comments). The corresponding two events for `superteam` and `using-github` are also recorded: subtree import, then `git mv plugins/<name>/skills/<name> skills/<name>` flatten. Per-file blame survives the chain because `git mv` is a rename, not a rewrite (verified by `git log --follow`). The upstream `patinaproject/bootstrap` repository keeps its original name and `v1.10.0` tag as the archived reference; the rename and flatten are local to the imported copy in this repository only.
+The merge approach for the three source repositories is explicitly chosen and documented: Git history is preserved via `git subtree add --prefix=plugins/<name>` per source repo. The plan derived from this design follows the choice without revisiting it. The three source repos remain readable as archived references for at least one release cycle after consolidation. The migration history record produced by this AC notes the **four** events for the scaffold skill in order:
+
+1. `git subtree add --prefix=plugins/bootstrap patinaproject/bootstrap v1.10.0` import (commit `912d6d9`).
+2. `git mv plugins/bootstrap plugins/scaffold-repository` rename (commit `794e199`).
+3. `git mv plugins/scaffold-repository/skills/scaffold-repository skills/scaffold-repository` flatten (delta 4, landed during execution after operator PR #59 comments).
+4. `git mv skills/scaffold-repository skills/engineering/scaffold-repository` categorize (delta 6, this design's amendment; commit to land during execution).
+
+The corresponding three events for `superteam` and `using-github`: subtree import, `git mv plugins/<name>/skills/<name> skills/<name>` flatten (delta 4), `git mv skills/<name> skills/engineering/<name>` categorize (delta 6).
+
+The corresponding two events for the previously-standalone skills: initial port to `.agents/skills/<name>/` (`office-hours` from PR #1143; `find-skills` from `npx skills add vercel-labs/skills@find-skills`), `git mv .agents/skills/<name> skills/<name>` flatten (delta 4), `git mv skills/<name> skills/productivity/<name>` categorize (delta 6).
+
+Per-skill READMEs imported from upstream (`scaffold-repository`, `superteam`, `using-github`) are recorded as **new file creation** under `skills/engineering/<name>/README.md` in delta 6, not as `git mv` from upstream — the import is a manual content-copy with light edits to strip the obsolete `patinaproject/skills` marketplace install blocks and reframe install instructions. The upstream commit SHA the import resolves against (`v1.10.0` for `bootstrap`, `v1.5.0` for `superteam`, `v2.0.0` for `using-github`) is recorded in the README file itself as a "Source" line below the title; the same provenance is mirrored in `docs/file-structure.md`'s Migration history section.
+
+Per-file blame survives the `git mv` chain because `git mv` is a rename, not a rewrite (verified by `git log --follow`). Per-skill READMEs imported in delta 6 do **not** carry upstream blame — their git history starts at the delta-6 import commit. The upstream `patinaproject/bootstrap` repository keeps its original name and `v1.10.0` tag as the archived reference; the rename, flatten, and categorize are local to the imported copy in this repository only.
+
+### AC-58-9
+
+Delta 6 rewrites the user-facing README surface to match the mattpocock/skills format, framed around "skills used by the Patina Project team." Three concrete artifacts are produced:
+
+**1. Rewritten root `README.md` (mattpocock format).** The root README is restructured to follow the mattpocock/skills shape:
+
+1. Title: `# Skills used by the Patina Project team` (Patina-equivalent of mattpocock's "Skills For Real Engineers")
+2. Optional skills.sh badge (`[![skills.sh](https://skills.sh/b/patinaproject/skills)](https://skills.sh/patinaproject/skills)`) — included if the badge endpoint resolves at design time; otherwise omitted as a follow-up.
+3. One-paragraph tagline framing the repo as a curated set used in practice, not a generic marketplace.
+4. **Quickstart** section with both install paths from AC-58-4 (vercel-labs CLI first; host-native marketplace second). The vercel-labs invocation pins `skills@1.5.6` per the supply-chain decision; the deliberate deviation from mattpocock's `@latest` is footnoted with a one-line rationale ("we pin the CLI version at the invocation site for supply-chain reasons; see docs/release-flow.md").
+5. **Why these skills exist** — a problem-narrative for each skill (one paragraph per skill, lifted from the upstream README or the SKILL.md `description:` field as appropriate). This mirrors mattpocock's "Why These Skills Exist" section structure.
+6. **Skills table** linking to each skill's folder in the repo, replacing the prior version-pinned table. Columns: `Skill`, `Description`, `Category`. **No version column** — release-please publishes one tag per repo (AC-58-5), so per-skill versions are not meaningful. Each `Skill` cell links to the in-repo skill folder (`skills/engineering/scaffold-repository/`, etc.), so clicking through goes to the skill's README (for the three ex-plugin skills) or its SKILL.md (for the two standalones).
+7. Newsletter-signup section from mattpocock is **omitted** (we don't have one).
+8. Logo/banner is **omitted** (no Patina branding asset prepared for this delta; the title alone carries identification).
+
+The 180-line delta-4 README is replaced. Length target: 100–200 lines, matching mattpocock's compact-but-narrative shape (their README is ~155 lines at HEAD).
+
+**2. Per-skill `README.md` for the three ex-plugin skills.** Each of `skills/engineering/scaffold-repository/`, `skills/engineering/superteam/`, `skills/engineering/using-github/` gets a `README.md` imported from the upstream tagged release:
+
+- `scaffold-repository/README.md` ← `patinaproject/bootstrap@v1.10.0/README.md` (269 lines).
+- `superteam/README.md` ← `patinaproject/superteam@v1.5.0/README.md` (250 lines).
+- `using-github/README.md` ← `patinaproject/using-github@v2.0.0/README.md` (236 lines).
+
+Each imported README requires three categories of edit before commit:
+
+a. **Title rename.** `# Bootstrap` → `# scaffold-repository` (lowercase to match the skill's frontmatter `name:`); `# Superteam` → `# superteam`; `# using-github` is already lowercase.
+b. **Install-block reframe.** Strip the obsolete pre-delta-6 install blocks (`/plugin marketplace add patinaproject/skills` followed by `/plugin install <name>@patinaproject-skills`, and the various `npx skills add patinaproject/skills@<name>` examples). Replace with a short pointer back to the root `README.md`'s Quickstart section ("See [the root README](../../../README.md) for install instructions"). Rationale: install instructions live in one place to prevent drift; per-skill READMEs focus on the skill's behavior and rationale.
+c. **Source line.** Add a one-line `Source:` reference immediately below the title pointing at the upstream tag (e.g. `Source: imported from [patinaproject/bootstrap@v1.10.0](https://github.com/patinaproject/bootstrap/tree/v1.10.0)`). This records provenance without a separate provenance catalog edit.
+
+No other edits to imported README content. The README is a verbatim port of upstream-tagged content modulo the three categories above; mermaid diagrams, prose, code blocks, and link targets to in-repo files (which now resolve relative to the new `skills/engineering/<name>/` location) are preserved.
+
+**3. No per-skill `README.md` for the two standalone skills.** `skills/productivity/office-hours/` and `skills/productivity/find-skills/` ship only their `SKILL.md` (matching mattpocock's pattern for per-skill folders without imported README content). The root README's "Skills table" links these two cells to the SKILL.md directly rather than to the folder.
+
+**Why this is a re-introduction of catalog material (delta 6 reverses delta 4's catalog deletion for the Claude Code surface, by operator direction).** The deliberate reversal is recorded explicitly in the Delta 6 history appendix; delta 4's "no marketplace catalog at all" decision was operator-driven, and delta 6's "re-introduce one marketplace catalog at `.claude-plugin/` per mattpocock/skills" is also operator-driven. The cost (re-introducing files we just deleted) is accepted as a learning iteration: the operator's binding direction shifted from "vercel-labs pure" (F1) to "mattpocock hybrid" (F2) after surveying the mattpocock reference. Both decisions are honored in sequence, not papered over.
+
+**Falsifiable checks:**
+
+- (a) Root `README.md` H1 reads `# Skills used by the Patina Project team` (or a verbally equivalent phrasing the operator approves).
+- (b) Root `README.md` contains a section heading `## Why these skills exist` (case-insensitive) and a section heading `## Quickstart` (or `## Quick start`).
+- (c) Root `README.md` skills table has exactly five rows, each row's first cell linking via Markdown to `skills/<category>/<name>/` (folder) for the three ex-plugin skills and `skills/<category>/<name>/SKILL.md` (file) for the two standalones, and **no** column carrying a version string.
+- (d) `skills/engineering/scaffold-repository/README.md` exists, has a `Source:` line referencing `patinaproject/bootstrap@v1.10.0` (regex `patinaproject/bootstrap.*v1\.10\.0`), and its H1 starts with `# scaffold-repository`. Equivalent checks for `superteam/README.md` (v1.5.0) and `using-github/README.md` (v2.0.0).
+- (e) `skills/productivity/office-hours/README.md` and `skills/productivity/find-skills/README.md` do **not** exist as separate files (`SKILL.md` is the only `.md` at those leaves).
 
 ## Context
 
@@ -135,51 +283,73 @@ Vendor each plugin under `plugins/<name>/` with `.codex-plugin/plugin.json`, `.c
 
 Same plugin layout as Option A but a single repo-wide version. Already rejected pre-PR-59 for weakening per-skill semver signal.
 
-### Option F1 (selected — vercel-labs pure): Flat `skills/<name>/` with per-skill `release-type: simple`, no marketplace catalog
+### Option F1 (delta 4 selection — vercel-labs pure): Flat `skills/<name>/` with single-package `release-type: simple`, no marketplace catalog
 
-Move each skill to `skills/<name>/` at the repo root. No `plugins/` directory. No marketplace manifests of any kind. No per-skill `package.json`. The vercel-labs CLI resolves `npx skills add patinaproject/skills@<name>` by walking the cloned tree for `SKILL.md` files matching the requested slug (verified design-time against `vercel-labs/skills@1.5.6`). `release-please` runs against a single root package with `release-type: simple` (delta 5; the originally-selected per-skill release-please configuration was consolidated to one package after operator-binding survey of comparable repos showed ecosystem unanimity on single-version marketplaces — see AC-58-5 and the Delta 5 appendix entry). Releases emit a plain `v<X.Y.Z>` tag that consumers pin via `npx skills add patinaproject/skills@<name>#v<X.Y.Z>`. Dogfood overlay is the only structural sugar that remains: `.claude/skills/<name>/` and `.agents/skills/<name>/` are committed thin symlinks pointing at `../../skills/<name>/` so a fresh clone is discoverable to both Claude Code and Codex without a post-clone install step.
+Move each skill to `skills/<name>/` at the repo root. No `plugins/` directory. No marketplace manifests of any kind. No per-skill `package.json`. The vercel-labs CLI resolves `npx skills add patinaproject/skills@<name>` by walking the cloned tree for `SKILL.md` files matching the requested slug (verified design-time against `vercel-labs/skills@1.5.6`). `release-please` runs against a single root package with `release-type: simple` (delta 5). Releases emit a plain `v<X.Y.Z>` tag that consumers pin via `npx skills add patinaproject/skills@<name>#v<X.Y.Z>`. Dogfood overlay is the only structural sugar that remains: `.claude/skills/<name>/` and `.agents/skills/<name>/` are committed thin symlinks pointing at `../../skills/<name>/` so a fresh clone is discoverable to both Claude Code and Codex without a post-clone install step.
 
-**Selected approach: F1.** It matches the operator's binding direction from PR #59 review, deletes a full layer of catalog/wrapper plumbing, and aligns this repo's shape with the canonical `vercel-labs/skills` reference. The host-native marketplace-add fallback is dropped (it required a marketplace.json we no longer ship); users who distrust the npm-distributed CLI can clone the repo and copy the SKILL.md directly, which is the same fallback `vercel-labs/skills` itself documents.
+**F1 was selected in delta 4** and matched the operator's PR #59 review direction. Delta 6 supersedes F1 with F2 below; F1 is preserved here as part of the design history.
+
+### Option F2 (selected — mattpocock hybrid): Category-organized `skills/<category>/<name>/` with `.claude-plugin/` catalog and per-skill READMEs
+
+Move each skill to `skills/<category>/<name>/` at the repo root with two categories (`engineering/`, `productivity/`), matching the mattpocock/skills HEAD layout. Reintroduce a Claude Code marketplace catalog at `.claude-plugin/marketplace.json` and `.claude-plugin/plugin.json` (mattpocock-style: one plugin entry named `patinaproject-skills`, `source: "./"`, ordered skill paths in `plugin.json.skills[]`). The Codex marketplace catalog stays deleted (delta 4); Codex installs via the vercel-labs CLI only. The three ex-plugin skills each get a per-skill `README.md` imported from their upstream tagged release (`bootstrap@v1.10.0`, `superteam@v1.5.0`, `using-github@v2.0.0`); the two standalones get `SKILL.md` only. The root `README.md` is rewritten in mattpocock format, framed around "skills used by the Patina Project team," with both install paths documented and a no-version skills table linking to each skill folder.
+
+Two install paths coexist:
+
+- **vercel-labs CLI (primary, per-skill granular)** — `npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@<name> --agent <agent> -y`. CLI version pinned at `@1.5.6` (deviating from mattpocock's `@latest` for supply-chain reasons; trade-off documented in delta 6 adversarial review).
+- **Host-native Claude Code marketplace (secondary, all-five-skills install)** — `/plugin marketplace add patinaproject/skills` then `/plugin install patinaproject-skills@patinaproject-skills`. Re-enabled by the reintroduced `.claude-plugin/marketplace.json` (mattpocock-shape).
+
+`release-please` runs against a single root package with `release-type: simple` (carried forward from delta 5); the `extra-files` block rewrites the `metadata.version` field in `.claude-plugin/marketplace.json` on each release so host-native install consumers see the same version the Git tag advertises. Dogfood overlay symlinks update target from `../../skills/<name>/` (F1) to `../../skills/<category>/<name>/` (F2); same depth, no extra `..` segments needed.
+
+**Selected approach: F2.** It matches the operator's binding delta-6 direction (adopt mattpocock structure), preserves the vercel-labs CLI install path as the primary user-facing flow, restores the host-native install path that was lost in delta 4, and imports substantive upstream README content into the repo where reviewers can find it via folder navigation. The cost — re-introducing two `.claude-plugin/` files that delta 4 deleted, plus one round of `git mv` to categorize — is accepted as a learning iteration recorded in the Delta history. F1 is retained above for design-history continuity; F1's "no marketplace catalog" decision is replaced by F2's "mattpocock-shape catalog for Claude only" decision in delta 6.
 
 ## Proposed file layout
 
 ```text
 patinaproject/skills/
-  skills/                                  # CANONICAL skill home (real files)
-    scaffold-repository/
-      SKILL.md                             # frontmatter "name: scaffold-repository"
-      ... (any supporting files lifted from the upstream plugin)
-    superteam/
-      SKILL.md
-      agents/...
-      pre-flight.md
-      routing-table.md
-      project-deltas.md
-      workflow-diagrams.md
-    using-github/
-      SKILL.md
-      ... (supporting files: workflows/, slash commands, etc.)
-    find-skills/
-      SKILL.md                             # vendored from vercel-labs/skills, tracked in skills-lock.json
-    office-hours/
-      SKILL.md                             # standalone skill, ported from patinaproject/patinaproject#1143
+  .claude-plugin/                          # mattpocock-style Claude Code marketplace catalog (delta 6)
+    marketplace.json                       # one plugin entry, name="patinaproject-skills", source="./"
+    plugin.json                            # name="patinaproject-skills", skills: [./skills/<cat>/<name>, ...]
+  skills/                                  # CANONICAL skill home (real files; category-organized in delta 6)
+    engineering/
+      scaffold-repository/
+        SKILL.md                           # frontmatter "name: scaffold-repository"
+        README.md                          # imported from patinaproject/bootstrap@v1.10.0/README.md (delta 6)
+        ... (supporting files lifted from upstream: templates/, scripts/, etc.)
+      superteam/
+        SKILL.md
+        README.md                          # imported from patinaproject/superteam@v1.5.0/README.md (delta 6)
+        agents/...
+        pre-flight.md
+        routing-table.md
+        project-deltas.md
+        workflow-diagrams.md
+      using-github/
+        SKILL.md
+        README.md                          # imported from patinaproject/using-github@v2.0.0/README.md (delta 6)
+        ... (supporting files: workflows/, slash commands, etc.)
+    productivity/
+      office-hours/
+        SKILL.md                           # standalone; ported from patinaproject/patinaproject#1143; no README.md
+      find-skills/
+        SKILL.md                           # vendored from vercel-labs/skills; tracked in skills-lock.json; no README.md
   .claude/skills/                          # Dogfood overlay (Option D1 — committed symlinks; see Gate G7)
-    scaffold-repository  -> ../../skills/scaffold-repository
-    superteam            -> ../../skills/superteam
-    using-github         -> ../../skills/using-github
-    find-skills          -> ../../skills/find-skills
-    office-hours         -> ../../skills/office-hours
+    scaffold-repository  -> ../../skills/engineering/scaffold-repository
+    superteam            -> ../../skills/engineering/superteam
+    using-github         -> ../../skills/engineering/using-github
+    find-skills          -> ../../skills/productivity/find-skills
+    office-hours         -> ../../skills/productivity/office-hours
   .agents/skills/                          # Dogfood overlay for Codex (same target set)
-    scaffold-repository  -> ../../skills/scaffold-repository
-    superteam            -> ../../skills/superteam
-    using-github         -> ../../skills/using-github
-    find-skills          -> ../../skills/find-skills
-    office-hours         -> ../../skills/office-hours
+    scaffold-repository  -> ../../skills/engineering/scaffold-repository
+    superteam            -> ../../skills/engineering/superteam
+    using-github         -> ../../skills/engineering/using-github
+    find-skills          -> ../../skills/productivity/find-skills
+    office-hours         -> ../../skills/productivity/office-hours
   skills-lock.json                         # committed; tracks the vercel-labs find-skills install for reproducibility
   scripts/
-    apply-scaffold-repository.js           # in-repo invocation of skills/scaffold-repository on release
+    apply-scaffold-repository.js           # in-repo invocation of skills/engineering/scaffold-repository on release
     verify-dogfood.sh                      # AC-58-3 dogfood check (file-presence + frontmatter + overlay resolution)
-  release-please-config.json               # one root package; release-type: simple; no extra-files
+    verify-marketplace.sh                  # delta-6 sanity check for .claude-plugin/marketplace.json + plugin.json (AC-58-2)
+  release-please-config.json               # one root package; release-type: simple; extra-files rewrites .claude-plugin/marketplace.json metadata.version
   .release-please-manifest.json            # one entry: ".": "1.0.0"
   CHANGELOG.md                             # repo-root, written by release-please after the first release
   docs/
@@ -201,17 +371,24 @@ patinaproject/skills/
                                            # for CLI-installed skills that are NOT part of the in-repo five
 ```
 
-**Deleted from the pre-flatten tree (delta 4):**
+**Deleted from the pre-flatten tree (delta 4) and still deleted after delta 6:**
 
 - `plugins/` (entire tree — scaffold-repository, superteam, using-github wrappers)
-- `.agents/plugins/` (Codex marketplace catalog tree)
-- `.claude-plugin/` (Claude Code marketplace catalog tree)
-- All `marketplace.json` and `marketplace.local.json` files in both catalog directories
-- `scripts/validate-marketplace.js` (no marketplace to validate)
+- `.agents/plugins/` (Codex marketplace catalog tree — stays deleted; Codex installs via vercel-labs CLI only)
+- `.agents/plugins/marketplace.json` and `.agents/plugins/marketplace.local.json`
+- `scripts/validate-marketplace.js` (the old multi-file marketplace validator)
 - `.gitattributes` `export-ignore` rules that pointed at deleted overlay directories
 - Pre-existing per-plugin `release-please-config.json` / `.release-please-manifest.json` files imported as carry-over from upstream (`plugins/<name>/release-please-config.json`, `plugins/<name>/.release-please-manifest.json`)
 - Per-plugin `package.json` files at `plugins/<name>/package.json` (subtree carry-over; not part of the live release pipeline)
 - `packages/skills-cli/` (already absent from the prior delta)
+
+**Re-introduced in delta 6 (reverses part of delta 4's catalog deletion):**
+
+- `.claude-plugin/marketplace.json` — Claude Code marketplace catalog, mattpocock-style; explicit shape recorded in AC-58-2.
+- `.claude-plugin/plugin.json` — Plugin definition with ordered skill paths; explicit shape recorded in AC-58-2.
+- `scripts/verify-marketplace.sh` — Lighter sanity check for the mattpocock-shape catalog (one plugin entry, name matches, source is `"./"`); replaces the deleted `scripts/validate-marketplace.js`'s role in CI.
+
+**Note on the F1→F2 reversal:** delta 4 deleted both `.claude-plugin/` and `.agents/plugins/` on operator direction (PR #59 comments objected to "local marketplace" files). Delta 6 partially reverses this on operator direction (the mattpocock/skills hybrid pattern is now the binding reference). The asymmetry — Claude Code catalog re-introduced, Codex catalog stays deleted — reflects that the operator-cited reference (mattpocock/skills) is Claude-Code-specific; Codex install continues to flow through the vercel-labs CLI with `--agent codex`. Both deltas are operator-driven and recorded in the Delta history appendix.
 
 The wiki carries everything that used to live in per-plugin `README.md` install walkthroughs, user-facing troubleshooting, and any non-design tutorial content.
 
@@ -219,36 +396,45 @@ The wiki carries everything that used to live in per-plugin `README.md` install 
 
 ## Canonical skill layout
 
-This repo has one canonical home for each skill — `skills/<name>/` at the repo root, holding real files. Two thin overlay directories exist solely so the repo's own Claude Code and Codex sessions discover the five in-repo skills out of a fresh clone with no install step:
+This repo has one canonical home for each skill — `skills/<category>/<name>/` at the repo root (delta 6 category-organized layout), holding real files. Two thin overlay directories exist solely so the repo's own Claude Code and Codex sessions discover the five in-repo skills out of a fresh clone with no install step. A separate Claude Code marketplace catalog at `.claude-plugin/` (delta 6, mattpocock-style) enables host-native `/plugin marketplace add` installation:
 
 ```text
-skills/<name>/SKILL.md            <-- canonical home (real file; the source of truth and the install target)
+skills/<category>/<name>/SKILL.md     <-- canonical home (real file; the source of truth and the install target)
   ^
   | symlink (dogfood overlay; Option D1)
   |
-.claude/skills/<name>/SKILL.md    <-- Claude Code skill loader scans here
-.agents/skills/<name>/SKILL.md    <-- Codex skill loader scans here
+.claude/skills/<name>/SKILL.md        <-- Claude Code skill loader scans here (dogfood overlay; flat name)
+.agents/skills/<name>/SKILL.md        <-- Codex skill loader scans here (dogfood overlay; flat name)
+
+.claude-plugin/marketplace.json       <-- delta 6: Claude Code marketplace catalog (one plugin entry, source "./")
+.claude-plugin/plugin.json            <-- delta 6: plugin manifest with ordered skill paths
 ```
+
+The dogfood overlay paths remain flat (`.claude/skills/<name>/`, `.agents/skills/<name>/`) because the host scanners walk the immediate children of `.claude/skills/` and `.agents/skills/`; introducing category subdirs at the overlay level would break host discovery. The symlink *targets* are category-organized (`../../skills/<category>/<name>/`), but the *symlink locations* are flat.
 
 Rationale:
 
-- `skills/<name>/` is the **canonical home**. It is what the vercel-labs CLI's `<owner/repo@skill>` resolver finds when it walks the cloned repo tree for `SKILL.md` files matching `<skill>`. It is also what `npx skills add patinaproject/skills@<name>` copies (with `--agent <agent>`) or symlinks (without `--agent`) to the consumer's local agent directory. For `superteam` and `using-github` the SKILL.md content is byte-equivalent to the upstream tag (and to the pre-flatten path under `plugins/<name>/skills/<name>/`) per AC-58-7. For `scaffold-repository` it carries the rename surfaces cataloged in the "Plugin rename" section.
-- `.claude/skills/<name>/` and `.agents/skills/<name>/` are **dogfood overlays**. Each is a single committed symlink whose target is `../../skills/<name>/`. They exist because Claude Code's skill loader scans `.claude/skills/**/SKILL.md` and Codex's scans `.agents/skills/**/SKILL.md`; neither host scans `skills/<name>/` directly. Without the overlay, a fresh clone would have skills that are invisible to the host running in this repo's worktree. Committing the overlay symlinks (Option D1; see Gate G7) makes dogfood work without a post-clone install command.
-- The overlay symlinks are **dev-time iteration aids**, and they are no longer required to be excluded from any release surface because there is no release surface that would carry them: no `npm publish` (Gate G6 CLOSED), no marketplace catalog (AC-58-2), and the consumer install path (`npx skills add patinaproject/skills@<name>`) targets `skills/<name>/` directly. The overlay symlinks travel with the repo as ordinary tracked content.
+- `skills/<category>/<name>/` is the **canonical home** (delta 6). It is what the vercel-labs CLI's `<owner/repo@skill>` resolver finds when it walks the cloned repo tree for `SKILL.md` files matching `<skill>` (the CLI resolves by walking, so the category subdir does not affect resolution). It is also what `npx skills add patinaproject/skills@<name>` copies (with `--agent <agent>`) or symlinks (without `--agent`) to the consumer's local agent directory. It is also what the `.claude-plugin/plugin.json`'s `skills[]` array references (one entry per skill, `./skills/<category>/<name>` shape). For `superteam` and `using-github` the SKILL.md content is byte-equivalent to the upstream tag (and to the pre-flatten path under `plugins/<name>/skills/<name>/` and the post-delta-4 path under `skills/<name>/`) per AC-58-7. For `scaffold-repository` it carries the rename surfaces cataloged in the "Plugin rename" section.
+- `.claude/skills/<name>/` and `.agents/skills/<name>/` are **dogfood overlays**. Each is a single committed symlink whose target is `../../skills/<category>/<name>/`. They exist because Claude Code's skill loader scans `.claude/skills/**/SKILL.md` and Codex's scans `.agents/skills/**/SKILL.md`; neither host scans `skills/<category>/<name>/` directly. Without the overlay, a fresh clone would have skills that are invisible to the host running in this repo's worktree. Committing the overlay symlinks (Option D1; see Gate G7) makes dogfood work without a post-clone install command.
+- The overlay symlinks are **dev-time iteration aids**. The Claude Code marketplace catalog at `.claude-plugin/marketplace.json` (delta 6) points its single plugin entry at `./` (the repo root), so the catalog effectively distributes the entire repo — including the overlay symlinks. This is the operator-binding mattpocock pattern; mattpocock/skills HEAD ships exactly the same shape. The overlay symlinks are harmless under host-native install because they are symlinks to *the same skills* the consumer is installing; they do not pollute the consumer's `.claude/skills/` directory. The consumer install path (`npx skills add patinaproject/skills@<name>`) targets `skills/<category>/<name>/` directly and does not touch the overlays. The overlay symlinks travel with the repo as ordinary tracked content.
 - Third-party skills installed locally via `npx skills add <other-source>@<other-skill>` land in `.claude/skills/<other-skill>/` and `.agents/skills/<other-skill>/`. These are gitignored (negated allowlist for the five in-repo overlay symlinks); see "Gitignore strategy" in the file layout above.
 
 The vercel-labs `skills` CLI defaults to copying skill content when `--agent <agent>` is passed and to symlinking otherwise. For the in-repo `find-skills` install (`npx skills add vercel-labs/skills@find-skills --agent claude-code -y`), the CLI wrote a copy and produced `skills-lock.json` at the repo root. As part of the delta-4 flatten, the copied content is moved to `skills/find-skills/SKILL.md` (the canonical home) and the `.claude/skills/find-skills/` directory is replaced by a symlink — same shape as the four other in-repo skills. `skills-lock.json` stays committed at the repo root for reproducible re-installs.
 
 ### Skill shapes after the flatten (single pattern)
 
-The previous design distinguished "plugin-scoped" and "standalone" skill patterns. The flat layout collapses that distinction: **every skill is a directory under `skills/` with a `SKILL.md` real file inside, possibly accompanied by supporting files (sub-skill assets, scripts, sub-directories).** The shape is the same whether the skill has one file (`office-hours`, `find-skills`) or many (`superteam` with its `agents/`, `pre-flight.md`, etc.). The difference between simple and complex skills is now visible from `ls skills/<name>/`, not from a wrapper directory.
+The previous design distinguished "plugin-scoped" and "standalone" skill patterns. The category-organized layout (delta 6) keeps that distinction collapsed: **every skill is a directory under `skills/<category>/` with a `SKILL.md` real file inside, possibly accompanied by supporting files (sub-skill assets, scripts, sub-directories, and — for the three ex-plugin skills — an imported `README.md`).** The shape is the same whether the skill has two files (`office-hours`, `find-skills`: SKILL.md only) or many (`superteam` with its `agents/`, `pre-flight.md`, README.md, etc.). The difference between simple and complex skills is visible from `ls skills/<category>/<name>/`, not from a wrapper directory.
 
 What this collapses:
 
-- **Plugin manifests.** Gone. There is no `.codex-plugin/plugin.json` or `.claude-plugin/plugin.json` anywhere in the tree. The vercel-labs CLI does not consult plugin manifests.
-- **Marketplace entries.** Gone. There is no marketplace catalog. The vercel-labs CLI resolves `@<name>` by walking the tree, not by reading a catalog.
+- **Codex plugin manifests.** Gone. There is no `.codex-plugin/plugin.json` anywhere in the tree. The vercel-labs CLI is the only Codex install path.
+- **Codex marketplace entries.** Gone (delta 4; unchanged by delta 6). The `.agents/plugins/` tree stays deleted. The vercel-labs CLI resolves `@<name>` by walking the tree for Codex consumers.
 - **Per-skill `package.json`.** Gone. `release-please` uses `release-type: simple`, which does not require a `package.json` per package.
-- **The "promote a standalone skill to a plugin" PR shape.** No longer needed. A skill that grows files just gets more files under `skills/<name>/`. No structural promotion happens.
+- **The "promote a standalone skill to a plugin" PR shape.** No longer needed. A skill that grows files just gets more files under `skills/<category>/<name>/`. No structural promotion happens. (Re-categorization between `engineering/` and `productivity/` is a `git mv`; promotion to a different shape is not a workflow this repo supports.)
+
+What is reintroduced (delta 6, Claude Code surface only):
+
+- **`.claude-plugin/marketplace.json`** and **`.claude-plugin/plugin.json`** at the repo root. Mattpocock-style hybrid: marketplace.json carries one plugin entry pointing at `./`; plugin.json carries the ordered `skills[]` array. Both files together enable the host-native `/plugin marketplace add patinaproject/skills` → `/plugin install patinaproject-skills@patinaproject-skills` flow. See AC-58-2 for the exact JSON shape.
 
 What stays:
 
@@ -292,7 +478,8 @@ The `<owner/repo@skill>` syntax resolves against the published GitHub repository
 - The CLI is a third-party dependency. The README install instructions pin a tested CLI **version at invocation** (e.g. `npx skills@1.5.6 add patinaproject/skills@scaffold-repository --agent claude-code -y`), not a recommended version range in prose. `npx <package>@<version>` resolves to that exact version regardless of the npm `latest` dist-tag at run time. The docs include both the upstream repo URL (`https://github.com/vercel-labs/skills`) and the tested version's published-to-npm date.
 - `npx skills add` should be run with `--ignore-scripts` (`npm_config_ignore_scripts=true npx skills@<pinned> add ...`). The README documents this env-var-prefix form as the **default** invocation.
 - `skills-lock.json` (produced by the CLI and committed) pins the resolved **skill** SHA, not the **CLI** version. CLI-version pinning lives in the install command syntax and in `docs/release-flow.md`.
-- **No host-native marketplace fallback.** The marketplace catalog is deleted (AC-58-2). A user who distrusts the npm-distributed CLI can clone the repo and copy `skills/<name>/SKILL.md` directly into their agent's skill directory; this is the fallback documented in `docs/release-flow.md`. The `/plugin marketplace add` and `codex plugin marketplace add` paths no longer apply to this repo.
+- **Claude Code host-native marketplace fallback (re-enabled in delta 6).** `/plugin marketplace add patinaproject/skills` followed by `/plugin install patinaproject-skills@patinaproject-skills` installs all five skills via the reintroduced `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json` (AC-58-2). The Codex `codex plugin marketplace add` path remains deleted; Codex consumers always go through the vercel-labs CLI with `--agent codex`.
+- **Clone-and-copy fallback.** For users who distrust both the npm-distributed CLI and the host-native marketplace flow, clone the repo and copy `skills/<category>/<name>/SKILL.md` directly into the agent's skill directory; this is the manual fallback documented in `docs/release-flow.md`.
 - If the upstream `vercel-labs/skills` package is unpublished or rewritten in a way that breaks the documented install pattern, the manual clone-and-copy fallback above is the documented rollback. The repo's `docs/release-flow.md` records this as the rollback procedure.
 
 Host detection / auto-invocation: out of scope (the vercel-labs CLI handles host detection via `--agent`; Gate G4 closed under the prior delta).
@@ -385,28 +572,29 @@ After delta-4 the rename surfaces collapse — most of the original catalog targ
 
 ## Wiki migration plan
 
-Move to the wiki:
+Move to the wiki (delta 6 reduced scope):
 
-- Per-host install walkthroughs (Claude Code, Codex) with screenshots; install commands all use `npx skills@<pinned> add patinaproject/skills@<name>` form (no marketplace-add path).
-- Per-skill usage examples and FAQs that today live in upstream `README.md`s.
-- Troubleshooting notes for `npx skills` install failures and CLI version pinning.
-- The "how superteam runs end-to-end" narrative currently in upstream `patinaproject/superteam/README.md`.
+- Per-host install walkthroughs (Claude Code, Codex) with screenshots; install commands cover both the vercel-labs CLI form (`npx skills@1.5.6 add patinaproject/skills@<name>`) and — for Claude Code — the host-native form (`/plugin marketplace add patinaproject/skills`).
+- Troubleshooting notes for `npx skills` install failures, CLI version pinning, and host-native install issues.
+- The "how superteam runs end-to-end" narrative (longer-form than what fits in the in-repo `skills/engineering/superteam/README.md`).
+- Cowork install walkthroughs (out of scope of any in-repo README).
 
-Keep in the repo:
+Keep in the repo (delta 6 expanded scope — per-skill READMEs now travel in-repo):
 
 - `AGENTS.md` (root) and the existing `CLAUDE.md` import shim
-- `docs/release-flow.md` (rewritten for release-please with `release-type: simple`)
-- `docs/file-structure.md` (rewritten for the flat `skills/` layout and dogfood overlays)
-- `docs/wiki-index.md` (canonical index of wiki pages)
+- `docs/release-flow.md` (rewritten for release-please with `release-type: simple` and the `.claude-plugin/marketplace.json` extra-files entry)
+- `docs/file-structure.md` (rewritten for the category-organized `skills/<category>/<name>/` layout and dogfood overlays)
+- `docs/wiki-index.md` (canonical index of remaining wiki pages — smaller after delta 6 since per-skill content moved into the repo)
 - `docs/superpowers/specs/` and `docs/superpowers/plans/`
-- `README.md` reduced to: one-paragraph repo description, `npx skills` quickstart, links to the wiki for everything else, and a links table for the five skills
+- `README.md` rewritten in mattpocock format per AC-58-9: one-paragraph tagline, two-install-path Quickstart, "Why these skills exist" problem-narrative section, no-version skills table linking to each skill folder. (Replaces the prior "reduced to" framing — the README is the primary user-facing landing surface again, not just a wiki pointer.)
+- `skills/engineering/scaffold-repository/README.md`, `skills/engineering/superteam/README.md`, `skills/engineering/using-github/README.md` (per AC-58-9 imports).
 
-There is no marketplace manifest description to link the wiki from. The README is the only consumer-facing landing surface.
+The `.claude-plugin/marketplace.json`'s `metadata.description` field carries the one-line repo description so host-native `/plugin marketplace browse` users see it; the `metadata.repository` field links to the GitHub repo. The wiki link is not surfaced in the marketplace catalog — it lives in the root README only.
 
 ## Open questions
 
-1. **(Resolved — Gate G1 CLOSED-OBSOLETE.)** Tag-prefix stripping is no longer applicable. With one release per repo and tag form `v<X.Y.Z>` (no component prefix), the rule is trivially satisfied and no marketplace manifest exists for release-please to rewrite.
-2. **(Resolved — Gate G2 removed.)** Codex `path:` source support is no longer applicable; no marketplace catalog exists for Codex to read.
+1. **(Resolved — Gate G1 CLOSED-OBSOLETE.)** Tag-prefix stripping is no longer applicable. With one release per repo and tag form `v<X.Y.Z>` (no component prefix), the rule is trivially satisfied and release-please rewrites only the `metadata.version` field in `.claude-plugin/marketplace.json` — a plain SemVer string with no prefix to strip.
+2. **(Resolved — Gate G2 removed for Codex; Claude side reintroduced in delta 6.)** Codex `path:` source support is no longer applicable; the Codex marketplace catalog stays deleted. Delta 6 reintroduces the Claude Code catalog at `.claude-plugin/marketplace.json` (mattpocock-style, `plugins[0].source: "./"`); Claude Code's host-native install path is re-enabled.
 3. **Scaffold-repository self-apply during release.** Gate G3 STAYS. The trigger condition is "release-please tag with prefix `scaffold-repository-`"; the self-apply runs in the same workflow run that publishes the tag. Whether the result is committed to a follow-up PR vs. directly on the default branch is a Planner-implementation detail; the M2 baseline already on this branch chose direct commit on the default branch with `github-actions[bot]` signing.
 4. **CLI host detection robustness.** Resolved by adopting the vercel-labs `skills` CLI. Gate G4 REMOVED.
 5. **Wiki content ownership.** Gate G5 STAYS. Recommendation: canonical wiki, with `docs/wiki-index.md` listing the wiki pages so review of wiki link-rot stays in-repo.
@@ -416,16 +604,17 @@ There is no marketplace manifest description to link the wiki from. The README i
 
 ### Gate G1 — Tag-prefix stripping (CLOSED-OBSOLETE)
 
-The prior design had a gate around how `release-please`'s component-prefixed tags (`scaffold-repository-v1.11.0`, etc.) would be stripped to the bare `vX.Y.Z` form required by the marketplace validator's regex. Two subsequent deltas obsoleted this gate from different angles:
+The prior design had a gate around how `release-please`'s component-prefixed tags (`scaffold-repository-v1.11.0`, etc.) would be stripped to the bare `vX.Y.Z` form required by the marketplace validator's regex. Three subsequent deltas obsoleted this gate from different angles:
 
-- **Delta 4 (flatten).** The marketplace catalog was deleted, so there is no manifest `ref` field for release-please to rewrite and no validator regex to satisfy.
+- **Delta 4 (flatten).** The marketplace catalogs were deleted, so there was no manifest `ref` field for release-please to rewrite and no validator regex to satisfy.
 - **Delta 5 (single-version).** Release-please now publishes a single repo-wide tag (`v<X.Y.Z>`) with no component prefix at all, so there is nothing to strip.
+- **Delta 6 (mattpocock structure).** The Claude Code marketplace catalog is re-introduced at `.claude-plugin/marketplace.json`, but its `plugins[0].source` is the literal `"./"` (no `ref` field) and the field release-please rewrites is `metadata.version` (a plain `X.Y.Z` semver string, no `v` prefix and no per-skill prefix). The release-please `extra-files` block does a single-field rewrite; no regex stripping needed.
 
-The gate is closed as obsolete on both grounds. Consumers pass the plain `v<X.Y.Z>` ref directly to the vercel-labs CLI: `npx skills add patinaproject/skills@<name>#v<X.Y.Z>`.
+The gate remains closed-obsolete on all three grounds. Consumers pass the plain `v<X.Y.Z>` ref directly to the vercel-labs CLI: `npx skills add patinaproject/skills@<name>#v<X.Y.Z>`. Host-native marketplace consumers do not pass a ref; they get whatever `metadata.version` the catalog at HEAD advertises.
 
 ### Gate G2 — Codex `path:` source support (REMOVED)
 
-The prior design needed Codex to accept a `path:` source in `marketplace.local.json` for the dev overlay. With the marketplace catalog deleted there is no Codex `marketplace.json` to consult. Codex's skill discovery reads `.agents/skills/<name>/SKILL.md` directly, and the dogfood overlay (Option D1) satisfies that scan with committed symlinks. The gate is removed.
+The prior design needed Codex to accept a `path:` source in `marketplace.local.json` for the dev overlay. With the Codex marketplace catalog deleted (delta 4, unchanged by delta 6) there is no Codex `marketplace.json` to consult. Codex's skill discovery reads `.agents/skills/<name>/SKILL.md` directly, and the dogfood overlay (Option D1) satisfies that scan with committed symlinks. The gate is removed. **Delta 6 reintroduces a Claude Code catalog at `.claude-plugin/marketplace.json` (mattpocock-style); the Codex side stays gated-out because the operator's reference (mattpocock/skills) is Claude-Code-specific.**
 
 ### Gate G3 — Scaffold-repository self-apply (STAYS)
 
@@ -473,7 +662,7 @@ Canonical wiki, with `docs/wiki-index.md` as the in-repo index.
 ## Risks
 
 - **Workflow-contract drift in `superteam`.** Moving SKILL.md changes its path and may inadvertently change line endings, trailing newlines, or YAML key order, which would shift the non-negotiable-rules SHA-256 prefix. Mitigation: AC-58-7 explicitly asserts the SHA-256 prefix round-trips, and the merge uses `git subtree add` rather than a fresh copy so byte content is preserved.
-- **Vercel-labs CLI supply-chain.** Adopting an upstream CLI for the primary install path means an unpublish or compromise upstream affects our docs. With the marketplace-add fallback removed (catalog deleted), this risk increases: there is no in-repo install surface. Mitigations: (a) pin the CLI version at the invocation site (`npx skills@1.5.6 add ...`) so README drift cannot silently change what installs; (b) recommend `npm_config_ignore_scripts=true` as the default invocation; (c) document a clone-and-copy fallback (clone the repo, copy `skills/<name>/SKILL.md` into the agent's skill directory manually) as the documented rollback in `docs/release-flow.md` for users who distrust the CLI entirely; (d) record the upstream repo URL and tested version in `docs/release-flow.md`. The dogfood overlay symlinks let the user verify the fallback locally before adopting it elsewhere.
+- **Vercel-labs CLI supply-chain.** Adopting an upstream CLI for the primary install path means an unpublish or compromise upstream affects our docs. Delta 6 re-introduces a host-native install fallback (Claude Code marketplace via `.claude-plugin/marketplace.json`), reducing this risk for Claude Code users — they have a working alternative if the CLI is unavailable. Codex users have no host-native fallback; their only mitigation is the clone-and-copy fallback. Mitigations: (a) pin the CLI version at the invocation site (`npx skills@1.5.6 add ...`) so README drift cannot silently change what installs; (b) recommend `npm_config_ignore_scripts=true` as the default invocation; (c) document a clone-and-copy fallback (clone the repo, copy `skills/<category>/<name>/SKILL.md` into the agent's skill directory manually) as the universal rollback in `docs/release-flow.md`; (d) record the upstream repo URL and tested version in `docs/release-flow.md`. The dogfood overlay symlinks let the user verify the fallback locally before adopting it elsewhere.
 - **Dogfood overlay symlinks committed (Option D1).** Committing `.claude/skills/<name>/` and `.agents/skills/<name>/` symlinks means the repo tree includes content that doesn't function on Windows hosts without symlink support enabled. Mitigation: this repo already has symlinks via `find-skills`'s prior install; no Windows-only contributor has been encountered. If/when one is, the fallback is to clone with `git config core.symlinks true` (admin shell on Windows) or to use WSL. Documented in `README.md`. The committed symlinks resolve at file-open time on all POSIX hosts; no per-clone setup step is required there.
 - **Single-release blast radius.** Once consolidated under one repo-wide version (delta 5), a bad release tag affects every skill in the repo at once — there are no per-skill version streams to roll back independently. Mitigation: a consumer holding a working `npx skills add patinaproject/skills@<name>#v<prev>` install can stay pinned to the previous tag while a follow-up release ships; the CLI's `skills-lock.json` records the resolved commit so re-installs of `@<name>#v<prev>` are reproducible. For the two non-release-please-tracked skills (`find-skills` vendored upstream; `office-hours` repo-versioned), HEAD-pinned installs propagate a bad commit immediately; mitigation is the standard PR-review gate before merge to the default branch. The blast-radius cost is the deliberate trade-off of single-version simplicity over per-skill granularity, recorded in AC-58-5.
 - **History-preservation cost.** `git subtree add` adds repo size proportional to the three source histories. Combined, this is small (the three repos are <50 MB), but it does mean `git clone` time grows. Acceptable.
@@ -673,3 +862,73 @@ Reviewer context: same-thread Brainstormer fallback. No fresh subagent was avail
 4. **Migration history preservation.** The upstream tags `bootstrap-v1.10.0`, `superteam-v1.5.0`, `using-github-v2.0.0` live on the upstream archived repos (`patinaproject/bootstrap`, `patinaproject/superteam`, `patinaproject/using-github`), not in this repo's `git tag` output. The subtree-merge commits in this repo (`912d6d9`, `028165e`, `54157bc`) carry the imported history and are referenced in `docs/file-structure.md`'s Migration history section. AC-58-5 explicitly records that the underlying per-skill upstream tags are preserved in those records rather than as live tags on this repo. Disposition: clean pass; existing migration-history records are sufficient and no new artifact is required.
 
 No material findings required further revisions beyond what the delta absorption already encodes. The single-version configuration aligns this repo with the ecosystem convention surveyed in the operator's rationale and removes one layer of release-please configuration complexity (three packages → one package) without affecting any AC-58-1 through AC-58-4 or AC-58-6 through AC-58-8 invariant. The information-loss of per-skill version-signal in the CHANGELOG header is the deliberate trade-off recorded in AC-58-5; it is not a regression because per-skill pin granularity was never independently meaningful.
+
+### 2026-05-12 — Operator delta revision: adopt mattpocock/skills structure (delta 6)
+
+Source: three operator feedback items supplied to the Brainstormer in this thread after delta 5 landed and CI was green at commit `6d945df`. The operator's reference is [mattpocock/skills](https://github.com/mattpocock/skills) (verified at HEAD during this delta) plus the [fuleinist/skills-1 PR](https://github.com/fuleinist/skills-1/pull/1) that introduces the same pattern variant with the marketplace.json shape. The operator-binding deltas absorbed in this revision are organized by feedback item.
+
+#### Feedback item 1: adopt mattpocock-style marketplace catalog with plugin name `patinaproject-skills`
+
+This **partially reverses delta 4's catalog deletion**. Delta 4 deleted `.claude-plugin/marketplace.json` and `.claude-plugin/marketplace.local.json` on operator direction (PR #59 comments 3220051689 and 3220059128). Delta 6 reintroduces both `.claude-plugin/marketplace.json` and `.claude-plugin/plugin.json` (the latter is new in delta 6; the former is reinstated) in the mattpocock/skills hybrid shape, also on operator direction. The Codex-side `.agents/plugins/` catalog stays deleted because the mattpocock reference is Claude-Code-only.
+
+The reversal is explicit, not silent: the operator's prior PR-59 comments and the operator's delta-6 prompt are both binding direction. Both are honored in sequence; neither is papered over. The cost — re-creating files we just deleted, plus one new `.claude-plugin/plugin.json` — is the deliberate trade-off accepted as a learning iteration. (Adversarial review records the cost; the operator's binding direction makes acceptance non-negotiable.)
+
+Absorbed deltas:
+
+1. **AC-58-2 rewritten.** The "no marketplace manifests" assertion is replaced by the explicit mattpocock-shape catalog spec: one `.claude-plugin/marketplace.json` and one `.claude-plugin/plugin.json`, both at the repo root. The exact JSON shape for both files is recorded in AC-58-2 with the plugin name `patinaproject-skills` (operator-specified slug) appearing in three places: `marketplace.json.name`, `marketplace.json.plugins[0].name`, and `plugin.json.name`. The `plugins[0].source` is the literal `"./"` (the plugin's source is the repo itself), and `plugins[0]` does **not** carry a `ref` field — release-please rewrites only the `metadata.version` field on each release.
+2. **AC-58-1 amended.** A new bullet records that the repo carries exactly one `.claude-plugin/plugin.json` and one `.claude-plugin/marketplace.json` at the root (the only plugin manifests in the tree); the `find` falsifiable check is updated to allow these two paths in addition to the repo-root `package.json`.
+3. **AC-58-4 rewritten.** Two install paths now coexist: vercel-labs CLI (primary, per-skill granular) and host-native marketplace (secondary, all-five-skills install). The host-native path uses `/plugin marketplace add patinaproject/skills` followed by `/plugin install patinaproject-skills@patinaproject-skills`. Both paths are documented in the new root README.
+4. **AC-58-5 amended.** Release-please's `extra-files` block is reintroduced for one purpose: rewrite `metadata.version` in `.claude-plugin/marketplace.json` on each release. The `simple` strategy still drives the version bump; the `extra-files` block ensures host-native install consumers see the same version the Git tag advertises. No `plugins[0].source.ref` rewrite (the field doesn't exist in the mattpocock shape).
+5. **Gate G1 disposition extended.** The CLOSED-OBSOLETE state is reaffirmed for a third reason (delta 6): the reintroduced `marketplace.json` carries no `ref` field for release-please to rewrite, and the `metadata.version` field is a plain SemVer string with no prefix — so there is still nothing to strip.
+6. **Gate G2 disposition refined.** REMOVED for Codex stays in force; the gate now notes explicitly that the Claude side has a catalog (re-introduced in delta 6) while the Codex side does not.
+
+#### Feedback item 2: per-skill READMEs and a no-version table linking to each skill folder
+
+Absorbed deltas:
+
+1. **New AC-58-9** captures the README rewrites: root `README.md` follows mattpocock format, per-skill READMEs imported from upstream for the three ex-plugin skills, no per-skill READMEs for the two standalones (matching mattpocock's pattern for per-skill folders without imported README content). The five `Source:` references and the install-block reframe are recorded explicitly.
+2. **Reference correction on mattpocock per-skill README pattern.** Verification at design time of `mattpocock/skills` HEAD showed that per-skill folders contain `SKILL.md` plus optional companion `.md` files (e.g. `tests.md`, `mocking.md`) — **not** `README.md` files. Per-skill READMEs are an *addition* on top of mattpocock's pattern for skills that have substantial upstream README content worth preserving (the three ex-plugin skills); the two standalones get `SKILL.md` only, which is fidelity to mattpocock. The category-level READMEs that mattpocock ships (`skills/engineering/README.md`, `skills/productivity/README.md`) are **not** carried into delta 6 because the root README's "Skills table" subsumes the category-overview role; the Planner may revisit this if the root README grows too long.
+3. **AC-58-6 wiki migration reframed.** Per-skill walkthroughs are no longer on the wiki — they live in `skills/<category>/<name>/README.md` for the three ex-plugin skills. The wiki retains longer-form troubleshooting and the multi-step "how superteam runs end-to-end" narrative only.
+
+#### Feedback item 3: rewrite root README in mattpocock format, framed around "skills used by the Patina Project team"
+
+Absorbed deltas:
+
+1. **AC-58-9 root-README rewrite spec.** The mattpocock structure is followed (title, optional badge, tagline, Quickstart, Why these skills exist, Skills table) with Patina-equivalent content. The newsletter signup and logo banner are dropped (we don't have them). The version column is dropped from the Skills table (release-please publishes one tag per repo per AC-58-5; per-skill versions are not meaningful).
+2. **CLI pin retained at `@1.5.6`**, deviating from mattpocock's `@latest`. The deviation is footnoted in the README and elaborated in the adversarial review below. Operator direction for this delta is "match mattpocock for structure"; the supply-chain hardening from delta 4 is a binding prior decision the operator did not waive in delta 6. The two directives are reconciled by adopting the structure but documenting the pin deviation; if the operator wants `@latest` instead, the Planner can swap the version-pin during execution without affecting any AC text.
+3. **Skills table links to in-repo skill folders.** Each row's first cell links to `skills/<category>/<name>/` (folder) for the three ex-plugin skills and to `skills/<category>/<name>/SKILL.md` (file) for the two standalones. Reviewers can click through to see the skill source.
+
+#### Category subdir decision (operator-deferred; this design picks)
+
+The operator's prompt presented two options: adopt `skills/<category>/<name>/` (mattpocock fidelity) or keep `skills/<name>/` flat. This design picks **category subdirs** for the following reasons:
+
+1. **Reference fidelity.** mattpocock's HEAD ships `skills/engineering/<name>/` and `skills/productivity/<name>/`; matching the reference structure makes the operator's "adopt mattpocock structure" directive maximally honored.
+2. **Future scale.** As the skill count grows past five, a flat directory becomes harder to navigate. Categorization shifts the navigation cost from "scan 10+ entries" to "pick category, then pick from 2-5 entries per category."
+3. **Cost is bounded.** The categorize step is one `git mv` per skill (five total). Per-file blame survives the `git mv` chain (delta-1 subtree → delta-2 rename → delta-4 flatten → delta-6 categorize is four steps; `git mv` rename detection handles arbitrary chains).
+
+The cost is recorded as an item in AC-58-8 (migration history extended to four events for the scaffold skill, three events for `superteam`/`using-github`, two events for the two standalones). The category assignment is `engineering/` for `scaffold-repository`, `superteam`, `using-github`; `productivity/` for `office-hours`, `find-skills` (per the operator's prompt's recommended assignment).
+
+#### Other delta-6 amendments
+
+1. **AC-58-3 dogfood verification path-updated.** The overlay symlink targets shift from `../../skills/<name>/` (delta 4) to `../../skills/<category>/<name>/` (delta 6); the AC's worked-example section is added so reviewers can verify the relative-path math is correct (both sides depth 2; the symlink resolves cleanly).
+2. **AC-58-7 SHA-256 round-trip extended to the four-step chain.** The pre-flatten value at `plugins/superteam/skills/superteam/SKILL.md` must equal the post-delta-4 value at `skills/superteam/SKILL.md` must equal the post-delta-6 value at `skills/engineering/superteam/SKILL.md`. Each `git mv` is index-only; the file bytes are preserved across all three transitions.
+3. **AC-58-8 migration history extended.** The categorize event is recorded as the fourth event for `scaffold-repository`, the third event for `superteam` and `using-github`, and the third event for the standalones. README imports are recorded as new-file creations (no `git mv` chain) with the upstream tag SHA as provenance.
+4. **`Deleted from the pre-flatten tree` section reframed.** The "Re-introduced in delta 6" subsection makes the partial F1→F2 reversal explicit and lists the two re-created files plus the new `verify-marketplace.sh`.
+5. **Proposed file layout regenerated** to show the category-organized tree, the `.claude-plugin/` catalog, and the new per-skill `README.md` files at the right places.
+6. **`scripts/validate-marketplace.js` stays deleted (delta 4).** The replacement check is a lighter `scripts/verify-marketplace.sh` (delta 6) that validates the mattpocock-shape (one plugin entry, name matches plugin.json, source is `"./"`) — full script specification is a Planner implementation detail.
+
+No prior acceptance criterion was weakened. AC-58-1, AC-58-2, AC-58-3, AC-58-4, AC-58-5, AC-58-6, AC-58-7, and AC-58-8 are all amended in scope; AC-58-9 is added. No non-negotiable rule was removed. The byte-equivalence requirement for `superteam` workflow-contract surfaces (AC-58-7) is reinforced by the categorize being another pure `git mv`.
+
+#### Delta-only adversarial review (mattpocock structure)
+
+Reviewer context: same-thread Brainstormer fallback. No fresh subagent was available in this thread; the review below is the same teammate re-reading the delta-6 absorption against the four dimensions named in the operator prompt (F1→F2 reversal cost, category subdirs vs. flat, per-skill README import quality, CLI install pin `@1.5.6` vs. `@latest`).
+
+1. **F1→F2 reversal cost** (source: AC-58-2 rewrite, "Re-introduced in delta 6" subsection in the file layout). Delta 4 deleted the marketplace catalog on the operator's PR-59 directive. Delta 6 reintroduces a subset of it (Claude side only, mattpocock shape) on the operator's delta-6 directive. The cost is concrete: re-creating one `.claude-plugin/marketplace.json` (similar shape to the deleted file but with `source: "./"` instead of `source: { source: 'github', ... }`) and creating one new `.claude-plugin/plugin.json` (not present in any prior delta). Reviewer position: the cost is bounded (two small JSON files, no code) and the iteration is legitimate — the operator's reference (mattpocock/skills HEAD) is materially different from the delta-4 reference (vercel-labs/skills) and the operator has updated direction accordingly. Accepted as a learning iteration. Recorded explicitly in the "Re-introduced in delta 6" subsection so the F1→F2 reversal is visible to future reviewers; the alternative ("keep F1, ignore delta 6") would have ignored binding operator direction. Disposition: clean pass; accept the reversal.
+
+2. **Category subdirs vs. flat** (source: AC-58-1 rewrite, Category subdir decision section above). The trade-off was named in the operator prompt and resolved by picking category subdirs for the three reasons above (fidelity, scale, bounded cost). Reviewer position: the alternative (keep flat) has one significant benefit — the existing five-skill tree is small enough that the navigation cost of categorization is arguably unnecessary today. However, the operator's reference is unambiguously category-organized at mattpocock HEAD (`skills/engineering/`, `skills/productivity/`), and "adopt mattpocock structure" with category subdirs absent would be a partial adoption that costs *more* over time than committing to the structure now. The `git mv` chain extension cost is one-time and bounded. Disposition: clean pass; category subdirs adopted.
+
+3. **Per-skill README import quality** (source: AC-58-9, line counts surveyed at design time). The three upstream READMEs are substantive (`bootstrap` 269 lines, `superteam` 250 lines, `using-github` 236 lines) and contain real onboarding content: mermaid flowcharts, problem narratives, code examples, "what you get" sections. Each contains an obsolete install block referencing the pre-delta-4 marketplace install pattern; AC-58-9 specifies stripping these blocks and pointing back to the root README. Concrete edits per file are mechanical (three categories: title rename, install-block reframe, `Source:` line addition); no rewriting of content. Reviewer position: the content is good enough to import; the alternative ("write per-skill READMEs from scratch") would discard 700+ lines of existing high-quality content the original authors already produced. mattpocock's per-skill folders do **not** ship README.md (corrected reference; mattpocock ships category-level READMEs at `skills/<category>/README.md`), so introducing per-skill READMEs is a slight *extension* of the reference pattern rather than fidelity to it. The extension is justified by the existing high-quality upstream content; without it, the imported content would be lost. Disposition: clean pass; import the three READMEs with the three categories of edit.
+
+4. **CLI install pin (`@1.5.6` vs. `@latest`)** (source: AC-58-4, AC-58-9). mattpocock's reference uses `npx skills@latest add mattpocock/skills`. Delta 6's adopted README spec uses `npx skills@1.5.6 add patinaproject/skills@<name>`. The deviation is deliberate: delta 4's adversarial review (recorded in the delta-4 history entry) made supply-chain hardening a binding decision — `npx <pkg>@<latest-tag>` resolves to whatever the npm `latest` dist-tag points at when the command runs, which means a compromised or unpublished upstream changes installed behavior silently; `npx <pkg>@<version>` resolves to that exact version regardless of the dist-tag. This decision was operator-confirmed in delta 4. Delta 6's operator direction ("adopt mattpocock structure") is structural; it does not explicitly waive the supply-chain decision. Reviewer position: keep the `@1.5.6` pin and footnote the deviation; if the operator explicitly waives the supply-chain pin during Gate 1 review, the Planner can swap `@1.5.6` for `@latest` in the README without affecting any AC text. Both options are documented in the Gate 1 packet so the operator can make the trade-off explicit. Disposition: clean pass with explicit trade-off recorded; default is `@1.5.6` pin retained.
+
+No material findings required further revisions beyond what the delta absorption already encodes. The four dimensions in the operator prompt are all resolved with clean passes (1 and 3 with explicit acceptance of bounded cost, 2 with explicit decision, 4 with explicit trade-off and reversible default). One observation worth flagging for the Gate 1 packet: the operator's note that mattpocock's marketplace.json shape (as quoted in the operator prompt) matches the `fuleinist/skills-1` PR rather than mattpocock HEAD — at HEAD, mattpocock ships only `.claude-plugin/plugin.json` (no `marketplace.json`). Both shapes are valid Claude Code marketplace patterns; the operator's reference is the PR-shape, so this delta adopts the PR-shape. If the operator prefers HEAD-shape (plugin.json only, no marketplace.json), the design would need to drop `.claude-plugin/marketplace.json` from AC-58-2 and the host-native install path from AC-58-4 (the host-native flow requires `marketplace.json`). This option is left as a Gate 1 question rather than as a design decision because the operator's prompt explicitly cited the PR-shape with the exact JSON.
