@@ -3,15 +3,12 @@
 The Patina Project skills repo releases via `release-please` with a single root package
 (`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-Skills are organized into two category directories:
-
-- `skills/engineering/` — `scaffold-repository`, `superteam`, `using-github` (versioned together)
-- `skills/productivity/` — `find-skills`, `office-hours` (standalone, not release-please packages)
-
-The three packaged skills are versioned together as a single marketplace surface. On each
-release, `release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json`
-via the `extra-files` block in `release-please-config.json`. Consumers install standalone
-skills from the default branch or a specific `#<git-ref>`.
+Skills live flat at `skills/<name>/` in this repo. Four in-repo skills ship as
+`patinaproject-skills`: `scaffold-repository`, `superteam`, `using-github`, `office-hours`.
+All four are versioned together as a single marketplace surface. On each release,
+`release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json` via the
+`extra-files` block in `release-please-config.json`. `find-skills` is no longer part of
+`patinaproject-skills`; install it separately from `vercel-labs/skills` (see root README).
 
 ## Install via vercel-labs skills CLI
 
@@ -46,7 +43,7 @@ and copy `skills/<name>/` directly into the agent's skill directory. No build st
    - Publishes a GitHub Release.
    - Updates the root `CHANGELOG.md`.
 3. On every release, the `apply-scaffold-repository` job additionally runs
-   `node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository` and commits any
+   `node scripts/apply-scaffold-repository.js skills/scaffold-repository` and commits any
    resulting scaffolding changes back to `main` (see
    [Scaffold-repository self-apply](#scaffold-repository-self-apply)). The apply script is
    idempotent — it exits 0 with no changes when there is no scaffolding drift.
@@ -82,10 +79,10 @@ scaffolding (commitlint config, husky hooks, issue templates, etc.). On each rel
 run that produces a tag, the scaffolding refresh runs unconditionally. The apply script is
 idempotent — it writes nothing and exits 0 when there is no scaffolding diff.
 
-`node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository` makes no
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository` makes no
 outbound network calls. The script applies the scaffold-repository baseline files from the
-local `skills/engineering/scaffold-repository/templates/` tree. Run
-`node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository --check`
+local `skills/scaffold-repository/templates/` tree. Run
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository --check`
 to preview what would change.
 
 **Intentional divergences from the template:** This skills repo is a monorepo root; it

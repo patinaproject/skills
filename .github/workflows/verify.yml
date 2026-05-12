@@ -30,7 +30,7 @@ jobs:
 
       # Check b: scaffold-repository apply, no network (exit 0)
       - name: "Check b — apply-scaffold-repository.js exits 0 (no-network)"
-        run: node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository --check
+        run: node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 
       # Check c: dogfood verification covers all five skills
       - name: "Check c — verify-dogfood.sh exits 0 (all five skills)"
@@ -49,11 +49,11 @@ jobs:
       - name: "Check a — CLI resolves scaffold-repository from local path (must exit 0)"
         run: |
           npm_config_ignore_scripts=true npx skills@1.5.6 \
-            add ./skills/engineering/scaffold-repository --list
+            add ./skills/scaffold-repository --list
           echo "exit=$?"
 
       - name: "Check a — CLI resolves office-hours from local path (must exit 0)"
         run: |
           npm_config_ignore_scripts=true npx skills@1.5.6 \
-            add ./skills/productivity/office-hours --list
+            add ./skills/office-hours --list
           echo "exit=$?"
