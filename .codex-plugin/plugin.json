@@ -1,0 +1,10 @@
+{
+  "name": "patinaproject-skills",
+  "version": "0.0.0",
+  "skills": [
+    "./skills/scaffold-repository",
+    "./skills/superteam",
+    "./skills/using-github",
+    "./skills/office-hours"
+  ]
+}

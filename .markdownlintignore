@@ -4,3 +4,6 @@ dist/
 build/
 docs/superpowers/plans/
 docs/superpowers/specs/
+skills/
+.agents/skills/
+.claude/skills/

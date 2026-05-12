@@ -5,38 +5,15 @@
     "url": "https://github.com/patinaproject"
   },
   "metadata": {
-    "description": "Marketplace catalog for Patina Project plugins."
+    "description": "Skills used by the Patina Project team",
+    "version": "0.0.0",
+    "repository": "https://github.com/patinaproject/skills"
   },
   "plugins": [
     {
-      "name": "bootstrap",
-      "description": "Patina Project plugin: bootstrap",
-      "category": "productivity",
-      "source": {
-        "source": "github",
-        "repo": "patinaproject/bootstrap",
-        "ref": "v1.10.0"
-      }
-    },
-    {
-      "name": "superteam",
-      "description": "Patina Project plugin: superteam",
-      "category": "productivity",
-      "source": {
-        "source": "github",
-        "repo": "patinaproject/superteam",
-        "ref": "v1.5.0"
-      }
-    },
-    {
-      "name": "using-github",
-      "description": "Patina Project plugin: using-github",
-      "category": "productivity",
-      "source": {
-        "source": "github",
-        "repo": "patinaproject/using-github",
-        "ref": "v2.0.0"
-      }
+      "name": "patinaproject-skills",
+      "description": "Skills used by the Patina Project team \u2014 scaffold-repository, superteam, using-github, office-hours",
+      "source": "./"
     }
   ]
 }

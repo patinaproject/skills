@@ -1,0 +1,70 @@
+# Contributing
+
+Thanks for contributing to `{{repo}}`. Start here for repo rules; everything else lives in [`AGENTS.md`](./AGENTS.md).
+
+## Setup
+
+```bash
+pnpm install
+```
+
+This installs dev tooling and registers the Husky hooks (`commit-msg` + `pre-commit`).
+
+## Commit messages
+
+Commits must follow Conventional Commits with no scope and a required GitHub issue tag:
+
+```text
+type: #123 short description
+```
+
+Examples:
+
+- `feat: #42 add a feature`
+- `docs: #17 clarify install steps`
+
+Pick the commit type by **path**, not by file extension. If any file in the diff matches one of the product-surface globs below, the commit type is `feat:` or `fix:` – never `docs:` or `chore:`.
+
+**Product-surface globs:**
+
+- `skills/**`
+- `skills/bootstrap/templates/**`
+- `.claude-plugin/**`, `.codex-plugin/**`
+- `.cursor/**`, `.windsurfrules`, `.github/copilot-instructions.md`
+- `.github/workflows/**`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/LABELS.md`
+- `AGENTS.md`, `AGENTS.md.tmpl`, `CONTRIBUTING.md`, `CONTRIBUTING.md.tmpl`, `RELEASING.md`, `RELEASING.md.tmpl`
+
+**Path-first rule:** If any file in the diff is under one of these globs, the commit type is `feat:` or `fix:` – never `docs:` or `chore:`. `docs:` and `chore:` apply if and only if the diff touches **zero** product-surface globs.
+
+| Change | Type |
+|--------|------|
+| Adds or changes shipped behavior, including behavior expressed in Markdown skill files, workflow gates, prompt contracts, plugin metadata, marketplace behavior, generated agent instructions, or other user-visible configuration | `feat:` |
+| Corrects broken shipped behavior in those same product surfaces | `fix:` |
+| Explains the product without changing shipped behavior or release semantics, and touches zero product-surface globs | `docs:` |
+| Performs maintenance that does not alter user-facing behavior, and touches zero product-surface globs | `chore:` |
+
+Changes that should produce a release must not use non-bumping types such as `docs:` or `chore:`. Use the release-triggering type that matches the product impact.
+
+See [`AGENTS.md` "Commit type selection"](./AGENTS.md#commit-type-selection) for the full rationalization table, red flags, and a WRONG → RIGHT worked example.
+
+The `commit-msg` hook enforces this. PR titles follow the same format so the squash commit can be reused verbatim.
+
+## Markdown
+
+All Markdown is linted with `markdownlint-cli2`. The `pre-commit` hook runs it on staged files. To lint the whole repo:
+
+```bash
+pnpm lint:md
+```
+
+## Pull requests
+
+- Keep the PR title in commitlint format.
+- Fill in the [PR template](./.github/pull_request_template.md).
+- Include an `Acceptance criteria` section when the linked issue defines ACs.
+
+## Further reading
+
+- [`AGENTS.md`](./AGENTS.md) – shared workflow contract.
+- [`CLAUDE.md`](./CLAUDE.md) – Claude Code–specific guidance.
+- [`docs/file-structure.md`](./docs/file-structure.md) – repository layout reference.

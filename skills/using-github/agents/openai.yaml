@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using GitHub"
+  short_description: "Start GitHub work with repository conventions"
+  default_prompt: "Use $using-github to route GitHub work through the repository's labels, templates, branch, PR, and public-safety conventions."

@@ -1,77 +1,148 @@
-# Plugin Release Flow
+# Skill Release Flow
 
-The Patina Project marketplace only publishes **tagged releases** (`vX.Y.Z`) of member plugins. The manifests in this repo never reference a branch — every plugin entry pins an explicit `ref`.
+The Patina Project skills repo releases via `release-please` with a single root package
+(`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-Current member plugins tracked by this flow:
+Skills live flat at `skills/<name>/` in this repo. Four in-repo skills ship as
+`patinaproject-skills`: `scaffold-repository`, `superteam`, `using-github`, `office-hours`.
+All four are versioned together as a single marketplace surface. On each release,
+`release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json` via the
+`extra-files` block in `release-please-config.json`. `find-skills` is no longer part of
+`patinaproject-skills`; install it separately from `vercel-labs/skills` (see root README).
 
-- `patinaproject/bootstrap` — repo scaffolding skill. Also **consumed by this repo** (see [Consuming bootstrap](#consuming-bootstrap) below), so a bootstrap release both updates the marketplace entry and refreshes this repo's own scaffolding.
-- `patinaproject/superteam` — issue-driven orchestration skill.
-- `patinaproject/using-github` — agent ergonomics for GitHub workflows (`/edit-issue`, `/new-issue`, `/new-branch`).
+## Install via vercel-labs skills CLI
+
+The primary install path for end users is the
+[vercel-labs/skills](https://github.com/vercel-labs/skills) CLI:
+
+```sh
+npx skills@latest add patinaproject/skills
+```
+
+The CLI prompts for which skills to install and auto-detects your agent.
+
+**Supply-chain note:** For environments where you want to prevent install scripts from
+running, prefix with `npm_config_ignore_scripts=true`. The CLI internal stability target
+is `skills@1.5.6` — see [CLI version pinning](#cli-version-pinning) for details.
+
+**Standalone-skill resolution:** `npx skills add patinaproject/skills@<name>` (no `#<ref>`
+qualifier) resolves to the default branch HEAD. Consumers wanting a pinned version pass
+`patinaproject/skills@<name>#<git-ref>`.
+
+**Supply-chain fallback:** If the upstream CLI is unavailable or distrusted, clone the repo
+and copy `skills/<name>/` directly into the agent's skill directory. No build step required.
 
 ## Lifecycle
 
-1. A member plugin repo (for example `patinaproject/superteam`) uses `release-please` on its default branch. Merging the standing Release PR tags a new semver release and publishes a GitHub Release.
-2. A workflow in that plugin repo fires a `repository_dispatch` into `patinaproject/skills` with event type `plugin-released` and payload `{ plugin, tag, repo }`.
-3. [`.github/workflows/plugin-release-bump.yml`](../.github/workflows/plugin-release-bump.yml) receives the dispatch, updates both marketplace manifests, and opens a bot-generated bump PR titled `chore: bump <plugin> to <tag>`. These bot-generated `bot/bump-*` PRs are the only PRs that may omit an issue ID.
-4. The workflow requests GitHub auto-merge for the trusted bump PR after it is
-   created or updated. GitHub merges it only after required checks and branch
-   protection requirements pass. The new version becomes the one users get on
-   install.
+1. A contributor opens a PR against `main` with changes under `skills/<name>/` (bug fix,
+   new feature, content update). The PR merges via squash merge.
+2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main`
+   and maintains a standing Release PR for the root package. When a Release PR is merged,
+   release-please:
+   - Tags the commit with `v<X.Y.Z>` (e.g. `v1.1.0`).
+   - Publishes a GitHub Release.
+   - Updates the root `CHANGELOG.md`.
+3. On every release, the `apply-scaffold-repository` job additionally runs
+   `node scripts/apply-scaffold-repository.js skills/scaffold-repository` and commits any
+   resulting scaffolding changes back to `main` (see
+   [Scaffold-repository self-apply](#scaffold-repository-self-apply)). The apply script is
+   idempotent — it exits 0 with no changes when there is no scaffolding drift.
+4. Auto-merge (`gh pr merge --auto --squash`) is enabled on each open release-please PR
+   after required checks pass.
 
-New plugins are added by the same flow: the workflow inserts an entry if the plugin isn't already listed, so the first tagged release of a plugin is also what publishes it.
+Bot-generated release-please PRs from `release-please--*` branches are the only PRs that
+may omit a GitHub issue ID in the commit subject.
 
-The release-bump PR workflow enables commit signing in `peter-evans/create-pull-request`, so commits are expected to be signed and verified as `github-actions[bot]` when the workflow uses the repository's default `GITHUB_TOKEN`. Do not switch this workflow to a PAT while expecting bot signature verification; PAT-created PRs are not the supported path for this signing mode.
+## Tag shape
 
-The workflow also enables GitHub auto-merge for release-bump PRs that it creates
-or updates from `bot/bump-*` branches. This uses
-`gh pr merge --auto --squash` against the PR number returned by
-`peter-evans/create-pull-request`; it does not use admin bypass and does not
-merge unrelated PRs. If repository auto-merge is disabled, token permissions are
-insufficient, required checks fail, or the PR contains unexpected changes,
-maintainers should inspect the open PR and resolve the blocker manually.
+`release-please` emits a single root tag per release:
 
-## Required setup in each member plugin repo
+- `v1.0.0` (initial release)
+- `v1.1.0` (minor bump from `feat:` commits)
+- `v1.0.1` (patch bump from `fix:` commits)
 
-Each plugin repo needs a workflow on `release: published` that fires the dispatch:
+The vercel-labs CLI consumer pins a specific tag via `#<git-ref>`:
 
-```yaml
-name: Notify marketplace
-on:
-  release:
-    types: [published]
-permissions: {}
-jobs:
-  dispatch:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.MARKETPLACE_DISPATCH_TOKEN }}
-          repository: patinaproject/skills
-          event-type: plugin-released
-          client-payload: |
-            {
-              "plugin": "${{ github.event.repository.name }}",
-              "tag": "${{ github.event.release.tag_name }}",
-              "repo": "${{ github.repository }}"
-            }
+```sh
+npx skills@latest add patinaproject/skills@scaffold-repository#v1.0.0
 ```
 
-`MARKETPLACE_DISPATCH_TOKEN` must be a PAT or GitHub App token with `repo` scope on `patinaproject/skills`.
+The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all five
+skills live under `skills/<name>/SKILL.md` in the same repo, one tag pins the full set.
+`skills-lock.json`'s `computedHash` records per-skill content provenance for reproducible
+re-installs within a given tag.
 
-## Manual fallback
+## Scaffold-repository self-apply
 
-If automation is down, a maintainer can run the workflow directly via **Actions → Plugin release bump → Run workflow**, supplying `plugin` and `tag` (and optionally `repo`). The workflow produces the same PR.
+This repo dogfoods `scaffold-repository`: every release drives an update of this repo's own
+scaffolding (commitlint config, husky hooks, issue templates, etc.). On each release-please
+run that produces a tag, the scaffolding refresh runs unconditionally. The apply script is
+idempotent — it writes nothing and exits 0 when there is no scaffolding diff.
 
-For a fully manual bump, edit `source.ref` for the plugin entry in both [.claude-plugin/marketplace.json](../.claude-plugin/marketplace.json) and [.agents/plugins/marketplace.json](../.agents/plugins/marketplace.json), then open a PR with `chore: #<issue> bump <plugin> to <tag>`.
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository` makes no
+outbound network calls. The script applies the scaffold-repository baseline files from the
+local `skills/scaffold-repository/templates/` tree. Run
+`node scripts/apply-scaffold-repository.js skills/scaffold-repository --check`
+to preview what would change.
 
-## Consuming bootstrap
+**Intentional divergences from the template:** This skills repo is a monorepo root; it
+does not have a single root `package.json` `version` field. As a result, two template
+items are not applied by the self-apply script:
 
-`patinaproject/skills` dogfoods `patinaproject/bootstrap`: the same tag that publishes bootstrap to the marketplace also drives an update of this repo's own scaffolding (commitlint config, husky hooks, issue templates, etc.). On a bootstrap release, the marketplace bump PR is opened as described above, and — in the same workflow run — the bootstrap skill is applied against this repo and any resulting scaffolding changes are committed to the same PR branch. Reviewing the PR therefore covers both the marketplace entry change and the scaffolding refresh in one place.
-
-Other Patina Project repos that want to consume bootstrap this way should subscribe to its `repository_dispatch` the same way this repo does.
+- `.husky/pre-commit` — the template hook calls `pnpm check:versions`, which checks
+  plugin manifest versions against `package.json`. This repo has no root plugin manifests
+  and no root `version` field, so the hook is skipped for self-apply.
+- `.github/workflows/markdown.yml` — the template excludes `#plugins/**` for plugin
+  wrapper directories, but this repo uses `#skills/**` for the flat skill layout.
+  The in-repo version is intentionally customized and must not be reverted.
 
 ## Invariants
 
-- Every plugin entry in both manifests has an explicit `ref` matching `vX.Y.Z`. Branches (`main`, `trunk`, etc.) are not allowed.
-- An untagged plugin is not listed in the marketplace at all. The first tagged release is what introduces it.
+- An untagged skill is not pinnable. The first `v<X.Y.Z>` tag is what introduces the repo
+  to the install path with a pinnable `#<ref>`.
+- Standalone skills (`office-hours`, `find-skills`) are not release-please packages.
+  They are installed from the default branch or a specific `#<git-ref>`.
+- `skills-lock.json` must be committed after any `npx skills add` invocation. The lockfile
+  records provenance for vercel-labs CLI-managed installs.
+
+## CLI version pinning
+
+The vercel-labs CLI is pinned at `skills@1.5.6` in all documentation. To bump:
+
+1. Update the version in `README.md`, `AGENTS.md`, and `docs/release-flow.md`.
+2. Re-run `bash scripts/verify-dogfood.sh` — exits 0.
+3. Run the [check-a local-path verification](../README.md#local-iteration) — exits 0.
+4. Open a PR with the version bump.
+
+## Token setup (required before first release)
+
+`release-please-action` runs with `token: ${{ github.token }}` by default. This
+works for opening release PRs, but has a known GitHub limitation:
+
+> PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
+
+The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
+NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
+will wait indefinitely.
+
+To enable fully-automated release PRs:
+
+1. Create a GitHub App or PAT with these scopes:
+   - `contents: write` — to push tags
+   - `pull-requests: write` — to open and update release PRs
+   - `issues: write` — to manage `autorelease:*` labels
+   - `workflows: write` — required if the scaffold-repository self-apply
+     ever touches a file under `.github/workflows/**` (the default
+     `GITHUB_TOKEN` cannot modify workflow files).
+2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
+3. Edit `.github/workflows/release-please.yml`: replace
+   `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
+
+The scaffold-refresh step already falls back to `RELEASE_PLEASE_TOKEN` when
+present (`${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}`), so this scope
+is consumed automatically once the secret exists.
+
+Until that's done, release PRs need a manual `git commit --allow-empty` or
+maintainer push to trigger checks, and any scaffold refresh that touches
+`.github/workflows/**` will fail at the Contents API PUT. The first-release
+fix can be deferred until either of those scenarios actually occurs.

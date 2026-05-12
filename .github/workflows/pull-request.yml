@@ -1,4 +1,4 @@
-name: Lint PR
+name: Pull Request
 
 on:
   pull_request:
@@ -9,19 +9,10 @@ permissions:
   pull-requests: read
 
 jobs:
-  marketplace-catalog:
-    name: Validate marketplace catalog
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    steps:
-      # actions/checkout@v4.3.1
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
-      - name: Validate marketplace manifests
-        run: node scripts/validate-marketplace.js
-
-  title-format:
-    name: Validate PR title
-    runs-on: ubuntu-latest
+    if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Enforce ASCII-only title
         env:
@@ -32,8 +23,7 @@ jobs:
             exit 1
           fi
 
-      - name: Validate conventional commits + issue ref
-        if: "${{ github.event.pull_request.user.login != 'github-actions[bot]' || !startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
+      - name: Validate conventional commits
         # amannn/action-semantic-pull-request@v5.5.3
         uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
         env:
@@ -60,33 +50,13 @@ jobs:
               feat: #123 add boot timeline
               fix: #456 restore search
             Scopes are not permitted. See AGENTS.md for conventions.
+          ignoreLabels: |
+            dependencies
 
-      - name: Validate bot release bump title
-        if: "${{ github.event.pull_request.user.login == 'github-actions[bot]' && startsWith(github.event.pull_request.head.ref, 'bot/bump-') }}"
-        # amannn/action-semantic-pull-request@v5.5.3
-        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          types: |
-            chore
-          requireScope: false
-          disallowScopes: |
-            .+
-          subjectPattern: '^bump .+$'
-          subjectPatternError: |
-            Bot release bump PR titles must use: chore: bump <plugin> to <tag>
-            Scopes are not permitted. This no-issue exception is only for github-actions[bot] bot/bump-* PRs.
-
-  linked-issue:
-    name: Require linked issue
-    runs-on: ubuntu-latest
-    steps:
       - name: Check for closing keyword in PR body
+        if: "${{ github.event.pull_request.user.login != 'dependabot[bot]' }}"
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
-          PR_USER: ${{ github.event.pull_request.user.login }}
-          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           if [ -z "$PR_BODY" ]; then
             echo "::error::PR body is empty. Add a GitHub closing keyword such as 'Closes #<issue>'."
@@ -107,21 +77,9 @@ jobs:
             echo "Closing keyword found."
             exit 0
           fi
-          if [ "$PR_USER" = "github-actions[bot]" ]; then
-            case "$PR_HEAD_REF" in
-              bot/bump-*)
-                echo "No closing keyword found; allowed for bot-generated release bump PR."
-                exit 0
-                ;;
-            esac
-          fi
           echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
           exit 1
 
-  mark-breaking-change:
-    name: Mark breaking change
-    runs-on: ubuntu-latest
-    steps:
       - name: Compare title `!` with body BREAKING CHANGE footer
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}

@@ -1,0 +1,113 @@
+name: Release please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release-please:
+    name: Open or update release PRs
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      # googleapis/release-please-action@v4.1.3
+      #
+      # NOTE: `token: ${{ github.token }}` (= GITHUB_TOKEN) is the simplest option
+      # but has a known limitation: PRs created with GITHUB_TOKEN do NOT trigger
+      # subsequent workflow runs (GitHub's anti-recursion safeguard). The auto-merge
+      # job below waits for required PR checks, so release PRs will sit idle until
+      # a maintainer pushes a no-op commit or manually triggers the checks.
+      #
+      # To enable fully-automated release PRs, set `RELEASE_PLEASE_TOKEN` to a
+      # GitHub App token or PAT with `contents: write` + `pull-requests: write` +
+      # `issues: write`, then replace `${{ github.token }}` below with
+      # `${{ secrets.RELEASE_PLEASE_TOKEN }}`. See docs/release-flow.md for setup.
+      - uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ github.token }}
+
+  apply-scaffold-repository:
+    name: Apply scaffold-repository scaffolding on release
+    needs: release-please
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      # actions/setup-node@v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24"
+
+      - name: Apply scaffold-repository scaffolding
+        run: node scripts/apply-scaffold-repository.js skills/scaffold-repository
+
+      - name: Push scaffold refresh via GitHub API
+        env:
+          # GITHUB_TOKEN has contents:write but NOT workflows:write, so PUTs
+          # against `.github/workflows/**` will 403. Falls back when
+          # RELEASE_PLEASE_TOKEN is unset so non-workflow refreshes still work.
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+        run: |
+          # Commit each changed file via the Contents API so the commit is
+          # auto-verified by GitHub (satisfies issue #29 intent without a
+          # local GPG/SSH signing key).
+          BRANCH="main"
+          REPO="${{ github.repository }}"
+          changed=$(git diff --name-only)
+          if [ -z "$changed" ]; then
+            echo "No scaffolding changes to commit"
+            exit 0
+          fi
+          for file in $changed; do
+            # Probe for an existing blob SHA; if the file doesn't exist on the
+            # branch yet, the Contents API returns 404 and we create the file
+            # without `-f sha=...` (the API rejects sha=... on creates).
+            sha=$(gh api "repos/$REPO/contents/$file?ref=$BRANCH" --jq '.sha' 2>/dev/null || true)
+            content=$(base64 -w0 < "$file")
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$REPO/contents/$file" \
+                -f message="chore: apply scaffold-repository scaffolding refresh" \
+                -f content="$content" \
+                -f sha="$sha" \
+                -f branch="$BRANCH"
+            else
+              gh api -X PUT "repos/$REPO/contents/$file" \
+                -f message="chore: apply scaffold-repository scaffolding refresh" \
+                -f content="$content" \
+                -f branch="$BRANCH"
+            fi
+          done
+
+  auto-merge:
+    name: Enable auto-merge on release PRs
+    needs: release-please
+    if: needs.release-please.outputs.releases_created != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Enable auto-merge on open release PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Enable auto-merge on any open release-please PRs
+          prs=$(gh pr list --label "autorelease: pending" --json number --jq '.[].number')
+          for pr in $prs; do
+            gh pr merge "$pr" --auto --squash || true
+          done

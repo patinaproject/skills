@@ -1,4 +1,4 @@
-name: Lint Markdown
+name: Markdown
 
 on:
   pull_request:
@@ -8,17 +8,23 @@ permissions:
   contents: read
 
 jobs:
-  markdownlint:
-    name: markdownlint-cli2
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      # actions/checkout@v4.3.1
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: markdownlint-cli2-action
+      - name: Check out repository
+        # actions/checkout@v4.3.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Run Markdown lint
         # DavidAnson/markdownlint-cli2-action@v18.0.0
         uses: DavidAnson/markdownlint-cli2-action@eb5ca3ab411449c66620fe7f1b3c9e10547144b0
         with:
           globs: |
             **/*.md
             #node_modules
+            #CHANGELOG.md
             #docs/superpowers/**
+            #plugins/**
+            #.agents/skills/**
+            #.claude/skills/**

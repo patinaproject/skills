@@ -15,12 +15,16 @@
   },
   "scripts": {
     "prepare": "husky",
+    "postinstall": "bash scripts/install-third-party-skills.sh",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\"",
-    "validate:marketplace": "node scripts/validate-marketplace.js",
-    "validate:marketplace:remote": "node scripts/validate-marketplace.js --remote"
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#docs/superpowers/**\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
+    "skills:install": "bash scripts/install-third-party-skills.sh",
+    "verify:dogfood": "bash scripts/verify-dogfood.sh",
+    "verify:marketplace": "bash scripts/verify-marketplace.sh",
+    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
+    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js skills/scaffold-repository --check"
   },
   "config": {
     "commitizen": {
@@ -38,8 +42,5 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "markdownlint-cli2": "^0.14.0"
-  },
-  "lint-staged": {
-    "*.md": "markdownlint-cli2"
   }
 }

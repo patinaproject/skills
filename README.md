@@ -1,111 +1,157 @@
-# Patina Project
+# Skills used by the Patina Project team
 
-This repository carries the Patina Project marketplace catalogs for both Codex and Claude plugins.
+Four installable agent skills for repository scaffolding, multi-teammate
+orchestration, GitHub workflows, and product design — available
+across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
-It is a marketplace catalog, not the source repo for every plugin. Marketplace entries can point at plugins packaged in this repo, or at Git-backed plugin sources maintained in other Patina Project repositories.
-
-## Current plugins
-
-The marketplace only lists plugins that have published a tagged release (`vX.Y.Z`). See [docs/release-flow.md](docs/release-flow.md) for how releases propagate here.
-
-Tracked member plugins:
-
-- `patinaproject/bootstrap` — repo scaffolding skill, currently `v1.2.0`
-- `patinaproject/superteam` — issue-driven orchestration skill, currently `v1.1.0`
-- `patinaproject/using-github` — GitHub workflow skill, currently `v2.0.0`
-
-## Install Surfaces
-
-- `patinaproject/skills` owns the marketplace catalogs and contributor docs
-- `patinaproject/bootstrap`, `patinaproject/superteam`, and `patinaproject/using-github` own their upstream plugin packages
-- Codex marketplace metadata lives in `.agents/plugins/marketplace.json`
-- Claude marketplace metadata lives in `.claude-plugin/marketplace.json`
-- Codex reads upstream package metadata from `.codex-plugin/plugin.json`
-- Claude reads upstream package metadata from `.claude-plugin/plugin.json`
-- Upstream skill content lives under each plugin repo's `skills/` directory
-
-## How it works
-
-Codex reads the marketplace definition from `.agents/plugins/marketplace.json`, and Claude reads the companion marketplace definition from `.claude-plugin/marketplace.json`.
-
-In this repo, the marketplace is named `patinaproject-skills` and exposed in the UI as `Patina Project`.
-
-Plugin entries do not vendor plugin files in this repository. Each entry points at a Git-backed plugin source repo pinned to an explicit release tag (`vX.Y.Z`). Branch refs such as `main` are not allowed — see [docs/release-flow.md](docs/release-flow.md).
-
-In each upstream plugin repository, the active install surfaces are:
-
-- Codex manifest: `.codex-plugin/plugin.json`
-- Claude manifest: `.claude-plugin/plugin.json`
-- Skill directory: `skills/`
-
-That keeps the marketplace catalogs isolated while allowing plugin source repos to stay independent.
-
-## Install In Codex
-
-Install this marketplace from GitHub:
+## Quickstart
 
 ```bash
-codex plugin marketplace add patinaproject/skills --ref main
+npx skills@latest add patinaproject/skills
 ```
 
-Refresh tracked marketplaces:
+The CLI prompts you to pick which skills to install and auto-detects your agent.
 
-```bash
-codex plugin marketplace upgrade
-```
+### Install via the host marketplace (alternative)
 
-Then open the Codex Plugin Directory, find `Patina Project`, and install the plugin you need: `bootstrap`, `superteam`, or `using-github`.
-
-## Install In Claude Code
-
-Register the Patina Project marketplace in Claude Code:
+Claude Code:
 
 ```text
 /plugin marketplace add patinaproject/skills
+/plugin install patinaproject-skills@patinaproject-skills
 ```
 
-Then install the plugin you need:
+Codex:
 
 ```text
-/plugin install bootstrap@patinaproject-skills
-/plugin install superteam@patinaproject-skills
-/plugin install using-github@patinaproject-skills
+/marketplace add patinaproject/skills
+/install patinaproject-skills
 ```
 
-## Use Installed Plugins
+> **Security note:** For environments where you want to prevent install scripts
+> from running during CLI execution, prefix the `npx` command above with
+> `npm_config_ignore_scripts=true`. Not required for standard use.
 
-After installing a plugin, invoke the relevant skill:
+### Related skills
 
-```text
-Use $bootstrap:bootstrap to align this repository with the Patina Project baseline.
-```
-
-```text
-Use $superteam:superteam to take issue #123 from design through review-ready execution.
-```
-
-```text
-Use $using-github for GitHub issue, branch, PR, and changelog work.
-```
-
-## Install From A Local Checkout
-
-If you are working locally in a checkout that contains this repo, add it by path instead:
+For skill discovery and catalog navigation, install `find-skills` from the
+[vercel-labs/skills](https://github.com/vercel-labs/skills) catalog:
 
 ```bash
-codex plugin marketplace add ./skills
+npx skills@latest add vercel-labs/skills@find-skills
 ```
 
-If Codex does not immediately show the updated marketplace catalog, restart Codex and re-open the Plugin Directory.
+## Why these skills exist
 
-## Maintenance Notes
+### superteam
 
-- Update marketplace entries in `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json`
-- Keep Git-backed entries pinned to an explicit tag `ref` (`vX.Y.Z`). Branch refs are not allowed.
-- Maintain plugin source and packaging in the owning source repository
-- For `bootstrap`, the source-of-truth repo is `patinaproject/bootstrap`
-- For `superteam`, the source-of-truth repo is `patinaproject/superteam`
-- For `using-github`, the source-of-truth repo is `patinaproject/using-github`
-- Run `pnpm validate:marketplace` before opening marketplace PRs
-- Run `pnpm validate:marketplace:remote` when validating release identity against upstream tags
-- See [docs/release-flow.md](docs/release-flow.md) for how plugin releases propagate into the marketplace
+Even with a capable agent, implementation loops need structure: a design doc
+to approve before planning starts, a plan to approve before code is written,
+an explicit reviewer pass before publishing, and a finisher who owns the PR
+through CI and human feedback. Without that structure, chat context is the only
+handoff artifact and restarts are expensive. `superteam` routes a GitHub issue
+through a six-teammate workflow — Team Lead, Brainstormer, Planner, Executor,
+Reviewer, Finisher — producing durable repo-owned artifacts at every gate.
+
+See [./skills/superteam/](./skills/superteam/) for the
+full README and skill contract.
+
+### using-github
+
+GitHub work — filing issues, editing issues, starting branches, writing
+changelogs, preparing PRs — is repetitive and convention-sensitive. Without a
+shared skill, every agent session re-derives the same rules from scratch and
+produces inconsistent output. `using-github` is a single skill that reads
+repository rules and applies the correct workflow for each task, so every
+GitHub action in a repo is consistent and auditable.
+
+See [./skills/using-github/](./skills/using-github/)
+for the full README and skill contract.
+
+### office-hours
+
+New product ideas benefit from honest forcing questions before any code is
+written — demand reality checks, narrowest-wedge tests, observation-grounded
+specificity. Without a structured partner, agents tend to validate rather than
+pressure-test. `office-hours` runs a YC-style session in one of two modes:
+Startup mode asks six forcing questions that expose whether the idea is
+genuinely worth building; Builder mode is an enthusiastic design partner for
+hackathons and side projects. Output is always a design doc, never code.
+
+See [./skills/office-hours/](./skills/office-hours/)
+for the skill contract.
+
+### scaffold-repository
+
+Teams spend disproportionate time on repo plumbing — commit conventions,
+markdown linting, PR templates, Husky hooks, release-please wiring, AI agent
+plugin manifests — and every new repo starts that conversation from scratch.
+`scaffold-repository` collapses that into one invocation that emits the full
+Patina Project baseline and keeps it aligned on rerun. It handles both new
+repos and realignment of existing ones, so convention drift gets caught before
+it accumulates.
+
+See [./skills/scaffold-repository/](./skills/scaffold-repository/)
+for the full README and skill contract.
+
+## Skills
+
+| Skill | Description |
+|---|---|
+| [superteam](./skills/superteam/) | Orchestrate a GitHub issue from design through merged PR |
+| [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
+| [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
+| [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
+
+## Local iteration
+
+Three checks prove the in-repo skills are wired correctly. Run these after any
+change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
+
+### Check a — CLI resolves skills from local paths
+
+```sh
+npx skills@latest add ./skills/scaffold-repository --list
+npx skills@latest add ./skills/office-hours --list
+```
+
+### Check b — scaffold-repository apply, no network
+
+```sh
+node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
+```
+
+### Check c — dogfood verification, all four skills
+
+```sh
+bash scripts/verify-dogfood.sh
+```
+
+## Repository layout
+
+```text
+skills/
+  scaffold-repository/
+  superteam/
+  using-github/
+  office-hours/
+.agents/skills/<name>/               Symlinks to ../../skills/<name>/
+.claude/skills/<name>/               Symlinks to ../../skills/<name>/
+.claude-plugin/
+  marketplace.json                   Claude marketplace catalog
+  plugin.json                        Claude plugin manifest
+scripts/                             Maintenance and verification scripts
+release-please-config.json           Release-please configuration
+.release-please-manifest.json        Version manifest
+```
+
+See [docs/file-structure.md](docs/file-structure.md) for the full layout
+reference.
+
+## License
+
+See [LICENSE](./LICENSE).
+
+## Contributing
+
+See [AGENTS.md](./AGENTS.md) for contributor guidelines and commit conventions.

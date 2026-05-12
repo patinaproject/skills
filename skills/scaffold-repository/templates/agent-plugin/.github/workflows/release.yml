@@ -1,0 +1,45 @@
+name: Release
+
+# Triggered on every push to `main`, with workflow_dispatch available as a
+# recovery escape hatch. release-please is idempotent: on regular feature/fix
+# merges it opens or refreshes the standing release PR; on the release-PR merge
+# it sees the merged PR (label `autorelease: pending`) and cuts the tag,
+# publishes the release, and dispatches downstream notifications. Manual
+# dispatch runs the same path. See RELEASING.md.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    # Declared at both workflow and job level. The workflow-level block is the
+    # upper bound for any job; the job-level block is what the runner actually
+    # presents to GitHub when release-please calls POST /repos/.../releases.
+    # Some org policies cap the workflow default below the workflow-level
+    # declaration, so setting job-level permissions explicitly removes the
+    # ambiguity that caused issue #18. `issues: write` is required because PR
+    # labels are on the Issues API: release-please relabels the release PR from
+    # `autorelease: pending` to `autorelease: tagged` as part of release
+    # creation, and without this scope the whole step 403s.
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        # googleapis/release-please-action@v4.4.1
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
