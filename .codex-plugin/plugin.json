@@ -1,6 +1,6 @@
 {
   "name": "patinaproject-skills",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "skills": [
     "./skills/scaffold-repository",
     "./skills/superteam",

@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Skills used by the Patina Project team",
-    "version": "1.0.0",
+    "version": "0.0.0",
     "repository": "https://github.com/patinaproject/skills"
   },
   "plugins": [
     {
       "name": "patinaproject-skills",
-      "description": "Skills used by the Patina Project team — scaffold-repository, superteam, using-github, office-hours",
+      "description": "Skills used by the Patina Project team \u2014 scaffold-repository, superteam, using-github, office-hours",
       "source": "./"
     }
   ]
