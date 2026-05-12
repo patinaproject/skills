@@ -61,7 +61,7 @@ For plugins, bootstrap wires a complete [release-please](https://github.com/goog
 
 ### GitHub repository settings
 
-Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./skills/bootstrap/SKILL.md#github-repository-settings).
+Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./SKILL.md#github-repository-settings).
 
 ## Modes
 
@@ -128,8 +128,8 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md). The r
 
 ## Related
 
-- [`skills/bootstrap/SKILL.md`](./skills/bootstrap/SKILL.md) – skill contract, modes, placeholders, emitted tree.
-- [`skills/bootstrap/audit-checklist.md`](./skills/bootstrap/audit-checklist.md) – realignment checklist.
-- [`docs/file-structure.md`](./docs/file-structure.md) – layout reference.
+- [`SKILL.md`](./SKILL.md) – skill contract, modes, placeholders, emitted tree.
+- [`audit-checklist.md`](./audit-checklist.md) – realignment checklist.
+- [`docs/file-structure.md`](../../../docs/file-structure.md) – layout reference.
 - [`patinaproject/superteam`](https://github.com/patinaproject/superteam) – sibling plugin whose layout bootstrap enforces.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) – marketplace distributing Patina Project plugins.
