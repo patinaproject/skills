@@ -16,31 +16,17 @@ skills from the default branch or a specific `#<git-ref>`.
 ## Install via vercel-labs skills CLI
 
 The primary install path for end users is the
-[vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, pinned at invocation:
+[vercel-labs/skills](https://github.com/vercel-labs/skills) CLI:
 
 ```sh
-# Install scaffold-repository
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@scaffold-repository \
-  --agent claude-code -y
-
-# Install superteam
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@superteam \
-  --agent claude-code -y
-
-# Install using-github
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@using-github \
-  --agent claude-code -y
-
-# Install office-hours standalone skill
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills@office-hours \
-  --agent claude-code -y
+npx skills@latest add patinaproject/skills
 ```
 
-**Supply-chain note:** `npm_config_ignore_scripts=true` is the default prefix for all install
-commands. Do not omit it. The CLI version (`skills@1.5.6`) is pinned at invocation — pass
-`--yes` or `-y` to avoid the interactive prompt. Bumping the pinned CLI version requires
-re-running `bash scripts/verify-dogfood.sh` and the
-[check-a local-path verification](../README.md#local-iteration) before merging.
+The CLI prompts for which skills to install and auto-detects your agent.
+
+**Supply-chain note:** For environments where you want to prevent install scripts from
+running, prefix with `npm_config_ignore_scripts=true`. The CLI internal stability target
+is `skills@1.5.6` — see [CLI version pinning](#cli-version-pinning) for details.
 
 **Standalone-skill resolution:** `npx skills add patinaproject/skills@<name>` (no `#<ref>`
 qualifier) resolves to the default branch HEAD. Consumers wanting a pinned version pass
@@ -81,9 +67,7 @@ may omit a GitHub issue ID in the commit subject.
 The vercel-labs CLI consumer pins a specific tag via `#<git-ref>`:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@scaffold-repository#v1.0.0 \
-  --agent claude-code -y
+npx skills@latest add patinaproject/skills@scaffold-repository#v1.0.0
 ```
 
 The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all five

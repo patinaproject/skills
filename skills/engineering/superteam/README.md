@@ -4,7 +4,7 @@
 
 Build with a team of agents using Superpowers.
 
-`superteam` is a Claude Code + Codex plugin. It ships an installable orchestration skill under `skills/superteam/` and is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace.
+`superteam` is a Claude Code + Codex plugin. It ships an installable orchestration skill under `skills/engineering/superteam/` and is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace.
 
 Spend less time managing implementation loops and babysitting CI. Superteam builds on Superpowers to get you to a real, demoable, testable artifact as quickly as possible, with enough structure to review it, iterate on it, and keep moving.
 
@@ -105,105 +105,7 @@ A run is only complete when the published branch state is stable enough to hand 
 | Reviewer | Local pre-publish review intake, finding classification, loopback routing | `superpowers:requesting-code-review`; `superpowers:receiving-code-review`; `superpowers:writing-skills` when reviewing `skills/**/*.md` |
 | Finisher | Publish-state follow-through, branch/PR/CI reporting, external post-publish review feedback | `superpowers:finishing-a-development-branch`; `superpowers:receiving-code-review` |
 
-## Installation
-
-`superteam` ships as part of the `patinaproject/skills` bundle. See [../../../README.md](../../../README.md) for the full install guide.
-
-```bash
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills --agent <agent> -y
-```
-
-Other supported editors read the repository-level files this plugin emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly.
-
-### Prerequisite: Install Superpowers
-
-Superteam depends on the separate [`obra/superpowers`](https://github.com/obra/superpowers) plugin. Install or enable Superpowers in the same runtime where you plan to use Superteam before installing this plugin, then continue with the Superteam steps for your runtime below.
-
-### Claude Code
-
-1. Register the Patina Project marketplace:
-
-   ```text
-   /plugin marketplace add patinaproject/skills
-   ```
-
-2. Install the plugin:
-
-   ```text
-   /plugin install patinaproject-skills@patinaproject-skills
-   ```
-
-3. Open the relevant GitHub issue in your Claude Code session, then invoke:
-
-   ```text
-   /superteam:superteam
-   ```
-
-#### Optional: Enable Agent Teams
-
-If you want Claude Code to use Agent Teams for this workflow, enable Agent Teams in your Claude configuration before invoking Superteam. Add `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to the `env` block in `~/.claude/settings.json` (user-wide) or `.claude/settings.json` (project-specific):
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
-
-Agent Teams is optional. If you do not enable it, Superteam still works with the regular single-agent or subagent flow. When using Agent Teams, prefer them for bounded, independent teammate work; keep highly interactive or clarification-heavy steps in the foreground.
-
-### OpenAI Codex CLI
-
-1. Register the Patina Project marketplace:
-
-   ```bash
-   codex plugin marketplace add patinaproject/skills
-   ```
-
-2. Install the plugin:
-
-   ```bash
-   codex plugin marketplace add patinaproject/skills --ref <MARKETPLACE_TAG>
-   ```
-
-3. Invoke from the target repository:
-
-   ```text
-   Use $superteam to route this issue through teammate-owned design, planning, execution, review, and Finisher-owned publish follow-through.
-   ```
-
-### OpenAI Codex App
-
-1. Install or enable the `superteam` plugin from your Codex plugin source.
-2. Open the target repository in the app.
-3. Invoke:
-
-   ```text
-   Use $superteam to route this issue through teammate-owned design, planning, execution, review, and Finisher-owned publish follow-through.
-   ```
-
-When `Finisher` is waiting on external publish-state in the Codex app, prefer a thread automation attached to the current thread so follow-through stays in the same conversation context.
-
-### GitHub Copilot
-
-No plugin install required. This repo ships `.github/copilot-instructions.md`, which Copilot Chat reads automatically when the repo is open in your editor.
-
-```text
-@workspace Use the superteam skill for the workflow described above.
-```
-
-### Cursor
-
-No plugin install required. This repo ships `.cursor/rules/superteam.mdc`, which Cursor loads as a project rule whenever the repo is open. Ask the Cursor agent to apply `superteam`.
-
-### Windsurf
-
-No plugin install required. This repo ships `.windsurfrules`, which Windsurf reads natively when the repo is open. Ask Cascade to apply `superteam`.
-
-### Aider, Zed, Cline, Opencode
-
-No plugin install required. These tools read `AGENTS.md` natively. Open the repo and ask the assistant to apply the `superteam` workflow described in `AGENTS.md`.
+> Install via the patinaproject-skills marketplace — see the [root README](../../../README.md) for Quickstart.
 
 ## Usage
 
@@ -253,6 +155,6 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md).
 
 ## Related
 
-- [`skills/superteam/SKILL.md`](./skills/superteam/SKILL.md) — skill contract.
+- [`skills/engineering/superteam/SKILL.md`](./SKILL.md) — skill contract.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) — marketplace distributing Patina Project plugins.
 - [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) — scaffolding skill that emitted this repo's baseline.

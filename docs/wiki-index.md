@@ -8,8 +8,8 @@ yet live. Publishing them is tracked as part of issue [#58](https://github.com/p
 
 | Wiki page name | Purpose |
 | --- | --- |
-| `Install-Claude-Code` | Step-by-step Claude Code install: `npx skills@1.5.6 add patinaproject/skills@<name>` for each skill. |
-| `Install-Codex` | Step-by-step Codex install: `npx skills@1.5.6 add patinaproject/skills@<name> --agent codex` for each skill. |
+| `Install-Claude-Code` | Step-by-step Claude Code install: `npx skills@latest add patinaproject/skills` (interactive selection). |
+| `Install-Codex` | Step-by-step Codex install: `npx skills@latest add patinaproject/skills` (interactive selection; CLI auto-detects agent). |
 | `Skill-scaffold-repository-usage` | Full usage walkthrough for `scaffold-repository`: new-repo scaffold mode, realignment mode, what each baseline file does, and how to add optional surfaces. Source: `skills/engineering/scaffold-repository/SKILL.md` and `skills/engineering/scaffold-repository/README.md` (now in-repo). |
 | `Skill-superteam-usage` | Full usage walkthrough for `superteam`: teammate roles (Team Lead, Brainstormer, Planner, Executor, Reviewer, Finisher), how to invoke the skill on an issue, how to hand off between teammates, and how to read the resulting design and plan docs. Source: `skills/engineering/superteam/SKILL.md` and `skills/engineering/superteam/README.md` (now in-repo). |
 | `Skill-using-github-usage` | Full usage walkthrough for `using-github`: entry point, issue filing, branch creation, PR preparation, and changelog writing. Source: `skills/engineering/using-github/SKILL.md` and `skills/engineering/using-github/README.md` (now in-repo). |

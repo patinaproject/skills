@@ -6,29 +6,25 @@ across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
-### Install via the skills CLI (primary)
-
 ```bash
-npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills --agent <agent> -y
+npx skills@latest add patinaproject/skills
 ```
 
-Replace `<agent>` with `claude-code` or `codex`. The `npm_config_ignore_scripts=true`
-prefix is required — do not omit it.
+The CLI prompts you to pick which skills to install and auto-detects your agent.
 
-### Install via the host marketplace (secondary)
-
-For Claude Code:
+### Install via the Claude Code host marketplace (alternative)
 
 ```text
 /plugin marketplace add patinaproject/skills
 /plugin install patinaproject-skills@patinaproject-skills
 ```
 
-For Codex:
-
-```text
-codex plugin marketplace add patinaproject/skills --ref <MARKETPLACE_TAG>
-```
+> **Codex users:** use the `npx skills` command above; there is no Codex
+> host-marketplace path in this repo.
+>
+> **Security note:** For environments where you want to prevent install scripts
+> from running during CLI execution, prefix the command with
+> `npm_config_ignore_scripts=true`. This is not required for standard use.
 
 ## Why these skills exist
 
@@ -96,13 +92,13 @@ for the skill contract.
 
 ## Skills
 
-| Skill | Description |
-|---|---|
-| [scaffold-repository](./skills/engineering/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
-| [superteam](./skills/engineering/superteam/) | Orchestrate a GitHub issue from design through merged PR |
-| [using-github](./skills/engineering/using-github/) | Patina Project GitHub workflow conventions |
-| [office-hours](./skills/productivity/office-hours/) | YC-style design partner; runs forcing questions |
-| [find-skills](./skills/productivity/find-skills/) | Discover and install agent skills |
+| Skill | Description | Category |
+|---|---|---|
+| [scaffold-repository](./skills/engineering/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline | engineering |
+| [superteam](./skills/engineering/superteam/) | Orchestrate a GitHub issue from design through merged PR | engineering |
+| [using-github](./skills/engineering/using-github/) | Patina Project GitHub workflow conventions | engineering |
+| [office-hours](./skills/productivity/office-hours/) | YC-style design partner; runs forcing questions | productivity |
+| [find-skills](./skills/productivity/find-skills/) | Discover and install agent skills | productivity |
 
 ## Local iteration
 
@@ -112,11 +108,8 @@ change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
 ### Check a — CLI resolves skills from local paths
 
 ```sh
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add ./skills/engineering/scaffold-repository --list
-
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add ./skills/productivity/office-hours --list
+npx skills@latest add ./skills/engineering/scaffold-repository --list
+npx skills@latest add ./skills/productivity/office-hours --list
 ```
 
 ### Check b — scaffold-repository apply, no network
