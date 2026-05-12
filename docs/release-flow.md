@@ -131,9 +131,18 @@ To enable fully-automated release PRs:
    - `contents: write` — to push tags
    - `pull-requests: write` — to open and update release PRs
    - `issues: write` — to manage `autorelease:*` labels
+   - `workflows: write` — required if the scaffold-repository self-apply
+     ever touches a file under `.github/workflows/**` (the default
+     `GITHUB_TOKEN` cannot modify workflow files).
 2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
 3. Edit `.github/workflows/release-please.yml`: replace
    `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
 
+The scaffold-refresh step already falls back to `RELEASE_PLEASE_TOKEN` when
+present (`${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}`), so this scope
+is consumed automatically once the secret exists.
+
 Until that's done, release PRs need a manual `git commit --allow-empty` or
-maintainer push to trigger checks. The first-release fix can be deferred.
+maintainer push to trigger checks, and any scaffold refresh that touches
+`.github/workflows/**` will fail at the Contents API PUT. The first-release
+fix can be deferred until either of those scenarios actually occurs.

@@ -6,8 +6,10 @@ on:
       - "skills/**"
       - "scripts/**"
       - ".agents/skills/**"
+      - ".agents/plugins/**"
       - ".claude/skills/**"
       - ".claude-plugin/**"
+      - ".codex-plugin/**"
 
 permissions:
   contents: read

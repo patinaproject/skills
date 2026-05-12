@@ -58,7 +58,10 @@ jobs:
 
       - name: Push scaffold refresh via GitHub API
         env:
-          GH_TOKEN: ${{ github.token }}
+          # GITHUB_TOKEN has contents:write but NOT workflows:write, so PUTs
+          # against `.github/workflows/**` will 403. Falls back when
+          # RELEASE_PLEASE_TOKEN is unset so non-workflow refreshes still work.
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
         run: |
           # Commit each changed file via the Contents API so the commit is
           # auto-verified by GitHub (satisfies issue #29 intent without a
@@ -71,13 +74,23 @@ jobs:
             exit 0
           fi
           for file in $changed; do
-            sha=$(gh api "repos/$REPO/contents/$file?ref=$BRANCH" --jq '.sha')
+            # Probe for an existing blob SHA; if the file doesn't exist on the
+            # branch yet, the Contents API returns 404 and we create the file
+            # without `-f sha=...` (the API rejects sha=... on creates).
+            sha=$(gh api "repos/$REPO/contents/$file?ref=$BRANCH" --jq '.sha' 2>/dev/null || true)
             content=$(base64 -w0 < "$file")
-            gh api -X PUT "repos/$REPO/contents/$file" \
-              -f message="chore: apply scaffold-repository scaffolding refresh" \
-              -f content="$content" \
-              -f sha="$sha" \
-              -f branch="$BRANCH"
+            if [ -n "$sha" ]; then
+              gh api -X PUT "repos/$REPO/contents/$file" \
+                -f message="chore: apply scaffold-repository scaffolding refresh" \
+                -f content="$content" \
+                -f sha="$sha" \
+                -f branch="$BRANCH"
+            else
+              gh api -X PUT "repos/$REPO/contents/$file" \
+                -f message="chore: apply scaffold-repository scaffolding refresh" \
+                -f content="$content" \
+                -f branch="$BRANCH"
+            fi
           done
 
   auto-merge:
