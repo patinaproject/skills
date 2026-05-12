@@ -128,3 +128,27 @@ The vercel-labs CLI is pinned at `skills@1.5.6` in all documentation. To bump:
 2. Re-run `bash scripts/verify-dogfood.sh` — exits 0.
 3. Run the [check-a local-path verification](../README.md#local-iteration) — exits 0.
 4. Open a PR with the version bump.
+
+## Token setup (required before first release)
+
+`release-please-action` runs with `token: ${{ github.token }}` by default. This
+works for opening release PRs, but has a known GitHub limitation:
+
+> PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
+
+The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
+NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
+will wait indefinitely.
+
+To enable fully-automated release PRs:
+
+1. Create a GitHub App or PAT with these scopes:
+   - `contents: write` — to push tags
+   - `pull-requests: write` — to open and update release PRs
+   - `issues: write` — to manage `autorelease:*` labels
+2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
+3. Edit `.github/workflows/release-please.yml`: replace
+   `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
+
+Until that's done, release PRs need a manual `git commit --allow-empty` or
+maintainer push to trigger checks. The first-release fix can be deferred.
