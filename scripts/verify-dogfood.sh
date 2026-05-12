@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # verify-dogfood.sh — Asserts that all five in-repo skills are discoverable
-# via the flat skills/<name>/ layout and the dogfood overlay symlinks.
+# via the category-based skills/<category>/<name>/ layout and the dogfood
+# overlay symlinks.
 # Covers AC-58-3 check c.
 #
 # Exit 0: all five skills pass all assertions.
@@ -13,7 +14,14 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-SKILLS=(scaffold-repository superteam using-github find-skills office-hours)
+# Each entry is "name:category"
+SKILLS=(
+  scaffold-repository:engineering
+  superteam:engineering
+  using-github:engineering
+  office-hours:productivity
+  find-skills:productivity
+)
 FAIL_COUNT=0
 
 fail() {
@@ -33,12 +41,14 @@ _realpath() {
   fi
 }
 
-for name in "${SKILLS[@]}"; do
-  CANONICAL="skills/$name/SKILL.md"
+for entry in "${SKILLS[@]}"; do
+  name="${entry%%:*}"
+  category="${entry##*:}"
+  CANONICAL="skills/$category/$name/SKILL.md"
   CLAUDE_LINK=".claude/skills/$name/SKILL.md"
   AGENTS_LINK=".agents/skills/$name/SKILL.md"
 
-  # 1. Assert skills/<name>/SKILL.md is a regular file (not a symlink, not missing).
+  # 1. Assert skills/<category>/<name>/SKILL.md is a regular file (not a symlink, not missing).
   if [ ! -f "$CANONICAL" ]; then
     fail "$CANONICAL missing or not a regular file"
     continue
@@ -80,7 +90,7 @@ for name in "${SKILLS[@]}"; do
   fi
 
   # 3. Assert .claude/skills/<name>/SKILL.md resolves to the same real path as
-  #    skills/<name>/SKILL.md via symlink traversal.
+  #    skills/<category>/<name>/SKILL.md via symlink traversal.
   if [ ! -e "$CLAUDE_LINK" ]; then
     fail "$CLAUDE_LINK does not resolve (broken symlink or missing)"
     continue
@@ -103,7 +113,7 @@ for name in "${SKILLS[@]}"; do
     continue
   fi
 
-  echo "OK: $name"
+  echo "OK: $name ($category)"
 done
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
@@ -113,5 +123,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all five skills discoverable via flat layout"
+echo "OK: all five skills discoverable via category layout"
 exit 0
