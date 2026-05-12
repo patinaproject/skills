@@ -1127,6 +1127,127 @@ Pass criterion: exit code 0. All five skills (`scaffold-repository`, `superteam`
 - Building a public skills registry beyond what GitHub Releases provide via release-please.
 - Updating branch-protection rules for the renamed CI check. Operator-managed post-merge action.
 
+## W26 — Delta 7 (de-categorize + drop find-skills)
+
+**Design head:** `ea393ad` (Brainstormer delta 7). Extends the approved delta-6 design to:
+1. Drop `find-skills` from the `patinaproject-skills` plugin; re-install it as a third-party vendored skill (7b, executed first).
+2. De-categorize the four surviving skills back to a flat `skills/<name>/` layout (7a, executed second).
+
+### W26.7b — Drop find-skills from patinaproject-skills
+
+**Goal:** Remove `find-skills` from the plugin manifest and re-install it as a third-party vendored skill at `.agents/skills/find-skills/` (real files) with `.claude/skills/find-skills` as a symlink into `.agents/skills/find-skills`. Plugin drops from 5 entries to 4.
+
+**Tasks:**
+
+- 7b.1 Remove the overlay symlinks for `find-skills` before the `git rm` (they would become dangling):
+  - `rm .agents/skills/find-skills`
+  - `rm .claude/skills/find-skills`
+- 7b.2 `git rm -rf skills/productivity/find-skills/`
+- 7b.3 Edit `.claude-plugin/plugin.json`: remove `./skills/productivity/find-skills` from `skills[]`. Exactly 4 entries remain (still categorized — delta 7a flattens next):
+  ```json
+  { "skills": ["./skills/engineering/scaffold-repository", "./skills/engineering/superteam", "./skills/engineering/using-github", "./skills/productivity/office-hours"] }
+  ```
+- 7b.4 Edit `.claude-plugin/marketplace.json` `plugins[0].description`: remove `find-skills` from the comma-separated list.
+- 7b.5 Re-install find-skills as a third-party vendored skill:
+  ```
+  /opt/homebrew/bin/npx -y skills@1.5.6 add vercel-labs/skills@find-skills --agent claude-code -y
+  ```
+  Expected result: `.agents/skills/find-skills/SKILL.md` as a real file; `.claude/skills/find-skills` symlink → `../../.agents/skills/find-skills` (same topology as the 22+ other third-party skills).
+- 7b.6 Update `scripts/verify-dogfood.sh`: iterate over 4 names only (`scaffold-repository`, `superteam`, `using-github`, `office-hours`). Remove the `find-skills:productivity` entry.
+- 7b.7 Update `scripts/verify-marketplace.sh`: add a negative assertion that `find-skills` does NOT appear in `.claude-plugin/plugin.json` `skills[]`.
+- 7b.8 Update root `README.md`:
+  - Remove the `find-skills` row from the skills table.
+  - Remove the `find-skills` section from "Why these skills exist".
+  - Add a brief "Related skills" Quickstart note pointing at `vercel-labs/skills@find-skills`.
+  - PRESERVE the uncommitted section reorder (scaffold-repository moved from 1st to 4th position in "Why these skills exist").
+- 7b.9 Update `.gitignore` dogfood overlay allowlist: remove `!.agents/skills/find-skills` and `!.claude/skills/find-skills` (find-skills is now third-party and should be gitignored like all other third-party skills).
+
+**Verification:**
+- `bash scripts/verify-dogfood.sh` exits 0 (4 skills; no find-skills branch).
+- `bash scripts/verify-marketplace.sh` exits 0.
+- `jq '.skills | length' .claude-plugin/plugin.json` returns 4.
+- `.agents/skills/find-skills/SKILL.md` is a real file (not symlink).
+- `.claude/skills/find-skills` is a symlink resolving via `.agents/skills/find-skills`.
+- `skills-lock.json` records the find-skills entry sourced from `vercel-labs/skills`.
+
+**Commit:** `feat: #58 drop find-skills from patinaproject-skills (delta 7b)`
+
+### W26.7a — De-categorize skills directory to flat layout
+
+**Goal:** Move all 4 surviving skills from `skills/<category>/<name>/` back to flat `skills/<name>/`. Update overlay symlinks, plugin manifest paths, scripts, workflows, docs, and AGENTS.md. Covers AC-58-7 SHA round-trip as a HALT condition.
+
+**Tasks:**
+
+- 7a.1 Move all 4 surviving skills:
+  ```
+  git mv skills/engineering/scaffold-repository skills/scaffold-repository
+  git mv skills/engineering/superteam skills/superteam
+  git mv skills/engineering/using-github skills/using-github
+  git mv skills/productivity/office-hours skills/office-hours
+  ```
+- 7a.2 Remove now-empty parent dirs (verify empty first):
+  ```
+  rmdir skills/engineering skills/productivity
+  ```
+- 7a.3 **AC-58-7 SHA round-trip HALT condition:**
+  ```
+  sha256sum skills/superteam/SKILL.md
+  ```
+  Must equal `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356`. If mismatch → HALT.
+- 7a.4 Update 4 overlay symlinks at `.agents/skills/<name>` and `.claude/skills/<name>`:
+  ```
+  for name in scaffold-repository superteam using-github office-hours; do
+    rm .agents/skills/$name .claude/skills/$name
+    ln -s ../../skills/$name .agents/skills/$name
+    ln -s ../../skills/$name .claude/skills/$name
+  done
+  ```
+- 7a.5 Update `.claude-plugin/plugin.json`: change paths to flat `./skills/<name>`:
+  ```json
+  "skills": ["./skills/scaffold-repository", "./skills/superteam", "./skills/using-github", "./skills/office-hours"]
+  ```
+- 7a.6 Update `scripts/apply-scaffold-repository.js`: change all `skills/engineering/scaffold-repository` references to `skills/scaffold-repository`.
+- 7a.7 Update root `package.json` pnpm scripts: `apply:scaffold-repository` and `apply:scaffold-repository:check` paths from `skills/engineering/scaffold-repository` to `skills/scaffold-repository`.
+- 7a.8 Update `.github/workflows/release-please.yml`: apply-scaffold-repository step input path from `skills/engineering/scaffold-repository` to `skills/scaffold-repository`.
+- 7a.9 Update per-skill READMEs for any intra-doc path strings referencing `skills/engineering/` or `skills/productivity/`:
+  - `skills/scaffold-repository/README.md`
+  - `skills/superteam/README.md`
+  - `skills/using-github/README.md`
+  - Search with `rg -F 'skills/engineering/' skills/` and `rg -F 'skills/productivity/' skills/`.
+- 7a.10 Update root `README.md`:
+  - Skill table link cells: change from `./skills/engineering/<name>/` and `./skills/productivity/<name>/` to `./skills/<name>/`.
+  - "Why these skills exist" section: update links.
+  - Quickstart `Check a` commands: update local path references.
+  - Repository layout block: update to flat layout.
+  - PRESERVE the 4-skill table (find-skills already removed in 7b) and section reorder.
+- 7a.11 Update `docs/file-structure.md`: revise category language; update tree diagrams to flat layout; add a "Delta 7" migration history entry.
+- 7a.12 Update `docs/wiki-index.md`: update paths from category to flat.
+- 7a.13 Update `AGENTS.md`: change all `skills/engineering/` and `skills/productivity/` path refs to flat `skills/<name>/`; update "5 skill paths" references to "4"; update `find skills -mindepth 3 -maxdepth 3` to `-mindepth 2 -maxdepth 2`.
+- 7a.14 Update `scripts/verify-dogfood.sh`: update canonical paths from `skills/$category/$name/SKILL.md` to `skills/$name/SKILL.md` (flat layout). Script already updated to 4 names in 7b.
+- 7a.15 Update `scripts/verify-marketplace.sh`: update path regex/assertion from category form to flat `^\./skills/[a-z-]+$`.
+- 7a.16 Update `.gitignore` dogfood overlay allowlist: the overlay symlinks already point at flat paths after 7a.4; no `.gitignore` change needed (patterns are `!.agents/skills/<name>` format which remains correct).
+
+**Final verification:**
+- `pnpm install --frozen-lockfile` succeeds
+- `pnpm lint:md` exits 0
+- `actionlint .github/workflows/*.yml` exits 0
+- `bash scripts/verify-dogfood.sh` exits 0
+- `bash scripts/verify-marketplace.sh` exits 0
+- `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` exits 0
+- `sha256sum skills/superteam/SKILL.md` = `87867b669c97d06b7076f155ab6aa9d61833aee06fd14fe14af88e363de34356`
+- `find skills -maxdepth 2 -name SKILL.md | sort` returns exactly 4 paths: `skills/{scaffold-repository,superteam,using-github,office-hours}/SKILL.md`
+- `jq '.skills | length' .claude-plugin/plugin.json` returns 4
+- `rg -F 'skills/engineering/' skills/ .claude-plugin/ scripts/ docs/ AGENTS.md README.md` returns no results (or only in `docs/superpowers/specs/` historical)
+- `rg -F 'skills/productivity/' skills/ .claude-plugin/ scripts/ docs/ AGENTS.md README.md` returns no results
+- `git status` clean
+
+**Commit:** `refactor: #58 de-categorize skills directory back to flat layout (delta 7a)`
+
+### Halt conditions (W26)
+
+- AC-58-7 SHA round-trip mismatch (step 7a.3) → halt.
+- Any verification check fails after fix attempts → halt.
+
 ## Done-report mapping
 
 The Finisher references this plan's workstream IDs (`W12`–`W19`) plus the historical IDs (`W1`–`W11`) in the eventual PR body's `Acceptance Criteria` section so each `AC-58-<n>` heading has verification steps anchored to specific tasks. The PR template's section ordering is preserved (per AGENTS.md's `.github/` templates rule).
