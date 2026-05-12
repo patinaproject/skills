@@ -1,180 +1,164 @@
-# Patina Project Skills
+# Skills used by the Patina Project team
 
-This repository is the source of truth for Patina Project agent skills.
-Five skills live under `skills/<name>/` at the repo root.
+Five installable agent skills for repository scaffolding, multi-teammate
+orchestration, GitHub workflows, product design, and skill discovery — available
+across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
+
+## Quickstart
+
+### Install via the skills CLI (primary)
+
+```bash
+npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills --agent <agent> -y
+```
+
+Replace `<agent>` with `claude-code` or `codex`. The `npm_config_ignore_scripts=true`
+prefix is required — do not omit it.
+
+### Install via the host marketplace (secondary)
+
+For Claude Code:
+
+```text
+/plugin marketplace add patinaproject/skills
+/plugin install patinaproject-skills@patinaproject-skills
+```
+
+For Codex:
+
+```text
+codex plugin marketplace add patinaproject/skills --ref <MARKETPLACE_TAG>
+```
+
+## Why these skills exist
+
+### scaffold-repository
+
+Teams spend disproportionate time on repo plumbing — commit conventions,
+markdown linting, PR templates, Husky hooks, release-please wiring, AI agent
+plugin manifests — and every new repo starts that conversation from scratch.
+`scaffold-repository` collapses that into one invocation that emits the full
+Patina Project baseline and keeps it aligned on rerun. It handles both new
+repos and realignment of existing ones, so convention drift gets caught before
+it accumulates.
+
+See [./skills/engineering/scaffold-repository/](./skills/engineering/scaffold-repository/)
+for the full README and skill contract.
+
+### superteam
+
+Even with a capable agent, implementation loops need structure: a design doc
+to approve before planning starts, a plan to approve before code is written,
+an explicit reviewer pass before publishing, and a finisher who owns the PR
+through CI and human feedback. Without that structure, chat context is the only
+handoff artifact and restarts are expensive. `superteam` routes a GitHub issue
+through a six-teammate workflow — Team Lead, Brainstormer, Planner, Executor,
+Reviewer, Finisher — producing durable repo-owned artifacts at every gate.
+
+See [./skills/engineering/superteam/](./skills/engineering/superteam/) for the
+full README and skill contract.
+
+### using-github
+
+GitHub work — filing issues, editing issues, starting branches, writing
+changelogs, preparing PRs — is repetitive and convention-sensitive. Without a
+shared skill, every agent session re-derives the same rules from scratch and
+produces inconsistent output. `using-github` is a single skill that reads
+repository rules and applies the correct workflow for each task, so every
+GitHub action in a repo is consistent and auditable.
+
+See [./skills/engineering/using-github/](./skills/engineering/using-github/)
+for the full README and skill contract.
+
+### office-hours
+
+New product ideas benefit from honest forcing questions before any code is
+written — demand reality checks, narrowest-wedge tests, observation-grounded
+specificity. Without a structured partner, agents tend to validate rather than
+pressure-test. `office-hours` runs a YC-style session in one of two modes:
+Startup mode asks six forcing questions that expose whether the idea is
+genuinely worth building; Builder mode is an enthusiastic design partner for
+hackathons and side projects. Output is always a design doc, never code.
+
+See [./skills/productivity/office-hours/](./skills/productivity/office-hours/)
+for the skill contract.
+
+### find-skills
+
+As the skills ecosystem grows, discovering the right skill for a task gets
+harder. `find-skills` helps users and agents navigate the catalog — searching
+for skills by capability, explaining what each does, and walking through the
+install steps — so the answer to "how do I do X?" is a concrete skill
+reference rather than a general response.
+
+See [./skills/productivity/find-skills/](./skills/productivity/find-skills/)
+for the skill contract.
 
 ## Skills
 
-| Skill | Description | Latest |
-| --- | --- | --- |
-| `scaffold-repository` | Scaffold or realign a repo to the Patina Project baseline | `v1.10.0` |
-| `superteam` | Issue-driven orchestration: design → plan → execute → review | `v1.5.0` |
-| `using-github` | GitHub workflow skill: issues, branches, PRs, changelogs | `v2.0.0` |
-| `office-hours` | YC-style office hours partner for product ideation | — |
-| `find-skills` | Helps users discover and install agent skills | — |
-
-`scaffold-repository`, `superteam`, and `using-github` are versioned by
-release-please. `office-hours` and `find-skills` are standalone skills that
-resolve to the default-branch HEAD when installed without a `#<ref>` qualifier.
-
-## Install via vercel-labs skills CLI
-
-The primary install path uses the [vercel-labs/skills](https://github.com/vercel-labs/skills)
-CLI. The `npm_config_ignore_scripts=true` prefix is the default — do not omit it.
-
-### Claude Code
-
-```sh
-# scaffold-repository
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@scaffold-repository --agent claude-code -y
-
-# superteam
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@superteam --agent claude-code -y
-
-# using-github
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@using-github --agent claude-code -y
-
-# office-hours (standalone skill)
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@office-hours --agent claude-code -y
-
-# find-skills
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@find-skills --agent claude-code -y
-```
-
-### Codex
-
-```sh
-# scaffold-repository
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@scaffold-repository --agent codex -y
-
-# superteam
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@superteam --agent codex -y
-
-# using-github
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@using-github --agent codex -y
-```
-
-The CLI version (`skills@1.5.6`) is pinned at invocation. A future pin bump requires
-re-running `bash scripts/verify-dogfood.sh` and the
-[check-a verification](#local-iteration) before merging.
-
-**Pinned version install:** To install a specific tagged release, pass the full
-prefixed tag as the `#<git-ref>`:
-
-```sh
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add patinaproject/skills@scaffold-repository#scaffold-repository-v1.10.0 \
-  --agent claude-code -y
-```
-
-**Standalone-skill resolution:** `patinaproject/skills@<name>` without a `#<ref>`
-qualifier resolves to the default branch HEAD. Consumers wanting a pinned version
-pass `patinaproject/skills@<name>#<git-ref>`.
-
-## Clone-and-copy fallback
-
-If the npm-distributed CLI is unavailable or distrusted, copy the skill files
-directly:
-
-```sh
-git clone https://github.com/patinaproject/skills.git
-cp -r skills/scaffold-repository ~/.claude/skills/scaffold-repository
-# or for Codex:
-cp -r skills/scaffold-repository ~/.codex/skills/scaffold-repository
-```
-
-Each skill directory contains a `SKILL.md` file and any supporting files the
-agent needs. No build step is required.
-
-## Use installed skills
-
-```text
-Use $scaffold-repository to align this repository with the Patina Project baseline.
-```
-
-```text
-Use $superteam to take issue #123 from design through review-ready execution.
-```
-
-```text
-Use $using-github for GitHub issue, branch, PR, and changelog work.
-```
+| Skill | Description |
+|---|---|
+| [scaffold-repository](./skills/engineering/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
+| [superteam](./skills/engineering/superteam/) | Orchestrate a GitHub issue from design through merged PR |
+| [using-github](./skills/engineering/using-github/) | Patina Project GitHub workflow conventions |
+| [office-hours](./skills/productivity/office-hours/) | YC-style design partner; runs forcing questions |
+| [find-skills](./skills/productivity/find-skills/) | Discover and install agent skills |
 
 ## Local iteration
 
-Three falsifiable checks prove the in-repo skills are wired correctly. Run these
-after any change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
+Three checks prove the in-repo skills are wired correctly. Run these after any
+change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
 
-### Check a — CLI resolves skills from local paths (exit 0)
-
-```sh
-# scaffold-repository skill
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add ./skills/scaffold-repository --list
-
-# office-hours skill
-npm_config_ignore_scripts=true npx skills@1.5.6 \
-  add ./skills/office-hours --list
-```
-
-Proves: the SKILL.md shape is compatible with the vercel-labs CLI (name, description
-fields present, file resolvable). In CI, local path sources are used because the
-branch may not be published at check time.
-
-### Check b — scaffold-repository apply, no network (exit 0)
+### Check a — CLI resolves skills from local paths
 
 ```sh
-node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
+npm_config_ignore_scripts=true npx skills@1.5.6 \
+  add ./skills/engineering/scaffold-repository --list
+
+npm_config_ignore_scripts=true npx skills@1.5.6 \
+  add ./skills/productivity/office-hours --list
 ```
 
-Proves: the scaffold-repository skill's templates can be applied idempotently
-against a target repo without making any outbound network calls.
+### Check b — scaffold-repository apply, no network
 
-### Check c — dogfood verification, all five skills (exit 0)
+```sh
+node scripts/apply-scaffold-repository.js skills/engineering/scaffold-repository --check
+```
+
+### Check c — dogfood verification, all five skills
 
 ```sh
 bash scripts/verify-dogfood.sh
 ```
 
-Proves: all five skills (`scaffold-repository`, `superteam`, `using-github`,
-`find-skills`, `office-hours`) are discoverable through the flat `skills/<name>/`
-layout and the dogfood overlay symlinks, with correct frontmatter names.
-
 ## Repository layout
 
 ```text
-skills/                              Skill source-of-truth (one directory per skill)
-  scaffold-repository/
-  superteam/
-  using-github/
-  find-skills/
-  office-hours/
-.agents/skills/<name>/               Symlinks to ../../skills/<name>/ (5 in-repo)
-.claude/skills/<name>/               Symlinks to ../../skills/<name>/ (5 in-repo)
+skills/
+  engineering/
+    scaffold-repository/
+    superteam/
+    using-github/
+  productivity/
+    office-hours/
+    find-skills/
+.agents/skills/<name>/               Symlinks to ../../skills/<category>/<name>/
+.claude/skills/<name>/               Symlinks to ../../skills/<category>/<name>/
+.claude-plugin/
+  marketplace.json                   Claude marketplace catalog
+  plugin.json                        Claude plugin manifest
 scripts/                             Maintenance and verification scripts
-skills-lock.json                     vercel-labs CLI install lockfile (commit it)
-release-please-config.json           Per-skill release-please configuration
-.release-please-manifest.json        Per-skill version manifest
+release-please-config.json           Release-please configuration
+.release-please-manifest.json        Version manifest
 ```
 
-See [docs/file-structure.md](docs/file-structure.md) for the full canonical-layout
-reference and symlink hygiene requirements.
+See [docs/file-structure.md](docs/file-structure.md) for the full layout
+reference.
 
-## Maintenance notes
+## License
 
-- Keep skill names and folder names aligned
-- Use lowercase names for skill folders
-- Use GitHub issue-tagged conventional commits with no scopes:
-  `type: #123 short description`
-- Run `pnpm verify:dogfood` after any overlay change
-- Run `pnpm apply:scaffold-repository:check` to confirm scaffolding is in sync
-- See [docs/release-flow.md](docs/release-flow.md) for how skill releases work
-- See [docs/wiki-index.md](docs/wiki-index.md) for the full wiki page index
+See [LICENSE](./LICENSE).
+
+## Contributing
+
+See [AGENTS.md](./AGENTS.md) for contributor guidelines and commit conventions.
