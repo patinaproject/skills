@@ -47,8 +47,7 @@ Context: <prior PR, prior QA pass, or follow-up issue this PR builds on, or `sta
   AC-specific coverage gaps, testing steps, or failing/pending PR checks here;
   PR check status is already reported by GitHub. Do not add this section for
   placeholders such as `None`, `N/A`, or `No work-specific pre-merge operator
-  steps.` To include an intentionally optional checkbox, put a
-  `pr-checkbox: optional` HTML comment immediately above that checkbox.
+  steps.`
 -->
 
 ## Test coverage

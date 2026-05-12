@@ -105,11 +105,6 @@ const STATIC_FILES = [
     src: ".github/workflows/pull-request.yml",
     dest: ".github/workflows/pull-request.yml",
   },
-  // PR template checkboxes validator — required by pull-request.yml
-  {
-    src: "scripts/check-pr-template-checkboxes.mjs",
-    dest: "scripts/check-pr-template-checkboxes.mjs",
-  },
 ];
 
 // .markdownlintignore is a static file in core templates (non-.tmpl)
