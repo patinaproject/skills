@@ -116,8 +116,9 @@ maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y
 component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
 [docs/release-flow.md](./docs/release-flow.md).
 
-The two standalone skills (`find-skills`, `office-hours`) are not release-please packages.
-Consumers install them from the default branch or a specific `#<git-ref>`.
+The five in-repo skills share the single root `patinaproject-skills` release and tag;
+they are not separate release-please packages. Third-party skills such as `find-skills`
+are installed separately from their source repo's default branch or a specific `#<git-ref>`.
 
 Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
 auto-merges Release PRs after required checks pass.
