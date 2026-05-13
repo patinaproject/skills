@@ -6,8 +6,8 @@ Tighten the `superteam` finish contract so `Finisher` cannot report the workflow
 complete from a PR creation event, a stale status snapshot, or green CI alone.
 Before any completion-style handoff, `Finisher` must run a latest-head PR
 completion gate that proves all actionable PR feedback has been handled and all
-required checks for the latest pushed head are passing or conclusively
-non-blocking.
+reported checks/statuses for the latest pushed head are passing, skipped,
+neutral, or explicitly classified non-blocking with evidence.
 
 The change is intentionally conservative. It strengthens the existing
 head-relative shutdown rules, external feedback ownership, and finish routing
@@ -51,8 +51,8 @@ contract leaves room for unsafe interpretations such as "the PR was opened",
 - Treat unresolved actionable PR review threads, review comments, top-level PR
   comments, and bot findings as blockers until handled or conclusively
   non-blocking.
-- Require all required checks for the latest pushed head to be passing before
-  completion, unless a check is conclusively non-blocking.
+- Require every reported check/status for the latest pushed head to be passing,
+  skipped, neutral, or evidence-classified non-blocking before completion.
 - Preserve existing feedback routing: requirement-bearing feedback routes to
   `Brainstormer`, implementation feedback routes through `Executor`, and
   `Finisher` owns external feedback intake and publish-state follow-through.
@@ -63,8 +63,8 @@ contract leaves room for unsafe interpretations such as "the PR was opened",
 
 - Auto-merge PRs.
 - Change GitHub branch protection or repository settings.
-- Require optional or informational checks to pass when GitHub does not treat
-  them as required.
+- Block purely informational signals or evidence-classified non-blocking checks
+  after their non-blocking evidence has been recorded and surfaced.
 - Add hidden workflow state, sidecar files, branch labels, or commit trailers.
 - Redesign Gate 1, local pre-publish review, model selection, or execution-mode
   selection.
@@ -109,32 +109,35 @@ A PR comment is handled when the workflow has either:
 Silence, elapsed time, local intent, or "CI is green" is not enough to classify a
 comment as handled.
 
-### R4: Required checks gate
+### R4: Checks and statuses gate
 
-The completion gate must inspect required checks for the latest pushed head.
-Completion is allowed only when every required check is passing, skipped/neutral
-in a way GitHub treats as passing for branch protection, or conclusively
-non-blocking because it is not required for mergeability. Pending, queued,
-missing, failing, cancelled, timed-out, or stale required checks block
-completion.
+The completion gate must inspect every reported check run, status context, and
+required-check signal for the latest pushed head. Completion is allowed only
+when each reported check/status is passing, skipped, neutral, or explicitly
+classified `non_blocking` with evidence. Pending, queued, missing, failing,
+cancelled, timed-out, stale, or unknown required checks always block completion.
+Optional non-passing checks/statuses also block completion unless `Finisher`
+records and surfaces evidence that they are non-blocking for the latest head.
 
-If the runtime cannot determine which checks are required, `Finisher` must not
-report complete. It reports the ambiguity as blocked or monitoring and includes
-the missing signal in the wakeup/status payload.
+If the runtime cannot determine required-check state or cannot enumerate latest
+head check/status signals, `Finisher` must not report complete. It reports the
+ambiguity as blocked or monitoring and includes the missing signal in the
+wakeup/status payload.
 
 ### R5: Completion language
 
 `Finisher` may use completion language only after the latest-head completion
 gate passes. Otherwise the operator-facing response must use a non-complete
 state such as `monitoring` or `blocked`, with concise counts for unresolved
-actionable feedback and pending/failing required checks.
+actionable feedback and non-passing or unknown check/status signals.
 
 ### R6: Durable wakeup payload
 
 Any durable wakeup or paused follow-through payload must include the branch, PR
 URL or number, latest pushed SHA, current publish-state, unresolved actionable
-feedback count, routed-feedback count, required-check state, pending signals,
-and an instruction to resume the latest-head PR completion gate.
+feedback count, routed-feedback count, required-check state, check/status
+inventory state, pending signals, and an instruction to resume the latest-head
+PR completion gate.
 
 ### R7: Role ownership
 
@@ -153,7 +156,9 @@ surfaces needed to make the gate binding:
   ownership, rationalization table entries, red flags, and done/shutdown
   contract language
 - `skills/superteam/agents/finisher.openai.yaml` for Finisher-owned
-  non-negotiable rules
+  non-negotiable rules in Codex-host delegation
+- `skills/superteam/.claude/agents/finisher.md` for Finisher-owned
+  non-negotiable rules in Claude Code delegation
 - `skills/superteam/pre-flight.md` for finish substate signal collection and
   latest-head PR state vocabulary
 - `skills/superteam/routing-table.md` for finish-phase routing through the
@@ -188,16 +193,18 @@ after a fresh latest-head PR feedback and checks sweep.
 
 ### AC-64-4
 
-Given any required PR check for the latest pushed head is pending, queued,
-missing, failing, cancelled, timed out, stale, or otherwise not known to be
-passing, when `Finisher` evaluates completion, then Superteam remains in
-monitoring or blocked state and does not report complete.
+Given any latest-head PR check/status is pending, queued, missing, failing,
+cancelled, timed out, stale, unknown, or otherwise not known to be passing,
+skipped, or neutral, when `Finisher` evaluates completion, then Superteam
+remains in monitoring or blocked state and does not report complete unless the
+non-passing optional signal is explicitly classified non-blocking with surfaced
+evidence.
 
 ### AC-64-5
 
 Given all actionable PR feedback has been addressed or classified as
-non-blocking and every required check for the latest pushed head is passing or
-conclusively non-blocking, when `Finisher` runs the completion gate, then
+non-blocking and every latest-head check/status is passing, skipped, neutral, or
+evidence-classified non-blocking, when `Finisher` runs the completion gate, then
 Superteam may report complete with the latest head SHA and concise final counts.
 
 ### AC-64-6
@@ -206,7 +213,8 @@ Given a finish-phase Superteam run is paused or waiting on CI/review feedback,
 when it emits a wakeup or status payload, then the payload includes the branch,
 PR URL or number, latest pushed SHA, current publish-state, unresolved
 actionable feedback count, routed-feedback count, required-check state, pending
-signals, and instruction to resume the latest-head PR completion gate.
+signals, check/status inventory state, and instruction to resume the latest-head
+PR completion gate.
 
 ## Design
 
@@ -229,17 +237,22 @@ with an explicit evidence note such as "the referenced line no longer exists and
 the replacement code does X" or "superseded by commit <sha> and verified by
 test <name>."
 
-Second, `Finisher` evaluates required checks for the latest pushed head. Required
-means required by branch protection, mergeability, or the platform's required
-status/check context model. Optional checks can be recorded as non-blocking, but
-failing optional checks should still be surfaced if they look relevant to the
-work. Unknown required-check state is not success. When required-check discovery
-is unavailable, the safe result is `blocked` or `monitoring`, not completion.
+Second, `Finisher` evaluates every reported check/status for the latest pushed
+head, including required checks, check runs, commit status contexts, mergeability
+signals, and optional checks visible in the PR UI. Required means required by
+branch protection, mergeability, or the platform's required status/check context
+model. Non-passing optional checks may be classified as non-blocking only with
+evidence, such as "experimental nightly job not required by branch protection
+and unrelated to the changed paths." A PR UI with unexplained red, pending,
+missing, cancelled, stale, or unknown signals is not complete. When check/status
+discovery is unavailable, the safe result is `blocked` or `monitoring`, not
+completion.
 
 The gate output should be compact. The operator needs the current state and next
 action, not a transcript of every comment. A normal non-complete status can say:
-"blocked: 2 actionable PR comments unresolved, 1 required check failing on
-<sha>." The durable state belongs in the PR, commits, and any wakeup payload.
+"blocked: 2 actionable PR comments unresolved, 1 required check failing, 1
+optional check non-passing without non-blocking evidence on <sha>." The durable
+state belongs in the PR, commits, and any wakeup payload.
 
 ## Finish substate behavior
 
@@ -247,10 +260,11 @@ The finish phase keeps the existing substates but makes their meaning sharper:
 
 - `triage`: PR exists and feedback/check state has not yet been fully classified
   for the latest head.
-- `monitoring`: no teammate action is currently needed, but required checks or
+- `monitoring`: no teammate action is currently needed, but checks/statuses or
   external signals are still pending for the latest head.
-- `blocked`: actionable feedback, failing required checks, ambiguous required
-  check state, or routed feedback prevents completion.
+- `blocked`: actionable feedback, required-check failures, unexplained
+  non-passing optional checks/statuses, ambiguous check/status state, or routed
+  feedback prevents completion.
 - `ready`: the latest-head PR completion gate has passed and the PR is ready for
   the final operator-facing handoff or merge policy.
 - `merged`: the PR has merged after the latest-head gate passed or after an
@@ -266,9 +280,9 @@ means the latest-head gate has passed.
 2. A reviewer comment refers to code removed by a later commit. `Finisher`
    verifies the current head, records the stale evidence, and may classify it as
    `non_blocking`.
-3. A check is optional and failing. `Finisher` records it as optional and
-   non-blocking only if branch protection or mergeability confirms it is not
-   required; otherwise completion is blocked.
+3. A check is optional and failing. `Finisher` blocks completion unless it
+   records and surfaces evidence that the signal is non-blocking for the latest
+   head.
 4. A required check is pending. `Finisher` enters `monitoring` and emits a wakeup
    payload with the latest head SHA and pending check.
 5. A PR comment changes acceptance intent. `Finisher` routes the requirement
@@ -277,14 +291,22 @@ means the latest-head gate has passed.
 6. A new push lands after comments were addressed. Prior green state is invalid;
    `Finisher` refreshes comments and checks against the new head before
    completion.
+7. RED: the old Finisher sees a PR with unresolved latest-head review feedback,
+   one pending required check, and one unexplained failing optional check, then
+   reports complete because the PR exists and some checks are green. GREEN: the
+   revised Finisher returns `blocked` for the unresolved feedback and unexplained
+   failing optional check, or `monitoring` for pending required checks when no
+   teammate action is available yet; it does not report complete.
 
 ## Workflow-contract considerations
 
 ### RED/GREEN baseline obligations
 
-The RED baseline is the issue reproduction: Superteam reports complete while
-latest-head PR comments remain unresolved or required checks are failing or
-pending. The GREEN behavior is a finish contract that blocks completion in those
+The RED baseline is the issue reproduction plus the explicit pressure scenario
+above: Superteam reports complete while latest-head PR comments remain
+unresolved or checks/statuses are pending, failing, unknown, stale, or otherwise
+non-passing without evidence-backed non-blocking classification. The GREEN
+behavior is a finish contract that returns `blocked` or `monitoring` in those
 states and allows completion only after the latest-head gate passes.
 
 ### Rationalization resistance
@@ -296,16 +318,20 @@ The contract must reject these shortcuts:
 - Green CI alone is not proof that PR feedback was handled.
 - A local plan to address a comment is not the same as an addressed comment.
 - An old head SHA cannot prove the current head is ready.
-- Unknown required-check state is not success.
+- Unknown check/status state is not success.
+- An unexplained optional failing check is not success.
+- Updating only one host's Finisher prompt is not host parity.
 
 ### Red flags
 
 - `Finisher` says complete while unresolved actionable feedback count is nonzero.
-- `Finisher` says complete while required checks are pending or failing.
+- `Finisher` says complete while any check/status is pending, failing, unknown,
+  stale, or non-passing without surfaced non-blocking evidence.
 - `Finisher` classifies comments as handled without evidence.
 - Requirement-bearing PR feedback is fixed directly in finish without returning
   through `Brainstormer` and `Planner`.
 - Wakeup payloads omit the latest pushed SHA or pending feedback/check signals.
+- Codex and Claude Code Finisher role surfaces diverge on the completion gate.
 
 ### Token-efficiency targets
 
@@ -324,6 +350,8 @@ requirement, plan, and implementation remediation after routing.
 The gate closes the finish-stage bypass where external feedback or CI can be
 ignored after PR publication. It does not create a shortcut around Gate 1,
 planning approval, ATDD implementation, local review, or spec-first routing.
+Requiring both Codex and Claude Code Finisher role surfaces closes the host
+parity bypass where one runtime would keep the older shutdown checklist.
 
 ## Verification
 
@@ -331,16 +359,18 @@ planning approval, ATDD implementation, local review, or spec-first routing.
 - Run `pnpm verify:dogfood`.
 - Run `pnpm verify:marketplace`.
 - Inspect the changed `skills/superteam/**` files to confirm the latest-head PR
-  completion gate is documented in cross-role contract language and Finisher
-  role language.
+  completion gate is documented in cross-role contract language and both Codex
+  and Claude Code Finisher role language.
 - Exercise or script fixture scenarios for unresolved review comments, stale
-  comments, pending required checks, failing required checks, optional failing
-  checks, and all-clear latest-head completion.
+  comments, pending required checks, failing required checks, optional
+  non-passing checks with and without non-blocking evidence, and all-clear
+  latest-head completion.
 
 ## Adversarial review
 
-Reviewer context: same-thread fallback. A fresh subagent or parallel specialist
-was not available in this Brainstormer runtime.
+Reviewer context: original same-thread fallback plus fresh external adversarial
+review for the Gate 1 delta. The fresh review produced Findings 5-7 below; this
+revision dispositions them in the artifact.
 
 ### Finding 1
 
@@ -362,9 +392,11 @@ was not available in this Brainstormer runtime.
 - Location: Required checks gate
 - Finding: "Checks pass" can be interpreted as all checks, including optional
   experiments, or as any one green check.
-- Disposition: Addressed by R4. The gate is anchored to required checks for the
-  latest head, while optional checks may be conclusively non-blocking. Unknown
-  required-check state blocks completion.
+- Disposition: Addressed by R4. The gate distinguishes required checks from
+  optional reported signals while inventorying all latest-head checks/statuses.
+  Optional non-passing checks may be conclusively non-blocking only with
+  surfaced evidence. Unknown required-check state or unenumerable reported
+  signals block completion.
 
 ### Finding 3
 
@@ -386,19 +418,61 @@ was not available in this Brainstormer runtime.
 - Disposition: Addressed by R7, AC-64-3, and the stage-gate bypass section.
   Requirement-bearing feedback remains spec-first.
 
+### Finding 5
+
+- Source: adversarial-review
+- Severity: material
+- Location: R8 scoped contract surfaces
+- Finding: R8 scoped Finisher prompt changes to
+  `skills/superteam/agents/finisher.openai.yaml`, but Superteam also ships
+  `skills/superteam/.claude/agents/finisher.md`, and `SKILL.md` names the
+  Claude role surface as the shutdown checklist reference.
+- Disposition: Addressed by R8, the red flags, stage-gate bypass notes, and
+  verification. The implementation scope now requires both Codex and Claude Code
+  Finisher role surfaces so the completion gate cannot be bypassed by host
+  selection.
+
+### Finding 6
+
+- Source: adversarial-review
+- Severity: material
+- Location: R4 checks gate
+- Finding: The design narrowed "PR checks fully passing" to required checks and
+  allowed optional failing checks to be non-blocking, which could leave a
+  failing PR UI after Superteam claims completion.
+- Disposition: Addressed by R4, AC-64-4, AC-64-5, the design section, pressure
+  tests, and clean-pass rationale. The gate now inventories every reported
+  latest-head check/status. Required failing or unknown signals always block;
+  optional non-passing signals also block unless `Finisher` records and surfaces
+  evidence that they are non-blocking for the latest head.
+
+### Finding 7
+
+- Source: adversarial-review
+- Severity: minor
+- Location: Pressure tests and RED/GREEN baseline
+- Finding: The artifact lacked an explicit RED pressure scenario and GREEN
+  expectation for the old Finisher reporting complete with unresolved
+  latest-head feedback or pending/failing/non-passing checks.
+- Disposition: Addressed by pressure test 7 and the RED/GREEN baseline section.
+  The expected GREEN behavior is `blocked` or `monitoring`, not completion.
+
 ## Clean pass rationale
 
-After dispositioning the findings above, no approval-blocking design issue
-remains in this same-thread fallback review. The manual `writing-skills`
-dimensions were checked as follows:
+After dispositioning the same-thread and fresh external findings above, no
+approval-blocking design issue remains in this Brainstormer revision. The manual
+`writing-skills` dimensions were checked as follows:
 
 - RED/GREEN baseline: the failing behavior and passing gate are both
-  falsifiable.
+  falsifiable, including the explicit old-Finisher RED and new-Finisher GREEN
+  pressure scenario.
 - Rationalization resistance: the design names and rejects the likely shortcuts.
 - Red flags: finish-stage false-completion signals are explicit.
 - Token efficiency: the operator surface uses counts and state names instead of
   dumping PR transcripts.
 - Role ownership: Finisher intakes and gates; other teammates remediate by
-  existing ownership.
+  existing ownership; both host-specific Finisher role surfaces must carry the
+  same gate.
 - Stage-gate bypass paths: requirement feedback still routes spec-first, and the
-  finish gate cannot bypass earlier workflow gates.
+  finish gate cannot bypass earlier workflow gates; host selection and optional
+  check/status failures no longer provide bypass paths.
