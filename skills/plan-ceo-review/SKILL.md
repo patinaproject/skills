@@ -1,11 +1,11 @@
 ---
 name: plan-ceo-review
-description: "Review an existing product, strategy, or implementation plan from a CEO/founder perspective. Use for CEO review, founder-mode review, think bigger, strategy review, rethink this plan, or is this ambitious enough requests."
+description: "Use when a user asks for CEO review, founder-mode review, think bigger, strategy review, rethink this plan, is this ambitious enough, or critique of an existing product, strategy, roadmap, or implementation plan."
 ---
 
 # CEO Plan Review
 
-Use this skill to pressure-test a plan that already exists. Your job is to decide whether the plan is ambitious enough, focused enough, sequenced well, and worth the opportunity cost.
+Pressure-test a plan that already exists. Decide whether it is ambitious enough, focused enough, sequenced well, and worth the opportunity cost.
 
 Be opinionated. A useful review makes a clear scope call, names the strongest objection, and gives the smallest next move that would prove or disprove the recommendation.
 
@@ -13,8 +13,7 @@ Be opinionated. A useful review makes a clear scope call, names the strongest ob
 
 - The user asks for a CEO review, founder-mode review, strategy review, ambition review, or "think bigger" pass.
 - The user provides an implementation plan, product spec, roadmap proposal, issue plan, PR plan, strategy memo, launch plan, or pasted plan.
-- The user asks whether a plan is too small, too broad, too cautious, too complex, or sequenced poorly.
-- A `superteam` artifact needs advisory strategic critique before its owner decides what to change.
+- A `superteam` artifact needs advisory strategic critique before its owning teammate decides what to change.
 
 ## When Not to Use
 
@@ -25,63 +24,22 @@ Be opinionated. A useful review makes a clear scope call, names the strongest ob
 
 ## Inputs
 
-Identify the artifact before reviewing:
+Identify the artifact before reviewing. If context is missing, ask at most three clarifying questions; otherwise state assumptions and proceed.
 
 - What kind of plan is it: implementation, product, strategy, roadmap, issue, PR, launch, or operations?
-- Who is the intended beneficiary: user, buyer, operator, maintainer, teammate, or business sponsor?
-- What outcome does the plan claim to create?
-- What constraint matters most: time, risk, quality, trust, distribution, cost, or learning?
-- What evidence is already present: usage, revenue, support pain, customer quotes, internal urgency, benchmark, or none?
-
-If the plan is missing critical context, ask at most three clarifying questions. If you can review with stated assumptions, proceed and mark those assumptions in the output.
+- Who benefits: user, buyer, operator, maintainer, teammate, or sponsor?
+- What outcome, constraint, and evidence matter most?
 
 ## Review Modes
 
 Choose exactly one mode for the verdict.
 
-### Expand
-
-Use when the plan is directionally right but too local. The plan solves a small symptom while a larger outcome is nearby.
-
-Behavior:
-
-- Name the bigger product or strategic bet.
-- Identify the smallest credible move toward that bigger bet.
-- Preserve only the current work that compounds into the larger outcome.
-- Challenge the user to measure a meaningful behavior change, not just task completion.
-
-### Selectively Expand
-
-Use when the core plan is right but one or two additions would materially improve leverage.
-
-Behavior:
-
-- Keep the current center of gravity.
-- Add only the highest-leverage missing move.
-- Explain why other expansions should wait.
-- Define the decision gate that decides whether to expand further.
-
-### Hold
-
-Use when the plan is appropriately scoped and the best move is execution discipline.
-
-Behavior:
-
-- Tighten the premise, success criteria, and sequencing.
-- Remove ambiguity without increasing scope.
-- Name the one risk most likely to surprise the team.
-- Protect the plan from ambition theater and unnecessary polish.
-
-### Reduce
-
-Use when the plan is overloaded, premature, or trying to solve too many problems at once.
-
-Behavior:
-
-- Strip the work to the essential wedge.
-- Name what to defer and why it can safely wait.
-- Replace broad deliverables with a sharper proof point.
-- Protect the team from spending effort before the premise earns it.
+| Mode | Use When | Behavior |
+| --- | --- | --- |
+| `Expand` | Directionally right, but too local | Name the larger bet and the smallest credible move toward it |
+| `Selectively expand` | Core scope is right, but one missing move would add leverage | Keep the center, add the highest-leverage move, gate later expansion |
+| `Hold` | Scope is right and execution discipline matters most | Tighten premise, success criteria, sequencing, and surprise risk |
+| `Reduce` | Plan is overloaded, premature, or trying to solve too much | Strip to the essential wedge and defer what has not earned its cost |
 
 ## Workflow
 
@@ -93,65 +51,31 @@ Behavior:
 6. Test user value: who benefits, what changes in their workflow, and what proof would validate it?
 7. Test sequencing: what must happen first, what can wait, and what gate prevents thrash?
 8. Test risks: premise, product, execution, and opportunity cost.
-9. Recommend one decision and the smallest next move.
+9. Recommend one decision, the smallest next move, and the next artifact to produce.
 
 Keep the review concrete. Do not write a broad essay, generic strategy advice, or a second plan unless the user asks for one.
 
+## Calibration
+
+- `Expand`: "This solves the admin problem, but the bigger bet is becoming the weekly operating review."
+- `Selectively expand`: "Keep the importer, but add a saved failure report because it changes trust."
+- `Hold`: "Do not add dashboard scope; the plan already proves the riskiest integration."
+- `Reduce`: "Drop multi-account support until one account can complete the workflow cleanly."
+
 ## Output
 
-Use this template.
+Use these headings:
 
-```markdown
-## Verdict
+- `Verdict`: one mode plus one-sentence rationale.
+- `Premise check`: core assumption, why it might be false, evidence that would change the review.
+- `Ambition check`: current ambition, stronger outcome, what would make this matter.
+- `Scope decision`: add, keep, defer, remove.
+- `User value`: beneficiary, workflow change, validating proof.
+- `Sequencing`: first move, later moves, decision gates.
+- `Risks`: premise, product, execution, and opportunity-cost risks.
+- `Recommendation`: decision, smallest next move, next artifact to produce.
 
-<Expand | Selectively expand | Hold | Reduce>: <one-sentence rationale.>
-
-## Premise check
-
-- Core assumption:
-- Why it might be false:
-- Evidence that would change this review:
-
-## Ambition check
-
-- Current ambition:
-- Stronger outcome:
-- What would make this matter:
-
-## Scope decision
-
-- Add:
-- Keep:
-- Defer:
-- Remove:
-
-## User value
-
-- Beneficiary:
-- Workflow change:
-- Validating proof:
-
-## Sequencing
-
-- First move:
-- Later moves:
-- Decision gates:
-
-## Risks
-
-- Premise risk:
-- Product risk:
-- Execution risk:
-- Opportunity-cost risk:
-
-## Recommendation
-
-- Decision:
-- Smallest next move:
-- Next artifact to produce:
-```
-
-If a section does not apply, write `None` and explain why in one phrase. Do not leave blanks.
+If a field does not apply, write `None` and explain why in one phrase.
 
 ## Red Flags
 
@@ -160,7 +84,5 @@ If a section does not apply, write `None` and explain why in one phrase. Do not 
 - The plan says "platform" but lacks a narrow wedge.
 - The plan is busy, but the expected outcome is small.
 - The plan claims strategic value without naming a business, user, or trust consequence.
-- The plan expands because expansion feels exciting, not because it increases leverage.
-- The plan reduces because reduction feels safer, not because the extra scope lacks proof.
 - The review stays neutral when the plan needs a decision.
 - The review asks broad discovery questions after the user has already supplied a plan.
