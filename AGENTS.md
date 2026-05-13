@@ -32,6 +32,7 @@ following acceptance criteria format:
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `pnpm verify:dogfood`: assert all four in-repo skills are discoverable via flat layout
 - `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
+- `pnpm verify:superteam`: assert Superteam contract surfaces stay in sync
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
 - `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the four skill entry points
 
@@ -66,6 +67,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/verify-dogfood.sh` to confirm all four in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
+- Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
 - Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
   confirm the scaffold baseline is idempotent against the current tree
 

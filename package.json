@@ -23,6 +23,7 @@
     "skills:install": "bash scripts/install-third-party-skills.sh",
     "verify:dogfood": "bash scripts/verify-dogfood.sh",
     "verify:marketplace": "bash scripts/verify-marketplace.sh",
+    "verify:superteam": "bash scripts/verify-superteam-contract.sh",
     "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
     "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js skills/scaffold-repository --check"
   },
