@@ -33,6 +33,7 @@ following acceptance criteria format:
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `pnpm verify:dogfood`: assert all five in-repo skills are discoverable via flat layout
 - `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
+- `pnpm verify:superteam`: assert Superteam contract surfaces stay in sync
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
 - `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the five skill entry points
 
@@ -44,11 +45,30 @@ following acceptance criteria format:
 - Issue titles use plain language, not conventional commit formatting. Example:
   `Update README with Claude Code install instructions`
 
+## Working on skills
+
+When creating or editing any skill under `skills/`, first use the third-party
+`write-a-skill` skill as a structure and progressive-disclosure review. It helps
+check trigger descriptions, concise `SKILL.md` shape, examples, helper scripts,
+and when to split reference material out of the main skill file.
+
+If `write-a-skill` is not installed in the local agent environment, install it with:
+
+```bash
+npm_config_ignore_scripts=true npx skills@1.5.6 add mattpocock/skills@write-a-skill -y
+```
+
+For workflow-contract changes, especially `skills/superteam/**`, also use
+`writing-skills` to pressure-test RED/GREEN baseline behavior, rationalization
+resistance, role ownership, and stage-gate bypass paths. `write-a-skill` is the
+structure check; `writing-skills` is the workflow-contract quality gate.
+
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
 - Run `bash scripts/verify-dogfood.sh` to confirm all five in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
+- Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
 - Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
   confirm the scaffold baseline is idempotent against the current tree
 
