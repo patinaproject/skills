@@ -1,7 +1,7 @@
 # Repository File Structure
 
 This repository is the marketplace surface for Patina Project plugins and related install
-documentation. Four skills live under `skills/<name>/` in a flat layout.
+documentation. Five skills live under `skills/<name>/` in a flat layout.
 
 ## Top level
 
@@ -9,10 +9,11 @@ documentation. Four skills live under `skills/<name>/` in a flat layout.
 - `skills/superteam/`: superteam skill
 - `skills/using-github/`: using-github skill
 - `skills/office-hours/`: office-hours skill
-- `.agents/skills/<name>/`: committed symlinks into `../../skills/<name>/` (four in-repo)
-- `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/` (four in-repo)
+- `skills/plan-ceo-review/`: plan-ceo-review skill
+- `.agents/skills/<name>/`: committed symlinks into `../../skills/<name>/` (five in-repo)
+- `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/` (five in-repo)
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog (plugin slug: `patinaproject-skills`)
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all 4 skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all five skill paths
 - `skills-lock.json`: vercel-labs CLI install lockfile (auto-generated; commit it)
 - `docs/`: contributor-facing docs for skill maintenance
 - `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling
@@ -22,7 +23,7 @@ documentation. Four skills live under `skills/<name>/` in a flat layout.
 
 ## Flat skill layout
 
-Four skills are owned by this repository:
+Five skills are owned by this repository:
 
 | Skill | Canonical path | Description |
 | --- | --- | --- |
@@ -30,6 +31,7 @@ Four skills are owned by this repository:
 | `superteam` | `skills/superteam/` | Issue-driven orchestration |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `office-hours` | `skills/office-hours/` | YC-style office hours for product ideation |
+| `plan-ceo-review` | `skills/plan-ceo-review/` | Founder-mode review for existing plans |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is installed
 via the vercel-labs CLI and is not owned by this repository. Install with:
@@ -45,7 +47,7 @@ install-block reframes.
 
 ## Dogfood overlay layout
 
-The four in-repo skills are also accessible through two overlay directories via one-hop
+The five in-repo skills are also accessible through two overlay directories via one-hop
 committed symlinks:
 
 | Overlay path | Symlink target | Mode |
@@ -56,7 +58,7 @@ committed symlinks:
 These symlinks allow the agent runtime to discover the in-repo skills alongside any
 third-party skills installed by the vercel-labs CLI.
 
-Third-party CLI-installed skills (including `find-skills`) are untracked; only the four
+Third-party CLI-installed skills (including `find-skills`) are untracked; only the five
 in-repo overlay symlinks are committed.
 
 ## Symlink hygiene
