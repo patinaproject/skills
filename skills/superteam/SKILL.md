@@ -279,6 +279,20 @@ Artifact-producing teammate done reports must anchor on committed handoff state 
 - `head_sha`: current HEAD SHA for the committed implementation and test state being handed to `Reviewer`
 - `verification[]`: verification commands and outcomes
 
+### Finisher completion/status report
+
+- `publish_state`: `triage` | `monitoring` | `blocked` | `ready` | `merged`
+- `branch`: branch under finish follow-through
+- `pr`: PR URL or number
+- `latest_pushed_sha`: latest pushed head SHA used for the gate
+- `unresolved_actionable_feedback_count`: count of `open_actionable` latest-head feedback items
+- `routed_feedback_count`: count of routed feedback items awaiting teammate return
+- `required_check_state`: `passing` | `pending` | `failing` | `missing` | `unknown` | `not_applicable`
+- `check_status_inventory_state`: `passing` | `non_blocking_with_evidence` | `pending` | `failing` | `missing` | `unknown` | `stale`
+- `pending_signals[]`: concise names of checks, statuses, feedback items, or discovery gaps preventing completion
+- `completion_gate`: `passed` | `blocked` | `monitoring`
+- `completion_evidence[]`: concise evidence for handled feedback and non-blocking classifications when `completion_gate=passed`
+
 ## Review and feedback routing
 
 Feedback classifications must be explicit:
@@ -303,6 +317,25 @@ External PR comments, review threads, bot findings, and other repository feedbac
 
 Before resolving comments tied to a prior branch state: verify current state matches the state the comment referred to; do not respond as if nothing changed; re-route requirement-bearing feedback through the spec-first path.
 
+`Finisher` owns PR feedback intake, check monitoring, PR replies, thread resolution where the host supports it, and the final latest-head PR completion gate. Requirement-bearing PR feedback still routes to `Brainstormer`, then `Planner`, then `Executor`; `Finisher` resumes only after that path returns and a fresh latest-head feedback and checks/status sweep passes.
+
+## Latest-head PR completion gate
+
+`Finisher` must run the latest-head PR completion gate after PR creation, after every push, on finish-phase resume, after CI status changes, and immediately before any completion-style handoff. The gate is bound to the latest pushed head SHA. If the head changes during remediation or monitoring, all PR feedback and check/status signals must be refreshed against the new head before completion.
+
+The gate has two required inventories:
+
+1. `latest_head_feedback_inventory`: unresolved review threads, review comments, pull request conversation comments, requested-changes review states, and bot comments or annotations that represent actionable review feedback.
+2. `latest_head_check_status_inventory`: every reported check run, status context, required-check signal, mergeability signal, and optional check/status visible for the latest pushed head.
+
+Feedback inventory items are classified as `addressed`, `routed`, `open_actionable`, or `non_blocking`. Completion requires zero `open_actionable` items and zero `routed` items awaiting teammate return.
+
+A PR feedback item is handled only when the workflow has addressed it in code, tests, docs, or workflow contracts and verified the latest head includes the fix; replied to or resolved the thread with a concrete explanation accepted by the classification; routed requirement-bearing feedback through `Brainstormer`, then `Planner`, then `Executor`, and returned to `Finisher` for a fresh latest-head sweep; or classified it as `non_blocking` with evidence that it is stale, duplicate, informational, optional, or not applicable to the latest head. Silence, elapsed time, local intent, PR creation, and green CI are never proof that feedback was handled.
+
+Check/status inventory items must be passing, skipped, neutral, or `non_blocking` with surfaced evidence before completion. Pending, queued, missing, failing, cancelled, timed-out, stale, unknown, or unenumerable required-check state blocks completion. Optional non-passing checks/statuses also block completion unless `Finisher` records and surfaces evidence that they are non-blocking for the latest head.
+
+Completion language is allowed only after the latest-head PR completion gate passes. Otherwise `Finisher` must report `monitoring` or `blocked` with concise counts for unresolved actionable feedback, routed feedback awaiting teammate return, non-passing or unknown check/status signals, and the latest pushed head SHA.
+
 ## Rationalization table
 
 | Excuse | Reality |
@@ -316,6 +349,11 @@ Before resolving comments tied to a prior branch state: verify current state mat
 | "Gate 1 was approved last session; the operator just told me so — no need to re-open it." | Gate 1 is durably observable iff a plan doc has been committed on the branch (R15). Ephemeral in-session approval is NOT durable. Operator memory is not the durable signal; the committed plan doc is. |
 | "Removing `Loopback:` trailers means we can skip local review on a later run." | When implementation exists without a PR and prior local findings cannot be proven resolved from visible state, route through `Reviewer` before `Finisher` can publish. |
 | "A direct operator requirement change during finish is not PR feedback, so Finisher can handle it." | Requirement-bearing deltas route spec-first regardless of source. PR feedback, human-test feedback, and direct operator prompts all return to `Brainstormer`, then `Planner`, then `Executor` before `Finisher` ready/shutdown can resume. |
+| "The PR exists, so Superteam can report complete." | PR creation is not completion. `Finisher` must run the latest-head PR completion gate before completion language. |
+| "CI is green, so the review comments must be handled." | green CI alone is not evidence that PR feedback was addressed. Latest-head feedback inventory must have zero `open_actionable` items and zero routed items awaiting teammate return. |
+| "One status snapshot was green before the last push." | Completion evidence is head-relative. Every new push invalidates older feedback/check snapshots and requires a fresh latest-head sweep. |
+| "The optional check is failing, but required checks passed." | Optional non-passing reported checks/statuses still block completion unless `Finisher` records and surfaces evidence that they are non-blocking for the latest head. |
+| "The check API was ambiguous, so assume it is fine." | Unknown, unenumerable, stale, missing, or ambiguous required-check state is not success. Report `monitoring` or `blocked` instead of complete. |
 | "No execution-mode tool is available, so every `/superteam` invocation must halt." | Missing execution capability blocks only routes that require execute-phase delegation. Approval, review, and `Finisher` status work can continue through their owning teammate. |
 | "We can replace `Loopback:` trailers with another hidden marker." | Feedback routing must resume from visible artifacts, PR state, and operator prompts; do not add sidecar state, branch labels, or new commit footers. |
 | "The operator said 'faster' / 'this is taking forever' — that's basically asking for inline." | Inline is auto-selected NEVER. Only unambiguous tokens (`inline`, `run inline`, `execute in this session`) are operator overrides per R14. Ambiguous framing is not. Not even when the CTO is cited. Not even under deadline pressure. |
@@ -368,6 +406,12 @@ Before resolving comments tied to a prior branch state: verify current state mat
 - Silently switching issues mid-run when the prompt names a different issue without explicit operator confirmation.
 - Reintroducing required `Loopback:` commit trailers or another hidden workflow-state marker.
 - Fresh-session resume from implementation work with no PR skipping `Reviewer` before `Finisher` publication when local review resolution is not visible.
+- `Finisher` reports complete while any latest-head feedback inventory item is `open_actionable` or `routed` awaiting teammate return.
+- `Finisher` reports complete while any latest-head required check/status is pending, queued, missing, failing, cancelled, timed out, stale, unknown, or unenumerable.
+- `Finisher` reports complete while an optional non-passing check/status lacks surfaced non-blocking evidence.
+- `Finisher` classifies PR feedback as handled based on silence, elapsed time, local intent, PR creation, or green CI.
+- A new push lands after feedback/check inventory and `Finisher` does not refresh the latest-head gate before completion.
+- Codex and Claude Code Finisher role surfaces diverge on the latest-head PR completion gate.
 - An execute-phase delegation prompt that names `superpowers:executing-plans` as the entry skill when the resolved mode is `team mode` or `subagent-driven`.
 - An execute-phase delegation that omits the resolved execution mode and asks the developer to choose.
 - Treating ambiguous "faster" / "inline-ish" / "forever" framing as an inline override.
