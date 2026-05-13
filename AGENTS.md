@@ -43,6 +43,24 @@ following acceptance criteria format:
 - Issue titles use plain language, not conventional commit formatting. Example:
   `Update README with Claude Code install instructions`
 
+## Working on skills
+
+When creating or editing any skill under `skills/`, first use the third-party
+`write-a-skill` skill as a structure and progressive-disclosure review. It helps
+check trigger descriptions, concise `SKILL.md` shape, examples, helper scripts,
+and when to split reference material out of the main skill file.
+
+If `write-a-skill` is not installed in the local agent environment, install it with:
+
+```bash
+npm_config_ignore_scripts=true npx skills@1.5.6 add mattpocock/skills@write-a-skill -y
+```
+
+For workflow-contract changes, especially `skills/superteam/**`, also use
+`writing-skills` to pressure-test RED/GREEN baseline behavior, rationalization
+resistance, role ownership, and stage-gate bypass paths. `write-a-skill` is the
+structure check; `writing-skills` is the workflow-contract quality gate.
+
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
