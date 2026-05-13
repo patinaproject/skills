@@ -101,8 +101,10 @@ items are not applied by the self-apply script:
 
 - An untagged skill is not pinnable. The first `v<X.Y.Z>` tag is what introduces the repo
   to the install path with a pinnable `#<ref>`.
-- Standalone skills (`office-hours`, `plan-ceo-review`, `find-skills`) are not release-please packages.
-  They are installed from the default branch or a specific `#<git-ref>`.
+- In-repo skills (`scaffold-repository`, `superteam`, `using-github`, `office-hours`,
+  `plan-ceo-review`) are not separate release-please packages; they share the single root
+  `patinaproject-skills` release and tag. Third-party skills such as `find-skills` are
+  installed separately from their source repo's default branch or a specific `#<git-ref>`.
 - `skills-lock.json` must be committed after any `npx skills add` invocation. The lockfile
   records provenance for vercel-labs CLI-managed installs.
 
