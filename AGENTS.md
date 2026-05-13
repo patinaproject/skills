@@ -8,10 +8,11 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/superteam/`: superteam skill
 - `skills/using-github/`: using-github skill
 - `skills/office-hours/`: office-hours skill
+- `skills/plan-ceo-review/`: plan-ceo-review skill
 - `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
 - `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all 4 skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all five skill paths
 - `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`,
   `docs/release-flow.md`, and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
@@ -30,10 +31,10 @@ following acceptance criteria format:
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
-- `pnpm verify:dogfood`: assert all four in-repo skills are discoverable via flat layout
+- `pnpm verify:dogfood`: assert all five in-repo skills are discoverable via flat layout
 - `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
-- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the four skill entry points
+- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the five skill entry points
 
 ## Coding Style & Naming Conventions
 
@@ -46,7 +47,7 @@ following acceptance criteria format:
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
-- Run `bash scripts/verify-dogfood.sh` to confirm all four in-repo skills pass the flat-layout check
+- Run `bash scripts/verify-dogfood.sh` to confirm all five in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
   confirm the scaffold baseline is idempotent against the current tree
@@ -104,8 +105,9 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns four skills at flat paths: `skills/scaffold-repository/`,
-`skills/superteam/`, `skills/using-github/`, and `skills/office-hours/`.
+This repo owns five skills at flat paths: `skills/scaffold-repository/`,
+`skills/superteam/`, `skills/using-github/`, `skills/office-hours/`, and
+`skills/plan-ceo-review/`.
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
 

@@ -23,6 +23,7 @@ Do NOT write code, scaffold a project, invoke any implementation skill, or take 
    - Startup / new revenue line / external pilot → **Startup mode** (Phase 2A)
    - Internal Patina feature pitch needing a sponsor → **Startup mode**, intrapreneurship adaptation (see Q4/Q6 below)
    - Hackathon, learning, OSS, side project, just for fun → **Builder mode** (Phase 2B)
+   - Existing concrete plan needing CEO/founder-level critique → use `plan-ceo-review` instead
 4. For startup mode only, ask product stage:
    - Pre-product (idea, no users)
    - Has users (people using it, no revenue)
