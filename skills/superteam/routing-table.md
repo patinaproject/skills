@@ -16,11 +16,11 @@ Heavy reference for the explicit `(detected_phase, prompt_classification)` routi
 | execute | plan doc present + prompt is resume / continue / generic invocation + implementation not complete | Executor | resume implementation from approved plan | inject pre-selected execution mode per R14 |
 | execute | implementation question | Executor | resume implementation | inject pre-selected execution mode per R14 |
 | execute | implementation state present + no PR + local review not visibly resolved | Reviewer | rerun/reconstruct local review | preserves pre-publish safety without hidden workflow state |
-| finish | Finisher state in {triage, monitoring, blocked} + status check | Finisher | resume; do not restart | run latest-head sweep |
-| finish | Finisher state in {ready, merged} + resume / status / generic invocation | Finisher | run latest-head shutdown sweep | shutdown is success-only and head-relative |
-| finish | PR open or merged + prompt does not change requirements | Finisher | resume publish-state follow-through | default finish route; verify latest head before any completion-style handoff |
-| finish | requirement-bearing PR feedback | Brainstormer | spec-first per existing external-feedback rules | then Planner, then Executor |
-| finish | requirement-bearing operator or human-test feedback | Brainstormer | route spec-level feedback | applies even when feedback is not phrased as PR feedback; then Planner, then Executor before Finisher ready/shutdown can resume |
+| finish | Finisher state in {triage, monitoring, blocked} + status check | Finisher | resume latest-head PR completion gate; do not restart | classify latest-head feedback inventory and check/status inventory before any completion language |
+| finish | Finisher state in {ready, merged} + resume / status / generic invocation | Finisher | rerun latest-head shutdown sweep | ready must still be revalidated against the latest pushed head before completion-style handoff |
+| finish | PR open or merged + prompt does not change requirements | Finisher | resume publish-state follow-through | default finish route; run the latest-head PR completion gate before any completion-style handoff |
+| finish | requirement-bearing PR feedback | Brainstormer | spec-first per existing external-feedback rules | then Planner, then Executor; Finisher resumes only after a fresh latest-head feedback and checks/status sweep |
+| finish | requirement-bearing operator or human-test feedback | Brainstormer | route spec-level feedback | applies even when feedback is not phrased as PR feedback; then Planner, then Executor before Finisher latest-head gate can resume |
 | halted | anything | (none) | show halt reason; require explicit operator instruction before resuming | recovery is operator-driven |
 | any | unambiguously a new top-of-workflow request for a different issue | (none) | require explicit operator confirmation before starting a new run | "no need to re-confirm" framing in the prompt is itself the disallowed shortcut per R7 |
 | any | otherwise / ambiguous in-flight prompt | active teammate | deliver as feedback; do not advance silently | explicit fallback route for resume-not-restart behavior |
@@ -35,9 +35,10 @@ Heavy reference for the explicit `(detected_phase, prompt_classification)` routi
 - If `phase=execute` and prompt is a question about implementation, classify as implementation work for `Executor`.
 - If `phase=execute`, implementation work is present, no PR exists, and prior local review findings cannot be proven resolved from visible state, classify as local review reconstruction for `Reviewer`.
 - If `phase=execute`, a plan doc is present, implementation is not complete, and the prompt is `resume`, `continue`, or a generic invocation, classify as implementation work for `Executor`.
-- If `phase=finish` and prompt is a status / "is it done" / "check CI" prompt, route to `Finisher` with the latest-head sweep.
+- If `phase=finish` and prompt is a status / "is it done" / "check CI" prompt, route to `Finisher` to run or resume the latest-head PR completion gate.
 - If `phase=finish` and prompt adds or changes requirements, acceptance criteria, or "what we are building", classify as spec-level feedback even when it is not PR feedback.
-- If `phase=finish` and the PR is ready, merged, or the prompt is otherwise generic, route to `Finisher` for latest-head publish-state or shutdown handling.
+- If `phase=finish` and prompt refers to PR review comments, review threads, bot findings, checks, statuses, mergeability, or CI without changing requirements, route to `Finisher` for latest-head feedback/check intake and classification.
+- If `phase=finish` and the PR is ready, merged, or the prompt is otherwise generic, route to `Finisher` for latest-head publish-state or shutdown handling; completion language still requires a passing latest-head PR completion gate.
 - If the prompt names a different issue number explicitly, require operator confirmation before starting a new run.
 - Otherwise, treat the prompt as feedback for the active teammate.
 - **Bias:** when a phase is in flight and the prompt is ambiguous, classify as feedback. Ambiguous prompts MUST NOT silently start a new phase.
