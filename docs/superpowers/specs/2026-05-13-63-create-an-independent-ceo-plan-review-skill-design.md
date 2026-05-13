@@ -2,13 +2,13 @@
 
 ## Summary
 
-Create a new Patina-owned `ceo-plan-review` skill at `skills/ceo-plan-review/SKILL.md`. The skill gives an agent a founder-mode review process for product, strategy, and implementation plans: challenge the premise, test ambition, decide whether to expand or reduce scope, and return a concrete recommendation with next steps. It may cite the upstream gstack plan review skill as inspiration in planning notes, but the implementation must be original and must not depend on gstack commands, runtime checks, telemetry, local state, generated preambles, branding, or file layout.
+Create a new Patina-owned `plan-ceo-review` skill at `skills/plan-ceo-review/SKILL.md`. The skill gives an agent a founder-mode review process for product, strategy, and implementation plans: challenge the premise, test ambition, decide whether to expand or reduce scope, and return a concrete recommendation with next steps. It may cite the upstream gstack plan review skill as inspiration in planning notes, but the implementation must be original and must not depend on gstack commands, runtime checks, telemetry, local state, generated preambles, branding, or file layout.
 
-The skill should feel adjacent to `office-hours` but not duplicate it. `office-hours` helps discover whether an idea is worth building before code. `ceo-plan-review` reviews an existing plan and pressure-tests whether it is ambitious enough, focused enough, sequenced well, and valuable enough to justify the work. It should also be usable inside `superteam` as a strategy review surface before or after a plan exists, without changing `superteam` gates.
+The skill should feel adjacent to `office-hours` but not duplicate it. `office-hours` helps discover whether an idea is worth building before code. `plan-ceo-review` reviews an existing plan and pressure-tests whether it is ambitious enough, focused enough, sequenced well, and valuable enough to justify the work. It should also be usable inside `superteam` as a strategy review surface before or after a plan exists, without changing `superteam` gates.
 
 ## Goals
 
-- Add a fifth in-repo flat skill named `ceo-plan-review`.
+- Add a fifth in-repo flat skill named `plan-ceo-review`.
 - Provide an original Patina-native workflow for reviewing plans from a CEO/founder perspective.
 - Cover ambition, scope, user value, sequencing, risk, and next steps.
 - Include clear mode selection for expanding scope, selectively expanding scope, holding scope, and reducing scope.
@@ -20,14 +20,14 @@ The skill should feel adjacent to `office-hours` but not duplicate it. `office-h
 - Do not copy, vendor, paraphrase section-by-section, or mechanically translate the gstack skill.
 - Do not add gstack-specific commands, telemetry, config files, analytics writes, session files, generated preambles, update checks, or local state paths.
 - Do not change `superteam` orchestration gates or treat CEO review as approval for any existing `superteam` gate.
-- Do not turn `ceo-plan-review` into customer discovery. If the user has no plan yet, route them to `office-hours`.
+- Do not turn `plan-ceo-review` into customer discovery. If the user has no plan yet, route them to `office-hours`.
 - Do not add scripts unless implementation proves deterministic automation is needed. The first version should be a lean Markdown skill.
 
 ## Acceptance Criteria
 
 ### AC-63-1
 
-A new Patina-owned skill exists at a flat `skills/ceo-plan-review/SKILL.md` path with YAML metadata and original workflow instructions. The `description` must include trigger language such as "CEO review", "founder-mode review", "think bigger", "strategy review", "rethink this plan", and "is this ambitious enough" so the skill is discoverable when users ask for strategic plan critique.
+A new Patina-owned skill exists at a flat `skills/plan-ceo-review/SKILL.md` path with YAML metadata and original workflow instructions. The `description` must include trigger language such as "CEO review", "founder-mode review", "think bigger", "strategy review", "rethink this plan", and "is this ambitious enough" so the skill is discoverable when users ask for strategic plan critique.
 
 ### AC-63-2
 
@@ -48,10 +48,10 @@ The skill gives agents a practical CEO/founder-mode review process covering:
 
 Marketplace and dogfood surfaces are updated so the new skill is discoverable with the other in-repo skills:
 
-- `.claude-plugin/plugin.json` includes `./skills/ceo-plan-review`.
+- `.claude-plugin/plugin.json` includes `./skills/plan-ceo-review`.
 - `.codex-plugin/plugin.json` includes the same skill path in the same order as Claude.
-- `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` descriptions mention `ceo-plan-review` if they enumerate included skills.
-- `.agents/skills/ceo-plan-review` and `.claude/skills/ceo-plan-review` symlink to `../../skills/ceo-plan-review`.
+- `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` descriptions mention `plan-ceo-review` if they enumerate included skills.
+- `.agents/skills/plan-ceo-review` and `.claude/skills/plan-ceo-review` symlink to `../../skills/plan-ceo-review`.
 - `scripts/verify-dogfood.sh` treats the repository as owning five in-repo skills.
 
 ### AC-63-5
@@ -93,7 +93,7 @@ The first implementation should be a single `SKILL.md` plus optional host metada
 Recommended `SKILL.md` shape:
 
 1. YAML frontmatter:
-   - `name: ceo-plan-review`
+   - `name: plan-ceo-review`
    - `description:` one concise paragraph naming when to use it and its trigger phrases.
 2. `# CEO Plan Review`
 3. `## When to Use`
@@ -108,9 +108,9 @@ Keep the skill body under roughly 350 lines. The body should contain enough exam
 
 ## Integration Notes
 
-`office-hours` relationship: `office-hours` remains the pre-plan idea interrogation skill. `ceo-plan-review` should say to use `office-hours` when the user has only an idea, no plan, or no evidence of demand. `office-hours` does not need to call `ceo-plan-review` in this issue unless the Executor finds a small cross-reference worthwhile and low risk.
+`office-hours` relationship: `office-hours` remains the pre-plan idea interrogation skill. `plan-ceo-review` should say to use `office-hours` when the user has only an idea, no plan, or no evidence of demand. `office-hours` does not need to call `plan-ceo-review` in this issue unless the Executor finds a small cross-reference worthwhile and low risk.
 
-`superteam` relationship: `ceo-plan-review` can review a spec or plan, but it does not approve Gate 1, replace Planner, bypass Reviewer, or alter Finisher shutdown. If `superteam` uses it later, it should be an advisory review surface whose findings route through the existing teammate owner for spec-level, plan-level, or implementation-level feedback.
+`superteam` relationship: `plan-ceo-review` can review a spec or plan, but it does not approve Gate 1, replace Planner, bypass Reviewer, or alter Finisher shutdown. If `superteam` uses it later, it should be an advisory review surface whose findings route through the existing teammate owner for spec-level, plan-level, or implementation-level feedback.
 
 Marketplace relationship: this repository currently validates both Claude and Codex plugin manifests and the dogfood symlink overlays. Adding the skill requires updating all surfaces that enumerate in-repo skills, including verification scripts whose messages still say "four".
 
@@ -127,7 +127,7 @@ RED baseline for implementation:
 
 GREEN target:
 
-- `skills/ceo-plan-review/SKILL.md` exists and has `name: ceo-plan-review`.
+- `skills/plan-ceo-review/SKILL.md` exists and has `name: plan-ceo-review`.
 - All marketplace and dogfood enumerations include the fifth skill.
 - Verification scripts pass without special casing.
 - The skill runs as standalone instructions with no external runtime dependency.
@@ -144,7 +144,7 @@ Implementation must resist these shortcuts:
 
 ### Red Flags
 
-- Any occurrence of `gstack`, `~/.gstack`, `gbrain`, `telemetry`, `analytics`, `session`, or `update-check` inside `skills/ceo-plan-review/SKILL.md`, except if a verification comment explicitly names forbidden strings.
+- Any occurrence of `gstack`, `~/.gstack`, `gbrain`, `telemetry`, `analytics`, `session`, or `update-check` inside `skills/plan-ceo-review/SKILL.md`, except if a verification comment explicitly names forbidden strings.
 - The skill asks broad discovery questions when the user already supplied a plan, instead of reviewing the plan.
 - The output is neutral when a clear scope decision is needed.
 - The review mode names exist but do not change behavior.
@@ -170,7 +170,7 @@ Implementation must resist these shortcuts:
 
 ### Stage-Gate Bypass Paths
 
-The implementation must not use `ceo-plan-review` to bypass existing workflow gates:
+The implementation must not use `plan-ceo-review` to bypass existing workflow gates:
 
 - It does not replace `office-hours` discovery when no plan exists.
 - It does not replace `superteam` Brainstormer approval.
@@ -191,15 +191,15 @@ find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort
 Executor should also inspect the new skill for forbidden gstack coupling:
 
 ```bash
-rg -n "gstack|~/.gstack|gbrain|telemetry|analytics|update-check|session" skills/ceo-plan-review/SKILL.md
+rg -n "gstack|~/.gstack|gbrain|telemetry|analytics|update-check|session" skills/plan-ceo-review/SKILL.md
 ```
 
 The expected result is no matches, unless the final implementation intentionally places a forbidden-string check outside the skill body.
 
 ## Open Questions
 
-- Should the root README's skill table mention `ceo-plan-review` in this issue? The acceptance criteria do not require it, but the repository currently uses the README as a user-facing skill index. Planner should decide whether to include it as part of discoverability.
-- Should `office-hours` include a small "use `ceo-plan-review` when a plan already exists" cross-reference? This is useful but not required by the issue.
+- Should the root README's skill table mention `plan-ceo-review` in this issue? The acceptance criteria do not require it, but the repository currently uses the README as a user-facing skill index. Planner should decide whether to include it as part of discoverability.
+- Should `office-hours` include a small "use `plan-ceo-review` when a plan already exists" cross-reference? This is useful but not required by the issue.
 - Should the marketplace description list every included skill or stay generic? If it lists skills, it must include the new one.
 
 ## Adversarial Review
