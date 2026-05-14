@@ -1,7 +1,7 @@
 # Skills used by the Patina Project team
 
-Four installable agent skills for repository scaffolding, multi-teammate
-orchestration, GitHub workflows, and product design — available
+Five installable agent skills for repository scaffolding, multi-teammate
+orchestration, GitHub workflows, product design, and strategic plan review — available
 across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
@@ -81,6 +81,17 @@ hackathons and side projects. Output is always a design doc, never code.
 See [./skills/office-hours/](./skills/office-hours/)
 for the skill contract.
 
+### plan-ceo-review
+
+Plans need a different kind of pressure test once the idea has turned into a
+proposed course of action. `plan-ceo-review` gives an existing plan a
+CEO/founder-mode review: should it expand, selectively expand, hold, or reduce?
+It challenges ambition, user value, sequencing, and opportunity cost, then
+returns a concrete recommendation and smallest next move.
+
+See [./skills/plan-ceo-review/](./skills/plan-ceo-review/)
+for the skill contract.
+
 ### scaffold-repository
 
 Teams spend disproportionate time on repo plumbing — commit conventions,
@@ -101,6 +112,7 @@ for the full README and skill contract.
 | [superteam](./skills/superteam/) | Orchestrate a GitHub issue from design through merged PR |
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
+| [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
@@ -121,7 +133,7 @@ npx skills@latest add ./skills/office-hours --list
 node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 ```
 
-### Check c — dogfood verification, all four skills
+### Check c — dogfood verification, all five skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -135,6 +147,7 @@ skills/
   superteam/
   using-github/
   office-hours/
+  plan-ceo-review/
 .agents/skills/<name>/               Symlinks to ../../skills/<name>/
 .claude/skills/<name>/               Symlinks to ../../skills/<name>/
 .claude-plugin/

@@ -8,10 +8,11 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/superteam/`: superteam skill
 - `skills/using-github/`: using-github skill
 - `skills/office-hours/`: office-hours skill
+- `skills/plan-ceo-review/`: plan-ceo-review skill
 - `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
 - `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all 4 skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all five skill paths
 - `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`,
   `docs/release-flow.md`, and, when present, `docs/superpowers/`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
@@ -30,11 +31,11 @@ following acceptance criteria format:
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
-- `pnpm verify:dogfood`: assert all four in-repo skills are discoverable via flat layout
+- `pnpm verify:dogfood`: assert all five in-repo skills are discoverable via flat layout
 - `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
 - `pnpm verify:superteam`: assert Superteam contract surfaces stay in sync
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
-- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the four skill entry points
+- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the five skill entry points
 
 ## Coding Style & Naming Conventions
 
@@ -65,7 +66,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 ## Testing Guidelines
 
 - Validate paths with `find` or `rg`
-- Run `bash scripts/verify-dogfood.sh` to confirm all four in-repo skills pass the flat-layout check
+- Run `bash scripts/verify-dogfood.sh` to confirm all five in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
 - Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
@@ -124,8 +125,9 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns four skills at flat paths: `skills/scaffold-repository/`,
-`skills/superteam/`, `skills/using-github/`, and `skills/office-hours/`.
+This repo owns five skills at flat paths: `skills/scaffold-repository/`,
+`skills/superteam/`, `skills/using-github/`, `skills/office-hours/`, and
+`skills/plan-ceo-review/`.
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
 
@@ -134,8 +136,9 @@ maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y
 component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
 [docs/release-flow.md](./docs/release-flow.md).
 
-The two standalone skills (`find-skills`, `office-hours`) are not release-please packages.
-Consumers install them from the default branch or a specific `#<git-ref>`.
+The five in-repo skills share the single root `patinaproject-skills` release and tag;
+they are not separate release-please packages. Third-party skills such as `find-skills`
+are installed separately from their source repo's default branch or a specific `#<git-ref>`.
 
 Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
 auto-merges Release PRs after required checks pass.
