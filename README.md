@@ -61,10 +61,12 @@ contract, including the required
 
 GitHub Actions cannot answer follow-up questions. `superteam-non-interactive`
 is the headless companion to `superteam`: it uses the same teammate workflow,
-artifacts, gates, and Finisher shutdown, but turns every missing prompt-time
-decision into an explicit CI blocker. Use it for one-shot issue runs where all
-required approvals and publish permissions must come from invocation inputs,
-environment variables, or durable repository state.
+artifacts, gates, and Finisher shutdown, but removes human-in-the-loop pauses.
+Clean designs auto-advance, publishing is allowed by default when the CI token
+permits it, and unresolved technical or review blockers are reported in a
+machine-actionable format for the next run. Use it for one-shot issue runs where
+the workflow must proceed from invocation inputs, environment variables, and
+durable repository state instead of chat replies.
 
 It ships with the same `patinaproject-skills` plugin as `superteam`.
 
