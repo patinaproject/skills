@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.0.0...patinaproject-skills-v1.1.0) (2026-05-14)
+
+
+### Features
+
+* [#63](https://github.com/patinaproject/skills/issues/63) add plan-ceo-review skill ([#66](https://github.com/patinaproject/skills/issues/66)) ([c22ad3c](https://github.com/patinaproject/skills/commit/c22ad3cbea9d9a15c0fafa25a6ba4746ec6d3552))
+
+
+### Bug Fixes
+
+* [#64](https://github.com/patinaproject/skills/issues/64) require latest-head PR completion gate ([#65](https://github.com/patinaproject/skills/issues/65)) ([fc1d699](https://github.com/patinaproject/skills/commit/fc1d699581cf970209e61fa8d0ea4a5c2c9bc8e1))
+
 ## 1.0.0 (2026-05-12)
 
 
