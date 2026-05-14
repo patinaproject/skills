@@ -1,32 +1,21 @@
 ---
 name: superteam-non-interactive
 description: Use when running Superteam in GitHub Actions, CI, headless automation, or any one-shot environment where prompts, confirmations, or interactive gate decisions would hang the job.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
-  - Task
-  - TodoRead
-  - TodoWrite
 ---
 
 # superteam-non-interactive
 
 `superteam-non-interactive` is the CI-safe Superteam entry point. It reuses the
-`superteam` Team Lead, Brainstormer, Planner, Executor, Reviewer, and Finisher
-contracts, but changes operator interaction into a strict fail-fast input
-contract so GitHub Actions can run without hanging.
+`superteam` teammate contracts, but changes operator interaction into a strict
+fail-fast input contract so GitHub Actions can run without hanging.
 
 ## Quick start
 
 Use this skill when the operator invokes `/superteam-non-interactive`, asks for
 Superteam in GitHub Actions, or requests a headless one-shot Superteam run.
 
-1. Load `skills/superteam/SKILL.md`, `pre-flight.md`, `routing-table.md`, and
-   `project-deltas.md`.
+1. Load the sibling Superteam files from `skills/superteam/`: `SKILL.md`,
+   `pre-flight.md`, `routing-table.md`, and `project-deltas.md`.
 2. Resolve the issue from an explicit `#<number>`, `SUPERTEAM_ISSUE`, or the
    current branch name. If none exists, halt.
 3. Run the normal Superteam pre-flight with `interaction_mode=non-interactive`.
@@ -49,7 +38,7 @@ Superteam in GitHub Actions, or requests a headless one-shot Superteam run.
 - Output concise status lines that CI logs can preserve: current phase, issue,
   branch, PR if any, blocker if any, and verification evidence.
 
-## Required Inputs
+## Inputs
 
 At minimum, one issue source must be present:
 
@@ -59,7 +48,6 @@ At minimum, one issue source must be present:
 
 Optional CI policy inputs:
 
-- `SUPERTEAM_NON_INTERACTIVE=1`: confirms this is a headless run.
 - `SUPERTEAM_APPROVE_CLEAN_DESIGN=1`: lets Gate 1 advance only when the design
   artifact exists, adversarial review is clean or dispositioned, and no
   approval-blocking finding remains.
@@ -73,14 +61,14 @@ Unset optional policy inputs mean "not permitted." Do not prompt to enable them.
 
 Gate 1 remains real. In non-interactive mode:
 
-- If no design exists, Brainstormer may write and commit one.
-- If a design exists but no plan exists, Team Lead may advance to Planner only
+- No design exists: Brainstormer may write and commit one.
+- Design exists but no plan exists: Team Lead may advance to Planner only
   when `SUPERTEAM_APPROVE_CLEAN_DESIGN=1` and the normal Gate 1 evidence is
   clean or dispositioned.
-- If Gate 1 evidence is blocked, missing, or ambiguous, halt with
+- Gate 1 evidence is blocked, missing, or ambiguous: halt with
   `superteam halted at Gate 1: <reason>`.
-- If a plan exists, execution may continue from the committed plan without a
-  chat approval prompt.
+- Plan exists: execution may continue from the committed plan without a chat
+  approval prompt.
 
 Publish behavior remains Finisher-owned. Finisher may push or open a PR only
 when `SUPERTEAM_ALLOW_PUBLISH=1`; otherwise halt with the exact publish action
