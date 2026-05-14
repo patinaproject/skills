@@ -20,7 +20,9 @@ Superteam in GitHub Actions, or requests a headless one-shot Superteam run.
    current branch name. If none exists, halt.
 3. Run the normal Superteam pre-flight with `interaction_mode=non-interactive`.
 4. Route to the owning teammate using the normal Superteam routing table.
-5. Before any place where `superteam` would ask the operator, require a
+5. Before delegation, load the routed teammate contract from
+   `skills/superteam/agents/` or `skills/superteam/.claude/agents/`.
+6. Before any place where `superteam` would ask the operator, require a
    provided input, deterministic default, or visible durable state. If none
    exists, halt with a machine-actionable blocker.
 
