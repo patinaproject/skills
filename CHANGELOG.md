@@ -2,18 +2,15 @@
 
 ## [1.1.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.0.0...patinaproject-skills-v1.1.0) (2026-05-14)
 
-
 ### Features
 
 * [#63](https://github.com/patinaproject/skills/issues/63) add plan-ceo-review skill ([#66](https://github.com/patinaproject/skills/issues/66)) ([c22ad3c](https://github.com/patinaproject/skills/commit/c22ad3cbea9d9a15c0fafa25a6ba4746ec6d3552))
-
 
 ### Bug Fixes
 
 * [#64](https://github.com/patinaproject/skills/issues/64) require latest-head PR completion gate ([#65](https://github.com/patinaproject/skills/issues/65)) ([fc1d699](https://github.com/patinaproject/skills/commit/fc1d699581cf970209e61fa8d0ea4a5c2c9bc8e1))
 
 ## 1.0.0 (2026-05-12)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -26,7 +23,6 @@
 * [#2](https://github.com/patinaproject/skills/issues/2) add Claude marketplace support ([#3](https://github.com/patinaproject/skills/issues/3)) ([aeb1c62](https://github.com/patinaproject/skills/commit/aeb1c62e156ae2547e9acb788ea0ac2013540d0d))
 * [#41](https://github.com/patinaproject/skills/issues/41) auto-merge release bump PRs ([#42](https://github.com/patinaproject/skills/issues/42)) ([d0dc1bf](https://github.com/patinaproject/skills/commit/d0dc1bf9750806904f49a72a6b98d8552c8b371b))
 * [#58](https://github.com/patinaproject/skills/issues/58) merge skills in-repo, rename bootstrap-&gt;scaffold-repository, adopt vercel-labs CLI ([#59](https://github.com/patinaproject/skills/issues/59)) ([15cfaf8](https://github.com/patinaproject/skills/commit/15cfaf88ff5a28f7c3b337dcee8e07138b9a0941))
-
 
 ### Bug Fixes
 

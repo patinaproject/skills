@@ -6,7 +6,7 @@
 # `pnpm skills:install`). Idempotent — re-runs are a no-op when the skills
 # are already present.
 #
-# Why this script exists: the five in-repo `patinaproject-skills` are tracked
+# Why this script exists: the six in-repo `patinaproject-skills` are tracked
 # in `skills/<name>/`; third-party skills (obra/superpowers, openai/skills,
 # anthropics/claude-code, mattpocock/skills, vercel-labs/skills) are tracked
 # only as pinned entries in `skills-lock.json` to avoid bloating
@@ -31,7 +31,7 @@ fi
 
 # `npx skills experimental_install` reads skills-lock.json and restores all
 # entries. The lockfile records only third-party skills; in-repo skills
-# (the five `patinaproject-skills`) are not in it.
+# (the six `patinaproject-skills`) are not in it.
 echo "install-third-party-skills: restoring vendored skills from skills-lock.json..."
 npx --yes skills@latest experimental_install --yes
 echo "install-third-party-skills: done"

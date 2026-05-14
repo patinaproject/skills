@@ -1,7 +1,7 @@
 # Skills used by the Patina Project team
 
-Five installable agent skills for repository scaffolding, multi-teammate
-orchestration, GitHub workflows, product design, and strategic plan review — available
+Six installable agent skills for repository scaffolding, multi-teammate
+orchestration, CI-safe orchestration, GitHub workflows, product design, and strategic plan review — available
 across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
@@ -55,6 +55,20 @@ Reviewer, Finisher — producing durable repo-owned artifacts at every gate.
 
 See [./skills/superteam/](./skills/superteam/) for the
 full README and skill contract.
+
+### superteam-non-interactive
+
+GitHub Actions cannot answer follow-up questions. `superteam-non-interactive`
+is the headless companion to `superteam`: it uses the same teammate workflow,
+artifacts, gates, and Finisher shutdown, but turns every missing prompt-time
+decision into an explicit CI blocker. Use it for one-shot issue runs where all
+required approvals and publish permissions must come from invocation inputs,
+environment variables, or durable repository state.
+
+It ships with the same `patinaproject-skills` plugin as `superteam`.
+
+See [./skills/superteam-non-interactive/](./skills/superteam-non-interactive/)
+for the skill contract.
 
 ### using-github
 
@@ -110,6 +124,7 @@ for the full README and skill contract.
 | Skill | Description |
 |---|---|
 | [superteam](./skills/superteam/) | Orchestrate a GitHub issue from design through merged PR |
+| [superteam-non-interactive](./skills/superteam-non-interactive/) | Run Superteam in GitHub Actions without prompts |
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
@@ -133,7 +148,7 @@ npx skills@latest add ./skills/office-hours --list
 node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 ```
 
-### Check c — dogfood verification, all five skills
+### Check c — dogfood verification, all six skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -145,6 +160,7 @@ bash scripts/verify-dogfood.sh
 skills/
   scaffold-repository/
   superteam/
+  superteam-non-interactive/
   using-github/
   office-hours/
   plan-ceo-review/
