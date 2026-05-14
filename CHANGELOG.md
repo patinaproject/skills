@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.1.0...patinaproject-skills-v1.2.0) (2026-05-14)
+
+
+### Features
+
+* [#71](https://github.com/patinaproject/skills/issues/71) add non-interactive superteam command ([#73](https://github.com/patinaproject/skills/issues/73)) ([1356457](https://github.com/patinaproject/skills/commit/135645712ad4cdc33e1109314510d5b82ffaab36))
+
 ## [1.1.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.0.0...patinaproject-skills-v1.1.0) (2026-05-14)
 
 ### Features
