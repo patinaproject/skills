@@ -13,6 +13,10 @@ const skillTemplatePath = path.join(
   repoRoot,
   "skills/scaffold-repository/templates/agent-plugin/skills/{{primary-skill-name}}/SKILL.md.tmpl",
 );
+const codexPluginTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/agent-plugin/.codex-plugin/plugin.json.tmpl",
+);
 const skillContractPath = path.join(repoRoot, "skills/scaffold-repository/SKILL.md");
 
 const values = {
@@ -69,9 +73,16 @@ function renderTemplate(template, replacements) {
 
 const template = fs.readFileSync(templatePath, "utf8");
 const skillTemplate = fs.readFileSync(skillTemplatePath, "utf8");
+const codexPluginTemplate = fs.readFileSync(codexPluginTemplatePath, "utf8");
 const skillContract = fs.readFileSync(skillContractPath, "utf8");
 const rendered = renderTemplate(template, values);
 const renderedSkill = renderTemplate(skillTemplate, values);
+const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
+  ...values,
+  "author-name": "Test Author",
+  "author-email": "test@example.com",
+  "author-handle": "test-author",
+});
 
 assertNotIncludes(rendered, "{{", "rendered README");
 assertIncludes(rendered, "/workflow-kit:issue-router", "Claude invocation");
@@ -100,6 +111,11 @@ assertIncludes(rendered, ".cursor/rules/workflow-kit.mdc", "Cursor rule path");
 assertNotIncludes(renderedSkill, "{{", "rendered primary skill starter");
 assertIncludes(renderedSkill, "name: issue-router", "primary skill frontmatter");
 assertIncludes(renderedSkill, "Use this skill to run the `workflow-kit` workflow.", "primary skill body");
+
+const codexPlugin = JSON.parse(renderedCodexPlugin);
+const defaultPrompt = codexPlugin.interface.defaultPrompt.join("\n");
+assertIncludes(defaultPrompt, "$issue-router", "Codex plugin default prompt");
+assertNotIncludes(defaultPrompt, "$workflow-kit", "Codex plugin default prompt");
 
 const codexCliSection = getSection(
   rendered,
