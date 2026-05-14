@@ -28,6 +28,17 @@ generated plugin repository name and the generated primary skill name differ.
   That second command registers the generated plugin repository as another
   marketplace source instead of installing the generated plugin from the
   already-registered Patina Project skills marketplace.
+- Local `codex plugin --help` and `codex plugin marketplace --help` expose
+  marketplace management commands (`add`, `upgrade`, `remove`) and no separate
+  `codex plugin install` subcommand. The template must not invent a CLI command
+  that is unsupported by the installed Codex surface.
+- When `<primary-skill-name>` is absent, there is no emitted
+  `skills/<primary-skill-name>/SKILL.md` file to invoke or link. Agent-plugin
+  README generation must either require a primary skill name before emitting the
+  skill-specific README variant, or omit skill-specific invocation examples and
+  Related links. For this issue, the intended fix is to require
+  `<primary-skill-name>` for agent-plugin README generation so the generated
+  plugin has one documented primary skill entry point.
 - The `write-a-skill` structure check is relevant because the change affects a
   skill-owned template, not because it creates a new skill. The fix should keep
   template behavior concise and avoid introducing extra reference material.
@@ -53,9 +64,17 @@ generated plugin repository name and the generated primary skill name differ.
 6. The Codex CLI section must install the generated plugin from the
    already-registered `patinaproject/skills` marketplace instead of registering
    the generated plugin repository as a second marketplace source.
-7. The implementation must include a verification path that renders or otherwise
+7. Because the current Codex CLI exposes marketplace management but no install
+   subcommand, the Codex CLI section must use exactly one CLI command:
+   `codex plugin marketplace add patinaproject/skills`. It must then instruct
+   users to install or enable `{{repo}}` from that registered Patina Project
+   marketplace/plugin source, without adding `{{owner}}/{{repo}}` as another
+   marketplace.
+8. Agent-plugin README generation must require `<primary-skill-name>` when the
+   README includes skill invocation examples or Related skill links.
+9. The implementation must include a verification path that renders or otherwise
    evaluates the template with `<repo> != <primary-skill-name>`.
-8. Existing guidance for editor surfaces that read repository files directly
+10. Existing guidance for editor surfaces that read repository files directly
    must remain keyed to `{{repo}}` unless those surfaces are explicitly invoking
    the primary skill.
 
@@ -116,15 +135,13 @@ The implementation should update the agent-plugin README template so:
 - Claude Code invocation becomes `/{{repo}}:{{primary-skill-name}}`;
 - Usage examples use `/{{repo}}:{{primary-skill-name}}`;
 - Related links use `skills/{{primary-skill-name}}/SKILL.md`;
-- Codex CLI install uses a plugin-install command against the already-added
-  `patinaproject/skills` marketplace, not another marketplace-add command for
-  `{{owner}}/{{repo}}@v0.1.0`.
-
-If the exact Codex CLI install subcommand is already established elsewhere in
-the repository, reuse that wording. If it is not established, choose the form
-that mirrors the Claude Code marketplace flow: register the marketplace once,
-then install `{{repo}}` from that marketplace with a tag or marketplace
-qualifier rather than adding the generated plugin repository as a marketplace.
+- Codex CLI install uses only
+  `codex plugin marketplace add patinaproject/skills`, then tells the user to
+  install or enable `{{repo}}` from the registered Patina Project marketplace or
+  Codex plugin source; it must not include
+  `codex plugin marketplace add {{owner}}/{{repo}}@v0.1.0`;
+- the scaffold path that emits this README requires `<primary-skill-name>` for
+  agent-plugin mode, or otherwise refuses/asks before rendering the README.
 
 ## Verification
 
@@ -139,6 +156,14 @@ qualifier rather than adding the generated plugin repository as a marketplace.
   `./skills/issue-router/SKILL.md`.
 - Assert the Codex CLI section registers `patinaproject/skills` and does not
   contain `codex plugin marketplace add patinaproject/workflow-kit@v0.1.0`.
+- Assert the Codex CLI section contains a positive instruction to install or
+  enable `workflow-kit` from the registered Patina Project marketplace/plugin
+  source, and does not contain an unsupported `codex plugin install` command.
+- Assert the generated README keeps repository-keyed editor/project surfaces as
+  `workflow-kit`, including the Cursor rule path `.cursor/rules/workflow-kit.mdc`.
+- Verify the scaffold path refuses or prompts when agent-plugin README
+  generation lacks `<primary-skill-name>`, so it cannot emit an empty
+  skill-invocation command or `skills//SKILL.md` link.
 - Run `pnpm lint:md`.
 - Run `pnpm verify:dogfood`.
 - Run `pnpm apply:scaffold-repository:check` to confirm the scaffold baseline
@@ -148,6 +173,10 @@ qualifier rather than adding the generated plugin repository as a marketplace.
 
 - Changing the scaffold prompt contract to require matching repo and primary
   skill names.
+- Supporting agent-plugin README generation with no primary skill entry point in
+  this issue. The fix requires `<primary-skill-name>` for this README variant
+  because the template documents a primary skill invocation and Related skill
+  link.
 - Changing generated plugin manifest names or marketplace metadata outside the
   README template.
 - Reworking non-plugin README templates.
@@ -156,7 +185,6 @@ qualifier rather than adding the generated plugin repository as a marketplace.
 
 ## Concerns
 
-No approval-blocking concerns remain. The main implementation risk is choosing
-an unsupported Codex CLI install subcommand; the executor should confirm the
-current expected command from repo-local docs or the available Codex plugin
-surface before changing that line.
+No approval-blocking concerns remain. The main implementation risk is preserving
+existing repo-keyed editor guidance while tightening primary-skill-specific
+examples; the rendered-output regression should catch that split.
