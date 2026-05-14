@@ -3,6 +3,7 @@
   "skills": [
     "./skills/scaffold-repository",
     "./skills/superteam",
+    "./skills/superteam-non-interactive",
     "./skills/using-github",
     "./skills/office-hours",
     "./skills/plan-ceo-review"

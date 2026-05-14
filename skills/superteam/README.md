@@ -138,6 +138,11 @@ See the [root README](../../README.md) for the full install guide.
 
 Superteam keeps the workflow grounded in explicit teammate ownership, written design and plan artifacts, verification before completion, and finish-owned review follow-through. You can invoke Superteam at any point in the lifecycle and have it resume from the right teammate instead of starting over.
 
+For GitHub Actions or other headless one-shot runs, use
+`/superteam-non-interactive`. It ships with this plugin and preserves the same
+teammate contracts while failing fast whenever an interactive prompt would have
+been required.
+
 ## Development
 
 This repository is the source for the plugin. Local workflow:
