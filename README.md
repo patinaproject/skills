@@ -53,8 +53,9 @@ handoff artifact and restarts are expensive. `superteam` routes a GitHub issue
 through a six-teammate workflow — Team Lead, Brainstormer, Planner, Executor,
 Reviewer, Finisher — producing durable repo-owned artifacts at every gate.
 
-See [./skills/superteam/](./skills/superteam/) for the
-full README and skill contract.
+See [./skills/superteam/](./skills/superteam/) for the full README and skill
+contract, including the required
+[Superpowers prerequisite](./skills/superteam/README.md#install).
 
 ### using-github
 

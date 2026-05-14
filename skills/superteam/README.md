@@ -107,6 +107,14 @@ A run is only complete when the published branch state is stable enough to hand 
 
 ## Install
 
+Superteam expects [Superpowers](https://github.com/obra/superpowers) to be installed first. Install it with the `skills` CLI:
+
+```bash
+npx skills@latest add obra/superpowers
+```
+
+See the [Superpowers repository](https://github.com/obra/superpowers) for other installation methods.
+
 Install just this skill via the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI:
 
 ```bash
