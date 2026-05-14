@@ -32,7 +32,7 @@
 3. Open a target repository (or an issue in one) in Claude Code and invoke:
 
    ```text
-   /{{repo}}:{{repo}}
+   /{{repo}}:{{primary-skill-name}}
    ```
 
 ### OpenAI Codex CLI
@@ -43,16 +43,12 @@
    codex plugin marketplace add patinaproject/skills
    ```
 
-2. Install the plugin (pin to a tag for reproducible installs):
-
-   ```bash
-   codex plugin marketplace add {{owner}}/{{repo}}@v0.1.0
-   ```
+2. Install or enable `{{repo}}` from the registered Patina Project marketplace/plugin source.
 
 3. Invoke from the target repository:
 
    ```text
-   Use ${{repo}} for the workflow described above.
+   Use ${{primary-skill-name}} for the workflow described above.
    ```
 
 ### OpenAI Codex App
@@ -62,7 +58,7 @@
 3. Invoke:
 
    ```text
-   Use ${{repo}} for the workflow described above.
+   Use ${{primary-skill-name}} for the workflow described above.
    ```
 
 ### GitHub Copilot
@@ -153,8 +149,8 @@ Then ask Continue to apply the `{{repo}}` workflow described in `AGENTS.md`.
 
 <!-- Example prompts or invocations tailored to this plugin. -->
 <!-- Example: -->
-<!-- /{{repo}}:{{repo}} work on issue 42 -->
-<!-- /{{repo}}:{{repo}} resume from review -->
+<!-- /{{repo}}:{{primary-skill-name}} work on issue 42 -->
+<!-- /{{repo}}:{{primary-skill-name}} resume from review -->
 
 ## Development
 
@@ -188,6 +184,6 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md).
 
 ## Related
 
-- [`skills/{{repo}}/SKILL.md`](./skills/{{repo}}/SKILL.md) – skill contract.
+- [`skills/{{primary-skill-name}}/SKILL.md`](./skills/{{primary-skill-name}}/SKILL.md) – skill contract.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) – marketplace distributing Patina Project plugins.
 - [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) – scaffolding skill that emitted this repo's baseline.
