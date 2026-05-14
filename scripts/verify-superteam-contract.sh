@@ -30,6 +30,7 @@ require_file skills/superteam/pre-flight.md
 require_file skills/superteam/routing-table.md
 require_file skills/superteam/project-deltas.md
 require_file skills/superteam/workflow-diagrams.md
+require_file skills/superteam-non-interactive/SKILL.md
 
 for role in team-lead brainstormer planner executor reviewer finisher; do
   require_file "skills/superteam/agents/$role.openai.yaml"
@@ -69,6 +70,19 @@ require_text skills/superteam/pre-flight.md "check_status_inventory_state"
 require_text skills/superteam/pre-flight.md 'ready`: the latest-head PR completion gate has passed'
 require_text skills/superteam/routing-table.md "latest-head PR completion gate"
 require_text skills/superteam/routing-table.md "PR review comments, review threads, bot findings, checks, statuses, mergeability, or CI"
+
+for needle in \
+  "## Autonomy Defaults" \
+  "Never halt just because an interactive Superteam run would have asked a human" \
+  "Gate 1: auto-advance a clean or fully dispositioned design" \
+  "Publishing: allow" \
+  "to push, create, or update the PR" \
+  "SUPERTEAM_ALLOW_PUBLISH=0" \
+  "Halting for" \
+  "being unset"
+do
+  require_text skills/superteam-non-interactive/SKILL.md "$needle"
+done
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
