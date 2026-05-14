@@ -52,6 +52,8 @@ generated plugin repository name and the generated primary skill name differ.
 
 1. The agent-plugin README template must use `{{primary-skill-name}}` anywhere
    it points at, invokes, or describes the generated primary skill entry point.
+   This includes Claude Code slash-command examples and Codex CLI/App prompt
+   examples that currently say `${{repo}}`.
 2. The template may continue to use `{{repo}}` for plugin identity, repository
    identity, marketplace plugin installation, and editor/project surfaces that
    are keyed by the plugin repository slug.
@@ -61,9 +63,11 @@ generated plugin repository name and the generated primary skill name differ.
    invocation.
 5. The Related skill link must point at the emitted
    `skills/{{primary-skill-name}}/SKILL.md` path.
-6. The Codex CLI section must install the generated plugin from the
-   already-registered `patinaproject/skills` marketplace instead of registering
-   the generated plugin repository as a second marketplace source.
+6. The Codex CLI section must not describe a command-based plugin install path
+   that the installed Codex CLI does not expose. Its command sequence must only
+   register the `patinaproject/skills` marketplace and must direct the user to
+   install or enable the generated plugin from that registered marketplace or
+   Codex plugin source.
 7. Because the current Codex CLI exposes marketplace management but no install
    subcommand, the Codex CLI section must use exactly one CLI command:
    `codex plugin marketplace add patinaproject/skills`. It must then instruct
@@ -94,9 +98,10 @@ then it points at the emitted `skills/<primary-skill-name>/SKILL.md` file.
 ### AC-72-3
 
 Given the generated README's Codex CLI installation section, when a reader
-follows the marketplace instructions, then the commands install the generated
-plugin from the registered `patinaproject/skills` marketplace instead of
-registering the generated plugin repo as a second marketplace.
+follows the marketplace instructions, then the command sequence registers only
+the `patinaproject/skills` marketplace and the surrounding instruction tells the
+reader to install or enable the generated plugin from that registered source
+instead of registering the generated plugin repo as a second marketplace.
 
 ## Approaches Considered
 
@@ -133,7 +138,11 @@ The implementation should update the agent-plugin README template so:
 
 - Claude Code install remains `/plugin install {{repo}}@patinaproject-skills`;
 - Claude Code invocation becomes `/{{repo}}:{{primary-skill-name}}`;
-- Usage examples use `/{{repo}}:{{primary-skill-name}}`;
+- Codex CLI/App prompt examples become `Use ${{primary-skill-name}} for the
+  workflow described above.`;
+- Usage examples use `/{{repo}}:{{primary-skill-name}}` when showing Claude Code
+  slash commands and `${{primary-skill-name}}` when showing Codex prompt
+  examples;
 - Related links use `skills/{{primary-skill-name}}/SKILL.md`;
 - Codex CLI install uses only
   `codex plugin marketplace add patinaproject/skills`, then tells the user to
@@ -152,6 +161,8 @@ The implementation should update the agent-plugin README template so:
 - Assert the rendered Claude Code invocation and Usage examples contain
   `/workflow-kit:issue-router`.
 - Assert the rendered README does not contain `/workflow-kit:workflow-kit`.
+- Assert the rendered Codex CLI and Codex App prompt examples contain
+  `$issue-router` and do not contain `$workflow-kit`.
 - Assert the Related skill link points to
   `./skills/issue-router/SKILL.md`.
 - Assert the Codex CLI section registers `patinaproject/skills` and does not
