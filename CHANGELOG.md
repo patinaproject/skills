@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.2.0...patinaproject-skills-v1.3.0) (2026-05-14)
+
+
+### Features
+
+* [#71](https://github.com/patinaproject/skills/issues/71) make non-interactive superteam autonomous ([#77](https://github.com/patinaproject/skills/issues/77)) ([42b15d1](https://github.com/patinaproject/skills/commit/42b15d10e959f683a3b40d6f7f732f6c918cb555))
+
+
+### Bug Fixes
+
+* [#72](https://github.com/patinaproject/skills/issues/72) fix scaffold README skill references ([#74](https://github.com/patinaproject/skills/issues/74)) ([fd4778b](https://github.com/patinaproject/skills/commit/fd4778b4a231a02e15feea1b40333d1b6142e0bc))
+
 ## [1.2.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.1.0...patinaproject-skills-v1.2.0) (2026-05-14)
 
 ### Features
