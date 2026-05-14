@@ -18,6 +18,7 @@ const codexPluginTemplatePath = path.join(
   "skills/scaffold-repository/templates/agent-plugin/.codex-plugin/plugin.json.tmpl",
 );
 const skillContractPath = path.join(repoRoot, "skills/scaffold-repository/SKILL.md");
+const auditChecklistPath = path.join(repoRoot, "skills/scaffold-repository/audit-checklist.md");
 
 const values = {
   owner: "patinaproject",
@@ -75,6 +76,7 @@ const template = fs.readFileSync(templatePath, "utf8");
 const skillTemplate = fs.readFileSync(skillTemplatePath, "utf8");
 const codexPluginTemplate = fs.readFileSync(codexPluginTemplatePath, "utf8");
 const skillContract = fs.readFileSync(skillContractPath, "utf8");
+const auditChecklist = fs.readFileSync(auditChecklistPath, "utf8");
 const rendered = renderTemplate(template, values);
 const renderedSkill = renderTemplate(skillTemplate, values);
 const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
@@ -106,6 +108,16 @@ assertIncludes(
   skillContract,
   "must collect `<primary-skill-name>` before rendering the README and primary skill starter",
   "Primary skill render requirement",
+);
+assertIncludes(
+  auditChecklist,
+  "skills/<primary-skill-name>/SKILL.md",
+  "Realignment primary skill check",
+);
+assertIncludes(
+  auditChecklist,
+  "`skills/.gitkeep` alone is stale for agent-plugin repos",
+  "Realignment stale gitkeep check",
 );
 assertIncludes(rendered, ".cursor/rules/workflow-kit.mdc", "Cursor rule path");
 assertNotIncludes(renderedSkill, "{{", "rendered primary skill starter");

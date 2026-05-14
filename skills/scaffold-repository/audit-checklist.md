@@ -87,7 +87,7 @@ When detected, the following surfaces should all be present. Missing platforms a
 | `.release-please-manifest.json` | yes | valid JSON; `.` version matches `package.json.version` |
 | `.cursor/rules/<repo>.mdc` | yes | present with frontmatter |
 | `.windsurfrules` | yes | present |
-| `skills/` | yes | directory exists with at least a `.gitkeep` or a skill subdirectory |
+| `skills/<primary-skill-name>/SKILL.md` | yes | present; frontmatter `name:` equals the primary skill name documented by the README/plugin workflow; `skills/.gitkeep` alone is stale for agent-plugin repos |
 
 Author URLs in `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` must point to the resolved `https://github.com/<author-handle>`, not the repository owner URL. Repository-level URLs such as `homepage`, `repository`, and Codex interface URLs stay on `https://github.com/<owner>/<repo>`.
 
