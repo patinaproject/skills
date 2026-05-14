@@ -118,12 +118,13 @@ Emitted only when `<is-agent-plugin>` is yes:
 README.md                           (replaces core README with installation instructions)
 release-please-config.json
 .release-please-manifest.json
+skills/{{primary-skill-name}}/SKILL.md
 skills/.gitkeep
 ```
 
 The agent-plugin `README.md.tmpl` is richer than the core one: it includes install steps for Claude Code, Codex CLI, and Codex App, plus usage examples. The core `README.md.tmpl` is emitted only for non-plugin repos.
 
-Because the agent-plugin README documents a primary skill invocation and links to that skill contract, agent-plugin mode must collect `<primary-skill-name>` before rendering the README.
+Because the agent-plugin README documents a primary skill invocation and links to that skill contract, agent-plugin mode must collect `<primary-skill-name>` before rendering the README and primary skill starter.
 
 Aider, Zed, Cline, and Opencode read `AGENTS.md` natively and are covered by the core baseline – no dedicated surface needed. Codex CLI also reads `AGENTS.md` natively but additionally consumes `.codex-plugin/plugin.json` in agent-plugin mode. Continue.dev is available as an opt-in secondary editor (`.continue/config.json`).
 

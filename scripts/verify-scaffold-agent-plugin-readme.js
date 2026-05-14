@@ -9,6 +9,11 @@ const templatePath = path.join(
   repoRoot,
   "skills/scaffold-repository/templates/agent-plugin/README.md.tmpl",
 );
+const skillTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/agent-plugin/skills/{{primary-skill-name}}/SKILL.md.tmpl",
+);
+const skillContractPath = path.join(repoRoot, "skills/scaffold-repository/SKILL.md");
 
 const values = {
   owner: "patinaproject",
@@ -63,7 +68,10 @@ function renderTemplate(template, replacements) {
 }
 
 const template = fs.readFileSync(templatePath, "utf8");
+const skillTemplate = fs.readFileSync(skillTemplatePath, "utf8");
+const skillContract = fs.readFileSync(skillContractPath, "utf8");
 const rendered = renderTemplate(template, values);
+const renderedSkill = renderTemplate(skillTemplate, values);
 
 assertNotIncludes(rendered, "{{", "rendered README");
 assertIncludes(rendered, "/workflow-kit:issue-router", "Claude invocation");
@@ -73,7 +81,25 @@ assertIncludes(
   "[`skills/issue-router/SKILL.md`](./skills/issue-router/SKILL.md)",
   "Related skill link",
 );
+assertIncludes(
+  skillContract,
+  "skills/{{primary-skill-name}}/SKILL.md",
+  "Agent plugin emitted primary skill surface",
+);
+assertIncludes(
+  skillContract,
+  "required when `<is-agent-plugin>` is yes",
+  "Primary skill prompt requirement",
+);
+assertIncludes(
+  skillContract,
+  "must collect `<primary-skill-name>` before rendering the README and primary skill starter",
+  "Primary skill render requirement",
+);
 assertIncludes(rendered, ".cursor/rules/workflow-kit.mdc", "Cursor rule path");
+assertNotIncludes(renderedSkill, "{{", "rendered primary skill starter");
+assertIncludes(renderedSkill, "name: issue-router", "primary skill frontmatter");
+assertIncludes(renderedSkill, "Use this skill to run the `workflow-kit` workflow.", "primary skill body");
 
 const codexCliSection = getSection(
   rendered,
