@@ -5,7 +5,8 @@
 Make Superteam's pre-flight branch preparation handle a freshly created worktree
 that has not yet been attached to a named issue branch. The workflow should
 create or reuse the issue branch before inspecting committed artifacts or
-delegating teammate work.
+delegating teammate work, without requiring the operator to remember a separate
+`new branch` command.
 
 ## Problem
 
@@ -18,6 +19,9 @@ inspection and author design or plan files outside the expected issue branch.
 That failure is especially risky for Superteam because its durable state is
 branch-scoped: Gate 1 design artifacts, plan artifacts, implementation commits,
 review evidence, and PR publication all assume work happens on the issue branch.
+It is also an operator-experience failure: starting Superteam on an issue should
+be enough intent for Superteam to prepare the issue branch. The operator should
+not have to remember to type `new branch` first.
 
 ## Requirements
 
@@ -33,6 +37,10 @@ review evidence, and PR publication all assume work happens on the issue branch.
 - AC-81-4: Given branch creation fails, when Superteam cannot safely continue,
   then it reports the failure clearly and stops before making implementation
   changes.
+- AC-81-5: Given the operator asks Superteam to work on an explicit issue, when
+  the current worktree has no matching issue branch checked out, then Superteam
+  performs branch preparation automatically without requiring a separate
+  operator phrase such as `new branch`.
 
 ## Proposed Change
 
@@ -48,6 +56,11 @@ include:
 Keep the no-op path for an existing matching issue branch. A non-default branch
 whose issue number conflicts with the explicit issue remains a halt, not an
 automatic branch replacement.
+
+The trigger belongs to every normal Superteam invocation that resolves an
+explicit issue, including prompts phrased as "work on this", "run superteam on
+#N", or equivalent. `new branch` is allowed as harmless operator wording, but it
+must not be required to activate the branch-preparation path.
 
 Branch naming stays self-contained and deterministic:
 
@@ -87,9 +100,10 @@ before delegation.
 ## Pressure Tests
 
 1. RED: Superteam starts from detached `HEAD` in a clean new worktree with
-   prompt `#81`. Old behavior does not match the default-branch trigger and can
-   inspect artifacts before switching. GREEN: pre-flight classifies detached
-   `HEAD` as branch preparation required, creates or checks out
+   prompt `work on #81`. Old behavior does not match the default-branch trigger
+   and can inspect artifacts before switching unless the operator remembers a
+   separate branch command. GREEN: pre-flight classifies detached `HEAD` as
+   branch preparation required, creates or checks out
    `81-superteam-should-create-issue-branches-in-brand-new-worktrees`, and only
    then inspects artifacts.
 2. RED: Superteam starts from an unborn clean branch in a new worktree. Old
@@ -103,6 +117,10 @@ before delegation.
 4. RED: Superteam starts on `64-some-other-issue` while the prompt names `#81`.
    A broad fix silently switches issues. GREEN: pre-flight halts for conflicting
    active issue candidates.
+5. RED: Superteam starts from a clean brand-new worktree with prompt `work on
+   #81` and no `new branch` wording. A narrow fix only runs branch preparation
+   when the operator says `new branch`. GREEN: branch preparation runs because
+   the explicit issue and worktree state are sufficient.
 
 ## Workflow-Contract Considerations
 
@@ -113,7 +131,8 @@ writing-skills dimensions apply.
   states and the new observable behavior.
 - Rationalization resistance: keep explicit table rows forbidding detached or
   unborn worktree fallthrough and forbidding branch replacement on mismatched
-  non-default branches.
+  non-default branches. Also forbid requiring the operator to type `new branch`
+  as a hidden trigger.
 - Red flags: add checks for detached or unborn branch states continuing into
   artifact inspection.
 - Token efficiency: keep the detailed algorithm in `pre-flight.md`; keep
@@ -149,13 +168,22 @@ Findings:
   finding: Role files should not duplicate the algorithm because Team Lead
   already points to SKILL.md and pre-flight.
   disposition: Addressed by keeping role files out of scope.
+- source: brainstormer
+  severity: material
+  location: Intent and Proposed Change
+  finding: The original design did not explicitly say the operator should never
+  have to remember `new branch`; that could let an implementation hide the fix
+  behind a magic phrase.
+  disposition: Addressed by adding AC-81-5, updating the trigger description,
+  and adding pressure test 5.
 
 Adversarial review status: findings dispositioned.
 
 Clean pass rationale: The revised design has falsifiable RED/GREEN cases,
 preserves Team Lead ownership, keeps detailed procedure text in the supporting
 reference, and does not weaken Gate 1, dirty-worktree, or conflicting-issue
-halts.
+halts. The feedback delta makes automatic branch preparation an explicit
+requirement rather than an optional operator command path.
 
 ## Verification
 
