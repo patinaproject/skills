@@ -2,20 +2,17 @@
 
 ## [1.4.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.2...patinaproject-skills-v1.4.0) (2026-05-15)
 
-
 ### Features
 
 * [#87](https://github.com/patinaproject/skills/issues/87) simplify scaffold PR template ([#88](https://github.com/patinaproject/skills/issues/88)) ([f8826b3](https://github.com/patinaproject/skills/commit/f8826b3f1d282092da65b5ef54490836b6fe23d6))
 
 ## [1.3.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.1...patinaproject-skills-v1.3.2) (2026-05-15)
 
-
 ### Bug Fixes
 
 * [#81](https://github.com/patinaproject/skills/issues/81) auto-prepare superteam issue branches ([#83](https://github.com/patinaproject/skills/issues/83)) ([e942778](https://github.com/patinaproject/skills/commit/e942778b1128651f1dfc98d1371d3c3709664d3f))
 
 ## [1.3.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.0...patinaproject-skills-v1.3.1) (2026-05-15)
-
 
 ### Bug Fixes
 
