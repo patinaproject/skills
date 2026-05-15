@@ -75,6 +75,14 @@ resolve the thread through GitHub before reporting finish-ready. If the host
 does not expose thread resolution, or resolution fails, `Finisher` must report a
 blocker that names the unresolved thread and the missing or failed capability.
 
+`Finisher` must not declare thread resolution unavailable until it has checked
+the repo-authorized GitHub surfaces available in the current runtime. The
+resolution capability check should be deterministic and explicit: inspect the
+connected GitHub app or plugin surface first when available, then fall back to
+`gh`/GraphQL if authenticated and permitted in the repository workflow. A
+blocked report must name the surfaces checked, the exact missing or failed
+capability, and the unresolved thread identifiers.
+
 ### R4: Latest-head verification before resolution
 
 Before resolving a thread, `Finisher` must verify that the current branch head
@@ -85,10 +93,16 @@ addressed unless the latest head evidence still supports the disposition.
 ### R5: Durable finish report includes unresolved thread closure state
 
 The `Finisher` completion/status report and any durable wakeup payload must
-surface review-thread closure state separately enough for an operator to know
-whether unresolved threads remain. At minimum, finish reports should include a
-count of unresolved review threads that still block completion or appear in
-`pending_signals[]`.
+surface review-thread closure state as first-class durable state, not only as
+prose. The report must include `review_thread_closure_state` and
+`unresolved_review_thread_count` or equivalent mandatory fields. Any unresolved
+review thread that blocks completion must also appear in `pending_signals[]`
+with enough identity for `Finisher` to resume from visible state.
+
+`completion_gate=passed` is illegal while any review thread tied to the latest
+head remains unresolved unless that thread has been classified `non_blocking`
+with evidence, routed and returned through the required teammate path, or
+reported as an explicit blocker.
 
 ### R6: Preserve issue #64 ownership and routing
 
@@ -142,13 +156,14 @@ closure, and checks/status inventories.
   explicitly separates review-thread closure from remediation and blocks
   completion on addressed-but-unresolved threads.
 - Update the `Finisher` completion/status report fields or field descriptions
-  so unresolved review-thread closure state is visible in completion and wakeup
-  handoffs.
+  so unresolved review-thread closure state is visible as durable fields in
+  completion and wakeup handoffs.
 - Update both host-specific Finisher role files:
   `skills/superteam/agents/finisher.openai.yaml` and
   `skills/superteam/.claude/agents/finisher.md`.
-- Update `skills/superteam/pre-flight.md` if finish substate vocabulary needs a
-  durable unresolved-thread signal for resume detection.
+- Update `skills/superteam/pre-flight.md` so finish substate collection includes
+  unresolved review-thread closure state and cannot resume to `ready` from stale
+  feedback/check evidence while addressed threads remain unresolved.
 - Update `skills/superteam/routing-table.md` only if the finish-phase routing
   text needs to name review-thread closure explicitly.
 
@@ -170,8 +185,10 @@ closure, and checks/status inventories.
    addressed thread or reports blocked/monitoring if resolution is unavailable.
 2. RED: A PR has an addressed thread, but the GitHub connector cannot resolve
    review threads. A naive implementation reports ready because the code fix is
-   present. GREEN: the unresolved thread appears in `pending_signals[]` and
-   completion language is withheld.
+   present. GREEN: `Finisher` checks the connected GitHub surface and then
+   repo-authorized `gh`/GraphQL where available; if resolution is still
+   unavailable or fails, the unresolved thread appears in `pending_signals[]`
+   and completion language is withheld.
 3. RED: A stale thread points at code removed by the latest head. A broad
    implementation tries to resolve it as "addressed" without evidence. GREEN:
    `Finisher` records a non-blocking stale/not-applicable classification with
@@ -184,6 +201,11 @@ closure, and checks/status inventories.
    evidence is reused. GREEN: the latest-head gate refreshes feedback,
    review-thread closure, and checks/status inventories before any completion
    handoff.
+6. RED: A later `/superteam` resume sees green checks and old feedback counts
+   but no durable unresolved-thread signal. A shallow implementation reports
+   ready. GREEN: pre-flight records unresolved review-thread closure state in
+   finish substate signals or explicit fields, and `Finisher` resumes the gate
+   instead of reporting ready.
 
 ## Workflow-Contract Considerations
 
@@ -193,7 +215,8 @@ This changes `skills/superteam/**` workflow-contract surfaces, so
 - RED/GREEN baseline obligations: the pressure tests name the unsafe baseline
   and the expected corrected behavior.
 - Rationalization resistance: the design blocks "fixed in code", "CI is
-  green", and "thread resolution is not exposed" as completion shortcuts.
+  green", "thread resolution is not exposed", and "pre-flight already saw ready
+  state" as completion shortcuts.
 - Red flags: completion language while addressed review threads remain
   unresolved; resolving stale or requirement-bearing threads without evidence or
   routing; host parity drift between Codex and Claude Code Finisher prompts.
@@ -203,7 +226,51 @@ This changes `skills/superteam/**` workflow-contract surfaces, so
   resolution, and completion gating; requirement-bearing feedback still routes
   through `Brainstormer`, `Planner`, and `Executor`.
 - Stage-gate bypass paths: thread resolution cannot bypass Gate 1, the approved
-  plan, local review, or the latest-head checks/statuses gate.
+  plan, local review, durable pre-flight resume state, or the latest-head
+  checks/statuses gate.
+
+## Adversarial Review
+
+Reviewer context: fresh subagent.
+
+Findings:
+
+- source: adversarial-review
+  severity: high
+  location: R5
+  finding: Durable thread-closure state was too vague and could let an
+  implementer hide addressed-but-unresolved threads in prose while preserving
+  the old feedback counts.
+  disposition: Addressed by requiring first-class durable
+  `review_thread_closure_state` and `unresolved_review_thread_count` or
+  equivalent mandatory fields, plus pending-signal entries for unresolved
+  blockers.
+- source: adversarial-review
+  severity: medium
+  location: R3
+  finding: The design allowed `Finisher` to report missing thread-resolution
+  capability without first checking other repo-authorized GitHub surfaces such
+  as `gh`/GraphQL.
+  disposition: Addressed by adding a deterministic capability check and
+  requiring blocked reports to name checked surfaces, missing or failed
+  capability, and thread identifiers.
+- source: adversarial-review
+  severity: medium
+  location: Proposed Contract Changes
+  finding: The pre-flight update was conditional, but durable resume detection
+  is mandatory for this issue.
+  disposition: Addressed by making pre-flight unresolved review-thread closure
+  state a required contract surface and adding pressure test 6.
+
+Adversarial review status: findings dispositioned.
+
+Clean pass rationale: The revised design has falsifiable RED/GREEN cases for
+code-fixed-but-unresolved threads, missing resolution capability, stale threads,
+requirement-bearing review feedback, new pushes, and fresh-session resume. It
+preserves Finisher ownership for external feedback and thread resolution,
+preserves spec-first routing for requirement changes, requires durable
+completion/report/pre-flight state, and rejects green CI or old ready state as
+proof of thread closure.
 
 ## Verification
 
