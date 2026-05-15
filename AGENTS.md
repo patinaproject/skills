@@ -165,9 +165,10 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-When an issue defines acceptance criteria, include an `Acceptance Criteria` section in the
-PR description.
+When linked issues define acceptance criteria, use the PR template's
+`Coverage and risks` section as the single AC, evidence, and risk summary.
 
-- Use one `### AC-<issue>-<n>` heading per relevant AC
-- Put a short outcome summary directly under each heading
-- Put verification steps under the AC they validate
+- Put one table row per relevant `AC-<issue>-<n>` in `Coverage and risks`
+- Add prose only when it changes reviewer judgment
+- Put operator-owned manual verification decisions in `Testing steps`
+- Put only pre-merge operational chores in `Do before merging`
