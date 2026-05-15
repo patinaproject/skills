@@ -30,6 +30,8 @@ supporting workflow contracts for this skill, not separate installable skills.
 - Existing issue edit: follow `workflows/edit-issue.md`.
 - Start issue work: follow `workflows/new-branch.md`.
 - Milestone changelog: follow `workflows/write-changelog.md`.
+- PR comments: follow `workflows/pr-comments.md` before replying to,
+  resolving, or reporting PR review feedback handled.
 - Pull request: read `.github/pull_request_template.md`, use the repo's PR
   title format, and include acceptance-criteria verification when the issue
   defines acceptance criteria.
