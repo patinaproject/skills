@@ -371,7 +371,7 @@ The gate has three required inventories:
 2. `review_thread_closure_inventory`: review-thread resolution state for every unresolved or recently addressed GitHub review thread tied to the latest head.
 3. `latest_head_check_status_inventory`: every reported check run, status context, required-check signal, mergeability signal, and optional check/status visible for the latest pushed head.
 
-Feedback inventory items are classified as `addressed`, `routed`, `open_actionable`, or `non_blocking`. Completion requires zero `open_actionable` items, zero `routed` items awaiting teammate return, and zero unresolved review threads that lack an evidence-backed `non_blocking`, `routed`, or `blocked` disposition.
+Feedback inventory items are classified as `addressed`, `routed`, `open_actionable`, or `non_blocking`. Completion requires zero `open_actionable` items, zero `routed` items awaiting teammate return, and zero unresolved review threads unless they have been resolved in GitHub or evidence-classified `non_blocking`. Routed items awaiting teammate return and blocked or unresolvable review threads prevent `completion_gate=passed`.
 
 Addressed is remediation evidence, not platform closure. A review thread is finish-complete only when `Finisher` has verified the latest head addresses it and resolved it in GitHub; classified it `non_blocking` with evidence that it is stale, duplicate, informational, optional, or not applicable to the latest head; routed requirement-bearing feedback through `Brainstormer`, then `Planner`, then `Executor`, and returned for a fresh latest-head sweep; or reported a blocker because it cannot be verified or resolved.
 
