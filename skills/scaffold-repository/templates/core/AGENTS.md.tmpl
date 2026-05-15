@@ -24,11 +24,14 @@ Use human-readable H1 titles inside those files:
 
 Format acceptance criteria IDs as `AC-<issue-number>-<integer>`, for example `AC-1-1`.
 
+When this repo uses the Superteam workflow, run `pnpm skills:install` before invoking Superteam. The script installs both `patinaproject/skills` and `obra/superpowers` through `npx skills`, which is the portable cross-runtime install path. Host marketplace plugin enablement may still be present, but it is not the only setup step.
+
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install local tooling and initialize Husky hooks.
 - `pnpm exec commitlint --edit <path>`: validate a commit message file against repo rules.
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`.
+- `pnpm skills:install`: install the Patina Project skills and Superpowers skills required for Superteam-oriented workflows.
 - `.husky/commit-msg <path>`: run commit-message validation through the active Git hook.
 - `.husky/pre-commit`: run `lint-staged`, which invokes `markdownlint-cli2` on staged `*.md`.
 

@@ -13,7 +13,29 @@
 
 ## Installation
 
-`{{repo}}` ships as a Claude Code + Codex plugin. Other supported editors read the repository-level files this plugin emits (`AGENTS.md`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly – those tools require no additional plugin install. Pick the section for your tool.
+Use the portable `npx skills` path first when you want the same setup across
+agent runtimes:
+
+```bash
+pnpm skills:install
+```
+
+Equivalent direct commands:
+
+```bash
+npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills -y
+npm_config_ignore_scripts=true npx skills@1.5.6 add obra/superpowers -y
+```
+
+Superteam-capable workflows need both sources: `patinaproject/skills` provides
+the Patina Project workflow skills, and `obra/superpowers` provides the
+supporting execution and review skills.
+
+Host marketplace installs are still available where supported. Other supported
+editors read the repository-level files this plugin emits (`AGENTS.md`,
+`.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`) directly;
+those tools require no additional plugin install. Pick the section for your
+tool.
 
 ### Claude Code
 
