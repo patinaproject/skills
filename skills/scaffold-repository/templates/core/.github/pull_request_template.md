@@ -17,27 +17,29 @@
 
 ## Linked issue
 
-- `Closes #<issue>` when this PR is intended to complete the issue
-- Otherwise: `Related to #<issue>` plus a short explanation of why this PR does not close it yet
-- `None` when no issue applies
+- `Closes #<issue>` for each issue this PR completes.
+- `Related to #<issue>` / `Blocks #<issue>` / `Partially satisfies #<issue>`
+  for each additional issue, with a short explanation when the relationship is
+  not obvious.
+- `None` when no issue applies.
 
 ## What changed
 
-Context: <prior PR, prior QA pass, or follow-up issue this PR builds on, or `standalone — <reason>` when there is none>
+Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
 
-- <change> — <why>
+- <change> - <why>
 
 <!--
-  The rendered `Context:` line and `- <change> — <why>` bullet shape are the
+  The rendered `Context:` line and `- <change> - <why>` bullet shape are the
   structural placeholders this section requires. Replace `<...>` with actual
   values; do not delete the `Context:` line. When this PR has no prior
-  context, write `Context: standalone — <reason>` (e.g.
-  `Context: standalone — first pass on the new lint rule`). One bullet per
-  change; the `— <why>` half states the rationale (user-visible reason or
+  context, write `Context: standalone - <reason>` (e.g.
+  `Context: standalone - first pass on the new lint rule`). One bullet per
+  change; the `- <why>` half states the rationale (user-visible reason or
   triggering observation), not a restatement of the change.
 
   Include this section only when PR-level operator steps that do not belong to
-  a specific AC must happen after review and before merge:
+  QA, coverage gaps, or pending CI must happen after review and before merge:
 
   ## Do before merging
 
@@ -50,78 +52,45 @@ Context: <prior PR, prior QA pass, or follow-up issue this PR builds on, or `sta
   steps.`
 -->
 
-## Test coverage
+## Coverage and risks
 
 Legend for status cells:
 
-- ✅ — required validation passed with no known relevant gap for this column.
-- ⚠️ — validation exists and is sufficient to merge with a known non-blocking gap documented under the AC.
-- ❌ — required validation is missing, failing, pending, or merge-blocked.
-- ➖ — not relevant to this AC.
+- PASS - required validation passed with no known relevant gap.
+- WARN - sufficient to merge with a known non-blocking gap in Risks.
+- BLOCKED - missing, failing, pending, or merge-blocking.
+- N/A - not relevant to this AC.
 
-The `AC` column references the acceptance-criteria IDs from the linked issue, in `AC-<issue>-<n>` form.
+The `AC` column references acceptance-criteria IDs from linked issues in
+`AC-<issue>-<n>` form.
 
 <!--
   When showing a partial example outside a PR body, label the whole example as
-  an excerpt before the first omitted section or table. Actual PR bodies must
-  not omit relevant AC headings.
-
-  Include one matrix row per relevant AC, then one subsection per AC with only
-  tester-useful coverage context: what was validated, where it ran, evidence,
-  known gaps or caveats, and whether manual testing is still needed. Keep the
-  `Unit` column, then add one column per supported platform affected by this
-  PR. Each cell summarizes the required-validation state for that AC and
-  column. Use only these symbols in status cells:
-  ✅ = required validation passed, with no known relevant gap for this column
-  ⚠️ = validation exists and is sufficient to merge, with a known non-blocking
-       gap documented under this AC
-  ❌ = required validation is missing, failing, pending, or blocked by a
-       merge-blocking gap
-  ➖ = not relevant to this AC
-
-  Use `➖` only when that verification type is not relevant to the AC. If an AC
-  includes evidence or a gap that clearly maps to a matrix column, that cell
-  must not be `➖`. If a known non-blocking gap remains after sufficient
-  validation, use `⚠️` and document the gap under the AC in prose. If required
-  validation is missing, failing, pending, blocked by an unresolved concern, or
-  otherwise cannot yet be trusted for merge, use `❌` and document the gap under
-  the AC in prose. Do not use checkboxes in this section; tester actions belong
-  under `## Testing steps`.
+  an excerpt before the first omitted section or table. Actual PR bodies should
+  include one table row per relevant AC when linked issues define ACs. The
+  table is the primary AC summary; add prose only when it changes reviewer
+  judgment. Report coverage so humans and agents can identify remaining risk,
+  not as an inventory of every passed test command. Do not use checkboxes in
+  this section.
 -->
-| AC | Title | Unit | <Platform> |
+| AC | Requirement | Evidence | Status |
 | --- | --- | --- | --- |
-| AC-<issue>-<n> | <short title> | ➖ | ➖ |
+| AC-<issue>-<n> | <short title> | <command, job, manual source, or doc review> | PASS |
 
-### AC-<issue>-<n>
+<!-- Omit this subsection when there are no notable risks or gaps. -->
+### Risks
 
-Coverage summary focused on what helps a human tester understand the state of this AC.
-
-- Evidence: `<Platform> test: <command, workflow job, tool, or harness>, <environment>[, <link, verifier, or ISO>]`.
-- Gap: <missing, pending, or non-blocking validation, or `None`>.
-- Manual testing needed: <yes/no and why>.
-
-<!--
-  Repeat one subsection per relevant AC. Keep this section evidence-only and
-  checkbox-free. Include only information that helps a reviewer or tester
-  understand coverage, gaps, and whether manual exercise is still needed.
--->
-
-<!--
-  Deferred or out-of-scope ACs still get a subsection so reviewers can see why
-  no testing is reported for them:
-
-  ### AC-<issue>-<n>
-
-  Deferred to `<repo-or-follow-up>`.
--->
+- <warning, missing coverage, merge blocker, manual-only validation, deferred
+  check, or caveat>
 
 ## Testing steps
 
 <!--
-  Add concrete tester actions here. Use checkboxes only in this section or in
-  `## Do before merging`. Steps should cover any `❌` or `⚠️` gaps called out
-  in `## Test coverage` when a human can close or evaluate the gap. If no
-  manual testing is needed, include one checked row explaining why.
+  List every operator-owned verification step here in the order the operator
+  should perform or inspect it. Use checkboxes for pass/fail verification
+  decisions or outcomes, not for every individual UI action. Anything the
+  operator needs to see or manually verify belongs here. If no manual testing is
+  needed, include one checked row explaining why.
 -->
 
-- [ ] <imperative testing step and expected result>
+- [ ] Verify <observable outcome> after <minimal action context>.

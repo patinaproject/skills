@@ -70,7 +70,7 @@ The `autorelease: pending` and `autorelease: tagged` labels are reserved for Rel
 
 This repo ships canonical templates for issues and pull requests. Agents must use them – do not invent parallel structure.
 
-- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`. The PR body must use the template's section headings in the order the template defines, even when the body is passed inline via `--body`. Include `Do before merging` only when work-specific operator steps exist; when present, it belongs between `What changed` and `Test coverage`.
+- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`. The PR body must use the template's section headings in the order the template defines, even when the body is passed inline via `--body`. Include `Do before merging` only when work-specific operator steps exist; when present, it belongs between `What changed` and `Coverage and risks`.
 - Issues: `.github/ISSUE_TEMPLATE/bug_report.md` and `.github/ISSUE_TEMPLATE/feature_request.md`. Pick the one that matches the report and reproduce its sections in order.
 
 Recommended `gh` patterns:
@@ -78,7 +78,7 @@ Recommended `gh` patterns:
 - PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered body must already follow the template. If you pass `--body` inline, copy every template section name and order verbatim before filling them in.
 - Issues: `gh issue create --template bug_report.md` or `--template feature_request.md` lets `gh` start from the canonical file. If you pass `--body` inline, mirror the template's headings the same way.
 
-Do not invent alternative section names when the template uses different ones – extend an existing section instead, or open a follow-up to update the template itself. The PR-body acceptance-criteria rules under [Commit & Pull Request Guidelines](#commit--pull-request-guidelines) are a refinement of the template's `Test coverage` and `Testing steps` sections, not a replacement for them.
+Do not invent alternative section names when the template uses different ones – extend an existing section instead, or open a follow-up to update the template itself. The PR-body acceptance-criteria rules under [Commit & Pull Request Guidelines](#commit--pull-request-guidelines) are a refinement of the template's `Coverage and risks` and `Testing steps` sections, not a replacement for them.
 
 ## GitHub Actions pinning
 
@@ -114,7 +114,7 @@ Pick the commit type by **path**, not by file extension or self-judged "intent".
 **Product-surface globs:**
 
 - `skills/**`
-- `skills/bootstrap/templates/**`
+- `skills/scaffold-repository/templates/**`
 - `.claude-plugin/**`, `.codex-plugin/**`
 - `.cursor/**`, `.windsurfrules`, `.github/copilot-instructions.md`
 - `.github/workflows/**`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/LABELS.md`
@@ -139,7 +139,7 @@ Changes that should produce a release must not use non-bumping types such as `do
 |-----------------|---------|
 | "It's just Markdown." | Markdown on `skills/**`, plugin manifests, or agent-instruction surfaces is the shipped product. Type by path, not by file extension. |
 | "I'm only aligning wording with the source of truth." | If the source of truth is itself a product surface (skill, template, agent instruction), wording IS behavior. Use `feat:`. |
-| "It's just a template change." | Templates under `skills/bootstrap/templates/**` ship to every bootstrapped repo on the next realignment. They are product. Use `feat:` / `fix:`. |
+| "It's just a template change." | Templates under `skills/scaffold-repository/templates/**` ship to every scaffolded repo on the next realignment. They are product. Use `feat:` / `fix:`. |
 | "I'm only adding a non-goal or an example to a skill." | Examples and non-goals on a `SKILL.md` change how the skill is interpreted by agents. Product. `feat:`. |
 | "I'm fixing a typo in a skill body." | Path-only rule: any edit inside `skills/**`, `.claude-plugin/**`, `.codex-plugin/**`, `.cursor/**`, `.windsurfrules`, or `.github/copilot-instructions.md` is `fix:` when correcting wrong shipped content and `feat:` when adding or changing shipped content. Do not assess "whether it affects how the skill is read" – the path test already settled it. `chore:` is only available when the diff touches zero product-surface globs. |
 | "It's a plugin manifest version bump." | Release-please owns version bumps under `chore: release X.Y.Z`. Hand-editing a manifest version outside that flow is a `fix:` (lockstep correction) or a release-PR commit, never `docs:`. Other manifest edits (description, homepage, keywords) are `feat:` because they change marketplace-visible product. |
@@ -166,19 +166,19 @@ The verb "standardize" combined with a diff under `skills/**` and `.codex-plugin
 
 #### Round-trip discipline
 
-On this repo the canonical "Commit type selection" section is shipped through `skills/bootstrap/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `bootstrap` skill in realignment mode. Mistyped commits silently suppress releases – see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping. The AC-54-7 parity grep (a one-liner that checks every per-tool surface for the verbatim glob list) is the verification artifact.
+On this repo the canonical "Commit type selection" section is shipped through `skills/scaffold-repository/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `scaffold-repository` skill in realignment mode. Mistyped commits silently suppress releases – see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping. The AC-54-7 parity grep (a one-liner that checks every per-tool surface for the verbatim glob list) is the verification artifact.
 
-Pull requests should include linked issue (`None` when no issue applies), what changed, test coverage matrix, and acceptance-criteria outcomes. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
+Pull requests should include linked issue references (`None` when no issue applies), what changed, a `Coverage and risks` table, and `Testing steps` for operator-owned verification. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
 
 For squash-and-merge workflows, PR titles must exactly match the commit format. Use the final intended squash commit title as the PR title.
 
 GitHub issue titles are different: write them as plain-language summaries of the problem or request. Do not use conventional-commit prefixes like `docs:` or `feat:` in issue titles.
 
-When an issue defines acceptance criteria, include matching AC entries in the PR description's `Test coverage` section and put human tester actions in `Testing steps`.
+When an issue defines acceptance criteria, include matching AC rows in the PR description's `Coverage and risks` table and put human tester actions in `Testing steps`.
 
-- Use one `### AC-<issue>-<n>` heading per relevant AC inside `Test coverage`, with the heading containing only the AC ID.
-- Put only tester-useful coverage context under each AC: what was validated, where it ran, evidence, gaps or caveats, and whether manual testing is still needed.
-- Do not use checkboxes in `Test coverage`.
-- Use checkboxes for human tester actions only in `Testing steps`, and for pre-merge operator actions only in `Do before merging`.
-- Make `Testing steps` cover any `❌` or `⚠️` coverage gaps when a human can close or evaluate the gap.
-- If an AC is deferred or out of scope for the repo, say so under its `Test coverage` heading and do not add fake checkboxes.
+- Put AC coverage in the table. Add extra prose only when it gives reader-useful context that changes reviewer judgment.
+- Use `### Risks` at the bottom of `Coverage and risks` for warnings, missing coverage, merge-blocking gaps, manual-only validation, deferred checks, or caveats. Omit it when empty.
+- Do not use checkboxes in `Coverage and risks`.
+- Use checkboxes for operator-owned pass/fail verification outcomes only in `Testing steps`, and for pre-merge operator chores only in `Do before merging`.
+- Do not put a checkbox on every individual UI action. Anything the operator needs to see or manually verify belongs in `Testing steps`, in the order the operator should perform or inspect it.
+- If an AC is deferred or out of scope for the repo, report that in the coverage table or `### Risks`; do not add fake checkboxes.
