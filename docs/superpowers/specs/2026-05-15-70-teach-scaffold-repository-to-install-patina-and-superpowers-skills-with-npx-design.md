@@ -21,7 +21,7 @@ Use the existing scaffold templates as the product surface. The generated `READM
 Add a generated package script to `templates/core/package.json.tmpl`, tentatively named `skills:install`, that runs the two `npx skills` installs in sequence. This satisfies the helper-script/package-command portion without adding a custom shell script unless the implementation discovers quoting or portability problems in `package.json` scripts. The script should install:
 
 - Patina Project skills from `patinaproject/skills`
-- Superpowers skills from the official Superpowers source used by the existing project plugin setting
+- Superpowers skills from `obra/superpowers`, matching the Superteam prerequisite documentation
 
 The generated docs should show both the script form and the underlying direct commands, so users can recover if they are not using PNPM scripts yet.
 
