@@ -13,7 +13,7 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 3. **Inspect committed artifacts on the active branch.** Look for the design doc at the canonical specs path (`docs/superpowers/specs/YYYY-MM-DD-<issue>-<title>-design.md`) and the plan doc at the canonical plans path (`docs/superpowers/plans/YYYY-MM-DD-<issue>-<title>-plan.md`). Treat only committed state as authoritative.
 4. **Inspect branch state.** Resolve the current branch and its tracking remote; record divergence and uncommitted state for completeness, but do NOT use uncommitted state as the phase signal.
 5. **Inspect implementation and local review state.** Determine whether committed implementation work is present beyond the committed plan and whether local pre-publish review resolution is visible from committed artifacts, review notes, implementation commits, or PR state.
-6. **Inspect PR state.** Determine whether a PR exists for this branch on origin and, if so, whether it is open or merged. For finish-phase runs, collect latest-head `Finisher` substate signals: latest pushed head SHA, review-thread/comment/review-state inventory status, actionable bot feedback status, required-check state, check/status inventory state, mergeability signal, pending signals, and whether any routed feedback is awaiting teammate return.
+6. **Inspect PR state.** Determine whether a PR exists for this branch on origin and, if so, whether it is open or merged. For finish-phase runs, collect latest-head `Finisher` substate signals: latest pushed head SHA, review-thread/comment/review-state inventory status, review-thread closure state, unresolved review-thread count, actionable bot feedback status, required-check state, check/status inventory state, mergeability signal, pending signals, and whether any routed feedback is awaiting teammate return.
 7. **Derive the detected phase** per the phase derivation rules below.
 8. **Classify the operator prompt** per `routing-table.md` `## Prompt-classification heuristic`.
 9. **Probe execution-mode capability** per the `## Execution-mode capability detection` section below.
@@ -155,6 +155,8 @@ The pre-flight produces this record, which is the input to `routing-table.md`:
   finisher_substate_signals?,
   latest_pushed_sha?,
   latest_head_feedback_inventory_state?,
+  review_thread_closure_state?,
+  unresolved_review_thread_count?,
   unresolved_actionable_feedback_count?,
   routed_feedback_count?,
   required_check_state?,
@@ -174,11 +176,13 @@ Field value contracts:
 - `finisher_substate_signals`: `triage` | `monitoring` | `ready` | `blocked` | `merged`
   - `triage`: PR exists and latest-head feedback/check state has not yet been fully classified.
   - `monitoring`: no teammate action is currently needed, but checks/statuses or external signals are still pending for the latest head.
-  - `blocked`: actionable feedback, routed feedback awaiting teammate return, required-check failures, unexplained non-passing optional checks/statuses, ambiguous check/status discovery, or missing latest-head evidence prevents completion.
-  - `ready`: the latest-head PR completion gate has passed for the latest pushed head.
+  - `blocked`: actionable feedback, unresolved review threads without an evidence-backed disposition, routed feedback awaiting teammate return, required-check failures, unexplained non-passing optional checks/statuses, ambiguous check/status discovery, ambiguous review-thread closure discovery, or missing latest-head evidence prevents completion.
+  - `ready`: the latest-head PR completion gate has passed for the latest pushed head, including review-thread closure state.
   - `merged`: the PR has merged after the latest-head gate passed or after an equivalent platform merge gate proved the same conditions.
 - `latest_pushed_sha`: latest pushed PR head SHA observed during pre-flight when `pr_state` is `open` or `merged`
 - `latest_head_feedback_inventory_state`: `unclassified` | `clear` | `open_actionable` | `routed` | `non_blocking_with_evidence` | `unknown`
+- `review_thread_closure_state`: `clear` | `unresolved` | `blocked` | `unknown`
+- `unresolved_review_thread_count`: integer count of review threads tied to the latest head that remain unresolved without a non-blocking, routed, or blocked disposition
 - `unresolved_actionable_feedback_count`: integer count of latest-head feedback items classified `open_actionable`
 - `routed_feedback_count`: integer count of routed feedback items awaiting teammate return
 - `required_check_state`: `passing` | `pending` | `failing` | `missing` | `unknown` | `not_applicable`

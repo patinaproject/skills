@@ -325,6 +325,8 @@ Artifact-producing teammate done reports must anchor on committed handoff state 
 - `latest_pushed_sha`: latest pushed head SHA used for the gate
 - `unresolved_actionable_feedback_count`: count of `open_actionable` latest-head feedback items
 - `routed_feedback_count`: count of routed feedback items awaiting teammate return
+- `review_thread_closure_state`: `clear` | `unresolved` | `blocked` | `unknown`
+- `unresolved_review_thread_count`: count of unresolved review threads still blocking completion
 - `required_check_state`: `passing` | `pending` | `failing` | `missing` | `unknown` | `not_applicable`
 - `check_status_inventory_state`: `passing` | `non_blocking_with_evidence` | `pending` | `failing` | `missing` | `unknown` | `stale`
 - `pending_signals[]`: concise names of checks, statuses, feedback items, or discovery gaps preventing completion
@@ -357,22 +359,27 @@ Before resolving comments tied to a prior branch state: verify current state mat
 
 `Finisher` owns PR feedback intake, check monitoring, PR replies, thread resolution where the host supports it, and the final latest-head PR completion gate. Requirement-bearing PR feedback still routes to `Brainstormer`, then `Planner`, then `Executor`; `Finisher` resumes only after that path returns and a fresh latest-head feedback and checks/status sweep passes.
 
+Addressed code is not the same as resolved GitHub thread state. Before resolving a review thread, `Finisher` must verify that the current branch head matches the PR latest head and that the latest head contains the fix or disposition for that thread. If a thread is requirement-bearing, `Finisher` routes it through `Brainstormer`, then `Planner`, then `Executor` before resuming a fresh latest-head sweep.
+
 ## Latest-head PR completion gate
 
 `Finisher` must run the latest-head PR completion gate after PR creation, after every push, on finish-phase resume, after CI status changes, and immediately before any completion-style handoff. The gate is bound to the latest pushed head SHA. If the head changes during remediation or monitoring, all PR feedback and check/status signals must be refreshed against the new head before completion.
 
-The gate has two required inventories:
+The gate has three required inventories:
 
 1. `latest_head_feedback_inventory`: unresolved review threads, review comments, pull request conversation comments, requested-changes review states, and bot comments or annotations that represent actionable review feedback.
-2. `latest_head_check_status_inventory`: every reported check run, status context, required-check signal, mergeability signal, and optional check/status visible for the latest pushed head.
+2. `review_thread_closure_inventory`: review-thread resolution state for every unresolved or recently addressed GitHub review thread tied to the latest head.
+3. `latest_head_check_status_inventory`: every reported check run, status context, required-check signal, mergeability signal, and optional check/status visible for the latest pushed head.
 
-Feedback inventory items are classified as `addressed`, `routed`, `open_actionable`, or `non_blocking`. Completion requires zero `open_actionable` items and zero `routed` items awaiting teammate return.
+Feedback inventory items are classified as `addressed`, `routed`, `open_actionable`, or `non_blocking`. Completion requires zero `open_actionable` items, zero `routed` items awaiting teammate return, and zero unresolved review threads that lack an evidence-backed `non_blocking`, `routed`, or `blocked` disposition.
 
-A PR feedback item is handled only when the workflow has addressed it in code, tests, docs, or workflow contracts and verified the latest head includes the fix; replied to or resolved the thread with a concrete explanation accepted by the classification; routed requirement-bearing feedback through `Brainstormer`, then `Planner`, then `Executor`, and returned to `Finisher` for a fresh latest-head sweep; or classified it as `non_blocking` with evidence that it is stale, duplicate, informational, optional, or not applicable to the latest head. Silence, elapsed time, local intent, PR creation, and green CI are never proof that feedback was handled.
+Addressed is remediation evidence, not platform closure. A review thread is finish-complete only when `Finisher` has verified the latest head addresses it and resolved it in GitHub; classified it `non_blocking` with evidence that it is stale, duplicate, informational, optional, or not applicable to the latest head; routed requirement-bearing feedback through `Brainstormer`, then `Planner`, then `Executor`, and returned for a fresh latest-head sweep; or reported a blocker because it cannot be verified or resolved.
+
+When an active GitHub surface supports review-thread resolution, `Finisher` must resolve verified addressed threads before reporting finish-ready. `Finisher` must not declare thread resolution unavailable until it has checked repo-authorized GitHub surfaces available in the current runtime, including the connected GitHub app or plugin surface when available and `gh`/GraphQL when authenticated and permitted. A blocked report must name the surfaces checked, the missing or failed capability, and the unresolved thread identifiers.
 
 Check/status inventory items must be passing, skipped, neutral, or `non_blocking` with surfaced evidence before completion. Pending, queued, missing, failing, cancelled, timed-out, stale, unknown, or unenumerable required-check state blocks completion. Optional non-passing checks/statuses also block completion unless `Finisher` records and surfaces evidence that they are non-blocking for the latest head.
 
-Completion language is allowed only after the latest-head PR completion gate passes. Otherwise `Finisher` must report `monitoring` or `blocked` with concise counts for unresolved actionable feedback, routed feedback awaiting teammate return, non-passing or unknown check/status signals, and the latest pushed head SHA.
+Completion language is allowed only after the latest-head PR completion gate passes. Otherwise `Finisher` must report `monitoring` or `blocked` with concise counts for unresolved actionable feedback, unresolved review threads, routed feedback awaiting teammate return, non-passing or unknown check/status signals, and the latest pushed head SHA.
 
 ## Rationalization table
 
@@ -390,6 +397,9 @@ Completion language is allowed only after the latest-head PR completion gate pas
 | "A direct operator requirement change during finish is not PR feedback, so Finisher can handle it." | Requirement-bearing deltas route spec-first regardless of source. PR feedback, human-test feedback, and direct operator prompts all return to `Brainstormer`, then `Planner`, then `Executor` before `Finisher` ready/shutdown can resume. |
 | "The PR exists, so Superteam can report complete." | PR creation is not completion. `Finisher` must run the latest-head PR completion gate before completion language. |
 | "CI is green, so the review comments must be handled." | Green CI alone is not evidence that PR feedback was addressed. Latest-head feedback inventory must have zero `open_actionable` items and zero routed items awaiting teammate return. |
+| "The code changed, so the review thread is handled." | Addressed code is remediation evidence, not GitHub thread closure. `Finisher` must resolve the addressed thread, classify it non-blocking with evidence, route it, or report a blocker. |
+| "The connector cannot resolve review threads, so we can still report ready." | Missing thread-resolution capability is a blocker, not completion. `Finisher` must check repo-authorized GitHub surfaces and name the unresolved thread and missing or failed capability. |
+| "Pre-flight already saw green checks and no open actionable feedback." | Finish-ready also requires durable review-thread closure state. Stale feedback/check evidence cannot hide addressed-but-unresolved review threads. |
 | "One status snapshot was green before the last push." | Completion evidence is head-relative. Every new push invalidates older feedback/check snapshots and requires a fresh latest-head sweep. |
 | "The optional check is failing, but required checks passed." | Optional non-passing reported checks/statuses still block completion unless `Finisher` records and surfaces evidence that they are non-blocking for the latest head. |
 | "The check API was ambiguous, so assume it is fine." | Unknown, unenumerable, stale, missing, or ambiguous required-check state is not success. Report `monitoring` or `blocked` instead of complete. |
@@ -450,6 +460,10 @@ Completion language is allowed only after the latest-head PR completion gate pas
 - Reintroducing required `Loopback:` commit trailers or another hidden workflow-state marker.
 - Fresh-session resume from implementation work with no PR skipping `Reviewer` before `Finisher` publication when local review resolution is not visible.
 - `Finisher` reports complete while any latest-head feedback inventory item is `open_actionable` or `routed` awaiting teammate return.
+- `Finisher` reports complete while any addressed latest-head review thread remains unresolved in GitHub.
+- `Finisher` treats code remediation, green CI, elapsed time, silence, or local intent as proof that a GitHub review thread was resolved.
+- `Finisher` reports thread-resolution capability unavailable without checking repo-authorized GitHub surfaces and naming the failed or missing capability.
+- Fresh-session finish resume reports `ready` without durable review-thread closure state for the latest head.
 - `Finisher` reports complete while any latest-head required check/status is pending, queued, missing, failing, cancelled, timed out, stale, unknown, or unenumerable.
 - `Finisher` reports complete while an optional non-passing check/status lacks surfaced non-blocking evidence.
 - `Finisher` classifies PR feedback as handled based on silence, elapsed time, local intent, PR creation, or green CI.
