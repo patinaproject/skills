@@ -85,6 +85,10 @@ At the top of every `/superteam` invocation, before any teammate delegation, `Te
 Summary of the sequence:
 
 - Resolve the active issue (explicit `#<n>` in prompt, then branch `<n>-<slug>`, then operator).
+- When an explicit issue is supplied and the worktree is on the default branch,
+  detached `HEAD`, or an unborn branch, auto-switch to the issue branch before
+  artifact inspection. Normal issue-work prompts are enough; `new branch` is
+  not required.
 - Inspect committed artifacts on the branch (design doc, plan doc) at the canonical specs and plans paths.
 - Inspect PR state on origin (open / merged / absent).
 - Derive the detected phase per the rules below.
@@ -397,6 +401,8 @@ Completion language is allowed only after the latest-head PR completion gate pas
 | "The operator said 'go faster' — that's basically asking for Sonnet." | Ambiguous framing is NOT an operator override (R26, parallel to R14). Only canonical tokens (`model: opus`, `model: sonnet`, `model: haiku`, or `use <model>` / `with <model>`) override the per-role default. "Go faster" routes to the per-role default; for `Executor` that is already Sonnet. |
 | "Brainstormer's default is Opus, but the operator typed `model: sonnet`, so I'll keep Opus because the design needs reasoning." | Operator override always wins for the delegation it targets. `Team Lead` does not second-guess the operator's explicit token. Override scope is the next delegation only. |
 | "The operator is on the default branch on purpose; they clearly meant to start work here." | When the active issue resolves from the operator prompt and the current branch is the repository default branch, pre-flight MUST auto-switch to the per-issue branch before committed-artifact inspection. Operator intent is captured by the `#<n>` reference, not by the branch they happened to be on. Not even when the operator is the maintainer. Not even under deadline pressure. |
+| "The operator forgot to type `new branch`, so stay on detached HEAD or an unborn worktree." | `new branch` is not the trigger. An explicit issue in a normal Superteam prompt is enough. Detached `HEAD`, unborn branch, and default-branch states MUST auto-switch before committed-artifact inspection. |
+| "This non-default branch is not for the issue, but auto-switching is probably fine." | A conflicting non-default branch is not a brand-new worktree signal. Halt for disambiguation instead of silently replacing the operator's branch context. |
 | "Skipping the auto-switch saves a step; we can branch later." | Skipping authors Gate 1 artifacts on the wrong base and forces `Finisher` to rewrite history or push from the default branch. The rule is not optional. |
 | "Dirty working tree? I can stash and continue." | The `superteam` issue-branch procedure refuses on a dirty working tree. `superteam` halts with `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`. Pre-flight does NOT stash on the operator's behalf. |
 | "Rebase conflict on the existing issue branch is fine; I'll abort and try again." | The `superteam` issue-branch procedure forbids `git rebase --abort` on the operator's behalf. `superteam` halts and surfaces the conflict. |
@@ -454,6 +460,9 @@ Completion language is allowed only after the latest-head PR completion gate pas
 - Treating ambiguous "faster" / "inline-ish" / "forever" framing as an inline override.
 - Halting a non-execute route solely because execution-mode capability is unavailable.
 - `Team Lead` proceeding to committed-artifact inspection while the current branch is the repository default branch and the active issue was resolved from an explicit `#<n>` in the prompt.
+- `Team Lead` proceeding to committed-artifact inspection while the current branch is detached `HEAD` or unborn and the active issue was resolved from an explicit `#<n>` in the prompt.
+- `Team Lead` requiring the operator to type `new branch` before auto-switching from a default, detached, or unborn worktree state for an explicit issue.
+- `Team Lead` silently switching away from a conflicting non-default branch instead of halting for issue disambiguation.
 - `Team Lead` performing `git stash` or any auto-stash variant as part of the auto-switch path.
 - `Team Lead` running `git rebase --abort` after a rebase conflict on the existing issue branch.
 - `pre-flight.md` depending on an external branch workflow instead of the self-contained issue-branch procedure.
