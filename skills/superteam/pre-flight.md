@@ -65,11 +65,14 @@ Algorithm:
    - trim leading and trailing hyphens
    - prepend `<issue-number>-`
    - truncate the full string to 60 characters, preferring the previous hyphen boundary, then trim trailing hyphens
-7. Fetch `origin/<defaultBranch>`.
-8. If the branch does not exist locally, check out `-b <branch> origin/<defaultBranch>`.
-9. If the branch exists locally, check it out and rebase onto `origin/<defaultBranch>`.
-10. If rebase conflicts occur, halt with condition 7 and do not run `git rebase --abort`.
-11. Skip dependency installation; pre-flight needs branch state only. Re-run committed-artifact inspection on the new branch.
+7. Fetch `origin/<defaultBranch>` and probe `origin/<branch>`.
+8. If the branch exists locally, check it out and rebase onto `origin/<defaultBranch>`.
+9. If the branch does not exist locally but `origin/<branch>` exists, check out
+   `-b <branch> --track origin/<branch>`.
+10. If the branch does not exist locally or remotely, check out
+   `-b <branch> origin/<defaultBranch>`.
+11. If rebase conflicts occur, halt with condition 7 and do not run `git rebase --abort`.
+12. Skip dependency installation; pre-flight needs branch state only. Re-run committed-artifact inspection on the new branch.
 
 No-op on `<n>-<slug>` matching the issue, or sources 2/3. Mismatched `<n>`
 fires halt 3. Detached `HEAD`, unborn branch, and default branch states are not
