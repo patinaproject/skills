@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.1...patinaproject-skills-v1.3.2) (2026-05-15)
+
+
+### Bug Fixes
+
+* [#81](https://github.com/patinaproject/skills/issues/81) auto-prepare superteam issue branches ([#83](https://github.com/patinaproject/skills/issues/83)) ([e942778](https://github.com/patinaproject/skills/commit/e942778b1128651f1dfc98d1371d3c3709664d3f))
+
 ## [1.3.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.0...patinaproject-skills-v1.3.1) (2026-05-15)
 
 
