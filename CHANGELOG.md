@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.5.0...patinaproject-skills-v1.6.0) (2026-05-15)
+
+
+### Features
+
+* [#95](https://github.com/patinaproject/skills/issues/95) refine pr template coverage sections ([#96](https://github.com/patinaproject/skills/issues/96)) ([ce58b23](https://github.com/patinaproject/skills/commit/ce58b23502ed5cdeeb936d9618cb1845c5f0814f))
+
+
+### Bug Fixes
+
+* [#79](https://github.com/patinaproject/skills/issues/79) require review-thread closure before finish ([#91](https://github.com/patinaproject/skills/issues/91)) ([561be6c](https://github.com/patinaproject/skills/commit/561be6cde491f33ebdf5e8767be806ecff9b9666))
+
 ## [1.5.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.4.0...patinaproject-skills-v1.5.0) (2026-05-15)
 
 
