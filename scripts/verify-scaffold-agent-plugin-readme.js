@@ -17,6 +17,14 @@ const codexPluginTemplatePath = path.join(
   repoRoot,
   "skills/scaffold-repository/templates/agent-plugin/.codex-plugin/plugin.json.tmpl",
 );
+const corePackageTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/core/package.json.tmpl",
+);
+const coreAgentsTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/core/AGENTS.md.tmpl",
+);
 const skillContractPath = path.join(repoRoot, "skills/scaffold-repository/SKILL.md");
 const auditChecklistPath = path.join(repoRoot, "skills/scaffold-repository/audit-checklist.md");
 
@@ -75,6 +83,8 @@ function renderTemplate(template, replacements) {
 const template = fs.readFileSync(templatePath, "utf8");
 const skillTemplate = fs.readFileSync(skillTemplatePath, "utf8");
 const codexPluginTemplate = fs.readFileSync(codexPluginTemplatePath, "utf8");
+const corePackageTemplate = fs.readFileSync(corePackageTemplatePath, "utf8");
+const coreAgentsTemplate = fs.readFileSync(coreAgentsTemplatePath, "utf8");
 const skillContract = fs.readFileSync(skillContractPath, "utf8");
 const auditChecklist = fs.readFileSync(auditChecklistPath, "utf8");
 const rendered = renderTemplate(template, values);
@@ -85,6 +95,12 @@ const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
   "author-email": "test@example.com",
   "author-handle": "test-author",
 });
+const corePackage = JSON.parse(corePackageTemplate);
+const skillsInstallScript = corePackage.scripts?.["skills:install"];
+
+if (typeof skillsInstallScript !== "string") {
+  fail("core package template: expected scripts.skills:install to be a string");
+}
 
 assertNotIncludes(rendered, "{{", "rendered README");
 assertIncludes(rendered, "pnpm skills:install", "Portable skills install script");
@@ -123,6 +139,36 @@ assertIncludes(
 assertIncludes(skillContract, "skills:install", "Skill contract skills install script");
 assertIncludes(skillContract, "patinaproject/skills", "Skill contract Patina Project skills source");
 assertIncludes(skillContract, "obra/superpowers", "Skill contract Superpowers skills source");
+assertIncludes(
+  skillsInstallScript,
+  "npx skills@1.5.6 add patinaproject/skills",
+  "Core package template Patina Project skills install command",
+);
+assertIncludes(
+  skillsInstallScript,
+  "npx skills@1.5.6 add obra/superpowers",
+  "Core package template Superpowers skills install command",
+);
+assertIncludes(
+  coreAgentsTemplate,
+  "pnpm skills:install",
+  "Core AGENTS template skills install guidance",
+);
+assertIncludes(
+  coreAgentsTemplate,
+  "patinaproject/skills",
+  "Core AGENTS template Patina Project skills source",
+);
+assertIncludes(
+  coreAgentsTemplate,
+  "obra/superpowers",
+  "Core AGENTS template Superpowers skills source",
+);
+assertIncludes(
+  coreAgentsTemplate,
+  "Host marketplace plugin enablement may still be present, but it is not the only setup step.",
+  "Core AGENTS template marketplace-not-only guidance",
+);
 assertIncludes(
   auditChecklist,
   "skills/<primary-skill-name>/SKILL.md",
