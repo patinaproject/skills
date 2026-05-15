@@ -23,7 +23,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`; `lint-staged` block for `*.md` |
+| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`, `skills:install`; `lint-staged` block for `*.md` |
 | `pnpm-lock.yaml` | yes | present |
 | `scripts/check-plugin-versions.mjs` | yes | present; fails with non-zero exit on version drift |
 | `scripts/sync-plugin-versions.mjs` | yes | present; rewrites plugin manifests from `package.json` |
@@ -99,6 +99,9 @@ Detection: look for `docs/superpowers/`. When present, verify both subdirectorie
 |---|---|---|
 | `docs/superpowers/specs/` | yes | directory exists (may contain only `.gitkeep`) |
 | `docs/superpowers/plans/` | yes | directory exists (may contain only `.gitkeep`) |
+| `package.json` | yes | `scripts.skills:install` exists and installs both `patinaproject/skills` and `obra/superpowers` through `npx skills`; if `docs/superpowers/` already exists and this is absent, classify as `stale` |
+| `AGENTS.md` | yes | mentions `pnpm skills:install` as the Superteam readiness step; if `docs/superpowers/` already exists and this is absent, classify as `stale` |
+| Agent-plugin install docs | agent plugin only | generated install docs mention both `patinaproject/skills` and `obra/superpowers`; if `docs/superpowers/` already exists and either source is absent, classify as `stale` |
 
 ## Area 7 – GitHub repository merge settings
 

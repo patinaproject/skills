@@ -22,7 +22,7 @@ Behavior:
 
 - Emit the full [core baseline](#core-baseline) tree.
 - If the user answers yes to "Is this an AI agent plugin?", additionally emit the [agent-plugin surfaces](#agent-plugin-surfaces).
-- If the user answers yes to "Use the superteam workflow?" (the Superpowers-based design + plan flow), additionally emit the `docs/superpowers/specs/.gitkeep` + `docs/superpowers/plans/.gitkeep` scaffolding.
+- If the user answers yes to "Use the superteam workflow?" (the Superpowers-based design + plan flow), additionally emit the `docs/superpowers/specs/.gitkeep` + `docs/superpowers/plans/.gitkeep` scaffolding, generated docs that explain `pnpm skills:install`, and the `skills:install` package script that installs both `patinaproject/skills` and `obra/superpowers` through `npx skills`.
 - Run `pnpm install` to generate `pnpm-lock.yaml` and wire Husky.
 - Leave all emitted files staged but uncommitted so the user owns the first commit.
 
@@ -59,7 +59,7 @@ The skill collects the following inputs. Author name, author email, and the secu
 | `<repo-description>` | – | one-line description |
 | `<visibility>` | public | public \| private |
 | `<is-agent-plugin>` | no | yes emits plugin/config surfaces for every supported AI coding tool |
-| `<use-superteam>` | no | yes emits `docs/superpowers/` skeleton |
+| `<use-superteam>` | no | yes emits `docs/superpowers/` skeleton plus the portable Superteam skills install path |
 | `<primary-skill-name>` | – | required when `<is-agent-plugin>` is yes; scaffolds `skills/<name>/SKILL.md` starter |
 | `<codeowner>` | `@<owner>` | written into `.github/CODEOWNERS` |
 | `<security-contact>` | from `git config user.email` | public repos only; written into `SECURITY.md` |
@@ -136,7 +136,7 @@ Historical note: an earlier revision of the supplement also added a `notify-pati
 
 Detection is done at scaffold time from `git remote get-url origin` (or the configured `<owner>` prompt). When generating the base workflow for non-Patina-Project repos, do not add `if: github.repository_owner == 'patinaproject'` gates; emit the clean workflow without any Patina-Project-specific plumbing.
 
-## Plugin enablement
+## Plugin enablement and skill installation
 
 The emitted `.claude/settings.json` enables the canonical Patina Project plugins at the project level:
 
@@ -149,7 +149,13 @@ The emitted `.claude/settings.json` enables the canonical Patina Project plugins
 }
 ```
 
-The skill does not recommend running any commands postinstall. Plugin enablement is declarative in the emitted settings; nothing else is printed or documented as a required follow-up.
+This declarative host enablement remains available for Claude Code hosts that
+understand project `enabledPlugins`. It is not the portable setup path by
+itself. Scaffolded repos also emit `pnpm skills:install`, which runs
+`npm_config_ignore_scripts=true npx skills@1.5.6 add patinaproject/skills -y`
+and `npm_config_ignore_scripts=true npx skills@1.5.6 add obra/superpowers -y`
+so contributors can install the required Patina Project and Superpowers skills
+across runtimes.
 
 ## Conventions encoded
 
@@ -161,7 +167,7 @@ The skill does not recommend running any commands postinstall. Plugin enablement
   operator-owned pass/fail verification.
 - **Issue titles**: plain-language, no commit-style prefix.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
-- **PNPM**: `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `lint:md` script.
+- **PNPM**: `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `lint:md` script, and `skills:install` script for the portable Superteam skills install path.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
 - **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).
