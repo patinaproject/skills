@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.4.0...patinaproject-skills-v1.5.0) (2026-05-15)
+
+
+### Features
+
+* [#60](https://github.com/patinaproject/skills/issues/60) add PR comment workflow ([#90](https://github.com/patinaproject/skills/issues/90)) ([153f256](https://github.com/patinaproject/skills/commit/153f256c67f1c60f301f410ace50eb813d54bc7e))
+* [#70](https://github.com/patinaproject/skills/issues/70) add scaffold skills install path ([#92](https://github.com/patinaproject/skills/issues/92)) ([a70d23c](https://github.com/patinaproject/skills/commit/a70d23c042724eb5bcc51c7e1955aee165610f28))
+
 ## [1.4.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.2...patinaproject-skills-v1.4.0) (2026-05-15)
 
 ### Features
