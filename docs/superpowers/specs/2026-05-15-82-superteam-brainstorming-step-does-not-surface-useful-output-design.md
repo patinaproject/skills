@@ -10,7 +10,8 @@ tradeoffs, risks, and open questions.
 
 This is a workflow-contract change. The durable artifact still remains the
 source of truth, but Team Lead must carry Brainstormer's user-facing
-brainstorming output into the Gate 1 approval request.
+brainstorming output into the Gate 1 approval request in a conversational,
+low-noise form.
 
 ## Skill guidance
 
@@ -40,10 +41,18 @@ not guarantee that the default brainstorming output reaches the user. A concise
 intent summary can compress away the useful design exploration: alternatives,
 why the chosen direction won, tradeoffs, risks, and unresolved questions.
 
+The first Gate 1 revision for this issue also exposed a second failure mode:
+even when all required evidence is technically present, a rigid approval packet
+can drown the operator in labels, lists, and workflow noise. The contract should
+make clear that required evidence is not a license to dump every field into
+chat. Team Lead should tell the operator what matters, why it matters, and what
+decision is needed.
+
 ## Goals
 
 - Require Brainstormer to hand off a concise `brainstorming_output` summary.
 - Require Team Lead to include that output in the Gate 1 approval request.
+- Make the Gate 1 handoff conversational and operator-useful by default.
 - Preserve the durable design artifact as the authoritative review target.
 - Keep the output natural and concise; avoid forcing raw transcripts or bulky
   status-report shells into chat.
@@ -83,11 +92,18 @@ a vague fallback summary.
 
 ### AC-82-4
 
+Given Team Lead presents Gate 1 for approval, when required evidence is included
+in the operator-facing message, then it is rendered as a concise conversational
+handoff focused on the approval decision, not as a verbose field dump or fixed
+status-report template.
+
+### AC-82-5
+
 Given a teammate or future maintainer reads the Superteam role contracts, when
 they inspect both Claude Code and Codex Brainstormer surfaces, then both surfaces
 name the `brainstorming_output` handoff obligation consistently.
 
-### AC-82-5
+### AC-82-6
 
 Given the workflow-contract change is implemented, when verification runs, then
 the Superteam contract check and Markdown lint pass.
@@ -101,6 +117,10 @@ Update `skills/superteam/SKILL.md` in two places:
 - Brainstormer done-report contract: add a `brainstorming_output` field with a
   tight definition: problem framing, options or directions considered,
   recommendation, tradeoffs, and open risks or questions.
+- Gate 1 rendering guidance: require Team Lead to render approval requests as
+  natural, decision-focused conversation. Required evidence must be present, but
+  implementation should avoid field labels, exhaustive checklist dumps, and
+  verification noise unless those details affect the approval decision.
 
 Update Brainstormer role surfaces in both supported hosts:
 
@@ -138,6 +158,12 @@ The change should be phrased as evidence, not as a fixed chat template. The
 existing operator-facing output rule still stands: handoffs should read
 naturally and focus on the decision being requested.
 
+A good Gate 1 handoff should usually read like a short note from Team Lead:
+"I think this is ready to approve; here is the decision trail and the few
+requirements that matter." It can mention the artifact path and review result,
+but it should not make those mechanics the main event. Verification details
+belong in the handoff only when they change the operator's decision.
+
 ## Adversarial review
 
 ### RED/GREEN baseline obligations
@@ -157,6 +183,8 @@ design got there and what alternatives or risks matter.
 
 - Gate 1 handoff includes a spec path but no options, tradeoffs, risks, or open
   questions.
+- Gate 1 handoff includes the new field but buries it inside a noisy report
+  shell that still makes the operator hunt for the decision.
 - Brainstormer reports done without the new field.
 - Team Lead treats `brainstorming_output` as optional because the design doc is
   linked.
@@ -167,7 +195,8 @@ design got there and what alternatives or risks matter.
 
 The field should fit in a normal approval handoff. If it grows too large, Team
 Lead should split or condense it into clean sections while preserving the useful
-decision trail.
+decision trail. The default output should prefer short prose over mechanical
+field-by-field rendering.
 
 ### Role ownership
 
@@ -187,5 +216,5 @@ approval request more useful before explicit approval.
 - Run `pnpm lint:md`.
 - Run `pnpm verify:superteam`.
 - Inspect `skills/superteam/SKILL.md` for the new Gate 1 evidence and
-  Brainstormer done-report field.
+  conversational rendering guidance.
 - Inspect both Brainstormer role surfaces for consistent handoff guidance.
