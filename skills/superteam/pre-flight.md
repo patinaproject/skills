@@ -30,26 +30,61 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 
 ## Auto-switch to issue branch
 
-Trigger (both MUST hold): issue came from source 1; current branch equals the default branch from `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`.
+Trigger: issue came from source 1 and branch state is not already the matching
+issue branch. A normal Superteam prompt that names an issue, such as "work on
+#N" or "run superteam on #N", is enough to activate this procedure. The operator
+does not need to type `new branch`.
+
+Branch-state classification:
+
+- **matching issue branch**: current branch matches `<n>-<slug>` for the active
+  issue number. No-op.
+- **conflicting issue branch**: current branch matches `<m>-<slug>` and `m != n`.
+  Halt with condition 3.
+- **default branch**: current branch equals the default branch from
+  `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`. Run the
+  algorithm below.
+- **detached HEAD**: current branch resolves to `HEAD`, empty output, or any
+  other detached-state signal from `git rev-parse --abbrev-ref HEAD` /
+  `git branch --show-current`. Run the algorithm below.
+- **unborn or unresolvable branch**: current branch cannot be resolved because
+  the worktree has no checked-out branch yet. Run the algorithm below after the
+  dirty-worktree and default-branch checks.
+- **other non-default branch**: halt with condition 3 unless the operator
+  explicitly disambiguates before continuing.
 
 Algorithm:
 
-1. Refuse a dirty working tree. If `git status --porcelain` is non-empty, halt with condition 5.
-2. Resolve the default branch with `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`. If it fails or returns empty, halt with condition 6.
-3. Resolve the issue title with `gh issue view <n> --json number,title,state`. If it fails, halt with condition 8. If the issue is not open, ask the operator before continuing.
-4. Compute the issue branch as `<issue-number>-<kebab-title>`:
+1. Refuse a dirty working tree. If `git status --porcelain` is non-empty, halt
+   with condition 5.
+2. Resolve the default branch with
+   `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`. If it
+   fails or returns empty, halt with condition 6.
+3. Resolve the current branch state using `git branch --show-current` and
+   `git rev-parse --abbrev-ref HEAD`. Treat command failure, empty output, and
+   `HEAD` as brand-new worktree states when the active issue came from source 1.
+4. If the current branch is the matching issue branch, no-op. If the current
+   branch is another non-default issue branch or any other non-default named
+   branch, halt with condition 3 unless the operator explicitly disambiguates.
+5. Resolve the issue title with `gh issue view <n> --json number,title,state`.
+   If it fails, halt with condition 8. If the issue is not open, ask the operator
+   before continuing.
+6. Compute the issue branch as `<issue-number>-<kebab-title>`:
    - lowercase the title
    - replace each run of non-`[a-z0-9]` characters with one hyphen
    - trim leading and trailing hyphens
    - prepend `<issue-number>-`
    - truncate the full string to 60 characters, preferring the previous hyphen boundary, then trim trailing hyphens
-5. Fetch `origin/<defaultBranch>`.
-6. If the branch does not exist locally, check out `-b <branch> origin/<defaultBranch>`.
-7. If the branch exists locally, check it out and rebase onto `origin/<defaultBranch>`.
-8. If rebase conflicts occur, halt with condition 7 and do not run `git rebase --abort`.
-9. Skip dependency installation; pre-flight needs branch state only. Re-run committed-artifact inspection on the new branch.
+7. Fetch `origin/<defaultBranch>`.
+8. If the branch does not exist locally, check out `-b <branch> origin/<defaultBranch>`.
+9. If the branch exists locally, check it out and rebase onto `origin/<defaultBranch>`.
+10. If rebase conflicts occur, halt with condition 7 and do not run `git rebase --abort`.
+11. Skip dependency installation; pre-flight needs branch state only. Re-run committed-artifact inspection on the new branch.
 
-No-op on `<n>-<slug>` matching the issue, or sources 2/3. Mismatched `<n>` fires halt 3.
+No-op on `<n>-<slug>` matching the issue, or sources 2/3. Mismatched `<n>`
+fires halt 3. Detached `HEAD`, unborn branch, and default branch states are not
+operator intent to stay branchless; the explicit issue reference is the branch
+preparation signal.
 
 Forbidden: auto-stash; `git rebase --abort`; silent fallback on `gh repo view` failure; external branch-workflow dependency.
 
@@ -59,7 +94,10 @@ Halt with the exact blocker string `superteam halted at Team Lead: <reason>` whe
 
 1. The operator prompt or branch name implies `phase=plan` but no design doc exists on the branch at the canonical specs path.
 2. The detected phase is `finish` but no PR exists for the branch on origin.
-3. Multiple candidate active issues are detected and cannot be reconciled (e.g. an explicit `#<n>` in the prompt disagrees with the branch's `<n>-<slug>` and operator does not disambiguate).
+3. Multiple candidate active issues are detected and cannot be reconciled, or a
+   non-default named branch does not match the explicit issue (e.g. an explicit
+   `#<n>` in the prompt disagrees with the branch's `<n>-<slug>` and operator
+   does not disambiguate).
 4. Committed artifacts and PR state cannot be reconciled (e.g. a merged PR exists but the branch has no plan doc, or a plan doc references a different issue than the PR).
 5. `superteam halted at Team Lead: dirty working tree blocks auto-switch to issue branch`.
 6. `superteam halted at Team Lead: default-branch lookup failed; cannot determine whether auto-switch is required`.
@@ -78,7 +116,8 @@ Order:
 
 If multiple candidates conflict, halt per halt condition 3 above.
 
-On default branch with source 1, run `## Auto-switch to issue branch` before step 3.
+On default branch, detached `HEAD`, or unborn branch with source 1, run
+`## Auto-switch to issue branch` before step 3.
 
 ## Local-review resume safety
 
