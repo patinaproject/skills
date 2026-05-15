@@ -28,7 +28,7 @@ Pick the commit type by **path**, not by file extension. If any file in the diff
 **Product-surface globs:**
 
 - `skills/**`
-- `skills/bootstrap/templates/**`
+- `skills/scaffold-repository/templates/**`
 - `.claude-plugin/**`, `.codex-plugin/**`
 - `.cursor/**`, `.windsurfrules`, `.github/copilot-instructions.md`
 - `.github/workflows/**`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/LABELS.md`
@@ -61,7 +61,8 @@ pnpm lint:md
 
 - Keep the PR title in commitlint format.
 - Fill in the [PR template](./.github/pull_request_template.md).
-- Include an `Acceptance criteria` section when the linked issue defines ACs.
+- Fill the template's `Coverage and risks` table when linked issues define ACs.
+- Put operator-owned verification decisions in `Testing steps`.
 
 ## Further reading
 
