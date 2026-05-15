@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.3.0...patinaproject-skills-v1.3.1) (2026-05-15)
+
+
+### Bug Fixes
+
+* [#82](https://github.com/patinaproject/skills/issues/82) surface brainstorming handoff output ([#84](https://github.com/patinaproject/skills/issues/84)) ([c7941f0](https://github.com/patinaproject/skills/commit/c7941f091806e7c6353bf7c3a6d15b42257e8137))
+
 ## [1.3.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.2.0...patinaproject-skills-v1.3.0) (2026-05-14)
 
 ### Features
