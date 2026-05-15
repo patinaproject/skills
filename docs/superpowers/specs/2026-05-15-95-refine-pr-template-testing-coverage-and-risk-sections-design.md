@@ -248,8 +248,8 @@ the scaffold template drives the root PR template, not the other way around.
 
 Implementation should run:
 
-- `rg -n "Coverage and risks|PASS|WARN|BLOCKED|N/A|checked row|no manual testing needed" .github AGENTS.md skills/scaffold-repository`;
-- `rg -n "## Testing steps|## Test coverage|## Risks|✅|⚠️|❌" .github/pull_request_template.md AGENTS.md skills/scaffold-repository`;
+- `rg --hidden -n "Coverage and risks|PASS|WARN|BLOCKED|N/A|checked row|no manual testing needed" .github AGENTS.md skills/scaffold-repository`;
+- `rg --hidden -n "## Testing steps|## Test coverage|## Risks|✅|⚠️|❌" .github/pull_request_template.md AGENTS.md skills/scaffold-repository`;
 - `pnpm apply:scaffold-repository:check`;
 - `pnpm verify:dogfood`;
 - `pnpm verify:marketplace`; and

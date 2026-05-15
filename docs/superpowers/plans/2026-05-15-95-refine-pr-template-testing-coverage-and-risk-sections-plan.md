@@ -137,10 +137,10 @@ Run the design's targeted searches and repo verification commands.
 
 Commands and expected outcomes:
 
-- W5.1 `rg -n "Coverage and risks|PASS|WARN|BLOCKED|N/A|checked row|no manual testing needed" .github AGENTS.md skills/scaffold-repository`
+- W5.1 `rg --hidden -n "Coverage and risks|PASS|WARN|BLOCKED|N/A|checked row|no manual testing needed" .github AGENTS.md skills/scaffold-repository`
   should show no active stale PR-body contract language. Historical or unrelated
   matches must be justified before handoff.
-- W5.2 `rg -n "## Testing steps|## Test coverage|## Risks|✅|⚠️|❌" .github/pull_request_template.md AGENTS.md skills/scaffold-repository`
+- W5.2 `rg --hidden -n "## Testing steps|## Test coverage|## Risks|✅|⚠️|❌" .github/pull_request_template.md AGENTS.md skills/scaffold-repository`
   should show the new section names, emoji guidance, and optional-section
   ownership in root and scaffold surfaces.
 - W5.3 `pnpm apply:scaffold-repository:check` should pass, proving root files
