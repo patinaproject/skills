@@ -30,28 +30,18 @@ Run this pre-flight at the top of every `/superteam` invocation, before any team
 
 ## Auto-switch to issue branch
 
-Trigger: issue came from source 1 and branch state is not already the matching
-issue branch. A normal Superteam prompt that names an issue, such as "work on
-#N" or "run superteam on #N", is enough to activate this procedure. The operator
-does not need to type `new branch`.
+Trigger: issue came from source 1 and the current branch state needs issue-branch
+preparation. A normal Superteam prompt that names an issue, such as "work on
+#N" or "run superteam on #N", is enough; the operator does not need to type
+`new branch`.
 
-Branch-state classification:
+Branch states:
 
-- **matching issue branch**: current branch matches `<n>-<slug>` for the active
-  issue number. No-op.
-- **conflicting issue branch**: current branch matches `<m>-<slug>` and `m != n`.
-  Halt with condition 3.
-- **default branch**: current branch equals the default branch from
-  `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`. Run the
-  algorithm below.
-- **detached HEAD**: current branch resolves to `HEAD`, empty output, or any
-  other detached-state signal from `git rev-parse --abbrev-ref HEAD` /
-  `git branch --show-current`. Run the algorithm below.
-- **unborn or unresolvable branch**: current branch cannot be resolved because
-  the worktree has no checked-out branch yet. Run the algorithm below after the
-  dirty-worktree and default-branch checks.
-- **other non-default branch**: halt with condition 3 unless the operator
-  explicitly disambiguates before continuing.
+- No-op when the current branch already starts with `<n>-`.
+- Run this procedure from the default branch, detached `HEAD`, or an unborn /
+  unresolvable branch.
+- Halt with condition 3 from any other named branch, including a branch for a
+  different issue, unless the operator explicitly disambiguates.
 
 Algorithm:
 
@@ -63,9 +53,9 @@ Algorithm:
 3. Resolve the current branch state using `git branch --show-current` and
    `git rev-parse --abbrev-ref HEAD`. Treat command failure, empty output, and
    `HEAD` as brand-new worktree states when the active issue came from source 1.
-4. If the current branch is the matching issue branch, no-op. If the current
-   branch is another non-default issue branch or any other non-default named
-   branch, halt with condition 3 unless the operator explicitly disambiguates.
+4. If the current branch already starts with `<n>-`, no-op. If it is any other
+   named non-default branch, halt with condition 3 unless the operator
+   explicitly disambiguates.
 5. Resolve the issue title with `gh issue view <n> --json number,title,state`.
    If it fails, halt with condition 8. If the issue is not open, ask the operator
    before continuing.
