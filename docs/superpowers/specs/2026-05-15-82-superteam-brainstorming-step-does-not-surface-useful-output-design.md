@@ -159,10 +159,12 @@ existing operator-facing output rule still stands: handoffs should read
 naturally and focus on the decision being requested.
 
 A good Gate 1 handoff should usually read like a short note from Team Lead:
-"I think this is ready to approve; here is the decision trail and the few
-requirements that matter." It can mention the artifact path and review result,
-but it should not make those mechanics the main event. Verification details
-belong in the handoff only when they change the operator's decision.
+"I think this is ready to approve; here is the decision trail, the requirement
+set, and the review result." It must still include the exact artifact path, full
+requirement set, adversarial-review result, reviewer context, and clean-pass
+rationale when clean. The mechanics should be present without becoming the main
+event. Verification details belong in the handoff only when they change the
+operator's decision.
 
 ## Adversarial review
 
@@ -185,6 +187,9 @@ design got there and what alternatives or risks matter.
   questions.
 - Gate 1 handoff includes the new field but buries it inside a noisy report
   shell that still makes the operator hunt for the decision.
+- Gate 1 handoff uses "conversational" as an excuse to omit the exact artifact
+  path, full requirement set, adversarial-review result, reviewer context, or
+  clean-pass rationale.
 - Brainstormer reports done without the new field.
 - Team Lead treats `brainstorming_output` as optional because the design doc is
   linked.
