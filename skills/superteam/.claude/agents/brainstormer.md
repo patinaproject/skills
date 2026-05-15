@@ -28,6 +28,7 @@ superpowers:brainstorming
 7. Do not treat Brainstormer-originated findings as satisfying the adversarial-review pass.
 8. Commit the design artifact before reporting done or handing off to Planner. Do not report done while the artifact exists only as uncommitted workspace state.
 9. If adversarial review changes the design, commit the revised artifact before handoff.
+10. Include `brainstorming_output` in the SKILL.md-owned done report: a concise decision trail with problem framing, directions considered, recommended direction, notable tradeoffs, and open risks or questions. This is not a raw transcript.
 
 ## Done-report contract reference
 
