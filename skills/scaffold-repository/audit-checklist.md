@@ -34,7 +34,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.github/pull_request_template.md` | yes | present; includes multiple linked-issue guidance, `## Coverage and risks`, exact `## Testing steps`, and `type: #123 short description` rule; has no AC-specific prose subsection requirement |
+| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## Coverage and risks`, exact `## Testing steps`, and `type: #123 short description` rule; has no AC-specific prose subsection requirement |
 | `.github/ISSUE_TEMPLATE/bug_report.md` | yes | present with frontmatter |
 | `.github/ISSUE_TEMPLATE/feature_request.md` | yes | present with frontmatter |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |

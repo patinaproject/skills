@@ -168,7 +168,7 @@ The verb "standardize" combined with a diff under `skills/**` and `.codex-plugin
 
 On this repo the canonical "Commit type selection" section is shipped through `skills/scaffold-repository/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `scaffold-repository` skill in realignment mode. Mistyped commits silently suppress releases – see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping. The AC-54-7 parity grep (a one-liner that checks every per-tool surface for the verbatim glob list) is the verification artifact.
 
-Pull requests should include linked issue references (`None` when no issue applies), what changed, a `Coverage and risks` table, and `Testing steps` for operator-owned verification. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
+Pull requests should include at least one GitHub closing keyword for normal PRs, any additional linked issue references, what changed, a `Coverage and risks` table, and `Testing steps` for operator-owned verification. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
 
 For squash-and-merge workflows, PR titles must exactly match the commit format. Use the final intended squash commit title as the PR title.
 
