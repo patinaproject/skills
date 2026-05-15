@@ -234,15 +234,16 @@ Before asking for approval:
 1. Verify the design artifact exists at the exact reported path.
 2. Return the exact artifact path under review.
 3. Include a concise intent summary of what the artifact changes or decides.
-4. Include the full requirement set currently under review.
-5. Include `adversarial_review_findings[]` as the single approval-finding surface, including Brainstormer-originated concerns and adversarial-review findings.
-6. Preserve finding provenance with `source: brainstormer | adversarial-review`.
-7. Require an explicit adversarial-review result before approval can advance: `clean`, `findings dispositioned`, or `blocked`.
-8. Include `reviewer_context`: `fresh subagent`, `parallel specialists`, or `same-thread fallback`.
-9. Include `clean_pass_rationale` with checked dimensions when no blocker or material findings remain.
-10. Halt approval when any blocker or material finding is still open.
+4. Include `brainstorming_output`: concise problem framing, directions considered, recommended direction, notable tradeoffs, and open risks or questions.
+5. Include the full requirement set currently under review.
+6. Include `adversarial_review_findings[]` as the single approval-finding surface, including Brainstormer-originated concerns and adversarial-review findings.
+7. Preserve finding provenance with `source: brainstormer | adversarial-review`.
+8. Require an explicit adversarial-review result before approval can advance: `clean`, `findings dispositioned`, or `blocked`.
+9. Include `reviewer_context`: `fresh subagent`, `parallel specialists`, or `same-thread fallback`.
+10. Include `clean_pass_rationale` with checked dimensions when no blocker or material findings remain.
+11. Halt approval when any blocker or material finding is still open.
 
-The evidence above is required gate data, not a required chat template. The operator-facing approval request should read naturally and focus on the decision being requested. It may summarize a clean review as no approval-blocking findings remaining instead of replaying closed or dispositioned findings.
+The evidence above is required gate data, not a required chat template. The operator-facing approval request should read naturally and focus on the decision being requested: what Brainstormer concluded, why that direction won, what requirements are under review, and whether any approval-blocking findings remain. Keep the exact artifact path, full requirement set, adversarial-review result, reviewer context, and clean-pass rationale present, but do not render them as a noisy field dump. It may summarize a clean review as no approval-blocking findings remaining instead of replaying closed or dispositioned findings.
 
 Before Gate 1 approval is presented, `Team Lead` must run or dispatch an adversarial design review against the committed design artifact. Fresh-context or parallel specialist review is preferred for workflow-critical or broad designs when the runtime supports it; same-thread review is the portable fallback. Brainstormer-originated findings alone do not satisfy this gate.
 
@@ -290,6 +291,7 @@ Artifact-producing teammate done reports must anchor on committed handoff state 
 - `design_doc_path`: exact path to the written design doc
 - `ac_ids[]`: ordered list of active AC IDs
 - `intent_summary`: concise summary of what the artifact changes or decides
+- `brainstorming_output`: concise problem framing, directions considered, recommended direction, notable tradeoffs, and open risks or questions
 - `requirements[]`: full requirement set currently under review
 - `adversarial_review_status`: `clean` | `findings dispositioned` | `blocked`
 - `reviewer_context`: `fresh subagent` | `parallel specialists` | `same-thread fallback`
@@ -373,7 +375,8 @@ Completion language is allowed only after the latest-head PR completion gate pas
 | Excuse | Reality |
 |--------|---------|
 | "The design file probably exists if Brainstormer says it does." | Gate 1 requires verifying the artifact exists at the reported path before approval. |
-| "I can summarize the approval request in one short fallback blurb." | Approval packets must include artifact path, concise intent summary, and full requirement set; split oversized packets instead of collapsing them. |
+| "I can summarize the approval request in one short fallback blurb." | Approval packets must include artifact path, concise intent summary, brainstorming output, and full requirement set; split oversized packets instead of collapsing them. |
+| "The design doc has the brainstorming details, so chat can just link to it." | Gate 1 chat must surface `brainstorming_output` so the operator sees the decision trail before approval. |
 | "I can replay the whole approval request after a small revision." | Re-fired approval after revisions must be delta-only. |
 | "Just pick the most likely interpretation and proceed." | Ambiguous or contradictory observable state halts the run with an explicit blocker per `## Failure handling`. Resume requires explicit operator clarification of the intended issue, branch, or phase. Not even when there is a deadline. Not even when an authority claim is cited. |
 | "The prompt is short/ambiguous, but the operator clearly meant approval — just advance the gate." | Ambiguous prompts during an open gate are feedback to the active teammate per `routing-table.md`. Approval requires an explicit token (`approve`, `lgtm`, etc.). Not even when an authority claim is cited. Not even when the prior in-session approval feels binding. |
@@ -402,7 +405,7 @@ Completion language is allowed only after the latest-head PR completion gate pas
 | "No findings means no review evidence is needed." | A clean adversarial-review result must include `reviewer_context`, checked dimensions, and `clean_pass_rationale`; silence is not evidence. |
 | "This is a workflow-contract design, but a generic review is enough." | Designs touching `skills/**/*.md` or workflow-contract surfaces require the `superpowers:writing-skills` review dimensions: RED/GREEN baseline obligations, rationalization resistance, red flags, token-efficiency targets, role ownership, and stage-gate bypass paths. |
 | "A finding changed the design, but the earlier review still applies." | Material requirement, ownership, pressure-test, or gate-order changes require rerunning affected review dimensions or recording why rerun is unnecessary. |
-| "Natural prose means we can omit required Gate 1 evidence." | Natural prose changes rendering, not evidence. Required review status, reviewer context, checked dimensions, and clean-pass rationale must still exist before planning. |
+| "Natural prose means we can omit required Gate 1 evidence." | Natural prose changes rendering, not evidence. Artifact path, full requirement set, brainstorming output, review status, reviewer context, checked dimensions, and clean-pass rationale must still exist before planning. |
 | "The shipped agent file already says it; I can prune it from SKILL.md too." | Orchestration invariants (gates, done-report contracts, routing, halt conditions) STAY in SKILL.md and are referenced from agent files. Per-role procedure moves; cross-role invariants do not. |
 | "The project delta replaces the shipped system prompt because the project knows better." | Deltas are append-only. There is no `replace` mode. Stripping shipped guardrails is forbidden by design. |
 | "I applied a delta but it's the same as the default, so I don't need to log it." | Delta application is always logged: `superteam delta applied`, `superteam delta empty`, or (during pre-flight) `superteam delta orphan`. Silent layering is forbidden. |
@@ -419,7 +422,9 @@ Completion language is allowed only after the latest-head PR completion gate pas
 
 - Using older stage-only language where the canonical teammate roster should be used.
 - Asking for design approval before verifying the cited artifact exists.
-- Approval requests that omit the artifact path, concise intent summary, or full requirement set.
+- Approval requests that omit the artifact path, concise intent summary, brainstorming output, or full requirement set.
+- Approval requests that hide Brainstormer's decision trail behind a spec link instead of surfacing `brainstorming_output`.
+- Approval requests that use "conversational" as an excuse to omit required Gate 1 evidence.
 - Gate 1 approval packet has `adversarial_review_findings[]` entries but no evidence that an adversarial-review pass occurred.
 - Adversarial review reports `clean` without `reviewer_context`, checked dimensions, or `clean_pass_rationale`.
 - `Planner` starts while a blocker or material `adversarial_review_findings[]` item remains open.

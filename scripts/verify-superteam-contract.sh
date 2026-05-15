@@ -45,9 +45,20 @@ for needle in \
   "## Latest-head PR completion gate" \
   "latest_head_feedback_inventory" \
   "latest_head_check_status_inventory" \
-  "Finisher completion/status report"
+  "Finisher completion/status report" \
+  "brainstorming_output" \
+  "noisy field dump"
 do
   require_text skills/superteam/SKILL.md "$needle"
+done
+
+for file in \
+  skills/superteam/agents/brainstormer.openai.yaml \
+  skills/superteam/.claude/agents/brainstormer.md
+do
+  require_text "$file" "brainstorming_output"
+  require_text "$file" "concise decision trail"
+  require_text "$file" "not a raw transcript"
 done
 
 for file in \
