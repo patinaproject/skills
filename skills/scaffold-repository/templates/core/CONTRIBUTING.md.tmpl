@@ -61,8 +61,11 @@ pnpm lint:md
 
 - Keep the PR title in commitlint format.
 - Fill in the [PR template](./.github/pull_request_template.md).
-- Fill the template's `Coverage and risks` table when linked issues define ACs.
-- Put operator-owned verification decisions in `Testing steps`.
+- Fill the template's `Test coverage` table when linked issues define ACs.
+- Put operator-owned verification decisions in `Testing steps`, and omit that
+  section when no operator-owned manual verification is needed.
+- Put warnings, gaps, caveats, or merge blockers in `Risks`, and omit that
+  section when there are no notable risks.
 
 ## Further reading
 
