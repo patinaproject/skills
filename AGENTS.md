@@ -166,9 +166,13 @@ Bot-generated release-please PRs from `release-please--*` branches and bot-gener
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
 When linked issues define acceptance criteria, use the PR template's
-`Coverage and risks` section as the single AC, evidence, and risk summary.
+`Test coverage` section as the single AC and evidence summary, with optional
+`Risks` only when risks exist.
 
-- Put one table row per relevant `AC-<issue>-<n>` in `Coverage and risks`
+- Put one table row per relevant `AC-<issue>-<n>` in `Test coverage`
 - Add prose only when it changes reviewer judgment
-- Put operator-owned manual verification decisions in `Testing steps`
+- Put operator-owned manual verification decisions in `Testing steps`, and omit
+  the section when no operator-owned manual verification is needed
+- Put warnings, missing coverage, manual-only validation, deferred checks, or
+  caveats in `Risks`
 - Put only pre-merge operational chores in `Do before merging`

@@ -163,8 +163,9 @@ across runtimes.
 - **PR titles**: same format, so squash commits reuse them verbatim.
 - **PR body**: required closing keywords for normal PRs, additional
   linked-issue relationships (`Related to`, `Blocks`, `Partially satisfies`), a
-  `Coverage and risks` AC/evidence table, and ordered `Testing steps` for
-  operator-owned pass/fail verification.
+  `Test coverage` AC/evidence table, optional `Testing steps` for
+  operator-owned pass/fail verification, and optional `Risks` for warnings,
+  gaps, caveats, or blockers.
 - **Issue titles**: plain-language, no commit-style prefix.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
 - **PNPM**: `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `lint:md` script, and `skills:install` script for the portable Superteam skills install path.

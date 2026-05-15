@@ -53,45 +53,42 @@ Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
   steps.`
 -->
 
-## Coverage and risks
+<!--
+  Optional: include this whole section only when operator-owned manual
+  verification is needed. Delete the full commented example when there is no
+  operator-owned manual verification; do not leave a checked or unchecked "no
+  manual testing needed" row.
 
-Legend for status cells:
+## Testing steps
 
-- PASS - required validation passed with no known relevant gap.
-- WARN - sufficient to merge with a known non-blocking gap in Risks.
-- BLOCKED - missing, failing, pending, or merge-blocking.
-- N/A - not relevant to this AC.
+  Include only operator-owned actions or inspections. Use unchecked checkboxes
+  for pass/fail verification decisions or outcomes, not for automated command
+  output, no-op placeholders, or every individual UI action.
 
-The `AC` column references acceptance-criteria IDs from linked issues in
-`AC-<issue>-<n>` form.
+- [ ] Verify <observable outcome> after <minimal action context>.
+-->
+
+## Test coverage
 
 <!--
   When showing a partial example outside a PR body, label the whole example as
   an excerpt before the first omitted section or table. Actual PR bodies should
   include one table row per relevant AC when linked issues define ACs. The
   table is the primary AC summary; add prose only when it changes reviewer
-  judgment. Report coverage so humans and agents can identify remaining risk,
-  not as an inventory of every passed test command. Do not use checkboxes in
-  this section.
+  judgment. Use `✅` for covered, `⚠️` for covered with an associated risk,
+  and `❌` for missing test coverage. Any `⚠️` row must have a matching
+  `## Risks` entry tied to the same AC. Do not use checkboxes in this section.
 -->
 | AC | Requirement | Evidence | Status |
 | --- | --- | --- | --- |
-| AC-<issue>-<n> | <short title> | <command, job, manual source, or doc review> | PASS |
-
-<!-- Omit this subsection when there are no notable risks or gaps. -->
-### Risks
-
-- <warning, missing coverage, merge blocker, manual-only validation, deferred
-  check, or caveat>
-
-## Testing steps
+| AC-<issue>-<n> | <short title> | <command, job, manual source, or doc review> | ✅ |
 
 <!--
-  List every operator-owned verification step here in the order the operator
-  should perform or inspect it. Use checkboxes for pass/fail verification
-  decisions or outcomes, not for every individual UI action. Anything the
-  operator needs to see or manually verify belongs here. If no manual testing is
-  needed, include one checked row explaining why.
--->
+  Optional: include this whole section only when there are notable risks. Delete
+  the full commented example when there are no risks.
 
-- [ ] Verify <observable outcome> after <minimal action context>.
+## Risks
+
+- `AC-<issue>-<n>`: <risk, caveat, missing coverage, manual-only validation,
+  deferred check, or merge blocker>.
+-->
