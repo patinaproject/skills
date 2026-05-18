@@ -1,0 +1,79 @@
+# Issue Branch Workflow
+
+**Goal:** Prepare a local branch for issue-linked work without mixing unrelated
+state, pushing empty branches, or triggering CI.
+
+## Inputs
+
+Accept a bare issue number, `#<number>`, or a same-repo issue URL. Operate only
+against the current working directory's default `gh` repository.
+
+## Steps
+
+1. Resolve the issue:
+
+   ```sh
+   gh issue view "$issue" --json number,title,state
+   ```
+
+   Refuse if the issue cannot be resolved. Refuse closed issues unless the user
+   explicitly allows closed issue work.
+
+2. Compute the branch name:
+
+   - Lowercase the title.
+   - Replace each run of non-`[a-z0-9]` characters with `-`.
+   - Trim leading and trailing `-`.
+   - Prefix the issue number and `-`.
+   - Limit the full branch name to 60 characters. Prefer the previous hyphen
+     boundary and trim any trailing hyphen.
+
+3. Inspect local branch state:
+
+   ```sh
+   git branch --show-current
+   git status --porcelain
+   ```
+
+   If the worktree is dirty, refuse without stashing or committing. If already
+   on the computed branch, report success and stop. If on a different
+   issue-number-prefixed branch, ask before switching.
+
+4. Resolve and fetch the default branch:
+
+   ```sh
+   gh repo view --json defaultBranchRef --jq .defaultBranchRef.name
+   git fetch origin "$default_branch"
+   ```
+
+5. Create or update the local branch:
+
+   - If the branch does not exist locally, run:
+
+     ```sh
+     git checkout -b "$branch" "origin/$default_branch"
+     ```
+
+   - If the branch exists locally, switch to it and rebase onto
+     `origin/$default_branch`.
+
+6. Report:
+
+   ```text
+   Branch: <branch>
+   Base:   <sha> (origin/<default-branch>)
+   ```
+
+## Refusals
+
+- Issue cannot be resolved.
+- Issue is closed without explicit allowance.
+- Worktree has uncommitted changes.
+- Default branch cannot be resolved.
+- User asks for a different repository from the current working directory.
+- Rebase conflicts occur.
+
+## Non-Goals
+
+Do not install dependencies, push, commit, create a pull request, trigger CI, or
+begin implementation work.

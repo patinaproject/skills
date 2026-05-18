@@ -1,8 +1,9 @@
 # Skills used by the Patina Project team
 
-Six installable agent skills for repository scaffolding, multi-teammate
-orchestration, CI-safe orchestration, GitHub workflows, product design, and strategic plan review — available
-across Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
+Eight installable agent skills for repository scaffolding, multi-teammate
+orchestration, CI-safe orchestration, GitHub workflows, issue branch setup, PR
+finishing, product design, and strategic plan review — available across Claude
+Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
@@ -79,11 +80,34 @@ GitHub work — filing issues, editing issues, starting branches, writing
 changelogs, preparing PRs — is repetitive and convention-sensitive. Without a
 shared skill, every agent session re-derives the same rules from scratch and
 produces inconsistent output. `using-github` is a single skill that reads
-repository rules and applies the correct workflow for each task, so every
-GitHub action in a repo is consistent and auditable.
+repository rules and routes to the correct workflow for each task, so every
+GitHub action in a repo is consistent and auditable. For issue-linked work it
+routes branch setup to `new-branch`, and for objectively complete work it
+routes publishing and checks to `finish-pr`.
 
 See [./skills/using-github/](./skills/using-github/)
 for the full README and skill contract.
+
+### new-branch
+
+Issue-linked implementation should start from the repository default branch on
+a predictable local branch. `new-branch` resolves an issue, derives GitHub's
+default issue-branch name, refuses dirty worktrees, and creates or switches to
+the local branch without pushing, installing dependencies, committing, or
+creating a PR.
+
+See [./skills/new-branch/](./skills/new-branch/)
+for the skill contract.
+
+### finish-pr
+
+Finishing branch work is more than opening a pull request. `finish-pr` verifies
+the local diff, commits with the repository convention, pushes when needed,
+creates or updates a ready-for-review PR from the template, watches checks
+fail-fast, handles existing review feedback, and stops at ready-to-merge.
+
+See [./skills/finish-pr/](./skills/finish-pr/)
+for the skill contract.
 
 ### office-hours
 
@@ -129,6 +153,8 @@ for the full README and skill contract.
 | [superteam](./skills/superteam/) | Orchestrate a GitHub issue from design through merged PR |
 | [superteam-non-interactive](./skills/superteam-non-interactive/) | Run Superteam in GitHub Actions without prompts |
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
+| [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
+| [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -151,7 +177,7 @@ npx skills@latest add ./skills/office-hours --list
 node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 ```
 
-### Check c — dogfood verification, all six skills
+### Check c — dogfood verification, all eight skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -165,6 +191,8 @@ skills/
   superteam/
   superteam-non-interactive/
   using-github/
+  new-branch/
+  finish-pr/
   office-hours/
   plan-ceo-review/
 .agents/skills/<name>/               Symlinks to ../../skills/<name>/

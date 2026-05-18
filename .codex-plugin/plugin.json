@@ -6,6 +6,8 @@
     "./skills/superteam",
     "./skills/superteam-non-interactive",
     "./skills/using-github",
+    "./skills/new-branch",
+    "./skills/finish-pr",
     "./skills/office-hours",
     "./skills/plan-ceo-review"
   ]
