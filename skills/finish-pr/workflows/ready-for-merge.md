@@ -78,19 +78,23 @@ directory's default `gh` repository.
    conflicting state. Do not use browser automation, GitHub's web conflict UI,
    or the "Automatically merge & resolve" button.
 
-   If the branch is already up to date, leave the branch unchanged and continue.
-   If the merge applies cleanly and changes the branch, keep the merge result in
-   the working tree, run documented verification, commit the merge with the
-   repository's normal issue-tagged format, push, and restart the readiness loop
-   on the new head. If verification fails on this clean merge, run
-   `git merge --abort` and stop under the verification stop condition.
+   If the merge reports `Already up to date.`, leave the branch unchanged and
+   continue. If the merge applies cleanly and changes the branch, keep the merge
+   result in the working tree, run documented verification, commit the merge
+   with the repository's normal issue-tagged format, push, and restart the
+   readiness loop on the new head. If verification fails on this clean merge,
+   run `git merge --abort` and stop under the verification stop condition. If
+   repeated base merges keep changing the branch without reaching a stable PR
+   head, stop for operator feedback instead of pushing indefinitely.
 
    If the merge conflicts, resolve conflicts only when the correct result is
    branch-local, in scope, and verifiable. Prefer repository behavior, tests,
    generators, and documented verification over ad hoc reasoning. Preserve both
    sides when that is clearly correct. After resolving, run documented
    verification, commit the resolution with the repository's normal issue-tagged
-   format, push, and restart the readiness loop on the new head.
+   format, push, and restart the readiness loop on the new head. Use
+   [triage.md](triage.md) as the source of truth for conflict classification;
+   this workflow owns the git sequence and readiness-loop restart.
 
    Stop when conflicts require product judgment, secrets, permissions,
    destructive git operations, unrelated scope, or unverifiable semantic
