@@ -11,6 +11,13 @@ fail() {
   FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
+require_command() {
+  local command_name="$1"
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    fail "required command not found: $command_name"
+  fi
+}
+
 assert_absent_path() {
   local path="$1"
   if [ -e "$path" ]; then
@@ -20,12 +27,23 @@ assert_absent_path() {
 
 assert_no_match() {
   local pattern="$1"
+  local output
+  local status
   shift
-  if rg -n -e "$pattern" "$@" >/dev/null 2>&1; then
+  set +e
+  output="$(rg -n -e "$pattern" "$@" 2>&1)"
+  status=$?
+  set -e
+  if [ "$status" -eq 0 ]; then
     fail "stale scaffold reference matched: $pattern"
-    rg -n -e "$pattern" "$@" >&2 || true
+    printf '%s\n' "$output" >&2
+  elif [ "$status" -ne 1 ]; then
+    fail "scaffold cleanup search failed for pattern: $pattern"
+    printf '%s\n' "$output" >&2
   fi
 }
+
+require_command "rg"
 
 assert_absent_path "skills/scaffold-repository/templates"
 assert_absent_path "scripts/apply-scaffold-repository.js"
