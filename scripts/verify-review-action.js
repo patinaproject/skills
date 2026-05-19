@@ -70,6 +70,16 @@ const multiSecretSafety = safetyReview({
 });
 assert.deepEqual(multiSecretSafety.ignoredSecrets, ["claude_code_oauth_token", "prompt"]);
 
+const unsupportedClaudeArgsSafety = safetyReview({
+  family: "claude",
+  action: "anthropics/claude-code-action",
+  with: {
+    claude_args: "--max-turns 25\n--model claude-opus-4-7",
+  },
+});
+assert.deepEqual(unsupportedClaudeArgsSafety.unmappedSettings, ["claude_args.--model"]);
+assert.match(unsupportedClaudeArgsSafety.haltingIssues[0], /--model/);
+
 const claudePlan = planInvocation(workflow, context);
 assert.equal(claudePlan.command, "claude");
 assert.equal(claudePlan.args[0], "--print");

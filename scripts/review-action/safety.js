@@ -22,10 +22,18 @@ const KNOWN_WITH_KEYS = {
   ]),
 };
 
+const SUPPORTED_CLAUDE_ARG_FLAGS = new Set(["--allowedTools", "--allowed-tools", "--append-system-prompt", "--max-turns"]);
+
 function containsMutation(value) {
   return /\b(gh\s+pr\s+comment|gh\s+api|git\s+push|git\s+commit|git\s+add|git\s+checkout|git\s+reset|Edit|Write|MultiEdit)\b/.test(
     value || "",
   );
+}
+
+function unsupportedClaudeArgFlags(rawArgs) {
+  if (!rawArgs) return [];
+  const flags = rawArgs.match(/--[a-zA-Z][a-zA-Z-]*/g) || [];
+  return [...new Set(flags.filter((flag) => !SUPPORTED_CLAUDE_ARG_FLAGS.has(flag)))];
 }
 
 function safetyReview(workflow) {
@@ -48,6 +56,14 @@ function safetyReview(workflow) {
 
     if (containsMutation(value)) {
       safetyOverrides.push(`Tightened mutating instruction or tool setting in '${key}' for terminal-only local review.`);
+    }
+
+    if (workflow.family === "claude" && key === "claude_args") {
+      for (const flag of unsupportedClaudeArgFlags(value)) {
+        const setting = `claude_args.${flag}`;
+        haltingIssues.push(`Unsupported ${workflow.action} argument '${flag}' may affect review scope or safety.`);
+        unmappedSettings.push(setting);
+      }
     }
   }
 
