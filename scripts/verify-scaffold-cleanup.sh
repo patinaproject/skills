@@ -78,24 +78,25 @@ for live_reference_path in \
   .gitignore \
   .husky/commit-msg \
   .husky/pre-commit \
-  .lintstagedrc.cjs \
+  .lintstagedrc.js \
   .markdownlint.jsonc \
   .markdownlintignore \
   .nvmrc \
   AGENTS.md \
   CHANGELOG.md \
   CLAUDE.md \
+  commitizen.config.json \
   CONTRIBUTING.md \
   LICENSE \
   README.md \
   SECURITY.md \
-  commitizen.config.js \
   commitlint.config.js \
   docs/file-structure.md \
   docs/release-flow.md \
   docs/wiki-index.md \
   package.json \
   scripts/install-third-party-skills.sh \
+  scripts/verify-esm-tooling.sh \
   skills-lock.json
 do
   assert_present_path "$live_reference_path"

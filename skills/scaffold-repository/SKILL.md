@@ -110,7 +110,7 @@ are themselves this marketplace repository.
 .gitignore
 .husky/commit-msg
 .husky/pre-commit
-.lintstagedrc.cjs
+.lintstagedrc.js
 .markdownlint.jsonc
 .markdownlintignore
 .nvmrc
@@ -121,7 +121,7 @@ CONTRIBUTING.md
 LICENSE
 README.md                   (core variant; replaced by agent-plugin variant when <is-agent-plugin>=yes)
 SECURITY.md                 (public repos only)
-commitizen.config.js
+commitizen.config.json
 commitlint.config.js
 docs/file-structure.md
 docs/release-flow.md

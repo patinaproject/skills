@@ -2,6 +2,7 @@
 set -euo pipefail
 
 bash scripts/verify-dogfood.sh
+bash scripts/verify-esm-tooling.sh
 bash scripts/verify-finish-pr-workflow.sh
 bash scripts/verify-marketplace.sh
 bash scripts/verify-scaffold-cleanup.sh

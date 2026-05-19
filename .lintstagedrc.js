@@ -2,7 +2,7 @@
 // Filters out vendored skill files, canonical skill overlay files (from
 // external sources), and superpowers artifacts from markdownlint so each
 // source can use its own markdownlint config without conflicting with ours.
-module.exports = {
+export default {
   "*.md": (files) => {
     const filtered = files.filter(
       (f) =>

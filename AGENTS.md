@@ -21,7 +21,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `docs/`: contributor docs such as `docs/file-structure.md` and
   `docs/release-flow.md`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
-- root config: `package.json`, `commitizen.config.js`, `commitlint.config.js`, and `.husky/`
+- root config: `package.json`, `commitizen.config.json`, `commitlint.config.js`, and `.husky/`
 
 Use GitHub issues as the durable product and design record. Do not add committed
 design/plan artifacts for routine issue work; put durable context on the issue
