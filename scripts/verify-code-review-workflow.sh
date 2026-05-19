@@ -90,14 +90,11 @@ if [ -f "$WORKFLOW" ]; then
 fi
 
 assert_match "blacksmith-2vcpu-ubuntu-2404" .github/actionlint.yaml
-assert_match "blacksmith-2vcpu-ubuntu-2404" skills/scaffold-repository/templates/core/.github/actionlint.yaml
 assert_no_match "runs-on: ubuntu-latest" .github/workflows/actions.yml
 assert_no_match "runs-on: ubuntu-latest" .github/workflows/markdown.yml
 assert_no_match "runs-on: ubuntu-latest" .github/workflows/pull-request.yml
 assert_no_match "runs-on: ubuntu-latest" .github/workflows/verify.yml
 assert_no_match "runs-on: ubuntu-latest" .github/workflows/release-please.yml
-assert_no_match "runs-on: ubuntu-latest" skills/scaffold-repository/templates/core/.github/workflows/actions.yml
-assert_no_match "runs-on: ubuntu-latest" skills/scaffold-repository/templates/core/.github/workflows/pull-request.yml
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

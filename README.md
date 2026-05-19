@@ -193,10 +193,10 @@ npx skills@latest add ./skills/office-hours --list
 npx skills@latest add ./skills/review-action --list
 ```
 
-### Check b — scaffold-repository apply, no network
+### Check b — scaffold-repository cleanup contract
 
 ```sh
-node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
+bash scripts/verify-scaffold-cleanup.sh
 ```
 
 ### Check c — dogfood verification, all ten skills

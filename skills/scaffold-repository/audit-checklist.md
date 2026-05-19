@@ -1,6 +1,8 @@
 # Audit Checklist
 
-Canonical checklist the `bootstrap` skill walks in realignment mode. Each row specifies a baseline item, how to detect it, how to classify it, and what to recommend on a gap.
+Canonical checklist the `scaffold-repository` skill walks in realignment mode.
+Each row specifies a live baseline item, how to detect it, how to classify it,
+and what to recommend on a gap.
 
 Classification:
 
@@ -23,15 +25,12 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`, `skills:install`, `skills:update`, `skills:list`; `lint-staged` block for `*.md` |
+| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `test`, and the live skills restore command |
 | `pnpm-lock.yaml` | yes | present |
-| `scripts/check-plugin-versions.mjs` | yes | present; fails with non-zero exit on version drift |
-| `scripts/sync-plugin-versions.mjs` | yes | present; rewrites plugin manifests from `package.json` |
-| `scripts/install-skills.mjs` | yes | present; `pnpm skills:install` installs from the committed lockfile without refreshing it, sets `npm_config_ignore_scripts=true`, and `pnpm skills:list` lists committed shared skills |
-| `skills-lock.json` | yes | present in scaffolded repos; contains the active Patina workflow skill catalog and excludes deprecated Superteam compatibility skills. The install wrapper still no-ops clearly when an older or hand-curated repo has no lockfile |
-| `scripts/update-skills.mjs` | yes | present; `pnpm skills:update` refreshes Patina-owned skills already present in the lockfile with `npx skills@latest add patinaproject/skills --skill <name>`, sets `npm_config_ignore_scripts=true`, pins missing immutable GitHub refs, verifies installability, restores the prior lockfile on failure, and documents that consumers should rerun `scaffold-repository` when `experimental_install` graduates |
+| `scripts/install-third-party-skills.sh` | yes | present; restores project-local third-party skills from the committed lockfile with install scripts disabled |
+| `skills-lock.json` | yes | present; records project-local third-party skill provenance for dogfooding |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
-| `RELEASING.md` | yes | present; documents the release-please flow |
+| `docs/release-flow.md` | yes | present; documents the release-please flow |
 
 ## Area 2 – GitHub metadata
 
@@ -77,21 +76,20 @@ project-specific plugin entries only when the repository explicitly opts in.
 
 ## Area 5 – AI agent plugin surfaces
 
-Detection: this repo is an AI agent plugin if **any** of these exist: `.claude-plugin/`, `.codex-plugin/`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`, `skills/`.
+Detection: this repo is an AI agent plugin if **any** of these exist:
+`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, or `skills/`.
 
 When detected, the following surfaces should all be present. Missing platforms are recommended as additions so existing plugins stay aligned with the current supported set.
 
 | File | Required (agent plugin) | Check |
 |---|---|---|
-| `.claude-plugin/plugin.json` | yes | valid JSON; has `name`, `version`, `description`, `author.name`, `author.email`, `author.url`, `skills`; `version` matches `package.json` |
-| `.codex-plugin/plugin.json` | yes | valid JSON; has `name`, `version`, `description`, `author.name`, `author.email`, `author.url`, `skills`, `interface`; `version` matches `package.json` |
-| `.github/copilot-instructions.md` | yes | present; references `AGENTS.md` |
-| `.github/workflows/release.yml` | yes | present; runs `release-please` on push to default branch |
+| `.claude-plugin/plugin.json` | yes | valid JSON; has `name`, `description`, `author.name`, `author.email`, `author.url`, and `skills` |
+| `.codex-plugin/plugin.json` | yes | valid JSON; has `name`, `version`, `description`, `author.name`, `author.email`, `author.url`, `skills`, and `interface`; `version` matches `.claude-plugin/marketplace.json` metadata |
+| `.claude-plugin/marketplace.json` | yes | valid JSON; marketplace entry name matches plugin name |
+| `.agents/plugins/marketplace.json` | yes | valid JSON; marketplace entry name matches plugin name |
+| `.github/workflows/release-please.yml` | yes | present; runs `release-please` on push to default branch |
 | `release-please-config.json` | yes | valid JSON; lists both plugin manifests under `extra-files` for version sync |
-| `.release-please-manifest.json` | yes | valid JSON; `.` version matches `package.json.version` |
-| `.cursor/rules/<repo>.mdc` | yes | present with frontmatter |
-| `.windsurfrules` | yes | present |
-| `skills/<primary-skill-name>/SKILL.md` | yes | present; frontmatter `name:` equals the primary skill name documented by the README/plugin workflow; `skills/.gitkeep` alone is stale for agent-plugin repos |
+| `.release-please-manifest.json` | yes | valid JSON; `.` version matches `.codex-plugin/plugin.json` and `.claude-plugin/marketplace.json` |
 
 Author URLs in `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` must point to the resolved `https://github.com/<author-handle>`, not the repository owner URL. Repository-level URLs such as `homepage`, `repository`, and Codex interface URLs stay on `https://github.com/<owner>/<repo>`.
 
@@ -142,16 +140,16 @@ For each gap, emit:
 [<area>] <file> – <classification>
   Recommendation: <one-line change>
   Diff preview:
-    <unified diff against the template or current baseline>
+    <unified diff against the live baseline>
   Action? (accept / skip / defer)
 ```
 
 Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every file in the "Source of truth for repo baseline" list in `AGENTS.md`):
 
-1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `release-please-config.json`, `.release-please-manifest.json`)
+1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
 2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`)
-3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `scripts/check-plugin-versions.mjs`, `scripts/sync-plugin-versions.mjs`)
-4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `RELEASING.md`)
-5. AI platform surfaces (`.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`)
-6. Workflows (`.github/workflows/*`, including `release.yml` with job-level `permissions:`)
+3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `scripts/install-third-party-skills.sh`, `skills-lock.json`)
+4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
+5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)
+6. Workflows (`.github/workflows/*`, including `release-please.yml` with job-level `permissions:`)
 7. Deprecated workflow cleanup

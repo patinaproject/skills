@@ -1,11 +1,17 @@
 ---
 name: scaffold-repository
-description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, release-please, agent docs (AGENTS.md, CLAUDE.md), or AI agent plugin manifests for Claude Code, Codex, Cursor, Windsurf, and Copilot. Triggers on phrases like "scaffold this repo", "scaffold a Patina plugin", "realign with the baseline", "audit our repo conventions", "set up commitlint and husky", or "add Codex/Cursor/Windsurf surfaces".
+description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, release-please, agent docs (AGENTS.md, CLAUDE.md), or AI agent plugin manifests for Claude Code and Codex. Triggers on phrases like "scaffold this repo", "scaffold a Patina plugin", "realign with the baseline", "audit our repo conventions", "set up commitlint and husky", or "add Claude/Codex plugin surfaces".
 ---
 
 # scaffold-repository
 
 `scaffold-repository` scaffolds a repository – new or existing – to the Patina Project baseline: a dual-plugin repository root, a self-contained `skills/` directory, conventional-commits-with-issue-ref enforcement, a PR template, `AGENTS.md` + `CLAUDE.md`, a human-readable `README.md`, a `docs/file-structure.md` contributor reference, and PNPM + Husky + markdownlint tooling.
+
+There is no committed template bundle. The live
+[`patinaproject/skills`](https://github.com/patinaproject/skills) repository
+root is the canonical baseline reference. When a scaffold or realignment needs
+file content, compare against the current maintained root files and manifests
+instead of reading copied baseline files from this skill directory.
 
 ## Modes
 
@@ -20,7 +26,7 @@ Preconditions:
 
 Behavior:
 
-- Emit the full [core baseline](#core-baseline) tree.
+- Emit the full [core baseline](#core-baseline) tree from the live repository baseline.
 - If the user answers yes to "Is this an AI agent plugin?", additionally emit the [agent-plugin surfaces](#agent-plugin-surfaces).
 - Run `pnpm install` to generate `pnpm-lock.yaml` and wire Husky.
 - Leave all emitted files staged but uncommitted so the user owns the first commit.
@@ -36,15 +42,15 @@ Behavior:
 - Walk [`audit-checklist.md`](./audit-checklist.md) against the target repo.
 - Classify each baseline item as `missing`, `stale`, or `divergent`.
 - For each gap, produce a concrete recommendation on how to realign with the current baseline.
-- Detect whether the repo is an AI agent plugin (by presence of any agent-plugin manifest). When detected, additionally recommend any currently-supported AI platform surface that is missing.
+- Detect whether the repo is an AI agent plugin (by presence of a Claude or Codex plugin manifest). When detected, additionally recommend any currently-supported plugin manifest or marketplace catalog that is missing from the live baseline.
 - For each recommendation, show a diff preview and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
-- Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files; no file from the "Source of truth for repo baseline" list in `AGENTS.md` may be skipped. `patinaproject/bootstrap` is a normal realignment target – the skill must not self-exclude when run against it.
-  1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `release-please-config.json`, `.release-please-manifest.json`.
+- Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files; no file from the "Source of truth for repo baseline" list in `AGENTS.md` may be skipped. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
+  1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
   2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`.
-  3. PNPM tooling: `package.json`, `.markdownlint.jsonc`, `scripts/check-plugin-versions.mjs`, `scripts/sync-plugin-versions.mjs`.
-  4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `RELEASING.md`.
-  5. AI platform surfaces: `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`.
-  6. Workflows: `.github/workflows/*` (including `release.yml` with job-level `permissions:`).
+  3. PNPM tooling: `package.json`, `.markdownlint.jsonc`, `scripts/install-third-party-skills.sh`, `skills-lock.json`.
+  4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
+  5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
+  6. Workflows: `.github/workflows/*` (including `release-please.yml` with job-level `permissions:`).
 
 ## Prompts
 
@@ -57,13 +63,11 @@ The skill collects the following inputs. Author name, author email, and the secu
 | `<repo-description>` | – | one-line description |
 | `<visibility>` | public | public \| private |
 | `<is-agent-plugin>` | no | yes emits plugin/config surfaces for every supported AI coding tool |
-| `<primary-skill-name>` | – | required when `<is-agent-plugin>` is yes; scaffolds `skills/<name>/SKILL.md` starter |
 | `<codeowner>` | `@<owner>` | written into `.github/CODEOWNERS` |
 | `<security-contact>` | from `git config user.email` | public repos only; written into `SECURITY.md` |
 | `<author-name>` | from `git config user.name` | written into every `author` block |
 | `<author-email>` | from `git config user.email` | written into every `author` block |
 | `<author-handle>` | from `gh api user --jq .login` | prompted if unavailable; written into `author.url` |
-| Continue.dev | no | opt-in secondary editor surface during agent-plugin mode |
 
 ## Core baseline
 
@@ -72,18 +76,23 @@ Emitted for every target repo:
 ```text
 .claude/settings.json
 .editorconfig
+.agents/plugins/marketplace.json
 .github/CODEOWNERS
 .github/ISSUE_TEMPLATE/bug_report.md
 .github/ISSUE_TEMPLATE/feature_request.md
 .github/actionlint.yaml
 .github/pull_request_template.md
 .github/workflows/actions.yml
+.github/workflows/code-review.yml
 .github/workflows/markdown.yml
 .github/workflows/pull-request.yml
+.github/workflows/release-please.yml
+.github/workflows/verify.yml
 .gitattributes
 .gitignore
 .husky/commit-msg
 .husky/pre-commit
+.lintstagedrc.cjs
 .markdownlint.jsonc
 .markdownlintignore
 .nvmrc
@@ -91,16 +100,24 @@ AGENTS.md
 CHANGELOG.md
 CLAUDE.md
 CONTRIBUTING.md
+LICENSE
 README.md                   (core variant; replaced by agent-plugin variant when <is-agent-plugin>=yes)
-RELEASING.md
 SECURITY.md                 (public repos only)
+commitizen.config.js
 commitlint.config.js
 docs/file-structure.md
+docs/release-flow.md
+docs/wiki-index.md
 package.json
-scripts/check-plugin-versions.mjs
-scripts/install-skills.mjs
-scripts/sync-plugin-versions.mjs
-scripts/update-skills.mjs
+scripts/install-third-party-skills.sh
+scripts/test.sh
+scripts/verify-code-review-workflow.sh
+scripts/verify-dogfood.sh
+scripts/verify-finish-pr-workflow.sh
+scripts/verify-marketplace.sh
+scripts/verify-scaffold-cleanup.sh
+scripts/verify-superteam-contract.sh
+scripts/verify-workflow-cleanup.sh
 skills-lock.json
 ```
 
@@ -109,32 +126,19 @@ skills-lock.json
 Emitted only when `<is-agent-plugin>` is yes:
 
 ```text
-.claude-plugin/plugin.json          (Claude Code)
-.codex-plugin/plugin.json           (Codex)
-.github/copilot-instructions.md     (GitHub Copilot)
-.github/workflows/release.yml       (release-please)
-.cursor/rules/{{repo}}.mdc          (Cursor)
-.windsurfrules                      (Windsurf)
-README.md                           (replaces core README with installation instructions)
+.claude-plugin/marketplace.json     (Claude marketplace catalog)
+.claude-plugin/plugin.json          (Claude Code plugin manifest)
+.agents/plugins/marketplace.json    (Codex marketplace catalog)
+.codex-plugin/plugin.json           (Codex plugin manifest)
+README.md                           (includes installation instructions)
 release-please-config.json
 .release-please-manifest.json
-skills/{{primary-skill-name}}/SKILL.md
-skills/.gitkeep
 ```
 
-The agent-plugin `README.md.tmpl` is richer than the core one: it includes install steps for Claude Code, Codex CLI, and Codex App, plus usage examples. The core `README.md.tmpl` is emitted only for non-plugin repos.
-
-Because the agent-plugin README documents a primary skill invocation and links to that skill contract, agent-plugin mode must collect `<primary-skill-name>` before rendering the README and primary skill starter.
-
-Aider, Zed, Cline, and Opencode read `AGENTS.md` natively and are covered by the core baseline – no dedicated surface needed. Codex CLI also reads `AGENTS.md` natively but additionally consumes `.codex-plugin/plugin.json` in agent-plugin mode. Continue.dev is available as an opt-in secondary editor (`.continue/config.json`).
-
-### Patina Project organization supplement
-
-When the target repo's owner is `patinaproject`, the skill replaces the agent-plugin `.github/workflows/release.yml` with the supplement at `skills/scaffold-repository/templates/patinaproject-supplement/.github/workflows/release.yml`. The supplement currently emits only the `release-please` job; non-Patina repos get the clean base workflow.
-
-Historical note: an earlier revision of the supplement also added a `notify-patinaproject-skills` job that dispatched `plugin-release-bump.yml` on `patinaproject/skills` after each release. That cross-repo bump path is obsolete — `patinaproject/skills` now vendors plugins directly via subtree merge and bumps its marketplace surface through release-please, so the dispatch was removed and Patina-org plugin repos no longer need cross-repo automation.
-
-Detection is done at scaffold time from `git remote get-url origin` (or the configured `<owner>` prompt). When generating the base workflow for non-Patina-Project repos, do not add `if: github.repository_owner == 'patinaproject'` gates; emit the clean workflow without any Patina-Project-specific plumbing.
+Agent-plugin mode does not generate starter skills or editor-specific side
+surfaces. Aider, Zed, Cline, Codex CLI, and Opencode read `AGENTS.md` natively
+and are covered by the core baseline. Additional editor surfaces should be added
+only when they exist in the live baseline.
 
 ## Plugin enablement
 
@@ -160,7 +164,11 @@ deprecated Superteam or Superpowers workflows.
 - **Issue titles**: plain-language, no commit-style prefix.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
 - **PNPM**: `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, and `lint:md` script.
-- **Shared skill lifecycle**: scaffolded consumer repositories expose `pnpm skills:install`, `pnpm skills:update`, and `pnpm skills:list`. Fresh repos emit a committed `skills-lock.json` containing the active Patina workflow skills: `scaffold-repository`, `using-github`, `new-branch`, `finish-pr`, `review-action`, `office-hours`, `plan-ceo-review`, and `install-skills`. Deprecated Superteam compatibility skills remain marketplace-installable but are excluded from scaffold defaults. The template lockfile intentionally starts with unpinned `patinaproject/skills` sources so the not-yet-released scaffold template can restore the active set after it ships; the first `pnpm skills:update` pins Patina sources to a full immutable GitHub SHA. Install restores the committed catalog without refreshing it. Update refreshes Patina-owned skills already present in the lockfile through `npx skills@latest add patinaproject/skills --skill <name>`, pins missing immutable GitHub refs, verifies the resulting lockfile installs, and restores the previous lockfile on failure. The wrappers set `npm_config_ignore_scripts=true` for CLI calls. While the vercel-labs CLI restore command is still named `experimental_install`, consumers should rerun `scaffold-repository` after that subcommand graduates or is renamed.
+- **Shared skill lifecycle**: this repository uses `skills-lock.json` plus
+  `scripts/install-third-party-skills.sh` to restore project-local third-party
+  skills for dogfooding. Scaffolded consumer repositories should copy the live
+  lifecycle pattern directly from the maintained baseline instead of relying on
+  hidden generated files.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
 - **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).
@@ -170,11 +178,11 @@ deprecated Superteam or Superpowers workflows.
 - **Author identity**: `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` use the same human author record: name and email from `git config`, plus `https://github.com/<author-handle>` from `gh api user --jq .login` or the required author-handle prompt. Repository-level URLs (`homepage`, `repository`, and Codex interface URLs) continue to use `<owner>/<repo>`.
 - **Releases (agent-plugin mode)**: [`release-please`](https://github.com/googleapis/release-please) reads conventional commits since the last tag, opens a standing release PR that bumps `package.json` + both plugin manifests + `CHANGELOG.md`, and publishes a GitHub Release on merge. Semver level is derived from commit types; there is no manual patch/minor/major choice.
 - **Distribution via `patinaproject/skills`**: Patina-Project plugins are vendored directly into `patinaproject/skills` via `git subtree` and ship through that repo's release-please flow. There is no cross-repo dispatch from individual plugin repos to the marketplace; the marketplace is updated as part of the consolidation/release flow in `patinaproject/skills` itself. The emitted Patina supplement therefore no longer carries the old `notify-patinaproject-skills` dispatch job — only the standard `release-please` job.
-- **Version canonicalization**: `package.json` is the single source of truth for the plugin version. `scripts/sync-plugin-versions.mjs` rewrites `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` to match; `scripts/check-plugin-versions.mjs` enforces the lockstep via husky `pre-commit`.
+- **Version canonicalization**: `.release-please-manifest.json`, `.claude-plugin/marketplace.json`, and `.codex-plugin/plugin.json` carry the marketplace version and are kept in lockstep by release-please.
 
 ## GitHub repository settings
 
-Every bootstrap-managed repo should carry these merge settings:
+Every scaffold-managed repo should carry these merge settings:
 
 | Setting | Value | Reason |
 |---|---|---|
@@ -277,11 +285,10 @@ Run `pnpm exec markdownlint-cli2 --fix "**/*.md" "#node_modules"` to auto-fix co
 
 ## Reference implementation
 
-This repository – [`patinaproject/bootstrap`](https://github.com/patinaproject/bootstrap) – is the canonical reference for every file this skill emits. The `templates/` directory under `skills/scaffold-repository/` mirrors these files with placeholders.
+This repository – [`patinaproject/skills`](https://github.com/patinaproject/skills) – is the canonical reference for every file this skill emits.
 
 ## Related documents
 
 - [`audit-checklist.md`](./audit-checklist.md) – canonical realignment checklist.
-- [`templates/`](./templates/) – template files emitted into target repos.
 - [`../../AGENTS.md`](../../AGENTS.md) – repo workflow contract.
 - [`../../docs/file-structure.md`](../../docs/file-structure.md) – layout reference.

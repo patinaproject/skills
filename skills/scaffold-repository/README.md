@@ -1,18 +1,16 @@
-<!-- Source: patinaproject/bootstrap @v1.10.0 -->
-
 # scaffold-repository
 
 Scaffold a new repository – or realign an existing one – to the Patina Project baseline. One invocation, consistent conventions, portable across every major AI coding tool.
 
-Bootstrap is a Claude Code + Codex plugin distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, plugin manifests, release flow, GitHub repo settings) and keeps existing repos aligned with the latest baseline on rerun.
+`scaffold-repository` is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, plugin manifests, release flow, GitHub repo settings) and keeps existing repos aligned with the latest live baseline on rerun.
 
-## How bootstrap works
+## How Scaffold Repository Works
 
 Bootstrap operates in one of two modes based on what it finds in the target repository.
 
 ```mermaid
 flowchart TD
-    invoke["/bootstrap:bootstrap"]:::artifact
+    invoke["scaffold-repository"]:::artifact
     detect["Detect mode"]
     newrepo["New repo"]
     realign["Realignment"]
@@ -37,7 +35,7 @@ flowchart TD
     classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
 ```
 
-## What bootstrap enforces
+## What Scaffold Repository Enforces
 
 ### Core baseline – every repo
 
@@ -53,11 +51,11 @@ flowchart TD
 
 ### AI agent plugin add-ons
 
-When the repo is itself a plugin, bootstrap additionally emits manifests/config for every AI coding tool with a real plugin/extension model: Claude Code, Codex, GitHub Copilot, Cursor, Windsurf. Aider, Zed, Cline, Codex CLI, and Opencode are covered by the core `AGENTS.md`. Continue.dev is an opt-in secondary editor.
+When the repo is itself a plugin, `scaffold-repository` additionally emits the live Claude Code and Codex marketplace/plugin manifests. Aider, Zed, Cline, Codex CLI, and Opencode are covered by the core `AGENTS.md`.
 
 ### Release flow
 
-For plugins, bootstrap wires a complete [release-please](https://github.com/googleapis/release-please) flow – standing release PR, auto-generated `CHANGELOG.md` and GitHub Release notes, both plugin manifests kept in lockstep with `package.json` on every bump.
+For plugins, `scaffold-repository` wires a complete [release-please](https://github.com/googleapis/release-please) flow – standing release PR, auto-generated `CHANGELOG.md` and GitHub Release notes, with marketplace versions kept in lockstep on every bump.
 
 ### GitHub repository settings
 
@@ -75,14 +73,10 @@ Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visua
 | [Claude Code](#claude-code) | `.claude-plugin/plugin.json` | Plugin manifest |
 | [OpenAI Codex CLI](#openai-codex-cli) | `.codex-plugin/plugin.json` | Plugin manifest |
 | [OpenAI Codex App](#openai-codex-app) | `.codex-plugin/plugin.json` | Plugin manifest |
-| [GitHub Copilot](#github-copilot) | `.github/copilot-instructions.md` | Instructions file |
-| [Cursor](#cursor) | `.cursor/rules/<repo>.mdc` | Rule file |
-| [Windsurf](#windsurf) | `.windsurfrules` | Rule file |
 | [Aider](#aider) | `AGENTS.md` | Native |
 | [Zed](#zed) | `AGENTS.md` | Native |
 | [Cline](#cline) | `AGENTS.md` | Native |
 | [Opencode](#opencode) | `AGENTS.md` | Native |
-| [Continue.dev](#continuedev) | `.continue/config.json` | Opt-in |
 
 ## Install
 
@@ -101,25 +95,23 @@ See the [root README](../../README.md) for the full install guide.
 
 ## First use
 
-After installing, run bootstrap from a cloned repository. The skill will prompt for:
+After installing, run `scaffold-repository` from a cloned repository. The skill will prompt for:
 
 - `<owner>`, `<repo>`, `<repo-description>`
 - `<visibility>` – public or private
-- `<is-agent-plugin>` – yes emits plugin manifests + Cursor/Windsurf/Copilot surfaces
-- Continue.dev – opt-in
+- `<is-agent-plugin>` – yes emits the live Claude Code and Codex marketplace/plugin manifests
 
 Author name, author email, and `SECURITY.md` contact default from `git config user.name` / `git config user.email`.
 
 ## Development
 
-This repository is its own reference implementation. Every file bootstrap emits is present either at the repo root or under `skills/bootstrap/templates/`. Running realignment mode against this repo must report zero gaps.
+This repository is its own reference implementation. The live repository root is the baseline; there is no copied template tree under this skill. Running realignment mode against this repo must report zero gaps.
 
 Local workflow:
 
 ```bash
 pnpm install           # installs dev deps and wires husky
 pnpm lint:md           # markdownlint-cli2
-pnpm check:versions    # enforce package.json ↔ plugin manifests lockstep
 pnpm commitlint        # one-off commit-message validation
 ```
 
@@ -136,7 +128,7 @@ Edits to `skills/**/SKILL.md` and adjacent skill workflow contracts are product/
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md). The release flow lives in [`RELEASING.md`](./RELEASING.md).
+See [`CONTRIBUTING.md`](../../CONTRIBUTING.md) and [`AGENTS.md`](../../AGENTS.md). The release flow lives in [`docs/release-flow.md`](../../docs/release-flow.md).
 
 ## Related
 

@@ -21,9 +21,7 @@
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
     "test": "bash scripts/test.sh",
-    "skills:restore": "bash scripts/install-third-party-skills.sh",
-    "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
-    "apply:scaffold-repository:check": "node scripts/apply-scaffold-repository.js skills/scaffold-repository --check"
+    "skills:restore": "bash scripts/install-third-party-skills.sh"
   },
   "config": {
     "commitizen": {
