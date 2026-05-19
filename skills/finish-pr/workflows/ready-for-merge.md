@@ -94,7 +94,14 @@ directory's default `gh` repository.
    Stop for human input instead of resolving when conflicts require product
    judgment, secrets, permissions, destructive git operations, unrelated scope,
    or verification cannot establish confidence. Do not rebase or force-push by
-   default. Do not merge the pull request itself.
+   default. Do not merge the pull request itself. Before any stop path that
+   leaves an uncommitted or conflicted merge in the working tree, run:
+
+   ```sh
+   git merge --abort
+   ```
+
+   Report the aborted merge state and the reason human input is required.
 
 9. Watch all checks to terminal state:
 
@@ -110,10 +117,10 @@ directory's default `gh` repository.
    window, stop for operator feedback instead of waiting indefinitely.
 
 10. Triage every non-pass, canceled, or otherwise problematic check with
-   [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
-   commits, verify locally, push, and restart the loop on the new head. Continue
-   for `explain`, `stale`, and `defer` outcomes only with concrete evidence.
-   Stop only when a check returns `needs-human`.
+    [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
+    commits, verify locally, push, and restart the loop on the new head. Continue
+    for `explain`, `stale`, and `defer` outcomes only with concrete evidence.
+    Stop only when a check returns `needs-human`.
 
 11. Fetch the full PR feedback surface after checks finish:
 

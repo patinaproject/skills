@@ -57,5 +57,7 @@ review threads, top-level PR comments, and review bodies.
 - Classify conflicts as `needs-human` when resolution requires product judgment,
   secrets, permissions, destructive git operations, unrelated scope, or
   unverifiable semantic choices.
+- Run `git merge --abort` before stopping when an uncommitted or conflicted
+  merge is still in the working tree.
 - Do not rebase, force-push, use browser conflict resolution, or merge the pull
   request itself by default.
