@@ -107,13 +107,32 @@ do
 done
 
 assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-repository self-apply" \
-  AGENTS.md README.md docs package.json .github/workflows skills/scaffold-repository
+  AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
+  scripts/install-third-party-skills.sh scripts/test.sh \
+  scripts/verify-code-review-workflow.sh scripts/verify-dogfood.sh \
+  scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
+  scripts/verify-superteam-contract.sh scripts/verify-workflow-cleanup.sh \
+  skills/scaffold-repository
 
 assert_no_match "skills/scaffold-repository/templates|skills/bootstrap/templates|\\.tmpl" \
-  AGENTS.md README.md docs package.json .github/workflows skills/scaffold-repository
+  AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
+  scripts/install-third-party-skills.sh scripts/test.sh \
+  scripts/verify-code-review-workflow.sh scripts/verify-dogfood.sh \
+  scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
+  scripts/verify-superteam-contract.sh scripts/verify-workflow-cleanup.sh \
+  skills/scaffold-repository
 
 assert_no_match "Cursor|Windsurf|Continue\\.dev|\\.cursor/|\\.windsurfrules|\\.continue/" \
   skills/scaffold-repository
+
+assert_no_match "skills@[0-9]+\\.[0-9]+\\.[0-9]+" \
+  README.md docs/release-flow.md .github/workflows/verify.yml
+
+assert_no_match "obra/superpowers" \
+  AGENTS.md skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
+assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
+  skills/scaffold-repository/README.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
