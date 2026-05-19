@@ -1,7 +1,7 @@
 # Check and Feedback Triage
 
-Use this shared state machine for failed PR checks, inline review threads,
-top-level PR comments, and review bodies.
+Use this shared state machine for merge conflicts, failed PR checks, inline
+review threads, top-level PR comments, and review bodies.
 
 | State | Meaning | Action |
 | --- | --- | --- |
@@ -15,6 +15,7 @@ top-level PR comments, and review bodies.
 
 - Latest PR head SHA used for the decision.
 - Check name, thread URL, comment URL, or review URL.
+- Mergeability state, base branch, and local merge result for merge conflicts.
 - File and line context when feedback is inline.
 - Fix commit SHA for `fix-now`.
 - Concrete current-state evidence for `explain`, `stale`, and `defer`.
@@ -42,3 +43,19 @@ top-level PR comments, and review bodies.
 - Fix branch-local failures in normal follow-up commits.
 - Stop for missing secrets, permission failures, external outages, or flaky
   infrastructure that cannot be proven branch-local.
+
+## Merge Conflict Rules
+
+- Capture `headRefOid`, `baseRefName`, `mergeable`, and `mergeStateStatus` with
+  `gh pr view` at the start of each readiness-loop pass.
+- Fetch the PR base branch and test the merge locally; local git results govern
+  when GitHub mergeability is stale or unknown.
+- Classify branch-local, in-scope, verifiable conflicts as `fix-now`.
+- Preserve both sides of a conflict when that is clearly correct.
+- Commit clean base merges and conflict resolutions with the repository's normal
+  issue-tagged commit format, push, and restart the readiness loop.
+- Classify conflicts as `needs-human` when resolution requires product judgment,
+  secrets, permissions, destructive git operations, unrelated scope, or
+  unverifiable semantic choices.
+- Do not rebase, force-push, use browser conflict resolution, or merge the pull
+  request itself by default.

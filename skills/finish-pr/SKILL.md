@@ -15,8 +15,8 @@ Example: on branch `42-let-agents-use-github-more-ergonomically`, infer issue
 the ready-for-review PR.
 
 This skill verifies, commits, pushes, creates or reuses a ready-for-review pull
-request, then loops through checks and PR feedback until the PR is
-ready-to-merge or human input is required. It never merges the PR.
+request, then loops through mergeability, checks, and PR feedback until the PR
+is ready-to-merge or human input is required. It never merges the PR.
 
 ## Workflow
 
@@ -28,8 +28,9 @@ ready-to-merge or human input is required. It never merges the PR.
 5. Commit using the repository's required commit format.
 6. Push the branch when there is work to publish.
 7. Create or update a ready-for-review PR using the repository template.
-8. Enter the readiness loop: watch all checks, triage every problematic check
-   and PR feedback item, fix branch-local issues, push, and repeat.
+8. Enter the readiness loop: detect merge conflicts, watch all checks, triage
+   every problematic check and PR feedback item, fix branch-local issues, push,
+   and repeat.
 9. Mark draft PRs ready when the loop reaches the ready state.
 10. Report ready-to-merge status without merging.
 
