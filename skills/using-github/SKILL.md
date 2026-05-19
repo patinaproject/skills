@@ -13,7 +13,8 @@ rendering, and pull request lifecycle routing.
 
 - Read root repository guidance such as `AGENTS.md`.
 - Read local docs that govern the files or GitHub surface being changed.
-- Use repository templates for issues and pull requests.
+- Use the repository pull request template; issue body shape is owned by the
+  workflow creating the issue.
 - Use canonical labels from the remote label inventory.
 - Do not manually apply or remove reserved release automation labels.
 - Keep public-repo output free of private repository URLs, private paths, and
@@ -86,5 +87,5 @@ release notes:
 |---------|-----|
 | Starting issue work on an ad hoc branch | Route through `new-branch` first. |
 | Treating PR creation as completion | Route through `finish-pr` and continue through checks and feedback. |
-| Inventing labels or templates | Read the repository label inventory and templates. |
+| Inventing labels or PR structure | Read the repository label inventory and pull request template. |
 | Including private repository context in public text | Rewrite as a public-safe summary or file in a private repository first. |

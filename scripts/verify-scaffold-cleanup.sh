@@ -50,11 +50,28 @@ assert_no_match() {
   fi
 }
 
+assert_match() {
+  local pattern="$1"
+  local output
+  local status
+  shift
+  set +e
+  output="$(rg -n -U -e "$pattern" "$@" 2>&1)"
+  status=$?
+  set -e
+  if [ "$status" -ne 0 ]; then
+    fail "expected scaffold reference did not match: $pattern"
+    printf '%s\n' "$output" >&2
+  fi
+}
+
 require_command "rg"
 
 assert_absent_path "skills/scaffold-repository/templates"
 assert_absent_path "scripts/apply-scaffold-repository.js"
 assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
+assert_absent_path ".github/ISSUE_TEMPLATE/bug_report.md"
+assert_absent_path ".github/ISSUE_TEMPLATE/feature_request.md"
 
 # This protects the live patinaproject/skills reference repo. It intentionally
 # includes marketplace-internal verification files that are not emitted into
@@ -65,8 +82,6 @@ for live_reference_path in \
   .editorconfig \
   .agents/plugins/marketplace.json \
   .github/CODEOWNERS \
-  .github/ISSUE_TEMPLATE/bug_report.md \
-  .github/ISSUE_TEMPLATE/feature_request.md \
   .github/actionlint.yaml \
   .github/pull_request_template.md \
   .github/workflows/actions.yml \
@@ -127,6 +142,14 @@ assert_no_match "skills@[0-9]+\\.[0-9]+\\.[0-9]+" \
 
 assert_no_match "obra/superpowers" \
   AGENTS.md skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
+assert_no_match "ISSUE_TEMPLATE|bug_report|feature_request|gh issue create --template|docs/issue-filing-style\\.md" \
+  AGENTS.md docs/agents/issue-tracker.md \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md \
+  skills/using-github/SKILL.md skills/using-github/workflows
+
+assert_match "(?s)## Parent.*## What to build.*## Acceptance criteria.*- \\[ \\].*## Blocked by" \
+  skills/using-github/workflows/new-issue.md
 
 assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
   skills/scaffold-repository/README.md

@@ -104,24 +104,24 @@ gh label list --json name,description --jq '.[] | select(.description == "")'
 
 ## Working with `.github/` templates
 
-This repo ships canonical templates for issues and pull requests. Agents must use them — do
-not invent parallel structure.
+This repo ships a canonical pull request template. Agents must use it — do
+not invent parallel PR structure.
 
 - Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`.
   The PR body must use the template's section headings in the order the template defines,
   even when the body is passed inline via `--body`.
-- Issues: `.github/ISSUE_TEMPLATE/bug_report.md` and
-  `.github/ISSUE_TEMPLATE/feature_request.md`. Pick the one that matches the report and
-  reproduce its sections in order.
+- Issues: body structure is owned by the skill creating the issue. Prefer `to-prd`
+  for PRD-shaped issues and `to-issues` or `using-github` for implementation-slice
+  issues. Manual GitHub issues are allowed when they contain enough context to act on.
 
 Recommended `gh` patterns:
 
 - PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered
   body must already follow the template. If you pass `--body` inline, copy every template
   section name and order verbatim before filling them in.
-- Issues: `gh issue create --template bug_report.md` or `--template feature_request.md`
-  lets `gh` start from the canonical file. If you pass `--body` inline, mirror the
-  template's headings the same way.
+- Issues: `gh issue create --title <title> --body-file <path-to-rendered-body>` keeps
+  the creating skill responsible for the issue body shape. Select labels from the remote
+  label inventory instead of hardcoding defaults.
 
 ## GitHub Actions pinning
 

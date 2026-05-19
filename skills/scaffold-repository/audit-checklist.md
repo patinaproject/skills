@@ -36,8 +36,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | File | Required | Check |
 |---|---|---|
 | `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, `## Verification`, no pre-checked testing-step guidance, and `type: #123 short description` rule |
-| `.github/ISSUE_TEMPLATE/bug_report.md` | yes | present with frontmatter |
-| `.github/ISSUE_TEMPLATE/feature_request.md` | yes | present with frontmatter |
+| Old GitHub issue templates | no | absent; existing issue templates are stale baseline artifacts and should be offered for deletion with a reviewable diff |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
 | `.github/workflows/pull-request.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
 | `.github/workflows/markdown.yml` | yes | present; runs `DavidAnson/markdownlint-cli2-action` on PRs |
@@ -146,7 +145,7 @@ For each gap, emit:
 Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
 
 1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
-2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`)
+2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, stale GitHub issue templates)
 3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`)
 4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)

@@ -64,7 +64,7 @@ Behavior:
 - For each recommendation, show a diff preview and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
-  2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`.
+  2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
   3. PNPM tooling: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`.
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
@@ -99,8 +99,6 @@ are themselves this marketplace repository.
 .claude/settings.json
 .editorconfig
 .github/CODEOWNERS
-.github/ISSUE_TEMPLATE/bug_report.md
-.github/ISSUE_TEMPLATE/feature_request.md
 .github/actionlint.yaml
 .github/pull_request_template.md
 .github/workflows/actions.yml
@@ -179,7 +177,9 @@ deprecated Superteam or Superpowers workflows.
   what changed, verification evidence, optional `Testing steps` for
   operator-owned pass/fail verification, and optional `Do before merging` for
   work-specific pre-merge operator chores.
-- **Issue titles**: plain-language, no commit-style prefix.
+- **Issue titles and bodies**: titles are plain-language, no commit-style
+  prefix. Body structure is owned by the skill creating the issue; do not emit
+  GitHub issue templates as a baseline convention.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
 - **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, and `lint:md` script.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.

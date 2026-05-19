@@ -1,10 +1,9 @@
 # new issue procedure Workflow
 
-**Goal:** Create a well-structured GitHub issue using
-`docs/issue-filing-style.md` as the single source of truth for issue-filing
-conventions, while this workflow retains the procedural `gh`-driven steps.
-Authoritative inputs: `docs/issue-filing-style.md` for filing policy and
-`gh label list` for the canonical remote label inventory.
+**Goal:** Create a well-structured GitHub issue using the same
+implementation-slice body shape as `to-issues`, while this workflow retains the
+procedural `gh`-driven steps. Authoritative inputs: this workflow for issue body
+shape and `gh label list` for the canonical remote label inventory.
 
 This workflow is an extension of the patinaproject `/new-issue` reference. It
 adds two behaviors: a **duplicate check** (Step 3) and a **public-repo leak
@@ -67,7 +66,7 @@ If the user has not provided a description, ask:
 > "What is the problem or goal you want to capture in this issue?
 > A sentence or two is fine."
 
-Apply `docs/issue-filing-style.md` from this point onward.
+Use the issue body shape in Step 7 from this point onward.
 
 Wait for the response before proceeding.
 
@@ -150,7 +149,7 @@ acknowledgement (`Continuing — will file a new issue.`).
 
 **Precondition:** duplicate check resolved with option (b) (Step 3).
 
-Filter the inventory using `docs/issue-filing-style.md` before presenting it:
+Filter the inventory before presenting it:
 
 - Remove Dependabot-reserved labels (`javascript`, `github_actions`).
 - Suggest zero or more labels that fit.
@@ -209,8 +208,7 @@ list, refuse:
 > first, or choose an existing one."
 
 Store `$milestone` for use in the Step 7 preview and the Step 9 `--milestone`
-flag. Canonical milestone, assignee, project, and relationship conventions live
-in `docs/issue-filing-style.md`.
+flag. Do not infer assignees, projects, or labels from local templates.
 
 ---
 
@@ -250,7 +248,7 @@ If any resolution returns `null` or empty string, refuse:
 > same-repo only (#N format; no owner/repo prefix)."
 
 **For each `related-to` entry**, append `Relates to #N` to `$contextSuffix`
-(a running string later appended to the `## Context` body section in Step 7).
+(a running string later appended to the `## Blocked by` body section in Step 7).
 GitHub has no native "related-to" mutation — the `Relates to #N` reference in
 the body causes GitHub to create a CrossReferencedEvent automatically.
 
@@ -270,56 +268,46 @@ relationship, warn now so the user is aware before draft review:
 
 > "Note: `addIssueDependency` is not available in this GitHub instance's
 > GraphQL schema. Dependency relationships will be added as body-prose fallback
-> (`Blocked by #N` / `Blocks #N`) in the `## Context` section."
+> (`Blocked by #N` / `Blocks #N`) in the `## Blocked by` section."
 
 ---
 
 ## Step 7: Draft and Present
 
-Draft the issue body using `docs/issue-filing-style.md` as the single source of
-truth for filing policy. Use this baseline layout:
+Draft the issue body using the exact implementation-slice shape below:
 
 ```markdown
-## Problem
+## Parent
 
-{Describe the current state and why it is a problem. Be concrete. Do not
-prescribe the implementation here unless the technology is genuinely
-load-bearing.}
+{Optional parent issue reference, such as #123. Omit this section when there is
+no parent issue.}
 
-## Proposal
+## What to build
 
-{Desired behavior or solution. Include examples, sketches, or API shapes if helpful.}
+{Describe the observable change to make. Include enough context for an
+implementation agent to pick up the work.}
 
-## Non-Goals / Implementation Notes
+## Acceptance criteria
 
-{Optional. Record preferences, constraints, or likely directions without locking
-the implementation. Omit if it adds no value.}
+- [ ] {Observable criterion}
+- [ ] {Observable criterion}
 
-## Acceptance Criteria
+## Blocked by
 
-- Given {precondition}, when {action}, then {observable outcome}.
-- Given {precondition}, when {action}, then {observable outcome}.
-
-## Context
-
-{Related issues (#N), PRs, or background. Leave blank if none.}
-
-## Out of Scope
-
-{What this issue explicitly does NOT cover.}
+{Optional same-repo blockers, such as #456. Write `None` when there are no
+blockers.}
 ```
 
 Rules:
 
-- Every Acceptance Criterion must use Given/When/Then format.
-- Include at least one AC.
-- Keep "Out of Scope" present even if brief.
-- `## Non-Goals / Implementation Notes` is optional; do not add other unlisted
-  sections.
+- Include `## Parent` only when there is a parent issue.
+- Include at least one checked-list Acceptance criteria item, and leave every
+  item unchecked.
+- Do not add unlisted sections.
 - If `$contextSuffix` is non-empty (from `related-to` entries in Step 6),
-  append it to the `## Context` section before presenting the draft.
+  append it under `## Blocked by` after any blockers as `Relates to #N`.
 - If `$depSupported = false` and any `blocked-by`/`blocks` entries exist, also
-  append `Blocked by #N` / `Blocks #N` lines to `## Context`.
+  append `Blocked by #N` / `Blocks #N` lines to `## Blocked by`.
 
 Resolve the target repository before presenting the draft:
 
@@ -574,10 +562,10 @@ If `$depSupported = false`, skip mutation and report:
 
 > `"blocks #$targetNumber recorded as body-prose fallback (addIssueDependency unavailable)."`
 
-**`related-to`** — already written to `## Context` body section in Step 7 via
+**`related-to`** — already written to `## Blocked by` body section in Step 7 via
 `$contextSuffix`. Nothing to mutate. Report:
 
-> `"related-to #$targetNumber recorded as body-prose (Relates to #N in ## Context — GitHub will create a CrossReferencedEvent automatically)."`
+> `"related-to #$targetNumber recorded as body-prose (Relates to #N in ## Blocked by — GitHub will create a CrossReferencedEvent automatically)."`
 
 ---
 
@@ -629,7 +617,7 @@ Stop and do NOT call `gh issue create` if:
 |---------|-----|
 | Hardcoding label names | Read from `gh label list` each run |
 | Refusing when no label chosen | Zero labels is valid — print the no-labels-chosen advisory in Step 9 and continue |
-| Using wrong body structure | Match the 5-section template exactly |
+| Using wrong body structure | Match the implementation-slice body shape exactly |
 | Creating issues in other repos | Only create in the current repo's default gh target |
 | Calling `gh issue create` twice | Step 9 runs once; report the URL and stop |
 | Skipping remote label check | Run Step 8 existence check before every create |
@@ -639,7 +627,7 @@ Stop and do NOT call `gh issue create` if:
 | Refusing when no milestone chosen | Zero milestone is valid — never block on this |
 | Refusing when no relationships chosen | Zero relationships is valid — never block on this |
 | Queuing GraphQL mutations before gh issue create | Step 6 resolution is queue-only; mutations happen in Step 10 |
-| Attempting related-to GraphQL mutation | related-to has no GitHub native primitive — body prose only (Relates to #N in ## Context) |
+| Attempting related-to GraphQL mutation | related-to has no GitHub native primitive — body prose only (Relates to #N in ## Blocked by) |
 | Rolling back the issue on Step 10 mutation failure | On any Step 10 error, warn + manual-retry; never delete the created issue |
 | Skipping Step 3 duplicate check | Always search before drafting; offer comment-instead as the default option |
 | Running the leak guard only once | Re-run in Step 8 — the body may change during Step 7 revisions |
