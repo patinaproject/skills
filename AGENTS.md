@@ -46,6 +46,7 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `pnpm verify:dogfood`: assert all eight in-repo skills are discoverable via flat layout
+- `pnpm verify:finish-pr`: assert the finish-pr workflow handles review-thread and finding gates
 - `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
 - `pnpm verify:superteam`: assert Superteam contract surfaces stay in sync
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
