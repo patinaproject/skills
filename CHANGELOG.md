@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.10.0...patinaproject-skills-v1.11.0) (2026-05-19)
+
+
+### Features
+
+* [#126](https://github.com/patinaproject/skills/issues/126) remove scaffold templates ([#128](https://github.com/patinaproject/skills/issues/128)) ([9b8168b](https://github.com/patinaproject/skills/commit/9b8168b3192be8a9cd204fc40a3ae37e0e7e26d4))
+
 ## [1.10.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.9.0...patinaproject-skills-v1.10.0) (2026-05-19)
 
 
