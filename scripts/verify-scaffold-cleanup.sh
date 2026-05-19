@@ -85,12 +85,12 @@ for live_reference_path in \
   AGENTS.md \
   CHANGELOG.md \
   CLAUDE.md \
-  commitizen.config.json \
-  commitlint.config.js \
   CONTRIBUTING.md \
   LICENSE \
   README.md \
   SECURITY.md \
+  commitizen.config.json \
+  commitlint.config.js \
   docs/file-structure.md \
   docs/release-flow.md \
   docs/wiki-index.md \

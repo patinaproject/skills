@@ -27,11 +27,13 @@ assert.equal(typeof lintStagedConfig.default, "object", "lint-staged config must
 
 await assert.rejects(
   access(".lintstagedrc.cjs"),
+  { code: "ENOENT" },
   "lint-staged config should use the package ESM module type"
 );
 
 await assert.rejects(
   access("commitizen.config.js"),
+  { code: "ENOENT" },
   "commitizen config should be JSON because cz-customizable requires it from CommonJS"
 );
 NODE
