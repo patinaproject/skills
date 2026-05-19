@@ -4,7 +4,7 @@ Scaffold a new repository – or realign an existing one – to the Patina Proje
 
 `scaffold-repository` is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, plugin manifests, release flow, GitHub repo settings) and keeps existing repos aligned with the latest live baseline on rerun.
 
-## How Scaffold Repository Works
+## How scaffold-repository works
 
 `scaffold-repository` operates in one of two modes based on what it finds in the target repository.
 
@@ -35,7 +35,7 @@ flowchart TD
     classDef artifact fill:#f7f7f7,stroke:#666,stroke-width:1px,color:#000;
 ```
 
-## What Scaffold Repository Enforces
+## What scaffold-repository enforces
 
 ### Core baseline – every repo
 

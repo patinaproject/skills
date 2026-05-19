@@ -142,12 +142,12 @@ For each gap, emit:
   Action? (accept / skip / defer)
 ```
 
-Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every file in the "Source of truth for repo baseline" list in `AGENTS.md`):
+Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
 
 1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
 2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`)
 3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`)
 4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)
-6. Workflows (`.github/workflows/*`, including `release-please.yml` with job-level `permissions:`)
+6. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`, and agent-plugin `release-please.yml` when applicable)
 7. Deprecated workflow cleanup

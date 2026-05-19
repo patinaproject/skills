@@ -44,13 +44,13 @@ Behavior:
 - For each gap, produce a concrete recommendation on how to realign with the current baseline.
 - Detect whether the repo is an AI agent plugin (by presence of a Claude or Codex plugin manifest). When detected, additionally recommend any currently-supported plugin manifest or marketplace catalog that is missing from the live baseline.
 - For each recommendation, show a diff preview and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
-- Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files; no file from the "Source of truth for repo baseline" list in `AGENTS.md` may be skipped. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
+- Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
   2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`.
   3. PNPM tooling: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`.
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
-  6. Workflows: `.github/workflows/*` (including `release-please.yml` with job-level `permissions:`).
+  6. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`, and agent-plugin release workflow when applicable.
 
 ## Prompts
 
@@ -86,11 +86,8 @@ are themselves this marketplace repository.
 .github/actionlint.yaml
 .github/pull_request_template.md
 .github/workflows/actions.yml
-.github/workflows/code-review.yml
 .github/workflows/markdown.yml
 .github/workflows/pull-request.yml
-.github/workflows/release-please.yml
-.github/workflows/verify.yml
 .gitattributes
 .gitignore
 .husky/commit-msg
@@ -117,9 +114,11 @@ pnpm-lock.yaml
 
 Marketplace-internal verification and dogfood files in the live reference repo,
 including the repository test harness, verify scripts, third-party skill restore
-script, lockfile, and generated agent overlays, are reference implementation
+script, lockfile, generated agent overlays, code-review workflow, verify
+workflow, and marketplace release workflow, are reference implementation
 tooling. Do not emit them into a generic scaffolded consumer repo unless that
-repo explicitly opts into the same marketplace maintenance role.
+repo explicitly opts into the same marketplace maintenance role. Consumer
+workflows must be adapted to the files they actually receive.
 
 ## Agent plugin surfaces
 
@@ -130,6 +129,7 @@ Emitted only when `<is-agent-plugin>` is yes:
 .claude-plugin/plugin.json          (Claude Code plugin manifest)
 .agents/plugins/marketplace.json    (Codex marketplace catalog)
 .codex-plugin/plugin.json           (Codex plugin manifest)
+.github/workflows/release-please.yml (release-please)
 README.md                           (includes installation instructions)
 release-please-config.json
 .release-please-manifest.json
