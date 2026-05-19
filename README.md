@@ -1,8 +1,8 @@
 # Skills used by the Patina Project team
 
-Ten installable agent skills for repository scaffolding, project-local skill
+Eleven installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, issue branch setup, PR finishing, local AI
-review-action emulation, product design, strategic plan review, and
+review-action emulation, issue-to-PR execution, product design, strategic plan review, and
 historical Superteam compatibility —
 available across Claude Code, Codex, and
 any agent runtime that reads `AGENTS.md`.
@@ -121,6 +121,18 @@ local CLI, and prints a terminal-only report.
 See [./skills/review-action/](./skills/review-action/)
 for the skill contract.
 
+### execute
+
+Routine issue work crosses several focused workflows: branch setup,
+test-driven implementation, local AI review, review remediation, and PR
+finishing. `execute` is the generic orchestrator for that lifecycle. It
+delegates branch setup to `new-branch`, local review to `review-action`, and
+publication readiness to `finish-pr`, while using TDD for implementation and
+review fixes.
+
+See [./skills/execute/](./skills/execute/)
+for the skill contract.
+
 ### office-hours
 
 New product ideas benefit from honest forcing questions before any code is
@@ -168,6 +180,7 @@ for the full README and skill contract.
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
+| [execute](./skills/execute/) | Orchestrate issue work from branch setup to PR readiness |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
@@ -191,6 +204,7 @@ npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/install-skills --list
 npx skills@latest add ./skills/office-hours --list
 npx skills@latest add ./skills/review-action --list
+npx skills@latest add ./skills/execute --list
 ```
 
 ### Check b — scaffold-repository cleanup contract
@@ -199,7 +213,7 @@ npx skills@latest add ./skills/review-action --list
 bash scripts/verify-scaffold-cleanup.sh
 ```
 
-### Check c — dogfood verification, all ten skills
+### Check c — dogfood verification, all eleven skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -217,6 +231,7 @@ skills/
   new-branch/
   finish-pr/
   review-action/
+  execute/
   office-hours/
   plan-ceo-review/
 .agents/skills/<name>/               Symlinks to ../../skills/<name>/

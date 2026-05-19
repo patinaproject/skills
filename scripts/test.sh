@@ -24,6 +24,7 @@ run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/office-hours
 run_cli_canary ./skills/review-action
+run_cli_canary ./skills/execute
 
 run_cli_install_canary() {
   local repo_root tmpdir status

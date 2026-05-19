@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# verify-dogfood.sh — Asserts that all ten in-repo skills are discoverable
+# verify-dogfood.sh — Asserts that all eleven in-repo skills are discoverable
 # via the flat skills/<name>/ layout and the dogfood overlay symlinks.
 # (find-skills is a third-party vendored skill, not an in-repo skill.)
-# Exit 0: all ten skills pass all assertions.
+# Exit 0: all eleven skills pass all assertions.
 # Exit 1: at least one assertion failed (with a clear FAIL message).
 #
 # Dependencies: bash 3+, realpath (macOS via coreutils) or python3 as fallback.
@@ -21,6 +21,7 @@ SKILLS=(
   new-branch
   finish-pr
   review-action
+  execute
   office-hours
   plan-ceo-review
 )
@@ -123,5 +124,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all ten in-repo skills discoverable via flat layout"
+echo "OK: all eleven in-repo skills discoverable via flat layout"
 exit 0
