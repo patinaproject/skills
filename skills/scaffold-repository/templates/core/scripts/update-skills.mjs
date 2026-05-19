@@ -37,13 +37,14 @@ function currentPatinaSkillsSha() {
   const result = spawnSync(
     "git",
     ["ls-remote", "https://github.com/patinaproject/skills.git", "HEAD"],
-    { encoding: "utf8" },
+    { encoding: "utf8", timeout: 30000 },
   );
   if (result.error) {
     throw new Error(`Failed to resolve patinaproject/skills HEAD: ${result.error.message}`);
   }
   if (result.status !== 0) {
-    throw new Error(`Failed to resolve patinaproject/skills HEAD: exit ${result.status}`);
+    const details = result.stderr?.trim() ? `\n${result.stderr.trim()}` : "";
+    throw new Error(`Failed to resolve patinaproject/skills HEAD: exit ${result.status}${details}`);
   }
 
   const sha = result.stdout.trim().split(/\s+/)[0];
@@ -79,6 +80,18 @@ function pinPatinaRefs() {
   writeCatalog(catalog);
 }
 
+function patinaSkillNames(catalog) {
+  return Object.entries(catalog.skills ?? {})
+    .filter(
+      ([, entry]) =>
+        entry?.sourceType === "github" &&
+        typeof entry.source === "string" &&
+        /^patinaproject\/skills(?:#.*)?$/.test(entry.source),
+    )
+    .map(([name]) => name)
+    .sort();
+}
+
 if (!existsSync(lockfile)) {
   console.log(`No ${lockfile} found; no shared skills to update.`);
   process.exit(0);
@@ -88,11 +101,18 @@ rmSync(backup, { force: true });
 copyFileSync(lockfile, backup);
 
 try {
-  run(
-    "npx",
-    ["--yes", "skills@latest", "add", "patinaproject/skills", "--yes"],
-    "Failed to refresh Patina Project shared skills",
-  );
+  const skills = patinaSkillNames(readCatalog());
+  if (skills.length === 0) {
+    console.log("No Patina Project shared skills found in skills-lock.json.");
+  }
+
+  for (const skill of skills) {
+    run(
+      "npx",
+      ["--yes", "skills@latest", "add", "patinaproject/skills", "--skill", skill, "--yes"],
+      `Failed to refresh Patina Project shared skill: ${skill}`,
+    );
+  }
   pinPatinaRefs();
   run(
     "npx",

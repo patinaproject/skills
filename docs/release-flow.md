@@ -130,6 +130,12 @@ scaffolded repo commands. To update examples after a CLI behavior change:
 3. Run the [check-a local-path verification](../README.md#local-iteration) — exits 0.
 4. Open a PR with the CLI policy update.
 
+The CI local-path smoke checks also use `skills@latest` deliberately. They are a
+compatibility canary for the current marketplace protocol, so a future upstream
+CLI break may fail PR checks even when the branch did not change skill files. In
+that case, confirm the break against the local-path commands, then update the
+examples, scaffolded wrappers, or policy here in the same PR that restores CI.
+
 ## Token setup (required before first release)
 
 `release-please-action` runs with `token: ${{ github.token }}` by default. This

@@ -20,7 +20,7 @@ or in normal docs when it is broadly useful beyond one issue.
 
 - `pnpm install`: install local tooling and initialize Husky hooks.
 - `pnpm skills:install`: install committed shared skills from `skills-lock.json`; no-ops when no lockfile exists.
-- `pnpm skills:update`: refresh Patina-owned shared skills through the marketplace, verify installability, and keep the previous lockfile on failure.
+- `pnpm skills:update`: refresh Patina-owned shared skills already in the lockfile, verify installability, and keep the previous lockfile on failure.
 - `pnpm skills:list`: list committed shared skills without changing installed payloads.
 - `pnpm exec commitlint --edit <path>`: validate a commit message file against repo rules.
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`.

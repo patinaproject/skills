@@ -157,11 +157,18 @@ assertIncludes(coreInstallSkillsTemplate, "No skills-lock.json found", "Install 
 assertIncludes(coreInstallSkillsTemplate, "experimental_install", "Install read-only lockfile command");
 assertIncludes(coreInstallSkillsTemplate, "--list", "Install list mode");
 assertIncludes(coreUpdateSkillsTemplate, '"npx"', "Update marketplace refresh command");
-assertIncludes(coreUpdateSkillsTemplate, '"--yes", "skills@latest", "add", "patinaproject/skills"', "Update marketplace refresh command");
+assertIncludes(
+  coreUpdateSkillsTemplate,
+  '"--yes", "skills@latest", "add", "patinaproject/skills", "--skill", skill, "--yes"',
+  "Update marketplace refresh command",
+);
 assertIncludes(coreUpdateSkillsTemplate, "pinPatinaRefs", "Update immutable ref pinning");
+assertIncludes(coreUpdateSkillsTemplate, "patinaSkillNames", "Update refreshes existing Patina skills");
 assertIncludes(coreUpdateSkillsTemplate, "needsImmutableRef", "Update re-pins mutable refs");
 assertIncludes(coreUpdateSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Update ignores npm lifecycle scripts");
 assertIncludes(coreInstallSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Install ignores npm lifecycle scripts");
+assertIncludes(coreUpdateSkillsTemplate, "timeout: 30000", "Update GitHub ref lookup timeout");
+assertIncludes(coreUpdateSkillsTemplate, "result.stderr", "Update GitHub ref lookup diagnostics");
 assertIncludes(coreUpdateSkillsTemplate, "experimental_install", "Update install verification");
 assertIncludes(coreUpdateSkillsTemplate, "restoreLockfile", "Update rollback on failure");
 assertNotIncludes(releaseFlow, "skills@1.5.6", "Release flow stale exact CLI version");
