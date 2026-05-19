@@ -93,10 +93,10 @@ directory's default `gh` repository.
    format, push, and restart the readiness loop on the new head.
 
    Stop when conflicts require product judgment, secrets, permissions,
-   destructive git operations, unrelated scope,
-   or verification cannot establish confidence. Do not rebase or force-push by
-   default. Do not merge the pull request itself. Before any stop path that
-   leaves an uncommitted or conflicted merge in the working tree, run:
+   destructive git operations, unrelated scope, or unverifiable semantic
+   choices. Do not rebase or force-push by default. Do not merge the pull
+   request itself. Before any stop path that leaves an uncommitted or conflicted
+   merge in the working tree, run:
 
    ```sh
    git merge --abort

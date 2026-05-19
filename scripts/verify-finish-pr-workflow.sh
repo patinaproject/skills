@@ -52,7 +52,7 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "git merge --abort" "$WORKFLOW"
   assert_match "Do not use browser automation" "$WORKFLOW"
   assert_match "Do not rebase or force-push" "$WORKFLOW"
-  assert_match "Do not merge the pull request itself" "$WORKFLOW"
+  assert_match "Do not merge the pull" "$WORKFLOW"
   assert_match "restart the readiness loop on the new head" "$WORKFLOW"
   assert_match "product judgment, secrets, permissions" "$WORKFLOW"
   assert_match "destructive git operations, unrelated scope" "$WORKFLOW"
