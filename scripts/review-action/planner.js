@@ -2,7 +2,7 @@ const { localReviewInstruction } = require("./safety");
 
 function extractClaudeArgs(rawArgs) {
   const args = [];
-  const allowedMatch = rawArgs.match(/--allowedTools\s+([^\n]+)/);
+  const allowedMatch = rawArgs.match(/(?:--allowedTools|--allowed-tools)\s+([^\n]+)/);
   if (allowedMatch) {
     // Claude Code Action workflows in this repo use a simple comma-separated
     // list; preserve that contract while removing mutating local tools.

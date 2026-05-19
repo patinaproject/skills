@@ -51,6 +51,7 @@ The terminal report should include:
 - Detected workflow and action family
 - Base and head used for the PR-equivalent diff
 - Changed files and skip classification
+- Uncommitted and untracked files when local dirty-state review is needed
 - Local command family and translated settings
 - Ignored secrets, unmapped settings, and safety overrides
 - Review output from the local CLI

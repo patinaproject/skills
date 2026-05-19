@@ -84,6 +84,7 @@ const claudePlan = planInvocation(workflow, context);
 assert.equal(claudePlan.command, "claude");
 assert.equal(claudePlan.args[0], "--print");
 assert.ok(claudePlan.args.includes("--disallowedTools"));
+// Live-fixture assertion: this should track the current code-review.yml value.
 assert.deepEqual(claudePlan.args.slice(claudePlan.args.indexOf("--max-turns"), claudePlan.args.indexOf("--max-turns") + 2), [
   "--max-turns",
   "25",
@@ -94,6 +95,18 @@ const claudePrompt = claudePlan.args.at(-1);
 assert.ok(claudePrompt.includes("PR 110 in patinaproject/skills"));
 assert.ok(!claudePrompt.includes("${{ env.PR_NUMBER }}"));
 assert.ok(!claudePrompt.includes("${{ env.PR_REPO }}"));
+
+const kebabAllowedToolsPlan = planInvocation(
+  {
+    family: "claude",
+    with: {
+      claude_args: "--allowed-tools Read,Bash(git diff:*)",
+      prompt: "Review this diff.",
+    },
+  },
+  context,
+);
+assert.equal(kebabAllowedToolsPlan.args[kebabAllowedToolsPlan.args.indexOf("--allowedTools") + 1], "Read,Bash(git diff:*)");
 
 const codexPlan = planInvocation(
   {
