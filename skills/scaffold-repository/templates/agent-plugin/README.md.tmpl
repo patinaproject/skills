@@ -162,6 +162,9 @@ This repository is the source for the plugin. Local workflow:
 
 ```bash
 pnpm install           # installs dev deps and wires husky
+pnpm skills:install    # installs committed shared skills, if skills-lock.json exists
+pnpm skills:update     # refreshes Patina-owned shared skills already in the lockfile
+pnpm skills:list       # lists committed shared skills without installing them
 pnpm lint:md           # markdownlint-cli2
 pnpm check:versions    # enforce package.json ↔ plugin manifests lockstep
 pnpm commitlint        # one-off commit-message validation

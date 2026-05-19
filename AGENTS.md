@@ -45,11 +45,7 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
-- `pnpm test`: run the core local verification bundle
-- `pnpm verify:dogfood`: assert all nine in-repo skills are discoverable via flat layout
-- `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
-- `pnpm verify:review-action`: assert local review emulator parsing, classification, safety, and planning
-- `pnpm verify:superteam`: assert Superteam contract surfaces stay in sync
+- `pnpm test`: run the full local verification suite
 - `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
 - `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the nine skill entry points
 
@@ -71,7 +67,7 @@ and when to split reference material out of the main skill file.
 If `write-a-skill` is not installed in the local agent environment, install it with:
 
 ```bash
-npm_config_ignore_scripts=true npx skills@1.5.6 add mattpocock/skills@write-a-skill -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-skill -y
 ```
 
 For workflow-contract changes, especially `skills/superteam/**`, also use
@@ -83,6 +79,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 
 - Validate paths with `find` or `rg`
 - Run `bash scripts/verify-dogfood.sh` to confirm all nine in-repo skills pass the flat-layout check
+- Run `bash scripts/verify-finish-pr-workflow.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `node scripts/verify-review-action.js` after changing `skills/review-action/**` or `scripts/review-action*`
 - Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`

@@ -162,10 +162,10 @@ for the full README and skill contract.
 
 ## Local iteration
 
-Three checks prove the in-repo skills are wired correctly. Run these after any
-change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
+The test suite proves the in-repo skills and workflow contracts are wired correctly. Run
+it after any change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
 
-For the core verification bundle, run:
+For the full local verification suite, run:
 
 ```sh
 pnpm test

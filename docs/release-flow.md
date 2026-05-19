@@ -24,12 +24,21 @@ npx skills@latest add patinaproject/skills
 The CLI prompts for which skills to install and auto-detects your agent.
 
 **Supply-chain note:** For environments where you want to prevent install scripts from
-running, prefix with `npm_config_ignore_scripts=true`. The CLI internal stability target
-is `skills@1.5.6` — see [CLI version pinning](#cli-version-pinning) for details.
+running, prefix with `npm_config_ignore_scripts=true`. Use `skills@latest` for install
+and update examples so consumers get the current marketplace protocol.
 
-**Standalone-skill resolution:** `npx skills add patinaproject/skills@<name>` (no `#<ref>`
-qualifier) resolves to the default branch HEAD. Consumers wanting a pinned version pass
-`patinaproject/skills@<name>#<git-ref>`.
+**Standalone-skill resolution:** pass the marketplace repository as the source and the
+skill name through `--skill`:
+
+```sh
+npx skills@latest add patinaproject/skills --skill scaffold-repository
+```
+
+Consumers wanting a pinned version keep the skill name separate from the repository ref:
+
+```sh
+npx skills@latest add patinaproject/skills#v1.0.0 --skill scaffold-repository
+```
 
 **Supply-chain fallback:** If the upstream CLI is unavailable or distrusted, clone the repo
 and copy `skills/<name>/` directly into the agent's skill directory. No build step required.
@@ -66,7 +75,7 @@ may omit a GitHub issue ID in the commit subject.
 The vercel-labs CLI consumer pins a specific tag via `#<git-ref>`:
 
 ```sh
-npx skills@latest add patinaproject/skills@scaffold-repository#v1.0.0
+npx skills@latest add patinaproject/skills#v1.0.0 --skill scaffold-repository
 ```
 
 The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all nine
@@ -108,17 +117,24 @@ items are not applied by the self-apply script:
   they share the single root `patinaproject-skills` release and tag.
   Third-party skills such as `find-skills` are installed separately from their
   source repo's default branch or a specific `#<git-ref>`.
-- `skills-lock.json` must be committed after any `npx skills add` invocation. The lockfile
+- `skills-lock.json` must be committed after any `npx skills@latest add` invocation. The lockfile
   records provenance for vercel-labs CLI-managed installs.
 
-## CLI version pinning
+## CLI update policy
 
-The vercel-labs CLI is pinned at `skills@1.5.6` in all documentation. To bump:
+The vercel-labs CLI is referenced as `skills@latest` in routine documentation and
+scaffolded repo commands. To update examples after a CLI behavior change:
 
-1. Update the version in `README.md`, `AGENTS.md`, and `docs/release-flow.md`.
+1. Update command examples in `README.md`, `AGENTS.md`, and `docs/release-flow.md`.
 2. Re-run `bash scripts/verify-dogfood.sh` — exits 0.
 3. Run the [check-a local-path verification](../README.md#local-iteration) — exits 0.
-4. Open a PR with the version bump.
+4. Open a PR with the CLI policy update.
+
+The CI local-path smoke checks also use `skills@latest` deliberately. They are a
+compatibility canary for the current marketplace protocol, so a future upstream
+CLI break may fail PR checks even when the branch did not change skill files. In
+that case, confirm the break against the local-path commands, then update the
+examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
 ## Token setup (required before first release)
 
