@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "skills": {
+    "scaffold-repository": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scaffold-repository/SKILL.md"
+    },
+    "using-github": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/using-github/SKILL.md"
+    },
+    "new-branch": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/new-branch/SKILL.md"
+    },
+    "finish-pr": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/finish-pr/SKILL.md"
+    },
+    "review-action": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/review-action/SKILL.md"
+    },
+    "office-hours": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/office-hours/SKILL.md"
+    },
+    "plan-ceo-review": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/plan-ceo-review/SKILL.md"
+    },
+    "install-skills": {
+      "source": "patinaproject/skills",
+      "sourceType": "github",
+      "skillPath": "skills/install-skills/SKILL.md"
+    }
+  }
+}

@@ -27,7 +27,8 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `pnpm-lock.yaml` | yes | present |
 | `scripts/check-plugin-versions.mjs` | yes | present; fails with non-zero exit on version drift |
 | `scripts/sync-plugin-versions.mjs` | yes | present; rewrites plugin manifests from `package.json` |
-| `scripts/install-skills.mjs` | yes | present; `pnpm skills:install` treats missing `skills-lock.json` as a no-op, installs from the committed lockfile without refreshing it, sets `npm_config_ignore_scripts=true`, and `pnpm skills:list` lists committed shared skills |
+| `scripts/install-skills.mjs` | yes | present; `pnpm skills:install` installs from the committed lockfile without refreshing it, sets `npm_config_ignore_scripts=true`, and `pnpm skills:list` lists committed shared skills |
+| `skills-lock.json` | yes | present in scaffolded repos; contains the active Patina workflow skill catalog and excludes deprecated Superteam compatibility skills. The install wrapper still no-ops clearly when an older or hand-curated repo has no lockfile |
 | `scripts/update-skills.mjs` | yes | present; `pnpm skills:update` refreshes Patina-owned skills already present in the lockfile with `npx skills@latest add patinaproject/skills --skill <name>`, sets `npm_config_ignore_scripts=true`, pins missing immutable GitHub refs, verifies installability, restores the prior lockfile on failure, and documents that consumers should rerun `scaffold-repository` when `experimental_install` graduates |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `RELEASING.md` | yes | present; documents the release-please flow |

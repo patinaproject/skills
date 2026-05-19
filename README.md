@@ -1,8 +1,9 @@
 # Skills used by the Patina Project team
 
-Nine installable agent skills for repository scaffolding, GitHub workflows,
-issue branch setup, PR finishing, local AI review-action emulation, product
-design, strategic plan review, and historical Superteam compatibility —
+Ten installable agent skills for repository scaffolding, project-local skill
+installation, GitHub workflows, issue branch setup, PR finishing, local AI
+review-action emulation, product design, strategic plan review, and
+historical Superteam compatibility —
 available across Claude Code, Codex, and
 any agent runtime that reads `AGENTS.md`.
 
@@ -76,6 +77,17 @@ routes publishing and checks to `finish-pr`.
 
 See [./skills/using-github/](./skills/using-github/)
 for the full README and skill contract.
+
+### install-skills
+
+Shared workflow skills should be added to a repository without mutating an
+operator's global agent environment. `install-skills` gives agents a canonical
+`npx skills@latest` workflow: read local guidance, inspect `skills-lock.json`,
+list ambiguous sources, install selected skills project-locally for all
+supported agent targets, and verify the resulting lockfile and overlay changes.
+
+See [./skills/install-skills/](./skills/install-skills/)
+for the skill contract.
 
 ### new-branch
 
@@ -158,6 +170,7 @@ for the full README and skill contract.
 | [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
+| [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
@@ -175,6 +188,7 @@ pnpm test
 
 ```sh
 npx skills@latest add ./skills/scaffold-repository --list
+npx skills@latest add ./skills/install-skills --list
 npx skills@latest add ./skills/office-hours --list
 npx skills@latest add ./skills/review-action --list
 ```
@@ -185,7 +199,7 @@ npx skills@latest add ./skills/review-action --list
 node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 ```
 
-### Check c — dogfood verification, all nine skills
+### Check c — dogfood verification, all ten skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -196,6 +210,7 @@ bash scripts/verify-dogfood.sh
 ```text
 skills/
   scaffold-repository/
+  install-skills/
   superteam/
   superteam-non-interactive/
   using-github/
