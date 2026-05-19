@@ -3,10 +3,13 @@ set -euo pipefail
 
 node --input-type=module <<'NODE'
 import assert from "node:assert/strict";
+import { constants } from "node:fs";
 import { access, readFile } from "node:fs/promises";
 
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 assert.equal(packageJson.type, "module", "package.json must declare ESM mode");
+
+await access("scripts/verify-esm-tooling.sh", constants.X_OK);
 
 const commitizenConfig = JSON.parse(await readFile("commitizen.config.json", "utf8"));
 assert.equal(typeof commitizenConfig, "object", "commitizen config must be JSON data");
