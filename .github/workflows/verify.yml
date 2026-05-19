@@ -50,12 +50,14 @@ jobs:
       # The local-path form proves the SKILL.md shape is CLI-compatible.
       - name: "Check a — CLI resolves scaffold-repository from local path (must exit 0)"
         run: |
+          # Intentional canary: this uses the current marketplace protocol.
           npm_config_ignore_scripts=true npx skills@latest \
             add ./skills/scaffold-repository --list
           echo "exit=$?"
 
       - name: "Check a — CLI resolves office-hours from local path (must exit 0)"
         run: |
+          # Intentional canary: this uses the current marketplace protocol.
           npm_config_ignore_scripts=true npx skills@latest \
             add ./skills/office-hours --list
           echo "exit=$?"

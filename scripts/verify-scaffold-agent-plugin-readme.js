@@ -164,9 +164,12 @@ assertIncludes(
 );
 assertIncludes(coreUpdateSkillsTemplate, "pinPatinaRefs", "Update immutable ref pinning");
 assertIncludes(coreUpdateSkillsTemplate, "patinaSkillNames", "Update refreshes existing Patina skills");
+assertIncludes(coreUpdateSkillsTemplate, "No Patina Project shared skills found", "Update no-Patina no-op");
 assertIncludes(coreUpdateSkillsTemplate, "needsImmutableRef", "Update re-pins mutable refs");
 assertIncludes(coreUpdateSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Update ignores npm lifecycle scripts");
 assertIncludes(coreInstallSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Install ignores npm lifecycle scripts");
+assertIncludes(coreUpdateSkillsTemplate, "npx --yes auto-installs", "Update documents npx yes flag");
+assertIncludes(coreInstallSkillsTemplate, "npx --yes auto-installs", "Install documents npx yes flag");
 assertIncludes(coreUpdateSkillsTemplate, "timeout: cliTimeoutMs", "Update CLI invocation timeout");
 assertIncludes(coreInstallSkillsTemplate, "timeout: cliTimeoutMs", "Install CLI invocation timeout");
 assertIncludes(coreUpdateSkillsTemplate, "result.signal", "Update CLI signal diagnostics");

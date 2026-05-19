@@ -107,11 +107,14 @@ try {
   const skills = patinaSkillNames(readCatalog());
   if (skills.length === 0) {
     console.log("No Patina Project shared skills found in skills-lock.json.");
+    rmSync(backup, { force: true });
+    process.exit(0);
   }
 
   for (const skill of skills) {
     run(
       "npx",
+      // npx --yes auto-installs the package; the trailing --yes suppresses skills CLI prompts.
       ["--yes", "skills@latest", "add", "patinaproject/skills", "--skill", skill, "--yes"],
       `Failed to refresh Patina Project shared skill: ${skill}`,
     );
