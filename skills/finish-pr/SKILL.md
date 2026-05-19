@@ -37,6 +37,7 @@ is ready-to-merge or human input is required. It never merges the PR.
 ## Guardrails
 
 - Do not rewrite branch history or force-push by default.
+- Do not use browser conflict resolution or merge the pull request itself.
 - Do not create follow-up issues from PR feedback.
 - Do not wait indefinitely for new human review comments.
 - Do not use fail-fast or required-check-only watching by default.
