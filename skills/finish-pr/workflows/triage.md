@@ -18,6 +18,7 @@ top-level PR comments, and review bodies.
 - File and line context when feedback is inline.
 - Fix commit SHA for `fix-now`.
 - Concrete current-state evidence for `explain`, `stale`, and `defer`.
+- Verified GraphQL resolution state when resolving inline threads.
 
 ## Review Feedback Rules
 
@@ -29,10 +30,14 @@ top-level PR comments, and review bodies.
 - Reply concisely to every handled human comment.
 - Resolve inline threads only after the fix or explanation is present on latest
   head and checks pass.
+- Track handled top-level comments and review bodies in memory during the run so
+  loop passes do not post duplicate replies.
 
 ## Check Failure Rules
 
-- Prefer the first fail-fast actionable failure.
+- Wait for all checks with `gh pr checks --watch`; do not use fail-fast by
+  default.
+- Triage every non-pass, canceled, or otherwise problematic check result.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
 - Stop for missing secrets, permission failures, external outages, or flaky
