@@ -4,17 +4,20 @@ import { spawnSync } from "node:child_process";
 
 const lockfile = "skills-lock.json";
 const backup = `${lockfile}.bak`;
+const cliTimeoutMs = 120000;
 
 function run(command, args, failureMessage) {
   const result = spawnSync(command, args, {
     env: { ...process.env, npm_config_ignore_scripts: "true" },
     stdio: "inherit",
+    timeout: cliTimeoutMs,
   });
   if (result.error) {
     throw new Error(`${failureMessage}: ${result.error.message}`);
   }
   if (result.status !== 0) {
-    throw new Error(`${failureMessage}: exit ${result.status}`);
+    const exitInfo = result.status !== null ? `exit ${result.status}` : `signal ${result.signal}`;
+    throw new Error(`${failureMessage}: ${exitInfo}`);
   }
 }
 

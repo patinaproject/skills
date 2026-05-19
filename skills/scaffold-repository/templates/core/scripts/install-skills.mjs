@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 
 const lockfile = "skills-lock.json";
 const listOnly = process.argv.includes("--list");
+const cliTimeoutMs = 120000;
 
 function readLockfile() {
   try {
@@ -38,11 +39,20 @@ const result = spawnSync(
   // The skills CLI currently exposes lockfile restore through experimental_install.
   // Keep this wrapper small so the subcommand is easy to replace when it graduates.
   ["--yes", "skills@latest", "experimental_install", "--yes"],
-  { env: { ...process.env, npm_config_ignore_scripts: "true" }, stdio: "inherit" },
+  {
+    env: { ...process.env, npm_config_ignore_scripts: "true" },
+    stdio: "inherit",
+    timeout: cliTimeoutMs,
+  },
 );
 
 if (result.error) {
   console.error(`Failed to install shared skills: ${result.error.message}`);
+  process.exit(1);
+}
+
+if (result.signal) {
+  console.error(`Failed to install shared skills: signal ${result.signal}`);
   process.exit(1);
 }
 

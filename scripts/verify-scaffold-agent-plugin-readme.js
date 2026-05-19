@@ -167,6 +167,10 @@ assertIncludes(coreUpdateSkillsTemplate, "patinaSkillNames", "Update refreshes e
 assertIncludes(coreUpdateSkillsTemplate, "needsImmutableRef", "Update re-pins mutable refs");
 assertIncludes(coreUpdateSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Update ignores npm lifecycle scripts");
 assertIncludes(coreInstallSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Install ignores npm lifecycle scripts");
+assertIncludes(coreUpdateSkillsTemplate, "timeout: cliTimeoutMs", "Update CLI invocation timeout");
+assertIncludes(coreInstallSkillsTemplate, "timeout: cliTimeoutMs", "Install CLI invocation timeout");
+assertIncludes(coreUpdateSkillsTemplate, "result.signal", "Update CLI signal diagnostics");
+assertIncludes(coreInstallSkillsTemplate, "result.signal", "Install CLI signal diagnostics");
 assertIncludes(coreUpdateSkillsTemplate, "timeout: 30000", "Update GitHub ref lookup timeout");
 assertIncludes(coreUpdateSkillsTemplate, "result.stderr", "Update GitHub ref lookup diagnostics");
 assertIncludes(coreUpdateSkillsTemplate, "experimental_install", "Update install verification");
