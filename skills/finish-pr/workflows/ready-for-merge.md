@@ -82,7 +82,8 @@ directory's default `gh` repository.
    If the merge applies cleanly and changes the branch, keep the merge result in
    the working tree, run documented verification, commit the merge with the
    repository's normal issue-tagged format, push, and restart the readiness loop
-   on the new head.
+   on the new head. If verification fails on this clean merge, run
+   `git merge --abort` and stop under the verification stop condition.
 
    If the merge conflicts, resolve conflicts only when the correct result is
    branch-local, in scope, and verifiable. Prefer repository behavior, tests,
@@ -91,8 +92,8 @@ directory's default `gh` repository.
    verification, commit the resolution with the repository's normal issue-tagged
    format, push, and restart the readiness loop on the new head.
 
-   Stop for human input instead of resolving when conflicts require product
-   judgment, secrets, permissions, destructive git operations, unrelated scope,
+   Stop when conflicts require product judgment, secrets, permissions,
+   destructive git operations, unrelated scope,
    or verification cannot establish confidence. Do not rebase or force-push by
    default. Do not merge the pull request itself. Before any stop path that
    leaves an uncommitted or conflicted merge in the working tree, run:
