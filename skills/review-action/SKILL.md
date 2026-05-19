@@ -36,6 +36,9 @@ Local review emulation is read-only and terminal-only.
 If no supported AI review workflow is found, halt instead of falling back to a
 generic review.
 
+If multiple supported review actions are detected, halt as a v1 scope boundary
+instead of guessing which hosted review contract to emulate.
+
 ## Portable Workflow
 
 1. Detect supported workflows by inspecting `.github/workflows/*.yml` and

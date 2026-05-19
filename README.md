@@ -176,6 +176,7 @@ pnpm test
 ```sh
 npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/office-hours --list
+npx skills@latest add ./skills/review-action --list
 ```
 
 ### Check b — scaffold-repository apply, no network
