@@ -95,25 +95,9 @@ const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
   "author-email": "test@example.com",
   "author-handle": "test-author",
 });
-const corePackage = JSON.parse(corePackageTemplate);
-const skillsInstallScript = corePackage.scripts?.["skills:install"];
-
-if (typeof skillsInstallScript !== "string") {
-  fail("core package template: expected scripts.skills:install to be a string");
-}
-
 assertNotIncludes(rendered, "{{", "rendered README");
-assertIncludes(rendered, "pnpm skills:install", "Portable skills install script");
-assertIncludes(
-  rendered,
-  "npx skills@1.5.6 add patinaproject/skills",
-  "Patina Project skills npx install",
-);
-assertIncludes(
-  rendered,
-  "npx skills@1.5.6 add obra/superpowers",
-  "Superpowers npx install",
-);
+assertNotIncludes(rendered, "pnpm skills:install", "Retired portable skills install script");
+assertNotIncludes(rendered, "obra/superpowers", "Retired Superpowers install source");
 assertIncludes(rendered, "/workflow-kit:issue-router", "Claude invocation");
 assertNotIncludes(rendered, "/workflow-kit:workflow-kit", "Claude invocation");
 assertIncludes(
@@ -136,39 +120,9 @@ assertIncludes(
   "must collect `<primary-skill-name>` before rendering the README and primary skill starter",
   "Primary skill render requirement",
 );
-assertIncludes(skillContract, "skills:install", "Skill contract skills install script");
-assertIncludes(skillContract, "patinaproject/skills", "Skill contract Patina Project skills source");
-assertIncludes(skillContract, "obra/superpowers", "Skill contract Superpowers skills source");
-assertIncludes(
-  skillsInstallScript,
-  "npx skills@1.5.6 add patinaproject/skills",
-  "Core package template Patina Project skills install command",
-);
-assertIncludes(
-  skillsInstallScript,
-  "npx skills@1.5.6 add obra/superpowers",
-  "Core package template Superpowers skills install command",
-);
-assertIncludes(
-  coreAgentsTemplate,
-  "pnpm skills:install",
-  "Core AGENTS template skills install guidance",
-);
-assertIncludes(
-  coreAgentsTemplate,
-  "patinaproject/skills",
-  "Core AGENTS template Patina Project skills source",
-);
-assertIncludes(
-  coreAgentsTemplate,
-  "obra/superpowers",
-  "Core AGENTS template Superpowers skills source",
-);
-assertIncludes(
-  coreAgentsTemplate,
-  "Host marketplace plugin enablement may still be present, but it is not the only setup step.",
-  "Core AGENTS template marketplace-not-only guidance",
-);
+assertNotIncludes(skillContract, "obra/superpowers", "Skill contract retired Superpowers source");
+assertNotIncludes(corePackageTemplate, "skills:install", "Core package retired skills install script");
+assertNotIncludes(coreAgentsTemplate, "obra/superpowers", "Core AGENTS retired Superpowers source");
 assertIncludes(
   auditChecklist,
   "skills/<primary-skill-name>/SKILL.md",
@@ -179,9 +133,7 @@ assertIncludes(
   "`skills/.gitkeep` alone is stale for agent-plugin repos",
   "Realignment stale gitkeep check",
 );
-assertIncludes(auditChecklist, "skills:install", "Audit checklist skills install script");
-assertIncludes(auditChecklist, "patinaproject/skills", "Audit checklist Patina Project skills source");
-assertIncludes(auditChecklist, "obra/superpowers", "Audit checklist Superpowers skills source");
+assertNotIncludes(auditChecklist, "obra/superpowers", "Audit checklist retired Superpowers source");
 assertIncludes(rendered, ".cursor/rules/workflow-kit.mdc", "Cursor rule path");
 assertNotIncludes(renderedSkill, "{{", "rendered primary skill starter");
 assertIncludes(renderedSkill, "name: issue-router", "primary skill frontmatter");

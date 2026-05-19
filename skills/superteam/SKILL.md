@@ -1,6 +1,6 @@
 ---
 name: superteam
-description: Orchestrates a GitHub issue through design, planning, implementation, review, PR publication, and latest-head shutdown using the Team Lead, Brainstormer, Planner, Executor, Reviewer, and Finisher roster. Use when the operator runs `/superteam`, says "run superteam on #N", asks to drive an issue to PR, or needs Superteam to resume publish-state follow-through.
+description: Deprecated historical Superteam orchestration for existing users. Avoid for new work; use GitHub issues for durable context, the current PR template for reviewer-facing summaries, and focused implementation or review skills instead.
 allowed-tools:
   - Read
   - Write
@@ -14,6 +14,11 @@ allowed-tools:
 ---
 
 # superteam
+
+> Deprecated: this skill remains installable for historical compatibility, but
+> it is no longer the recommended Patina Project workflow for new issue work.
+> Use GitHub issues as the durable product record and use focused
+> implementation, review, branch, and PR-finishing skills instead.
 
 `superteam` is an orchestration skill for running a structured issue workflow across a canonical teammate roster. It uses repository-owned artifacts in `skills/` and `docs/` so the workflow stays portable across repositories and runtimes.
 

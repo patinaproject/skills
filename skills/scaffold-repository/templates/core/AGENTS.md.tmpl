@@ -6,32 +6,21 @@ This repository follows the Patina Project baseline. It is organized around root
 
 - `skills/`: installable skill directories. Each skill lives in its own folder.
 - `.claude-plugin/`, `.codex-plugin/`, `.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`: AI editor plugin/config surfaces (present only when this repo is an AI agent plugin).
-- `.claude/settings.json`: project-level Claude Code configuration, including `enabledPlugins`.
-- `docs/`: contributor-facing docs and planning artifacts.
+- `.claude/settings.json`: project-level Claude Code configuration.
+- `docs/`: contributor-facing docs.
 - Root config: `package.json`, `commitlint.config.js`, `.husky/`, `.markdownlint.jsonc` define local tooling, commit enforcement, and markdown linting.
 
 Keep each skill self-contained. Prefer adjacent support files over hidden tool-specific wrappers unless a runtime requires them.
 
-For Superpowers-generated design and planning artifacts, use the issue number and issue title as the topic slug:
-
-- `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<issue-title>-design.md`
-- `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<issue-title>-plan.md`
-
-Use human-readable H1 titles inside those files:
-
-- Design docs: `# Design: <exact issue title> [#<issue>](<issue-url>)`
-- Plan docs: `# Plan: <exact issue title> [#<issue>](<issue-url>)`
-
-Format acceptance criteria IDs as `AC-<issue-number>-<integer>`, for example `AC-1-1`.
-
-When this repo uses the Superteam workflow, run `pnpm skills:install` before invoking Superteam. The script installs both `patinaproject/skills` and `obra/superpowers` through `npx skills`, which is the portable cross-runtime install path. Host marketplace plugin enablement may still be present, but it is not the only setup step.
+Use GitHub issues as the durable product and design record. Do not add committed
+design/plan artifacts for routine issue work; put durable context on the issue
+or in normal docs when it is broadly useful beyond one issue.
 
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install local tooling and initialize Husky hooks.
 - `pnpm exec commitlint --edit <path>`: validate a commit message file against repo rules.
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`.
-- `pnpm skills:install`: install the Patina Project skills and Superpowers skills required for Superteam-oriented workflows.
 - `.husky/commit-msg <path>`: run commit-message validation through the active Git hook.
 - `.husky/pre-commit`: run `lint-staged`, which invokes `markdownlint-cli2` on staged `*.md`.
 
@@ -81,7 +70,7 @@ Recommended `gh` patterns:
 - PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered body must already follow the template. If you pass `--body` inline, copy every template section name and order verbatim before filling them in.
 - Issues: `gh issue create --template bug_report.md` or `--template feature_request.md` lets `gh` start from the canonical file. If you pass `--body` inline, mirror the template's headings the same way.
 
-Do not invent alternative section names when the template uses different ones – extend an existing section instead, or open a follow-up to update the template itself. The PR-body acceptance-criteria rules under [Commit & Pull Request Guidelines](#commit--pull-request-guidelines) are a refinement of the template's `Testing steps`, `Test coverage`, and optional `Risks` sections, not a replacement for them.
+Do not invent alternative section names when the template uses different ones – extend an existing section instead, or open a follow-up to update the template itself.
 
 ## GitHub Actions pinning
 
@@ -169,19 +158,12 @@ The verb "standardize" combined with a diff under `skills/**` and `.codex-plugin
 
 #### Round-trip discipline
 
-On this repo the canonical "Commit type selection" section is shipped through `skills/scaffold-repository/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `scaffold-repository` skill in realignment mode. Mistyped commits silently suppress releases – see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping. The AC-54-7 parity grep (a one-liner that checks every per-tool surface for the verbatim glob list) is the verification artifact.
+On this repo the canonical "Commit type selection" section is shipped through `skills/scaffold-repository/templates/core/AGENTS.md.tmpl` and round-tripped to root `AGENTS.md` via the `scaffold-repository` skill in realignment mode. Mistyped commits silently suppress releases – see [`RELEASING.md`](RELEASING.md) for the release-please semver mapping.
 
-Pull requests should include at least one GitHub closing keyword for normal PRs, any additional linked issue references, what changed, and a `Test coverage` table. Include `Testing steps` only when operator-owned manual verification is needed. Include a `Risks` section only when risks exist. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
+Pull requests should include at least one GitHub closing keyword for normal PRs, any additional linked issue references, what changed, and verification evidence. Include `Testing steps` only when operator-owned manual verification is needed. Include a `Do before merging` section only when work-specific operator pre-merge steps exist.
 
 For squash-and-merge workflows, PR titles must exactly match the commit format. Use the final intended squash commit title as the PR title.
 
 GitHub issue titles are different: write them as plain-language summaries of the problem or request. Do not use conventional-commit prefixes like `docs:` or `feat:` in issue titles.
 
-When an issue defines acceptance criteria, include matching AC rows in the PR description's `Test coverage` table and put human tester actions in `Testing steps`.
-
-- Put AC coverage in the table. Add extra prose only when it gives reader-useful context that changes reviewer judgment.
-- Use `Risks` for warnings, missing coverage, merge-blocking gaps, manual-only validation, deferred checks, or caveats. Omit it when empty.
-- Do not use checkboxes in `Test coverage`.
-- Use checkboxes for operator-owned pass/fail verification outcomes only in `Testing steps`, and for pre-merge operator chores only in `Do before merging`.
-- Do not put a checkbox on every individual UI action. Anything the operator needs to see or manually verify belongs in `Testing steps`, in the order the operator should perform or inspect it. Omit `Testing steps` when no operator-owned manual verification is needed.
-- If an AC is deferred or out of scope for the repo, report that in the coverage table or `Risks`; do not add fake checkboxes.
+Use checkboxes for operator-owned pass/fail verification outcomes only in `Testing steps`, and for pre-merge operator chores only in `Do before merging`. Do not put a checkbox on every individual UI action. Anything the operator needs to see or manually verify belongs in `Testing steps`, in the order the operator should perform or inspect it. Omit `Testing steps` when no operator-owned manual verification is needed.

@@ -23,7 +23,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`, `skills:install`; `lint-staged` block for `*.md` |
+| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`; `lint-staged` block for `*.md` |
 | `pnpm-lock.yaml` | yes | present |
 | `scripts/check-plugin-versions.mjs` | yes | present; fails with non-zero exit on version drift |
 | `scripts/sync-plugin-versions.mjs` | yes | present; rewrites plugin manifests from `package.json` |
@@ -34,7 +34,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, optional `## Testing steps`, `## Test coverage`, optional `## Risks`, emoji status guidance, no pre-checked testing-step guidance, and `type: #123 short description` rule; has no AC-specific prose subsection requirement |
+| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, `## Verification`, no pre-checked testing-step guidance, and `type: #123 short description` rule |
 | `.github/ISSUE_TEMPLATE/bug_report.md` | yes | present with frontmatter |
 | `.github/ISSUE_TEMPLATE/feature_request.md` | yes | present with frontmatter |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
@@ -56,7 +56,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `AGENTS.md` | yes | present; covers project structure, commands, conventions, commits, PRs; "Commit type selection" section leads with the product-surface glob list and one-sentence path-first rule BEFORE the type table, contains a rationalization table, a red-flags STOP block, and at least one WRONG → RIGHT pair. Verify with the AC-54-7 parity grep one-liner (see `docs/superpowers/specs/2026-04-28-54-sharpen-commit-type-guidance-for-product-surface-changes-design.md`). |
+| `AGENTS.md` | yes | present; covers project structure, commands, conventions, commits, PRs; "Commit type selection" section leads with the product-surface glob list and one-sentence path-first rule BEFORE the type table, contains a rationalization table, a red-flags STOP block, and at least one WRONG → RIGHT pair. Verify with a parity grep across agent-facing surfaces. |
 | `CLAUDE.md` | yes | present; imports `@AGENTS.md`; Claude-only guidance below |
 | `CONTRIBUTING.md` | yes | present; pointer to `AGENTS.md` |
 | `SECURITY.md` | public only | public repo → present; private → absent |
@@ -67,9 +67,10 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.claude/settings.json` | yes | present; parses as valid JSONC; `enabledPlugins` declared |
+| `.claude/settings.json` | yes | present; parses as valid JSONC; `enabledPlugins` declared as an object |
 
-For agent plugins, `enabledPlugins` should include `superteam@patinaproject-skills` and `superpowers@claude-plugins-official` unless the user has explicitly opted out.
+For new scaffolded repos, `enabledPlugins` is empty by default. Recommend
+project-specific plugin entries only when the repository explicitly opts in.
 
 ## Area 5 – AI agent plugin surfaces
 
@@ -91,17 +92,16 @@ When detected, the following surfaces should all be present. Missing platforms a
 
 Author URLs in `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` must point to the resolved `https://github.com/<author-handle>`, not the repository owner URL. Repository-level URLs such as `homepage`, `repository`, and Codex interface URLs stay on `https://github.com/<owner>/<repo>`.
 
-## Area 6 – Superpowers opt-in
+## Area 6 – Deprecated workflow cleanup
 
-Detection: look for `docs/superpowers/`. When present, verify both subdirectories exist.
+Detection: look for retired workflow scaffolding in active repo guidance.
 
-| File | Required (if opted in) | Check |
+| File | Required | Check |
 |---|---|---|
-| `docs/superpowers/specs/` | yes | directory exists (may contain only `.gitkeep`) |
-| `docs/superpowers/plans/` | yes | directory exists (may contain only `.gitkeep`) |
-| `package.json` | yes | `scripts.skills:install` exists and installs both `patinaproject/skills` and `obra/superpowers` through `npx skills`; if `docs/superpowers/` already exists and this is absent, classify as `stale` |
-| `AGENTS.md` | yes | mentions `pnpm skills:install` as the Superteam readiness step; if `docs/superpowers/` already exists and this is absent, classify as `stale` |
-| Agent-plugin install docs | agent plugin only | generated install docs mention both `patinaproject/skills` and `obra/superpowers`; if `docs/superpowers/` already exists and either source is absent, classify as `stale` |
+| `docs/superpowers/` | no | absent from new scaffolded repos; if present, classify as `stale` unless the repository explicitly keeps historical artifacts |
+| `package.json` | no | does not install retired Superteam/Superpowers dependencies by default |
+| `AGENTS.md` | yes | directs durable issue context to GitHub issues instead of committed design/plan artifacts |
+| Agent-plugin install docs | agent plugin only | do not require Superpowers for new installs |
 
 ## Area 7 – GitHub repository merge settings
 
@@ -151,4 +151,4 @@ Group recommendations into ordered batches and offer them in this sequence (matc
 4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `RELEASING.md`)
 5. AI platform surfaces (`.cursor/`, `.windsurfrules`, `.github/copilot-instructions.md`)
 6. Workflows (`.github/workflows/*`, including `release.yml` with job-level `permissions:`)
-7. Superpowers scaffolding (opt-in)
+7. Deprecated workflow cleanup

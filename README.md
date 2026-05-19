@@ -1,9 +1,9 @@
 # Skills used by the Patina Project team
 
-Eight installable agent skills for repository scaffolding, multi-teammate
-orchestration, CI-safe orchestration, GitHub workflows, issue branch setup, PR
-finishing, product design, and strategic plan review — available across Claude
-Code, Codex, and any agent runtime that reads `AGENTS.md`.
+Eight installable agent skills for repository scaffolding, GitHub workflows,
+issue branch setup, PR finishing, product design, strategic plan review, and
+historical Superteam compatibility — available across Claude Code, Codex, and
+any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
@@ -46,33 +46,21 @@ npx skills@latest add vercel-labs/skills@find-skills
 
 ### superteam
 
-Even with a capable agent, implementation loops need structure: a design doc
-to approve before planning starts, a plan to approve before code is written,
-an explicit reviewer pass before publishing, and a finisher who owns the PR
-through CI and human feedback. Without that structure, chat context is the only
-handoff artifact and restarts are expensive. `superteam` routes a GitHub issue
-through a six-teammate workflow — Team Lead, Brainstormer, Planner, Executor,
-Reviewer, Finisher — producing durable repo-owned artifacts at every gate.
+Deprecated. `superteam` remains installable for historical compatibility, but
+new work should use GitHub issues for durable context, the current PR template
+for reviewer-facing summaries, and focused implementation or review skills.
 
-See [./skills/superteam/](./skills/superteam/) for the full README and skill
-contract, including the required
-[Superpowers prerequisite](./skills/superteam/README.md#install).
+See [./skills/superteam/](./skills/superteam/) for the deprecated skill
+contract.
 
 ### superteam-non-interactive
 
-GitHub Actions cannot answer follow-up questions. `superteam-non-interactive`
-is the headless companion to `superteam`: it uses the same teammate workflow,
-artifacts, gates, and Finisher shutdown, but removes human-in-the-loop pauses.
-Clean designs auto-advance, publishing is allowed by default when the CI token
-permits it, and unresolved technical or review blockers are reported in a
-machine-actionable format for the next run. Use it for one-shot issue runs where
-the workflow must proceed from invocation inputs, environment variables, and
-durable repository state instead of chat replies.
-
-It ships with the same `patinaproject-skills` plugin as `superteam`.
+Deprecated. `superteam-non-interactive` remains installable for CI users who
+still depend on the retired Superteam contract, but it is not recommended for
+new automation.
 
 See [./skills/superteam-non-interactive/](./skills/superteam-non-interactive/)
-for the skill contract.
+for the deprecated skill contract.
 
 ### using-github
 
@@ -150,8 +138,8 @@ for the full README and skill contract.
 
 | Skill | Description |
 |---|---|
-| [superteam](./skills/superteam/) | Orchestrate a GitHub issue from design through merged PR |
-| [superteam-non-interactive](./skills/superteam-non-interactive/) | Run Superteam in GitHub Actions without prompts |
+| [superteam](./skills/superteam/) | Deprecated historical Superteam orchestration |
+| [superteam-non-interactive](./skills/superteam-non-interactive/) | Deprecated CI-safe Superteam orchestration |
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |

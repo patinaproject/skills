@@ -5,8 +5,8 @@
 This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
 - `skills/scaffold-repository/`: scaffold-repository skill
-- `skills/superteam/`: superteam skill
-- `skills/superteam-non-interactive/`: CI-safe superteam skill
+- `skills/superteam/`: deprecated Superteam compatibility skill
+- `skills/superteam-non-interactive/`: deprecated CI-safe Superteam compatibility skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/finish-pr/`: PR finishing skill
@@ -16,17 +16,14 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all eight skill paths
-- `docs/`: contributor docs plus planning artifacts; use paths such as `docs/file-structure.md`,
-  `docs/release-flow.md`, and, when present, `docs/superpowers/`
+- `docs/`: contributor docs such as `docs/file-structure.md` and
+  `docs/release-flow.md`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
 - root config: `package.json`, `commitizen.config.js`, `commitlint.config.js`, and `.husky/`
 
-For Superpowers-generated design and planning artifacts, use issue-based filenames and the
-following acceptance criteria format:
-
-- `docs/superpowers/specs/YYYY-MM-DD-<issue-number>-<issue-title>-design.md`
-- `docs/superpowers/plans/YYYY-MM-DD-<issue-number>-<issue-title>-plan.md`
-- Acceptance criteria IDs: `AC-<issue-number>-<integer>`
+Use GitHub issues as the durable product and design record. Do not add committed
+design/plan artifacts for routine issue work; put durable context on the issue
+or in normal docs when it is broadly useful beyond one issue.
 
 ## Build, Test, and Development Commands
 
@@ -129,9 +126,10 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 ## Skill Releases
 
 This repo owns eight skills at flat paths: `skills/scaffold-repository/`,
-`skills/superteam/`, `skills/superteam-non-interactive/`,
 `skills/using-github/`, `skills/new-branch/`, `skills/finish-pr/`,
-`skills/office-hours/`, and `skills/plan-ceo-review/`.
+`skills/office-hours/`, `skills/plan-ceo-review/`, plus deprecated
+compatibility skills at `skills/superteam/` and
+`skills/superteam-non-interactive/`.
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
 
@@ -140,9 +138,11 @@ maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y
 component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
 [docs/release-flow.md](./docs/release-flow.md).
 
-The eight in-repo skills share the single root `patinaproject-skills` release and tag;
-they are not separate release-please packages. Third-party skills such as `find-skills`
-are installed separately from their source repo's default branch or a specific `#<git-ref>`.
+The eight in-repo skills share the single root `patinaproject-skills` release
+and tag; they are not separate release-please packages. Deprecated Superteam
+skills remain in the release while they are kept for compatibility. Third-party
+skills such as `find-skills` are installed separately from their source repo's
+default branch or a specific `#<git-ref>`.
 
 Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
 auto-merges Release PRs after required checks pass.
@@ -168,14 +168,7 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-When linked issues define acceptance criteria, use the PR template's
-`Test coverage` section as the single AC and evidence summary, with optional
-`Risks` only when risks exist.
-
-- Put one table row per relevant `AC-<issue>-<n>` in `Test coverage`
-- Add prose only when it changes reviewer judgment
-- Put operator-owned manual verification decisions in `Testing steps`, and omit
-  the section when no operator-owned manual verification is needed
-- Put warnings, missing coverage, manual-only validation, deferred checks, or
-  caveats in `Risks`
-- Put only pre-merge operational chores in `Do before merging`
+Use the PR template as written: linked issues, what changed, and verification
+evidence. Put operator-owned manual verification decisions in `Testing steps`,
+and omit that section when no operator-owned manual verification is needed. Put
+only pre-merge operational chores in `Do before merging`.

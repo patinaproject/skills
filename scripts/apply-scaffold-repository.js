@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // apply-scaffold-repository.js — Idempotent scaffolding applier for the
-// scaffold-repository skill (AC-58-3 check b, AC-58-5 Gate G3).
+// scaffold-repository skill.
 //
 // Usage:
 //   node scripts/apply-scaffold-repository.js <skill-dir>

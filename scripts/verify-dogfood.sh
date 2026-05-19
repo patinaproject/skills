@@ -2,8 +2,6 @@
 # verify-dogfood.sh — Asserts that all eight in-repo skills are discoverable
 # via the flat skills/<name>/ layout and the dogfood overlay symlinks.
 # (find-skills is a third-party vendored skill, not an in-repo skill.)
-# Covers AC-58-3 check c.
-#
 # Exit 0: all eight skills pass all assertions.
 # Exit 1: at least one assertion failed (with a clear FAIL message).
 #

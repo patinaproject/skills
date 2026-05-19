@@ -2,6 +2,11 @@
 
 # Superteam
 
+> Deprecated: Superteam remains available for historical compatibility, but it
+> is no longer the recommended Patina Project workflow for new work. Use GitHub
+> issues for durable context, the current PR template for reviewer-facing
+> summaries, and focused implementation or review skills instead.
+
 Build with a team of agents using Superpowers.
 
 `superteam` is a Claude Code + Codex plugin. It ships an installable orchestration skill under `skills/superteam/` and is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace.

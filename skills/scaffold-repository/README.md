@@ -48,7 +48,7 @@ flowchart TD
 - **GitHub Actions SHA pinning** – every `uses:` references a full commit SHA with a version comment; policy documented in `AGENTS.md`.
 - **PNPM toolchain** – `packageManager: pnpm@10.33.2`, `engines.node >=24`, `.nvmrc`, `.gitattributes`, `.editorconfig`.
 - **Agent + repo docs** – `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md` (public only), `README.md`, `docs/file-structure.md`.
-- **Claude Code project settings** – `.claude/settings.json` with `enabledPlugins` declaring Patina Project marketplace plugins.
+- **Claude Code project settings** – `.claude/settings.json` with no plugins enabled by default.
 - **CODEOWNERS + issue/PR templates** under `.github/`.
 
 ### AI agent plugin add-ons
@@ -57,7 +57,7 @@ When the repo is itself a plugin, bootstrap additionally emits manifests/config 
 
 ### Release flow
 
-For plugins, bootstrap wires a complete [release-please](https://github.com/googleapis/release-please) flow – standing release PR, auto-generated `CHANGELOG.md` and GitHub Release notes, both plugin manifests kept in lockstep with `package.json` on every bump. When the repo is in the `patinaproject` org, the release workflow also dispatches a marketplace-bump event to `patinaproject/skills`.
+For plugins, bootstrap wires a complete [release-please](https://github.com/googleapis/release-please) flow – standing release PR, auto-generated `CHANGELOG.md` and GitHub Release notes, both plugin manifests kept in lockstep with `package.json` on every bump.
 
 ### GitHub repository settings
 
@@ -106,7 +106,6 @@ After installing, run bootstrap from a cloned repository. The skill will prompt 
 - `<owner>`, `<repo>`, `<repo-description>`
 - `<visibility>` – public or private
 - `<is-agent-plugin>` – yes emits plugin manifests + Cursor/Windsurf/Copilot surfaces
-- `<use-superteam>` – yes emits `docs/superpowers/` skeleton
 - Continue.dev – opt-in
 
 Author name, author email, and `SECURITY.md` contact default from `git config user.name` / `git config user.email`.
@@ -144,5 +143,4 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`AGENTS.md`](./AGENTS.md). The r
 - [`SKILL.md`](./SKILL.md) – skill contract, modes, placeholders, emitted tree.
 - [`audit-checklist.md`](./audit-checklist.md) – realignment checklist.
 - [`docs/file-structure.md`](../../../docs/file-structure.md) – layout reference.
-- [`patinaproject/superteam`](https://github.com/patinaproject/superteam) – sibling plugin whose layout bootstrap enforces.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) – marketplace distributing Patina Project plugins.

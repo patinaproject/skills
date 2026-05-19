@@ -37,8 +37,7 @@ pnpm lint:md
 
 - Keep the PR title in commitlint format.
 - Fill in the [PR template](./.github/pull_request_template.md).
-- Use `Coverage and risks` for AC evidence and risks when linked issues define
-  ACs.
+- Include concise verification evidence in the PR body.
 - Use `Testing steps` for operator-owned verification decisions.
 - Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 

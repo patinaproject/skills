@@ -1,9 +1,13 @@
 ---
 name: superteam-non-interactive
-description: Use when running Superteam in GitHub Actions, CI, headless automation, or any one-shot environment where prompts, confirmations, or interactive gate decisions would hang the job.
+description: Deprecated CI-safe Superteam entry point for existing automation. Avoid for new work; use issue-native GitHub workflow skills and focused implementation or review skills instead.
 ---
 
 # superteam-non-interactive
+
+> Deprecated: this skill remains installable for historical CI compatibility,
+> but it is no longer the recommended Patina Project workflow for new
+> automation.
 
 `superteam-non-interactive` is the CI-safe Superteam entry point. It reuses the
 `superteam` teammate contracts, but removes human-in-the-loop pauses so GitHub

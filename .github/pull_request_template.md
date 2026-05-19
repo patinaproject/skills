@@ -40,17 +40,17 @@ Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
   triggering observation), not a restatement of the change.
 
   Include this section only when PR-level operator steps that do not belong to
-  QA, coverage gaps, or pending CI must happen after review and before merge:
+  verification evidence, testing steps, or pending CI must happen after review
+  and before merge:
 
   ## Do before merging
 
   - [ ] Rotate the production secret after deploy.
 
   Keep checklist items concrete, actionable, and imperative. Do not duplicate
-  AC-specific coverage gaps, testing steps, or failing/pending PR checks here;
-  PR check status is already reported by GitHub. Do not add this section for
-  placeholders such as `None`, `N/A`, or `No work-specific pre-merge operator
-  steps.`
+  testing steps or failing/pending PR checks here; PR check status is already
+  reported by GitHub. Do not add this section for placeholders such as `None`,
+  `N/A`, or `No work-specific pre-merge operator steps.`
 -->
 
 <!--
@@ -68,27 +68,12 @@ Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
 - [ ] Verify <observable outcome> after <minimal action context>.
 -->
 
-## Test coverage
+## Verification
 
 <!--
-  When showing a partial example outside a PR body, label the whole example as
-  an excerpt before the first omitted section or table. Actual PR bodies should
-  include one table row per relevant AC when linked issues define ACs. The
-  table is the primary AC summary; add prose only when it changes reviewer
-  judgment. Use `✅` for covered, `⚠️` for covered with an associated risk,
-  and `❌` for missing test coverage. Any `⚠️` row must have a matching
-  `## Risks` entry tied to the same AC. Do not use checkboxes in this section.
+  Include automated checks, targeted inspections, or explicit reasons when a
+  documented check was not run. Do not use checkboxes here; reserve checkboxes
+  for operator-owned manual verification in `Testing steps` and pre-merge
+  operational chores in `Do before merging`.
 -->
-| AC | Requirement | Evidence | Status |
-| --- | --- | --- | --- |
-| AC-<issue>-<n> | <short title> | <command, job, manual source, or doc review> | ✅ |
-
-<!--
-  Optional: include this whole section only when there are notable risks. Delete
-  the full commented example when there are no risks.
-
-## Risks
-
-- `AC-<issue>-<n>`: <risk, caveat, missing coverage, manual-only validation,
-  deferred check, or merge blocker>.
--->
+- `<command or inspection>` — <result>

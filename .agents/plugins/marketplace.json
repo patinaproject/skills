@@ -14,7 +14,8 @@
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Productivity"
+      "category": "Productivity",
+      "description": "Patina Project workflow skills, including deprecated Superteam compatibility skills."
     }
   ]
 }

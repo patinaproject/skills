@@ -6,8 +6,8 @@ documentation. Eight skills live under `skills/<name>/` in a flat layout.
 ## Top level
 
 - `skills/scaffold-repository/`: scaffold-repository skill
-- `skills/superteam/`: superteam skill
-- `skills/superteam-non-interactive/`: CI-safe superteam skill
+- `skills/superteam/`: deprecated Superteam compatibility skill
+- `skills/superteam-non-interactive/`: deprecated CI-safe Superteam compatibility skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/finish-pr/`: PR finishing skill
@@ -21,8 +21,8 @@ documentation. Eight skills live under `skills/<name>/` in a flat layout.
 - `docs/`: contributor-facing docs for skill maintenance
 - `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
-- `.lintstagedrc.cjs`: lint-staged config that excludes vendored skill files and
-  superpowers artifacts from root lint
+- `.lintstagedrc.cjs`: lint-staged config that excludes vendored skill files
+  from root lint
 
 ## Flat skill layout
 
@@ -31,8 +31,8 @@ Eight skills are owned by this repository:
 | Skill | Canonical path | Description |
 | --- | --- | --- |
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
-| `superteam` | `skills/superteam/` | Issue-driven orchestration |
-| `superteam-non-interactive` | `skills/superteam-non-interactive/` | CI-safe Superteam orchestration |
+| `superteam` | `skills/superteam/` | Deprecated historical orchestration |
+| `superteam-non-interactive` | `skills/superteam-non-interactive/` | Deprecated CI-safe historical orchestration |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
@@ -84,10 +84,9 @@ Requirements:
 ## Migration history
 
 This repository was consolidated from three separate upstream repositories in issue
-[#58](https://github.com/patinaproject/skills/issues/58) (approved design:
-`docs/superpowers/specs/2026-05-11-58-merge-superteam-bootstrap-using-github-skills-into-this-repository-for-easier-skill-iteration-design.md`,
-plan:
-`docs/superpowers/plans/2026-05-11-58-merge-superteam-bootstrap-using-github-skills-into-this-repository-for-easier-skill-iteration-plan.md`).
+[#58](https://github.com/patinaproject/skills/issues/58). Historical design
+context now lives on the related GitHub issues rather than in committed
+planning artifacts.
 
 ### Import mechanism
 
@@ -125,7 +124,7 @@ git remote remove upstream-using-github
 | superteam | v1.5.0 | `2dc88cb7e445b4661b473efc21678cae8c3a9c14` | `028165e` |
 | using-github | v2.0.0 | `2aabdb36fe41342810753222e1848bc5ef01ebf4` | `54157bc` |
 
-### SHA-256 round-trip (AC-58-7)
+### SHA-256 round-trip
 
 The `superteam/SKILL.md` was SHA-256 hashed before and after the subtree import and
 again after the delta-4 flatten. All round-trips passed byte-equivalence:
