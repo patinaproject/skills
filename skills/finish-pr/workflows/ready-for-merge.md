@@ -103,12 +103,24 @@ directory's default `gh` repository.
     Stop only when feedback returns `needs-human`.
 
 12. Resolve eligible inline threads only after the relevant fix or explanation
-    is present on the latest head and checks pass. Verify GraphQL `isResolved`
-    after resolving. If permissions do not allow resolution, leave an
-    evidence-bearing reply and report the unresolved state. Do not treat replies
-    as resolution.
+    is present on the latest head and checks pass. Use GraphQL
+    `resolveReviewThread`, then verify GraphQL `isResolved` after resolving. If
+    permissions do not allow resolution, leave an evidence-bearing reply and
+    report the unresolved state. Do not treat replies as resolution.
 
-13. When the loop reaches the ready state, mark a draft PR ready for review:
+13. Final unresolved review-thread gate: immediately before declaring the PR
+    ready, re-query paginated GraphQL review threads for the latest PR head.
+    Distinguish unresolved actionable feedback from outdated or stale feedback
+    that is already fixed on the latest head. For stale fixed threads, resolve
+    them with `resolveReviewThread` when permissions allow, then verify
+    `isResolved: true` from GraphQL. If any thread remains unresolved because it
+    still needs action, cannot be resolved automatically, lacks current-head
+    evidence, or needs human judgment, report it as a blocker instead of
+    reporting ready-to-merge. Restart the readiness loop after branch-local
+    fixes or newly pushed commits. Unresolved threads are blockers until they
+    are resolved, fixed, or evidence-classified as stale or non-blocking.
+
+14. When the loop reaches the ready state, mark a draft PR ready for review:
 
     ```sh
     gh pr ready
@@ -116,12 +128,13 @@ directory's default `gh` repository.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
-14. Final report includes:
+15. Final report includes:
 
     - PR URL.
     - Latest head SHA.
     - Verification commands and results.
     - Check status.
+    - Final unresolved review-thread gate result.
     - Feedback handled, deferred, stale, explained, or blocked.
     - Human blockers, if any.
 

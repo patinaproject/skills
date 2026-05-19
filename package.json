@@ -25,6 +25,7 @@
     "verify:marketplace": "bash scripts/verify-marketplace.sh",
     "verify:scaffold-readme": "node scripts/verify-scaffold-agent-plugin-readme.js",
     "verify:superteam": "bash scripts/verify-superteam-contract.sh",
+    "verify:finish-pr": "bash scripts/verify-finish-pr-workflow.sh",
     "verify:code-review": "bash scripts/verify-code-review-workflow.sh",
     "verify:workflow-cleanup": "bash scripts/verify-workflow-cleanup.sh",
     "apply:scaffold-repository": "node scripts/apply-scaffold-repository.js skills/scaffold-repository",
