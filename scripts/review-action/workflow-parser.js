@@ -47,7 +47,7 @@ function parseWithBlock(lines, startIndex, stepIndent) {
     const indent = countIndent(line);
     const trimmed = line.trim();
 
-    if (index > startIndex && indent <= stepIndent && trimmed.startsWith("- ")) break;
+    if (indent <= stepIndent && trimmed.startsWith("- ")) break;
     if (trimmed !== "with:") continue;
 
     const withIndent = indent;

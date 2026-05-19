@@ -3,6 +3,7 @@ function isLowSignal(file) {
   if (file === "CHANGELOG.md") return true;
   if (file === "pnpm-lock.yaml" || file === "package-lock.json" || file === "yarn.lock") return true;
   if (file === "bun.lockb") return true;
+  // This repo keeps AI-agent plan artifacts under docs/superpowers.
   if (file.startsWith("docs/superpowers/")) return true;
   if (file.startsWith(".agents/skills/")) return true;
   if (file.startsWith(".claude/skills/")) return true;
