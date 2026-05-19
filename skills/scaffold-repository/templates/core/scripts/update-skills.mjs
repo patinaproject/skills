@@ -60,13 +60,17 @@ function pinPatinaRefs() {
       /^patinaproject\/skills(?:#.*)?$/.test(entry.source),
   );
 
-  const unpinned = entries.filter((entry) => !entry.source.includes("#"));
-  if (unpinned.length === 0) {
+  const needsImmutableRef = entries.filter((entry) => {
+    const [, ref = ""] = entry.source.split("#", 2);
+    return !/^[0-9a-f]{40}$/i.test(ref);
+  });
+
+  if (needsImmutableRef.length === 0) {
     return;
   }
 
   const sha = currentPatinaSkillsSha();
-  for (const entry of unpinned) {
+  for (const entry of needsImmutableRef) {
     entry.source = `patinaproject/skills#${sha}`;
   }
   writeCatalog(catalog);
@@ -90,6 +94,8 @@ try {
   pinPatinaRefs();
   run(
     "npx",
+    // The skills CLI currently exposes lockfile restore through experimental_install.
+    // Keep this wrapper small so the subcommand is easy to replace when it graduates.
     ["--yes", "skills@latest", "experimental_install", "--yes"],
     "Updated shared skill lockfile could not be installed",
   );

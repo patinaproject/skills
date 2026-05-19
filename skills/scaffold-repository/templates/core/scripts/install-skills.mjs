@@ -35,6 +35,8 @@ if (listOnly) {
 
 const result = spawnSync(
   "npx",
+  // The skills CLI currently exposes lockfile restore through experimental_install.
+  // Keep this wrapper small so the subcommand is easy to replace when it graduates.
   ["--yes", "skills@latest", "experimental_install", "--yes"],
   { stdio: "inherit" },
 );

@@ -150,11 +150,13 @@ assertIncludes(coreAgentsTemplate, "pnpm skills:update", "Core AGENTS skill upda
 assertIncludes(coreAgentsTemplate, "pnpm skills:list", "Core AGENTS skill list command");
 assertIncludes(coreGitignoreTemplate, ".agents/skills/", "Generated Agents skill payload ignore");
 assertIncludes(coreGitignoreTemplate, ".claude/skills/", "Generated Claude skill payload ignore");
+assertIncludes(coreGitignoreTemplate, "skills-lock.json.bak", "Generated skill rollback backup ignore");
 assertIncludes(coreInstallSkillsTemplate, "No skills-lock.json found", "Install no-lockfile no-op");
 assertIncludes(coreInstallSkillsTemplate, "experimental_install", "Install read-only lockfile command");
 assertIncludes(coreInstallSkillsTemplate, "--list", "Install list mode");
 assertIncludes(coreUpdateSkillsTemplate, "npx --yes skills@latest add patinaproject/skills", "Update marketplace refresh command");
 assertIncludes(coreUpdateSkillsTemplate, "pinPatinaRefs", "Update immutable ref pinning");
+assertIncludes(coreUpdateSkillsTemplate, "needsImmutableRef", "Update re-pins mutable refs");
 assertIncludes(coreUpdateSkillsTemplate, "experimental_install", "Update install verification");
 assertIncludes(coreUpdateSkillsTemplate, "restoreLockfile", "Update rollback on failure");
 assertNotIncludes(releaseFlow, "skills@1.5.6", "Release flow stale exact CLI version");
