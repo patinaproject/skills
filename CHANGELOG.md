@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.10.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.9.0...patinaproject-skills-v1.10.0) (2026-05-19)
+
+
+### Features
+
+* [#122](https://github.com/patinaproject/skills/issues/122) add install-skills workflow ([#124](https://github.com/patinaproject/skills/issues/124)) ([51f85ca](https://github.com/patinaproject/skills/commit/51f85ca8aea57448a399a6a9ead2e69b82511a82))
+* [#127](https://github.com/patinaproject/skills/issues/127) teach finish-pr to handle conflicts ([#129](https://github.com/patinaproject/skills/issues/129)) ([2f0830e](https://github.com/patinaproject/skills/commit/2f0830eb39f9336a0fa7c928666ffe1f125b585c))
+
 ## [1.9.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.8.0...patinaproject-skills-v1.9.0) (2026-05-19)
 
 
