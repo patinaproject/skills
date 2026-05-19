@@ -25,6 +25,20 @@ Use GitHub issues as the durable product and design record. Do not add committed
 design/plan artifacts for routine issue work; put durable context on the issue
 or in normal docs when it is broadly useful beyond one issue.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs are tracked in this repository's GitHub Issues using `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage roles map to this repository's existing GitHub labels, without inventing new labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repository; domain docs are optional and created lazily when useful. See `docs/agents/domain.md`.
+
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install dev tooling and initialize Husky
