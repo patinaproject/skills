@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.7.1...patinaproject-skills-v1.8.0) (2026-05-19)
+
+
+### Features
+
+* [#111](https://github.com/patinaproject/skills/issues/111) align shared skill commands ([#114](https://github.com/patinaproject/skills/issues/114)) ([2c3a3fb](https://github.com/patinaproject/skills/commit/2c3a3fb37917f69f80539978151e49f3be51487f))
+
 ## [1.7.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.7.0...patinaproject-skills-v1.7.1) (2026-05-19)
 
 ### Bug Fixes
