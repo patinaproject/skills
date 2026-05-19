@@ -11,6 +11,9 @@ review threads, top-level PR comments, and review bodies.
 | `defer` | Valid but outside this PR | Explain the scope decision; do not create an issue |
 | `needs-human` | Requires judgment, permissions, secrets, or conflicting direction | Stop and ask |
 
+For merge conflicts, apply the Merge Conflict Rules below when choosing and
+executing the state action.
+
 ## Required Evidence
 
 - Latest PR head SHA used for the decision.

@@ -69,7 +69,8 @@ directory's default `gh` repository.
 8. Resolve the mergeability gate before watching checks. The working tree must
    be clean before the local base-merge attempt; stop for operator feedback if
    a prior step left staged, unstaged, or conflicted changes. In the commands
-   below, `<base-branch>` is the `baseRefName` captured in step 7:
+   below, `<base-branch>` is the `baseRefName` captured in step 7 and is fetched
+   from the working directory's default `gh` repository remote:
 
    ```sh
    git fetch origin <base-branch>
