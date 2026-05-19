@@ -48,7 +48,6 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `pnpm test`: run the full local verification suite
-- `pnpm apply:scaffold-repository:check`: assert scaffolding is in sync (exit 0)
 - `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the ten skill entry points
 
 ## Coding Style & Naming Conventions
@@ -87,9 +86,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 - Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
 - Run `bash scripts/verify-code-review-workflow.sh` after changing `.github/workflows/code-review.yml`
 - Run `bash scripts/verify-workflow-cleanup.sh` after changing workflow cleanup behavior
-- Run `node scripts/verify-scaffold-agent-plugin-readme.js` after changing scaffold README templates
-- Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
-  confirm the scaffold baseline is idempotent against the current tree
+- Run `bash scripts/verify-scaffold-cleanup.sh` after changing scaffold baseline cleanup behavior
 
 ## Issue and PR labels
 
