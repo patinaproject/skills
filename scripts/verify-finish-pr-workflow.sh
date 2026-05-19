@@ -5,6 +5,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 WORKFLOW="skills/finish-pr/workflows/ready-for-merge.md"
+TRIAGE="skills/finish-pr/workflows/triage.md"
 FAIL_COUNT=0
 
 fail() {
@@ -40,9 +41,22 @@ assert_order() {
 }
 
 assert_file "$WORKFLOW"
+assert_file "$TRIAGE"
 
 if [ -f "$WORKFLOW" ]; then
   assert_match "Final unresolved review-thread gate" "$WORKFLOW"
+  assert_match "mergeStateStatus" "$WORKFLOW"
+  assert_match "baseRefName" "$WORKFLOW"
+  assert_match "git fetch origin <base-branch>" "$WORKFLOW"
+  assert_match "git merge --no-commit --no-ff origin/<base-branch>" "$WORKFLOW"
+  assert_match "git merge --abort" "$WORKFLOW"
+  assert_match "Do not use browser automation" "$WORKFLOW"
+  assert_match "Do not rebase or force-push" "$WORKFLOW"
+  assert_match "Do not merge the pull" "$WORKFLOW"
+  assert_match "restart the readiness loop on the new head" "$WORKFLOW"
+  assert_match "product judgment, secrets, permissions" "$WORKFLOW"
+  assert_match "destructive git operations, unrelated scope" "$WORKFLOW"
+  assert_order "mergeability gate" "gh pr checks --watch" "$WORKFLOW"
   assert_order "gh pr checks --watch" "Final unresolved review-thread gate" "$WORKFLOW"
   assert_order "Final unresolved review-thread gate" "gh pr ready" "$WORKFLOW"
   assert_match "resolveReviewThread" "$WORKFLOW"
@@ -51,6 +65,20 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "top-level" "$WORKFLOW"
   assert_match "per-finding disposition" "$WORKFLOW"
   assert_match "unaddressed findings" "$WORKFLOW"
+fi
+
+if [ -f "$TRIAGE" ]; then
+  assert_match "merge conflicts" "$TRIAGE"
+  assert_match "Merge Conflict Rules" "$TRIAGE"
+  assert_match "headRefOid" "$TRIAGE"
+  assert_match "baseRefName" "$TRIAGE"
+  assert_match "mergeStateStatus" "$TRIAGE"
+  assert_match "git merge --abort" "$TRIAGE"
+  assert_match 'Classify branch-local, in-scope, verifiable conflicts as `fix-now`' "$TRIAGE"
+  assert_match 'Classify conflicts as `needs-human`' "$TRIAGE"
+  assert_match "Do not rebase or force-push by default" "$TRIAGE"
+  assert_match "Do not use browser conflict" "$TRIAGE"
+  assert_match "merge the pull request itself" "$TRIAGE"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

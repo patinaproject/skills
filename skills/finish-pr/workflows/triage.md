@@ -1,7 +1,7 @@
 # Check and Feedback Triage
 
-Use this shared state machine for failed PR checks, inline review threads,
-top-level PR comments, and review bodies.
+Use this shared state machine for merge conflicts, failed PR checks, inline
+review threads, top-level PR comments, and review bodies.
 
 | State | Meaning | Action |
 | --- | --- | --- |
@@ -11,10 +11,14 @@ top-level PR comments, and review bodies.
 | `defer` | Valid but outside this PR | Explain the scope decision; do not create an issue |
 | `needs-human` | Requires judgment, permissions, secrets, or conflicting direction | Stop and ask |
 
+For merge conflicts, apply the Merge Conflict Rules below when choosing and
+executing the state action.
+
 ## Required Evidence
 
 - Latest PR head SHA used for the decision.
 - Check name, thread URL, comment URL, or review URL.
+- Mergeability state, base branch, and local merge result for merge conflicts.
 - File and line context when feedback is inline.
 - Fix commit SHA for `fix-now`.
 - Concrete current-state evidence for `explain`, `stale`, and `defer`.
@@ -42,3 +46,21 @@ top-level PR comments, and review bodies.
 - Fix branch-local failures in normal follow-up commits.
 - Stop for missing secrets, permission failures, external outages, or flaky
   infrastructure that cannot be proven branch-local.
+
+## Merge Conflict Rules
+
+- Capture `headRefOid`, `baseRefName`, `mergeable`, and `mergeStateStatus` with
+  `gh pr view` at the start of each readiness-loop pass.
+- Fetch the PR base branch and test the merge locally; local git results govern
+  when GitHub mergeability is stale or unknown.
+- Classify branch-local, in-scope, verifiable conflicts as `fix-now`.
+- Preserve both sides of a conflict when that is clearly correct.
+- Commit clean base merges and conflict resolutions with the repository's normal
+  issue-tagged commit format, push, and restart the readiness loop.
+- Classify conflicts as `needs-human` when resolution requires product judgment,
+  secrets, permissions, destructive git operations, unrelated scope, or
+  unverifiable semantic choices.
+- Run `git merge --abort` before stopping when an uncommitted or conflicted
+  merge is still in the working tree.
+- Do not rebase or force-push by default. Do not use browser conflict
+  resolution or merge the pull request itself.

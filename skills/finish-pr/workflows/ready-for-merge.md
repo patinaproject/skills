@@ -54,10 +54,11 @@ directory's default `gh` repository.
    - Create a ready-for-review PR by default.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR
-   head SHA and verifying local `HEAD` matches it:
+   head SHA, base branch, and GitHub mergeability state, then verifying local
+   `HEAD` matches the PR head:
 
    ```sh
-   gh pr view --json headRefOid,isDraft,reviewDecision,statusCheckRollup
+   gh pr view --json headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
    git rev-parse HEAD
    ```
 
@@ -65,7 +66,54 @@ directory's default `gh` repository.
    stop for operator feedback before checking, resolving, replying, or
    reporting.
 
-8. Watch all checks to terminal state:
+8. Resolve the mergeability gate before watching checks. The working tree must
+   be clean before the local base-merge attempt; stop for operator feedback if
+   a prior step left staged, unstaged, or conflicted changes. In the commands
+   below, `<base-branch>` is the `baseRefName` captured in step 7 and is fetched
+   from the working directory's default `gh` repository remote:
+
+   ```sh
+   git fetch origin <base-branch>
+   git merge --no-commit --no-ff origin/<base-branch>
+   ```
+
+   Use the `gh pr view` mergeability fields as the remote signal and the local
+   merge attempt as the source of truth when GitHub reports `UNKNOWN`, stale, or
+   conflicting state. Do not use browser automation, GitHub's web conflict UI,
+   or the "Automatically merge & resolve" button.
+
+   If the merge reports `Already up to date.`, leave the branch unchanged and
+   continue. If the merge applies cleanly and changes the branch, keep the merge
+   result in the working tree, run documented verification, commit the merge
+   with the repository's normal issue-tagged format, push, and restart the
+   readiness loop on the new head. If verification fails on this clean merge,
+   run `git merge --abort` and stop under the verification stop condition. If
+   two consecutive base merges keep changing the branch without reaching a
+   stable PR head in the same finish-pr run, stop for operator feedback instead
+   of pushing indefinitely.
+
+   If the merge conflicts, resolve conflicts only when the correct result is
+   branch-local, in scope, and verifiable. Prefer repository behavior, tests,
+   generators, and documented verification over ad hoc reasoning. Preserve both
+   sides when that is clearly correct. After resolving, run documented
+   verification, commit the resolution with the repository's normal issue-tagged
+   format, push, and restart the readiness loop on the new head. Use
+   [triage.md](triage.md) as the source of truth for conflict classification;
+   this workflow owns the git sequence and readiness-loop restart.
+
+   Stop when conflicts require product judgment, secrets, permissions,
+   destructive git operations, unrelated scope, or unverifiable semantic
+   choices. Do not rebase or force-push by default. Do not merge the pull
+   request itself. Before any stop path that leaves an uncommitted or conflicted
+   merge in the working tree, run:
+
+   ```sh
+   git merge --abort
+   ```
+
+   Report the aborted merge state and the reason human input is required.
+
+9. Watch all checks to terminal state:
 
    ```sh
    gh pr checks --watch
@@ -78,13 +126,13 @@ directory's default `gh` repository.
    caps. If the check set shows no state change after a reasonable observation
    window, stop for operator feedback instead of waiting indefinitely.
 
-9. Triage every non-pass, canceled, or otherwise problematic check with
-   [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
-   commits, verify locally, push, and restart the loop on the new head. Continue
-   for `explain`, `stale`, and `defer` outcomes only with concrete evidence.
-   Stop only when a check returns `needs-human`.
+10. Triage every non-pass, canceled, or otherwise problematic check with
+    [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
+    commits, verify locally, push, and restart the loop on the new head. Continue
+    for `explain`, `stale`, and `defer` outcomes only with concrete evidence.
+    Stop only when a check returns `needs-human`.
 
-10. Fetch the full PR feedback surface after checks finish:
+11. Fetch the full PR feedback surface after checks finish:
 
     - Unresolved inline review threads through paginated GraphQL.
     - Top-level PR comments, including bot summaries with `Findings`,
@@ -98,7 +146,7 @@ directory's default `gh` repository.
     time when available, classification, and evidence status. Do not persist
     handled state in files.
 
-11. Handle feedback. Fix `fix-now` outcomes in branch-local follow-up commits,
+12. Handle feedback. Fix `fix-now` outcomes in branch-local follow-up commits,
     verify locally, push, and restart the loop on the new head. For `explain`,
     `stale`, and `defer`, reply or report with concrete evidence and continue.
     Stop only when feedback returns `needs-human`. When a top-level review
@@ -109,13 +157,13 @@ directory's default `gh` repository.
     are blockers until they have a disposition recorded in the PR or final
     report.
 
-12. Resolve eligible inline threads only after the relevant fix or explanation
+13. Resolve eligible inline threads only after the relevant fix or explanation
     is present on the latest head and checks pass. Use GraphQL
     `resolveReviewThread`, then verify GraphQL `isResolved` after resolving. If
     permissions do not allow resolution, leave an evidence-bearing reply and
     report the unresolved state. Do not treat replies as resolution.
 
-13. Final unresolved review-thread gate: immediately before declaring the PR
+14. Final unresolved review-thread gate: immediately before declaring the PR
     ready, re-query paginated GraphQL review threads for the latest PR head.
     Distinguish unresolved actionable feedback from outdated or stale feedback
     that is already fixed on the latest head. For stale fixed threads, resolve
@@ -127,7 +175,7 @@ directory's default `gh` repository.
     fixes or newly pushed commits. Unresolved threads are blockers until they
     are resolved, fixed, or evidence-classified as stale or non-blocking.
 
-14. When the loop reaches the ready state, mark a draft PR ready for review:
+15. When the loop reaches the ready state, mark a draft PR ready for review:
 
     ```sh
     gh pr ready
@@ -135,11 +183,14 @@ directory's default `gh` repository.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
-15. Final report includes:
+16. Final report includes:
 
     - PR URL.
     - Latest head SHA.
     - Verification commands and results.
+    - Mergeability and conflict-handling evidence, including the base branch,
+      merge state, local merge result, and any merge or conflict-resolution
+      commit pushed during the loop.
     - Check status.
     - Final unresolved review-thread gate result.
     - Feedback handled, deferred, stale, explained, or blocked, including a
@@ -151,6 +202,8 @@ directory's default `gh` repository.
 - Issue inference is ambiguous.
 - Change staging would include unrelated or ambiguous files.
 - Local verification fails for a reason that is not branch-local or in scope.
+- Merge conflict resolution requires product judgment, secrets, permissions,
+  destructive git operations, unrelated scope, or unverifiable semantic choices.
 - Check or feedback triage returns `needs-human`.
 - Review feedback changes requirements, acceptance criteria, or product scope.
 - Another actor pushes to the PR while the readiness loop is running.
@@ -158,6 +211,7 @@ directory's default `gh` repository.
 
 ## Non-Goals
 
-Do not merge the PR, rewrite history, force-push, create follow-up issues,
-persist handled feedback state, wait indefinitely for new human comments after
-the PR is ready, or add agent attribution by default.
+Do not merge the PR, rebase or force-push by default, use browser conflict
+resolution, create follow-up issues, persist handled feedback state, wait
+indefinitely for new human comments after the PR is ready, or add agent
+attribution by default.
