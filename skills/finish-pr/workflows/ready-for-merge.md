@@ -87,7 +87,8 @@ directory's default `gh` repository.
 10. Fetch the full PR feedback surface after checks finish:
 
     - Unresolved inline review threads through paginated GraphQL.
-    - Top-level PR comments.
+    - Top-level PR comments, including bot summaries with `Findings`,
+      severity counts, or line-keyed observations.
     - Review bodies and latest review state.
     - Review decision, when available.
 
@@ -100,7 +101,13 @@ directory's default `gh` repository.
 11. Handle feedback. Fix `fix-now` outcomes in branch-local follow-up commits,
     verify locally, push, and restart the loop on the new head. For `explain`,
     `stale`, and `defer`, reply or report with concrete evidence and continue.
-    Stop only when feedback returns `needs-human`.
+    Stop only when feedback returns `needs-human`. When a top-level review
+    comment contains findings, handle each finding separately with a
+    per-finding disposition: fixed in a named commit, explained with evidence,
+    stale, deferred as out of scope, or blocked for human judgment. Severity
+    labels such as `Minor` do not make findings optional; unaddressed findings
+    are blockers until they have a disposition recorded in the PR or final
+    report.
 
 12. Resolve eligible inline threads only after the relevant fix or explanation
     is present on the latest head and checks pass. Use GraphQL
@@ -135,7 +142,8 @@ directory's default `gh` repository.
     - Verification commands and results.
     - Check status.
     - Final unresolved review-thread gate result.
-    - Feedback handled, deferred, stale, explained, or blocked.
+    - Feedback handled, deferred, stale, explained, or blocked, including a
+      per-finding disposition for every top-level review finding.
     - Human blockers, if any.
 
 ## Stop Conditions

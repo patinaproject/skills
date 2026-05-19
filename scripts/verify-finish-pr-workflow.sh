@@ -46,6 +46,9 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "resolveReviewThread" "$WORKFLOW"
   assert_match "isResolved" "$WORKFLOW"
   assert_match "(?i)(?:unresolved.*blocker|blocker.*unresolved)" "$WORKFLOW"
+  assert_match "top-level.*Findings|top-level.*finding" "$WORKFLOW"
+  assert_match "per-finding disposition" "$WORKFLOW"
+  assert_match "unaddressed findings" "$WORKFLOW"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
