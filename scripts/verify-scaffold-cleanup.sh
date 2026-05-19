@@ -61,6 +61,7 @@ assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
 # generic scaffolded consumer repositories.
 for live_reference_path in \
   .claude/settings.json \
+  .codex/environments/environment.toml \
   .editorconfig \
   .agents/plugins/marketplace.json \
   .github/CODEOWNERS \
@@ -78,7 +79,7 @@ for live_reference_path in \
   .gitignore \
   .husky/commit-msg \
   .husky/pre-commit \
-  .lintstagedrc.cjs \
+  .lintstagedrc.js \
   .markdownlint.jsonc \
   .markdownlintignore \
   .nvmrc \
@@ -89,13 +90,14 @@ for live_reference_path in \
   LICENSE \
   README.md \
   SECURITY.md \
-  commitizen.config.js \
+  commitizen.config.json \
   commitlint.config.js \
   docs/file-structure.md \
   docs/release-flow.md \
   docs/wiki-index.md \
   package.json \
   scripts/install-third-party-skills.sh \
+  scripts/verify-esm-tooling.sh \
   skills-lock.json
 do
   assert_present_path "$live_reference_path"
@@ -105,7 +107,7 @@ assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-re
   AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
   scripts/install-third-party-skills.sh scripts/test.sh \
   scripts/verify-code-review-workflow.sh scripts/verify-dogfood.sh \
-  scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
+  scripts/verify-esm-tooling.sh scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
   scripts/verify-superteam-contract.sh scripts/verify-workflow-cleanup.sh \
   skills/scaffold-repository
 
@@ -113,7 +115,7 @@ assert_no_match "skills/scaffold-repository/templates|skills/bootstrap/templates
   AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
   scripts/install-third-party-skills.sh scripts/test.sh \
   scripts/verify-code-review-workflow.sh scripts/verify-dogfood.sh \
-  scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
+  scripts/verify-esm-tooling.sh scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
   scripts/verify-superteam-contract.sh scripts/verify-workflow-cleanup.sh \
   skills/scaffold-repository
 
@@ -129,7 +131,7 @@ assert_no_match "obra/superpowers" \
 assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
   skills/scaffold-repository/README.md
 
-assert_no_match "scripts/(test|verify-code-review-workflow|verify-dogfood|verify-finish-pr-workflow|verify-marketplace|verify-scaffold-cleanup|verify-superteam-contract|verify-workflow-cleanup)\\.sh" \
+assert_no_match "scripts/(test|verify-code-review-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-scaffold-cleanup|verify-superteam-contract|verify-workflow-cleanup)\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

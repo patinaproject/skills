@@ -1,6 +1,7 @@
 {
   "name": "skills",
   "private": true,
+  "type": "module",
   "description": "Marketplace catalog for Patina Project plugins and packaged skills (Codex + Claude)",
   "author": {
     "name": "Ted Mader",
@@ -28,7 +29,7 @@
       "path": "cz-customizable"
     },
     "cz-customizable": {
-      "config": "commitizen.config.js"
+      "config": "commitizen.config.json"
     }
   },
   "devDependencies": {

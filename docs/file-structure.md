@@ -19,11 +19,13 @@ documentation. Ten skills live under `skills/<name>/` in a flat layout.
 - `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/` (ten in-repo)
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog (plugin slug: `patinaproject-skills`)
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all ten skill paths
+- `.codex/environments/environment.toml`: Codex workspace setup for this
+  repository
 - `skills-lock.json`: vercel-labs CLI install lockfile (auto-generated; commit it)
 - `docs/`: contributor-facing docs for skill maintenance
-- `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling
+- `package.json`, `commitizen.config.json`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
-- `.lintstagedrc.cjs`: lint-staged config that excludes vendored skill files
+- `.lintstagedrc.js`: lint-staged config that excludes vendored skill files
   from root lint
 
 ## Flat skill layout
