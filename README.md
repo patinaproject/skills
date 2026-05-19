@@ -1,8 +1,9 @@
 # Skills used by the Patina Project team
 
-Eight installable agent skills for repository scaffolding, GitHub workflows,
-issue branch setup, PR finishing, product design, strategic plan review, and
-historical Superteam compatibility — available across Claude Code, Codex, and
+Nine installable agent skills for repository scaffolding, GitHub workflows,
+issue branch setup, PR finishing, local AI review-action emulation, product
+design, strategic plan review, and historical Superteam compatibility —
+available across Claude Code, Codex, and
 any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
@@ -97,6 +98,17 @@ fail-fast, handles existing review feedback, and stops at ready-to-merge.
 See [./skills/finish-pr/](./skills/finish-pr/)
 for the skill contract.
 
+### review-action
+
+Hosted AI code review is useful, but waiting for a pull request check slows
+local iteration. `review-action` detects supported Claude Code Action and Codex
+Action review workflows, computes the PR-equivalent branch diff, tightens any
+mutating hosted settings for local read-only execution, invokes the matching
+local CLI, and prints a terminal-only report.
+
+See [./skills/review-action/](./skills/review-action/)
+for the skill contract.
+
 ### office-hours
 
 New product ideas benefit from honest forcing questions before any code is
@@ -143,6 +155,7 @@ for the full README and skill contract.
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
+| [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -165,10 +178,16 @@ npx skills@latest add ./skills/office-hours --list
 node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 ```
 
-### Check c — dogfood verification, all eight skills
+### Check c — dogfood verification, all nine skills
 
 ```sh
 bash scripts/verify-dogfood.sh
+```
+
+### Check d — review-action deterministic behavior
+
+```sh
+node scripts/verify-review-action.js
 ```
 
 ## Repository layout
@@ -181,6 +200,7 @@ skills/
   using-github/
   new-branch/
   finish-pr/
+  review-action/
   office-hours/
   plan-ceo-review/
 .agents/skills/<name>/               Symlinks to ../../skills/<name>/

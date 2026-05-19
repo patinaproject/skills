@@ -1,7 +1,7 @@
 # Repository File Structure
 
 This repository is the marketplace surface for Patina Project plugins and related install
-documentation. Eight skills live under `skills/<name>/` in a flat layout.
+documentation. Nine skills live under `skills/<name>/` in a flat layout.
 
 ## Top level
 
@@ -11,12 +11,13 @@ documentation. Eight skills live under `skills/<name>/` in a flat layout.
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/finish-pr/`: PR finishing skill
+- `skills/review-action/`: local AI code-review action emulator skill
 - `skills/office-hours/`: office-hours skill
 - `skills/plan-ceo-review/`: plan-ceo-review skill
-- `.agents/skills/<name>/`: committed symlinks into `../../skills/<name>/` (eight in-repo)
-- `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/` (eight in-repo)
+- `.agents/skills/<name>/`: committed symlinks into `../../skills/<name>/` (nine in-repo)
+- `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/` (nine in-repo)
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog (plugin slug: `patinaproject-skills`)
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all eight skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all nine skill paths
 - `skills-lock.json`: vercel-labs CLI install lockfile (auto-generated; commit it)
 - `docs/`: contributor-facing docs for skill maintenance
 - `package.json`, `commitizen.config.js`, `commitlint.config.js`: repo tooling
@@ -26,7 +27,7 @@ documentation. Eight skills live under `skills/<name>/` in a flat layout.
 
 ## Flat skill layout
 
-Eight skills are owned by this repository:
+Nine skills are owned by this repository:
 
 | Skill | Canonical path | Description |
 | --- | --- | --- |
@@ -36,6 +37,7 @@ Eight skills are owned by this repository:
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
+| `review-action` | `skills/review-action/` | Local AI code-review action emulation |
 | `office-hours` | `skills/office-hours/` | YC-style office hours for product ideation |
 | `plan-ceo-review` | `skills/plan-ceo-review/` | Founder-mode review for existing plans |
 
@@ -53,7 +55,7 @@ install-block reframes.
 
 ## Dogfood overlay layout
 
-The eight in-repo skills are also accessible through two overlay directories via one-hop
+The nine in-repo skills are also accessible through two overlay directories via one-hop
 committed symlinks:
 
 | Overlay path | Symlink target | Mode |
@@ -64,7 +66,7 @@ committed symlinks:
 These symlinks allow the agent runtime to discover the in-repo skills alongside any
 third-party skills installed by the vercel-labs CLI.
 
-Third-party CLI-installed skills (including `find-skills`) are untracked; only the eight
+Third-party CLI-installed skills (including `find-skills`) are untracked; only the nine
 in-repo overlay symlinks are committed.
 
 ## Symlink hygiene

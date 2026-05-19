@@ -34,9 +34,13 @@ jobs:
       - name: "Check b — apply-scaffold-repository.js exits 0 (no-network)"
         run: node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 
-      # Check c: dogfood verification covers all five skills
-      - name: "Check c — verify-dogfood.sh exits 0 (all five skills)"
+      # Check c: dogfood verification covers all nine skills
+      - name: "Check c — verify-dogfood.sh exits 0 (all nine skills)"
         run: bash scripts/verify-dogfood.sh
+
+      # Check review-action deterministic parser, classifier, safety, planner
+      - name: "Check d — verify-review-action.js exits 0 (local review emulator)"
+        run: node scripts/verify-review-action.js
 
       # Check marketplace catalog validity
       - name: "verify-marketplace.sh exits 0 (catalog validated)"

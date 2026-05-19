@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "patinaproject-skills",
-      "description": "Skills used by the Patina Project team — scaffold-repository, using-github, new-branch, finish-pr, office-hours, plan-ceo-review, plus deprecated Superteam compatibility skills",
+      "description": "Skills used by the Patina Project team — scaffold-repository, using-github, new-branch, finish-pr, review-action, office-hours, plan-ceo-review, plus deprecated Superteam compatibility skills",
       "source": "./"
     }
   ]
