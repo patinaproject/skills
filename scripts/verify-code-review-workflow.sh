@@ -70,10 +70,18 @@ if [ -f "$WORKFLOW" ]; then
   assert_order "uses: actions/checkout@[0-9a-f]{40}" "uses: anthropics/claude-code-action@[0-9a-f]{40}" "$WORKFLOW"
   assert_match "# anthropics/claude-code-action@v1" "$WORKFLOW"
   assert_match "uses: anthropics/claude-code-action@[0-9a-f]{40}" "$WORKFLOW"
+  assert_match "NON-INTERACTIVE CI REVIEW" "$WORKFLOW"
+  assert_match "gh pr diff" "$WORKFLOW"
+  assert_match "BASE_SHA=\\$\\(gh pr view" "$WORKFLOW"
+  assert_match "Critical \\(Must Fix\\)" "$WORKFLOW"
+  assert_match "Major \\(Should Fix\\)" "$WORKFLOW"
+  assert_match "## Code Review" "$WORKFLOW"
+  assert_match "Affected Areas" "$WORKFLOW"
   assert_match "include_fix_links: false" "$WORKFLOW"
   assert_match "display_report: false" "$WORKFLOW"
   assert_match "show_full_output: false" "$WORKFLOW"
-  assert_match "--disallowedTools \".*Edit.*MultiEdit.*Write.*Bash.*\"" "$WORKFLOW"
+  assert_match "--allowedTools Read,Bash\\(gh pr comment:\\*\\),Bash\\(gh pr diff:\\*\\),Bash\\(gh pr view:\\*\\),Bash\\(git diff:\\*\\)" "$WORKFLOW"
+  assert_no_match "--disallowedTools" "$WORKFLOW"
 fi
 
 assert_match "blacksmith-2vcpu-ubuntu-2404" .github/actionlint.yaml

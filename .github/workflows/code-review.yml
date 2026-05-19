@@ -77,6 +77,9 @@ jobs:
     needs: classify
     runs-on: blacksmith-2vcpu-ubuntu-2404
     if: needs.classify.outputs.should_review == 'true'
+    env:
+      PR_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       - name: Checkout repository
         # actions/checkout@v4.3.1
@@ -84,7 +87,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Run passive Claude review
+      - name: Run Code Review
+        id: code-review
         # anthropics/claude-code-action@v1
         uses: anthropics/claude-code-action@855a15bff2f22a6b15d90a4ebef506b5f1da1aec
         with:
@@ -94,23 +98,116 @@ jobs:
           show_full_output: false
           use_sticky_comment: true
           prompt: |
-            Review this pull request in the public repository ${{ github.repository }}.
+            NON-INTERACTIVE CI REVIEW for PR ${{ env.PR_NUMBER }} in ${{ env.PR_REPO }}.
 
-            Scope:
-            - Focus on correctness, security, maintainability, test coverage, GitHub Actions safety, and this repository's conventions.
-            - Do not duplicate normal CI output, formatting output, release notes, or dependency-update noise.
-            - Treat generated assets, lockfiles, changelogs, and planning artifacts as low-signal unless they reveal a concrete risk.
+            This review is non-mutating. Do not edit files, stage changes,
+            commit changes, or push branches.
 
-            Security boundary:
-            - This repository is public. Do not print, summarize, infer, or request secrets, credentials, token values, or private context.
-            - Do not modify files, create commits, push branches, open pull requests, run shell commands, or suggest privileged automation.
-            - If you see a possible secret, describe the risk category without reproducing the value.
+            ## Step 1: Load project context
 
-            Output:
-            - Post inline comments only for critical or major findings with actionable fixes.
-            - Put minor findings in the single summary comment.
-            - Include one concise summary comment with change walkthrough, risk level, and finding counts.
-            - Avoid accidental issue autolinks in bot text; write issue references with a space after the hash, such as "# 123".
+            Read AGENTS.md, CLAUDE.md if present, and docs that govern changed
+            files.
+
+            ## Step 2: Get PR diff
+
+            Run:
+              gh pr view ${{ env.PR_NUMBER }}
+              gh pr diff ${{ env.PR_NUMBER }}
+
+            Store the diff for use in the review below.
+
+            Skip these paths in all review passes:
+            - CHANGELOG.md and release-please generated release metadata
+            - pnpm-lock.yaml and other lock files
+            - .agents/skills/** and .claude/skills/** dogfood overlay paths
+            - generated marketplace output unless it reveals a concrete risk
+
+            ## Step 3: Compute base and head SHAs
+
+            Run:
+              BASE_SHA=$(gh pr view ${{ env.PR_NUMBER }} --json baseRefOid --jq .baseRefOid)
+              HEAD_SHA=$(gh pr view ${{ env.PR_NUMBER }} --json headRefOid --jq .headRefOid)
+
+            ## Step 4: Primary review
+
+            Apply the repository code-review rubric to the diff
+            (BASE_SHA..HEAD_SHA). Preserve exact functionality. Never ask for a
+            refactor that changes what the code does unless the current behavior
+            is a bug.
+
+            **Correctness and security:**
+            - Does the implementation match the issue intent?
+            - Are GitHub Actions permissions, pinned action SHAs, and secret
+              boundaries safe?
+            - Does the change introduce credential leaks, public-repo private
+              context leaks, or unsafe automation?
+
+            **Maintainability:**
+            - Reduce unnecessary complexity and nesting.
+            - Eliminate redundant wording, stale workflow names, and unclear
+              skill instructions.
+            - Preserve repository conventions for skills, marketplace manifests,
+              issue-linked commits, and PR templates.
+
+            **Testing:**
+            - Are changed workflow contracts covered by verification scripts?
+            - Are changed skill behaviors verified through discoverability,
+              marketplace, lint, or focused workflow checks?
+            - Do tests verify observable behavior rather than implementation
+              trivia?
+
+            Categorize findings as:
+            - **Critical (Must Fix):** Bugs, security issues, credential leaks,
+              broken workflows, or data loss risks
+            - **Major (Should Fix):** Missing verification, unsafe permissions,
+              unclear contracts, or likely agent workflow regressions
+            - **Minor (Nice to Have):** Style, wording, or documentation polish
+
+            ## Step 5: Consolidate and post findings
+
+            Merge all findings. Deduplicate overlapping findings.
+            Do NOT duplicate output from CI lint/test pipelines.
+            Do not edit files, stage changes, commit changes, or push branches.
+
+            For each Critical and Major finding, post an inline comment on the
+            specific line in the diff when possible. Each comment must include:
+            - The severity label (C1:, M1:, M2:, etc.)
+            - A clear description of the issue
+            - A concrete suggested fix
+
+            Post one summary comment using:
+              gh pr comment ${{ env.PR_NUMBER }} --body "..."
+
+            Use this structure for the summary:
+
+            ## Code Review
+
+            ### Change Walkthrough
+            [Brief description per file or area changed]
+
+            ### Affected Areas
+            [List of skill, workflow, marketplace, or docs areas touched]
+
+            ### Risk: [Low/Medium/High]
+            [One sentence reasoning]
+
+            ### Findings
+            - Critical: [N]
+            - Major: [N]
+            - Minor: [N]
+
+            [For Minor findings not posted as inline comments, list them briefly here]
+
+            ## Important comment formatting rules
+
+            - NEVER write '#' followed by a number (for example, '#1' or '#2');
+              GitHub auto-links these to issues and PRs.
+            - Use C1:, M1:, and L1: style labels instead.
+            - Keep inline comments concise and actionable.
+            - This repository is public. Do not print, summarize, infer, or
+              request secrets, credentials, token values, private repository
+              URLs, private paths, or private context.
           claude_args: |
-            --max-turns 6
-            --disallowedTools "Edit,MultiEdit,Write,Bash"
+            --max-turns 100
+            --allowedTools Read,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
+            --append-system-prompt "CI NON-INTERACTIVE MODE: Auto-proceed at all skill checkpoints, HALT conditions, and escalation menus. Never wait for human confirmation or approval. When a skill step says HALT, continue to the next step automatically."
