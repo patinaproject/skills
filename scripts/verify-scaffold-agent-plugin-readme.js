@@ -25,8 +25,22 @@ const coreAgentsTemplatePath = path.join(
   repoRoot,
   "skills/scaffold-repository/templates/core/AGENTS.md.tmpl",
 );
+const coreGitignoreTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/core/.gitignore.tmpl",
+);
+const coreInstallSkillsTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/core/scripts/install-skills.mjs",
+);
+const coreUpdateSkillsTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/core/scripts/update-skills.mjs",
+);
 const skillContractPath = path.join(repoRoot, "skills/scaffold-repository/SKILL.md");
 const auditChecklistPath = path.join(repoRoot, "skills/scaffold-repository/audit-checklist.md");
+const releaseFlowPath = path.join(repoRoot, "docs/release-flow.md");
+const verifyWorkflowPath = path.join(repoRoot, ".github/workflows/verify.yml");
 
 const values = {
   owner: "patinaproject",
@@ -85,8 +99,13 @@ const skillTemplate = fs.readFileSync(skillTemplatePath, "utf8");
 const codexPluginTemplate = fs.readFileSync(codexPluginTemplatePath, "utf8");
 const corePackageTemplate = fs.readFileSync(corePackageTemplatePath, "utf8");
 const coreAgentsTemplate = fs.readFileSync(coreAgentsTemplatePath, "utf8");
+const coreGitignoreTemplate = fs.readFileSync(coreGitignoreTemplatePath, "utf8");
+const coreInstallSkillsTemplate = fs.readFileSync(coreInstallSkillsTemplatePath, "utf8");
+const coreUpdateSkillsTemplate = fs.readFileSync(coreUpdateSkillsTemplatePath, "utf8");
 const skillContract = fs.readFileSync(skillContractPath, "utf8");
 const auditChecklist = fs.readFileSync(auditChecklistPath, "utf8");
+const releaseFlow = fs.readFileSync(releaseFlowPath, "utf8");
+const verifyWorkflow = fs.readFileSync(verifyWorkflowPath, "utf8");
 const rendered = renderTemplate(template, values);
 const renderedSkill = renderTemplate(skillTemplate, values);
 const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
@@ -96,7 +115,9 @@ const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
   "author-handle": "test-author",
 });
 assertNotIncludes(rendered, "{{", "rendered README");
-assertNotIncludes(rendered, "pnpm skills:install", "Retired portable skills install script");
+assertIncludes(rendered, "pnpm skills:install", "Consumer skill install wrapper");
+assertIncludes(rendered, "pnpm skills:update", "Consumer skill update wrapper");
+assertIncludes(rendered, "pnpm skills:list", "Consumer skill list wrapper");
 assertNotIncludes(rendered, "obra/superpowers", "Retired Superpowers install source");
 assertIncludes(rendered, "/workflow-kit:issue-router", "Claude invocation");
 assertNotIncludes(rendered, "/workflow-kit:workflow-kit", "Claude invocation");
@@ -121,7 +142,33 @@ assertIncludes(
   "Primary skill render requirement",
 );
 assertNotIncludes(skillContract, "obra/superpowers", "Skill contract retired Superpowers source");
-assertNotIncludes(corePackageTemplate, "skills:install", "Core package retired skills install script");
+assertIncludes(corePackageTemplate, "\"skills:install\"", "Core package skill install script");
+assertIncludes(corePackageTemplate, "\"skills:update\"", "Core package skill update script");
+assertIncludes(corePackageTemplate, "\"skills:list\"", "Core package skill list script");
+assertIncludes(coreAgentsTemplate, "pnpm skills:install", "Core AGENTS skill install command");
+assertIncludes(coreAgentsTemplate, "pnpm skills:update", "Core AGENTS skill update command");
+assertIncludes(coreAgentsTemplate, "pnpm skills:list", "Core AGENTS skill list command");
+assertIncludes(coreGitignoreTemplate, ".agents/skills/", "Generated Agents skill payload ignore");
+assertIncludes(coreGitignoreTemplate, ".claude/skills/", "Generated Claude skill payload ignore");
+assertIncludes(coreInstallSkillsTemplate, "No skills-lock.json found", "Install no-lockfile no-op");
+assertIncludes(coreInstallSkillsTemplate, "experimental_install", "Install read-only lockfile command");
+assertIncludes(coreInstallSkillsTemplate, "--list", "Install list mode");
+assertIncludes(coreUpdateSkillsTemplate, "npx --yes skills@latest add patinaproject/skills", "Update marketplace refresh command");
+assertIncludes(coreUpdateSkillsTemplate, "pinPatinaRefs", "Update immutable ref pinning");
+assertIncludes(coreUpdateSkillsTemplate, "experimental_install", "Update install verification");
+assertIncludes(coreUpdateSkillsTemplate, "restoreLockfile", "Update rollback on failure");
+assertNotIncludes(releaseFlow, "skills@1.5.6", "Release flow stale exact CLI version");
+assertNotIncludes(verifyWorkflow, "skills@1.5.6", "Verify workflow stale exact CLI version");
+assertIncludes(
+  releaseFlow,
+  "npx skills@latest add patinaproject/skills --skill scaffold-repository",
+  "Release flow current single-skill example",
+);
+assertIncludes(
+  releaseFlow,
+  "npx skills@latest add patinaproject/skills#v1.0.0 --skill scaffold-repository",
+  "Release flow current pinned single-skill example",
+);
 assertNotIncludes(coreAgentsTemplate, "obra/superpowers", "Core AGENTS retired Superpowers source");
 assertIncludes(
   auditChecklist,

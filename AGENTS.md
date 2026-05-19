@@ -69,7 +69,7 @@ and when to split reference material out of the main skill file.
 If `write-a-skill` is not installed in the local agent environment, install it with:
 
 ```bash
-npm_config_ignore_scripts=true npx skills@1.5.6 add mattpocock/skills@write-a-skill -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-skill -y
 ```
 
 For workflow-contract changes, especially `skills/superteam/**`, also use

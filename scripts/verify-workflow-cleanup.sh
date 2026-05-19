@@ -50,7 +50,7 @@ assert_no_match "docs/superpowers/(specs|plans)" "${ACTIVE_PATHS[@]}"
 assert_no_match "AC-[0-9]+|AC-<|acceptance criteria|Test coverage|Coverage and risks|## Risks|\\bRisks\\b" \
   AGENTS.md CONTRIBUTING.md .github/pull_request_template.md \
   skills/scaffold-repository skills/using-github
-assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superteam@patinaproject-skills|<use-superteam>|skills:install" \
+assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superteam@patinaproject-skills|<use-superteam>" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
   skills/scaffold-repository
 

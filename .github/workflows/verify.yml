@@ -45,17 +45,17 @@ jobs:
       # Check a (representative sample): CLI resolves skills from local paths
       # Using local path sources because the branch may not be published to
       # remote at CI time. Post-merge, consumers use:
-      #   npm_config_ignore_scripts=true npx skills@1.5.6 \
-      #     add patinaproject/skills@<name> --agent claude-code -y
+      #   npm_config_ignore_scripts=true npx skills@latest \
+      #     add patinaproject/skills --skill <name> --agent claude-code -y
       # The local-path form proves the SKILL.md shape is CLI-compatible.
       - name: "Check a — CLI resolves scaffold-repository from local path (must exit 0)"
         run: |
-          npm_config_ignore_scripts=true npx skills@1.5.6 \
+          npm_config_ignore_scripts=true npx skills@latest \
             add ./skills/scaffold-repository --list
           echo "exit=$?"
 
       - name: "Check a — CLI resolves office-hours from local path (must exit 0)"
         run: |
-          npm_config_ignore_scripts=true npx skills@1.5.6 \
+          npm_config_ignore_scripts=true npx skills@latest \
             add ./skills/office-hours --list
           echo "exit=$?"
