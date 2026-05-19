@@ -28,7 +28,7 @@ assert_absent_path() {
 assert_present_path() {
   local path="$1"
   if [ ! -e "$path" ]; then
-    fail "live scaffold baseline path is missing: $path"
+    fail "live scaffold reference path is missing: $path"
   fi
 }
 
@@ -56,7 +56,10 @@ assert_absent_path "skills/scaffold-repository/templates"
 assert_absent_path "scripts/apply-scaffold-repository.js"
 assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
 
-for baseline_path in \
+# This protects the live patinaproject/skills reference repo. It intentionally
+# includes marketplace-internal verification files that are not emitted into
+# generic scaffolded consumer repositories.
+for live_reference_path in \
   .claude/settings.json \
   .editorconfig \
   .agents/plugins/marketplace.json \
@@ -93,17 +96,9 @@ for baseline_path in \
   docs/wiki-index.md \
   package.json \
   scripts/install-third-party-skills.sh \
-  scripts/test.sh \
-  scripts/verify-code-review-workflow.sh \
-  scripts/verify-dogfood.sh \
-  scripts/verify-finish-pr-workflow.sh \
-  scripts/verify-marketplace.sh \
-  scripts/verify-scaffold-cleanup.sh \
-  scripts/verify-superteam-contract.sh \
-  scripts/verify-workflow-cleanup.sh \
   skills-lock.json
 do
-  assert_present_path "$baseline_path"
+  assert_present_path "$live_reference_path"
 done
 
 assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-repository self-apply" \
@@ -133,6 +128,9 @@ assert_no_match "obra/superpowers" \
 
 assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
   skills/scaffold-repository/README.md
+
+assert_no_match "scripts/(test|verify-code-review-workflow|verify-dogfood|verify-finish-pr-workflow|verify-marketplace|verify-scaffold-cleanup|verify-superteam-contract|verify-workflow-cleanup)\\.sh" \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

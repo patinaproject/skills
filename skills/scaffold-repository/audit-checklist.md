@@ -25,10 +25,8 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `test`, and the live skills restore command |
+| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
 | `pnpm-lock.yaml` | yes | present |
-| `scripts/install-third-party-skills.sh` | yes | present; restores project-local third-party skills from the committed lockfile with install scripts disabled |
-| `skills-lock.json` | yes | present; records project-local third-party skill provenance for dogfooding |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `docs/release-flow.md` | yes | present; documents the release-please flow |
 
@@ -148,7 +146,7 @@ Group recommendations into ordered batches and offer them in this sequence (matc
 
 1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
 2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`)
-3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `scripts/install-third-party-skills.sh`, `skills-lock.json`)
+3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`)
 4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)
 6. Workflows (`.github/workflows/*`, including `release-please.yml` with job-level `permissions:`)

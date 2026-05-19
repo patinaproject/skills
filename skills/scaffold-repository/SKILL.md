@@ -26,7 +26,7 @@ Preconditions:
 
 Behavior:
 
-- Emit the full [core baseline](#core-baseline) tree from the live repository baseline.
+- Emit the full [core baseline](#core-baseline) tree from the live repository baseline, filtering out marketplace-internal verification and dogfood tooling.
 - If the user answers yes to "Is this an AI agent plugin?", additionally emit the [agent-plugin surfaces](#agent-plugin-surfaces).
 - Run `pnpm install` to generate `pnpm-lock.yaml` and wire Husky.
 - Leave all emitted files staged but uncommitted so the user owns the first commit.
@@ -47,7 +47,7 @@ Behavior:
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files; no file from the "Source of truth for repo baseline" list in `AGENTS.md` may be skipped. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
   2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`.
-  3. PNPM tooling: `package.json`, `.markdownlint.jsonc`, `scripts/install-third-party-skills.sh`, `skills-lock.json`.
+  3. PNPM tooling: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`.
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
   6. Workflows: `.github/workflows/*` (including `release-please.yml` with job-level `permissions:`).
@@ -71,12 +71,15 @@ The skill collects the following inputs. Author name, author email, and the secu
 
 ## Core baseline
 
-Emitted for every target repo:
+Emitted for every target repo. Use the live repository root as the content
+reference, but filter out `patinaproject/skills` marketplace maintenance
+verifiers. Consumer repos should not receive dogfood, marketplace, Superteam,
+finish-pr, scaffold-cleanup, or workflow-cleanup verifier scripts unless they
+are themselves this marketplace repository.
 
 ```text
 .claude/settings.json
 .editorconfig
-.agents/plugins/marketplace.json
 .github/CODEOWNERS
 .github/ISSUE_TEMPLATE/bug_report.md
 .github/ISSUE_TEMPLATE/feature_request.md
@@ -109,17 +112,15 @@ docs/file-structure.md
 docs/release-flow.md
 docs/wiki-index.md
 package.json
-scripts/install-third-party-skills.sh
-scripts/test.sh
-scripts/verify-code-review-workflow.sh
-scripts/verify-dogfood.sh
-scripts/verify-finish-pr-workflow.sh
-scripts/verify-marketplace.sh
-scripts/verify-scaffold-cleanup.sh
-scripts/verify-superteam-contract.sh
-scripts/verify-workflow-cleanup.sh
-skills-lock.json
+pnpm-lock.yaml
 ```
+
+Marketplace-internal verification and dogfood files in the live reference repo,
+including `scripts/test.sh`, `scripts/verify-*.sh`,
+`scripts/install-third-party-skills.sh`, `skills-lock.json`, and generated
+agent overlays, are reference implementation tooling. Do not emit them into a
+generic scaffolded consumer repo unless that repo explicitly opts into the same
+marketplace maintenance role.
 
 ## Agent plugin surfaces
 
