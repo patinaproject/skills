@@ -64,7 +64,8 @@ instead of guessing which hosted review contract to emulate.
      `Bash(git diff:*)`, `Bash(git status:*)`, `Bash(git show:*)`,
      `Bash(gh pr view:*)`, and `Bash(gh pr diff:*)`. Add mutating tools to
      `--disallowedTools` as defense in depth, and preserve max-turn
-     equivalents.
+     equivalents. If no pull request exists yet and `gh pr diff` is
+     unavailable, use `git diff` output instead.
    - Codex: `codex review --base origin/<default-branch>`, adding
      `--uncommitted` when the worktree is dirty and passing prompt context on
      stdin when useful.
@@ -84,6 +85,9 @@ The terminal report should include:
 - Local command family and translated settings
 - Ignored secrets, unmapped settings, and safety overrides
 - Review output from the local CLI
+
+When halting, print the halt reason, detected review workflows, affected
+settings or prompt text, and the exact condition that must change before retry.
 
 ## Deterministic Planning
 
