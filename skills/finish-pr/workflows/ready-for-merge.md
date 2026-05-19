@@ -87,8 +87,9 @@ directory's default `gh` repository.
    with the repository's normal issue-tagged format, push, and restart the
    readiness loop on the new head. If verification fails on this clean merge,
    run `git merge --abort` and stop under the verification stop condition. If
-   repeated base merges keep changing the branch without reaching a stable PR
-   head, stop for operator feedback instead of pushing indefinitely.
+   two consecutive base merges keep changing the branch without reaching a
+   stable PR head in the same finish-pr run, stop for operator feedback instead
+   of pushing indefinitely.
 
    If the merge conflicts, resolve conflicts only when the correct result is
    branch-local, in scope, and verifiable. Prefer repository behavior, tests,

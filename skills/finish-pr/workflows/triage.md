@@ -59,5 +59,5 @@ review threads, top-level PR comments, and review bodies.
   unverifiable semantic choices.
 - Run `git merge --abort` before stopping when an uncommitted or conflicted
   merge is still in the working tree.
-- Do not rebase, force-push, use browser conflict resolution, or merge the pull
-  request itself by default.
+- Do not rebase or force-push by default. Do not use browser conflict
+  resolution or merge the pull request itself.

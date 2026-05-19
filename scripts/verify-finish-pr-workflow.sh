@@ -76,7 +76,9 @@ if [ -f "$TRIAGE" ]; then
   assert_match "git merge --abort" "$TRIAGE"
   assert_match 'Classify branch-local, in-scope, verifiable conflicts as `fix-now`' "$TRIAGE"
   assert_match 'Classify conflicts as `needs-human`' "$TRIAGE"
-  assert_match "Do not rebase, force-push, use browser conflict resolution, or merge the pull" "$TRIAGE"
+  assert_match "Do not rebase or force-push by default" "$TRIAGE"
+  assert_match "Do not use browser conflict" "$TRIAGE"
+  assert_match "merge the pull request itself" "$TRIAGE"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
