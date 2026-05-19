@@ -190,12 +190,6 @@ node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 bash scripts/verify-dogfood.sh
 ```
 
-### Check d — review-action deterministic behavior
-
-```sh
-node scripts/verify-review-action.js
-```
-
 ## Repository layout
 
 ```text

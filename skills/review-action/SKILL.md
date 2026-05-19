@@ -1,28 +1,20 @@
 ---
 name: review-action
-description: Emulate supported AI code-review GitHub Actions locally and print a terminal-only review. Use when running /review-action, pnpm review-action, or checking local PR-review feedback before publishing.
+description: Emulate supported AI code-review GitHub Actions locally and print a terminal-only review from portable skill instructions. Use when running /review-action or checking local PR-review feedback before publishing.
 ---
 
 # Review Action
 
 ## Quick Start
 
-Run from the repository root:
-
-```sh
-pnpm review-action
-```
-
-The helper detects a supported AI review workflow, computes the branch diff
-against the default branch merge base, translates supported action settings,
-invokes the matching local CLI, and prints a terminal-only report.
+This skill is portable. It works from instructions alone and must not depend on
+repository-local helper scripts.
 
 Prerequisites:
 
 - Fetch the default branch locally, for example `git fetch origin main`.
-- Authenticate `gh` for pull request metadata. If `gh` is unavailable, the
-  helper falls back to `origin/HEAD` for default-branch detection and runs
-  without pull request metadata.
+- Authenticate `gh` for optional pull request metadata. If `gh` is unavailable,
+  derive the default branch from `origin/HEAD` and run without PR metadata.
 - Authenticate the matching local AI CLI (`claude` or `codex`).
 
 ## Safety Boundary
@@ -44,6 +36,34 @@ Local review emulation is read-only and terminal-only.
 If no supported AI review workflow is found, halt instead of falling back to a
 generic review.
 
+## Portable Workflow
+
+1. Detect supported workflows by inspecting `.github/workflows/*.yml` and
+   `.github/workflows/*.yaml` for supported `uses:` entries. If zero or more
+   than one supported review action is found, halt and report the reason.
+2. Parse only the matched step's `with:` settings. Preserve supported prompt
+   text and action args. Ignore secret-backed settings by key name only, never
+   by reading secret values.
+3. Resolve the default branch with `gh repo view --json defaultBranchRef` or
+   `git rev-parse --abbrev-ref origin/HEAD`. Compute the base with
+   `git merge-base origin/<default-branch> HEAD`.
+4. Compute changed files from the base to the working tree, including committed,
+   staged, unstaged, and untracked files. Include deleted files.
+5. Apply the workflow's low-signal and self-review skip rules. Skip dogfood
+   overlay paths when the hosted prompt tells reviewers to ignore them. Halt
+   when the resulting scope should not be reviewed.
+6. Translate settings into a local read-only invocation:
+   - Claude: `claude --print <prompt>` with mutating tools removed from
+     `--allowedTools`, mutating tools added to `--disallowedTools`, and max-turn
+     equivalents preserved.
+   - Codex: `codex review --base origin/<default-branch>`, adding
+     `--uncommitted` when the worktree is dirty and passing prompt context on
+     stdin when useful.
+7. Halt on unsupported settings or unsupported CLI flags that may affect safety,
+   model choice, tool access, sandboxing, or review scope.
+8. Print a terminal report only. Do not edit files, post comments, resolve
+   threads, create commits, push, or mutate GitHub state.
+
 ## Expected Output
 
 The terminal report should include:
@@ -58,5 +78,6 @@ The terminal report should include:
 
 ## Deterministic Planning
 
-Use `pnpm review-action -- --plan-only` to inspect workflow detection, file
-classification, safety decisions, and command shape without invoking a model.
+Print the plan yourself before running the local CLI so workflow detection, file
+classification, safety decisions, and command shape are inspectable without
+invoking a model.

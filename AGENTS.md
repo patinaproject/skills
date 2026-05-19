@@ -81,7 +81,6 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 - Run `bash scripts/verify-dogfood.sh` to confirm all nine in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-finish-pr-workflow.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
-- Run `node scripts/verify-review-action.js` after changing `skills/review-action/**` or `scripts/review-action*`
 - Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
 - Run `node scripts/apply-scaffold-repository.js skills/scaffold-repository --check` to
   confirm the scaffold baseline is idempotent against the current tree

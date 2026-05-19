@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-node scripts/verify-review-action.js
 bash scripts/verify-dogfood.sh
 bash scripts/verify-finish-pr-workflow.sh
 bash scripts/verify-marketplace.sh
