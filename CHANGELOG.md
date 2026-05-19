@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.8.0...patinaproject-skills-v1.9.0) (2026-05-19)
+
+
+### Features
+
+* [#110](https://github.com/patinaproject/skills/issues/110) add local review action emulator ([#116](https://github.com/patinaproject/skills/issues/116)) ([5640ef1](https://github.com/patinaproject/skills/commit/5640ef1972de127b9a60ecd8f53977d8a247060c))
+
 ## [1.8.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.7.1...patinaproject-skills-v1.8.0) (2026-05-19)
 
 ### Features
