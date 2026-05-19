@@ -211,6 +211,7 @@ jobs:
               URLs, private paths, or private context.
           claude_args: |
             --model claude-opus-4-7
+            --effort medium
             --max-turns 25
             --allowedTools Read,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
             --append-system-prompt "CI NON-INTERACTIVE MODE: Do not prompt for human confirmation. Proceed through the review steps automatically and report findings using only the allowed tools."
