@@ -1,4 +1,4 @@
-name: Claude Review
+name: Code Review
 
 on:
   pull_request:
@@ -8,6 +8,7 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  id-token: write
 
 jobs:
   classify:
@@ -37,7 +38,7 @@ jobs:
 
           changed_files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
 
-          if printf '%s\n' "$changed_files" | grep -qx '.github/workflows/claude-review.yml'; then
+          if printf '%s\n' "$changed_files" | grep -qx '.github/workflows/code-review.yml'; then
             {
               echo "should_review=false"
               echo "reason=review workflow changed"
