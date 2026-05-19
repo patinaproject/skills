@@ -116,11 +116,10 @@ pnpm-lock.yaml
 ```
 
 Marketplace-internal verification and dogfood files in the live reference repo,
-including `scripts/test.sh`, `scripts/verify-*.sh`,
-`scripts/install-third-party-skills.sh`, `skills-lock.json`, and generated
-agent overlays, are reference implementation tooling. Do not emit them into a
-generic scaffolded consumer repo unless that repo explicitly opts into the same
-marketplace maintenance role.
+including the repository test harness, verify scripts, third-party skill restore
+script, lockfile, and generated agent overlays, are reference implementation
+tooling. Do not emit them into a generic scaffolded consumer repo unless that
+repo explicitly opts into the same marketplace maintenance role.
 
 ## Agent plugin surfaces
 
