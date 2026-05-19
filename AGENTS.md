@@ -78,6 +78,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 
 ## Testing Guidelines
 
+- Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/verify-dogfood.sh` to confirm all nine in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-finish-pr-workflow.sh` after changing `skills/finish-pr/**`
