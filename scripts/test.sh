@@ -12,6 +12,14 @@ node scripts/apply-scaffold-repository.js skills/scaffold-repository --check
 
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.
-npm_config_ignore_scripts=true npx skills@latest add ./skills/scaffold-repository --list
-npm_config_ignore_scripts=true npx skills@latest add ./skills/office-hours --list
-npm_config_ignore_scripts=true npx skills@latest add ./skills/review-action --list
+run_cli_canary() {
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+  else
+    npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+  fi
+}
+
+run_cli_canary ./skills/scaffold-repository
+run_cli_canary ./skills/office-hours
+run_cli_canary ./skills/review-action
