@@ -42,6 +42,10 @@ jobs:
       - name: "verify-marketplace.sh exits 0 (catalog validated)"
         run: bash scripts/verify-marketplace.sh
 
+      # Check finish-pr workflow contract
+      - name: "verify-finish-pr-workflow.sh exits 0 (workflow contract)"
+        run: bash scripts/verify-finish-pr-workflow.sh
+
       # Check a (representative sample): CLI resolves skills from local paths
       # Using local path sources because the branch may not be published to
       # remote at CI time. Post-merge, consumers use:
