@@ -165,6 +165,12 @@ for the full README and skill contract.
 Three checks prove the in-repo skills are wired correctly. Run these after any
 change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
 
+For the core verification bundle, run:
+
+```sh
+pnpm test
+```
+
 ### Check a — CLI resolves skills from local paths
 
 ```sh

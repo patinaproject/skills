@@ -45,6 +45,7 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
+- `pnpm test`: run the core local verification bundle
 - `pnpm verify:dogfood`: assert all nine in-repo skills are discoverable via flat layout
 - `pnpm verify:marketplace`: assert `.claude-plugin/` catalog is valid
 - `pnpm verify:review-action`: assert local review emulator parsing, classification, safety, and planning
