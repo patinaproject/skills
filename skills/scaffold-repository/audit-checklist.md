@@ -14,7 +14,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.gitignore` | yes | present; contains `node_modules/` |
+| `.gitignore` | yes | present; contains `node_modules/`, `.agents/skills/`, and `.claude/skills/` so generated shared-skill payloads stay local |
 | `.gitattributes` | yes | present; contains `* text=auto eol=lf` |
 | `.editorconfig` | yes | present; `root = true`; `end_of_line = lf` |
 | `.nvmrc` | yes | present |
@@ -23,10 +23,12 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`; `lint-staged` block for `*.md` |
+| `package.json` | yes | present; has `version`; `author.name`; `author.email`; `author.url`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `check:versions`, `sync:versions`, `skills:install`, `skills:update`, `skills:list`; `lint-staged` block for `*.md` |
 | `pnpm-lock.yaml` | yes | present |
 | `scripts/check-plugin-versions.mjs` | yes | present; fails with non-zero exit on version drift |
 | `scripts/sync-plugin-versions.mjs` | yes | present; rewrites plugin manifests from `package.json` |
+| `scripts/install-skills.mjs` | yes | present; `pnpm skills:install` treats missing `skills-lock.json` as a no-op, installs from the committed lockfile without refreshing it, sets `npm_config_ignore_scripts=true`, and `pnpm skills:list` lists committed shared skills |
+| `scripts/update-skills.mjs` | yes | present; `pnpm skills:update` refreshes Patina-owned skills already present in the lockfile with `npx skills@latest add patinaproject/skills --skill <name>`, sets `npm_config_ignore_scripts=true`, pins missing immutable GitHub refs, verifies installability, restores the prior lockfile on failure, and documents that consumers should rerun `scaffold-repository` when `experimental_install` graduates |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `RELEASING.md` | yes | present; documents the release-please flow |
 
