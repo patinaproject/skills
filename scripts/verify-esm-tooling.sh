@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
 node --input-type=module <<'NODE'
 import assert from "node:assert/strict";
 import { constants } from "node:fs";
