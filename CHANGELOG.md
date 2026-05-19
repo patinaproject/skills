@@ -2,7 +2,6 @@
 
 ## [1.7.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.7.0...patinaproject-skills-v1.7.1) (2026-05-19)
 
-
 ### Bug Fixes
 
 * [#108](https://github.com/patinaproject/skills/issues/108) add code review oidc permission ([#109](https://github.com/patinaproject/skills/issues/109)) ([3390016](https://github.com/patinaproject/skills/commit/3390016a5928d019fa7f3909ea14e911b80f5767))
