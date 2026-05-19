@@ -61,8 +61,8 @@ instead of guessing which hosted review contract to emulate.
 6. Translate settings into a local read-only invocation:
    - Claude: `claude --print <prompt>`; set a strict `--allowedTools` allowlist
      limited to read-only file and GitHub inspection, such as `Read` plus
-     `Bash(git diff:*)`, `Bash(git status:*)`, `Bash(git show:*)`,
-     `Bash(gh pr view:*)`, and `Bash(gh pr diff:*)`. Add mutating tools to
+     `Bash(git diff*)`, `Bash(git status*)`, `Bash(git show*)`,
+     `Bash(gh pr view*)`, and `Bash(gh pr diff*)`. Add mutating tools to
      `--disallowedTools` as defense in depth, and preserve max-turn
      equivalents. If no pull request exists yet and `gh pr diff` is
      unavailable, use `git diff` output instead.
