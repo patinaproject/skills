@@ -25,8 +25,11 @@ assert.equal(typeof commitlintConfig.default, "object", "commitlint config must 
 const lintStagedConfig = await import("./.lintstagedrc.js");
 assert.equal(typeof lintStagedConfig.default, "object", "lint-staged config must export a default object");
 
-const rootJsFiles = await readdir(".");
-for (const file of rootJsFiles.filter((candidate) => candidate.endsWith(".js"))) {
+const rootConfigFiles = await readdir(".");
+const rootCommonJsConfigs = rootConfigFiles.filter((candidate) => candidate.endsWith(".cjs"));
+assert.deepEqual(rootCommonJsConfigs, [], "root config files should not use .cjs CommonJS escape hatches");
+
+for (const file of rootConfigFiles.filter((candidate) => /\.m?js$/.test(candidate))) {
   const source = await readFile(file, "utf8");
   assert.doesNotMatch(source, /\bmodule\.exports\b/, `${file} must not use CommonJS exports`);
 }
