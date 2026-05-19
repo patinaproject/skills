@@ -53,6 +53,8 @@ assert_no_match "AC-[0-9]+|AC-<|acceptance criteria|Test coverage|Coverage and r
 assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superteam@patinaproject-skills|<use-superteam>" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
   skills/scaffold-repository
+assert_no_match "skills:install" \
+  AGENTS.md CONTRIBUTING.md README.md .claude/settings.json
 
 assert_match "[Dd]eprecated" README.md .claude-plugin/marketplace.json .agents/plugins/marketplace.json
 assert_match "[Dd]eprecated" skills/superteam/SKILL.md skills/superteam/README.md skills/superteam-non-interactive/SKILL.md
