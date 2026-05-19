@@ -66,7 +66,10 @@ directory's default `gh` repository.
    stop for operator feedback before checking, resolving, replying, or
    reporting.
 
-8. Resolve the mergeability gate before watching checks:
+8. Resolve the mergeability gate before watching checks. The working tree must
+   be clean before the local base-merge attempt; stop for operator feedback if
+   a prior step left staged, unstaged, or conflicted changes. In the commands
+   below, `<base-branch>` is the `baseRefName` captured in step 7:
 
    ```sh
    git fetch origin <base-branch>
