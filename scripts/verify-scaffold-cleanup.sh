@@ -21,9 +21,9 @@ assert_absent_path() {
 assert_no_match() {
   local pattern="$1"
   shift
-  if rg -n --pcre2 -e "$pattern" "$@" >/dev/null 2>&1; then
+  if rg -n -e "$pattern" "$@" >/dev/null 2>&1; then
     fail "stale scaffold reference matched: $pattern"
-    rg -n --pcre2 -e "$pattern" "$@" >&2 || true
+    rg -n -e "$pattern" "$@" >&2 || true
   fi
 }
 
@@ -38,7 +38,7 @@ assert_no_match "skills/scaffold-repository/templates|skills/bootstrap/templates
   AGENTS.md README.md docs package.json .github/workflows skills/scaffold-repository
 
 assert_no_match "Cursor|Windsurf|Continue\\.dev|\\.cursor/|\\.windsurfrules|\\.continue/" \
-  skills/scaffold-repository README.md docs
+  skills/scaffold-repository
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

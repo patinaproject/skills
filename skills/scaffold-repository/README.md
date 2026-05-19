@@ -6,7 +6,7 @@ Scaffold a new repository – or realign an existing one – to the Patina Proje
 
 ## How Scaffold Repository Works
 
-Bootstrap operates in one of two modes based on what it finds in the target repository.
+`scaffold-repository` operates in one of two modes based on what it finds in the target repository.
 
 ```mermaid
 flowchart TD
@@ -59,7 +59,7 @@ For plugins, `scaffold-repository` wires a complete [release-please](https://git
 
 ### GitHub repository settings
 
-Bootstrap walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./SKILL.md#github-repository-settings).
+`scaffold-repository` walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./SKILL.md#github-repository-settings).
 
 ## Modes
 
