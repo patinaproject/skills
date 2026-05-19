@@ -10,6 +10,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/finish-pr/`: PR finishing skill
+- `skills/review-action/`: local AI review-action emulator skill
 - `skills/office-hours/`: office-hours skill
 - `skills/plan-ceo-review/`: plan-ceo-review skill
 - `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)

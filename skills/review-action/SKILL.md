@@ -53,9 +53,9 @@ generic review.
    overlay paths when the hosted prompt tells reviewers to ignore them. Halt
    when the resulting scope should not be reviewed.
 6. Translate settings into a local read-only invocation:
-   - Claude: `claude --print <prompt>` with mutating tools removed from
-     `--allowedTools`, mutating tools added to `--disallowedTools`, and max-turn
-     equivalents preserved.
+   - Claude: `claude --print <prompt>`; omit mutating tools when constructing
+     `--allowedTools`, add them explicitly to `--disallowedTools`, and preserve
+     max-turn equivalents.
    - Codex: `codex review --base origin/<default-branch>`, adding
      `--uncommitted` when the worktree is dirty and passing prompt context on
      stdin when useful.
