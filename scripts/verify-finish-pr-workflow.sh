@@ -45,7 +45,7 @@ if [ -f "$WORKFLOW" ]; then
   assert_order "Final unresolved review-thread gate" "gh pr ready" "$WORKFLOW"
   assert_match "resolveReviewThread" "$WORKFLOW"
   assert_match "isResolved" "$WORKFLOW"
-  assert_match "(?i)unresolved.*blocker|blocker.*unresolved" "$WORKFLOW"
+  assert_match "(?i)(?:unresolved.*blocker|blocker.*unresolved)" "$WORKFLOW"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
