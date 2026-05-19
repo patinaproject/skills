@@ -81,6 +81,7 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "display_report: false" "$WORKFLOW"
   assert_match "show_full_output: false" "$WORKFLOW"
   assert_match "--model claude-opus-4-7" "$WORKFLOW"
+  assert_match "--effort medium" "$WORKFLOW"
   assert_match "--max-turns 25" "$WORKFLOW"
   assert_match "--allowedTools Read,Bash\\(gh pr comment:\\*\\),Bash\\(gh pr diff:\\*\\),Bash\\(gh pr view:\\*\\),Bash\\(git diff:\\*\\)" "$WORKFLOW"
   assert_no_match "inline comment on the" "$WORKFLOW"
