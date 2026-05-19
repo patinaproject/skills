@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-WORKFLOW=".github/workflows/claude-review.yml"
+WORKFLOW=".github/workflows/code-review.yml"
 FAIL_COUNT=0
 
 fail() {
@@ -37,17 +37,19 @@ assert_file "$WORKFLOW"
 
 if [ -f "$WORKFLOW" ]; then
   assert_match "pull_request:" "$WORKFLOW"
+  assert_match "name: Code Review" "$WORKFLOW"
   assert_match "types: \\[opened, synchronize, reopened, ready_for_review\\]" "$WORKFLOW"
   assert_no_match "pull_request_target:" "$WORKFLOW"
   assert_match "contents: read" "$WORKFLOW"
   assert_match "pull-requests: write" "$WORKFLOW"
   assert_match "issues: write" "$WORKFLOW"
+  assert_match "id-token: write" "$WORKFLOW"
   assert_no_match "contents: write" "$WORKFLOW"
   assert_match "runs-on: blacksmith-2vcpu-ubuntu-2404" "$WORKFLOW"
   assert_match "github\\.event\\.pull_request\\.draft == false" "$WORKFLOW"
   assert_match "github\\.event\\.pull_request\\.head\\.repo\\.fork == false" "$WORKFLOW"
   assert_match "github\\.event\\.pull_request\\.user\\.login != 'dependabot\\[bot\\]'" "$WORKFLOW"
-  assert_match "claude-review\\.yml" "$WORKFLOW"
+  assert_match "code-review\\.yml" "$WORKFLOW"
   assert_match "CLAUDE_CODE_OAUTH_TOKEN" "$WORKFLOW"
   assert_no_match "ANTHROPIC_API_KEY|RELEASE_PLEASE_TOKEN|NPM_TOKEN|GITHUB_TOKEN:" "$WORKFLOW"
   assert_match "# anthropics/claude-code-action@v1" "$WORKFLOW"
@@ -70,8 +72,8 @@ assert_no_match "runs-on: ubuntu-latest" skills/scaffold-repository/templates/co
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
-  echo "FAIL: $FAIL_COUNT Claude review workflow assertion(s) failed" >&2
+  echo "FAIL: $FAIL_COUNT code review workflow assertion(s) failed" >&2
   exit 1
 fi
 
-echo "OK: Claude review workflow assertions passed"
+echo "OK: code review workflow assertions passed"
