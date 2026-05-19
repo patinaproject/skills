@@ -101,6 +101,7 @@ scripts/check-plugin-versions.mjs
 scripts/install-skills.mjs
 scripts/sync-plugin-versions.mjs
 scripts/update-skills.mjs
+skills-lock.json
 ```
 
 ## Agent plugin surfaces
@@ -159,7 +160,7 @@ deprecated Superteam or Superpowers workflows.
 - **Issue titles**: plain-language, no commit-style prefix.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
 - **PNPM**: `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, and `lint:md` script.
-- **Shared skill lifecycle**: scaffolded consumer repositories expose `pnpm skills:install`, `pnpm skills:update`, and `pnpm skills:list`. Fresh repos do not emit `skills-lock.json`; install and list no-op clearly until a repo commits a shared skill catalog. Update refreshes Patina-owned skills already present in the lockfile through `npx skills@latest add patinaproject/skills --skill <name>`, pins missing immutable GitHub refs, verifies the resulting lockfile installs, and restores the previous lockfile on failure. The wrappers set `npm_config_ignore_scripts=true` for CLI calls. While the vercel-labs CLI restore command is still named `experimental_install`, consumers should rerun `scaffold-repository` after that subcommand graduates or is renamed.
+- **Shared skill lifecycle**: scaffolded consumer repositories expose `pnpm skills:install`, `pnpm skills:update`, and `pnpm skills:list`. Fresh repos emit a committed `skills-lock.json` containing the active Patina workflow skills: `scaffold-repository`, `using-github`, `new-branch`, `finish-pr`, `review-action`, `office-hours`, `plan-ceo-review`, and `install-skills`. Deprecated Superteam compatibility skills remain marketplace-installable but are excluded from scaffold defaults. The template lockfile intentionally starts with unpinned `patinaproject/skills` sources so the not-yet-released scaffold template can restore the active set after it ships; the first `pnpm skills:update` pins Patina sources to a full immutable GitHub SHA. Install restores the committed catalog without refreshing it. Update refreshes Patina-owned skills already present in the lockfile through `npx skills@latest add patinaproject/skills --skill <name>`, pins missing immutable GitHub refs, verifies the resulting lockfile installs, and restores the previous lockfile on failure. The wrappers set `npm_config_ignore_scripts=true` for CLI calls. While the vercel-labs CLI restore command is still named `experimental_install`, consumers should rerun `scaffold-repository` after that subcommand graduates or is renamed.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
 - **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).

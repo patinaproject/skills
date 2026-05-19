@@ -33,6 +33,10 @@ const coreInstallSkillsTemplatePath = path.join(
   repoRoot,
   "skills/scaffold-repository/templates/core/scripts/install-skills.mjs",
 );
+const coreSkillsLockTemplatePath = path.join(
+  repoRoot,
+  "skills/scaffold-repository/templates/core/skills-lock.json",
+);
 const coreUpdateSkillsTemplatePath = path.join(
   repoRoot,
   "skills/scaffold-repository/templates/core/scripts/update-skills.mjs",
@@ -102,6 +106,7 @@ const corePackageTemplate = fs.readFileSync(corePackageTemplatePath, "utf8");
 const coreAgentsTemplate = fs.readFileSync(coreAgentsTemplatePath, "utf8");
 const coreGitignoreTemplate = fs.readFileSync(coreGitignoreTemplatePath, "utf8");
 const coreInstallSkillsTemplate = fs.readFileSync(coreInstallSkillsTemplatePath, "utf8");
+const coreSkillsLockTemplate = fs.readFileSync(coreSkillsLockTemplatePath, "utf8");
 const coreUpdateSkillsTemplate = fs.readFileSync(coreUpdateSkillsTemplatePath, "utf8");
 const skillContract = fs.readFileSync(skillContractPath, "utf8");
 const auditChecklist = fs.readFileSync(auditChecklistPath, "utf8");
@@ -156,6 +161,39 @@ assertIncludes(coreGitignoreTemplate, "skills-lock.json.bak", "Generated skill r
 assertIncludes(coreInstallSkillsTemplate, "No skills-lock.json found", "Install no-lockfile no-op");
 assertIncludes(coreInstallSkillsTemplate, "experimental_install", "Install read-only lockfile command");
 assertIncludes(coreInstallSkillsTemplate, "--list", "Install list mode");
+const scaffoldDefaultSkills = Object.keys(JSON.parse(coreSkillsLockTemplate).skills ?? {}).sort();
+const expectedScaffoldDefaultSkills = [
+  "finish-pr",
+  "install-skills",
+  "new-branch",
+  "office-hours",
+  "plan-ceo-review",
+  "review-action",
+  "scaffold-repository",
+  "using-github",
+];
+if (JSON.stringify(scaffoldDefaultSkills) !== JSON.stringify(expectedScaffoldDefaultSkills)) {
+  fail(
+    `Scaffold default skills: expected ${expectedScaffoldDefaultSkills.join(", ")}, got ${scaffoldDefaultSkills.join(", ")}`,
+  );
+}
+for (const deprecatedSkill of ["superteam", "superteam-non-interactive"]) {
+  if (scaffoldDefaultSkills.includes(deprecatedSkill)) {
+    fail(`Scaffold default skills: deprecated ${deprecatedSkill} must not be included`);
+  }
+}
+const scaffoldDefaultCatalog = JSON.parse(coreSkillsLockTemplate);
+for (const [skill, entry] of Object.entries(scaffoldDefaultCatalog.skills ?? {})) {
+  if (entry.source !== "patinaproject/skills") {
+    fail(`Scaffold default ${skill}: expected source patinaproject/skills`);
+  }
+  if (entry.sourceType !== "github") {
+    fail(`Scaffold default ${skill}: expected sourceType github`);
+  }
+  if (entry.skillPath !== `skills/${skill}/SKILL.md`) {
+    fail(`Scaffold default ${skill}: expected skillPath skills/${skill}/SKILL.md`);
+  }
+}
 assertIncludes(coreUpdateSkillsTemplate, '"npx"', "Update marketplace refresh command");
 assertIncludes(
   coreUpdateSkillsTemplate,

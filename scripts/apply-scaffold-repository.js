@@ -113,6 +113,11 @@ const STATIC_FILES = [
 // The SKILL.md lists it as part of the baseline, but for self-apply the
 // in-repo version is intentionally extended and must not be reverted.
 
+// skills-lock.json is a static file in core templates, but this repo's root
+// lockfile records third-party dogfood skills. The scaffold template lockfile
+// records active Patina skills for downstream repos, so self-apply must not
+// overwrite the root third-party catalog with the scaffold default catalog.
+
 // .husky/pre-commit in the template calls `pnpm check:versions`, which runs
 // scripts/check-plugin-versions.mjs. That script checks that plugin manifest
 // versions match package.json. This skills repo is a monorepo root with no

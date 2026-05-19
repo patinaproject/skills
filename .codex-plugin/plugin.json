@@ -3,13 +3,14 @@
   "version": "1.9.0",
   "skills": [
     "./skills/scaffold-repository",
-    "./skills/superteam",
-    "./skills/superteam-non-interactive",
     "./skills/using-github",
     "./skills/new-branch",
     "./skills/finish-pr",
     "./skills/review-action",
     "./skills/office-hours",
-    "./skills/plan-ceo-review"
+    "./skills/plan-ceo-review",
+    "./skills/install-skills",
+    "./skills/superteam",
+    "./skills/superteam-non-interactive"
   ]
 }

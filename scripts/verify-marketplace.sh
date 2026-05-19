@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/finish-pr","./skills/review-action","./skills/office-hours","./skills/plan-ceo-review","./skills/install-skills","./skills/superteam","./skills/superteam-non-interactive"]'
+expected_scaffold_default_skills='["finish-pr","install-skills","new-branch","office-hours","plan-ceo-review","review-action","scaffold-repository","using-github"]'
+
 # Validate the Claude Code marketplace catalog.
 test -f .claude-plugin/marketplace.json
 test -f .claude-plugin/plugin.json
@@ -54,6 +57,37 @@ if [ "$claude_skills" != "$codex_skills" ]; then
   echo "FAIL: Claude and Codex plugin.json skills[] arrays diverged" >&2
   echo "  Claude: $claude_skills" >&2
   echo "  Codex:  $codex_skills" >&2
+  exit 1
+fi
+if [ "$claude_skills" != "$expected_marketplace_skills" ]; then
+  echo "FAIL: marketplace skills[] did not match expected shipped catalog" >&2
+  echo "  Expected: $expected_marketplace_skills" >&2
+  echo "  Actual:   $claude_skills" >&2
+  exit 1
+fi
+
+scaffold_default_skills=$(jq -c '.skills | keys | sort' skills/scaffold-repository/templates/core/skills-lock.json)
+if [ "$scaffold_default_skills" != "$expected_scaffold_default_skills" ]; then
+  echo "FAIL: scaffold default skills-lock.json did not match expected active catalog" >&2
+  echo "  Expected: $expected_scaffold_default_skills" >&2
+  echo "  Actual:   $scaffold_default_skills" >&2
+  exit 1
+fi
+if jq -e '.skills | has("superteam") or has("superteam-non-interactive")' \
+  skills/scaffold-repository/templates/core/skills-lock.json >/dev/null; then
+  echo "FAIL: scaffold defaults must exclude deprecated Superteam compatibility skills" >&2
+  exit 1
+fi
+if ! jq -e '
+  .skills
+  | to_entries
+  | all(
+      .value.source == "patinaproject/skills"
+      and .value.sourceType == "github"
+      and .value.skillPath == ("skills/" + .key + "/SKILL.md")
+    )
+' skills/scaffold-repository/templates/core/skills-lock.json >/dev/null; then
+  echo "FAIL: scaffold default lockfile entries must point at patinaproject/skills skill paths" >&2
   exit 1
 fi
 
