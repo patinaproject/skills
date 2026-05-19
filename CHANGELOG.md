@@ -2,7 +2,6 @@
 
 ## [1.7.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.6.0...patinaproject-skills-v1.7.0) (2026-05-19)
 
-
 ### Features
 
 * [#100](https://github.com/patinaproject/skills/issues/100) deprecate superteam workflow ([#101](https://github.com/patinaproject/skills/issues/101)) ([54ce095](https://github.com/patinaproject/skills/commit/54ce0953292ff37abd9427d1c57ee455f3bf91b6))
