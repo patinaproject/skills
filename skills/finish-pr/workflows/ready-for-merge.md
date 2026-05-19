@@ -75,7 +75,8 @@ directory's default `gh` repository.
    optional checks can produce review comments or useful blocking evidence.
    Check completion is the synchronization point for GitHub Action-authored
    feedback. Do not add arbitrary settle sleeps, pass-count caps, or wall-clock
-   caps.
+   caps. If the check set shows no state change after a reasonable observation
+   window, stop for operator feedback instead of waiting indefinitely.
 
 9. Triage every non-pass, canceled, or otherwise problematic check with
    [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up

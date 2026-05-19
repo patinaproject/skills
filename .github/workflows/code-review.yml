@@ -169,9 +169,10 @@ jobs:
             Do NOT duplicate output from CI lint/test pipelines.
             Do not edit files, stage changes, commit changes, or push branches.
 
-            For each Critical and Major finding, post an inline comment on the
-            specific line in the diff when possible. Each comment must include:
+            For each Critical and Major finding, include a focused entry in the
+            summary comment. Each finding must include:
             - The severity label (C1:, M1:, M2:, etc.)
+            - The file and line or nearest stable location when available
             - A clear description of the issue
             - A concrete suggested fix
 
@@ -196,18 +197,19 @@ jobs:
             - Major: [N]
             - Minor: [N]
 
-            [For Minor findings not posted as inline comments, list them briefly here]
+            [List each actionable finding briefly here. Include Minor findings
+            only when they are concrete enough to act on.]
 
             ## Important comment formatting rules
 
             - NEVER write '#' followed by a number (for example, '#1' or '#2');
               GitHub auto-links these to issues and PRs.
             - Use C1:, M1:, and L1: style labels instead.
-            - Keep inline comments concise and actionable.
+            - Keep findings concise and actionable.
             - This repository is public. Do not print, summarize, infer, or
               request secrets, credentials, token values, private repository
               URLs, private paths, or private context.
           claude_args: |
-            --max-turns 100
+            --max-turns 25
             --allowedTools Read,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
-            --append-system-prompt "CI NON-INTERACTIVE MODE: Auto-proceed at all skill checkpoints, HALT conditions, and escalation menus. Never wait for human confirmation or approval. When a skill step says HALT, continue to the next step automatically."
+            --append-system-prompt "CI NON-INTERACTIVE MODE: Do not prompt for human confirmation. Proceed through the review steps automatically and report findings using only the allowed tools."

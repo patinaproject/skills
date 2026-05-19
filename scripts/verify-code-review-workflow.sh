@@ -80,7 +80,10 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "include_fix_links: false" "$WORKFLOW"
   assert_match "display_report: false" "$WORKFLOW"
   assert_match "show_full_output: false" "$WORKFLOW"
+  assert_match "--max-turns 25" "$WORKFLOW"
   assert_match "--allowedTools Read,Bash\\(gh pr comment:\\*\\),Bash\\(gh pr diff:\\*\\),Bash\\(gh pr view:\\*\\),Bash\\(git diff:\\*\\)" "$WORKFLOW"
+  assert_no_match "inline comment on the" "$WORKFLOW"
+  assert_no_match "When a skill step says HALT" "$WORKFLOW"
   assert_no_match "--disallowedTools" "$WORKFLOW"
 fi
 
