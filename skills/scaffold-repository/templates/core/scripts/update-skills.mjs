@@ -6,7 +6,10 @@ const lockfile = "skills-lock.json";
 const backup = `${lockfile}.bak`;
 
 function run(command, args, failureMessage) {
-  const result = spawnSync(command, args, { stdio: "inherit" });
+  const result = spawnSync(command, args, {
+    env: { ...process.env, npm_config_ignore_scripts: "true" },
+    stdio: "inherit",
+  });
   if (result.error) {
     throw new Error(`${failureMessage}: ${result.error.message}`);
   }
@@ -85,7 +88,6 @@ rmSync(backup, { force: true });
 copyFileSync(lockfile, backup);
 
 try {
-  // Equivalent command: npx --yes skills@latest add patinaproject/skills --yes
   run(
     "npx",
     ["--yes", "skills@latest", "add", "patinaproject/skills", "--yes"],

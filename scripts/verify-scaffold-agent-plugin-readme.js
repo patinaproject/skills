@@ -41,6 +41,7 @@ const skillContractPath = path.join(repoRoot, "skills/scaffold-repository/SKILL.
 const auditChecklistPath = path.join(repoRoot, "skills/scaffold-repository/audit-checklist.md");
 const releaseFlowPath = path.join(repoRoot, "docs/release-flow.md");
 const verifyWorkflowPath = path.join(repoRoot, ".github/workflows/verify.yml");
+const rootReadmePath = path.join(repoRoot, "README.md");
 
 const values = {
   owner: "patinaproject",
@@ -106,6 +107,7 @@ const skillContract = fs.readFileSync(skillContractPath, "utf8");
 const auditChecklist = fs.readFileSync(auditChecklistPath, "utf8");
 const releaseFlow = fs.readFileSync(releaseFlowPath, "utf8");
 const verifyWorkflow = fs.readFileSync(verifyWorkflowPath, "utf8");
+const rootReadme = fs.readFileSync(rootReadmePath, "utf8");
 const rendered = renderTemplate(template, values);
 const renderedSkill = renderTemplate(skillTemplate, values);
 const renderedCodexPlugin = renderTemplate(codexPluginTemplate, {
@@ -154,13 +156,17 @@ assertIncludes(coreGitignoreTemplate, "skills-lock.json.bak", "Generated skill r
 assertIncludes(coreInstallSkillsTemplate, "No skills-lock.json found", "Install no-lockfile no-op");
 assertIncludes(coreInstallSkillsTemplate, "experimental_install", "Install read-only lockfile command");
 assertIncludes(coreInstallSkillsTemplate, "--list", "Install list mode");
-assertIncludes(coreUpdateSkillsTemplate, "npx --yes skills@latest add patinaproject/skills", "Update marketplace refresh command");
+assertIncludes(coreUpdateSkillsTemplate, '"npx"', "Update marketplace refresh command");
+assertIncludes(coreUpdateSkillsTemplate, '"--yes", "skills@latest", "add", "patinaproject/skills"', "Update marketplace refresh command");
 assertIncludes(coreUpdateSkillsTemplate, "pinPatinaRefs", "Update immutable ref pinning");
 assertIncludes(coreUpdateSkillsTemplate, "needsImmutableRef", "Update re-pins mutable refs");
+assertIncludes(coreUpdateSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Update ignores npm lifecycle scripts");
+assertIncludes(coreInstallSkillsTemplate, 'npm_config_ignore_scripts: "true"', "Install ignores npm lifecycle scripts");
 assertIncludes(coreUpdateSkillsTemplate, "experimental_install", "Update install verification");
 assertIncludes(coreUpdateSkillsTemplate, "restoreLockfile", "Update rollback on failure");
 assertNotIncludes(releaseFlow, "skills@1.5.6", "Release flow stale exact CLI version");
 assertNotIncludes(verifyWorkflow, "skills@1.5.6", "Verify workflow stale exact CLI version");
+assertNotIncludes(rootReadme, "skills@1.5.6", "Root README stale exact CLI version");
 assertIncludes(
   releaseFlow,
   "npx skills@latest add patinaproject/skills --skill scaffold-repository",

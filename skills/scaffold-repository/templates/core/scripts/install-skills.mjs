@@ -38,7 +38,7 @@ const result = spawnSync(
   // The skills CLI currently exposes lockfile restore through experimental_install.
   // Keep this wrapper small so the subcommand is easy to replace when it graduates.
   ["--yes", "skills@latest", "experimental_install", "--yes"],
-  { stdio: "inherit" },
+  { env: { ...process.env, npm_config_ignore_scripts: "true" }, stdio: "inherit" },
 );
 
 if (result.error) {
