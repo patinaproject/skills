@@ -134,5 +134,5 @@ See [`CONTRIBUTING.md`](../../CONTRIBUTING.md) and [`AGENTS.md`](../../AGENTS.md
 
 - [`SKILL.md`](./SKILL.md) – skill contract, modes, placeholders, emitted tree.
 - [`audit-checklist.md`](./audit-checklist.md) – realignment checklist.
-- [`docs/file-structure.md`](../../../docs/file-structure.md) – layout reference.
+- [`docs/file-structure.md`](../../docs/file-structure.md) – layout reference.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) – marketplace distributing Patina Project plugins.

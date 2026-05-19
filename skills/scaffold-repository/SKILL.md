@@ -13,6 +13,24 @@ root is the canonical baseline reference. When a scaffold or realignment needs
 file content, compare against the current maintained root files and manifests
 instead of reading copied baseline files from this skill directory.
 
+## Obtaining the baseline
+
+When running outside `patinaproject/skills`, fetch baseline files from GitHub
+before writing them into the target repo. Prefer the GitHub CLI when available:
+
+```sh
+gh api repos/patinaproject/skills/contents/<path> --jq .content | base64 -d
+```
+
+For multi-file comparisons, create a shallow temporary clone instead:
+
+```sh
+git clone --depth 1 https://github.com/patinaproject/skills.git /tmp/patinaproject-skills-baseline
+```
+
+If neither network access nor a local baseline checkout is available, stop and
+ask the user for a baseline source. Do not invent file contents from memory.
+
 ## Modes
 
 The skill detects which mode to run based on target-repo state.
