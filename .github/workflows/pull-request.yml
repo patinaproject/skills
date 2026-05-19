@@ -11,7 +11,7 @@ permissions:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
       - name: Enforce ASCII-only title

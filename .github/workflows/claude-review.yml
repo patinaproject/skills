@@ -1,0 +1,109 @@
+name: Claude Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  classify:
+    name: Classify PR
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    if: >-
+      ${{
+        github.event.pull_request.draft == false &&
+        github.event.pull_request.head.repo.fork == false &&
+        github.event.pull_request.user.login != 'dependabot[bot]'
+      }}
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      should_review: ${{ steps.changed-files.outputs.should_review }}
+      reason: ${{ steps.changed-files.outputs.reason }}
+    steps:
+      - name: Classify changed files
+        id: changed-files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          changed_files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+
+          if printf '%s\n' "$changed_files" | grep -qx '.github/workflows/claude-review.yml'; then
+            {
+              echo "should_review=false"
+              echo "reason=review workflow changed"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          reviewable=false
+          while IFS= read -r file; do
+            case "$file" in
+              ""|CHANGELOG.md|pnpm-lock.yaml|package-lock.json|yarn.lock|bun.lockb|docs/superpowers/*)
+                ;;
+              *.lock|*.lockb|*.snap|*.png|*.jpg|*.jpeg|*.gif|*.webp|*.svg)
+                ;;
+              *)
+                reviewable=true
+                ;;
+            esac
+          done <<< "$changed_files"
+
+          if [ "$reviewable" = false ]; then
+            {
+              echo "should_review=false"
+              echo "reason=only low-signal files changed"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "should_review=true"
+            echo "reason=reviewable changes detected"
+          } >> "$GITHUB_OUTPUT"
+
+  review:
+    name: Review PR
+    needs: classify
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    if: needs.classify.outputs.should_review == 'true'
+    steps:
+      - name: Run passive Claude review
+        # anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@855a15bff2f22a6b15d90a4ebef506b5f1da1aec
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          include_fix_links: false
+          display_report: false
+          show_full_output: false
+          use_sticky_comment: true
+          prompt: |
+            Review this pull request in the public repository ${{ github.repository }}.
+
+            Scope:
+            - Focus on correctness, security, maintainability, test coverage, GitHub Actions safety, and this repository's conventions.
+            - Do not duplicate normal CI output, formatting output, release notes, or dependency-update noise.
+            - Treat generated assets, lockfiles, changelogs, and planning artifacts as low-signal unless they reveal a concrete risk.
+
+            Security boundary:
+            - This repository is public. Do not print, summarize, infer, or request secrets, credentials, token values, or private context.
+            - Do not modify files, create commits, push branches, open pull requests, run shell commands, or suggest privileged automation.
+            - If you see a possible secret, describe the risk category without reproducing the value.
+
+            Output:
+            - Post inline comments only for critical or major findings with actionable fixes.
+            - Put minor findings in the single summary comment.
+            - Include one concise summary comment with change walkthrough, risk level, and finding counts.
+            - Avoid accidental issue autolinks in bot text; write issue references with a space after the hash, such as "# 123".
+          claude_args: |
+            --max-turns 6
+            --disallowedTools "Edit,MultiEdit,Write,Bash"

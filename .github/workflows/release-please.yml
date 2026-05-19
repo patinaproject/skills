@@ -13,7 +13,7 @@ permissions:
 jobs:
   release-please:
     name: Open or update release PRs
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
     steps:
@@ -43,7 +43,7 @@ jobs:
     name: Apply scaffold-repository scaffolding on release
     needs: release-please
     if: needs.release-please.outputs.releases_created == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -97,7 +97,7 @@ jobs:
     name: Enable auto-merge on release PRs
     needs: release-please
     if: needs.release-please.outputs.releases_created != 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
