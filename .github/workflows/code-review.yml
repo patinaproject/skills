@@ -78,6 +78,12 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     if: needs.classify.outputs.should_review == 'true'
     steps:
+      - name: Checkout repository
+        # actions/checkout@v4.3.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+
       - name: Run passive Claude review
         # anthropics/claude-code-action@v1
         uses: anthropics/claude-code-action@855a15bff2f22a6b15d90a4ebef506b5f1da1aec
