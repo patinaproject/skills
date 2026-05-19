@@ -61,6 +61,7 @@ assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
 # generic scaffolded consumer repositories.
 for live_reference_path in \
   .claude/settings.json \
+  .codex/environments/environment.toml \
   .editorconfig \
   .agents/plugins/marketplace.json \
   .github/CODEOWNERS \

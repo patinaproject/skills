@@ -7,7 +7,7 @@ cd "$REPO_ROOT"
 node --input-type=module <<'NODE'
 import assert from "node:assert/strict";
 import { constants } from "node:fs";
-import { access, readFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 assert.equal(packageJson.type, "module", "package.json must declare ESM mode");
@@ -24,6 +24,12 @@ assert.equal(typeof commitlintConfig.default, "object", "commitlint config must 
 
 const lintStagedConfig = await import("./.lintstagedrc.js");
 assert.equal(typeof lintStagedConfig.default, "object", "lint-staged config must export a default object");
+
+const rootJsFiles = await readdir(".");
+for (const file of rootJsFiles.filter((candidate) => candidate.endsWith(".js"))) {
+  const source = await readFile(file, "utf8");
+  assert.doesNotMatch(source, /\bmodule\.exports\b/, `${file} must not use CommonJS exports`);
+}
 
 await assert.rejects(
   access(".lintstagedrc.cjs"),

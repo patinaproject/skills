@@ -18,6 +18,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all ten skill paths
+- `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `docs/`: contributor docs such as `docs/file-structure.md` and
   `docs/release-flow.md`
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
