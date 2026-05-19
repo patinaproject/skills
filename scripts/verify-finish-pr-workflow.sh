@@ -31,7 +31,7 @@ assert_order() {
   local file="$3"
   local first_line second_line
   # These workflow command assertions intentionally use the first occurrence.
-  # If examples add duplicate commands earlier in the file, update this check.
+  # If examples add duplicate commands earlier, use a unique anchor pattern.
   first_line="$(rg -n --pcre2 -e "$first_pattern" "$file" | head -n 1 | cut -d: -f1 || true)"
   second_line="$(rg -n --pcre2 -e "$second_pattern" "$file" | head -n 1 | cut -d: -f1 || true)"
   if [ -z "$first_line" ] || [ -z "$second_line" ] || [ "$first_line" -ge "$second_line" ]; then
@@ -49,7 +49,6 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "isResolved" "$WORKFLOW"
   assert_match "(?i)(?:unresolved.*blocker|blocker.*unresolved)" "$WORKFLOW"
   assert_match "top-level" "$WORKFLOW"
-  assert_match "Findings|finding" "$WORKFLOW"
   assert_match "per-finding disposition" "$WORKFLOW"
   assert_match "unaddressed findings" "$WORKFLOW"
 fi
