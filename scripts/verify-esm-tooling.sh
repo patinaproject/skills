@@ -16,6 +16,8 @@ await access("scripts/verify-esm-tooling.sh", constants.X_OK);
 
 const commitizenConfig = JSON.parse(await readFile("commitizen.config.json", "utf8"));
 assert.equal(typeof commitizenConfig, "object", "commitizen config must be JSON data");
+assert.ok(Array.isArray(commitizenConfig.types), "commitizen config must declare commit types");
+assert.equal(commitizenConfig.subjectLimit, 72, "commitizen config must preserve the subject limit");
 
 const commitlintConfig = await import("./commitlint.config.js");
 assert.equal(typeof commitlintConfig.default, "object", "commitlint config must export a default object");

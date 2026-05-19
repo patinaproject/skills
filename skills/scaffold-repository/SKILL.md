@@ -181,7 +181,8 @@ deprecated Superteam or Superpowers workflows.
   work-specific pre-merge operator chores.
 - **Issue titles**: plain-language, no commit-style prefix.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
-- **PNPM**: `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, and `lint:md` script.
+- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, and `lint:md` script.
+- **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Shared skill lifecycle**: this repository uses `skills-lock.json` plus
   `scripts/install-third-party-skills.sh` to restore project-local third-party
   skills for dogfooding. Scaffolded consumer repositories should copy the live
