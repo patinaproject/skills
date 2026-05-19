@@ -31,10 +31,18 @@ function extractClaudeArgs(rawArgs) {
   return args;
 }
 
+function normalizeHostedPrompt(prompt, context) {
+  if (!prompt) return "Review the local branch diff.";
+
+  return prompt
+    .replaceAll("${{ env.PR_NUMBER }}", context.pr?.number ? String(context.pr.number) : "the current branch")
+    .replaceAll("${{ env.PR_REPO }}", context.pr?.repository || "the current repository");
+}
+
 function planClaude(workflow, context) {
   // Keep the hosted prompt intact for fidelity; local no-mutation behavior is
   // enforced through the appended system prompt and disallowed tool list.
-  const prompt = [localReviewInstruction(context), "", workflow.with.prompt || "Review the local branch diff."].join("\n");
+  const prompt = [localReviewInstruction(context), "", normalizeHostedPrompt(workflow.with.prompt, context)].join("\n");
   return {
     command: "claude",
     args: ["--print", ...extractClaudeArgs(workflow.with.claude_args || ""), prompt],
@@ -44,7 +52,7 @@ function planClaude(workflow, context) {
 }
 
 function planCodex(workflow, context) {
-  const prompt = [localReviewInstruction(context), "", workflow.with.prompt || "Review the local branch diff."].join("\n");
+  const prompt = [localReviewInstruction(context), "", normalizeHostedPrompt(workflow.with.prompt, context)].join("\n");
   const args = ["review", "--base", `origin/${context.defaultBranch}`];
   if (context.dirty) args.push("--uncommitted");
   if (workflow.with.model) args.push("-c", `model="${workflow.with.model}"`);

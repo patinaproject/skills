@@ -73,6 +73,8 @@ function parseWithBlock(lines, startIndex, stepIndent) {
             cursor -= 1;
             break;
           }
+          // Repository workflows use two-space YAML indentation, which matches
+          // the block scalar indentation produced by the hosted action config.
           blockLines.push(blockLine.slice(Math.min(blockLine.length, blockIndent + 2)));
           cursor += 1;
         }

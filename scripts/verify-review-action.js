@@ -16,6 +16,8 @@ const context = {
   dirty: true,
   headSha: "head-sha",
   pr: {
+    number: 110,
+    repository: "patinaproject/skills",
     title: "Add local review action emulator skill",
     url: "https://github.com/patinaproject/skills/pull/110",
   },
@@ -78,6 +80,10 @@ assert.deepEqual(claudePlan.args.slice(claudePlan.args.indexOf("--max-turns"), c
 ]);
 const allowedTools = claudePlan.args[claudePlan.args.indexOf("--allowedTools") + 1];
 assert.ok(!allowedTools.includes("Bash(gh pr comment:*)"));
+const claudePrompt = claudePlan.args.at(-1);
+assert.ok(claudePrompt.includes("PR 110 in patinaproject/skills"));
+assert.ok(!claudePrompt.includes("${{ env.PR_NUMBER }}"));
+assert.ok(!claudePrompt.includes("${{ env.PR_REPO }}"));
 
 const codexPlan = planInvocation(
   {

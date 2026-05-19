@@ -72,7 +72,13 @@ function prMetadata() {
       "--json",
       "number,title,body,url,baseRefName,headRefName,headRefOid,baseRefOid",
     ]);
-    return JSON.parse(json);
+    const metadata = JSON.parse(json);
+    try {
+      metadata.repository = runGh(["repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"]);
+    } catch (_error) {
+      metadata.repository = null;
+    }
+    return metadata;
   } catch (_error) {
     return null;
   }

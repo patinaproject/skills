@@ -5,6 +5,8 @@ function isLowSignal(file) {
   if (file === "bun.lockb") return true;
   // This repo keeps AI-agent plan artifacts under docs/superpowers.
   if (file.startsWith("docs/superpowers/")) return true;
+  // The hosted prompt skips dogfood overlays during review; mirror that in the
+  // deterministic local scope so symlink churn does not dominate the packet.
   if (file.startsWith(".agents/skills/")) return true;
   if (file.startsWith(".claude/skills/")) return true;
   return /\.(lock|lockb|snap|png|jpg|jpeg|gif|webp|svg)$/.test(file);
