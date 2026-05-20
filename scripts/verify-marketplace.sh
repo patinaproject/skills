@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/finish-pr","./skills/review-action","./skills/office-hours","./skills/plan-ceo-review","./skills/install-skills","./skills/superteam","./skills/superteam-non-interactive"]'
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/develop-issue","./skills/finish-pr","./skills/review-action","./skills/office-hours","./skills/plan-ceo-review","./skills/install-skills","./skills/superteam","./skills/superteam-non-interactive"]'
 
 # Validate the Claude Code marketplace catalog.
 test -f .claude-plugin/marketplace.json

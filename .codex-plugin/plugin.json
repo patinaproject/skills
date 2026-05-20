@@ -5,6 +5,7 @@
     "./skills/scaffold-repository",
     "./skills/using-github",
     "./skills/new-branch",
+    "./skills/develop-issue",
     "./skills/finish-pr",
     "./skills/review-action",
     "./skills/office-hours",

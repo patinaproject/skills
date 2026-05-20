@@ -2,6 +2,7 @@
 set -euo pipefail
 
 bash scripts/verify-dogfood.sh
+bash scripts/verify-develop-issue-workflow.sh
 bash scripts/verify-esm-tooling.sh
 bash scripts/verify-finish-pr-workflow.sh
 bash scripts/verify-marketplace.sh
@@ -13,10 +14,25 @@ bash scripts/verify-workflow-cleanup.sh
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.
 run_cli_canary() {
+  local output
+  if [ "${2:-}" = "" ]; then
+    if command -v timeout >/dev/null 2>&1; then
+      COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    else
+      COLUMNS=240 npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    fi
+    return
+  fi
+
   if command -v timeout >/dev/null 2>&1; then
-    timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    output="$(COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list 2>&1)"
   else
-    npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    output="$(COLUMNS=240 npm_config_ignore_scripts=true npx skills@latest add "$1" --list 2>&1)"
+  fi
+  printf '%s\n' "$output"
+  if ! printf '%s\n' "$output" | grep -Fq "$2"; then
+    echo "FAIL: CLI canary for '$1' did not display expected text: $2" >&2
+    return 1
   fi
 }
 
@@ -24,6 +40,7 @@ run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/office-hours
 run_cli_canary ./skills/review-action
+run_cli_canary ./skills/develop-issue '/develop-issue #123'
 
 run_cli_install_canary() {
   local repo_root tmpdir status

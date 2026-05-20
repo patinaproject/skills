@@ -1,8 +1,9 @@
 # Skills used by the Patina Project team
 
-Ten installable agent skills for repository scaffolding, project-local skill
+Eleven installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, issue branch setup, PR finishing, local AI
-review-action emulation, product design, strategic plan review, and
+review-action emulation, issue development orchestration, product design,
+strategic plan review, and
 historical Superteam compatibility —
 available across Claude Code, Codex, and
 any agent runtime that reads `AGENTS.md`.
@@ -100,6 +101,17 @@ creating a PR.
 See [./skills/new-branch/](./skills/new-branch/)
 for the skill contract.
 
+### develop-issue
+
+End-to-end issue work needs a single entrypoint without weakening the focused
+skills that already own branch setup, test-driven implementation, diagnosis,
+local review, and PR finishing. `develop-issue` takes exactly one same-repo
+issue reference, coordinates `new-branch`, `tdd`, `diagnose`, `review-action`,
+and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
+
+See [./skills/develop-issue/](./skills/develop-issue/)
+for the skill contract.
+
 ### finish-pr
 
 Finishing branch work is more than opening a pull request. `finish-pr` verifies
@@ -166,6 +178,7 @@ for the full README and skill contract.
 | [superteam-non-interactive](./skills/superteam-non-interactive/) | Deprecated CI-safe Superteam orchestration |
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
+| [develop-issue](./skills/develop-issue/) | Develop one issue through local review and PR readiness |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
@@ -199,7 +212,7 @@ npx skills@latest add ./skills/review-action --list
 bash scripts/verify-scaffold-cleanup.sh
 ```
 
-### Check c — dogfood verification, all ten skills
+### Check c — dogfood verification, all eleven skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -215,6 +228,7 @@ skills/
   superteam-non-interactive/
   using-github/
   new-branch/
+  develop-issue/
   finish-pr/
   review-action/
   office-hours/
