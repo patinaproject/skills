@@ -14,8 +14,9 @@ Invoke from a local work branch:
 /update-branch release/1.x
 ```
 
-No argument means resolve the base from `origin/HEAD`. An optional base argument
-selects another branch or remote-tracking ref.
+No argument means resolve the base from `origin/HEAD`. An optional base
+argument selects another branch or remote-tracking ref. The workflow may create
+a local auto-commit for cohesive dirty work before merging.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push
@@ -35,15 +36,19 @@ automatically.
 
 1. Read repository guidance for commit messages, verification, and protected
    branches.
-2. Record the current branch with `git branch --show-current`.
+2. Record the current branch with `git branch --show-current`. Compare it to
+   the repository default branch before fetch or merge, and refuse default-
+   branch updates unless the user supplied a base and confirmed that intent.
 3. Resolve the base:
    - With an optional base argument, normalize any bare branch name, such as
-     `main`, `master`, `develop`, or `trunk`, to its `origin/<name>`
-     remote-tracking ref. Keep remote-tracking refs such as
+     `main`, `master`, `develop`, `trunk`, or `release/1.x`, to its
+     `origin/<name>` remote-tracking ref. Keep remote-tracking refs such as
      `origin/release/1.x` as supplied.
    - Without an argument, read `refs/remotes/origin/HEAD` and normalize it to
      the remote-tracking branch it points at, such as `origin/main`.
-4. Fetch the selected base from `origin`.
+4. Fetch the remote head name for the selected base from `origin`, stripping
+   the leading `origin/` first. For example, fetch `main` for `origin/main` and
+   `release/1.x` for `origin/release/1.x`.
 5. Inspect local dirty state before merging:
    - Run `git status --short`.
    - Review staged, unstaged, and untracked diffs.
