@@ -47,9 +47,10 @@ automatically.
    - Review staged, unstaged, and untracked diffs.
    - Auto-commit only when the entire dirty set is cohesive, branch-local,
      free of secrets, and can be summarized under the local commit convention.
-   - Stop for unrelated or ambiguous changes, generated output with unclear
-     source, possible secrets, or any commit-message requirement that cannot be
-     satisfied from local guidance.
+   - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
+     generated-file dirty set; generated output with unclear source; possible
+     secrets; or any commit-message requirement that cannot be satisfied from
+     local guidance.
 6. Merge with an explicit merge commit:
    - Run `git merge --no-ff <base-ref>`.
    - If Git reports `Already up to date`, report that no merge commit was
