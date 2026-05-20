@@ -16,8 +16,8 @@ Invoke from a local work branch:
 
 No argument means resolve the base from `origin/HEAD`. An optional base
 argument selects another branch or remote-tracking ref. Dirty work normally
-stops the update; a clearly cohesive, branch-local, non-silent auto-commit is
-the only exception.
+stops the update; a clearly cohesive, branch-local, non-silent auto-commit with
+explicit operator confirmation is the only exception.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push
@@ -58,7 +58,8 @@ automatically.
    - Auto-commit only when the entire dirty set is cohesive, branch-local,
      free of secrets, and can be summarized under the local commit convention.
      Before committing, state the exact files and commit message that will be
-     used so the auto-commit is not silent.
+     used, then wait for explicit operator confirmation so the auto-commit is
+     not silent. Without confirmation, stop and report the dirty state.
    - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
      generated-file dirty set; generated output with unclear source; possible
      secrets; or any commit-message requirement, such as a required issue tag,

@@ -20,7 +20,7 @@ assert_file() {
 assert_match() {
   local pattern="$1"
   local file="$2"
-  if ! rg -n -U --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
+  if ! rg -n -U -e "$pattern" "$file" >/dev/null 2>&1; then
     fail "missing expected pattern in $file: $pattern"
   fi
 }
@@ -28,7 +28,7 @@ assert_match() {
 assert_no_match() {
   local pattern="$1"
   local file="$2"
-  if rg -n --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
+  if rg -n -e "$pattern" "$file" >/dev/null 2>&1; then
     fail "unexpected pattern in $file: $pattern"
   fi
 }
@@ -56,6 +56,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'git status --short' "$SKILL"
   assert_match 'Auto-commit only when' "$SKILL"
   assert_match 'must never happen silently|not silent' "$SKILL"
+  assert_match 'explicit operator confirmation' "$SKILL"
   assert_match 'cohesive' "$SKILL"
   assert_match 'branch-local' "$SKILL"
   assert_match 'secrets' "$SKILL"
