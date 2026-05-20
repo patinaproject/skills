@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.15.0...patinaproject-skills-v2.0.0) (2026-05-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* removes plan-ceo-review, office-hours, review-action, superteam, and superteam-non-interactive from the patinaproject-skills marketplace catalog.
+
+### Features
+
+* [#151](https://github.com/patinaproject/skills/issues/151) remove retired marketplace skills ([#152](https://github.com/patinaproject/skills/issues/152)) ([6351192](https://github.com/patinaproject/skills/commit/635119270321a416d8aeefc644a40fe2262486d3))
+
 ## [1.15.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.14.0...patinaproject-skills-v1.15.0) (2026-05-20)
 
 ### Features
