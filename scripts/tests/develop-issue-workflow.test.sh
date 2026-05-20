@@ -20,7 +20,7 @@ assert_file() {
 assert_match() {
   local pattern="$1"
   local file="$2"
-  if ! rg -n --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
+  if ! rg -n -U --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
     fail "missing expected pattern in $file: $pattern"
   fi
 }
@@ -54,6 +54,9 @@ if [ -f "$SKILL" ]; then
   for child in new-branch tdd diagnose review-code finish-pr; do
     assert_match "\`$child\`" "$SKILL"
   done
+  for route in write-a-skill zoom-out prototype; do
+    assert_match "\`$route\`" "$SKILL"
+  done
   assert_match '\`review-action\` remains available separately' "$SKILL"
 
   assert_match 'Reject missing issue references' "$SKILL"
@@ -63,20 +66,42 @@ if [ -f "$SKILL" ]; then
   assert_match 'halt before implementation' "$SKILL"
   assert_match 'Read `AGENTS\.md` and `CLAUDE\.md` if present' "$SKILL"
   assert_match 'Delegate branch setup to `new-branch`' "$SKILL"
+  assert_match 'Conditional routes are not blanket prerequisites' "$SKILL"
+  assert_match 'mattpocock/skills@write-a-skill' "$SKILL"
+  assert_match 'mattpocock/skills@zoom-out' "$SKILL"
+  assert_match 'mattpocock/skills@prototype' "$SKILL"
+  assert_match 'Route through `write-a-skill` when the issue changes an installable skill[[:space:]]+package surface' "$SKILL"
+  assert_match 'run `write-a-skill` before `tdd`' "$SKILL"
+  assert_match 'Use `zoom-out` for ad-hoc, read-only discovery' "$SKILL"
+  assert_match 'background explorer' "$SKILL"
+  assert_match 'consume the result before choosing an implementation route' "$SKILL"
+  assert_match 'Use `prototype` only when the issue explicitly asks for throwaway exploration' "$SKILL"
+  assert_match 'Delete or absorb prototype output before local review' "$SKILL"
   assert_match 'Implement one behavior at a time through `tdd`' "$SKILL"
+  assert_match '`tdd` stays in the main[[:space:]]+thread' "$SKILL"
   assert_match 'Route to `diagnose` when root cause is unclear' "$SKILL"
   assert_match 'Run `review-code` as the local review gate' "$SKILL"
+  assert_match 'In Codex, automatically spawn a fresh Explorer background agent' "$SKILL"
+  assert_match 'do not ask for another user[[:space:]]+confirmation' "$SKILL"
+  assert_match 'Close the[[:space:]]+Explorer or reviewer agent after consuming its final report' "$SKILL"
+  assert_match 'Do not leave old[[:space:]]+review agents running' "$SKILL"
   assert_match 'Delegate final publishing and PR readiness to `finish-pr`' "$SKILL"
   assert_match 'Never merge the pull request' "$SKILL"
 
   assert_order 'Delegate branch setup to `new-branch`' 'Implement one behavior at a time through `tdd`' "$SKILL"
+  assert_order 'Use `zoom-out` for ad-hoc, read-only discovery' 'Implement one behavior at a time through `tdd`' "$SKILL"
   assert_order 'Run `review-code` as the local review gate' 'Delegate final publishing and PR readiness to `finish-pr`' "$SKILL"
 
   for outcome in ready-for-agent ready-for-human wontfix; do
     assert_match "\`$outcome\`" "$SKILL"
   done
+  assert_match 'valid work outside the issue' "$SKILL"
+  assert_match 'future reviewers would otherwise re-raise' "$SKILL"
   assert_match 'There is no `needs-info` state' "$SKILL"
+  assert_match 'clean or every local finding has a[[:space:]]+disposition' "$SKILL"
   assert_no_match 'receiving-code-review' "$SKILL"
+  assert_no_match 'requesting-code-review' "$SKILL"
+  assert_no_match 'Superpowers' "$SKILL"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

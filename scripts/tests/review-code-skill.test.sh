@@ -15,7 +15,7 @@ fail() {
 assert_match() {
   local pattern="$1"
   local file="$2"
-  if ! rg -n --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
+  if ! rg -n -U --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
     fail "missing expected pattern in $file: $pattern"
   fi
 }
@@ -34,6 +34,10 @@ if [ -f "$SKILL" ]; then
   assert_match '^name:[[:space:]]*review-code$' "$SKILL"
   assert_match 'fresh-context reviewer' "$SKILL"
   assert_match 'read-only Explorer or reviewer background agent' "$SKILL"
+  assert_match 'Codex.*spawn a fresh Explorer background agent' "$SKILL"
+  assert_match 'without asking[[:space:]]+for another user confirmation' "$SKILL"
+  assert_match 'Close[[:space:]]+the Explorer or reviewer agent after its final report is consumed' "$SKILL"
+  assert_match 'Do not let[[:space:]]+old review agents pile up' "$SKILL"
   assert_match 'If fresh reviewer dispatch is unavailable, halt' "$SKILL"
   assert_match 'Do not fall back to same-thread review' "$SKILL"
   assert_match 'read-only and findings-only' "$SKILL"

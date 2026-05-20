@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# verify-dogfood.sh — Asserts that all twelve in-repo skills are discoverable
+# dogfood.test.sh — Asserts that all twelve in-repo skills are discoverable
 # via the flat skills/<name>/ layout and the dogfood overlay symlinks.
 # (find-skills is a third-party vendored skill, not an in-repo skill.)
 # Exit 0: all twelve skills pass all assertions.

@@ -99,7 +99,7 @@ The vercel-labs CLI is referenced as `skills@latest` in routine documentation an
 scaffolded repo commands. To update examples after a CLI behavior change:
 
 1. Update command examples in `README.md`, `AGENTS.md`, and `docs/release-flow.md`.
-2. Re-run `bash scripts/verify-dogfood.sh` — exits 0.
+2. Re-run `bash scripts/tests/dogfood.test.sh` — exits 0.
 3. Run the [check-a local-path verification](../README.md#local-iteration) — exits 0.
 4. Open a PR with the CLI policy update.
 
