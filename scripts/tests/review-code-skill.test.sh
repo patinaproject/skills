@@ -63,7 +63,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'rationale' "$SKILL"
   assert_match 'suggested fix' "$SKILL"
   assert_match '## Distinction From Hosted Review' "$SKILL"
-  assert_match '`review-action`' "$SKILL"
+  assert_match 'This skill only covers local isolated branch-diff review' "$SKILL"
   assert_match '`code-review\.yml`' "$SKILL"
   assert_no_match 'repository-local helper script' "$SKILL"
 fi

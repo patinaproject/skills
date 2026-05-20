@@ -93,9 +93,8 @@ so and mention residual risk or test gaps.
 not emulate `code-review.yml`, does not require a PR number, and does not post
 comments.
 
-Use `review-action` when the user explicitly wants to emulate a supported
-hosted AI code-review workflow locally. Hosted workflows own their own prompt,
-permissions, and PR-commenting contract.
+This skill only covers local isolated branch-diff review. Hosted review
+workflows own their own prompt, permissions, and PR-commenting contract.
 
 ## Report
 

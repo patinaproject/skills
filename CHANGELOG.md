@@ -2,7 +2,6 @@
 
 ## [1.15.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.14.0...patinaproject-skills-v1.15.0) (2026-05-20)
 
-
 ### Features
 
 * [#143](https://github.com/patinaproject/skills/issues/143) add isolated review-code skill ([#144](https://github.com/patinaproject/skills/issues/144)) ([05e01d3](https://github.com/patinaproject/skills/commit/05e01d3b49f07613312781aa30dc2b364b240aea))
@@ -10,13 +9,11 @@
 
 ## [1.14.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.13.0...patinaproject-skills-v1.14.0) (2026-05-20)
 
-
 ### Features
 
 * [#117](https://github.com/patinaproject/skills/issues/117) select code review workflow locally ([#141](https://github.com/patinaproject/skills/issues/141)) ([0e0c4a8](https://github.com/patinaproject/skills/commit/0e0c4a825c4da965faa6bd619b7d16cb1b913898))
 
 ## [1.13.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.12.0...patinaproject-skills-v1.13.0) (2026-05-20)
-
 
 ### Features
 
@@ -24,20 +21,17 @@
 
 ## [1.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.11.0...patinaproject-skills-v1.12.0) (2026-05-20)
 
-
 ### Features
 
 * [#134](https://github.com/patinaproject/skills/issues/134) let skills own issue shape ([#136](https://github.com/patinaproject/skills/issues/136)) ([f46428b](https://github.com/patinaproject/skills/commit/f46428bdd03c1763d7fb12631c7e9a4be836c7bd))
 
 ## [1.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.10.0...patinaproject-skills-v1.11.0) (2026-05-19)
 
-
 ### Features
 
 * [#126](https://github.com/patinaproject/skills/issues/126) remove scaffold templates ([#128](https://github.com/patinaproject/skills/issues/128)) ([9b8168b](https://github.com/patinaproject/skills/commit/9b8168b3192be8a9cd204fc40a3ae37e0e7e26d4))
 
 ## [1.10.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.9.0...patinaproject-skills-v1.10.0) (2026-05-19)
-
 
 ### Features
 
