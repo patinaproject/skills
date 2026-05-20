@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.0.0...patinaproject-skills-v2.1.0) (2026-05-20)
+
+
+### Features
+
+* [#153](https://github.com/patinaproject/skills/issues/153) add update-branch skill ([#155](https://github.com/patinaproject/skills/issues/155)) ([d761c0f](https://github.com/patinaproject/skills/commit/d761c0fb808d95eee2efa2e7bb88418a8b6f3794))
+* [#156](https://github.com/patinaproject/skills/issues/156) prioritize PR feedback before checks ([#159](https://github.com/patinaproject/skills/issues/159)) ([4c086ac](https://github.com/patinaproject/skills/commit/4c086ac5aac8aba269484fc8e1f90655fd5a7ae7))
+
 ## [2.0.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.15.0...patinaproject-skills-v2.0.0) (2026-05-20)
 
 ### ⚠ BREAKING CHANGES
