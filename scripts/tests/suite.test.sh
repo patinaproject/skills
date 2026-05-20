@@ -40,7 +40,7 @@ run_cli_canary() {
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/review-code
-run_cli_canary ./skills/develop-issue '/develop-issue #123'
+run_cli_canary ./skills/develop-issue 'develop-issue'
 
 run_cli_install_canary() {
   local repo_root tmpdir status
