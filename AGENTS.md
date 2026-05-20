@@ -80,6 +80,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
 - Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`
+- Run `bash scripts/tests/pull-request-workflow.test.sh` after changing `.github/workflows/pull-request.yml`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior
 
