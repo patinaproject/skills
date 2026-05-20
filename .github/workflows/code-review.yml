@@ -49,7 +49,7 @@ jobs:
           reviewable=false
           while IFS= read -r file; do
             case "$file" in
-              ""|CHANGELOG.md|pnpm-lock.yaml|package-lock.json|yarn.lock|bun.lockb|docs/superpowers/*)
+              ""|CHANGELOG.md|pnpm-lock.yaml|package-lock.json|yarn.lock|bun.lockb)
                 ;;
               *.lock|*.lockb|*.snap|*.png|*.jpg|*.jpeg|*.gif|*.webp|*.svg)
                 ;;

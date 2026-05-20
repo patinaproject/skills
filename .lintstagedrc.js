@@ -1,13 +1,12 @@
 // Lint-staged configuration
-// Filters out vendored skill files, canonical skill overlay files (from
-// external sources), and superpowers artifacts from markdownlint so each
-// source can use its own markdownlint config without conflicting with ours.
+// Filters out vendored skill files and canonical skill overlay files (from
+// external sources) so each source can use its own markdownlint config without
+// conflicting with ours.
 export default {
   "*.md": (files) => {
     const filtered = files.filter(
       (f) =>
         !f.includes("/skills/") &&
-        !f.includes("/docs/superpowers/") &&
         !f.includes("/.agents/skills/") &&
         !f.includes("/.claude/skills/")
     );
