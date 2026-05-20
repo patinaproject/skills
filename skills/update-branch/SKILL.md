@@ -59,7 +59,8 @@ automatically.
      free of secrets, and can be summarized under the local commit convention.
      Before committing, state the exact files and commit message that will be
      used, then wait for explicit operator confirmation so the auto-commit is
-     not silent. Without confirmation, stop and report the dirty state.
+     not silent. Without confirmation, including in non-interactive runs, stop
+     and report the dirty state.
    - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
      generated-file dirty set; generated output with unclear source; possible
      secrets; or any commit-message requirement, such as a required issue tag,
