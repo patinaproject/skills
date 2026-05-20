@@ -152,15 +152,15 @@ directory's default `gh` repository.
 
 12. Watch all checks to terminal state:
 
-   ```sh
-   gh pr checks --watch
-   ```
+    ```sh
+    gh pr checks --watch
+    ```
 
-   Do not use `--fail-fast` by default. Do not filter to required checks only;
-   optional checks can produce review comments or useful blocking evidence.
-   Do not add arbitrary settle sleeps, pass-count caps, or wall-clock caps. If
-   the check set shows no state change after a reasonable observation window,
-   stop for operator feedback instead of waiting indefinitely.
+    Do not use `--fail-fast` by default. Do not filter to required checks only;
+    optional checks can produce review comments or useful blocking evidence.
+    Do not add arbitrary settle sleeps, pass-count caps, or wall-clock caps. If
+    the check set shows no state change after a reasonable observation window,
+    stop for operator feedback instead of waiting indefinitely.
 
 13. Triage every non-pass, canceled, or otherwise problematic check with
     [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
