@@ -70,6 +70,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'mattpocock/skills@write-a-skill' "$SKILL"
   assert_match 'mattpocock/skills@zoom-out' "$SKILL"
   assert_match 'mattpocock/skills@prototype' "$SKILL"
+  assert_match 'The `tdd`, `diagnose`, `write-a-skill`, `zoom-out`, and `prototype` install[[:space:]]+hints intentionally track' "$SKILL"
   assert_match 'Route through `write-a-skill` when the issue changes an installable skill[[:space:]]+package surface' "$SKILL"
   assert_match 'run `write-a-skill` before `tdd`' "$SKILL"
   assert_match 'Use `zoom-out` for ad-hoc, read-only discovery' "$SKILL"

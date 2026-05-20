@@ -37,9 +37,9 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnose -y
 ```
 
-The `tdd` and `diagnose` install hints intentionally track their source
-catalog's default branch. Consumers who need a frozen install can add
-`#<git-ref>` to either source.
+The `tdd`, `diagnose`, `write-a-skill`, `zoom-out`, and `prototype` install
+hints intentionally track their source catalog's default branch. Consumers who
+need a frozen install can add `#<git-ref>` to those sources.
 
 ## Conditional Routes
 
