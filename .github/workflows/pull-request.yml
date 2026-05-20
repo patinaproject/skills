@@ -96,7 +96,10 @@ jobs:
             body_has_footer=true
           fi
           commit_has_footer=false
-          commit_messages="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/commits" --jq '.[].commit.message')"
+          if ! commit_messages="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/commits" --jq '.[].commit.message')"; then
+            echo "::error::Failed to list PR commits while checking breaking-change markers."
+            exit 1
+          fi
           if printf '%s\n' "$commit_messages" | grep -qE '^BREAKING[ -]CHANGE:'; then
             commit_has_footer=true
           fi
