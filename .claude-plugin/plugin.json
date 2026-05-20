@@ -7,12 +7,7 @@
     "./skills/develop-issue",
     "./skills/finish-pr",
     "./skills/review-code",
-    "./skills/review-action",
     "./skills/update-branch",
-    "./skills/office-hours",
-    "./skills/plan-ceo-review",
-    "./skills/install-skills",
-    "./skills/superteam",
-    "./skills/superteam-non-interactive"
+    "./skills/install-skills"
   ]
 }

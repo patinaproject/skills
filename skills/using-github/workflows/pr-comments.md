@@ -43,7 +43,7 @@ Create todos for each step before starting:
 - [ ] Step 1: Resolve repo, PR number, branch, and latest head SHA
 - [ ] Step 2: Enumerate review threads with paginated GraphQL
 - [ ] Step 3: Classify unresolved, resolved, outdated, and non-blocking items
-- [ ] Step 4: Route requirement-bearing feedback through Superteam owners
+- [ ] Step 4: Route requirement-bearing feedback through the owning workflow
 - [ ] Step 5: Verify each handled item against the latest head
 - [ ] Step 6: Post evidence-bearing threaded replies through REST
 - [ ] Step 7: Optionally resolve eligible threads through GraphQL
@@ -154,8 +154,8 @@ Replies do not equal resolution. A thread with replies remains unresolved when
 
 Before fixing or replying, classify the substance of the feedback.
 
-Route through `Brainstormer -> Planner -> Executor` when feedback changes any
-of these:
+Route requirement-bearing feedback back to the workflow owner before fixing or
+replying when feedback changes any of these:
 
 - Requirements.
 - Acceptance criteria.
@@ -163,8 +163,8 @@ of these:
 - User-visible behavior.
 - Workflow contracts.
 
-Do not implement or reply as complete until that route has happened and PR
-comment handling resumes with the approved outcome.
+Do not implement or reply as complete until that owner has approved the
+required handling and PR comment handling resumes with the approved outcome.
 
 Implementation-detail feedback that preserves approved requirements and
 acceptance intent may route directly to the implementation owner. Say that
@@ -223,7 +223,7 @@ Replies must include evidence:
 - If no fix commit exists because the comment is stale, duplicate,
   informational, or not applicable, state the concrete evidence for that
   classification.
-- If the item was routed through Superteam owners, state the routing result or
+- If the item was routed through the owning workflow, state the routing result or
   that handling is still pending.
 
 Do not post a reply that says the item is handled based only on local intent,
@@ -251,7 +251,7 @@ Eligible threads must be one of:
 
 - Fixed in code, tests, docs, or workflow contracts and verified on latest head.
 - Stale, duplicate, informational, or otherwise non-blocking with evidence.
-- Routed through the required Superteam owner path and returned with a handled
+- Routed through the required workflow owner path and returned with a handled
   outcome.
 
 If the mutation fails or permissions are unavailable, leave the
@@ -268,7 +268,7 @@ A PR comment is "handled" only when it is one of:
 - Addressed in code, tests, docs, or workflow contracts and verified on latest
   head.
 - Replied to with evidence and optionally resolved through GraphQL.
-- Routed through the proper Superteam owner path when requirement-bearing.
+- Routed through the proper workflow owner path when requirement-bearing.
 - Classified non-blocking with concrete evidence.
 
 Final reports should include:
@@ -295,8 +295,7 @@ Stop and do not reply, resolve, or report feedback handled when:
    OIDs needed for verification.
 4. The working tree does not match the PR head being reported.
 5. The comment still applies but has not been fixed or routed.
-6. Requirement-bearing feedback has not gone through
-   `Brainstormer -> Planner -> Executor`.
+6. Requirement-bearing feedback has not gone through the required owner route.
 7. Resolution permissions are unavailable and no evidence-bearing threaded
    reply has been left.
 8. The only evidence is silence, elapsed time, local intent, PR creation, or

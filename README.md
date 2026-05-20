@@ -1,12 +1,10 @@
 # Skills used by the Patina Project team
 
-Thirteen installable agent skills for repository scaffolding, project-local skill
-installation, GitHub workflows, issue branch setup, PR finishing, local AI
-isolated code review, hosted-review emulation, local branch updating, issue development
-orchestration, product design, strategic plan review, and
-historical Superteam compatibility —
-available across Claude Code, Codex, and
-any agent runtime that reads `AGENTS.md`.
+Eight installable agent skills for repository scaffolding, project-local skill
+installation, GitHub workflows, issue branch setup, issue development, PR
+finishing, isolated local code review, and local branch updating. They are
+available across Claude Code, Codex, and any agent runtime that reads
+`AGENTS.md`.
 
 ## Quickstart
 
@@ -47,48 +45,26 @@ npx skills@latest add vercel-labs/skills@find-skills
 
 ## Why these skills exist
 
-### superteam
-
-Deprecated. `superteam` remains installable for historical compatibility, but
-new work should use GitHub issues for durable context, the current PR template
-for reviewer-facing summaries, and focused implementation or review skills.
-
-See [./skills/superteam/](./skills/superteam/) for the deprecated skill
-contract.
-
-### superteam-non-interactive
-
-Deprecated. `superteam-non-interactive` remains installable for CI users who
-still depend on the retired Superteam contract, but it is not recommended for
-new automation.
-
-See [./skills/superteam-non-interactive/](./skills/superteam-non-interactive/)
-for the deprecated skill contract.
-
 ### using-github
 
-GitHub work — filing issues, editing issues, starting branches, writing
-changelogs, preparing PRs — is repetitive and convention-sensitive. Without a
+GitHub work - filing issues, editing issues, starting branches, writing
+changelogs, preparing PRs - is repetitive and convention-sensitive. Without a
 shared skill, every agent session re-derives the same rules from scratch and
-produces inconsistent output. `using-github` is a single skill that reads
-repository rules and routes to the correct workflow for each task, so every
-GitHub action in a repo is consistent and auditable. For issue-linked work it
-routes branch setup to `new-branch`, and for objectively complete work it
-routes publishing and checks to `finish-pr`.
+produces inconsistent output. `using-github` reads repository rules and routes
+to the correct workflow for each task.
 
-See [./skills/using-github/](./skills/using-github/)
-for the full README and skill contract.
+See [./skills/using-github/](./skills/using-github/) for the full README and
+skill contract.
 
 ### install-skills
 
 Shared workflow skills should be added to a repository without mutating an
 operator's global agent environment. `install-skills` gives agents a canonical
 `npx skills@latest` workflow: read local guidance, inspect `skills-lock.json`,
-list ambiguous sources, install selected skills project-locally for all
-supported agent targets, and verify the resulting lockfile and overlay changes.
+install selected skills project-locally for all supported agent targets, and
+verify the resulting lockfile and overlay changes.
 
-See [./skills/install-skills/](./skills/install-skills/)
-for the skill contract.
+See [./skills/install-skills/](./skills/install-skills/) for the skill contract.
 
 ### new-branch
 
@@ -98,8 +74,7 @@ default issue-branch name, refuses dirty worktrees, and creates or switches to
 the local branch without pushing, installing dependencies, committing, or
 creating a PR.
 
-See [./skills/new-branch/](./skills/new-branch/)
-for the skill contract.
+See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
 ### develop-issue
 
@@ -109,103 +84,56 @@ local review, and PR finishing. `develop-issue` takes exactly one same-repo
 issue reference, coordinates `new-branch`, `tdd`, `diagnose`, `review-code`,
 and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
 
-See [./skills/develop-issue/](./skills/develop-issue/)
-for the skill contract.
+See [./skills/develop-issue/](./skills/develop-issue/) for the skill contract.
 
 ### review-code
 
 Local issue work needs a fresh review pass before publishing. `review-code`
 computes the default-branch merge-base, includes committed, staged, unstaged,
 and untracked changes, then dispatches a fresh read-only reviewer to report
-findings without editing files or mutating GitHub state. It halts when isolated
-review dispatch is unavailable.
+findings without editing files or mutating GitHub state.
 
-See [./skills/review-code/](./skills/review-code/)
-for the skill contract.
+See [./skills/review-code/](./skills/review-code/) for the skill contract.
 
 ### finish-pr
 
 Finishing branch work is more than opening a pull request. `finish-pr` verifies
 the local diff, commits with the repository convention, pushes when needed,
-creates or updates a ready-for-review PR from the template, watches checks
-fail-fast, handles existing review feedback, and stops at ready-to-merge.
+creates or updates a ready-for-review PR from the template, watches checks, and
+stops at ready-to-merge.
 
-See [./skills/finish-pr/](./skills/finish-pr/)
-for the skill contract.
-
-### review-action
-
-Hosted AI code review is useful, but waiting for a pull request check slows
-local iteration. `review-action` detects supported Claude Code Action and Codex
-Action review workflows, computes the PR-equivalent branch diff, tightens any
-mutating hosted settings for local read-only execution, invokes the matching
-local CLI, and prints a terminal-only report.
-
-See [./skills/review-action/](./skills/review-action/)
-for the skill contract.
+See [./skills/finish-pr/](./skills/finish-pr/) for the skill contract.
 
 ### update-branch
 
-Keeping a work branch current should be a local git operation unless an operator
-chooses to publish it. `update-branch` fetches the selected base branch,
-defaults to `origin/HEAD`, guards dirty work, merges with `git merge --no-ff`,
-and reports the local-only result plus the push command to run later.
+Keeping a work branch current should be a local git operation unless an
+operator chooses to publish it. `update-branch` fetches the selected base
+branch, defaults to `origin/HEAD`, guards dirty work, merges with
+`git merge --no-ff`, and reports the local-only result plus the push command to
+run later.
 
-See [./skills/update-branch/](./skills/update-branch/)
-for the skill contract.
-
-### office-hours
-
-New product ideas benefit from honest forcing questions before any code is
-written — demand reality checks, narrowest-wedge tests, observation-grounded
-specificity. Without a structured partner, agents tend to validate rather than
-pressure-test. `office-hours` runs a YC-style session in one of two modes:
-Startup mode asks six forcing questions that expose whether the idea is
-genuinely worth building; Builder mode is an enthusiastic design partner for
-hackathons and side projects. Output is always a design doc, never code.
-
-See [./skills/office-hours/](./skills/office-hours/)
-for the skill contract.
-
-### plan-ceo-review
-
-Plans need a different kind of pressure test once the idea has turned into a
-proposed course of action. `plan-ceo-review` gives an existing plan a
-CEO/founder-mode review: should it expand, selectively expand, hold, or reduce?
-It challenges ambition, user value, sequencing, and opportunity cost, then
-returns a concrete recommendation and smallest next move.
-
-See [./skills/plan-ceo-review/](./skills/plan-ceo-review/)
-for the skill contract.
+See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 
 ### scaffold-repository
 
-Teams spend disproportionate time on repo plumbing — commit conventions,
-markdown linting, PR templates, Husky hooks, release-please wiring, AI agent
-plugin manifests — and every new repo starts that conversation from scratch.
-`scaffold-repository` collapses that into one invocation that emits the full
-Patina Project baseline and keeps it aligned on rerun. It handles both new
-repos and realignment of existing ones, so convention drift gets caught before
-it accumulates.
+Teams spend disproportionate time on repo plumbing - commit conventions,
+markdown linting, PR templates, Husky hooks, release-please wiring, and AI
+agent plugin manifests. `scaffold-repository` emits the full Patina Project
+baseline and keeps it aligned on rerun.
 
-See [./skills/scaffold-repository/](./skills/scaffold-repository/)
-for the full README and skill contract.
+See [./skills/scaffold-repository/](./skills/scaffold-repository/) for the full
+README and skill contract.
 
 ## Skills
 
 | Skill | Description |
 |---|---|
-| [superteam](./skills/superteam/) | Deprecated historical Superteam orchestration |
-| [superteam-non-interactive](./skills/superteam-non-interactive/) | Deprecated CI-safe Superteam orchestration |
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [develop-issue](./skills/develop-issue/) | Develop one issue through local review and PR readiness |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [review-code](./skills/review-code/) | Run isolated local branch-diff review |
-| [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
-| [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
-| [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
@@ -220,24 +148,23 @@ For the full local verification suite, run:
 pnpm test
 ```
 
-### Check a — CLI resolves skills from local paths
+### Check a - CLI resolves skills from local paths
 
 ```sh
 npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/install-skills --list
-npx skills@latest add ./skills/office-hours --list
 npx skills@latest add ./skills/review-code --list
-npx skills@latest add ./skills/review-action --list
 npx skills@latest add ./skills/update-branch --list
+npx skills@latest add ./skills/develop-issue --list
 ```
 
-### Check b — scaffold-repository cleanup contract
+### Check b - scaffold-repository cleanup contract
 
 ```sh
 bash scripts/tests/scaffold-cleanup.test.sh
 ```
 
-### Check c — dogfood verification, all thirteen skills
+### Check c - dogfood verification, all eight skills
 
 ```sh
 bash scripts/tests/dogfood.test.sh
@@ -249,17 +176,12 @@ bash scripts/tests/dogfood.test.sh
 skills/
   scaffold-repository/
   install-skills/
-  superteam/
-  superteam-non-interactive/
   using-github/
   new-branch/
   develop-issue/
   finish-pr/
   review-code/
-  review-action/
   update-branch/
-  office-hours/
-  plan-ceo-review/
 .agents/skills/<name>/               Symlinks to ../../skills/<name>/
 .claude/skills/<name>/               Symlinks to ../../skills/<name>/
 .claude-plugin/

@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Skills used by the Patina Project team",
-    "version": "1.15.0",
+    "version": "2.0.0",
     "repository": "https://github.com/patinaproject/skills"
   },
   "plugins": [
     {
       "name": "patinaproject-skills",
-      "description": "Skills used by the Patina Project team — scaffold-repository, using-github, new-branch, develop-issue, finish-pr, review-code, review-action, update-branch, office-hours, plan-ceo-review, install-skills, plus deprecated Superteam compatibility skills",
+      "description": "Skills used by the Patina Project team — scaffold-repository, using-github, new-branch, develop-issue, finish-pr, review-code, update-branch, and install-skills",
       "source": "./"
     }
   ]

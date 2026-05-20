@@ -111,8 +111,6 @@ or otherwise needs judgment not recorded in the issue.
    requirements, read-only boundary, cleanup, and halt reporting.
    When no reviewable changes exist, skip `review-code` and report that no
    local changes required review.
-   `review-action` remains available separately for users who explicitly want
-   hosted workflow emulation.
 10. Triage every local review finding with the router below.
 11. Repeat implementation, verification, reviewable-change detection, and
     `review-code` until no actionable local findings remain or a human-owned

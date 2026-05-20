@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/develop-issue","./skills/finish-pr","./skills/review-code","./skills/review-action","./skills/update-branch","./skills/office-hours","./skills/plan-ceo-review","./skills/install-skills","./skills/superteam","./skills/superteam-non-interactive"]'
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/develop-issue","./skills/finish-pr","./skills/review-code","./skills/update-branch","./skills/install-skills"]'
+retired_marketplace_skills='review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive'
 
 # Validate the Claude Code marketplace catalog.
 test -f .claude-plugin/marketplace.json
@@ -21,6 +22,10 @@ for path in $(jq -r '.skills[]' .claude-plugin/plugin.json); do
 done
 if jq -r '.skills[]' .claude-plugin/plugin.json | grep -q 'find-skills'; then
   echo "FAIL: find-skills must not appear in .claude-plugin/plugin.json skills[] (it is third-party)" >&2
+  exit 1
+fi
+if jq -r '.skills[]' .claude-plugin/plugin.json | grep -Eq "$retired_marketplace_skills"; then
+  echo "FAIL: retired skills must not appear in .claude-plugin/plugin.json skills[]" >&2
   exit 1
 fi
 
@@ -46,6 +51,10 @@ for path in $(jq -r '.skills[]' .codex-plugin/plugin.json); do
 done
 if jq -r '.skills[]' .codex-plugin/plugin.json | grep -q 'find-skills'; then
   echo "FAIL: find-skills must not appear in .codex-plugin/plugin.json skills[] (it is third-party)" >&2
+  exit 1
+fi
+if jq -r '.skills[]' .codex-plugin/plugin.json | grep -Eq "$retired_marketplace_skills"; then
+  echo "FAIL: retired skills must not appear in .codex-plugin/plugin.json skills[]" >&2
   exit 1
 fi
 

@@ -57,7 +57,7 @@ if [ -f "$SKILL" ]; then
   for route in write-a-skill zoom-out prototype; do
     assert_match "\`$route\`" "$SKILL"
   done
-  assert_match '\`review-action\` remains available separately' "$SKILL"
+  assert_no_match '\`review-action\` remains available separately' "$SKILL"
 
   assert_match 'Reject missing issue references' "$SKILL"
   assert_match 'Reject multiple issue references' "$SKILL"

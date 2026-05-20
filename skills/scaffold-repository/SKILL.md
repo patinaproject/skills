@@ -91,7 +91,7 @@ The skill collects the following inputs. Author name, author email, and the secu
 
 Emitted for every target repo. Use the live repository root as the content
 reference, but filter out `patinaproject/skills` marketplace maintenance
-verifiers. Consumer repos should not receive dogfood, marketplace, Superteam,
+verifiers. Consumer repos should not receive dogfood, marketplace,
 finish-pr, scaffold-cleanup, or workflow-cleanup verifier scripts unless they
 are themselves this marketplace repository.
 
@@ -166,7 +166,7 @@ only when they exist in the live baseline.
 
 The emitted `.claude/settings.json` is intentionally empty by default. Projects
 may opt into host plugins later, but the scaffold does not auto-enable
-deprecated Superteam or Superpowers workflows.
+retired workflow dependencies.
 
 ## Conventions encoded
 
