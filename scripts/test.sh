@@ -2,6 +2,7 @@
 set -euo pipefail
 
 bash scripts/verify-dogfood.sh
+bash scripts/verify-develop-issue-workflow.sh
 bash scripts/verify-esm-tooling.sh
 bash scripts/verify-finish-pr-workflow.sh
 bash scripts/verify-marketplace.sh
@@ -14,6 +15,15 @@ bash scripts/verify-workflow-cleanup.sh
 # local skill paths are accepted by the current marketplace install protocol.
 run_cli_canary() {
   local output
+  if [ "${2:-}" = "" ]; then
+    if command -v timeout >/dev/null 2>&1; then
+      COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    else
+      COLUMNS=240 npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    fi
+    return
+  fi
+
   if command -v timeout >/dev/null 2>&1; then
     output="$(COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list)"
   else

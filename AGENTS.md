@@ -84,6 +84,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/verify-dogfood.sh` to confirm all eleven in-repo skills pass the flat-layout check
 - Run `bash scripts/verify-esm-tooling.sh` after changing repo tooling configs or the package module type
+- Run `bash scripts/verify-develop-issue-workflow.sh` after changing `skills/develop-issue/**`
 - Run `bash scripts/verify-finish-pr-workflow.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`

@@ -36,6 +36,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnose -y
 ```
 
+The `tdd` and `diagnose` install hints intentionally track their source
+catalog's default branch. Consumers who need a frozen install can add
+`#<git-ref>` to either source.
+
 ## Input Contract
 
 1. Accept one bare issue number, `#<number>`, or same-repository GitHub issue
