@@ -109,6 +109,13 @@ or otherwise needs judgment not recorded in the issue.
 9. When reviewable changes exist, invoke `review-code` and inherit its full
    contract. `review-code` owns fresh reviewer dispatch, isolation
    requirements, read-only boundary, cleanup, and halt reporting.
+   Explicit use of `develop-issue` is sufficient approval for this required
+   local review gate: dispatch the fresh read-only reviewer without asking for
+   another user confirmation. Preserve the `review-code` boundary exactly:
+   no same-thread fallback and no file edits, staging, commits, pushes, PR
+   comments, review-thread mutation, or other worktree mutation. Halt if fresh
+   reviewer dispatch is unavailable or if `review-code` reports a halt
+   condition.
    When no reviewable changes exist, skip `review-code` and report that no
    local changes required review.
 10. Triage every local review finding with the router below.
