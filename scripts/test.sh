@@ -25,9 +25,9 @@ run_cli_canary() {
   fi
 
   if command -v timeout >/dev/null 2>&1; then
-    output="$(COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list)"
+    output="$(COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list 2>&1)"
   else
-    output="$(COLUMNS=240 npm_config_ignore_scripts=true npx skills@latest add "$1" --list)"
+    output="$(COLUMNS=240 npm_config_ignore_scripts=true npx skills@latest add "$1" --list 2>&1)"
   fi
   printf '%s\n' "$output"
   if ! printf '%s\n' "$output" | grep -Fq "$2"; then
