@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.14.0...patinaproject-skills-v1.15.0) (2026-05-20)
+
+
+### Features
+
+* [#143](https://github.com/patinaproject/skills/issues/143) add isolated review-code skill ([#144](https://github.com/patinaproject/skills/issues/144)) ([05e01d3](https://github.com/patinaproject/skills/commit/05e01d3b49f07613312781aa30dc2b364b240aea))
+* [#145](https://github.com/patinaproject/skills/issues/145) add conditional develop-issue routes ([#147](https://github.com/patinaproject/skills/issues/147)) ([2448aaf](https://github.com/patinaproject/skills/commit/2448aaf03cdbd5abc8ac878e867c3ebdc603cc04))
+
 ## [1.14.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.13.0...patinaproject-skills-v1.14.0) (2026-05-20)
 
 
