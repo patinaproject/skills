@@ -80,10 +80,12 @@ jobs:
           echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
           exit 1
 
-      - name: Compare title `!` with body BREAKING CHANGE footer
+      - name: Compare title `!` with breaking-change markers
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           title_has_bang=false
           if echo "$PR_TITLE" | grep -qE '^[a-z]+(\([^)]*\))?!:'; then
@@ -93,12 +95,21 @@ jobs:
           if printf '%s' "$PR_BODY" | grep -qE '^BREAKING[ -]CHANGE:'; then
             body_has_footer=true
           fi
-          if [ "$title_has_bang" = true ] && [ "$body_has_footer" = false ]; then
-            echo "::error::PR title declares a breaking change (\`!\` in prefix) but the body has no \`BREAKING CHANGE:\` footer. Explain the break in the body or drop the \`!\`."
+          commit_has_footer=false
+          commit_messages="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/commits" --jq '.[].commit.message')"
+          if printf '%s\n' "$commit_messages" | grep -qE '^BREAKING[ -]CHANGE:'; then
+            commit_has_footer=true
+          fi
+          breaking_has_footer=false
+          if [ "$body_has_footer" = true ] || [ "$commit_has_footer" = true ]; then
+            breaking_has_footer=true
+          fi
+          if [ "$title_has_bang" = true ] && [ "$breaking_has_footer" = false ]; then
+            echo "::error::PR title declares a breaking change (\`!\` in prefix) but neither the body nor PR commit messages include a \`BREAKING CHANGE:\` footer. Explain the break or drop the \`!\`."
             exit 1
           fi
-          if [ "$body_has_footer" = true ] && [ "$title_has_bang" = false ]; then
-            echo "::error::PR body has a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: #123 ...\`) so squash-merged commits carry the marker."
+          if [ "$breaking_has_footer" = true ] && [ "$title_has_bang" = false ]; then
+            echo "::error::PR body or commit messages include a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: #123 ...\`) so squash-merged commits carry the marker."
             exit 1
           fi
           echo "Breaking change markers are consistent."

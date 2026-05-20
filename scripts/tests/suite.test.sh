@@ -6,6 +6,7 @@ bash scripts/tests/develop-issue-workflow.test.sh
 bash scripts/tests/esm-tooling.test.sh
 bash scripts/tests/finish-pr-workflow.test.sh
 bash scripts/tests/marketplace.test.sh
+bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/review-code-skill.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/code-review-workflow.test.sh
