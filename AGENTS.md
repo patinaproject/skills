@@ -83,17 +83,17 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - Validate paths with `find` or `rg`
-- Run `bash scripts/verify-dogfood.sh` to confirm all twelve in-repo skills pass the flat-layout check
-- Run `bash scripts/verify-esm-tooling.sh` after changing repo tooling configs or the package module type
-- Run `bash scripts/verify-develop-issue-workflow.sh` after changing `skills/develop-issue/**`
-- Run `bash scripts/verify-finish-pr-workflow.sh` after changing `skills/finish-pr/**`
-- Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
-- Run `bash scripts/verify-review-code-skill.sh` after changing `skills/review-code/**`
-- Run `bash scripts/verify-review-action-skill.sh` after changing `skills/review-action/**`
-- Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
-- Run `bash scripts/verify-code-review-workflow.sh` after changing `.github/workflows/code-review.yml`
-- Run `bash scripts/verify-workflow-cleanup.sh` after changing workflow cleanup behavior
-- Run `bash scripts/verify-scaffold-cleanup.sh` after changing scaffold baseline cleanup behavior
+- Run `bash scripts/tests/dogfood.test.sh` to confirm all twelve in-repo skills pass the flat-layout check
+- Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
+- Run `bash scripts/tests/develop-issue-workflow.test.sh` after changing `skills/develop-issue/**`
+- Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
+- Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
+- Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
+- Run `bash scripts/tests/review-action-skill.test.sh` after changing `skills/review-action/**`
+- Run `bash scripts/tests/superteam-contract.test.sh` after changing `skills/superteam/**`
+- Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`
+- Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior
+- Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior
 
 ## Issue and PR labels
 

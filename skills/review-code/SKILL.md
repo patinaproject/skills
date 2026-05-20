@@ -54,6 +54,13 @@ Prefer a host-provided read-only Explorer or reviewer background agent when one
 is available, because branch-diff review is a codebase question with a bounded
 scope.
 
+In Codex, spawn a fresh Explorer background agent for the review without asking
+for another user confirmation when the caller has already requested local
+review, `/review-code`, or an issue workflow that reaches the review gate. Close
+the Explorer or reviewer agent after its final report is consumed. Do not let
+old review agents pile up, and do not start a duplicate reviewer for the same
+unresolved review pass.
+
 Pass only:
 
 - Repository path

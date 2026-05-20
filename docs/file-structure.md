@@ -202,7 +202,7 @@ mattpocock plugin structure and enable a host-native install path via `.claude-p
 | W22 per-skill READMEs | `skills/engineering/<name>/README.md` imported from upstream repos with source headers and install-block reframes |
 | W23 root README | `README.md` rewritten in mattpocock format (100–200 lines, quickstart-first, per-skill blurbs, skills table) |
 | W24 doc sweep | `AGENTS.md`, `docs/release-flow.md`, `docs/file-structure.md`, `docs/wiki-index.md` updated for category paths and plugin slug |
-| W25 final verification | Full suite passed: `pnpm lint:md`, `actionlint`, `verify-dogfood.sh`, `verify-marketplace.sh`, SHA round-trip |
+| W25 final verification | Full suite passed: `pnpm lint:md`, `actionlint`, `dogfood.test.sh`, `marketplace.test.sh`, SHA round-trip |
 
 ### Delta 7 — de-categorize + drop find-skills (Workstream W26)
 
@@ -211,5 +211,5 @@ from the `patinaproject-skills` plugin (now third-party via `vercel-labs/skills`
 
 | Event | Description |
 | --- | --- |
-| W26.7b drop find-skills | `git rm -rf skills/productivity/find-skills/` (pre-decategorize path); removed from `plugin.json` and `marketplace.json`; reinstalled as third-party via `npx skills@latest add vercel-labs/skills@find-skills --agent claude-code -y`; `verify-dogfood.sh` updated to 4 skills; `verify-marketplace.sh` negative assertion added |
+| W26.7b drop find-skills | `git rm -rf skills/productivity/find-skills/` (pre-decategorize path); removed from `plugin.json` and `marketplace.json`; reinstalled as third-party via `npx skills@latest add vercel-labs/skills@find-skills --agent claude-code -y`; `dogfood.test.sh` updated to 4 skills; `marketplace.test.sh` negative assertion added |
 | W26.7a de-categorize | `git mv` of all 4 remaining skills from `skills/engineering/<name>` and `skills/productivity/office-hours` back to flat `skills/<name>`; overlay symlinks retargeted to `../../skills/<name>`; `plugin.json` paths flattened; `package.json`, `release-please.yml`, per-skill READMEs, root README, docs, AGENTS.md updated for flat layout |

@@ -222,13 +222,13 @@ npx skills@latest add ./skills/review-action --list
 ### Check b — scaffold-repository cleanup contract
 
 ```sh
-bash scripts/verify-scaffold-cleanup.sh
+bash scripts/tests/scaffold-cleanup.test.sh
 ```
 
 ### Check c — dogfood verification, all twelve skills
 
 ```sh
-bash scripts/verify-dogfood.sh
+bash scripts/tests/dogfood.test.sh
 ```
 
 ## Repository layout

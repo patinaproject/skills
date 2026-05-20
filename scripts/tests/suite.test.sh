@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-bash scripts/verify-dogfood.sh
-bash scripts/verify-develop-issue-workflow.sh
-bash scripts/verify-esm-tooling.sh
-bash scripts/verify-finish-pr-workflow.sh
-bash scripts/verify-marketplace.sh
-bash scripts/verify-review-code-skill.sh
-bash scripts/verify-review-action-skill.sh
-bash scripts/verify-scaffold-cleanup.sh
-bash scripts/verify-superteam-contract.sh
-bash scripts/verify-code-review-workflow.sh
-bash scripts/verify-workflow-cleanup.sh
+bash scripts/tests/dogfood.test.sh
+bash scripts/tests/develop-issue-workflow.test.sh
+bash scripts/tests/esm-tooling.test.sh
+bash scripts/tests/finish-pr-workflow.test.sh
+bash scripts/tests/marketplace.test.sh
+bash scripts/tests/review-code-skill.test.sh
+bash scripts/tests/review-action-skill.test.sh
+bash scripts/tests/scaffold-cleanup.test.sh
+bash scripts/tests/superteam-contract.test.sh
+bash scripts/tests/code-review-workflow.test.sh
+bash scripts/tests/workflow-cleanup.test.sh
 
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.

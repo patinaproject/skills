@@ -112,26 +112,38 @@ for live_reference_path in \
   docs/wiki-index.md \
   package.json \
   scripts/install-third-party-skills.sh \
-  scripts/verify-esm-tooling.sh \
+  scripts/tests/code-review-workflow.test.sh \
+  scripts/tests/develop-issue-workflow.test.sh \
+  scripts/tests/dogfood.test.sh \
+  scripts/tests/esm-tooling.test.sh \
+  scripts/tests/finish-pr-workflow.test.sh \
+  scripts/tests/marketplace.test.sh \
+  scripts/tests/review-action-skill.test.sh \
+  scripts/tests/review-code-skill.test.sh \
+  scripts/tests/scaffold-cleanup.test.sh \
+  scripts/tests/suite.test.sh \
+  scripts/tests/superteam-contract.test.sh \
+  scripts/tests/workflow-cleanup.test.sh \
   skills-lock.json
 do
   assert_present_path "$live_reference_path"
 done
 
+test_files=()
+for test_file in scripts/tests/*.test.sh; do
+  if [ "$test_file" != "scripts/tests/scaffold-cleanup.test.sh" ]; then
+    test_files+=("$test_file")
+  fi
+done
+
 assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-repository self-apply" \
   AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
-  scripts/install-third-party-skills.sh scripts/test.sh \
-  scripts/verify-code-review-workflow.sh scripts/verify-dogfood.sh \
-  scripts/verify-esm-tooling.sh scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
-  scripts/verify-superteam-contract.sh scripts/verify-workflow-cleanup.sh \
+  scripts/install-third-party-skills.sh "${test_files[@]}" \
   skills/scaffold-repository
 
 assert_no_match "skills/scaffold-repository/templates|skills/bootstrap/templates|\\.tmpl" \
   AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
-  scripts/install-third-party-skills.sh scripts/test.sh \
-  scripts/verify-code-review-workflow.sh scripts/verify-dogfood.sh \
-  scripts/verify-esm-tooling.sh scripts/verify-finish-pr-workflow.sh scripts/verify-marketplace.sh \
-  scripts/verify-superteam-contract.sh scripts/verify-workflow-cleanup.sh \
+  scripts/install-third-party-skills.sh "${test_files[@]}" \
   skills/scaffold-repository
 
 assert_no_match "Cursor|Windsurf|Continue\\.dev|\\.cursor/|\\.windsurfrules|\\.continue/" \
@@ -154,7 +166,7 @@ assert_match "(?s)## Parent.*## What to build.*## Acceptance criteria.*- \\[ \\]
 assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
   skills/scaffold-repository/README.md
 
-assert_no_match "scripts/(test|verify-code-review-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-scaffold-cleanup|verify-superteam-contract|verify-workflow-cleanup)\\.sh" \
+assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-review-action-skill|verify-review-code-skill|verify-scaffold-cleanup|verify-superteam-contract|verify-workflow-cleanup)\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
