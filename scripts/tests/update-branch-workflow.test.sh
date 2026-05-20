@@ -69,6 +69,13 @@ if [ -f "$SKILL" ]; then
   assert_match 'documented verification' "$SKILL"
   assert_match 'auto-commit|auto-committing' "$SKILL"
   assert_match 'conflict resolution|resolving conflicts|resolved conflicts' "$SKILL"
+  assert_match 'dependency-related files changing during[[:space:]]+the merge|dependency inputs changed during the merge' "$SKILL"
+  assert_match 'manifests, lockfiles,[[:space:]]+workspace manifests, or toolchain version files' "$SKILL"
+  assert_match 'documented[[:space:]]+install/bootstrap command' "$SKILL"
+  assert_match 'before verification' "$SKILL"
+  assert_match 'no install/bootstrap command is[[:space:]]+documented' "$SKILL"
+  assert_match 'do not reinstall dependencies unconditionally|does not reinstall dependencies unconditionally' "$SKILL"
+  assert_match 'Do not silently commit lockfile or generated dependency changes' "$SKILL"
 fi
 
 node --input-type=module <<'NODE'
