@@ -37,8 +37,10 @@ automatically.
    branches.
 2. Record the current branch with `git branch --show-current`.
 3. Resolve the base:
-   - With an optional base argument, normalize `main` to `origin/main` and keep
-     remote-tracking refs such as `origin/release/1.x` as supplied.
+   - With an optional base argument, normalize any bare branch name, such as
+     `main`, `master`, `develop`, or `trunk`, to its `origin/<name>`
+     remote-tracking ref. Keep remote-tracking refs such as
+     `origin/release/1.x` as supplied.
    - Without an argument, read `refs/remotes/origin/HEAD` and normalize it to
      the remote-tracking branch it points at, such as `origin/main`.
 4. Fetch the selected base from `origin`.
