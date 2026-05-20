@@ -18,6 +18,9 @@ No argument means resolve the base from `origin/HEAD`. An optional base
 argument selects another branch or remote-tracking ref. Dirty work normally
 stops the update; a clearly cohesive, branch-local, non-silent auto-commit with
 explicit operator confirmation is the only exception.
+Dependency refresh is conditional on dependency-related files changing during
+the merge; do not reinstall dependencies unconditionally on every branch
+update.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push
@@ -73,11 +76,24 @@ automatically.
    in scope, and mechanically verifiable. Stop for product judgment, unrelated
    scope, permissions, secrets, generated-file uncertainty, or unverifiable
    semantics.
-8. Run documented verification after auto-committing dirty work or completing
-   conflict resolution. Prefer commands in `AGENTS.md`, README files, package
-   scripts, or other repository guidance. If no local verification applies,
-   say so explicitly.
-9. Report the result without pushing.
+8. After a successful merge or conflict resolution, inspect whether dependency
+   inputs changed during the merge. Treat package manifests, lockfiles,
+   workspace manifests, or toolchain version files as dependency inputs.
+   - When dependency inputs changed, run the repository's documented
+     install/bootstrap command before verification. Prefer commands in
+     `AGENTS.md`, README files, package scripts, or other repository guidance.
+   - If dependency inputs changed and no install/bootstrap command is
+     documented, stop and report that dependencies may need refresh before
+     verification can run.
+   - Do not silently commit lockfile or generated dependency changes. Include
+     them only when they are a direct result of the documented install command,
+     are in scope for the branch update, and follow the same explicit
+     confirmation and commit-message rules as other auto-committed dirty work.
+9. Run documented verification after auto-committing dirty work, completing
+   dependency refresh, or completing conflict resolution. Prefer commands in
+   `AGENTS.md`, README files, package scripts, or other repository guidance. If
+   no local verification applies, say so explicitly.
+10. Report the result without pushing.
 
 ## Conflict Rules
 
@@ -95,6 +111,8 @@ Always include:
 - Base ref fetched and merged.
 - Whether a dirty-work auto-commit was created.
 - Whether a merge commit was created or the branch was already up to date.
+- Whether dependency refresh was skipped, run, or blocked because no documented
+  install/bootstrap command was available.
 - Conflicts resolved or the human-owned blocker that stopped the workflow.
 - Documented verification commands and results, when run.
 - A clear note that the branch remains local-only.
