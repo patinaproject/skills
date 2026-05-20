@@ -4,6 +4,7 @@ description: Emulate supported AI code-review GitHub Actions locally and print a
 ---
 
 # Review Action
+
 This skill is portable. It works from instructions alone and must not depend on
 repository-local helper scripts.
 Prerequisites: fetch the default branch, authenticate `claude` or `codex`, and
@@ -11,6 +12,7 @@ authenticate `gh` for optional PR metadata. If `gh` is unavailable, derive the
 default branch from `origin/HEAD`.
 
 ## Safety Boundary
+
 Local review emulation is read-only and terminal-only.
 
 - Do not edit files, stage changes, commit, push, create pull requests, post
@@ -21,13 +23,14 @@ Local review emulation is read-only and terminal-only.
 - Halt when unsupported workflow settings affect review scope or safety.
 
 ## Detect
+
 Inspect `.github/workflows/*.yml` and `.github/workflows/*.yaml`:
 
 - `anthropics/claude-code-action` maps to `claude --print`.
 - `openai/codex-action` maps to `codex review`.
 
-When multiple supported AI workflows exist, select the obvious code-review
-workflow instead of halting solely because more than one action is present.
+When multiple supported AI workflows exist, apply **Workflow Selection** to pick
+the code-review one; halt only when selection is ambiguous.
 
 ## Workflow Selection
 
