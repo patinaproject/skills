@@ -1,9 +1,9 @@
 # Skills used by the Patina Project team
 
-Eleven installable agent skills for repository scaffolding, project-local skill
+Twelve installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, issue branch setup, PR finishing, local AI
-review-action emulation, issue development orchestration, product design,
-strategic plan review, and
+isolated code review, hosted-review emulation, issue development
+orchestration, product design, strategic plan review, and
 historical Superteam compatibility —
 available across Claude Code, Codex, and
 any agent runtime that reads `AGENTS.md`.
@@ -106,10 +106,21 @@ for the skill contract.
 End-to-end issue work needs a single entrypoint without weakening the focused
 skills that already own branch setup, test-driven implementation, diagnosis,
 local review, and PR finishing. `develop-issue` takes exactly one same-repo
-issue reference, coordinates `new-branch`, `tdd`, `diagnose`, `review-action`,
+issue reference, coordinates `new-branch`, `tdd`, `diagnose`, `review-code`,
 and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
 
 See [./skills/develop-issue/](./skills/develop-issue/)
+for the skill contract.
+
+### review-code
+
+Local issue work needs a fresh review pass before publishing. `review-code`
+computes the default-branch merge-base, includes committed, staged, unstaged,
+and untracked changes, then dispatches a fresh read-only reviewer to report
+findings without editing files or mutating GitHub state. It halts when isolated
+review dispatch is unavailable.
+
+See [./skills/review-code/](./skills/review-code/)
 for the skill contract.
 
 ### finish-pr
@@ -180,6 +191,7 @@ for the full README and skill contract.
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [develop-issue](./skills/develop-issue/) | Develop one issue through local review and PR readiness |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
+| [review-code](./skills/review-code/) | Run isolated local branch-diff review |
 | [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
@@ -203,6 +215,7 @@ pnpm test
 npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/install-skills --list
 npx skills@latest add ./skills/office-hours --list
+npx skills@latest add ./skills/review-code --list
 npx skills@latest add ./skills/review-action --list
 ```
 
@@ -212,7 +225,7 @@ npx skills@latest add ./skills/review-action --list
 bash scripts/verify-scaffold-cleanup.sh
 ```
 
-### Check c — dogfood verification, all eleven skills
+### Check c — dogfood verification, all twelve skills
 
 ```sh
 bash scripts/verify-dogfood.sh
@@ -230,6 +243,7 @@ skills/
   new-branch/
   develop-issue/
   finish-pr/
+  review-code/
   review-action/
   office-hours/
   plan-ceo-review/

@@ -51,9 +51,10 @@ if [ -f "$SKILL" ]; then
   assert_match '^name:[[:space:]]*develop-issue$' "$SKILL"
   assert_match '/develop-issue #123' "$SKILL"
 
-  for child in new-branch tdd diagnose review-action finish-pr; do
+  for child in new-branch tdd diagnose review-code finish-pr; do
     assert_match "\`$child\`" "$SKILL"
   done
+  assert_match '\`review-action\` remains available separately' "$SKILL"
 
   assert_match 'Reject missing issue references' "$SKILL"
   assert_match 'Reject multiple issue references' "$SKILL"
@@ -64,12 +65,12 @@ if [ -f "$SKILL" ]; then
   assert_match 'Delegate branch setup to `new-branch`' "$SKILL"
   assert_match 'Implement one behavior at a time through `tdd`' "$SKILL"
   assert_match 'Route to `diagnose` when root cause is unclear' "$SKILL"
-  assert_match 'Run `review-action` as the local review gate' "$SKILL"
+  assert_match 'Run `review-code` as the local review gate' "$SKILL"
   assert_match 'Delegate final publishing and PR readiness to `finish-pr`' "$SKILL"
   assert_match 'Never merge the pull request' "$SKILL"
 
   assert_order 'Delegate branch setup to `new-branch`' 'Implement one behavior at a time through `tdd`' "$SKILL"
-  assert_order 'Run `review-action` as the local review gate' 'Delegate final publishing and PR readiness to `finish-pr`' "$SKILL"
+  assert_order 'Run `review-code` as the local review gate' 'Delegate final publishing and PR readiness to `finish-pr`' "$SKILL"
 
   for outcome in ready-for-agent ready-for-human wontfix; do
     assert_match "\`$outcome\`" "$SKILL"
