@@ -118,7 +118,8 @@ or otherwise needs judgment not recorded in the issue.
    local findings remain or a human-owned blocker appears.
 11. Delegate final publishing and PR readiness to `finish-pr` only after local
     verification and `review-code` are clean or every local finding has a
-    disposition; inherit every halt. Never merge the pull request.
+    recorded `ready-for-agent`, `ready-for-human`, or `wontfix` disposition;
+    inherit every halt. Never merge the pull request.
 
 ## Review Finding Router
 
