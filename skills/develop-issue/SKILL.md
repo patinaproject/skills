@@ -11,6 +11,7 @@ Invoke with exactly one same-repository GitHub issue reference:
 
 ```text
 /develop-issue #123
+/develop-issue https://github.com/<owner>/<repo>/issues/123
 ```
 
 This skill coordinates existing workflow skills. It does not replace their
