@@ -1,8 +1,8 @@
 # Skills used by the Patina Project team
 
-Twelve installable agent skills for repository scaffolding, project-local skill
+Thirteen installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, issue branch setup, PR finishing, local AI
-isolated code review, hosted-review emulation, issue development
+isolated code review, hosted-review emulation, local branch updating, issue development
 orchestration, product design, strategic plan review, and
 historical Superteam compatibility —
 available across Claude Code, Codex, and
@@ -144,6 +144,16 @@ local CLI, and prints a terminal-only report.
 See [./skills/review-action/](./skills/review-action/)
 for the skill contract.
 
+### update-branch
+
+Keeping a work branch current should be a local git operation unless an operator
+chooses to publish it. `update-branch` fetches the selected base branch,
+defaults to `origin/HEAD`, guards dirty work, merges with `git merge --no-ff`,
+and reports the local-only result plus the push command to run later.
+
+See [./skills/update-branch/](./skills/update-branch/)
+for the skill contract.
+
 ### office-hours
 
 New product ideas benefit from honest forcing questions before any code is
@@ -193,6 +203,7 @@ for the full README and skill contract.
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [review-code](./skills/review-code/) | Run isolated local branch-diff review |
 | [review-action](./skills/review-action/) | Emulate supported AI code-review actions locally |
+| [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [office-hours](./skills/office-hours/) | YC-style design partner; runs forcing questions |
 | [plan-ceo-review](./skills/plan-ceo-review/) | Founder-mode review for existing plans |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
@@ -217,6 +228,7 @@ npx skills@latest add ./skills/install-skills --list
 npx skills@latest add ./skills/office-hours --list
 npx skills@latest add ./skills/review-code --list
 npx skills@latest add ./skills/review-action --list
+npx skills@latest add ./skills/update-branch --list
 ```
 
 ### Check b — scaffold-repository cleanup contract
@@ -225,7 +237,7 @@ npx skills@latest add ./skills/review-action --list
 bash scripts/tests/scaffold-cleanup.test.sh
 ```
 
-### Check c — dogfood verification, all twelve skills
+### Check c — dogfood verification, all thirteen skills
 
 ```sh
 bash scripts/tests/dogfood.test.sh
@@ -245,6 +257,7 @@ skills/
   finish-pr/
   review-code/
   review-action/
+  update-branch/
   office-hours/
   plan-ceo-review/
 .agents/skills/<name>/               Symlinks to ../../skills/<name>/

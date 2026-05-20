@@ -13,13 +13,14 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/finish-pr/`: PR finishing skill
 - `skills/review-code/`: isolated local branch-diff review skill
 - `skills/review-action/`: local AI review-action emulator skill
+- `skills/update-branch/`: local branch update skill
 - `skills/office-hours/`: office-hours skill
 - `skills/plan-ceo-review/`: plan-ceo-review skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
 - `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all twelve skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all thirteen skill paths
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `docs/`: contributor docs such as `docs/file-structure.md` and
   `docs/release-flow.md`
@@ -51,7 +52,7 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `pnpm test`: run the full local verification suite
-- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the twelve skill entry points
+- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the thirteen skill entry points
 
 ## Coding Style & Naming Conventions
 
@@ -83,13 +84,14 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - Validate paths with `find` or `rg`
-- Run `bash scripts/tests/dogfood.test.sh` to confirm all twelve in-repo skills pass the flat-layout check
+- Run `bash scripts/tests/dogfood.test.sh` to confirm all thirteen in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/develop-issue-workflow.test.sh` after changing `skills/develop-issue/**`
 - Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
 - Run `bash scripts/tests/review-action-skill.test.sh` after changing `skills/review-action/**`
+- Run `bash scripts/tests/update-branch-workflow.test.sh` after changing `skills/update-branch/**`
 - Run `bash scripts/tests/superteam-contract.test.sh` after changing `skills/superteam/**`
 - Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior
@@ -148,10 +150,10 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns twelve skills at flat paths: `skills/scaffold-repository/`,
+This repo owns thirteen skills at flat paths: `skills/scaffold-repository/`,
 `skills/using-github/`, `skills/new-branch/`, `skills/develop-issue/`,
 `skills/finish-pr/`, `skills/review-code/`,
-`skills/review-action/`, `skills/office-hours/`, `skills/plan-ceo-review/`,
+`skills/review-action/`, `skills/update-branch/`, `skills/office-hours/`, `skills/plan-ceo-review/`,
 `skills/install-skills/`, plus deprecated compatibility skills at
 `skills/superteam/` and `skills/superteam-non-interactive/`.
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
@@ -162,7 +164,7 @@ maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y
 component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
 [docs/release-flow.md](./docs/release-flow.md).
 
-The twelve in-repo skills share the single root `patinaproject-skills` release
+The thirteen in-repo skills share the single root `patinaproject-skills` release
 and tag; they are not separate release-please packages. Deprecated Superteam
 skills remain in the release while they are kept for compatibility. Third-party
 skills such as `find-skills` are installed separately from their source repo's
