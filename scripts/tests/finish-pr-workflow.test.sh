@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+SKILL="skills/finish-pr/SKILL.md"
 WORKFLOW="skills/finish-pr/workflows/ready-for-merge.md"
 TRIAGE="skills/finish-pr/workflows/triage.md"
 FAIL_COUNT=0
@@ -40,8 +41,14 @@ assert_order() {
   fi
 }
 
+assert_file "$SKILL"
 assert_file "$WORKFLOW"
 assert_file "$TRIAGE"
+
+if [ -f "$SKILL" ]; then
+  assert_match "currently available PR feedback" "$SKILL"
+  assert_match "eligible conversation resolution" "$SKILL"
+fi
 
 if [ -f "$WORKFLOW" ]; then
   assert_match "Final unresolved review-thread gate" "$WORKFLOW"
@@ -56,15 +63,24 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "restart the readiness loop on the new head" "$WORKFLOW"
   assert_match "product judgment, secrets, permissions" "$WORKFLOW"
   assert_match "destructive git operations, unrelated scope" "$WORKFLOW"
-  assert_order "mergeability gate" "gh pr checks --watch" "$WORKFLOW"
-  assert_order "gh pr checks --watch" "Final unresolved review-thread gate" "$WORKFLOW"
+  assert_order "mergeability gate" "Fetch the full PR feedback surface" "$WORKFLOW"
+  assert_order "Fetch the full PR feedback surface" "Triage every currently available feedback item" "$WORKFLOW"
+  assert_order "Triage every currently available feedback item" "gh pr checks --watch" "$WORKFLOW"
+  assert_order "gh pr checks --watch" "Re-query the full PR feedback surface" "$WORKFLOW"
+  assert_order "Re-query the full PR feedback surface" "Final unresolved review-thread gate" "$WORKFLOW"
   assert_order "Final unresolved review-thread gate" "gh pr ready" "$WORKFLOW"
   assert_match "resolveReviewThread" "$WORKFLOW"
   assert_match "isResolved" "$WORKFLOW"
+  assert_match "newly available, changed, unresolved" "$WORKFLOW"
+  assert_match "evidence-pending feedback" "$WORKFLOW"
+  assert_match "body hash or update time" "$WORKFLOW"
+  assert_match "deferred-until-checks dispositions" "$WORKFLOW"
   assert_match "(?i)(?:unresolved.*blocker|blocker.*unresolved)" "$WORKFLOW"
   assert_match "top-level" "$WORKFLOW"
   assert_match "per-finding disposition" "$WORKFLOW"
   assert_match "unaddressed findings" "$WORKFLOW"
+  assert_match "fix-now.*pending checks" "$WORKFLOW"
+  assert_match "explain.*stale.*defer.*before checks" "$WORKFLOW"
 fi
 
 if [ -f "$TRIAGE" ]; then
@@ -79,6 +95,12 @@ if [ -f "$TRIAGE" ]; then
   assert_match "Do not rebase or force-push by default" "$TRIAGE"
   assert_match "Do not use browser conflict" "$TRIAGE"
   assert_match "merge the pull request itself" "$TRIAGE"
+  assert_match "Handle currently available feedback before watching checks" "$TRIAGE"
+  assert_match "fix-now.*pending" "$TRIAGE"
+  assert_match "explain.*stale.*defer.*before checks" "$TRIAGE"
+  assert_match "isResolved: true" "$TRIAGE"
+  assert_match "Re-query the full feedback surface after checks finish" "$TRIAGE"
+  assert_match "Wait for all checks only after currently available feedback has been handled" "$TRIAGE"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

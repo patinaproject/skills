@@ -113,7 +113,44 @@ directory's default `gh` repository.
 
    Report the aborted merge state and the reason human input is required.
 
-9. Watch all checks to terminal state:
+9. Fetch the full PR feedback surface before watching checks:
+
+   - Unresolved inline review threads through paginated GraphQL.
+   - Top-level PR comments, including bot summaries with `Findings`,
+     severity counts, or line-keyed observations.
+   - Review bodies and latest review state.
+   - Review decision, when available.
+
+   Prefer inline threads when duplicate feedback exists. Maintain an in-memory
+   handled inventory for this run with comment or review identifiers, URLs,
+   authors, body hash or update time when available, classification, and
+   evidence status. Do not persist handled state in files.
+
+10. Triage every currently available feedback item with
+    [triage.md](triage.md). A `fix-now` finding interrupts pending checks:
+    patch, verify, commit, push, and restart the readiness loop on the new head
+    before waiting on check runs that the fix will make stale. For `explain`,
+    `stale`, and `defer`, reply or report with concrete evidence; handle
+    `explain`, `stale`, and `defer` before checks unless the evidence itself
+    depends on check results. Stop only when feedback returns `needs-human`.
+
+    When a top-level review comment contains findings, handle each finding
+    separately with a per-finding disposition: fixed in a named commit,
+    explained with evidence, stale, deferred as out of scope, or blocked for
+    human judgment. Severity labels such as `Minor` do not make findings
+    optional; unaddressed findings are blockers until they have a disposition
+    recorded in the PR or final report.
+
+11. Resolve eligible inline threads once the disposition is valid. Explanation,
+    stale, and deferral dispositions are eligible after an evidence-bearing
+    reply is present on the latest head. Code-fix dispositions are eligible
+    after the fix is present on the latest head and local verification passes.
+    Use GraphQL `resolveReviewThread`, then verify GraphQL `isResolved` after
+    resolving. If permissions do not allow resolution, leave an
+    evidence-bearing reply and report the unresolved state. Do not treat
+    replies as resolution.
+
+12. Watch all checks to terminal state:
 
    ```sh
    gh pr checks --watch
@@ -121,49 +158,28 @@ directory's default `gh` repository.
 
    Do not use `--fail-fast` by default. Do not filter to required checks only;
    optional checks can produce review comments or useful blocking evidence.
-   Check completion is the synchronization point for GitHub Action-authored
-   feedback. Do not add arbitrary settle sleeps, pass-count caps, or wall-clock
-   caps. If the check set shows no state change after a reasonable observation
-   window, stop for operator feedback instead of waiting indefinitely.
+   Do not add arbitrary settle sleeps, pass-count caps, or wall-clock caps. If
+   the check set shows no state change after a reasonable observation window,
+   stop for operator feedback instead of waiting indefinitely.
 
-10. Triage every non-pass, canceled, or otherwise problematic check with
+13. Triage every non-pass, canceled, or otherwise problematic check with
     [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
     commits, verify locally, push, and restart the loop on the new head. Continue
     for `explain`, `stale`, and `defer` outcomes only with concrete evidence.
     Stop only when a check returns `needs-human`.
 
-11. Fetch the full PR feedback surface after checks finish:
+14. Re-query the full PR feedback surface after checks finish because GitHub
+    Actions or review automation may have posted new comments or updated
+    existing comments while checks were running. Compare comment and review
+    identifiers plus body hash or update time from the in-memory handled
+    inventory. Triage and handle any newly available, changed, unresolved, or
+    evidence-pending feedback before the final gate, including
+    deferred-until-checks dispositions whose evidence depended on check
+    results. Apply the same disposition rules from steps 10 and 11, including
+    immediate loop restart for `fix-now` feedback and GraphQL verification for
+    resolved inline threads.
 
-    - Unresolved inline review threads through paginated GraphQL.
-    - Top-level PR comments, including bot summaries with `Findings`,
-      severity counts, or line-keyed observations.
-    - Review bodies and latest review state.
-    - Review decision, when available.
-
-    Prefer inline threads when duplicate feedback exists. Triage each item with
-    [triage.md](triage.md). Maintain an in-memory handled inventory for this
-    run with comment or review identifiers, URLs, authors, body hash or update
-    time when available, classification, and evidence status. Do not persist
-    handled state in files.
-
-12. Handle feedback. Fix `fix-now` outcomes in branch-local follow-up commits,
-    verify locally, push, and restart the loop on the new head. For `explain`,
-    `stale`, and `defer`, reply or report with concrete evidence and continue.
-    Stop only when feedback returns `needs-human`. When a top-level review
-    comment contains findings, handle each finding separately with a
-    per-finding disposition: fixed in a named commit, explained with evidence,
-    stale, deferred as out of scope, or blocked for human judgment. Severity
-    labels such as `Minor` do not make findings optional; unaddressed findings
-    are blockers until they have a disposition recorded in the PR or final
-    report.
-
-13. Resolve eligible inline threads only after the relevant fix or explanation
-    is present on the latest head and checks pass. Use GraphQL
-    `resolveReviewThread`, then verify GraphQL `isResolved` after resolving. If
-    permissions do not allow resolution, leave an evidence-bearing reply and
-    report the unresolved state. Do not treat replies as resolution.
-
-14. Final unresolved review-thread gate: immediately before declaring the PR
+15. Final unresolved review-thread gate: immediately before declaring the PR
     ready, re-query paginated GraphQL review threads for the latest PR head.
     Distinguish unresolved actionable feedback from outdated or stale feedback
     that is already fixed on the latest head. For stale fixed threads, resolve
@@ -175,7 +191,7 @@ directory's default `gh` repository.
     fixes or newly pushed commits. Unresolved threads are blockers until they
     are resolved, fixed, or evidence-classified as stale or non-blocking.
 
-15. When the loop reaches the ready state, mark a draft PR ready for review:
+16. When the loop reaches the ready state, mark a draft PR ready for review:
 
     ```sh
     gh pr ready
@@ -183,7 +199,7 @@ directory's default `gh` repository.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
-16. Final report includes:
+17. Final report includes:
 
     - PR URL.
     - Latest head SHA.

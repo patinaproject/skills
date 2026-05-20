@@ -29,23 +29,32 @@ executing the state action.
 - Paginate GraphQL review threads; REST review comments alone are not enough.
 - Replies do not equal resolution. Check `isResolved`.
 - Verify line context against the latest head before replying or resolving.
+- Handle currently available feedback before watching checks. A `fix-now`
+  feedback item restarts the readiness loop on the new head even when checks are
+  pending; treat `fix-now` as pending-check-interrupting feedback.
+- Reply to or record `explain`, `stale`, and `defer` dispositions before checks
+  when the evidence does not depend on check results.
 - Route requirement, acceptance-criteria, scope, or user-visible behavior
   changes through the repository's planning owner before implementation.
 - Reply concisely to every handled human comment.
-- Resolve inline threads only after the fix or explanation is present on latest
-  head and checks pass.
+- Resolve inline threads only after the fix, explanation, stale evidence, or
+  deferral evidence is present on latest head.
+- Verify `isResolved: true` after calling `resolveReviewThread`; unresolved
+  threads remain blockers unless permission-blocked and explicitly reported.
 - Track handled top-level comments and review bodies in memory during the run so
   loop passes do not post duplicate replies.
 
 ## Check Failure Rules
 
-- Wait for all checks with `gh pr checks --watch`; do not use fail-fast by
-  default.
+- Wait for all checks only after currently available feedback has been handled.
+- Use `gh pr checks --watch`; do not use fail-fast by default.
 - Triage every non-pass, canceled, or otherwise problematic check result.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
 - Stop for missing secrets, permission failures, external outages, or flaky
   infrastructure that cannot be proven branch-local.
+- Re-query the full feedback surface after checks finish so CI-authored review
+  comments are triaged before final readiness reporting.
 
 ## Merge Conflict Rules
 
