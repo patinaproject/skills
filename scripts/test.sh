@@ -13,10 +13,16 @@ bash scripts/verify-workflow-cleanup.sh
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.
 run_cli_canary() {
+  local output
   if command -v timeout >/dev/null 2>&1; then
-    timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    output="$(COLUMNS=240 timeout 60 env npm_config_ignore_scripts=true npx skills@latest add "$1" --list)"
   else
-    npm_config_ignore_scripts=true npx skills@latest add "$1" --list
+    output="$(COLUMNS=240 npm_config_ignore_scripts=true npx skills@latest add "$1" --list)"
+  fi
+  printf '%s\n' "$output"
+  if [ "${2:-}" != "" ] && ! printf '%s\n' "$output" | grep -Fq "$2"; then
+    echo "FAIL: CLI canary for '$1' did not display expected text: $2" >&2
+    return 1
   fi
 }
 
@@ -24,6 +30,7 @@ run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/office-hours
 run_cli_canary ./skills/review-action
+run_cli_canary ./skills/develop-issue '/develop-issue #123'
 
 run_cli_install_canary() {
   local repo_root tmpdir status
