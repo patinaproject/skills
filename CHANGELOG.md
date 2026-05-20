@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.11.0...patinaproject-skills-v1.12.0) (2026-05-20)
+
+
+### Features
+
+* [#134](https://github.com/patinaproject/skills/issues/134) let skills own issue shape ([#136](https://github.com/patinaproject/skills/issues/136)) ([f46428b](https://github.com/patinaproject/skills/commit/f46428bdd03c1763d7fb12631c7e9a4be836c7bd))
+
 ## [1.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.10.0...patinaproject-skills-v1.11.0) (2026-05-19)
 
 
