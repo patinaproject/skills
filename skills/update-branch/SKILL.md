@@ -30,7 +30,8 @@ automatically.
 2. Refuse detached HEAD.
 3. Refuse a missing `origin` remote.
 4. When no base is supplied, refuse missing `origin/HEAD`; do not hardcode
-   `main`, `master`, or another default branch.
+   `main`, `master`, or another default branch. Tell the operator to run
+   `git remote set-head origin -a` when `origin/HEAD` is missing.
 5. Refuse to update the repository default branch unless the user explicitly
    supplies a base and confirms they intend to mutate that branch.
 
@@ -61,8 +62,8 @@ automatically.
      used so the auto-commit is not silent.
    - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
      generated-file dirty set; generated output with unclear source; possible
-     secrets; or any commit-message requirement that cannot be satisfied from
-     local guidance.
+     secrets; or any commit-message requirement, such as a required issue tag,
+     that cannot be satisfied from local guidance.
 6. Merge with an explicit merge commit:
    - Run `git merge --no-ff <base-ref>`.
    - If Git reports `Already up to date`, report that no merge commit was
