@@ -1,60 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "Agent Development": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/agent-development/SKILL.md",
-      "computedHash": "4931c2867890bfef5881225adb691c3d719fe9ad556e3d5fae15f83e0668fa60"
-    },
-    "Command Development": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/command-development/SKILL.md",
-      "computedHash": "bca581f0a2789f75d9501499b9f4dc354eb40b213ccd23d13f5b87299db1f84a"
-    },
-    "Hook Development": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/hook-development/SKILL.md",
-      "computedHash": "a1721df65785b6c0439d4326cdee0cb2b6aa98de09fc98463afc3e040fe00ce9"
-    },
-    "MCP Integration": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/mcp-integration/SKILL.md",
-      "computedHash": "99cfef49810cb80a39762a79dbb6a80d486ea56cfa1a81ed10cae0a5a296b496"
-    },
-    "Plugin Settings": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/plugin-settings/SKILL.md",
-      "computedHash": "b4be0bf62782da83e962aa759e7d5efb1d5934b81554f1d15801fdf5e01b18a4"
-    },
-    "Plugin Structure": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/plugin-structure/SKILL.md",
-      "computedHash": "c4e9b3ea36efad4ab599465aaac71f81dc3320a183920678fe1587181c446b07"
-    },
-    "Skill Development": {
-      "source": "anthropics/claude-code",
-      "sourceType": "github",
-      "skillPath": "plugins/plugin-dev/skills/skill-development/SKILL.md",
-      "computedHash": "8d262f08f33825947ea20204ebf5101e36056c98090251bd973a552ec8ef0c0c"
-    },
-    "caveman": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "skillPath": "skills/productivity/caveman/SKILL.md",
-      "computedHash": "934433479903febc585bf6deb5f0cebc63137e3f86b7babe0aab1ecb94d6d7a4"
-    },
-    "cli-creator": {
-      "source": "openai/skills",
-      "sourceType": "github",
-      "skillPath": "skills/.curated/cli-creator/SKILL.md",
-      "computedHash": "bd8f6db9268abf0483e17215ae6a39852a8780429c54b65658780c6f94bb4f61"
-    },
     "diagnose": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -91,18 +37,6 @@
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "ef32aea0a8fab9b365ff9e08a95f8d353e20ca21ea46ec2e73587c86dd341351"
     },
-    "migrate-to-codex": {
-      "source": "openai/skills",
-      "sourceType": "github",
-      "skillPath": "skills/.curated/migrate-to-codex/SKILL.md",
-      "computedHash": "23d69489c36cf1fb7f960949e2c5ec64bf154ddb490e3f94ae0d2f9e3ecc3ec3"
-    },
-    "plugin-creator": {
-      "source": "openai/skills",
-      "sourceType": "github",
-      "skillPath": "skills/.system/plugin-creator/SKILL.md",
-      "computedHash": "f6cd2ab74e30276067cb68aa2f41d56a762b41fe9dfb9dd914f2dbc27d0010f9"
-    },
     "prototype": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -114,18 +48,6 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
       "computedHash": "0164a8b1ef998abca426056c6ed8a7716a9d4692fc6daa5378f68381a6dafd24"
-    },
-    "skill-creator": {
-      "source": "openai/skills",
-      "sourceType": "github",
-      "skillPath": "skills/.system/skill-creator/SKILL.md",
-      "computedHash": "c1f04920b03c2a412e1d0b90680dc10b6de64793db7daae7e4bf64535b9fdf75"
-    },
-    "skill-installer": {
-      "source": "openai/skills",
-      "sourceType": "github",
-      "skillPath": "skills/.system/skill-installer/SKILL.md",
-      "computedHash": "44e8f0fda4a4aff2b98ae8587ceb812c15e7e5dba230f16295017c2f416f6d05"
     },
     "tdd": {
       "source": "mattpocock/skills",
