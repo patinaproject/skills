@@ -103,23 +103,25 @@ or otherwise needs judgment not recorded in the issue.
 6. Route to `diagnose` when root cause is unclear, reproduction is missing,
    behavior is flaky, or performance has regressed.
 7. Run repository-documented verification before local review.
-8. Run `review-code` as the local review gate; inherit its read-only boundary,
-   fresh-reviewer isolation requirement, and halt conditions.
-   In Codex, automatically spawn a fresh Explorer background agent for this
-   local review when agent dispatch is available; do not ask for another user
-   confirmation after `/develop-issue` has reached the review gate. Close the
-   Explorer or reviewer agent after consuming its final report. Do not leave old
-   review agents running or start duplicate reviewers for the same unresolved
-   review pass.
+8. Check for reviewable local changes after verification: committed branch diff
+   from the default-branch merge base, staged changes, unstaged changes, or
+   untracked files.
+9. When reviewable changes exist, invoke `review-code` and inherit its full
+   contract. `review-code` owns fresh reviewer dispatch, isolation
+   requirements, read-only boundary, cleanup, and halt reporting.
+   When no reviewable changes exist, skip `review-code` and report that no
+   local changes required review.
    `review-action` remains available separately for users who explicitly want
    hosted workflow emulation.
-9. Triage every local review finding with the router below.
-10. Repeat implementation, verification, and `review-code` until no actionable
-   local findings remain or a human-owned blocker appears.
-11. Delegate final publishing and PR readiness to `finish-pr` only after local
-    verification and `review-code` are clean or every local finding has a
-    recorded `ready-for-agent`, `ready-for-human`, or `wontfix` disposition;
-    inherit every halt. Never merge the pull request.
+10. Triage every local review finding with the router below.
+11. Repeat implementation, verification, reviewable-change detection, and
+    `review-code` until no actionable local findings remain or a human-owned
+    blocker appears.
+12. Delegate final publishing and PR readiness to `finish-pr` only after local
+    verification and `review-code` are clean, skipped because no reviewable
+    local changes exist, or every local finding has a recorded
+    `ready-for-agent`, `ready-for-human`, or `wontfix` disposition; inherit
+    every halt. Never merge the pull request.
 
 ## Review Finding Router
 
@@ -142,7 +144,8 @@ When the workflow stops, report:
 - Branch name
 - Child skills invoked, with halt reason if any
 - Verification commands and results
-- Latest `review-code` result
+- Latest `review-code` result, or that it was skipped because no reviewable
+  local changes existed
 - Human-owned blockers, if any
 - `wontfix` explanations, if any
 - PR URL and readiness status, when `finish-pr` runs
