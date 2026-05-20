@@ -17,7 +17,8 @@ Invoke from a local work branch:
 No argument means resolve the base from `origin/HEAD`. An optional base
 argument selects another branch or remote-tracking ref. Workflow step 5 allows
 a local auto-commit only when the whole dirty set is clearly cohesive and
-branch-local; otherwise dirty work stops the update.
+branch-local, and it must never happen silently; otherwise dirty work stops the
+update.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push
@@ -56,6 +57,8 @@ automatically.
    - Review staged, unstaged, and untracked diffs.
    - Auto-commit only when the entire dirty set is cohesive, branch-local,
      free of secrets, and can be summarized under the local commit convention.
+     Before committing, state the exact files and commit message that will be
+     used so the auto-commit is not silent.
    - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
      generated-file dirty set; generated output with unclear source; possible
      secrets; or any commit-message requirement that cannot be satisfied from

@@ -54,6 +54,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'stripping[[:space:]]+the leading `origin/`' "$SKILL"
   assert_match 'git status --short' "$SKILL"
   assert_match 'Auto-commit only when' "$SKILL"
+  assert_match 'must never happen silently|not silent' "$SKILL"
   assert_match 'cohesive' "$SKILL"
   assert_match 'branch-local' "$SKILL"
   assert_match 'secrets' "$SKILL"
