@@ -15,10 +15,9 @@ Invoke from a local work branch:
 ```
 
 No argument means resolve the base from `origin/HEAD`. An optional base
-argument selects another branch or remote-tracking ref. Workflow step 5 allows
-a local auto-commit only when the whole dirty set is clearly cohesive and
-branch-local, and it must never happen silently; otherwise dirty work stops the
-update.
+argument selects another branch or remote-tracking ref. Dirty work normally
+stops the update; a clearly cohesive, branch-local, non-silent auto-commit is
+the only exception.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push
