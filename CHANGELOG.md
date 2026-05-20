@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.12.0...patinaproject-skills-v1.13.0) (2026-05-20)
+
+
+### Features
+
+* [#138](https://github.com/patinaproject/skills/issues/138) add develop-issue workflow skill ([#139](https://github.com/patinaproject/skills/issues/139)) ([abe47a5](https://github.com/patinaproject/skills/commit/abe47a5f3f31b75dbf32a88810ddd1feda23cc0e))
+
 ## [1.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.11.0...patinaproject-skills-v1.12.0) (2026-05-20)
 
 
