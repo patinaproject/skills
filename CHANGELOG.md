@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.13.0...patinaproject-skills-v1.14.0) (2026-05-20)
+
+
+### Features
+
+* [#117](https://github.com/patinaproject/skills/issues/117) select code review workflow locally ([#141](https://github.com/patinaproject/skills/issues/141)) ([0e0c4a8](https://github.com/patinaproject/skills/commit/0e0c4a825c4da965faa6bd619b7d16cb1b913898))
+
 ## [1.13.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v1.12.0...patinaproject-skills-v1.13.0) (2026-05-20)
 
 
