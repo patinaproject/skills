@@ -50,7 +50,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'detached HEAD' "$SKILL"
   assert_match 'missing `origin`|no `origin`' "$SKILL"
   assert_match 'default branch' "$SKILL"
-  assert_match 'before fetch or merge' "$SKILL"
+  assert_match 'Before fetch or[[:space:]]+merge' "$SKILL"
   assert_match 'stripping[[:space:]]+the leading `origin/`' "$SKILL"
   assert_match 'git status --short' "$SKILL"
   assert_match 'Auto-commit only when' "$SKILL"

@@ -15,8 +15,9 @@ Invoke from a local work branch:
 ```
 
 No argument means resolve the base from `origin/HEAD`. An optional base
-argument selects another branch or remote-tracking ref. The workflow may create
-a local auto-commit for cohesive dirty work before merging.
+argument selects another branch or remote-tracking ref. Workflow step 5 allows
+a local auto-commit only when the whole dirty set is clearly cohesive and
+branch-local; otherwise dirty work stops the update.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push
@@ -36,9 +37,10 @@ automatically.
 
 1. Read repository guidance for commit messages, verification, and protected
    branches.
-2. Record the current branch with `git branch --show-current`. Compare it to
-   the repository default branch before fetch or merge, and refuse default-
-   branch updates unless the user supplied a base and confirmed that intent.
+2. Record the current branch with `git branch --show-current`. Before fetch or
+   merge, compare it to the repository default branch. If they match, stop
+   unless the user supplied a base and explicitly confirmed they intend to
+   update the default branch.
 3. Resolve the base:
    - With an optional base argument, normalize any bare branch name, such as
      `main`, `master`, `develop`, `trunk`, or `release/1.x`, to its
