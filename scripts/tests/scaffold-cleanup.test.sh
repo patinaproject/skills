@@ -118,11 +118,9 @@ for live_reference_path in \
   scripts/tests/esm-tooling.test.sh \
   scripts/tests/finish-pr-workflow.test.sh \
   scripts/tests/marketplace.test.sh \
-  scripts/tests/review-action-skill.test.sh \
   scripts/tests/review-code-skill.test.sh \
   scripts/tests/scaffold-cleanup.test.sh \
   scripts/tests/suite.test.sh \
-  scripts/tests/superteam-contract.test.sh \
   scripts/tests/workflow-cleanup.test.sh \
   skills-lock.json
 do
@@ -166,7 +164,7 @@ assert_match "(?s)## Parent.*## What to build.*## Acceptance criteria.*- \\[ \\]
 assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
   skills/scaffold-repository/README.md
 
-assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-review-action-skill|verify-review-code-skill|verify-scaffold-cleanup|verify-superteam-contract|verify-workflow-cleanup)\\.sh" \
+assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-review-code-skill|verify-scaffold-cleanup|verify-workflow-cleanup)\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

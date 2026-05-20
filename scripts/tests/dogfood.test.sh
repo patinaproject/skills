@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# dogfood.test.sh — Asserts that all twelve in-repo skills are discoverable
+# dogfood.test.sh — Asserts that all seven in-repo skills are discoverable
 # via the flat skills/<name>/ layout and the dogfood overlay symlinks.
 # (find-skills is a third-party vendored skill, not an in-repo skill.)
-# Exit 0: all twelve skills pass all assertions.
+# Exit 0: all seven skills pass all assertions.
 # Exit 1: at least one assertion failed (with a clear FAIL message).
 #
 # Dependencies: bash 3+, realpath (macOS via coreutils) or python3 as fallback.
@@ -15,16 +15,11 @@ cd "$REPO_ROOT"
 SKILLS=(
   scaffold-repository
   install-skills
-  superteam
-  superteam-non-interactive
   using-github
   new-branch
   develop-issue
   finish-pr
   review-code
-  review-action
-  office-hours
-  plan-ceo-review
 )
 FAIL_COUNT=0
 
@@ -125,5 +120,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all twelve in-repo skills discoverable via flat layout"
+echo "OK: all seven in-repo skills discoverable via flat layout"
 exit 0

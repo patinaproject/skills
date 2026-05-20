@@ -98,7 +98,7 @@ Detection: look for retired workflow scaffolding in active repo guidance.
 | File | Required | Check |
 |---|---|---|
 | `docs/superpowers/` | no | absent from new scaffolded repos; if present, classify as `stale` unless the repository explicitly keeps historical artifacts |
-| `package.json` | no | does not install retired Superteam/Superpowers dependencies by default |
+| `package.json` | no | does not install retired workflow dependencies by default |
 | `AGENTS.md` | yes | directs durable issue context to GitHub issues instead of committed design/plan artifacts |
 | Agent-plugin install docs | agent plugin only | do not require Superpowers for new installs |
 

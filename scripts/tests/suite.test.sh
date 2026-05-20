@@ -7,9 +7,7 @@ bash scripts/tests/esm-tooling.test.sh
 bash scripts/tests/finish-pr-workflow.test.sh
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/review-code-skill.test.sh
-bash scripts/tests/review-action-skill.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
-bash scripts/tests/superteam-contract.test.sh
 bash scripts/tests/code-review-workflow.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 
@@ -40,9 +38,7 @@ run_cli_canary() {
 
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
-run_cli_canary ./skills/office-hours
 run_cli_canary ./skills/review-code
-run_cli_canary ./skills/review-action
 run_cli_canary ./skills/develop-issue '/develop-issue #123'
 
 run_cli_install_canary() {

@@ -5,21 +5,16 @@
 This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
 - `skills/scaffold-repository/`: scaffold-repository skill
-- `skills/superteam/`: deprecated Superteam compatibility skill
-- `skills/superteam-non-interactive/`: deprecated CI-safe Superteam compatibility skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/develop-issue/`: issue development orchestration skill
 - `skills/finish-pr/`: PR finishing skill
 - `skills/review-code/`: isolated local branch-diff review skill
-- `skills/review-action/`: local AI review-action emulator skill
-- `skills/office-hours/`: office-hours skill
-- `skills/plan-ceo-review/`: plan-ceo-review skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
 - `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all twelve skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing all seven skill paths
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `docs/`: contributor docs such as `docs/file-structure.md` and
   `docs/release-flow.md`
@@ -51,7 +46,7 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
 - `pnpm test`: run the full local verification suite
-- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the twelve skill entry points
+- `find skills -mindepth 2 -maxdepth 2 -name SKILL.md | sort`: inspect the seven skill entry points
 
 ## Coding Style & Naming Conventions
 
@@ -74,23 +69,16 @@ If `write-a-skill` is not installed in the local agent environment, install it w
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-skill -y
 ```
 
-For workflow-contract changes, especially `skills/superteam/**`, also use
-`writing-skills` to pressure-test RED/GREEN baseline behavior, rationalization
-resistance, role ownership, and stage-gate bypass paths. `write-a-skill` is the
-structure check; `writing-skills` is the workflow-contract quality gate.
-
 ## Testing Guidelines
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - Validate paths with `find` or `rg`
-- Run `bash scripts/tests/dogfood.test.sh` to confirm all twelve in-repo skills pass the flat-layout check
+- Run `bash scripts/tests/dogfood.test.sh` to confirm all seven in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/develop-issue-workflow.test.sh` after changing `skills/develop-issue/**`
 - Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
-- Run `bash scripts/tests/review-action-skill.test.sh` after changing `skills/review-action/**`
-- Run `bash scripts/tests/superteam-contract.test.sh` after changing `skills/superteam/**`
 - Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior
@@ -148,12 +136,10 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns twelve skills at flat paths: `skills/scaffold-repository/`,
+This repo owns seven skills at flat paths: `skills/scaffold-repository/`,
 `skills/using-github/`, `skills/new-branch/`, `skills/develop-issue/`,
 `skills/finish-pr/`, `skills/review-code/`,
-`skills/review-action/`, `skills/office-hours/`, `skills/plan-ceo-review/`,
-`skills/install-skills/`, plus deprecated compatibility skills at
-`skills/superteam/` and `skills/superteam-non-interactive/`.
+and `skills/install-skills/`.
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
 
@@ -162,9 +148,8 @@ maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y
 component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
 [docs/release-flow.md](./docs/release-flow.md).
 
-The twelve in-repo skills share the single root `patinaproject-skills` release
-and tag; they are not separate release-please packages. Deprecated Superteam
-skills remain in the release while they are kept for compatibility. Third-party
+The seven in-repo skills share the single root `patinaproject-skills` release
+and tag; they are not separate release-please packages. Third-party
 skills such as `find-skills` are installed separately from their source repo's
 default branch or a specific `#<git-ref>`.
 
@@ -183,7 +168,7 @@ Commits must use conventional commit types, no scopes, and a required GitHub iss
 Examples:
 
 - `chore: #1 bootstrap marketplace repo`
-- `feat: #12 add superteam skill entry`
+- `feat: #12 add GitHub workflow skill`
 
 For squash-and-merge workflows, PR titles must match the commitlint commit format:
 

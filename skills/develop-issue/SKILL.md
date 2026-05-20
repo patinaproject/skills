@@ -111,8 +111,6 @@ or otherwise needs judgment not recorded in the issue.
    Explorer or reviewer agent after consuming its final report. Do not leave old
    review agents running or start duplicate reviewers for the same unresolved
    review pass.
-   `review-action` remains available separately for users who explicitly want
-   hosted workflow emulation.
 9. Triage every local review finding with the router below.
 10. Repeat implementation, verification, and `review-code` until no actionable
    local findings remain or a human-owned blocker appears.

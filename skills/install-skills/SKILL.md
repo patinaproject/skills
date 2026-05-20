@@ -67,15 +67,10 @@ Active Patina scaffold defaults are:
 - `scaffold-repository`
 - `using-github`
 - `new-branch`
+- `develop-issue`
 - `finish-pr`
-- `review-action`
-- `office-hours`
-- `plan-ceo-review`
+- `review-code`
 - `install-skills`
-
-Deprecated Superteam compatibility skills remain installable, but do not add
-them to a scaffold default catalog unless the user explicitly asks for legacy
-compatibility.
 
 ## Verify
 

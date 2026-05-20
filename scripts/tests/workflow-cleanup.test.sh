@@ -43,6 +43,27 @@ ACTIVE_PATHS=(
   skills/scaffold-repository
   skills/using-github
 )
+REMOVED_SKILL_PATHS=(
+  skills/review-action
+  skills/office-hours
+  skills/plan-ceo-review
+  skills/superteam
+  skills/superteam-non-interactive
+  .agents/skills/review-action
+  .agents/skills/office-hours
+  .agents/skills/plan-ceo-review
+  .agents/skills/superteam
+  .agents/skills/superteam-non-interactive
+  .claude/skills/review-action
+  .claude/skills/office-hours
+  .claude/skills/plan-ceo-review
+  .claude/skills/superteam
+  .claude/skills/superteam-non-interactive
+)
+
+for removed_path in "${REMOVED_SKILL_PATHS[@]}"; do
+  test ! -e "$removed_path" || fail "retired skill path still exists: $removed_path"
+done
 
 test ! -e docs/superpowers || fail "docs/superpowers should be removed after spec migration"
 
@@ -53,11 +74,12 @@ assert_no_match "AC-[0-9]+|AC-<|acceptance criteria|Test coverage|Coverage and r
 assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superteam@patinaproject-skills|<use-superteam>" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
   skills/scaffold-repository
+assert_no_match "review-action|office-hours|plan-ceo-review|superteam-non-interactive|skills/superteam" \
+  AGENTS.md README.md docs .claude-plugin/marketplace.json .claude-plugin/plugin.json \
+  .codex-plugin/plugin.json .agents/plugins/marketplace.json \
+  skills/develop-issue skills/review-code skills/install-skills
 assert_no_match "skills:install" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json
-
-assert_match "[Dd]eprecated" README.md .claude-plugin/marketplace.json .agents/plugins/marketplace.json
-assert_match "[Dd]eprecated" skills/superteam/SKILL.md skills/superteam/README.md skills/superteam-non-interactive/SKILL.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
