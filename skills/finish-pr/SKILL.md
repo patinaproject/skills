@@ -31,7 +31,7 @@ human input is required. It never merges the PR.
 7. Create or update a ready-for-review PR using the repository template.
 8. Enter the readiness loop: detect merge conflicts, triage currently
    available PR feedback, resolve eligible conversations, watch all checks,
-   triage every problematic check or newly posted feedback item, fix
+   triage every problematic check, re-query PR feedback after checks, fix
    branch-local issues, push, and repeat.
 9. Mark draft PRs ready when the loop reaches the ready state.
 10. Report ready-to-merge status without merging.

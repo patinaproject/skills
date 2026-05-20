@@ -175,9 +175,10 @@ directory's default `gh` repository.
     inventory. Triage and handle any newly available, changed, unresolved, or
     evidence-pending feedback before the final gate, including
     deferred-until-checks dispositions whose evidence depended on check
-    results. Apply the same disposition rules from steps 10 and 11, including
-    immediate loop restart for `fix-now` feedback and GraphQL verification for
-    resolved inline threads.
+    results. Prior eligible resolutions stand unless the re-query shows changed
+    or newly unresolved thread state. Apply the same disposition rules from
+    steps 10 and 11, including immediate loop restart for `fix-now` feedback
+    and GraphQL verification for resolved inline threads.
 
 15. Final unresolved review-thread gate: immediately before declaring the PR
     ready, re-query paginated GraphQL review threads for the latest PR head.

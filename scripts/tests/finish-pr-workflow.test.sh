@@ -48,6 +48,7 @@ assert_file "$TRIAGE"
 if [ -f "$SKILL" ]; then
   assert_match "currently available PR feedback" "$SKILL"
   assert_match "eligible conversation resolution" "$SKILL"
+  assert_match "re-query PR feedback after checks" "$SKILL"
 fi
 
 if [ -f "$WORKFLOW" ]; then
@@ -75,6 +76,7 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "evidence-pending feedback" "$WORKFLOW"
   assert_match "body hash or update time" "$WORKFLOW"
   assert_match "deferred-until-checks dispositions" "$WORKFLOW"
+  assert_match "Prior eligible resolutions stand" "$WORKFLOW"
   assert_match "(?i)(?:unresolved.*blocker|blocker.*unresolved)" "$WORKFLOW"
   assert_match "top-level" "$WORKFLOW"
   assert_match "per-finding disposition" "$WORKFLOW"
