@@ -6,6 +6,7 @@ bash scripts/verify-develop-issue-workflow.sh
 bash scripts/verify-esm-tooling.sh
 bash scripts/verify-finish-pr-workflow.sh
 bash scripts/verify-marketplace.sh
+bash scripts/verify-review-code-skill.sh
 bash scripts/verify-review-action-skill.sh
 bash scripts/verify-scaffold-cleanup.sh
 bash scripts/verify-superteam-contract.sh
@@ -40,6 +41,7 @@ run_cli_canary() {
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/office-hours
+run_cli_canary ./skills/review-code
 run_cli_canary ./skills/review-action
 run_cli_canary ./skills/develop-issue '/develop-issue #123'
 

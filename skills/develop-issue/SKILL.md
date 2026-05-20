@@ -25,14 +25,14 @@ available in the agent environment:
 - `new-branch`
 - `tdd`
 - `diagnose`
-- `review-action`
+- `review-code`
 - `finish-pr`
 
 If any are missing, halt before implementation. Report the missing skill names
 and install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch --skill review-action --skill finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch --skill review-code --skill finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnose -y
 ```
@@ -66,10 +66,12 @@ or otherwise needs judgment not recorded in the issue.
 5. Route to `diagnose` when root cause is unclear, reproduction is missing,
    behavior is flaky, or performance has regressed.
 6. Run repository-documented verification before local review.
-7. Run `review-action` as the local review gate; inherit its read-only boundary
-   and unsupported-workflow halts.
+7. Run `review-code` as the local review gate; inherit its read-only boundary,
+   fresh-reviewer isolation requirement, and halt conditions.
+   `review-action` remains available separately for users who explicitly want
+   hosted workflow emulation.
 8. Triage every local review finding with the router below.
-9. Repeat implementation, verification, and `review-action` until no actionable
+9. Repeat implementation, verification, and `review-code` until no actionable
    local findings remain or a human-owned blocker appears.
 10. Delegate final publishing and PR readiness to `finish-pr`; inherit every
     halt. Never merge the pull request.
@@ -95,7 +97,7 @@ When the workflow stops, report:
 - Branch name
 - Child skills invoked, with halt reason if any
 - Verification commands and results
-- Latest `review-action` result
+- Latest `review-code` result
 - Human-owned blockers, if any
 - `wontfix` explanations, if any
 - PR URL and readiness status, when `finish-pr` runs

@@ -3,7 +3,7 @@ docs/superpowers/plans/.artifacts/
 
 # Third-party skills (installed via `npx skills add` on demand) are not
 # committed to the repo. The pnpm `postinstall` script restores them from
-# `skills-lock.json` so editors get them after `pnpm install`. Only the nine
+# `skills-lock.json` so editors get them after `pnpm install`. Only the twelve
 # in-repo `patinaproject-skills` overlay symlinks are tracked.
 .agents/skills/*
 !.agents/skills/scaffold-repository
@@ -11,17 +11,23 @@ docs/superpowers/plans/.artifacts/
 !.agents/skills/superteam-non-interactive
 !.agents/skills/using-github
 !.agents/skills/new-branch
+!.agents/skills/develop-issue
 !.agents/skills/finish-pr
+!.agents/skills/review-code
 !.agents/skills/review-action
 !.agents/skills/office-hours
 !.agents/skills/plan-ceo-review
+!.agents/skills/install-skills
 .claude/skills/*
 !.claude/skills/scaffold-repository
 !.claude/skills/superteam
 !.claude/skills/superteam-non-interactive
 !.claude/skills/using-github
 !.claude/skills/new-branch
+!.claude/skills/develop-issue
 !.claude/skills/finish-pr
+!.claude/skills/review-code
 !.claude/skills/review-action
 !.claude/skills/office-hours
 !.claude/skills/plan-ceo-review
+!.claude/skills/install-skills
