@@ -6,6 +6,7 @@ bash scripts/verify-develop-issue-workflow.sh
 bash scripts/verify-esm-tooling.sh
 bash scripts/verify-finish-pr-workflow.sh
 bash scripts/verify-marketplace.sh
+bash scripts/verify-review-action-skill.sh
 bash scripts/verify-scaffold-cleanup.sh
 bash scripts/verify-superteam-contract.sh
 bash scripts/verify-code-review-workflow.sh
