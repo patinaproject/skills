@@ -85,6 +85,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'committed branch diff[[:space:]]+from the default-branch merge base' "$SKILL"
   assert_match 'staged changes, unstaged changes, or[[:space:]]+untracked files' "$SKILL"
   assert_match 'When reviewable changes exist, invoke `review-code`' "$SKILL"
+  assert_match 'without asking for[[:space:]]+another user confirmation' "$SKILL"
   assert_match 'When no reviewable changes exist, skip `review-code`' "$SKILL"
   assert_match '`review-code` owns fresh reviewer dispatch' "$SKILL"
   assert_match 'isolation[[:space:]]+requirements, read-only boundary, cleanup, and halt reporting' "$SKILL"
