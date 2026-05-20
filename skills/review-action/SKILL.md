@@ -53,8 +53,8 @@ Outcomes:
   step to emulate.
 
 The Patina Project shape where `.github/workflows/code.yml` and
-`.github/workflows/code-review.yml` both contain supported AI actions must
-select `.github/workflows/code-review.yml`.
+`.github/workflows/code-review.yml` (or the `.yaml` equivalent) both contain
+supported AI actions must select the code-review workflow.
 
 ## Portable Workflow
 
