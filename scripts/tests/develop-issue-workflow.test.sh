@@ -99,7 +99,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'valid work outside the issue' "$SKILL"
   assert_match 'future reviewers would otherwise re-raise' "$SKILL"
   assert_match 'There is no `needs-info` state' "$SKILL"
-  assert_match 'clean or every local finding has a[[:space:]]+disposition' "$SKILL"
+  assert_match 'clean or every local finding has a[[:space:]]+recorded `ready-for-agent`, `ready-for-human`, or `wontfix` disposition' "$SKILL"
   assert_no_match 'receiving-code-review' "$SKILL"
   assert_no_match 'requesting-code-review' "$SKILL"
   assert_no_match 'Superpowers' "$SKILL"
