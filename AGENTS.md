@@ -87,6 +87,7 @@ structure check; `writing-skills` is the workflow-contract quality gate.
 - Run `bash scripts/verify-develop-issue-workflow.sh` after changing `skills/develop-issue/**`
 - Run `bash scripts/verify-finish-pr-workflow.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/verify-marketplace.sh` to confirm the `.claude-plugin/` catalog is valid
+- Run `bash scripts/verify-review-action-skill.sh` after changing `skills/review-action/**`
 - Run `bash scripts/verify-superteam-contract.sh` after changing `skills/superteam/**`
 - Run `bash scripts/verify-code-review-workflow.sh` after changing `.github/workflows/code-review.yml`
 - Run `bash scripts/verify-workflow-cleanup.sh` after changing workflow cleanup behavior
