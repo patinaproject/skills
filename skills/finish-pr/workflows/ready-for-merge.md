@@ -154,13 +154,17 @@ directory's default `gh` repository.
     each watch window, confirm all currently available feedback and known
     problematic check states have been triaged. Use 10-minute observation
     windows and watch all checks with a tool-enforced 10-minute timeout. Use an
-    equivalent host tool when needed; examples include GNU `timeout` and
-    Homebrew `gtimeout`:
+    equivalent host tool when needed; examples include GNU `timeout`, Homebrew
+    `gtimeout`, and a portable `perl` fallback:
 
     ```sh
     timeout 10m gh pr checks --watch --fail-fast
     gtimeout 10m gh pr checks --watch --fail-fast
+    perl -e 'setpgrp(0, 0); $SIG{ALRM}=sub { kill q(TERM), -$$; exit 124 }; alarm shift; exec @ARGV' 600 gh pr checks --watch --fail-fast
     ```
+
+    Treat exit code 124 from the timeout tool as a watch timeout. Treat a
+    non-zero `gh` exit before the timeout as a fail-fast watch exit.
 
     Do not filter to required checks only; optional checks can produce review
     comments or useful blocking evidence. After any watch command exit,
@@ -188,8 +192,8 @@ directory's default `gh` repository.
     time out because GitHub Actions or review automation may have posted new
     comments or updated existing comments while checks were running. Compare
     comment and review identifiers plus body hash or update time from the
-    in-memory handled inventory. Triage and handle any newly available, changed, unresolved,
-    or evidence-pending feedback before the final gate,
+    in-memory handled inventory. Triage and handle any newly available,
+    changed, unresolved, or evidence-pending feedback before the final gate,
     including deferred-until-checks dispositions whose evidence depended on
     check results. Prior eligible resolutions stand unless the re-query shows
     changed or newly unresolved thread state. Apply the same disposition rules

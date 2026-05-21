@@ -49,13 +49,17 @@ executing the state action.
 - Wait for all checks only after currently available feedback has been handled.
 - Use a tool-enforced 10-minute timeout around `gh pr checks --watch
   --fail-fast` in 10-minute observation windows. GNU `timeout`, Homebrew
-  `gtimeout`, or an equivalent host timeout are acceptable.
+  `gtimeout`, the portable `perl` fallback below, or an equivalent host timeout
+  are acceptable.
 
   ```sh
   timeout 10m gh pr checks --watch --fail-fast
   gtimeout 10m gh pr checks --watch --fail-fast
+  perl -e 'setpgrp(0, 0); $SIG{ALRM}=sub { kill q(TERM), -$$; exit 124 }; alarm shift; exec @ARGV' 600 gh pr checks --watch --fail-fast
   ```
 
+- Treat exit code 124 from the timeout tool as a watch timeout. Treat a
+  non-zero `gh` exit before the timeout as a fail-fast watch exit.
 - Keep optional checks in scope; do not switch to required-check-only watching.
 - Perform a full PR state resync after every watch exit or timeout: all check
   buckets, unresolved review threads, top-level PR comments, review bodies,
