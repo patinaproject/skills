@@ -48,9 +48,8 @@ executing the state action.
 
 - Wait for all checks only after currently available feedback has been handled.
 - Use a tool-enforced 10-minute timeout around `gh pr checks --watch
-  --fail-fast` in 10-minute observation windows. GNU `timeout 10m gh pr checks
-  --watch --fail-fast`, Homebrew `gtimeout 10m gh pr checks --watch
-  --fail-fast`, or an equivalent host timeout are acceptable.
+  --fail-fast` in 10-minute observation windows. GNU `timeout`, Homebrew
+  `gtimeout`, or an equivalent host timeout are acceptable.
 
   ```sh
   timeout 10m gh pr checks --watch --fail-fast
