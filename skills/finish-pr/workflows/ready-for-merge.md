@@ -160,7 +160,7 @@ directory's default `gh` repository.
     ```sh
     timeout 10m gh pr checks --watch --fail-fast
     gtimeout 10m gh pr checks --watch --fail-fast
-    perl -e 'setpgrp(0, 0); $SIG{ALRM}=sub { kill q(TERM), -$$; exit 124 }; alarm shift; exec @ARGV' 600 gh pr checks --watch --fail-fast
+    perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --watch --fail-fast
     ```
 
     Treat exit code 124 from the timeout tool as a watch timeout. Treat a
