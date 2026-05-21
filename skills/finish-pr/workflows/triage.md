@@ -47,14 +47,31 @@ executing the state action.
 ## Check Failure Rules
 
 - Wait for all checks only after currently available feedback has been handled.
-- Use `gh pr checks --watch`; do not use fail-fast by default.
-- Triage every non-pass, canceled, or otherwise problematic check result.
+- Use a tool-enforced 10-minute timeout around `gh pr checks --watch
+  --fail-fast` in 10-minute observation windows. GNU `timeout 10m gh pr checks
+  --watch --fail-fast`, Homebrew `gtimeout 10m gh pr checks --watch
+  --fail-fast`, or an equivalent host timeout are acceptable.
+
+  ```sh
+  timeout 10m gh pr checks --watch --fail-fast
+  gtimeout 10m gh pr checks --watch --fail-fast
+  ```
+
+- Keep optional checks in scope; do not switch to required-check-only watching.
+- Perform a full PR state resync after every watch exit or timeout: all check
+  buckets, unresolved review threads, top-level PR comments, review bodies,
+  review decision, and current PR head.
+- Stop after two consecutive 10-minute no-progress windows. No progress means
+  no meaningful change in check buckets, check start or completion timestamps,
+  PR head SHA, or feedback inventory between observation windows.
+- Triage every failed, canceled, skipped-problematic, or otherwise non-pass
+  check result before starting another watch window.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
 - Stop for missing secrets, permission failures, external outages, or flaky
   infrastructure that cannot be proven branch-local.
-- Re-query the full feedback surface after checks finish so CI-authored review
-  comments are triaged before final readiness reporting.
+- Re-query the full feedback surface after checks finish, fail fast, or time out
+  so CI-authored review comments are triaged before final readiness reporting.
 
 ## Merge Conflict Rules
 

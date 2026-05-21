@@ -150,35 +150,51 @@ directory's default `gh` repository.
     evidence-bearing reply and report the unresolved state. Do not treat
     replies as resolution.
 
-12. Watch all checks to terminal state:
+12. Watch all checks only through the fail-fast bounded-watch policy. Before
+    each watch window, confirm all currently available feedback and known
+    problematic check states have been triaged. Use 10-minute observation
+    windows and watch all checks with a tool-enforced 10-minute timeout. Use an
+    equivalent host tool when needed; examples include GNU `timeout` and
+    Homebrew `gtimeout`:
 
     ```sh
-    gh pr checks --watch
+    timeout 10m gh pr checks --watch --fail-fast
+    gtimeout 10m gh pr checks --watch --fail-fast
     ```
 
-    Do not use `--fail-fast` by default. Do not filter to required checks only;
-    optional checks can produce review comments or useful blocking evidence.
-    Do not add arbitrary settle sleeps, pass-count caps, or wall-clock caps. If
-    the check set shows no state change after a reasonable observation window,
-    stop for operator feedback instead of waiting indefinitely.
+    Do not filter to required checks only; optional checks can produce review
+    comments or useful blocking evidence. After any watch command exit,
+    immediately snapshot all check states and perform a full PR state resync:
+    all check buckets, unresolved review threads, top-level PR comments, review
+    bodies, review decision, and current PR head. After any watch timeout,
+    immediately snapshot all check states and perform the same full PR state
+    resync before choosing the next action. Treat a failed, canceled,
+    skipped-problematic, or otherwise non-pass check as a triage item before
+    starting another watch window.
+
+    Define no progress as no meaningful change in check buckets, check start or
+    completion timestamps, PR head SHA, or feedback inventory between
+    observation windows. Stop for operator input after two consecutive
+    10-minute no-progress windows instead of waiting indefinitely.
 
 13. Triage every non-pass, canceled, or otherwise problematic check with
-    [triage.md](triage.md). Fix `fix-now` outcomes in branch-local follow-up
-    commits, verify locally, push, and restart the loop on the new head. Continue
-    for `explain`, `stale`, and `defer` outcomes only with concrete evidence.
-    Stop only when a check returns `needs-human`.
+    [triage.md](triage.md), using the full PR state snapshot rather than
+    tunneling into only the first failed check. Fix branch-local blockers, push
+    follow-up commits when appropriate, and restart the readiness loop on the
+    new head. Continue for `explain`, `stale`, and `defer` outcomes only with
+    concrete evidence. Stop only when a check returns `needs-human`.
 
-14. Re-query the full PR feedback surface after checks finish because GitHub
-    Actions or review automation may have posted new comments or updated
-    existing comments while checks were running. Compare comment and review
-    identifiers plus body hash or update time from the in-memory handled
-    inventory. Triage and handle any newly available, changed, unresolved, or
-    evidence-pending feedback before the final gate, including
-    deferred-until-checks dispositions whose evidence depended on check
-    results. Prior eligible resolutions stand unless the re-query shows changed
-    or newly unresolved thread state. Apply the same disposition rules from
-    steps 10 and 11, including immediate loop restart for `fix-now` feedback
-    and GraphQL verification for resolved inline threads.
+14. Re-query the full PR feedback surface after checks finish, fail fast, or
+    time out because GitHub Actions or review automation may have posted new
+    comments or updated existing comments while checks were running. Compare
+    comment and review identifiers plus body hash or update time from the
+    in-memory handled inventory. Triage and handle any newly available, changed, unresolved,
+    or evidence-pending feedback before the final gate,
+    including deferred-until-checks dispositions whose evidence depended on
+    check results. Prior eligible resolutions stand unless the re-query shows
+    changed or newly unresolved thread state. Apply the same disposition rules
+    from steps 10 and 11, including immediate loop restart for `fix-now`
+    feedback and GraphQL verification for resolved inline threads.
 
 15. Final unresolved review-thread gate: immediately before declaring the PR
     ready, re-query paginated GraphQL review threads for the latest PR head.
@@ -209,6 +225,7 @@ directory's default `gh` repository.
       merge state, local merge result, and any merge or conflict-resolution
       commit pushed during the loop.
     - Check status.
+    - Feedback status and any no-progress stop reason.
     - Final unresolved review-thread gate result.
     - Feedback handled, deferred, stale, explained, or blocked, including a
       per-finding disposition for every top-level review finding.
@@ -222,6 +239,7 @@ directory's default `gh` repository.
 - Merge conflict resolution requires product judgment, secrets, permissions,
   destructive git operations, unrelated scope, or unverifiable semantic choices.
 - Check or feedback triage returns `needs-human`.
+- Two consecutive 10-minute no-progress check observation windows complete.
 - Review feedback changes requirements, acceptance criteria, or product scope.
 - Another actor pushes to the PR while the readiness loop is running.
 - Merge is the next action.

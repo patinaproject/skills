@@ -30,9 +30,10 @@ human input is required. It never merges the PR.
 6. Push the branch when there is work to publish.
 7. Create or update a ready-for-review PR using the repository template.
 8. Enter the readiness loop: detect merge conflicts, triage currently
-   available PR feedback, resolve eligible conversations, watch all checks,
-   triage every problematic check, re-query PR feedback after checks, fix
-   branch-local issues, push, and repeat.
+   available PR feedback, resolve eligible conversations, watch all checks in
+   fail-fast bounded observation windows, triage every problematic check,
+   re-query PR feedback after checks, re-query again after every watch exit or
+   timeout, fix branch-local issues, push, and repeat.
 9. Mark draft PRs ready when the loop reaches the ready state.
 10. Report ready-to-merge status without merging.
 
@@ -42,6 +43,8 @@ human input is required. It never merges the PR.
 - Do not use browser conflict resolution or merge the pull request itself.
 - Do not create follow-up issues from PR feedback.
 - Do not wait indefinitely for new human review comments.
-- Do not use fail-fast or required-check-only watching by default.
+- Do not use required-check-only watching; optional checks remain in scope.
+- Stop after the documented no-progress threshold instead of watching
+  indefinitely.
 - Do not add AI or agent attribution unless the repository requires it.
 - Stop for secrets, permissions, product decisions, or ambiguous scope.

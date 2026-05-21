@@ -27,6 +27,14 @@ assert_match() {
   fi
 }
 
+assert_no_match() {
+  local pattern="$1"
+  local file="$2"
+  if rg -n --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
+    fail "unexpected pattern in $file: $pattern"
+  fi
+}
+
 assert_order() {
   local first_pattern="$1"
   local second_pattern="$2"
@@ -66,10 +74,32 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "destructive git operations, unrelated scope" "$WORKFLOW"
   assert_order "mergeability gate" "Fetch the full PR feedback surface" "$WORKFLOW"
   assert_order "Fetch the full PR feedback surface" "Triage every currently available feedback item" "$WORKFLOW"
-  assert_order "Triage every currently available feedback item" "gh pr checks --watch" "$WORKFLOW"
-  assert_order "gh pr checks --watch" "Re-query the full PR feedback surface" "$WORKFLOW"
+  assert_order "Triage every currently available feedback item" "tool-enforced 10-minute timeout" "$WORKFLOW"
+  assert_order "tool-enforced 10-minute timeout" "Re-query the full PR feedback surface" "$WORKFLOW"
   assert_order "Re-query the full PR feedback surface" "Final unresolved review-thread gate" "$WORKFLOW"
   assert_order "Final unresolved review-thread gate" "gh pr ready" "$WORKFLOW"
+  assert_match "fail-fast bounded-watch" "$WORKFLOW"
+  assert_match "tool-enforced 10-minute timeout" "$WORKFLOW"
+  assert_match "timeout 10m gh pr checks --watch --fail-fast" "$WORKFLOW"
+  assert_match "gtimeout 10m gh pr checks --watch --fail-fast" "$WORKFLOW"
+  assert_no_match "^[[:space:]]*gh pr checks --watch[[:space:]]*$" "$WORKFLOW"
+  assert_no_match "^[[:space:]]*gh pr checks --watch --fail-fast[[:space:]]*$" "$WORKFLOW"
+  assert_no_match 'Do not use `--fail-fast` by default' "$WORKFLOW"
+  assert_match "10-minute observation" "$WORKFLOW"
+  assert_match "windows and watch all checks" "$WORKFLOW"
+  assert_match "two consecutive" "$WORKFLOW"
+  assert_match "10-minute no-progress windows" "$WORKFLOW"
+  assert_match "After any watch command exit" "$WORKFLOW"
+  assert_match "After any watch timeout" "$WORKFLOW"
+  assert_match "snapshot all check states" "$WORKFLOW"
+  assert_match "all check buckets, unresolved review threads" "$WORKFLOW"
+  assert_match "review decision, and current PR head" "$WORKFLOW"
+  assert_match "PR head SHA, or feedback inventory" "$WORKFLOW"
+  assert_match "(?i)do not filter to required checks only" "$WORKFLOW"
+  assert_match "skipped-problematic, or otherwise non-pass" "$WORKFLOW"
+  assert_match "Fix branch-local blockers" "$WORKFLOW"
+  assert_match "push" "$WORKFLOW"
+  assert_match "follow-up commits when appropriate" "$WORKFLOW"
   assert_match "resolveReviewThread" "$WORKFLOW"
   assert_match "isResolved" "$WORKFLOW"
   assert_match "newly available, changed, unresolved" "$WORKFLOW"
@@ -103,6 +133,16 @@ if [ -f "$TRIAGE" ]; then
   assert_match "isResolved: true" "$TRIAGE"
   assert_match "Re-query the full feedback surface after checks finish" "$TRIAGE"
   assert_match "Wait for all checks only after currently available feedback has been handled" "$TRIAGE"
+  assert_match "tool-enforced 10-minute timeout" "$TRIAGE"
+  assert_match "timeout 10m gh pr checks --watch --fail-fast" "$TRIAGE"
+  assert_match "gtimeout 10m gh pr checks --watch --fail-fast" "$TRIAGE"
+  assert_no_match "^[[:space:]]*gh pr checks --watch[[:space:]]*$" "$TRIAGE"
+  assert_no_match "^[[:space:]]*gh pr checks --watch --fail-fast[[:space:]]*$" "$TRIAGE"
+  assert_match "10-minute observation windows" "$TRIAGE"
+  assert_match "two consecutive 10-minute no-progress windows" "$TRIAGE"
+  assert_match "full PR state resync" "$TRIAGE"
+  assert_match "failed, canceled, skipped-problematic, or otherwise non-pass" "$TRIAGE"
+  assert_no_match 'Use `gh pr checks --watch`; do not use fail-fast by default' "$TRIAGE"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
