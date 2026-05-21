@@ -2,18 +2,15 @@
 
 ## [2.2.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.1.0...patinaproject-skills-v2.2.0) (2026-05-20)
 
-
 ### Features
 
 * [#162](https://github.com/patinaproject/skills/issues/162) refresh dependencies after branch updates ([#163](https://github.com/patinaproject/skills/issues/163)) ([7face9d](https://github.com/patinaproject/skills/commit/7face9d7828b66d623d87c22dd8c47f938f5bb80))
-
 
 ### Bug Fixes
 
 * [#165](https://github.com/patinaproject/skills/issues/165) set up scaffold skill installation ([#166](https://github.com/patinaproject/skills/issues/166)) ([cd718d7](https://github.com/patinaproject/skills/commit/cd718d72ab985e2efd2ca23a4fa5d01a796c1b6c))
 
 ## [2.1.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.0.0...patinaproject-skills-v2.1.0) (2026-05-20)
-
 
 ### Features
 
