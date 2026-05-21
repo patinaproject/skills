@@ -179,10 +179,10 @@ directory's default `gh` repository.
 
 13. Triage every non-pass, canceled, or otherwise problematic check with
     [triage.md](triage.md), using the full PR state snapshot rather than
-    tunneling into only the first failed check. Fix branch-local blockers, push
-    follow-up commits when appropriate, and restart the readiness loop on the
-    new head. Continue for `explain`, `stale`, and `defer` outcomes only with
-    concrete evidence. Stop only when a check returns `needs-human`.
+    tunneling into only the first failed check. Fix branch-local blockers,
+    push follow-up commits when appropriate, and restart the readiness loop on
+    the new head. Continue for `explain`, `stale`, and `defer` outcomes only
+    with concrete evidence. Stop only when a check returns `needs-human`.
 
 14. Re-query the full PR feedback surface after checks finish, fail fast, or
     time out because GitHub Actions or review automation may have posted new
