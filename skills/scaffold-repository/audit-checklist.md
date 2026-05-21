@@ -26,8 +26,10 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
+| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `postinstall: bash scripts/install-third-party-skills.sh`, and `skills:restore: bash scripts/install-third-party-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
 | `pnpm-lock.yaml` | yes | present |
+| `skills-lock.json` | yes | present; valid JSON; records project-local skills restored by the skills CLI, or an empty `skills` object when no shared skills are locked yet |
+| `scripts/install-third-party-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise runs `npx --yes skills@latest experimental_install --yes` from the repo root |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `docs/release-flow.md` | yes | present; documents the release-please flow |
 
@@ -91,6 +93,20 @@ When detected, the following surfaces should all be present. Missing platforms a
 
 Author URLs in `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` must point to the resolved `https://github.com/<author-handle>`, not the repository owner URL. Repository-level URLs such as `homepage`, `repository`, and Codex interface URLs stay on `https://github.com/<owner>/<repo>`.
 
+### Shared skill lifecycle
+
+This check applies to every scaffolded or realigned repository so project-local
+skills restore after `pnpm install`.
+
+| File / command | Required | Check |
+|---|---|---|
+| `skills-lock.json` | yes | present; records every vendored skill that should be restored into the project overlay, or an empty `skills` object if none are installed yet |
+| `scripts/install-third-party-skills.sh` | yes | present; runs `npx --yes skills@latest experimental_install --yes` from the repo root |
+| `package.json` | yes | includes `postinstall: bash scripts/install-third-party-skills.sh` and `skills:restore: bash scripts/install-third-party-skills.sh` |
+| `.gitignore` | yes | ignores generated `.agents/skills/*` and `.claude/skills/*` payloads while keeping committed in-repo skill symlinks unignored |
+| `pnpm skills:restore` | yes | run after accepting lifecycle drift when one or more skills are locked; installs all locked vendored skills into the local project overlay |
+| `npx --yes skills@latest list --json` | yes | verify restored locked vendored skills are present alongside any in-repo overlay symlinks |
+
 ## Area 6 – Deprecated workflow cleanup
 
 Detection: look for retired workflow scaffolding in active repo guidance.
@@ -146,7 +162,7 @@ Group recommendations into ordered batches and offer them in this sequence (matc
 
 1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
 2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, stale GitHub issue templates)
-3. PNPM tooling (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`)
+3. PNPM tooling and skills installation (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-third-party-skills.sh`, `.gitignore`)
 4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)
 6. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`, and agent-plugin `release-please.yml` when applicable)

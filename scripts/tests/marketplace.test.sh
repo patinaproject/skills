@@ -74,6 +74,23 @@ if [ "$claude_skills" != "$expected_marketplace_skills" ]; then
   exit 1
 fi
 
+unexpected_lock_entries="$(
+  jq -r '
+    .skills
+    | to_entries[]
+    | select(
+        (.value.source != "mattpocock/skills")
+        and (.key != "find-skills" or .value.source != "vercel-labs/skills")
+      )
+    | "\(.key): \(.value.source)"
+  ' skills-lock.json
+)"
+if [ -n "$unexpected_lock_entries" ]; then
+  echo "FAIL: skills-lock.json may only keep mattpocock/skills entries plus find-skills" >&2
+  printf '%s\n' "$unexpected_lock_entries" >&2
+  exit 1
+fi
+
 # Assert the two version fields stay in lockstep. Each host stores the
 # marketplace version in a different file per its own schema:
 #   Claude: .claude-plugin/marketplace.json metadata.version

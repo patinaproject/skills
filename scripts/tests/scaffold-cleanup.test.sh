@@ -73,9 +73,9 @@ assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
 assert_absent_path ".github/ISSUE_TEMPLATE/bug_report.md"
 assert_absent_path ".github/ISSUE_TEMPLATE/feature_request.md"
 
-# This protects the live patinaproject/skills reference repo. It intentionally
-# includes marketplace-internal verification files that are not emitted into
-# generic scaffolded consumer repositories.
+# This protects the live patinaproject/skills reference repo. Some files below
+# are marketplace-internal verification files, while the skill installation
+# lifecycle files are now part of the generic scaffold baseline.
 for live_reference_path in \
   .claude/settings.json \
   .codex/environments/environment.toml \
@@ -167,6 +167,18 @@ assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
 
 assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-review-code-skill|verify-scaffold-cleanup|verify-workflow-cleanup)\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
+assert_match "scripts/install-third-party-skills\\.sh" \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
+assert_match "skills-lock\\.json" \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
+assert_match "postinstall: \"bash scripts/install-third-party-skills\\.sh\"" \
+  skills/scaffold-repository/SKILL.md
+
+assert_match "skills:restore: \"bash scripts/install-third-party-skills\\.sh\"" \
+  skills/scaffold-repository/SKILL.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
