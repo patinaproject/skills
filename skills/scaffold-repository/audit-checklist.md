@@ -37,7 +37,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, no dedicated automated-verification section, no pre-checked testing-step guidance, GitHub Checks as the routine automated verification surface, and `type: #123 short description` rule. Classify templates as stale when they encourage command transcripts, routine automated evidence, or padded testing sections. |
+| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, no dedicated automated-verification section, no pre-checked testing-step guidance, GitHub Checks as the routine automated verification surface, and `type: #123 short description` rule |
 | Old GitHub issue templates | no | absent; existing issue templates are stale baseline artifacts and should be offered for deletion with a reviewable diff |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
 | `.github/workflows/pull-request.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
@@ -47,6 +47,8 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | End-to-end release smoke | yes | After realignment, run `gh workflow run Release --repo <owner>/<repo>` on a repo seeded with at least one `feat:` or `fix:` commit since its last tag. Verify release-please opens/updates a release PR; on merge, a tag and GitHub Release appear. Report a gap if the target has no prior release **and** `gh api repos/<owner>/<repo>/actions/permissions/workflow --jq .default_workflow_permissions` returns `read`. |
 | Default workflow permissions | yes | `gh api repos/<owner>/<repo>/actions/permissions/workflow --jq .default_workflow_permissions` must return `write`. When it returns `read`, emit a realignment-gap warning entry recommending **Settings → Actions → General → Workflow permissions → Read and write permissions**. This check runs regardless of whether the repo has ever cut a release, so the problem surfaces before the first 403. |
 | Tag rulesets do not require signatures | yes | `gh api repos/<owner>/<repo>/rulesets --jq '.[] \| select(.target=="tag")'` must not return any ruleset whose `rules[].type == "required_signatures"` applies to the release-tag pattern. When it does, emit a realignment-gap warning entry: signed tags break `release-please-action`, which cannot sign; scope the signature rule to branches or to non-release tag refs. |
+
+Classify stale PR templates when they encourage command transcripts, routine automated evidence, or padded testing sections.
 
 ### Reserved GitHub labels
 
