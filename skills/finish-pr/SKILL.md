@@ -37,7 +37,9 @@ not halt the skill by themselves. It never merges the PR.
    timeout, fix branch-local issues, push, and repeat. When a failing check is
    outside branch scope or cannot be fixed by the agent, record a concrete
    disposition and continue to final reporting instead of halting.
-9. Mark draft PRs ready only when the loop reaches the ready state.
+9. Mark draft PRs ready for review once all currently visible failing checks
+   have been fixed or dispositioned; ready-for-review is distinct from
+   ready-to-merge.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.
 
@@ -54,5 +56,5 @@ not halt the skill by themselves. It never merges the PR.
   triage it, fix branch-local causes when possible, and otherwise report the
   check disposition.
 - Do not add AI or agent attribution unless the repository requires it.
-- Stop for secrets, permissions, product decisions, or ambiguous scope that are
-  not check-related.
+- Stop for non-check blockers involving secrets, permissions, product
+  decisions, or ambiguous scope.

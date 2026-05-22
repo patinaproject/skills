@@ -6,7 +6,7 @@ review threads, top-level PR comments, and review bodies.
 | State | Meaning | Action |
 | --- | --- | --- |
 | `fix-now` | Branch-local, actionable, in scope | Patch, verify, commit, push, and re-check |
-| `explain` | Valid to answer without code | Reply or report with concise evidence |
+| `explain` | Valid to answer without code, or a reportable check disposition | Reply or report with concise evidence |
 | `stale` | No longer applies to latest head | Reply or report with current-head evidence |
 | `defer` | Valid but outside this PR | Explain the scope decision; do not create an issue |
 | `needs-human` | Non-check work requires judgment, permissions, secrets, or conflicting direction | Stop and ask |

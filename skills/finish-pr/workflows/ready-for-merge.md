@@ -217,11 +217,17 @@ directory's default `gh` repository.
     fixes or newly pushed commits. Unresolved threads are blockers until they
     are resolved, fixed, or evidence-classified as stale or non-blocking.
 
-16. When the loop reaches the ready state, mark a draft PR ready for review:
+16. When all currently visible failing checks have been fixed or dispositioned,
+    mark a draft PR ready for review:
 
     ```sh
     gh pr ready
     ```
+
+    Ready-for-review is distinct from ready-to-merge. A draft PR can become
+    ready for review even when known failing checks remain, as long as each
+    failing check has a concrete disposition and no human-owned stop condition
+    remains.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
