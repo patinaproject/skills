@@ -41,7 +41,7 @@ against the current working directory's default `gh` repository.
        exit 1
      fi
      printf '%s\n' "$page" |
-       jq -r '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")'
+       jq -r '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN") | "#\(.number) \(.title) [\(.state)] \(.url)"'
      has_next="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.hasNextPage')"
      after="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.endCursor')"
      [ "$has_next" = "true" ] || break
