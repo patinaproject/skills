@@ -20,13 +20,15 @@ implementation work.
 
 1. Read the repository guidance first, especially branch and GitHub rules.
 2. Resolve the issue in the current working directory's default `gh` repository.
-3. Compute the branch name as `<issue-number>-<kebab-title>`, matching
+3. Halt when open native GitHub `blockedBy` dependencies exist, unless the user
+   explicitly asks to start blocked work anyway.
+4. Compute the branch name as `<issue-number>-<kebab-title>`, matching
    GitHub's issue branch suggestion.
-4. Refuse to switch branches when the worktree has uncommitted changes.
-5. Fetch the repository default branch from `origin`.
-6. Create the branch from `origin/<default-branch>`, switch to it, or warn
+5. Refuse to switch branches when the worktree has uncommitted changes.
+6. Fetch the repository default branch from `origin`.
+7. Create the branch from `origin/<default-branch>`, switch to it, or warn
    before leaving a different issue branch.
-7. Report the branch and base SHA.
+8. Report the branch and base SHA.
 
 ## Guardrails
 
@@ -34,4 +36,5 @@ implementation work.
 - Never hardcode `main`; resolve the default branch through `gh repo view`.
 - Keep empty issue branches local.
 - Ask before switching away from a different issue branch.
+- Use native GitHub issue relationships as the blocked-work source of truth.
 - Stop on rebase conflicts and surface the manual resolution steps.
