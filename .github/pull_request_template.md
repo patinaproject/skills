@@ -58,7 +58,7 @@ Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
 
 ## Testing steps
 
-  Include only operator-owned actions or inspections. Use unchecked checkboxes
+  Include only human-owned actions or inspections. Use unchecked checkboxes
   for pass/fail verification decisions or outcomes. Prefer app behavior or reviewable artifacts:
   routes, screens, forms, buttons, filters, visual states,
   permissions, saved data, workflows, rendered docs, generated files, install

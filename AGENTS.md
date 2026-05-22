@@ -81,8 +81,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
 - Run `bash scripts/tests/pr-body-policy.test.sh` after changing PR body policy,
-  `.github/pull_request_template.md`, `finish-pr` PR-body guidance, or
-  scaffold PR-body guidance
+  `.github/pull_request_template.md`, `CONTRIBUTING.md`, `finish-pr` PR-body
+  guidance, or scaffold PR-body guidance
 - Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
 - Run `bash scripts/tests/update-branch-workflow.test.sh` after changing `skills/update-branch/**`
 - Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`

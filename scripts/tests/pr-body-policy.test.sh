@@ -6,6 +6,7 @@ cd "$REPO_ROOT"
 
 TEMPLATE=".github/pull_request_template.md"
 AGENTS="AGENTS.md"
+CONTRIBUTING="CONTRIBUTING.md"
 SCAFFOLD_SKILL="skills/scaffold-repository/SKILL.md"
 SCAFFOLD_AUDIT="skills/scaffold-repository/audit-checklist.md"
 SCAFFOLD_PR_DOC="skills/scaffold-repository/pr-body-template.md"
@@ -36,6 +37,7 @@ assert_no_match() {
 for file in \
   "$TEMPLATE" \
   "$AGENTS" \
+  "$CONTRIBUTING" \
   "$SCAFFOLD_SKILL" \
   "$SCAFFOLD_AUDIT" \
   "$SCAFFOLD_PR_DOC" \
@@ -58,6 +60,10 @@ assert_no_match "command output|command transcript|routine automated evidence" "
 assert_match "GitHub Checks.*routine automated verification" "$AGENTS"
 assert_match "Testing steps.*human-owned behavior or artifact" "$AGENTS"
 assert_no_match "verification evidence" "$AGENTS"
+
+assert_match "GitHub Checks.*routine automated verification" "$CONTRIBUTING"
+assert_match "Testing steps.*human-owned behavior or artifact" "$CONTRIBUTING"
+assert_no_match "verification evidence" "$CONTRIBUTING"
 
 assert_match "GitHub Checks.*routine automated verification" "$FINISH_PR_WORKFLOW"
 assert_match "reviewer-friendly PR body" "$FINISH_PR_WORKFLOW"

@@ -37,8 +37,9 @@ pnpm lint:md
 
 - Keep the PR title in commitlint format.
 - Fill in the [PR template](./.github/pull_request_template.md).
-- Include concise verification evidence in the PR body.
-- Use `Testing steps` for operator-owned verification decisions.
+- Treat GitHub Checks as the source of truth for routine automated verification.
+- Use `Testing steps` only for meaningful human-owned behavior or artifact
+  checks.
 - Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 ## Further reading
