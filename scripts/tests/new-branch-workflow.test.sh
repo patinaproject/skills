@@ -48,8 +48,12 @@ if [ -f "$SKILL" ]; then
 fi
 
 if [ -f "$WORKFLOW" ]; then
+  assert_match 'gh issue view "\$issue" --json number,title,state' "$WORKFLOW"
+  assert_match 'issue_number=' "$WORKFLOW"
   assert_match 'gh repo view --json nameWithOwner' "$WORKFLOW"
   assert_match 'blockedBy\(first:100\)' "$WORKFLOW"
+  assert_match 'If the dependency query fails' "$WORKFLOW"
+  assert_match 'refuse unless the user gives an explicit current-turn override' "$WORKFLOW"
   assert_match 'state:[[:space:]]*OPEN' "$WORKFLOW"
   assert_match 'number, title, state, and URL' "$WORKFLOW"
   assert_match 'Closed blockers do not halt' "$WORKFLOW"
@@ -58,6 +62,7 @@ if [ -f "$WORKFLOW" ]; then
   assert_match 'parent or sub-issue relationships.*do not halt' "$WORKFLOW"
   assert_match 'explicit current-turn override' "$WORKFLOW"
   assert_match 'Open native `blockedBy` dependencies exist' "$WORKFLOW"
+  assert_match 'The native `blockedBy` dependency query fails' "$WORKFLOW"
 
   assert_order 'Resolve the issue' 'Check native dependency blockers' "$WORKFLOW"
   assert_order 'Check native dependency blockers' 'Inspect local branch state' "$WORKFLOW"

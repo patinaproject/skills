@@ -14,6 +14,7 @@ against the current working directory's default `gh` repository.
 
    ```sh
    gh issue view "$issue" --json number,title,state
+   issue_number="$(gh issue view "$issue" --json number --jq .number)"
    ```
 
    Refuse if the issue cannot be resolved. Refuse closed issues unless the user
@@ -30,6 +31,8 @@ against the current working directory's default `gh` repository.
      -f query='query($owner:String!,$repo:String!,$number:Int!){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100){nodes{number title state url}}}}}' \
      --jq '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")'
    ```
+
+   If the dependency query fails, refuse unless the user gives an explicit current-turn override. This includes GraphQL errors, an unavailable `blockedBy` field, or any other result that prevents the workflow from checking native GitHub issue relationships as the source of truth.
 
    Treat blockers with `state: OPEN` as active blockers. If any open blockers
    exist, refuse before inspecting or changing local
@@ -89,6 +92,7 @@ against the current working directory's default `gh` repository.
 - Issue cannot be resolved.
 - Issue is closed without explicit allowance.
 - Open native `blockedBy` dependencies exist without explicit override.
+- The native `blockedBy` dependency query fails without explicit override.
 - Worktree has uncommitted changes.
 - Default branch cannot be resolved.
 - User asks for a different repository from the current working directory.
