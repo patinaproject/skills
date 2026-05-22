@@ -57,6 +57,8 @@ if [ -f "$WORKFLOW" ]; then
   assert_match 'pageInfo[[:space:]]*\{[[:space:]]*hasNextPage[[:space:]]+endCursor[[:space:]]*\}' "$WORKFLOW"
   assert_match 'while :; do' "$WORKFLOW"
   assert_match 'after:' "$WORKFLOW"
+  assert_match 'if ! page=' "$WORKFLOW"
+  assert_match "\\.errors" "$WORKFLOW"
   assert_match 'dependency query fails' "$WORKFLOW"
   assert_match 'refuse unless the user gives an explicit[[:space:]]+current-turn override' "$WORKFLOW"
   assert_match 'state:[[:space:]]*OPEN' "$WORKFLOW"

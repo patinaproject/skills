@@ -30,9 +30,16 @@ against the current working directory's default `gh` repository.
    repo="${repo_full_name#*/}"
    after=null
    while :; do
-     page="$(gh api graphql \
+     if ! page="$(gh api graphql \
        -F owner="$owner" -F repo="$repo" -F number="$issue_number" -F after="$after" \
-       -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"
+       -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
+       echo "Dependency query failed; refuse unless explicit override." >&2
+       exit 1
+     fi
+     if printf '%s\n' "$page" | jq -e '.errors | length > 0' >/dev/null; then
+       echo "Dependency query returned GraphQL errors; refuse unless explicit override." >&2
+       exit 1
+     fi
      printf '%s\n' "$page" |
        jq -r '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")'
      has_next="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.hasNextPage')"
