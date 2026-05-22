@@ -13,8 +13,7 @@ against the current working directory's default `gh` repository.
 1. Resolve the issue:
 
    ```sh
-   gh issue view "$issue" --json number,title,state
-   issue_number="$(gh issue view "$issue" --json number --jq .number)"
+   issue_number="$(gh issue view "$issue" --json number,title,state --jq .number)"
    ```
 
    Refuse if the issue cannot be resolved. Refuse closed issues unless the user
@@ -26,13 +25,24 @@ against the current working directory's default `gh` repository.
    repo_full_name="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
    owner="${repo_full_name%%/*}"
    repo="${repo_full_name#*/}"
-   gh api graphql \
-     -F owner="$owner" -F repo="$repo" -F number="$issue_number" \
-     -f query='query($owner:String!,$repo:String!,$number:Int!){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100){nodes{number title state url}}}}}' \
-     --jq '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")'
+   after=null
+   while :; do
+     page="$(gh api graphql \
+       -F owner="$owner" -F repo="$repo" -F number="$issue_number" -F after="$after" \
+       -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"
+     printf '%s\n' "$page" |
+       jq -r '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN")'
+     has_next="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.hasNextPage')"
+     after="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.endCursor')"
+     [ "$has_next" = "true" ] || break
+   done
    ```
 
-   If the dependency query fails, refuse unless the user gives an explicit current-turn override. This includes GraphQL errors, an unavailable `blockedBy` field, or any other result that prevents the workflow from checking native GitHub issue relationships as the source of truth.
+   Fetch every dependency page before deciding that no open blockers exist. If
+   the dependency query fails, refuse unless the user gives an explicit
+   current-turn override. This includes GraphQL errors, an unavailable
+   `blockedBy` field, or any other result that prevents the workflow from
+   checking native GitHub issue relationships as the source of truth.
 
    Treat blockers with `state: OPEN` as active blockers. If any open blockers
    exist, refuse before inspecting or changing local

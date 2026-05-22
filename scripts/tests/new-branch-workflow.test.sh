@@ -48,12 +48,15 @@ if [ -f "$SKILL" ]; then
 fi
 
 if [ -f "$WORKFLOW" ]; then
-  assert_match 'gh issue view "\$issue" --json number,title,state' "$WORKFLOW"
+  assert_match 'gh issue view "\$issue" --json number,title,state --jq \.number' "$WORKFLOW"
   assert_match 'issue_number=' "$WORKFLOW"
   assert_match 'gh repo view --json nameWithOwner' "$WORKFLOW"
-  assert_match 'blockedBy\(first:100\)' "$WORKFLOW"
-  assert_match 'If the dependency query fails' "$WORKFLOW"
-  assert_match 'refuse unless the user gives an explicit current-turn override' "$WORKFLOW"
+  assert_match 'blockedBy\(first:100' "$WORKFLOW"
+  assert_match 'pageInfo[[:space:]]*\{[[:space:]]*hasNextPage[[:space:]]+endCursor[[:space:]]*\}' "$WORKFLOW"
+  assert_match 'while :; do' "$WORKFLOW"
+  assert_match 'after:' "$WORKFLOW"
+  assert_match 'dependency query fails' "$WORKFLOW"
+  assert_match 'refuse unless the user gives an explicit[[:space:]]+current-turn override' "$WORKFLOW"
   assert_match 'state:[[:space:]]*OPEN' "$WORKFLOW"
   assert_match 'number, title, state, and URL' "$WORKFLOW"
   assert_match 'Closed blockers do not halt' "$WORKFLOW"

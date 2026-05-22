@@ -76,6 +76,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - Validate paths with `find` or `rg`
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
+- Run `bash scripts/tests/new-branch-workflow.test.sh` after changing `skills/new-branch/**`
 - Run `bash scripts/tests/develop-issue-workflow.test.sh` after changing `skills/develop-issue/**`
 - Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
