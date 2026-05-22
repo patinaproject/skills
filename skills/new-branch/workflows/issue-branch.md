@@ -13,7 +13,10 @@ against the current working directory's default `gh` repository.
 1. Resolve the issue:
 
    ```sh
-   issue_number="$(gh issue view "$issue" --json number,title,state --jq .number)"
+   issue_json="$(gh issue view "$issue" --json number,title,state)"
+   issue_number="$(printf '%s\n' "$issue_json" | jq -r .number)"
+   issue_title="$(printf '%s\n' "$issue_json" | jq -r .title)"
+   issue_state="$(printf '%s\n' "$issue_json" | jq -r .state)"
    ```
 
    Refuse if the issue cannot be resolved. Refuse closed issues unless the user
@@ -50,7 +53,12 @@ against the current working directory's default `gh` repository.
    only when the user gives an explicit current-turn override such as "start
    anyway" or "start blocked work anyway".
 
-   Closed blockers do not halt. Body-prose fallback relationships such as `Blocked by #N` do not halt. Native `blocking` relationships, meaning issues this target is blocking, do not halt. Native parent or sub-issue relationships do not halt.
+   The following relationships do not halt:
+
+   - Closed blockers do not halt.
+   - Body-prose fallback relationships such as `Blocked by #N` do not halt.
+   - Issues this target is blocking do not halt.
+   - Parent or sub-issue relationships do not halt.
 
 3. Compute the branch name:
 
