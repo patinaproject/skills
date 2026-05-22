@@ -184,7 +184,8 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-Use the PR template as written: linked issues and what changed. GitHub Checks are the source of truth for routine automated verification.
+Use the PR template as written: linked issues and what changed.
+GitHub Checks are the source of truth for routine automated verification.
 Put `Testing steps` only when a human-owned behavior or artifact check is
 useful, and make each unchecked item describe the expected outcome. Omit the
 section when no human review judgment is needed. Put only pre-merge operational
