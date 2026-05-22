@@ -17,7 +17,8 @@ the ready-for-review PR.
 This skill verifies, commits, pushes, creates or reuses a ready-for-review pull
 request, then loops through mergeability, currently available PR feedback,
 eligible conversation resolution, and checks until the PR is ready-to-merge or
-human input is required. It never merges the PR.
+the current check state has been fully triaged and reported. Failing checks do
+not halt the skill by themselves. It never merges the PR.
 
 ## Workflow
 
@@ -33,9 +34,12 @@ human input is required. It never merges the PR.
    available PR feedback, resolve eligible conversations, watch all checks in
    fail-fast bounded observation windows, triage every problematic check,
    re-query PR feedback after checks, re-query again after every watch exit or
-   timeout, fix branch-local issues, push, and repeat.
-9. Mark draft PRs ready when the loop reaches the ready state.
-10. Report ready-to-merge status without merging.
+   timeout, fix branch-local issues, push, and repeat. When a failing check is
+   outside branch scope or cannot be fixed by the agent, record a concrete
+   disposition and continue to final reporting instead of halting.
+9. Mark draft PRs ready only when the loop reaches the ready state.
+10. Report ready-to-merge status or concrete non-ready check dispositions
+    without merging.
 
 ## Guardrails
 
@@ -46,5 +50,9 @@ human input is required. It never merges the PR.
 - Do not use required-check-only watching; optional checks remain in scope.
 - Stop after the documented no-progress threshold instead of watching
   indefinitely.
+- Do not stop solely because a check failed, was canceled, or is out of scope;
+  triage it, fix branch-local causes when possible, and otherwise report the
+  check disposition.
 - Do not add AI or agent attribution unless the repository requires it.
-- Stop for secrets, permissions, product decisions, or ambiguous scope.
+- Stop for non-check secrets, permissions, product decisions, or ambiguous
+  scope.

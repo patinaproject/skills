@@ -1,7 +1,9 @@
 # Ready for Merge Workflow
 
 **Goal:** Carry completed branch-local work through publication, checks, and
-PR feedback until the pull request is ready to merge or human input is required.
+PR feedback until the pull request is ready to merge or every visible non-ready
+state has a concrete disposition. A failing check is evidence to triage and
+report, not a halt condition by itself.
 
 ## Preconditions
 
@@ -183,10 +185,13 @@ directory's default `gh` repository.
 
 13. Triage every non-pass, canceled, or otherwise problematic check with
     [triage.md](triage.md), using the full PR state snapshot rather than
-    tunneling into only the first failed check. Fix branch-local blockers,
+    tunneling into only the first failed check. Fix branch-local check causes,
     push follow-up commits when appropriate, and restart the readiness loop on
-    the new head. Continue for `explain`, `stale`, and `defer` outcomes only
-    with concrete evidence. Stop only when a check returns `needs-human`.
+    the new head. Continue for `explain`, `stale`, and `defer` outcomes with
+    concrete evidence. Do not halt solely because a check failed, was canceled,
+    is flaky, is infrastructure-owned, lacks agent permissions, depends on
+    missing secrets, or is outside the PR scope; record that disposition and
+    continue to the feedback and final reporting gates.
 
 14. Re-query the full PR feedback surface after checks finish, fail fast, or
     time out because GitHub Actions or review automation may have posted new
@@ -228,7 +233,7 @@ directory's default `gh` repository.
     - Mergeability and conflict-handling evidence, including the base branch,
       merge state, local merge result, and any merge or conflict-resolution
       commit pushed during the loop.
-    - Check status.
+    - Check status and per-failing-check dispositions.
     - Feedback status and any no-progress stop reason.
     - Final unresolved review-thread gate result.
     - Feedback handled, deferred, stale, explained, or blocked, including a
@@ -242,7 +247,10 @@ directory's default `gh` repository.
 - Local verification fails for a reason that is not branch-local or in scope.
 - Merge conflict resolution requires product judgment, secrets, permissions,
   destructive git operations, unrelated scope, or unverifiable semantic choices.
-- Check or feedback triage returns `needs-human`.
+- Feedback triage returns `needs-human`.
+- Check triage uncovers a non-check human blocker, such as a required product
+  decision or ambiguous branch scope. The failing check itself is not the halt
+  condition.
 - Two consecutive 10-minute no-progress check observation windows complete.
 - Review feedback changes requirements, acceptance criteria, or product scope.
 - Another actor pushes to the PR while the readiness loop is running.
