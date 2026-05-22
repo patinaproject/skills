@@ -6,10 +6,10 @@ review threads, top-level PR comments, and review bodies.
 | State | Meaning | Action |
 | --- | --- | --- |
 | `fix-now` | Branch-local, actionable, in scope | Patch, verify, commit, push, and re-check |
-| `explain` | Valid to answer without code | Reply or report with concise evidence |
+| `explain` | Valid to answer without code, or a reportable check disposition | Reply or report with concise evidence |
 | `stale` | No longer applies to latest head | Reply or report with current-head evidence |
 | `defer` | Valid but outside this PR | Explain the scope decision; do not create an issue |
-| `needs-human` | Requires judgment, permissions, secrets, or conflicting direction | Stop and ask |
+| `needs-human` | Non-check work requires judgment, permissions, secrets, or conflicting direction | Stop and ask |
 
 For merge conflicts, apply the Merge Conflict Rules below when choosing and
 executing the state action.
@@ -71,8 +71,16 @@ executing the state action.
   check result before starting another watch window.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
-- Stop for missing secrets, permission failures, external outages, or flaky
-  infrastructure that cannot be proven branch-local.
+- Do not classify a check as `needs-human` solely because it failed, was
+  canceled, needs missing secrets, hit a permission failure, depends on an
+  external outage, is flaky infrastructure, or is outside the PR's scope. Use
+  `explain`, `stale`, or `defer` with evidence and continue to final reporting.
+- Classify flaky, infrastructure-owned, external-outage, missing-secret, and
+  permission-limited check failures as `explain` when evidence shows they are
+  not branch-local.
+- Only stop when check investigation reveals a separate non-check blocker, such
+  as a required product decision, ambiguous branch scope, or conflicting human
+  direction.
 - Re-query the full feedback surface after checks finish, fail fast, or time out
   so CI-authored review comments are triaged before final readiness reporting.
 

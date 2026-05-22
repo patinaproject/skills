@@ -57,6 +57,10 @@ if [ -f "$SKILL" ]; then
   assert_match "currently available PR feedback" "$SKILL"
   assert_match "eligible conversation resolution" "$SKILL"
   assert_match "re-query PR feedback after checks" "$SKILL"
+  assert_match "Failing checks do" "$SKILL"
+  assert_match "not halt the skill by themselves" "$SKILL"
+  assert_match "concrete non-ready check dispositions" "$SKILL"
+  assert_match "ready-for-review is distinct from" "$SKILL"
 fi
 
 if [ -f "$WORKFLOW" ]; then
@@ -78,6 +82,8 @@ if [ -f "$WORKFLOW" ]; then
   assert_order "tool-enforced 10-minute timeout" "Re-query the full PR feedback surface" "$WORKFLOW"
   assert_order "Re-query the full PR feedback surface" "Final unresolved review-thread gate" "$WORKFLOW"
   assert_order "Final unresolved review-thread gate" "gh pr ready" "$WORKFLOW"
+  assert_match "Ready-for-review is distinct from ready-to-merge" "$WORKFLOW"
+  assert_match "known failing checks remain" "$WORKFLOW"
   assert_match "fail-fast bounded-watch" "$WORKFLOW"
   assert_match "tool-enforced 10-minute timeout" "$WORKFLOW"
   assert_match "timeout 10m gh pr checks --watch --fail-fast" "$WORKFLOW"
@@ -100,7 +106,9 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "PR head SHA, or feedback inventory" "$WORKFLOW"
   assert_match "(?i)do not filter to required checks only" "$WORKFLOW"
   assert_match "skipped-problematic, or otherwise non-pass" "$WORKFLOW"
-  assert_match "Fix branch-local blockers" "$WORKFLOW"
+  assert_match "Fix branch-local check causes" "$WORKFLOW"
+  assert_match "Do not halt solely because a check failed" "$WORKFLOW"
+  assert_match "per-failing-check dispositions" "$WORKFLOW"
   assert_match "push follow-up commits when appropriate" "$WORKFLOW"
   assert_match "resolveReviewThread" "$WORKFLOW"
   assert_match "isResolved" "$WORKFLOW"
@@ -148,6 +156,13 @@ if [ -f "$TRIAGE" ]; then
   assert_match "two consecutive 10-minute no-progress windows" "$TRIAGE"
   assert_match "full PR state resync" "$TRIAGE"
   assert_match "failed, canceled, skipped-problematic, or otherwise non-pass" "$TRIAGE"
+  assert_match "reportable check disposition" "$TRIAGE"
+  assert_match 'Do not classify a check as `needs-human` solely because it failed' "$TRIAGE"
+  assert_match "needs missing secrets" "$TRIAGE"
+  assert_match "permission failure" "$TRIAGE"
+  assert_match "external outage" "$TRIAGE"
+  assert_match "Classify flaky, infrastructure-owned, external-outage, missing-secret, and" "$TRIAGE"
+  assert_match 'permission-limited check failures as `explain`' "$TRIAGE"
   assert_no_match 'Use `gh pr checks --watch`; do not use fail-fast by default' "$TRIAGE"
 fi
 
