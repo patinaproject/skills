@@ -32,19 +32,17 @@ against the current working directory's default `gh` repository.
    open_blockers_found=0
    while :; do
      if [ "$after" = null ]; then
-       if ! page="$(gh api graphql \
-         -F owner="$owner" -F repo="$repo" -F number="$issue_number" -F after=null \
-         -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
-         echo "Dependency query failed; refuse unless explicit override." >&2
-         exit 1
-       fi
+       after_flag="-F"
+       after_value="after=null"
      else
-       if ! page="$(gh api graphql \
-         -F owner="$owner" -F repo="$repo" -F number="$issue_number" -f after="$after" \
-         -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
-         echo "Dependency query failed; refuse unless explicit override." >&2
-         exit 1
-       fi
+       after_flag="-f"
+       after_value="after=$after"
+     fi
+     if ! page="$(gh api graphql \
+       -F owner="$owner" -F repo="$repo" -F number="$issue_number" "$after_flag" "$after_value" \
+       -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
+       echo "Dependency query failed; refuse unless explicit override." >&2
+       exit 1
      fi
      if printf '%s\n' "$page" | jq -e '.errors | length > 0' >/dev/null; then
        echo "Dependency query returned GraphQL errors; refuse unless explicit override." >&2
