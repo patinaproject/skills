@@ -49,8 +49,20 @@ directory's default `gh` repository.
    - Read `.github/pull_request_template.md`.
    - Use the repository's PR title format.
    - Include `Closes #<issue>` or another required closing keyword.
-   - Summarize acceptance criteria and verification evidence in the template's
-     verification section when the linked issue defines acceptance criteria.
+   - Summarize acceptance criteria and local verification evidence outside the
+     human `## Test plan` when the linked issue defines acceptance criteria.
+   - Translate local verification evidence into QA-friendly manual test steps
+     for the real app.
+   - Write each test-plan item as a concrete user action and expected app result.
+   - Prefer user flows, routes, screens, forms, filters, buttons, visual states,
+     and saved data over commands.
+   - Do not ask humans to run tests, lint, type-checks, hooks, package commands,
+     or other checks that CI owns.
+   - Use command-based test-plan items only when no realistic app-level
+     verification path exists.
+   - Name the app behavior or repo contract that any command-based exception
+     verifies.
+   - Keep generated example checkboxes unchecked.
    - Create a ready-for-review PR by default.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR

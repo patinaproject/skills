@@ -116,6 +116,13 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "unaddressed findings" "$WORKFLOW"
   assert_match "fix-now.*pending checks" "$WORKFLOW"
   assert_match "explain.*stale.*defer.*before checks" "$WORKFLOW"
+  assert_match "Translate local verification evidence into QA-friendly manual test steps" "$WORKFLOW"
+  assert_match "concrete user action and expected app result" "$WORKFLOW"
+  assert_match "Prefer user flows, routes, screens, forms, filters, buttons, visual states" "$WORKFLOW"
+  assert_match "Do not ask humans to run tests, lint, type-checks, hooks, package commands" "$WORKFLOW"
+  assert_match "no realistic app-level" "$WORKFLOW"
+  assert_match "app behavior or repo contract" "$WORKFLOW"
+  assert_match "Keep generated example checkboxes unchecked" "$WORKFLOW"
 fi
 
 if [ -f "$TRIAGE" ]; then
