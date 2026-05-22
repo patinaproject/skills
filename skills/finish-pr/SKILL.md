@@ -54,5 +54,5 @@ not halt the skill by themselves. It never merges the PR.
   triage it, fix branch-local causes when possible, and otherwise report the
   check disposition.
 - Do not add AI or agent attribution unless the repository requires it.
-- Stop for non-check secrets, permissions, product decisions, or ambiguous
-  scope.
+- Stop for secrets, permissions, product decisions, or ambiguous scope that are
+  not check-related.
