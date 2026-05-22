@@ -75,6 +75,9 @@ executing the state action.
   canceled, needs missing secrets, hit a permission failure, depends on an
   external outage, is flaky infrastructure, or is outside the PR's scope. Use
   `explain`, `stale`, or `defer` with evidence and continue to final reporting.
+- Classify flaky, infrastructure-owned, external-outage, missing-secret, and
+  permission-limited check failures as `explain` when evidence shows they are
+  not branch-local.
 - Only stop when check investigation reveals a separate non-check blocker, such
   as a required product decision, ambiguous branch scope, or conflicting human
   direction.

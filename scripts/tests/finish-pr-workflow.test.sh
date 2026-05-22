@@ -157,6 +157,8 @@ if [ -f "$TRIAGE" ]; then
   assert_match "needs missing secrets" "$TRIAGE"
   assert_match "permission failure" "$TRIAGE"
   assert_match "external outage" "$TRIAGE"
+  assert_match "Classify flaky, infrastructure-owned, external-outage, missing-secret, and" "$TRIAGE"
+  assert_match 'permission-limited check failures as `explain`' "$TRIAGE"
   assert_no_match 'Use `gh pr checks --watch`; do not use fail-fast by default' "$TRIAGE"
 fi
 
