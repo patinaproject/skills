@@ -118,8 +118,8 @@ for live_reference_path in \
   scripts/tests/esm-tooling.test.sh \
   scripts/tests/finish-pr-workflow.test.sh \
   scripts/tests/marketplace.test.sh \
-  scripts/tests/pull-request-workflow.test.sh \
   scripts/tests/pr-body-policy.test.sh \
+  scripts/tests/pull-request-workflow.test.sh \
   scripts/tests/review-code-skill.test.sh \
   scripts/tests/scaffold-cleanup.test.sh \
   scripts/tests/suite.test.sh \
