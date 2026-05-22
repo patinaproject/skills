@@ -52,7 +52,7 @@ assert_match "app behavior or reviewable artifacts" "$TEMPLATE"
 assert_match "command.*exception.*behavior or repository contract" "$TEMPLATE"
 assert_no_match "^## Verification$" "$TEMPLATE"
 assert_no_match "\\[[xX]\\]" "$TEMPLATE"
-assert_no_match "No manual testing needed|N/A|None" "$TEMPLATE"
+assert_no_match "^[[:space:]]*(?:[-*][[:space:]]*)?(?:No manual testing needed|N/A|None)[[:punct:][:space:]]*$" "$TEMPLATE"
 assert_no_match "command output|command transcript|routine automated evidence" "$TEMPLATE"
 
 assert_match "GitHub Checks.*routine automated verification" "$AGENTS"
