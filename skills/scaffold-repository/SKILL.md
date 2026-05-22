@@ -183,9 +183,10 @@ retired workflow dependencies.
 - **PR titles**: same format, so squash commits reuse them verbatim.
 - **PR body**: required closing keywords for normal PRs, additional
   linked-issue relationships (`Related to`, `Blocks`, `Partially satisfies`),
-  what changed, verification evidence, optional `Testing steps` for
-  operator-owned pass/fail verification, and optional `Do before merging` for
-  work-specific pre-merge operator chores.
+  a concise `What changed` summary, optional `Testing steps` only for
+  human-owned behavior or artifact checks, and optional `Do before merging` for
+  work-specific pre-merge operator chores. GitHub Checks are the source of truth for routine automated verification; PR bodies should not repeat
+  successful lint, test, type-check, hook, package, or similar command results.
 - **Issue titles and bodies**: titles are plain-language, no commit-style
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.

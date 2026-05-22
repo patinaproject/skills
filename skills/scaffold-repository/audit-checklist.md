@@ -37,7 +37,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, `## Verification`, no pre-checked testing-step guidance, and `type: #123 short description` rule |
+| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, no dedicated automated-verification section, no pre-checked testing-step guidance, GitHub Checks as the routine automated verification surface, and `type: #123 short description` rule. Classify templates as stale when they encourage command transcripts, routine automated evidence, or padded testing sections. |
 | Old GitHub issue templates | no | absent; existing issue templates are stale baseline artifacts and should be offered for deletion with a reviewable diff |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
 | `.github/workflows/pull-request.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |

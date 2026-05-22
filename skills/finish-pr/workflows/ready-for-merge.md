@@ -49,8 +49,16 @@ directory's default `gh` repository.
    - Read `.github/pull_request_template.md`.
    - Use the repository's PR title format.
    - Include `Closes #<issue>` or another required closing keyword.
-   - Summarize acceptance criteria and verification evidence in the template's
-     verification section when the linked issue defines acceptance criteria.
+   - Write a reviewer-friendly PR body: summarize what changed and why in
+     `What changed` instead of narrating the implementation transcript.
+   - GitHub Checks are the source of truth for routine automated verification.
+     Do not copy command transcripts or successful lint, test, type-check,
+     hook, package, or similar command results into the PR body.
+   - Include `Testing steps` only when a human reviewer has meaningful behavior
+     or artifact verification to perform. Make each unchecked item
+     outcome-oriented, and use command-based manual checks only when no
+     realistic app or artifact review path exists; name the behavior or
+     repository contract the command verifies.
    - Create a ready-for-review PR by default.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR

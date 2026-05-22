@@ -6,4 +6,12 @@ This file exists so downstream skills that inspect adjacent skill files find a p
 
 ## Commit-type guidance validation reminder
 
-When a PR touches commit-type guidance (any of `AGENTS.md`, `CONTRIBUTING.md`, `docs/release-flow.md`, skill contracts, plugin manifests, marketplace catalogs, or workflow files), include the parity grep output as evidence in the `Verification` section, or write `empty output verified` if the grep produced no output. Non-empty blocking output must be called out in the PR body. Use `Do before merging` only when a human operator still has a work-specific action to perform before merge.
+GitHub Checks are the source of truth for routine automated verification. When
+a PR touches commit-type guidance (any of `AGENTS.md`, `CONTRIBUTING.md`,
+`docs/release-flow.md`, skill contracts, plugin manifests, marketplace
+catalogs, or workflow files), do not paste parity grep output into the PR body
+when the automated check passes. If the check is missing, blocked, or the
+command is the only realistic way to verify a repository contract, mention the
+behavior or repository contract and the limitation in `What changed` or an
+outcome-oriented `Testing steps` item. Use `Do before merging` only when a
+human operator still has a work-specific action to perform before merge.
