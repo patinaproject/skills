@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.2.0...patinaproject-skills-v2.3.0) (2026-05-22)
+
+
+### Features
+
+* [#170](https://github.com/patinaproject/skills/issues/170) halt blocked issue branches ([#171](https://github.com/patinaproject/skills/issues/171)) ([be35af4](https://github.com/patinaproject/skills/commit/be35af4d1493e69ecd672b5010548236ebf2974f))
+
 ## [2.2.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.1.0...patinaproject-skills-v2.2.0) (2026-05-20)
 
 ### Features
