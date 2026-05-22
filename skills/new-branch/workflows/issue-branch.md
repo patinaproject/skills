@@ -29,24 +29,45 @@ against the current working directory's default `gh` repository.
    owner="${repo_full_name%%/*}"
    repo="${repo_full_name#*/}"
    after=null
+   open_blockers_found=0
    while :; do
-     if ! page="$(gh api graphql \
-       -F owner="$owner" -F repo="$repo" -F number="$issue_number" -F after="$after" \
-       -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
-       echo "Dependency query failed; refuse unless explicit override." >&2
-       exit 1
+     if [ "$after" = null ]; then
+       if ! page="$(gh api graphql \
+         -F owner="$owner" -F repo="$repo" -F number="$issue_number" -F after=null \
+         -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
+         echo "Dependency query failed; refuse unless explicit override." >&2
+         exit 1
+       fi
+     else
+       if ! page="$(gh api graphql \
+         -F owner="$owner" -F repo="$repo" -F number="$issue_number" -f after="$after" \
+         -f query='query($owner:String!,$repo:String!,$number:Int!,$after:String){repository(owner:$owner,name:$repo){issue(number:$number){blockedBy(first:100, after:$after){nodes{number title state url} pageInfo { hasNextPage endCursor }}}}}')"; then
+         echo "Dependency query failed; refuse unless explicit override." >&2
+         exit 1
+       fi
      fi
      if printf '%s\n' "$page" | jq -e '.errors | length > 0' >/dev/null; then
        echo "Dependency query returned GraphQL errors; refuse unless explicit override." >&2
        exit 1
      fi
-     printf '%s\n' "$page" |
-       jq -r '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN") | "#\(.number) \(.title) [\(.state)] \(.url)"'
+     open_blockers="$(printf '%s\n' "$page" |
+       jq -r '.data.repository.issue.blockedBy.nodes[] | select(.state == "OPEN") | "#\(.number) \(.title) [\(.state)] \(.url)"')"
+     if [ -n "$open_blockers" ]; then
+       printf '%s\n' "$open_blockers"
+       open_blockers_found=1
+     fi
      has_next="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.hasNextPage')"
      after="$(printf '%s\n' "$page" | jq -r '.data.repository.issue.blockedBy.pageInfo.endCursor')"
      [ "$has_next" = "true" ] || break
    done
+   if [ "$open_blockers_found" -eq 1 ]; then
+     echo "Open native blockedBy dependencies exist; refuse unless explicit override." >&2
+     exit 1
+   fi
    ```
+
+   The first dependency query sends `after` as JSON `null`; later pages send
+   the cursor as a string so GitHub does not type-coerce cursor text.
 
    Fetch every dependency page before deciding that no open blockers exist. If
    the dependency query fails, refuse unless the user gives an explicit
