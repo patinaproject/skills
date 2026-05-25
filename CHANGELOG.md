@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.0...patinaproject-skills-v2.4.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* [#170](https://github.com/patinaproject/skills/issues/170) enforce blocked-by gate exit ([#175](https://github.com/patinaproject/skills/issues/175)) ([9e5f64a](https://github.com/patinaproject/skills/commit/9e5f64a7a53c550e3564de910752e339d15f2492))
+
 ## [2.4.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.3.0...patinaproject-skills-v2.4.0) (2026-05-25)
 
 
