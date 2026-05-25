@@ -239,7 +239,72 @@ directory's default `gh` repository.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
-17. Final report includes:
+17. Mandatory final ready-to-merge check. Run this immediately before the final
+    response, after all feedback, check, draft, and branch-freshness handling is
+    complete. Re-capture the local checkout, PR identity, GitHub merge state,
+    current checks, and paginated GraphQL review threads; do not reuse earlier
+    readiness-loop evidence as the final answer.
+
+    ```sh
+    pwd
+    git branch --show-current
+    git status --short
+    git rev-parse HEAD
+    gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
+    gh pr checks <pr-number-or-url>
+    ```
+
+    Also enumerate review threads with paginated GraphQL for the PR immediately
+    before reporting. REST review comments are not sufficient, and replies do
+    not count as resolution. Use this self-contained query shape, preserving the
+    pagination and fields needed to identify unresolved actionable feedback.
+    Replace `<pr-number-or-url>`, `<owner>`, `<repo>`, and `<pr-number>` with
+    the resolved PR identity from this workflow before running these commands:
+
+    ```sh
+    gh api graphql --paginate \
+      -F owner=<owner> -F repo=<repo> -F number=<pr-number> \
+      -f query='query($owner:String!,$repo:String!,$number:Int!,$endCursor:String){
+        repository(owner:$owner,name:$repo){
+          pullRequest(number:$number){
+            reviewThreads(first:100, after:$endCursor){
+              nodes{
+                id
+                isResolved
+                path
+                line
+                comments(first:100){
+                  nodes{id author{login} body url createdAt path line originalLine diffHunk}
+                }
+              }
+              pageInfo{hasNextPage endCursor}
+            }
+          }
+        }
+      }'
+    ```
+
+    The PR is `ready-to-merge` only when every final gate below is true:
+
+    - local worktree is clean.
+    - local branch equals the PR `headRefName`.
+    - local `HEAD` equals the PR `headRefOid`.
+    - `mergeStateStatus` is `CLEAN`.
+    - PR is not a draft.
+    - every current check has status `COMPLETED` and conclusion `SUCCESS`.
+    - no paginated GraphQL review thread has `isResolved: false`.
+    - no human blocker or no-progress stop condition remains.
+
+    If every gate passes, report `ready-to-merge`. If any gate fails, report
+    `not ready-to-merge` and list the blocker in human-friendly language, with
+    just enough evidence to make the state clear. Do not dump the full command
+    output or every collected field unless the user asks for it. Check
+    dispositions, stale feedback explanations, and evidence-bearing replies may
+    explain why the workflow is blocked, but they do not permit ready-to-merge
+    wording when a gate is false. Do not describe a blocked outcome as
+    finished.
+
+18. Final report includes:
 
     - PR URL.
     - Latest head SHA.
@@ -249,7 +314,9 @@ directory's default `gh` repository.
       commit pushed during the loop.
     - Check status and per-failing-check dispositions.
     - Feedback status and any no-progress stop reason.
-    - Final unresolved review-thread gate result.
+    - Final ready-to-merge check result, including the final unresolved
+      review-thread gate result and the human-readable blocker when the PR is
+      not ready-to-merge.
     - Feedback handled, deferred, stale, explained, or blocked, including a
       per-finding disposition for every top-level review finding.
     - Human blockers, if any.
