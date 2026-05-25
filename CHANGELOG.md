@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.3.0...patinaproject-skills-v2.4.0) (2026-05-25)
+
+
+### Features
+
+* [#179](https://github.com/patinaproject/skills/issues/179) let update-branch continue safe dirty commits ([#180](https://github.com/patinaproject/skills/issues/180)) ([36a4f80](https://github.com/patinaproject/skills/commit/36a4f80dbfdaec9a7d8624c515c6bd9fff52d965))
+
 ## [2.3.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.2.0...patinaproject-skills-v2.3.0) (2026-05-22)
 
 
