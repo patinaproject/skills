@@ -20,6 +20,11 @@ eligible conversation resolution, and checks until the PR is ready-to-merge or
 the current check state has been fully triaged and reported. Failing checks do
 not halt the skill by themselves. It never merges the PR.
 
+Before the final response, the workflow must run a strict final ready-to-merge
+check. If any final gate fails, report the PR as not ready-to-merge and list the
+blocker in human-friendly language; do not imply success, and must not call it
+finished.
+
 ## Workflow
 
 1. Read repository guidance, commit rules, and the PR template.

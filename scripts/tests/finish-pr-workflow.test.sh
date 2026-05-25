@@ -61,6 +61,10 @@ if [ -f "$SKILL" ]; then
   assert_match "not halt the skill by themselves" "$SKILL"
   assert_match "concrete non-ready check dispositions" "$SKILL"
   assert_match "ready-for-review is distinct from" "$SKILL"
+  assert_match "final ready-to-merge" "$SKILL"
+  assert_match "report the PR as not ready-to-merge" "$SKILL"
+  assert_match "human-friendly language" "$SKILL"
+  assert_match "must not call it" "$SKILL"
 fi
 
 if [ -f "$WORKFLOW" ]; then
@@ -124,6 +128,29 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "unaddressed findings" "$WORKFLOW"
   assert_match "fix-now.*pending checks" "$WORKFLOW"
   assert_match "explain.*stale.*defer.*before checks" "$WORKFLOW"
+  assert_match "Mandatory final ready-to-merge check" "$WORKFLOW"
+  assert_match "immediately before the final" "$WORKFLOW"
+  assert_match "gh pr view <pr-number-or-url> --json" "$WORKFLOW"
+  assert_match "gh pr checks <pr-number-or-url>" "$WORKFLOW"
+  assert_match "local worktree is clean" "$WORKFLOW"
+  assert_match 'local branch equals the PR `headRefName`' "$WORKFLOW"
+  assert_match 'local `HEAD` equals the PR `headRefOid`' "$WORKFLOW"
+  assert_match '`mergeStateStatus` is `CLEAN`' "$WORKFLOW"
+  assert_match "PR is not a draft" "$WORKFLOW"
+  assert_match 'every current check has status `COMPLETED` and conclusion `SUCCESS`' "$WORKFLOW"
+  assert_match 'no paginated GraphQL review thread has `isResolved: false`' "$WORKFLOW"
+  assert_match "gh api graphql --paginate" "$WORKFLOW"
+  assert_match 'Replace `<pr-number-or-url>`, `<owner>`, `<repo>`, and `<pr-number>`' "$WORKFLOW"
+  assert_match 'reviewThreads\(first:100, after:\$endCursor\)' "$WORKFLOW"
+  assert_match "comments\\(first:100\\)" "$WORKFLOW"
+  assert_match "pageInfo\\{hasNextPage endCursor\\}" "$WORKFLOW"
+  assert_match "author\\{login\\} body url createdAt path line originalLine diffHunk" "$WORKFLOW"
+  assert_match 'If every gate passes, report `ready-to-merge`' "$WORKFLOW"
+  assert_match 'If any gate fails, report' "$WORKFLOW"
+  assert_match "human-friendly language" "$WORKFLOW"
+  assert_match "Do not dump the full command" "$WORKFLOW"
+  assert_match "Do not describe a blocked outcome" "$WORKFLOW"
+  assert_order "Mandatory final ready-to-merge check" "Final report includes" "$WORKFLOW"
 fi
 
 if [ -f "$TRIAGE" ]; then
