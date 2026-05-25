@@ -15,9 +15,10 @@ Invoke from a local work branch:
 ```
 
 No argument means resolve the base from `origin/HEAD`. An optional base
-argument selects another branch or remote-tracking ref. Dirty work normally
-stops the update; a clearly cohesive, branch-local, non-silent auto-commit with
-explicit operator confirmation is the only exception.
+argument selects another branch or remote-tracking ref. The initial update
+request authorizes a clearly cohesive, branch-local, non-silent dirty-work
+auto-commit when no human judgment is needed; otherwise dirty work stops the
+update.
 Dependency refresh is conditional on dependency-related files changing during
 the merge; do not reinstall dependencies unconditionally on every branch
 update.
@@ -60,10 +61,10 @@ automatically.
    - Review staged, unstaged, and untracked diffs.
    - Auto-commit only when the entire dirty set is cohesive, branch-local,
      free of secrets, and can be summarized under the local commit convention.
-     Before committing, state the exact files and commit message that will be
-     used, then wait for explicit operator confirmation so the auto-commit is
-     not silent. Without confirmation, including in non-interactive runs, stop
-     and report the dirty state.
+     The initial update request authorizes this safe dirty-work auto-commit
+     without asking for another confirmation. Before committing, state the
+     exact files and commit message that will be used so the auto-commit is
+     not silent.
    - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
      generated-file dirty set; generated output with unclear source; possible
      secrets; or any commit-message requirement, such as a required issue tag,
@@ -87,8 +88,8 @@ automatically.
      verification can run.
    - Do not silently commit lockfile or generated dependency changes. Include
      them only when they are a direct result of the documented install command,
-     are in scope for the branch update, and follow the same explicit
-     confirmation and commit-message rules as other auto-committed dirty work.
+     are in scope for the branch update, and follow the same reporting and
+     commit-message rules as other auto-committed dirty work.
 9. Run documented verification after auto-committing dirty work, completing
    dependency refresh, or completing conflict resolution. Prefer commands in
    `AGENTS.md`, README files, package scripts, or other repository guidance. If
