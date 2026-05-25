@@ -40,8 +40,7 @@ Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
   triggering observation), not a restatement of the change.
 
   Include this section only when PR-level operator steps that do not belong to
-  verification evidence, testing steps, or pending CI must happen after review
-  and before merge:
+  testing steps or pending CI must happen after review and before merge:
 
   ## Do before merging
 
@@ -49,31 +48,27 @@ Context: <prior PR, prior QA pass, follow-up issue, or `standalone - <reason>`>
 
   Keep checklist items concrete, actionable, and imperative. Do not duplicate
   testing steps or failing/pending PR checks here; PR check status is already
-  reported by GitHub. Do not add this section for placeholders such as `None`,
-  `N/A`, or `No work-specific pre-merge operator steps.`
+  reported by GitHub. Do not add this section for filler or placeholder rows.
 -->
 
 <!--
-  Optional: include this whole section only when operator-owned manual
+  Optional: include this whole section only when human-owned behavior or artifact
   verification is needed. Delete the full commented example when there is no
-  operator-owned manual verification; do not leave a checked or unchecked "no
-  manual testing needed" row.
+  human-owned verification decision; do not leave a placeholder row.
 
 ## Testing steps
 
-  Include only operator-owned actions or inspections. Use unchecked checkboxes
-  for pass/fail verification decisions or outcomes, not for automated command
-  output, no-op placeholders, or every individual UI action.
+  Include only human-owned actions or inspections. Use unchecked checkboxes
+  for pass/fail verification decisions or outcomes. Prefer app behavior or reviewable artifacts:
+  routes, screens, forms, buttons, filters, visual states,
+  permissions, saved data, workflows, rendered docs, generated files, install
+  behavior, release notes, or templates.
+
+  GitHub Checks are the source of truth for routine automated verification.
+  Do not paste successful lint, test, type-check, hook, package, or similar
+  command results into the PR body. A command-based manual testing exception
+  belongs here only when no realistic app or artifact review path exists; the
+  command exception must name the behavior or repository contract it verifies.
 
 - [ ] Verify <observable outcome> after <minimal action context>.
 -->
-
-## Verification
-
-<!--
-  Include automated checks, targeted inspections, or explicit reasons when a
-  documented check was not run. Do not use checkboxes here; reserve checkboxes
-  for operator-owned manual verification in `Testing steps` and pre-merge
-  operational chores in `Do before merging`.
--->
-- `<command or inspection>` — <result>

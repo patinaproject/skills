@@ -80,6 +80,9 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - Run `bash scripts/tests/develop-issue-workflow.test.sh` after changing `skills/develop-issue/**`
 - Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
+- Run `bash scripts/tests/pr-body-policy.test.sh` after changing PR body policy,
+  `.github/pull_request_template.md`, `CONTRIBUTING.md`, `finish-pr` PR-body
+  guidance, or scaffold PR-body guidance
 - Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
 - Run `bash scripts/tests/update-branch-workflow.test.sh` after changing `skills/update-branch/**`
 - Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`
@@ -181,7 +184,9 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-Use the PR template as written: linked issues, what changed, and verification
-evidence. Put operator-owned manual verification decisions in `Testing steps`,
-and omit that section when no operator-owned manual verification is needed. Put
-only pre-merge operational chores in `Do before merging`.
+Use the PR template as written: linked issues and what changed.
+GitHub Checks are the source of truth for routine automated verification.
+Put `Testing steps` only when a human-owned behavior or artifact check is
+useful, and make each unchecked item describe the expected outcome. Omit the
+section when no human review judgment is needed. Put only pre-merge operational
+chores in `Do before merging`.
