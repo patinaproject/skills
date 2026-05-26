@@ -76,11 +76,11 @@ const fs = require("fs");
 const lock = require("./skills-lock.json");
 const names = Object.keys(lock.skills || {});
 
-if (names.length < 2) {
+if (names.length < 1) {
   process.exit(0);
 }
 
-lock.skills[names[0]].computedHash = lock.skills[names[1]].computedHash;
+lock.skills[names[0]].computedHash = `${lock.skills[names[0]].computedHash}-mutated`;
 fs.writeFileSync("skills-lock.json", JSON.stringify(lock, null, 2) + "\n");
 NODE
 SH
