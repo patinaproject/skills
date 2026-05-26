@@ -16,8 +16,9 @@ public lifecycle command instead:
 pnpm skills:install
 ```
 
-Use this skill instead of `pnpm skills:install` only when adding, removing,
-refreshing, or otherwise changing the locked skill set.
+Use this skill when the desired result is a changed skill catalog: adding,
+removing, refreshing, or otherwise updating the entries recorded in
+`skills-lock.json`.
 
 ## Preflight
 
