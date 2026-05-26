@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-third-party-skills.sh
+# install-skills.sh
 #
 # Restore the third-party vendored skills recorded in `skills-lock.json`.
 # Run automatically as a pnpm `postinstall` hook (and on demand via
@@ -165,6 +165,9 @@ function collectFiles(baseDir, currentDir, results) {
         relativePath: path.relative(baseDir, fullPath).split(path.sep).join("/"),
         content: fs.readFileSync(fullPath),
       });
+    } else {
+      const relativePath = path.relative(baseDir, fullPath).split(path.sep).join("/");
+      throw new Error(`skill payload contains unsupported filesystem entry: ${relativePath}`);
     }
   }
 }
@@ -202,6 +205,10 @@ const groups = new Map();
 for (const [name, entry] of entries) {
   assertSafeRelative(name, "skill name");
   assertSafeRelative(entry.skillPath, `${name}.skillPath`);
+
+  if (path.basename(entry.skillPath) !== "SKILL.md") {
+    throw new Error(`${name}.skillPath must point to a SKILL.md file`);
+  }
 
   if (path.dirname(entry.skillPath) === ".") {
     throw new Error(`${name}.skillPath must point to a skill directory, not a repository-root SKILL.md`);

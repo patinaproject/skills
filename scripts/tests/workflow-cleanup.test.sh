@@ -80,7 +80,7 @@ assert_no_match "review-action|office-hours|plan-ceo-review|superteam-non-intera
   skills/develop-issue skills/review-code skills/install-skills
 assert_no_match "skills:restore" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
-  docs skills/scaffold-repository skills/install-skills scripts/install-third-party-skills.sh
+  docs skills/scaffold-repository skills/install-skills scripts/install-skills.sh
 
 assert_match "skills:install" \
   AGENTS.md skills/scaffold-repository/SKILL.md skills/install-skills/SKILL.md

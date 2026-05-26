@@ -111,7 +111,7 @@ for live_reference_path in \
   docs/release-flow.md \
   docs/wiki-index.md \
   package.json \
-  scripts/install-third-party-skills.sh \
+  scripts/install-skills.sh \
   scripts/tests/code-review-workflow.test.sh \
   scripts/tests/develop-issue-workflow.test.sh \
   scripts/tests/dogfood.test.sh \
@@ -139,12 +139,12 @@ done
 
 assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-repository self-apply" \
   AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
-  scripts/install-third-party-skills.sh "${test_files[@]}" \
+  scripts/install-skills.sh "${test_files[@]}" \
   skills/scaffold-repository
 
 assert_no_match "skills/scaffold-repository/templates|skills/bootstrap/templates|\\.tmpl" \
   AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
-  scripts/install-third-party-skills.sh "${test_files[@]}" \
+  scripts/install-skills.sh "${test_files[@]}" \
   skills/scaffold-repository
 
 assert_no_match "Cursor|Windsurf|Continue\\.dev|\\.cursor/|\\.windsurfrules|\\.continue/" \
@@ -170,7 +170,7 @@ assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
 assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-review-code-skill|verify-scaffold-cleanup|verify-workflow-cleanup)\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
-assert_match "scripts/install-third-party-skills\\.sh" \
+assert_match "scripts/install-skills\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 assert_match "skills-lock\\.json" \
@@ -179,7 +179,7 @@ assert_match "skills-lock\\.json" \
 assert_match "postinstall: \"pnpm skills:install\"" \
   skills/scaffold-repository/SKILL.md
 
-assert_match "skills:install: \"bash scripts/install-third-party-skills\\.sh\"" \
+assert_match "skills:install: \"bash scripts/install-skills\\.sh\"" \
   skills/scaffold-repository/SKILL.md
 
 assert_no_match "skills:restore" \

@@ -21,7 +21,7 @@ if [ "$postinstall_script" != "pnpm skills:install" ]; then
   exit 1
 fi
 
-if [ "$install_script" != "bash scripts/install-third-party-skills.sh" ]; then
+if [ "$install_script" != "bash scripts/install-skills.sh" ]; then
   echo "FAIL: package.json skills:install must run the restore implementation" >&2
   exit 1
 fi
@@ -45,7 +45,7 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$temp_repo/scripts" "$temp_repo/skills/develop-issue"
-cp scripts/install-third-party-skills.sh "$temp_repo/scripts/"
+cp scripts/install-skills.sh "$temp_repo/scripts/"
 printf '# develop-issue\n' >"$temp_repo/skills/develop-issue/SKILL.md"
 cat >"$temp_repo/skills-lock.json" <<'JSON'
 {
@@ -65,14 +65,14 @@ JSON
 collision_out="$temp_repo/skill-install-collision.out"
 collision_err="$temp_repo/skill-install-collision.err"
 
-if (cd "$temp_repo" && bash scripts/install-third-party-skills.sh >"$collision_out" 2>"$collision_err"); then
+if (cd "$temp_repo" && bash scripts/install-skills.sh >"$collision_out" 2>"$collision_err"); then
   echo "FAIL: pnpm skills:install must reject third-party locks that collide with in-repo skills" >&2
   exit 1
 fi
 
 lock_repo="$temp_repo/lock-check"
 mkdir -p "$lock_repo/scripts"
-cp scripts/install-third-party-skills.sh "$lock_repo/scripts/"
+cp scripts/install-skills.sh "$lock_repo/scripts/"
 cat >"$lock_repo/skills-lock.json" <<'JSON'
 {
   "version": 1,
@@ -89,7 +89,7 @@ cat >"$lock_repo/skills-lock.json" <<'JSON'
 JSON
 printf '%s\n' "$$" >"$lock_repo/.skills-install.lock"
 
-if (cd "$lock_repo" && bash scripts/install-third-party-skills.sh >"$lock_repo/skill-install-lock.out" 2>"$lock_repo/skill-install-lock.err"); then
+if (cd "$lock_repo" && bash scripts/install-skills.sh >"$lock_repo/skill-install-lock.out" 2>"$lock_repo/skill-install-lock.err"); then
   echo "FAIL: pnpm skills:install must reject concurrent restore attempts" >&2
   exit 1
 fi
@@ -101,7 +101,7 @@ fi
 
 printf '999999\n' >"$lock_repo/.skills-install.lock"
 
-if ! (cd "$lock_repo" && PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=1 bash scripts/install-third-party-skills.sh >"$lock_repo/skill-install-stale-lock.out" 2>"$lock_repo/skill-install-stale-lock.err"); then
+if ! (cd "$lock_repo" && PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=1 bash scripts/install-skills.sh >"$lock_repo/skill-install-stale-lock.out" 2>"$lock_repo/skill-install-stale-lock.err"); then
   if [ -f "$lock_repo/.skills-install.lock" ]; then
     echo "FAIL: pnpm skills:install must clean up a stale process lock after claiming it" >&2
     exit 1

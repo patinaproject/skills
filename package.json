@@ -22,7 +22,7 @@
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
     "test": "bash scripts/tests/suite.test.sh",
-    "skills:install": "bash scripts/install-third-party-skills.sh"
+    "skills:install": "bash scripts/install-skills.sh"
   },
   "config": {
     "commitizen": {
