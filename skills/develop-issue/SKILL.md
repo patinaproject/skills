@@ -151,10 +151,10 @@ For this skill, all visible PR checks include required and optional checks.
 2. Validate the single same-repository issue reference and required child
    skills.
 3. Inspect the issue's existing GitHub Projects through its GitHub Project items
-   before branch setup, using GitHub issue project item data such as
-   `projectItems`. For each existing GitHub Project item:
-   - Use project-item inspection to find a compatible single-select `Status`
-     field that offers the exact `In progress` option
+   before branch setup, using the issue's `projectItems` data. For each
+   existing GitHub Project item:
+   - Use project-item inspection to find a compatible `Status` field that
+     offers the exact `In progress` option
      (Status = `In progress`) and update that project item to `In progress`.
    - Do not add the issue to projects. Do not create project fields or status
      options.
