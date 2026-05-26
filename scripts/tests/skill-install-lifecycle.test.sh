@@ -231,6 +231,9 @@ rm -f "$locked_sources"
 # unchanged.
 before_hash="$(git hash-object skills-lock.json)"
 mkdir -p .agents/skills/.stale-test.old-123-abcdef12 .claude/skills/.stale-test.tmp-123-abcdef12
+mkdir -p .agents/skills/stale-third-party .claude/skills/stale-third-party
+printf '# stale\n' >.agents/skills/stale-third-party/SKILL.md
+printf '# stale\n' >.claude/skills/stale-third-party/SKILL.md
 pnpm skills:install
 after_hash="$(git hash-object skills-lock.json)"
 
@@ -258,6 +261,11 @@ fi
 
 if [ -e .agents/skills/.stale-test.old-123-abcdef12 ] || [ -e .claude/skills/.stale-test.tmp-123-abcdef12 ]; then
   echo "FAIL: pnpm skills:install did not clean stale promotion directories" >&2
+  exit 1
+fi
+
+if [ -e .agents/skills/stale-third-party ] || [ -e .claude/skills/stale-third-party ]; then
+  echo "FAIL: pnpm skills:install did not prune unlocked third-party skill overlays" >&2
   exit 1
 fi
 

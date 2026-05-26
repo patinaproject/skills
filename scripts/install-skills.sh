@@ -294,6 +294,26 @@ function removeStalePromotionDirs() {
   }
 }
 
+function removeUnlockedSkillDirs(lockedSkillNames) {
+  for (const root of [path.join(repoRoot, ".agents", "skills"), path.join(repoRoot, ".claude", "skills")]) {
+    if (!fs.existsSync(root)) {
+      continue;
+    }
+
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (entry.name.startsWith(".") || lockedSkillNames.has(entry.name)) {
+        continue;
+      }
+
+      if (fs.existsSync(path.join(repoRoot, "skills", entry.name, "SKILL.md"))) {
+        continue;
+      }
+
+      fs.rmSync(path.join(root, entry.name), { recursive: true, force: true });
+    }
+  }
+}
+
 function repoUrlForSource(source) {
   if (typeof source !== "string" || !/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(source)) {
     throw new Error(`lock entry source must be a GitHub owner/repo slug: ${source}`);
@@ -419,6 +439,7 @@ for (const [name, entry] of entries) {
 console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
 acquireInstallLock(groups.size);
 removeStalePromotionDirs();
+removeUnlockedSkillDirs(new Set(entries.map(([name]) => name)));
 
 const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
 fs.mkdirSync(stagedSkillsRoot, { recursive: true });
