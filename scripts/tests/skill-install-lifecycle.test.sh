@@ -99,6 +99,52 @@ if [ ! -f "$lock_repo/.skills-install.lock" ]; then
   exit 1
 fi
 
+stale_lock_repo="$temp_repo/stale-lock-check"
+mkdir -p "$stale_lock_repo/scripts" "$stale_lock_repo/bin"
+cp scripts/install-skills.sh "$stale_lock_repo/scripts/"
+cat >"$stale_lock_repo/skills-lock.json" <<'JSON'
+{
+  "version": 1,
+  "skills": {
+    "diagnose": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
+      "skillPath": "skills/engineering/diagnose/SKILL.md",
+      "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
+    }
+  }
+}
+JSON
+cat >"$stale_lock_repo/bin/git" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "${1:-}" = "fetch" ]; then
+  echo "forced fake git fetch failure" >&2
+  exit 42
+fi
+
+exit 0
+SH
+chmod +x "$stale_lock_repo/bin/git"
+printf '{"pid":999999,"command":"pnpm skills:install"}\n' >"$stale_lock_repo/.skills-install.lock"
+
+if (cd "$stale_lock_repo" && PATH="$stale_lock_repo/bin:$PATH" PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=not-a-number bash scripts/install-skills.sh >"$stale_lock_repo/skill-install-stale-lock.out" 2>"$stale_lock_repo/skill-install-stale-lock.err"); then
+  echo "FAIL: stale-lock fixture should stop at fake git fetch failure" >&2
+  exit 1
+fi
+
+if grep -q "already running" "$stale_lock_repo/skill-install-stale-lock.err"; then
+  echo "FAIL: pnpm skills:install must recover a stale lock whose PID is gone" >&2
+  exit 1
+fi
+
+if [ -f "$stale_lock_repo/.skills-install.lock" ]; then
+  echo "FAIL: pnpm skills:install must clean up a recovered stale lock after exit" >&2
+  exit 1
+fi
+
 node <<'NODE'
 const lock = require("./skills-lock.json");
 for (const [name, entry] of Object.entries(lock.skills || {})) {
@@ -116,6 +162,7 @@ hash_fixture="$(mktemp -d)"
 mkdir -p "$hash_fixture/nested"
 printf 'one\n' >"$hash_fixture/a.txt"
 printf 'two\n' >"$hash_fixture/nested/b.txt"
+ln -s a.txt "$hash_fixture/symlink-to-a"
 
 actual_fixture_hash="$(node - "$hash_fixture" <<'NODE'
 const { createHash } = require("node:crypto");

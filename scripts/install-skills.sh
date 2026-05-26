@@ -84,7 +84,7 @@ function runWithCapturedOutput(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd || repoRoot,
     encoding: "utf8",
-    timeout: Number.parseInt(process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS || "120000", 10),
+    timeout: gitTimeoutMs(),
     env: process.env,
   });
 
@@ -107,17 +107,90 @@ function runWithCapturedOutput(command, args, options = {}) {
   }
 }
 
-function acquireInstallLock() {
+function gitTimeoutMs() {
+  const value = process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS;
+  const parsed = value === undefined ? 120000 : Number.parseInt(value, 10);
+
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    return 120000;
+  }
+
+  return parsed;
+}
+
+function lockPidFromDisk() {
+  let raw;
   try {
-    installLockHandle = fs.openSync(installLockPath, "wx");
-    fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+    raw = fs.readFileSync(installLockPath, "utf8").trim();
   } catch (error) {
-    if (error.code === "EEXIST") {
-      throw new Error("another skills:install process may be running; remove .skills-install.lock manually only after confirming no restore is active");
+    if (error.code === "ENOENT") {
+      return undefined;
     }
 
     throw error;
   }
+
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const pid = Number.parseInt(typeof parsed === "number" ? parsed : parsed.pid, 10);
+    return Number.isSafeInteger(pid) && pid > 0 ? pid : undefined;
+  } catch {
+    const pid = Number.parseInt(raw, 10);
+    return Number.isSafeInteger(pid) && pid > 0 ? pid : undefined;
+  }
+}
+
+function isProcessActive(pid) {
+  if (!Number.isSafeInteger(pid) || pid <= 0) {
+    return false;
+  }
+
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if (error.code === "ESRCH") {
+      return false;
+    }
+
+    // EPERM and unknown errors mean a process may still own the lock. Fail
+    // closed instead of deleting a live install lock we cannot inspect.
+    return true;
+  }
+}
+
+function acquireInstallLock() {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      installLockHandle = fs.openSync(installLockPath, "wx");
+      fs.writeFileSync(
+        installLockHandle,
+        `${JSON.stringify({
+          pid: process.pid,
+          createdAt: new Date().toISOString(),
+          command: "pnpm skills:install",
+        })}\n`,
+      );
+      return;
+    } catch (error) {
+      if (error.code !== "EEXIST") {
+        throw error;
+      }
+
+      const lockPid = lockPidFromDisk();
+      if (lockPid !== undefined && isProcessActive(lockPid)) {
+        throw new Error(`another skills:install process is already running with pid ${lockPid}`);
+      }
+
+      fs.rmSync(installLockPath, { force: true });
+    }
+  }
+
+  throw new Error("could not acquire .skills-install.lock after removing a stale lock");
 }
 
 function repoUrlForSource(source) {
@@ -153,9 +226,6 @@ function collectFiles(baseDir, currentDir, results) {
         relativePath: path.relative(baseDir, fullPath).split(path.sep).join("/"),
         content: fs.readFileSync(fullPath),
       });
-    } else {
-      const relativePath = path.relative(baseDir, fullPath).split(path.sep).join("/");
-      throw new Error(`skill payload contains unsupported filesystem entry: ${relativePath}`);
     }
   }
 }
@@ -184,7 +254,12 @@ function copyDirectory(source, target) {
     preserveTimestamps: false,
     filter: (sourcePath) => {
       const parts = path.relative(source, sourcePath).split(path.sep);
-      return !parts.includes(".git") && !parts.includes("node_modules");
+      if (parts.includes(".git") || parts.includes("node_modules")) {
+        return false;
+      }
+
+      const stat = fs.lstatSync(sourcePath);
+      return stat.isDirectory() || stat.isFile();
     },
   });
 }
@@ -300,6 +375,9 @@ for (const targetSkillsRoot of targetSkillsRoots) {
   }
 }
 
+// Promotion is idempotent but not fully transactional across every skill and
+// overlay. If a process dies mid-promotion, rerunning restores all targets from
+// the lockfile; per-target backups cover ordinary rename failures.
 for (const { targetDir, tempTargetDir } of promotions) {
   const backupTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.old-${process.pid}-${randomBytes(4).toString("hex")}`);
   let hasBackup = false;

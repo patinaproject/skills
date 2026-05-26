@@ -68,6 +68,13 @@ The current restore lifecycle reads `skills-lock.json` directly, fetches that
 exact ref, and verifies `computedHash`; branch names, tags, or missing refs are
 not reproducible enough for `pnpm skills:install`.
 
+When the desired source is already known, pin the add command to the producing
+commit ref:
+
+```bash
+npm_config_ignore_scripts=true npx --yes skills@latest add owner/repo#0123456789abcdef0123456789abcdef01234567 --skill <skill-name> --agent '*' --yes
+```
+
 If the skills CLI writes a lock entry without a full commit SHA, record the
 exact commit from the local checkout or CLI output that produced the installed
 payload before committing:
