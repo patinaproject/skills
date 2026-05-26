@@ -11,6 +11,23 @@ Use this workflow only after implementation is complete or the user explicitly
 asks to finish, publish, or open a ready PR. Stay in the current working
 directory's default `gh` repository.
 
+## Operating Contract
+
+Treat this as one durable, resumable workflow. The objective is to carry
+completed branch-local work through PR publication, feedback, checks, and final
+readiness without broadening into unrelated issue work or merging the pull
+request.
+
+The validation loop is the readiness loop below: inspect the current PR state,
+handle currently available feedback, observe all visible checks, triage every
+non-ready state, publish branch-local fixes when appropriate, and repeat on the
+new head. End only when the final ready-to-merge gates pass or a documented
+stop condition requires human input.
+
+Progress reports should name the current checkpoint, evidence gathered, next
+action, and blocker status. Keep stop reports concrete enough for a human to
+decide the next move.
+
 ## Steps
 
 1. Resolve context:
