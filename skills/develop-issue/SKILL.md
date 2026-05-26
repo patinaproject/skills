@@ -257,6 +257,8 @@ changes what the human should do next.
 
 ### Good final output
 
+Example for issue 190:
+
 ```md
 Done: [#190](https://github.com/patinaproject/skills/issues/190) is implemented
 on [PR #197](https://github.com/patinaproject/skills/pull/197)

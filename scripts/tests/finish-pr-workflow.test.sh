@@ -65,7 +65,8 @@ if [ -f "$SKILL" ]; then
   assert_match "report the PR as not ready-to-merge" "$SKILL"
   assert_match "human-friendly language" "$SKILL"
   assert_match "must not call it" "$SKILL"
-  assert_match "compress ready-to-merge evidence into a human line" "$SKILL"
+  assert_match "compress ready-to-merge evidence" "$SKILL"
+  assert_match "human line instead of listing the gates" "$SKILL"
 fi
 
 if [ -f "$WORKFLOW" ]; then
