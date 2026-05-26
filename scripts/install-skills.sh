@@ -49,8 +49,13 @@ if (entries.length === 0) {
 
 const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "patina-skills-install-"));
 let installLockHandle;
+const promotionTempDirs = [];
 
 function cleanup() {
+  for (const tempDir of promotionTempDirs) {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+
   if (installLockHandle !== undefined) {
     fs.closeSync(installLockHandle);
     installLockHandle = undefined;
@@ -102,12 +107,17 @@ function runWithCapturedOutput(command, args, options = {}) {
   }
 }
 
-function acquireInstallLock(attempt = 1) {
-  try {
-    installLockHandle = fs.openSync(installLockPath, "wx");
-    fs.writeFileSync(installLockHandle, `${process.pid}\n`);
-  } catch (error) {
-    if (error.code === "EEXIST") {
+function acquireInstallLock() {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      installLockHandle = fs.openSync(installLockPath, "wx");
+      fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+      return;
+    } catch (error) {
+      if (error.code !== "EEXIST") {
+        throw error;
+      }
+
       const lockPid = Number.parseInt(fs.readFileSync(installLockPath, "utf8"), 10);
       const lockIsActive = Number.isInteger(lockPid) && (() => {
         try {
@@ -123,22 +133,20 @@ function acquireInstallLock(attempt = 1) {
       }
 
       fs.rmSync(installLockPath, { force: true });
+
       try {
         installLockHandle = fs.openSync(installLockPath, "wx");
         fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+        return;
       } catch (retryError) {
-        if (retryError.code === "EEXIST" && attempt < 3) {
-          acquireInstallLock(attempt + 1);
-          return;
+        if (retryError.code !== "EEXIST") {
+          throw retryError;
         }
-
-        throw retryError;
       }
-      return;
     }
-
-    throw error;
   }
+
+  throw new Error("could not acquire .skills-install.lock after 3 attempts");
 }
 
 function repoUrlForSource(source) {
@@ -207,6 +215,13 @@ function copyDirectory(source, target) {
       return !parts.includes(".git") && !parts.includes("node_modules");
     },
   });
+}
+
+function forgetPromotionTempDir(tempDir) {
+  const index = promotionTempDirs.indexOf(tempDir);
+  if (index !== -1) {
+    promotionTempDirs.splice(index, 1);
+  }
 }
 
 const groups = new Map();
@@ -308,13 +323,37 @@ for (const targetSkillsRoot of targetSkillsRoots) {
     const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${randomBytes(4).toString("hex")}`);
 
     copyDirectory(stagedDir, tempTargetDir);
+    promotionTempDirs.push(tempTargetDir);
     promotions.push({ targetDir, tempTargetDir });
   }
 }
 
 for (const { targetDir, tempTargetDir } of promotions) {
-  fs.rmSync(targetDir, { recursive: true, force: true });
-  fs.renameSync(tempTargetDir, targetDir);
+  const backupTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.old-${process.pid}-${randomBytes(4).toString("hex")}`);
+  let hasBackup = false;
+
+  if (fs.existsSync(targetDir)) {
+    fs.renameSync(targetDir, backupTargetDir);
+    hasBackup = true;
+    promotionTempDirs.push(backupTargetDir);
+  }
+
+  try {
+    fs.renameSync(tempTargetDir, targetDir);
+    forgetPromotionTempDir(tempTargetDir);
+  } catch (error) {
+    if (hasBackup && !fs.existsSync(targetDir)) {
+      fs.renameSync(backupTargetDir, targetDir);
+      forgetPromotionTempDir(backupTargetDir);
+    }
+
+    throw error;
+  }
+
+  if (hasBackup) {
+    fs.rmSync(backupTargetDir, { recursive: true, force: true });
+    forgetPromotionTempDir(backupTargetDir);
+  }
 }
 
 console.log("skills:install: done");
