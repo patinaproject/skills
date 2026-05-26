@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# This test intentionally runs the public lifecycle command, so it is
+# network-backed while the upstream lockfile restore path is
+# `skills@latest experimental_install`.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
