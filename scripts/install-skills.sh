@@ -48,20 +48,32 @@ if (entries.length === 0) {
 }
 
 const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "patina-skills-install-"));
-let installLockHandle;
+let installLockOwned = false;
 const promotionTempDirs = [];
 
 function cleanup() {
   for (const tempDir of promotionTempDirs) {
-    fs.rmSync(tempDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch {
+      // Best-effort cleanup must not mask the original install failure.
+    }
   }
 
-  if (installLockHandle !== undefined) {
-    fs.closeSync(installLockHandle);
-    installLockHandle = undefined;
-    fs.rmSync(installLockPath, { force: true });
+  if (installLockOwned) {
+    try {
+      fs.rmSync(installLockPath, { force: true });
+    } catch {
+      // Best-effort cleanup must not mask the original install failure.
+    }
+    installLockOwned = false;
   }
-  fs.rmSync(stageRoot, { recursive: true, force: true });
+
+  try {
+    fs.rmSync(stageRoot, { recursive: true, force: true });
+  } catch {
+    // Best-effort cleanup must not mask the original install failure.
+  }
 }
 
 process.on("exit", cleanup);
@@ -165,16 +177,23 @@ function isProcessActive(pid) {
 
 function acquireInstallLock() {
   for (let attempt = 0; attempt < 2; attempt += 1) {
+    const candidateLockPath = path.join(
+      repoRoot,
+      `.skills-install.lock.${process.pid}-${randomBytes(4).toString("hex")}.tmp`,
+    );
+
     try {
-      installLockHandle = fs.openSync(installLockPath, "wx");
       fs.writeFileSync(
-        installLockHandle,
+        candidateLockPath,
         `${JSON.stringify({
           pid: process.pid,
           createdAt: new Date().toISOString(),
           command: "pnpm skills:install",
         })}\n`,
+        { mode: 0o600 },
       );
+      fs.linkSync(candidateLockPath, installLockPath);
+      installLockOwned = true;
       return;
     } catch (error) {
       if (error.code !== "EEXIST") {
@@ -187,6 +206,8 @@ function acquireInstallLock() {
       }
 
       fs.rmSync(installLockPath, { force: true });
+    } finally {
+      fs.rmSync(candidateLockPath, { force: true });
     }
   }
 
