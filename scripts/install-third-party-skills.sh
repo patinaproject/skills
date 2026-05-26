@@ -17,7 +17,7 @@ set -euo pipefail
 
 # Skip if CI explicitly opts out (e.g., when only running unrelated jobs).
 if [ "${PATINA_SKIP_SKILL_INSTALL:-0}" = "1" ]; then
-  echo "install-third-party-skills: PATINA_SKIP_SKILL_INSTALL=1, skipping"
+  echo "skills:install: PATINA_SKIP_SKILL_INSTALL=1, skipping"
   exit 0
 fi
 
@@ -25,7 +25,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
 if [ ! -f skills-lock.json ]; then
-  echo "install-third-party-skills: no skills-lock.json, nothing to do"
+  echo "skills:install: no skills-lock.json, nothing to do"
   exit 0
 fi
 
@@ -42,7 +42,7 @@ const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
 
 if (entries.length === 0) {
-  console.log("install-third-party-skills: skills-lock.json has no skills, nothing to do");
+  console.log("skills:install: skills-lock.json has no skills, nothing to do");
   process.exit(0);
 }
 
@@ -75,18 +75,18 @@ function runWithCapturedOutput(command, args, options = {}) {
     env: process.env,
   });
 
+  if (result.status !== 0) {
+    const error = new Error(`Command failed: ${command} ${args.join(" ")}`);
+    error.stderr = result.stderr;
+    throw error;
+  }
+
   if (result.stdout) {
     process.stdout.write(result.stdout);
   }
 
   if (result.stderr) {
     process.stderr.write(result.stderr);
-  }
-
-  if (result.status !== 0) {
-    const error = new Error(`Command failed: ${command} ${args.join(" ")}`);
-    error.stderr = result.stderr;
-    throw error;
   }
 }
 
@@ -192,7 +192,7 @@ for (const [name, entry] of entries) {
   groups.set(groupKey, group);
 }
 
-console.log(`install-third-party-skills: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
+console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
 
 const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
 fs.mkdirSync(stagedSkillsRoot, { recursive: true });
@@ -253,5 +253,5 @@ for (const targetSkillsRoot of targetSkillsRoots) {
   }
 }
 
-console.log("install-third-party-skills: done");
+console.log("skills:install: done");
 NODE
