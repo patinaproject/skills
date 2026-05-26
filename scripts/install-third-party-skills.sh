@@ -40,6 +40,7 @@ const repoRoot = process.cwd();
 const lockPath = path.join(repoRoot, "skills-lock.json");
 const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
+const installLockPath = path.join(repoRoot, ".skills-install.lock");
 
 if (entries.length === 0) {
   console.log("skills:install: skills-lock.json has no skills, nothing to do");
@@ -47,8 +48,14 @@ if (entries.length === 0) {
 }
 
 const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "patina-skills-install-"));
+let installLockHandle;
 
 function cleanup() {
+  if (installLockHandle !== undefined) {
+    fs.closeSync(installLockHandle);
+    installLockHandle = undefined;
+    fs.rmSync(installLockPath, { force: true });
+  }
   fs.rmSync(stageRoot, { recursive: true, force: true });
 }
 
@@ -72,8 +79,13 @@ function runWithCapturedOutput(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd || repoRoot,
     encoding: "utf8",
+    timeout: Number.parseInt(process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS || "120000", 10),
     env: process.env,
   });
+
+  if (result.error) {
+    throw result.error;
+  }
 
   if (result.status !== 0) {
     const error = new Error(`Command failed: ${command} ${args.join(" ")}`);
@@ -87,6 +99,36 @@ function runWithCapturedOutput(command, args, options = {}) {
 
   if (result.stderr) {
     process.stderr.write(result.stderr);
+  }
+}
+
+function acquireInstallLock() {
+  try {
+    installLockHandle = fs.openSync(installLockPath, "wx");
+    fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+  } catch (error) {
+    if (error.code === "EEXIST") {
+      const lockPid = Number.parseInt(fs.readFileSync(installLockPath, "utf8"), 10);
+      const lockIsActive = Number.isInteger(lockPid) && (() => {
+        try {
+          process.kill(lockPid, 0);
+          return true;
+        } catch {
+          return false;
+        }
+      })();
+
+      if (lockIsActive) {
+        throw new Error(`another skills:install process is already running with pid ${lockPid}`);
+      }
+
+      fs.rmSync(installLockPath, { force: true });
+      installLockHandle = fs.openSync(installLockPath, "wx");
+      fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+      return;
+    }
+
+    throw error;
   }
 }
 
@@ -193,6 +235,7 @@ for (const [name, entry] of entries) {
 }
 
 console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
+acquireInstallLock();
 
 const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
 fs.mkdirSync(stagedSkillsRoot, { recursive: true });
@@ -238,6 +281,7 @@ const targetSkillsRoots = [
   path.join(repoRoot, ".agents", "skills"),
   path.join(repoRoot, ".claude", "skills"),
 ];
+const promotions = [];
 
 for (const targetSkillsRoot of targetSkillsRoots) {
   fs.mkdirSync(targetSkillsRoot, { recursive: true });
@@ -248,9 +292,13 @@ for (const targetSkillsRoot of targetSkillsRoots) {
     const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${randomBytes(4).toString("hex")}`);
 
     copyDirectory(stagedDir, tempTargetDir);
-    fs.rmSync(targetDir, { recursive: true, force: true });
-    fs.renameSync(tempTargetDir, targetDir);
+    promotions.push({ targetDir, tempTargetDir });
   }
+}
+
+for (const { targetDir, tempTargetDir } of promotions) {
+  fs.rmSync(targetDir, { recursive: true, force: true });
+  fs.renameSync(tempTargetDir, targetDir);
 }
 
 console.log("skills:install: done");

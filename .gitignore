@@ -1,4 +1,5 @@
 node_modules/
+.skills-install.lock
 
 # Third-party skills (installed via `npx skills add` on demand) are not
 # committed to the repo. The pnpm `postinstall` script restores them from

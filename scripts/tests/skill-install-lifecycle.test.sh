@@ -70,6 +70,44 @@ if (cd "$temp_repo" && bash scripts/install-third-party-skills.sh >"$collision_o
   exit 1
 fi
 
+lock_repo="$temp_repo/lock-check"
+mkdir -p "$lock_repo/scripts"
+cp scripts/install-third-party-skills.sh "$lock_repo/scripts/"
+cat >"$lock_repo/skills-lock.json" <<'JSON'
+{
+  "version": 1,
+  "skills": {
+    "diagnose": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
+      "skillPath": "skills/engineering/diagnose/SKILL.md",
+      "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
+    }
+  }
+}
+JSON
+printf '%s\n' "$$" >"$lock_repo/.skills-install.lock"
+
+if (cd "$lock_repo" && bash scripts/install-third-party-skills.sh >"$lock_repo/skill-install-lock.out" 2>"$lock_repo/skill-install-lock.err"); then
+  echo "FAIL: pnpm skills:install must reject concurrent restore attempts" >&2
+  exit 1
+fi
+
+if [ ! -f "$lock_repo/.skills-install.lock" ]; then
+  echo "FAIL: pnpm skills:install must not remove another process lock" >&2
+  exit 1
+fi
+
+printf '999999\n' >"$lock_repo/.skills-install.lock"
+
+if ! (cd "$lock_repo" && PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=1 bash scripts/install-third-party-skills.sh >"$lock_repo/skill-install-stale-lock.out" 2>"$lock_repo/skill-install-stale-lock.err"); then
+  if [ -f "$lock_repo/.skills-install.lock" ]; then
+    echo "FAIL: pnpm skills:install must clean up a stale process lock after claiming it" >&2
+    exit 1
+  fi
+fi
+
 node <<'NODE'
 const lock = require("./skills-lock.json");
 for (const [name, entry] of Object.entries(lock.skills || {})) {
