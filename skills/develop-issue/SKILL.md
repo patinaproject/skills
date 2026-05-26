@@ -151,14 +151,76 @@ There is no `needs-info` state in v1. Insufficient information maps to
 
 ## Final Report
 
-When the workflow stops, report:
+When the workflow stops, write for a human first and a process log never. Lead
+with the outcome. Keep the default report short, direct, and human-readable, and
+surface only details that change what the reader needs to understand or do.
 
-- Issue reference and URL
-- Branch name
-- Child skills invoked, with halt reason if any
-- Verification commands and results
+Include:
+
+- What changed, in 1-3 meaningful bullets.
+- Where the work ended up: include the issue, PR, and branch links when
+  available.
+- Verification commands and results, summarized at the highest useful level.
+  Collapse routine verification into one concise line when everything passed.
 - Latest `review-code` result, or that it was skipped because no reviewable
-  local changes existed
-- Human-owned blockers, if any
-- `wontfix` explanations, if any
-- PR URL and readiness status, when `finish-pr` runs
+  local changes existed, only when it affects reviewer confidence or next
+  action.
+- Human-owned blockers, if any.
+- `wontfix` explanations, if any.
+- PR URL and readiness status, when `finish-pr` runs.
+
+Keep visible and specific:
+
+- Failed checks, skipped checks, unresolved risks, or human action still needed.
+- The exact command and blocker for any verification that did not run or did not
+  pass.
+- Runtime-required token or budget reporting, but place token or budget
+  reporting after the result so it does not dominate the message.
+
+Remove or minimize:
+
+- Long lists of every command run when all passed.
+- Repeated statements that lint, typecheck, tests, hooks, and PR checks were
+  each verified.
+- Generic process narration such as "I inspected status, reviewed diffs, ran
+  checks."
+- Full PR check inventories when they are all green.
+- Mergeability, review, or unrelated dirty-file status unless it changes what
+  the human should do next.
+
+### Good final output
+
+```md
+Done: [#190](https://github.com/patinaproject/skills/issues/190) is implemented
+on [PR #191](https://github.com/patinaproject/skills/pull/191)
+([branch `190-human-focused-final-output`](https://github.com/patinaproject/skills/tree/190-human-focused-final-output)).
+
+Changed:
+- `develop-issue` final reports now lead with outcome and meaningful changes.
+- Routine verification is collapsed unless something failed, skipped, or needs
+  human attention.
+
+Verified: targeted tests, lint, type-check, and PR checks passed.
+
+Needs human attention: none before review.
+```
+
+### Bad final output
+
+Avoid final output shaped like a process transcript:
+
+```md
+Implemented issue #190.
+
+Verification:
+- develop-issue workflow test passed.
+- markdownlint passed.
+- type-check passed.
+- commit hook passed.
+- PR check Test Gate passed.
+- PR check code-review passed.
+- PR is MERGEABLE and CLEAN.
+
+Child skills invoked: new-branch, write-a-skill, tdd, review-code, finish-pr.
+No unrelated dirty files except local config. Goal marked complete.
+```
