@@ -209,6 +209,23 @@ if [ "${PATINA_SKILL_INSTALL_OFFLINE:-0}" = "1" ]; then
   exit 0
 fi
 
+locked_sources="$(mktemp)"
+node <<'NODE' >"$locked_sources"
+const lock = require("./skills-lock.json");
+for (const source of new Set(Object.values(lock.skills || {}).map((entry) => entry.source))) {
+  console.log(source);
+}
+NODE
+
+while IFS= read -r source; do
+  if ! git ls-remote "https://github.com/${source}.git" HEAD >/dev/null 2>&1; then
+    rm -f "$locked_sources"
+    echo "SKIP: no network for live pnpm skills:install restore"
+    exit 0
+  fi
+done <"$locked_sources"
+rm -f "$locked_sources"
+
 # This runs the real restore path because the issue requires the public install
 # command to prove locked skills are restored while the committed lockfile stays
 # unchanged.

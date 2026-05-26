@@ -47,6 +47,7 @@ const lockPath = path.join(repoRoot, "skills-lock.json");
 const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
 const installLockPath = path.join(repoRoot, ".skills-install.lock");
+const installLockAttempts = 8;
 
 if (entries.length === 0) {
   console.log("skills:install: skills-lock.json has no skills, nothing to do");
@@ -204,7 +205,7 @@ function isLockOwnerActive(lockInfo, groupCount) {
 }
 
 function acquireInstallLock(groupCount) {
-  for (let attempt = 0; attempt < 4; attempt += 1) {
+  for (let attempt = 0; attempt < installLockAttempts; attempt += 1) {
     // Keep candidate/stale lock names under `.skills-install.lock.*.tmp`;
     // `.gitignore` intentionally covers this family for interrupted runs.
     const candidateLockPath = path.join(
@@ -270,7 +271,10 @@ function acquireInstallLock(groupCount) {
     }
   }
 
-  throw new Error("could not acquire .skills-install.lock after removing a stale lock");
+  throw new Error(
+    `could not acquire ${path.relative(repoRoot, installLockPath)} after ${installLockAttempts} attempts; ` +
+      "confirm no install is active, then wait for stale-lock recovery or delete the lock manually",
+  );
 }
 
 function removeStalePromotionDirs() {
