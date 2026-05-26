@@ -3,8 +3,9 @@
 #
 # Restore the third-party vendored skills recorded in `skills-lock.json`.
 # Run automatically as a pnpm `postinstall` hook (and on demand via
-# `pnpm skills:install`). Re-runs restore the recorded skills, but the lifecycle
-# is not allowed to refresh or rewrite the committed lockfile.
+# `pnpm skills:install`). Re-runs restore the recorded skills; this script never
+# refreshes or rewrites the committed lockfile. Use the install-skills workflow
+# for add/update flows.
 #
 # Why this script exists: the eight in-repo `patinaproject-skills` are tracked
 # in `skills/<name>/`; third-party skills from external skill catalogs are tracked
