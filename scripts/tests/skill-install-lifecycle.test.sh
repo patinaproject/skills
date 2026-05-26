@@ -56,4 +56,47 @@ if [ "$before_hash" != "$after_hash" ]; then
   exit 1
 fi
 
+temp_repo="$(mktemp -d)"
+mkdir -p "$temp_repo/scripts"
+cp package.json skills-lock.json "$temp_repo/"
+cp scripts/install-third-party-skills.sh "$temp_repo/scripts/"
+
+cleanup() {
+  rm -rf "$temp_repo"
+}
+trap cleanup EXIT
+
+(
+  cd "$temp_repo"
+  node <<'NODE'
+const fs = require("fs");
+const lock = require("./skills-lock.json");
+const names = Object.keys(lock.skills || {});
+
+if (names.length < 2) {
+  process.exit(0);
+}
+
+lock.skills[names[0]].computedHash = lock.skills[names[1]].computedHash;
+fs.writeFileSync("skills-lock.json", JSON.stringify(lock, null, 2) + "\n");
+NODE
+
+  stale_hash="$(git hash-object skills-lock.json)"
+  set +e
+  bash scripts/install-third-party-skills.sh >/tmp/skill-install-lifecycle-stale.out 2>/tmp/skill-install-lifecycle-stale.err
+  stale_status=$?
+  set -e
+  guarded_hash="$(git hash-object skills-lock.json)"
+
+  if [ "$stale_status" -eq 0 ]; then
+    echo "FAIL: stale skills-lock.json restore should fail instead of updating the lockfile" >&2
+    exit 1
+  fi
+
+  if [ "$stale_hash" != "$guarded_hash" ]; then
+    echo "FAIL: stale skills-lock.json guard did not restore the original lockfile" >&2
+    exit 1
+  fi
+)
+
 echo "OK: pnpm skills:install restores locked skills and leaves skills-lock.json unchanged"

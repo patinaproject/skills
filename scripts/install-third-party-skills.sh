@@ -3,8 +3,8 @@
 #
 # Restore the third-party vendored skills recorded in `skills-lock.json`.
 # Run automatically as a pnpm `postinstall` hook (and on demand via
-# `pnpm skills:install`). Idempotent — re-runs are a no-op when the skills
-# are already present.
+# `pnpm skills:install`). Re-runs restore the recorded skills, but the lifecycle
+# is not allowed to refresh or rewrite the committed lockfile.
 #
 # Why this script exists: the eight in-repo `patinaproject-skills` are tracked
 # in `skills/<name>/`; third-party skills from external skill catalogs are tracked
@@ -28,9 +28,43 @@ if [ ! -f skills-lock.json ]; then
   exit 0
 fi
 
-# `npx skills experimental_install` reads skills-lock.json and restores all
+locked_skill_count="$(node -e "const lock = require('./skills-lock.json'); console.log(Object.keys(lock.skills || {}).length)")"
+
+if [ "$locked_skill_count" = "0" ]; then
+  echo "install-third-party-skills: skills-lock.json has no skills, nothing to do"
+  exit 0
+fi
+
+lock_backup="$(mktemp)"
+cp skills-lock.json "$lock_backup"
+before_hash="$(git hash-object skills-lock.json)"
+
+cleanup() {
+  rm -f "$lock_backup"
+}
+trap cleanup EXIT
+
+# `pnpm dlx skills experimental_install` reads skills-lock.json and restores all
 # entries. The root lockfile records only third-party skills; in-repo skills
-# (the eight `patinaproject-skills`) are not in it.
+# (the eight `patinaproject-skills`) are not in it. This lifecycle is a
+# restore-only path: if the upstream command rewrites the lockfile while
+# restoring, put the committed lockfile back and fail visibly.
 echo "install-third-party-skills: restoring vendored skills from skills-lock.json..."
-npx --yes skills@latest experimental_install --yes
+set +e
+pnpm dlx skills@latest experimental_install --yes
+install_status=$?
+set -e
+
+after_hash="$(git hash-object skills-lock.json)"
+
+if [ "$before_hash" != "$after_hash" ]; then
+  cp "$lock_backup" skills-lock.json
+  echo "install-third-party-skills: upstream restore attempted to mutate skills-lock.json; restored original lockfile" >&2
+  exit 1
+fi
+
+if [ "$install_status" -ne 0 ]; then
+  exit "$install_status"
+fi
+
 echo "install-third-party-skills: done"
