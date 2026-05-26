@@ -130,29 +130,29 @@ function gitTimeoutMs() {
   return parsed;
 }
 
-function lockPidFromDisk() {
+function lockInfoFromDisk() {
   let raw;
   try {
     raw = fs.readFileSync(installLockPath, "utf8").trim();
   } catch (error) {
     if (error.code === "ENOENT") {
-      return undefined;
+      return { pid: undefined, raw: undefined };
     }
 
     throw error;
   }
 
   if (!raw) {
-    return undefined;
+    return { pid: undefined, raw };
   }
 
   try {
     const parsed = JSON.parse(raw);
     const pid = Number.parseInt(typeof parsed === "number" ? parsed : parsed.pid, 10);
-    return Number.isSafeInteger(pid) && pid > 0 ? pid : undefined;
+    return { pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined, raw };
   } catch {
     const pid = Number.parseInt(raw, 10);
-    return Number.isSafeInteger(pid) && pid > 0 ? pid : undefined;
+    return { pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined, raw };
   }
 }
 
@@ -200,18 +200,52 @@ function acquireInstallLock() {
         throw error;
       }
 
-      const lockPid = lockPidFromDisk();
-      if (lockPid !== undefined && isProcessActive(lockPid)) {
-        throw new Error(`another skills:install process is already running with pid ${lockPid}`);
+      const lockInfo = lockInfoFromDisk();
+      if (lockInfo.pid !== undefined && isProcessActive(lockInfo.pid)) {
+        throw new Error(`another skills:install process is already running with pid ${lockInfo.pid}`);
       }
 
-      fs.rmSync(installLockPath, { force: true });
+      const currentLock = lockInfoFromDisk();
+      if (currentLock.raw !== lockInfo.raw) {
+        continue;
+      }
+
+      const staleLockPath = path.join(
+        repoRoot,
+        `.skills-install.lock.stale-${process.pid}-${randomBytes(4).toString("hex")}.tmp`,
+      );
+
+      try {
+        fs.renameSync(installLockPath, staleLockPath);
+      } catch (renameError) {
+        if (renameError.code !== "ENOENT") {
+          throw renameError;
+        }
+      } finally {
+        fs.rmSync(staleLockPath, { force: true });
+      }
     } finally {
       fs.rmSync(candidateLockPath, { force: true });
     }
   }
 
   throw new Error("could not acquire .skills-install.lock after removing a stale lock");
+}
+
+function removeStalePromotionDirs() {
+  const stalePromotionPattern = /^\.[^.].*\.(old|tmp)-\d+-[0-9a-f]{8}$/;
+
+  for (const root of [path.join(repoRoot, ".agents", "skills"), path.join(repoRoot, ".claude", "skills")]) {
+    if (!fs.existsSync(root)) {
+      continue;
+    }
+
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (entry.isDirectory() && stalePromotionPattern.test(entry.name)) {
+        fs.rmSync(path.join(root, entry.name), { recursive: true, force: true });
+      }
+    }
+  }
 }
 
 function repoUrlForSource(source) {
@@ -335,6 +369,7 @@ for (const [name, entry] of entries) {
 
 console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
 acquireInstallLock();
+removeStalePromotionDirs();
 
 const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
 fs.mkdirSync(stagedSkillsRoot, { recursive: true });

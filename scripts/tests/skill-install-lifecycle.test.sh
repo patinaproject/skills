@@ -213,6 +213,7 @@ fi
 # command to prove locked skills are restored while the committed lockfile stays
 # unchanged.
 before_hash="$(git hash-object skills-lock.json)"
+mkdir -p .agents/skills/.stale-test.old-123-abcdef12 .claude/skills/.stale-test.tmp-123-abcdef12
 pnpm skills:install
 after_hash="$(git hash-object skills-lock.json)"
 
@@ -235,6 +236,11 @@ NODE
 
 if [ -n "$missing_skill" ]; then
   echo "FAIL: pnpm skills:install did not restore locked skill path: $missing_skill" >&2
+  exit 1
+fi
+
+if [ -e .agents/skills/.stale-test.old-123-abcdef12 ] || [ -e .claude/skills/.stale-test.tmp-123-abcdef12 ]; then
+  echo "FAIL: pnpm skills:install did not clean stale promotion directories" >&2
   exit 1
 fi
 
