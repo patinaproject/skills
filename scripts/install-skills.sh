@@ -111,13 +111,7 @@ function runWithCapturedOutput(command, args, options = {}) {
     throw error;
   }
 
-  if (result.stdout) {
-    process.stdout.write(result.stdout);
-  }
-
-  if (result.stderr) {
-    process.stderr.write(result.stderr);
-  }
+  return result;
 }
 
 function gitTimeoutMs() {
@@ -171,8 +165,8 @@ function lockInfoFromDisk() {
   }
 }
 
-function staleLockTtlMs() {
-  return Math.max(gitTimeoutMs() * Math.max(groups.size, 1) * 2, 10 * 60 * 1000);
+function staleLockTtlMs(groupCount) {
+  return Math.max(gitTimeoutMs() * Math.max(groupCount, 1) * 2, 10 * 60 * 1000);
 }
 
 function isProcessActive(pid) {
@@ -194,16 +188,16 @@ function isProcessActive(pid) {
   }
 }
 
-function isLockOwnerActive(lockInfo) {
+function isLockOwnerActive(lockInfo, groupCount) {
   if (lockInfo.pid === undefined || !isProcessActive(lockInfo.pid)) {
     return false;
   }
 
   const ageMs = Date.now() - (lockInfo.createdAtMs || 0);
-  return ageMs <= staleLockTtlMs();
+  return ageMs <= staleLockTtlMs(groupCount);
 }
 
-function acquireInstallLock() {
+function acquireInstallLock(groupCount) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     // Keep candidate/stale lock names under `.skills-install.lock.*.tmp`;
     // `.gitignore` intentionally covers this family for interrupted runs.
@@ -231,7 +225,7 @@ function acquireInstallLock() {
       }
 
       const lockInfo = lockInfoFromDisk();
-      if (isLockOwnerActive(lockInfo)) {
+      if (isLockOwnerActive(lockInfo, groupCount)) {
         throw new Error(`another skills:install process is already running with pid ${lockInfo.pid}`);
       }
 
@@ -409,7 +403,7 @@ for (const [name, entry] of entries) {
 }
 
 console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
-acquireInstallLock();
+acquireInstallLock(groups.size);
 removeStalePromotionDirs();
 
 const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
@@ -424,7 +418,7 @@ for (const group of groups.values()) {
   run("git", ["init", "-q"], { cwd: checkoutDir });
   run("git", ["remote", "add", "origin", repoUrlForSource(group.source)], { cwd: checkoutDir });
   try {
-    runWithCapturedOutput("git", ["fetch", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
+    runWithCapturedOutput("git", ["fetch", "-q", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
   } catch (error) {
     const skillNames = group.skills.map(({ name }) => name).join(", ");
     const stderr = error.stderr?.toString().trim();
@@ -433,7 +427,7 @@ for (const group of groups.values()) {
   }
 
   const skillDirs = [...new Set(group.skills.map(({ entry }) => path.dirname(entry.skillPath)))];
-  run("git", ["checkout", "FETCH_HEAD", "--", ...skillDirs], { cwd: checkoutDir });
+  run("git", ["checkout", "-q", "FETCH_HEAD", "--", ...skillDirs], { cwd: checkoutDir });
 
   for (const { name, entry } of group.skills) {
     const sourceDir = path.join(checkoutDir, path.dirname(entry.skillPath));
