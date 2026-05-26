@@ -54,11 +54,9 @@ function cleanup() {
 
 process.on("exit", cleanup);
 process.on("SIGINT", () => {
-  cleanup();
   process.exit(130);
 });
 process.on("SIGTERM", () => {
-  cleanup();
   process.exit(143);
 });
 
@@ -116,6 +114,8 @@ function computeSkillFolderHash(skillDir) {
   files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
 
   const hash = createHash("sha256");
+  // Match the upstream skills CLI lock hash exactly so existing computedHash
+  // values remain meaningful.
   for (const file of files) {
     hash.update(file.relativePath);
     hash.update(file.content);
