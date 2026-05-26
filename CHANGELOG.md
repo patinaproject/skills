@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.2...patinaproject-skills-v2.5.0) (2026-05-26)
+
+
+### Features
+
+* [#185](https://github.com/patinaproject/skills/issues/185) use skills install lifecycle ([#186](https://github.com/patinaproject/skills/issues/186)) ([d200410](https://github.com/patinaproject/skills/commit/d200410f05685526d72246ca3b7ba83b5ee3a37b))
+
 ## [2.4.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.1...patinaproject-skills-v2.4.2) (2026-05-26)
 
 
