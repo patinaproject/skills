@@ -199,12 +199,13 @@ retired workflow dependencies.
   an empty or absent lockfile is a no-op, while a populated lockfile restores
   every locked skill from the immutable Git `ref` recorded on each lock entry,
   verifies the restored payload hash against `computedHash`, and then promotes
-  the restored overlay into the repository. The script must treat
+  the restored payloads into both `.agents/skills/` and `.claude/skills/`.
+  The script must treat
   `skills-lock.json` as restore-only input and must not call a lifecycle command
   that refreshes or rewrites the lockfile. Realignment must add missing
   `postinstall` and `skills:install` package scripts, run `pnpm skills:install`
   after accepted lifecycle changes when skills are locked, and verify the
-  restored overlay with `npx --yes skills@latest list --json`.
+  restored overlays with `npx --yes skills@latest list --json`.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
 - **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).

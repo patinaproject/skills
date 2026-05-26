@@ -40,6 +40,10 @@ fi
 node <<'NODE'
 const lock = require("./skills-lock.json");
 for (const [name, entry] of Object.entries(lock.skills || {})) {
+  if (!/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(entry.source || "")) {
+    throw new Error(`${name} must include a GitHub owner/repo source`);
+  }
+
   if (!/^[0-9a-f]{40}$/i.test(entry.ref || "")) {
     throw new Error(`${name} must include an immutable 40-character ref`);
   }
@@ -58,7 +62,12 @@ const fs = require("fs");
 const lock = require("./skills-lock.json");
 for (const name of Object.keys(lock.skills || {})) {
   if (!fs.existsSync(`.agents/skills/${name}/SKILL.md`)) {
-    console.log(name);
+    console.log(`.agents/skills/${name}/SKILL.md`);
+    process.exit(0);
+  }
+
+  if (!fs.existsSync(`.claude/skills/${name}/SKILL.md`)) {
+    console.log(`.claude/skills/${name}/SKILL.md`);
     process.exit(0);
   }
 }
@@ -66,7 +75,7 @@ NODE
 )"
 
 if [ -n "$missing_skill" ]; then
-  echo "FAIL: pnpm skills:install did not restore locked skill: $missing_skill" >&2
+  echo "FAIL: pnpm skills:install did not restore locked skill path: $missing_skill" >&2
   exit 1
 fi
 

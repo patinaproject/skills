@@ -69,13 +69,10 @@ function run(command, args, options = {}) {
 }
 
 function repoUrlForSource(source) {
-  if (typeof source !== "string" || source.length === 0) {
-    throw new Error("lock entry source must be a non-empty string");
+  if (typeof source !== "string" || !/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(source)) {
+    throw new Error(`lock entry source must be a GitHub owner/repo slug: ${source}`);
   }
 
-  if (/^(https?:|git@)/.test(source)) {
-    return source;
-  }
   return `https://github.com/${source}.git`;
 }
 
@@ -199,17 +196,23 @@ for (const group of groups.values()) {
   }
 }
 
-const targetSkillsRoot = path.join(repoRoot, ".agents", "skills");
-fs.mkdirSync(targetSkillsRoot, { recursive: true });
+const targetSkillsRoots = [
+  path.join(repoRoot, ".agents", "skills"),
+  path.join(repoRoot, ".claude", "skills"),
+];
 
-for (const [name] of entries) {
-  const stagedDir = path.join(stagedSkillsRoot, name);
-  const targetDir = path.join(targetSkillsRoot, name);
-  const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}`);
+for (const targetSkillsRoot of targetSkillsRoots) {
+  fs.mkdirSync(targetSkillsRoot, { recursive: true });
 
-  copyDirectory(stagedDir, tempTargetDir);
-  fs.rmSync(targetDir, { recursive: true, force: true });
-  fs.renameSync(tempTargetDir, targetDir);
+  for (const [name] of entries) {
+    const stagedDir = path.join(stagedSkillsRoot, name);
+    const targetDir = path.join(targetSkillsRoot, name);
+    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}`);
+
+    copyDirectory(stagedDir, tempTargetDir);
+    fs.rmSync(targetDir, { recursive: true, force: true });
+    fs.renameSync(tempTargetDir, targetDir);
+  }
 }
 
 console.log("install-third-party-skills: done");

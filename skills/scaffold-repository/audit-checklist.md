@@ -29,7 +29,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `postinstall: pnpm skills:install`, and `skills:install: bash scripts/install-third-party-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
 | `pnpm-lock.yaml` | yes | present |
 | `skills-lock.json` | yes | present; valid JSON; records project-local skills with immutable `ref` values and `computedHash` values, or an empty `skills` object when no shared skills are locked yet |
-| `scripts/install-third-party-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise fetches each locked source at its immutable `ref`, verifies each restored skill against `computedHash`, promotes the restored skills, and never mutates `skills-lock.json` |
+| `scripts/install-third-party-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise fetches each locked source at its immutable `ref`, verifies each restored skill against `computedHash`, promotes the restored skills into `.agents/skills/` and `.claude/skills/`, and never mutates `skills-lock.json` |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `docs/release-flow.md` | yes | present; documents the release-please flow |
 
@@ -102,11 +102,11 @@ skills restore after `pnpm install`.
 
 | File / command | Required | Check |
 |---|---|---|
-| `skills-lock.json` | yes | present; records every vendored skill that should be restored into the project overlay with an immutable `ref`, or an empty `skills` object if none are installed yet |
-| `scripts/install-third-party-skills.sh` | yes | present; fetches each locked source at its immutable `ref`, verifies restored skill payloads against `computedHash`, promotes matching skills, and never mutates `skills-lock.json` |
+| `skills-lock.json` | yes | present; records every vendored skill that should be restored into the project overlays with an immutable `ref`, or an empty `skills` object if none are installed yet |
+| `scripts/install-third-party-skills.sh` | yes | present; fetches each locked source at its immutable `ref`, verifies restored skill payloads against `computedHash`, promotes matching skills into `.agents/skills/` and `.claude/skills/`, and never mutates `skills-lock.json` |
 | `package.json` | yes | includes `postinstall: pnpm skills:install` and `skills:install: bash scripts/install-third-party-skills.sh` |
 | `.gitignore` | yes | ignores generated `.agents/skills/*` and `.claude/skills/*` payloads while keeping committed in-repo skill symlinks unignored |
-| `pnpm skills:install` | yes | run after accepting lifecycle drift when one or more skills are locked; installs all locked vendored skills into the local project overlay |
+| `pnpm skills:install` | yes | run after accepting lifecycle drift when one or more skills are locked; installs all locked vendored skills into the local project overlays |
 | `npx --yes skills@latest list --json` | yes | verify restored locked vendored skills are present alongside any in-repo overlay symlinks |
 
 ## Area 6 – Deprecated workflow cleanup
