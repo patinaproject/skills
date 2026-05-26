@@ -259,8 +259,8 @@ function computeSkillFolderHash(skillDir) {
   const hash = createHash("sha256");
   // Match skills@1.5.7's computeSkillFolderHash implementation exactly so
   // skills-lock.json values produced by the upstream CLI remain meaningful.
-  // The immutable Git ref is the primary integrity anchor; this hash confirms
-  // the restored payload matches the committed lock.
+  // The immutable Git ref is the primary integrity anchor; this checksum
+  // confirms the restored payload matches the committed lock.
   for (const file of files) {
     hash.update(file.relativePath);
     hash.update(file.content);
