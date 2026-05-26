@@ -197,12 +197,11 @@ retired workflow dependencies.
   `skills-lock.json` plus `scripts/install-third-party-skills.sh` so
   project-local skills restore after `pnpm install`. The script is idempotent:
   an empty or absent lockfile is a no-op, while a populated lockfile restores
-  every locked skill through `pnpm dlx skills@latest experimental_install
-  --yes`. The script must treat `skills-lock.json` as restore-only input:
-  run the upstream restore in a staging directory, verify the staged lockfile
-  did not change, and only then promote the restored overlay into the
-  repository. If the upstream command rewrites the staged lockfile, fail
-  visibly without promoting generated skills. Realignment must add missing
+  every locked skill from the immutable Git `ref` recorded on each lock entry,
+  verifies the restored payload hash against `computedHash`, and then promotes
+  the restored overlay into the repository. The script must treat
+  `skills-lock.json` as restore-only input and must not call a lifecycle command
+  that refreshes or rewrites the lockfile. Realignment must add missing
   `postinstall` and `skills:install` package scripts, run `pnpm skills:install`
   after accepted lifecycle changes when skills are locked, and verify the
   restored overlay with `npx --yes skills@latest list --json`.

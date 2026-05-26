@@ -28,63 +28,188 @@ if [ ! -f skills-lock.json ]; then
   exit 0
 fi
 
-locked_skill_count="$(node -e "const lock = require('./skills-lock.json'); console.log(Object.keys(lock.skills || {}).length)")"
+node <<'NODE'
+const { execFileSync } = require("node:child_process");
+const { createHash } = require("node:crypto");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 
-if [ "$locked_skill_count" = "0" ]; then
-  echo "install-third-party-skills: skills-lock.json has no skills, nothing to do"
-  exit 0
-fi
+const repoRoot = process.cwd();
+const lockPath = path.join(repoRoot, "skills-lock.json");
+const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
+const entries = Object.entries(lock.skills || {});
 
-before_hash="$(git hash-object skills-lock.json)"
-stage_dir="$(mktemp -d)"
-cp skills-lock.json "$stage_dir/skills-lock.json"
-
-cleanup() {
-  rm -rf "$stage_dir"
+if (entries.length === 0) {
+  console.log("install-third-party-skills: skills-lock.json has no skills, nothing to do");
+  process.exit(0);
 }
-trap cleanup EXIT
 
-# `pnpm dlx skills experimental_install` reads skills-lock.json and restores all
-# entries. The root lockfile records only third-party skills; in-repo skills
-# (the eight `patinaproject-skills`) are not in it. This lifecycle is a
-# restore-only path: if the upstream command rewrites the lockfile while
-# restoring, fail without promoting the generated overlay into the repository.
-echo "install-third-party-skills: restoring vendored skills from skills-lock.json..."
-set +e
-(
-  cd "$stage_dir"
-  # Test hook: lets the lifecycle test force a lockfile mutation without relying
-  # on current upstream `skills@latest` behavior.
-  if [ -n "${PATINA_SKILL_INSTALL_RESTORE_COMMAND:-}" ]; then
-    "$PATINA_SKILL_INSTALL_RESTORE_COMMAND"
-  else
-    pnpm dlx skills@latest experimental_install --yes
-  fi
-)
-install_status=$?
-set -e
+const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "patina-skills-install-"));
 
-after_hash="$(git hash-object "$stage_dir/skills-lock.json")"
+function cleanup() {
+  fs.rmSync(stageRoot, { recursive: true, force: true });
+}
 
-if [ "$before_hash" != "$after_hash" ]; then
-  echo "install-third-party-skills: restore command exited $install_status and attempted to mutate skills-lock.json; generated overlay was not promoted" >&2
-  exit 1
-fi
+process.on("exit", cleanup);
+process.on("SIGINT", () => {
+  cleanup();
+  process.exit(130);
+});
+process.on("SIGTERM", () => {
+  cleanup();
+  process.exit(143);
+});
 
-if [ "$install_status" -ne 0 ]; then
-  exit "$install_status"
-fi
+function run(command, args, options = {}) {
+  execFileSync(command, args, {
+    cwd: options.cwd || repoRoot,
+    stdio: options.stdio || "inherit",
+    env: process.env,
+  });
+}
 
-node -e "const lock = require('./skills-lock.json'); for (const name of Object.keys(lock.skills || {})) console.log(name)" |
-while IFS= read -r skill_name; do
-  if [ ! -f "$stage_dir/.agents/skills/$skill_name/SKILL.md" ]; then
-    echo "install-third-party-skills: restored overlay is missing locked skill: $skill_name" >&2
-    exit 1
-  fi
+function repoUrlForSource(source) {
+  if (typeof source !== "string" || source.length === 0) {
+    throw new Error("lock entry source must be a non-empty string");
+  }
 
-  mkdir -p .agents/skills
-  rm -rf ".agents/skills/$skill_name"
-  cp -R "$stage_dir/.agents/skills/$skill_name" ".agents/skills/$skill_name"
-done
+  if (/^(https?:|git@)/.test(source)) {
+    return source;
+  }
+  return `https://github.com/${source}.git`;
+}
 
-echo "install-third-party-skills: done"
+function assertSafeRelative(value, label) {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    path.isAbsolute(value) ||
+    value.split(/[\\/]/).includes("..")
+  ) {
+    throw new Error(`${label} must be a safe relative path: ${value}`);
+  }
+}
+
+function collectFiles(baseDir, currentDir, results) {
+  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+    if (entry.name === ".git" || entry.name === "node_modules") {
+      continue;
+    }
+
+    const fullPath = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      collectFiles(baseDir, fullPath, results);
+    } else if (entry.isFile()) {
+      results.push({
+        relativePath: path.relative(baseDir, fullPath).split(path.sep).join("/"),
+        content: fs.readFileSync(fullPath),
+      });
+    }
+  }
+}
+
+function computeSkillFolderHash(skillDir) {
+  const files = [];
+  collectFiles(skillDir, skillDir, files);
+  files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+
+  const hash = createHash("sha256");
+  for (const file of files) {
+    hash.update(file.relativePath);
+    hash.update(file.content);
+  }
+  return hash.digest("hex");
+}
+
+function copyDirectory(source, target) {
+  fs.rmSync(target, { recursive: true, force: true });
+  fs.cpSync(source, target, {
+    recursive: true,
+    preserveTimestamps: false,
+    filter: (sourcePath) => {
+      const parts = path.relative(source, sourcePath).split(path.sep);
+      return !parts.includes(".git") && !parts.includes("node_modules");
+    },
+  });
+}
+
+const groups = new Map();
+
+for (const [name, entry] of entries) {
+  assertSafeRelative(name, "skill name");
+  assertSafeRelative(entry.skillPath, `${name}.skillPath`);
+
+  if (entry.sourceType !== "github") {
+    throw new Error(`${name} has unsupported sourceType ${entry.sourceType}; only github lock entries can be restored`);
+  }
+
+  const ref = entry.ref;
+  if (typeof ref !== "string" || !/^[0-9a-f]{40}$/i.test(ref)) {
+    throw new Error(`${name} must include an immutable 40-character ref in skills-lock.json`);
+  }
+
+  if (typeof entry.computedHash !== "string" || !/^[0-9a-f]{64}$/i.test(entry.computedHash)) {
+    throw new Error(`${name} must include a sha256 computedHash in skills-lock.json`);
+  }
+
+  const groupKey = `${entry.source}\0${ref}`;
+  const group = groups.get(groupKey) || {
+    source: entry.source,
+    ref,
+    skills: [],
+  };
+  group.skills.push({ name, entry });
+  groups.set(groupKey, group);
+}
+
+console.log(`install-third-party-skills: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
+
+const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
+fs.mkdirSync(stagedSkillsRoot, { recursive: true });
+
+let groupIndex = 0;
+for (const group of groups.values()) {
+  groupIndex += 1;
+  const checkoutDir = path.join(stageRoot, `checkout-${groupIndex}`);
+  fs.mkdirSync(checkoutDir, { recursive: true });
+
+  run("git", ["init", "-q"], { cwd: checkoutDir });
+  run("git", ["remote", "add", "origin", repoUrlForSource(group.source)], { cwd: checkoutDir });
+  run("git", ["fetch", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
+
+  const skillDirs = [...new Set(group.skills.map(({ entry }) => path.dirname(entry.skillPath)))];
+  run("git", ["checkout", "FETCH_HEAD", "--", ...skillDirs], { cwd: checkoutDir });
+
+  for (const { name, entry } of group.skills) {
+    const sourceDir = path.join(checkoutDir, path.dirname(entry.skillPath));
+    const stagedDir = path.join(stagedSkillsRoot, name);
+
+    if (!fs.existsSync(path.join(sourceDir, "SKILL.md"))) {
+      throw new Error(`${name} ref ${group.ref} does not contain ${entry.skillPath}`);
+    }
+
+    copyDirectory(sourceDir, stagedDir);
+
+    const actualHash = computeSkillFolderHash(stagedDir);
+    if (actualHash !== entry.computedHash) {
+      throw new Error(`${name} hash mismatch for ${group.source}@${group.ref}: expected ${entry.computedHash}, got ${actualHash}`);
+    }
+  }
+}
+
+const targetSkillsRoot = path.join(repoRoot, ".agents", "skills");
+fs.mkdirSync(targetSkillsRoot, { recursive: true });
+
+for (const [name] of entries) {
+  const stagedDir = path.join(stagedSkillsRoot, name);
+  const targetDir = path.join(targetSkillsRoot, name);
+  const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}`);
+
+  copyDirectory(stagedDir, tempTargetDir);
+  fs.rmSync(targetDir, { recursive: true, force: true });
+  fs.renameSync(tempTargetDir, targetDir);
+}
+
+console.log("install-third-party-skills: done");
+NODE
