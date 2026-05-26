@@ -68,6 +68,19 @@ function run(command, args, options = {}) {
   });
 }
 
+function runWithCapturedOutput(command, args, options = {}) {
+  const output = execFileSync(command, args, {
+    cwd: options.cwd || repoRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    env: process.env,
+  });
+
+  if (output) {
+    process.stdout.write(output);
+  }
+}
+
 function repoUrlForSource(source) {
   if (typeof source !== "string" || !/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(source)) {
     throw new Error(`lock entry source must be a GitHub owner/repo slug: ${source}`);
@@ -180,10 +193,12 @@ for (const group of groups.values()) {
   run("git", ["init", "-q"], { cwd: checkoutDir });
   run("git", ["remote", "add", "origin", repoUrlForSource(group.source)], { cwd: checkoutDir });
   try {
-    run("git", ["fetch", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
+    runWithCapturedOutput("git", ["fetch", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
   } catch (error) {
     const skillNames = group.skills.map(({ name }) => name).join(", ");
-    throw new Error(`${skillNames}: ref ${group.ref} was not found in ${group.source}`);
+    const stderr = error.stderr?.toString().trim();
+    const details = stderr || error.message;
+    throw new Error(`${skillNames}: could not fetch ref ${group.ref} from ${group.source}: ${details}`);
   }
 
   const skillDirs = [...new Set(group.skills.map(({ entry }) => path.dirname(entry.skillPath)))];

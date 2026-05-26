@@ -61,7 +61,10 @@ cat >"$temp_repo/skills-lock.json" <<'JSON'
 }
 JSON
 
-if (cd "$temp_repo" && bash scripts/install-third-party-skills.sh >/tmp/skill-install-collision.out 2>/tmp/skill-install-collision.err); then
+collision_out="$temp_repo/skill-install-collision.out"
+collision_err="$temp_repo/skill-install-collision.err"
+
+if (cd "$temp_repo" && bash scripts/install-third-party-skills.sh >"$collision_out" 2>"$collision_err"); then
   echo "FAIL: pnpm skills:install must reject third-party locks that collide with in-repo skills" >&2
   exit 1
 fi
