@@ -65,6 +65,8 @@ if [ -f "$SKILL" ]; then
   assert_match "report the PR as not ready-to-merge" "$SKILL"
   assert_match "human-friendly language" "$SKILL"
   assert_match "must not call it" "$SKILL"
+  assert_match "compress ready-to-merge evidence" "$SKILL"
+  assert_match "human line instead of listing the gates" "$SKILL"
 fi
 
 if [ -f "$WORKFLOW" ]; then
@@ -150,6 +152,11 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "human-friendly language" "$WORKFLOW"
   assert_match "Do not dump the full command" "$WORKFLOW"
   assert_match "Do not describe a blocked outcome" "$WORKFLOW"
+  assert_match "Compress ready-to-merge evidence into one human line" "$WORKFLOW"
+  assert_match "Do not write gate inventories" "$WORKFLOW"
+  assert_match "Verified: local suite and PR checks passed" "$WORKFLOW"
+  assert_match "Avoid final output shaped like a readiness checklist" "$WORKFLOW"
+  assert_no_match "Final gate is clean" "$WORKFLOW"
   assert_order "Mandatory final ready-to-merge check" "Final report includes" "$WORKFLOW"
 fi
 
