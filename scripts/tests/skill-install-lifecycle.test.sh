@@ -56,4 +56,4 @@ if [ "$before_hash" != "$after_hash" ]; then
   exit 1
 fi
 
-echo "OK: pnpm skills:install leaves skills-lock.json unchanged"
+echo "OK: pnpm skills:install restores locked skills and leaves skills-lock.json unchanged"
