@@ -78,8 +78,12 @@ assert_no_match "review-action|office-hours|plan-ceo-review|superteam-non-intera
   AGENTS.md README.md docs .claude-plugin/marketplace.json .claude-plugin/plugin.json \
   .codex-plugin/plugin.json .agents/plugins/marketplace.json \
   skills/develop-issue skills/review-code skills/install-skills
-assert_no_match "skills:install" \
-  AGENTS.md CONTRIBUTING.md README.md .claude/settings.json
+assert_no_match "skills:restore" \
+  AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
+  docs skills/scaffold-repository skills/install-skills scripts/install-skills.sh
+
+assert_match "skills:install" \
+  AGENTS.md skills/scaffold-repository/SKILL.md skills/install-skills/SKILL.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

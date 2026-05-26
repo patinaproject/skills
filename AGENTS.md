@@ -43,6 +43,8 @@ This is a single-context repository; domain docs are optional and created lazily
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install dev tooling and initialize Husky
+- `pnpm skills:install`: restore locked project-local skills from `skills-lock.json`
+  with `git` available on `PATH`
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
@@ -73,7 +75,12 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 ## Testing Guidelines
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
+- `pnpm test` includes network-backed skills CLI canaries and the
+  `skills:install` lifecycle check.
 - Validate paths with `find` or `rg`
+- Run `bash scripts/tests/skill-install-lifecycle.test.sh` after changing
+  `scripts/install-skills.sh`, `package.json` `postinstall`, or the
+  `skills:install` package script.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/new-branch-workflow.test.sh` after changing `skills/new-branch/**`

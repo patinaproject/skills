@@ -65,15 +65,15 @@ Behavior:
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
   2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
-  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-third-party-skills.sh`, `.gitignore`.
+  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-skills.sh`, `.gitignore`.
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
   6. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`, and agent-plugin release workflow when applicable.
 - Include skills installation in every scaffold and realignment. Emit or
-  realign `skills-lock.json`, `scripts/install-third-party-skills.sh`,
-  `.gitignore`, and the `package.json` `postinstall` / `skills:restore` scripts
+  realign `skills-lock.json`, `scripts/install-skills.sh`,
+  `.gitignore`, and the `package.json` `postinstall` / `skills:install` scripts
   so project-local skills restore after `pnpm install`. After accepted changes
-  to those files, run `pnpm skills:restore` when the lockfile records one or
+  to those files, run `pnpm skills:install` when the lockfile records one or
   more skills, then verify `npx --yes skills@latest list --json` includes the
   restored project-local skills.
 
@@ -133,7 +133,7 @@ docs/release-flow.md
 docs/wiki-index.md
 package.json
 pnpm-lock.yaml
-scripts/install-third-party-skills.sh
+scripts/install-skills.sh
 skills-lock.json
 ```
 
@@ -191,17 +191,22 @@ retired workflow dependencies.
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
-- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `postinstall: "bash scripts/install-third-party-skills.sh"`, `skills:restore: "bash scripts/install-third-party-skills.sh"`, and `lint:md` script.
+- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `postinstall: "pnpm skills:install"`, `skills:install: "bash scripts/install-skills.sh"`, and `lint:md` script.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Shared skill lifecycle**: scaffolded repositories include
-  `skills-lock.json` plus `scripts/install-third-party-skills.sh` so
-  project-local skills restore after `pnpm install`. The script is idempotent:
+  `skills-lock.json` plus `scripts/install-skills.sh` so
+  project-local skills restore after `pnpm install`; `git` must be available
+  on `PATH` in install environments. The script is idempotent:
   an empty or absent lockfile is a no-op, while a populated lockfile restores
-  every locked skill through `npx --yes skills@latest experimental_install
-  --yes`. Realignment must add missing `postinstall` and `skills:restore`
-  package scripts, run `pnpm skills:restore` after accepted lifecycle changes
-  when skills are locked, and verify the restored overlay with
-  `npx --yes skills@latest list --json`.
+  every locked skill from the immutable Git `ref` recorded on each lock entry,
+  verifies the restored payload hash against `computedHash`, and then promotes
+  the restored payloads into both `.agents/skills/` and `.claude/skills/`.
+  The script must treat
+  `skills-lock.json` as restore-only input and must not call a lifecycle command
+  that refreshes or rewrites the lockfile. Realignment must add missing
+  `postinstall` and `skills:install` package scripts, run `pnpm skills:install`
+  after accepted lifecycle changes when skills are locked, and verify the
+  restored overlays with `npx --yes skills@latest list --json`.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
 - **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).

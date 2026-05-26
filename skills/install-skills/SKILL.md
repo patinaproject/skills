@@ -1,12 +1,24 @@
 ---
 name: install-skills
-description: Install one or more agent skills into the current repository with the skills CLI. Use when adding, refreshing, or restoring project-local skills, when a user names a skill source, or when a repository needs shared skills installed without mutating global agent state.
+description: Install one or more agent skills into the current repository with the skills CLI. Use when adding or refreshing locked project-local skills, when a user names a skill source, or when a repository needs shared skills installed without mutating global agent state.
 ---
 
 # install-skills
 
 Install skills project-locally so the repository, not the operator's global
 environment, owns the shared workflow catalog.
+
+This skill changes the locked skill set and may update `skills-lock.json`.
+For routine setup or repair from an existing lockfile, use the repository's
+public lifecycle command instead:
+
+```bash
+pnpm skills:install
+```
+
+Use this skill when the desired result is a changed skill catalog: adding,
+removing, refreshing, or otherwise updating the entries recorded in
+`skills-lock.json`.
 
 ## Preflight
 
@@ -51,11 +63,30 @@ For all skills from a source, prefer an explicit all-agent install:
 npm_config_ignore_scripts=true npx --yes skills@latest add <source> --skill '*' --agent '*' --yes
 ```
 
-Use a pinned source when reproducibility matters:
+GitHub lock entries must be committed with an immutable 40-character `ref`.
+The current restore lifecycle reads `skills-lock.json` directly, fetches that
+exact ref, and verifies `computedHash`; branch names, tags, or missing refs are
+not reproducible enough for `pnpm skills:install`.
+
+When the desired source is already known, pin the add command to the producing
+commit ref:
 
 ```bash
-npm_config_ignore_scripts=true npx --yes skills@latest add owner/repo#<git-ref> --skill <skill-name> --agent '*' --yes
+npm_config_ignore_scripts=true npx --yes skills@latest add owner/repo#0123456789abcdef0123456789abcdef01234567 --skill <skill-name> --agent '*' --yes
 ```
+
+If the skills CLI writes a lock entry without a full commit SHA, record the
+exact commit from the local checkout or CLI output that produced the installed
+payload before committing:
+
+```bash
+git -C <local-skills-source-clone> rev-parse HEAD
+```
+
+Do not re-resolve a branch or tag later through the GitHub API; its target may
+have moved after the payload was installed. Record the producing commit SHA as
+the entry's `ref`, then run `pnpm skills:install` to prove the lockfile can
+restore the exact recorded skills without changing `skills-lock.json`.
 
 ## Patina Sources
 
