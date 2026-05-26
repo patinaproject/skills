@@ -61,6 +61,14 @@ the Explorer or reviewer agent after its final report is consumed. Do not let
 old review agents pile up, and do not start a duplicate reviewer for the same
 unresolved review pass.
 
+Cleanup is part of the review lifecycle: spawn the reviewer, wait for its
+result, consume and report that result, then close the reviewer once it is no
+longer needed. If the review times out or returns a requested partial result,
+close the Explorer or reviewer agent after capturing and reporting the useful
+output. Never close a reviewer before its final report, timeout notice, or
+requested partial result has been captured. Keep only reviewer agents that are
+still actively producing needed results visible during code review work.
+
 Pass only:
 
 - Repository path
