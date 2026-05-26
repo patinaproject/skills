@@ -8,10 +8,10 @@
 # for add/update flows.
 #
 # A live lock normally cleans up on process exit. After SIGKILL or host crash,
-# stale locks recover automatically after a bounded TTL based on the Git fetch
-# timeout and locked source count; deleting `.skills-install.lock` manually is
-# only needed when a contributor wants to bypass that wait after confirming no
-# install is active.
+# stale locks recover automatically after a bounded TTL: the greater of 10
+# minutes or twice the Git fetch timeout per locked source group. Deleting
+# `.skills-install.lock` manually is only needed when a contributor wants to
+# bypass that wait after confirming no install is active.
 #
 # Why this script exists: the eight in-repo `patinaproject-skills` are tracked
 # in `skills/<name>/`; third-party skills from external skill catalogs are tracked
@@ -48,6 +48,7 @@ const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
 const installLockPath = path.join(repoRoot, ".skills-install.lock");
 const installLockAttempts = 8;
+const promotionTokenPattern = "[0-9a-f]{8}";
 
 if (entries.length === 0) {
   console.log("skills:install: skills-lock.json has no skills, nothing to do");
@@ -278,7 +279,7 @@ function acquireInstallLock(groupCount) {
 }
 
 function removeStalePromotionDirs() {
-  const stalePromotionPattern = /^\.[^.].*\.(old|tmp)-\d+-[0-9a-f]{8}$/;
+  const stalePromotionPattern = new RegExp(`^\\.[^.].*\\.(old|tmp)-\\d+-${promotionTokenPattern}$`);
 
   for (const root of [path.join(repoRoot, ".agents", "skills"), path.join(repoRoot, ".claude", "skills")]) {
     if (!fs.existsSync(root)) {
@@ -471,7 +472,8 @@ for (const targetSkillsRoot of targetSkillsRoots) {
   for (const [name] of entries) {
     const stagedDir = path.join(stagedSkillsRoot, name);
     const targetDir = path.join(targetSkillsRoot, name);
-    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${randomBytes(4).toString("hex")}`);
+    const promotionToken = randomBytes(4).toString("hex");
+    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${promotionToken}`);
 
     copyDirectory(stagedDir, tempTargetDir);
     promotionTempDirs.push(tempTargetDir);
@@ -483,7 +485,8 @@ for (const targetSkillsRoot of targetSkillsRoots) {
 // overlay. If a process dies mid-promotion, rerunning restores all targets from
 // the lockfile; per-target backups cover ordinary rename failures.
 for (const { targetDir, tempTargetDir } of promotions) {
-  const backupTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.old-${process.pid}-${randomBytes(4).toString("hex")}`);
+  const promotionToken = randomBytes(4).toString("hex");
+  const backupTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.old-${process.pid}-${promotionToken}`);
   let hasBackup = false;
 
   if (fs.existsSync(targetDir)) {
