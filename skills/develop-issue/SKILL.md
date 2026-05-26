@@ -174,13 +174,13 @@ For this skill, all visible PR checks include required and optional checks.
    default-branch merge base, staged changes, unstaged changes, or untracked
    files.
 10. When reviewable local changes exist, invoke `review-code` and inherit its
-   full contract. Explicit use of `develop-issue` is sufficient approval for
-   this required local review gate: dispatch the fresh read-only reviewer
-   without asking for another user confirmation. Preserve the `review-code`
-   boundary exactly: no same-thread fallback and no file edits, staging,
-   commits, pushes, PR comments, review-thread mutation, or other worktree
-   mutation. Halt if fresh reviewer dispatch is unavailable or if `review-code`
-   reports a halt condition.
+    full contract. Explicit use of `develop-issue` is sufficient approval for
+    this required local review gate: dispatch the fresh read-only reviewer
+    without asking for another user confirmation. Preserve the `review-code`
+    boundary exactly: no same-thread fallback and no file edits, staging,
+    commits, pushes, PR comments, review-thread mutation, or other worktree
+    mutation. Halt if fresh reviewer dispatch is unavailable or if `review-code`
+    reports a halt condition.
 11. Route local review findings through the Review Finding Router.
 12. Use `finish-pr` for commit, push, PR creation or update, visible check
     observation, PR feedback loops, and ready-to-merge reporting. Invoke
