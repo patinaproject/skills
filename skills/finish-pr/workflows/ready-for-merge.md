@@ -304,22 +304,63 @@ directory's default `gh` repository.
     wording when a gate is false. Do not describe a blocked outcome as
     finished.
 
-18. Final report includes:
+18. Final report includes a short human handoff:
+
+    Write the final response as a short human handoff, not as a readiness audit.
+    The gate evidence from step 17 proves the state; it should not become the
+    shape of the message.
+
+    Include:
 
     - PR URL.
-    - Latest head SHA.
-    - Verification commands and results.
-    - Mergeability and conflict-handling evidence, including the base branch,
-      merge state, local merge result, and any merge or conflict-resolution
-      commit pushed during the loop.
-    - Check status and per-failing-check dispositions.
-    - Feedback status and any no-progress stop reason.
-    - Final ready-to-merge check result, including the final unresolved
-      review-thread gate result and the human-readable blocker when the PR is
-      not ready-to-merge.
+    - Latest head SHA only when it helps identify a pushed fix or conflict
+      resolution.
+    - Meaningful changes since the previous report, especially conflict
+      resolution or feedback fixes.
+    - Verification commands and results, summarized at the highest useful
+      level.
     - Feedback handled, deferred, stale, explained, or blocked, including a
-      per-finding disposition for every top-level review finding.
+      per-finding disposition for every top-level review finding and
+      per-failing-check dispositions when they change what the human should
+      know.
     - Human blockers, if any.
+
+    Compress ready-to-merge evidence into one human line when every final gate
+    passes. Do not write gate inventories such as clean worktree, head SHA
+    equality, merge state, all checks passed, and no unresolved review threads.
+    That evidence is required for the workflow decision, but it is routine proof
+    when everything passes.
+
+    Good final output:
+
+    ```md
+    Done: PR #197 is ready to merge.
+
+    Updated the branch with latest `main`, resolved the skill guidance conflict,
+    and pushed `2635d83`.
+
+    Verified: local suite and PR checks passed. No human action needed before
+    merge.
+    ```
+
+    Avoid final output shaped like a readiness checklist:
+
+    ```md
+    PR #197 is ready-to-merge.
+
+    Final readiness:
+    - local worktree is clean
+    - local branch equals `headRefName`
+    - local HEAD equals `headRefOid`
+    - mergeStateStatus is CLEAN
+    - every current check is SUCCESS
+    - no unresolved review threads
+    ```
+
+    When any final gate fails, report `not ready-to-merge` and name the blocker
+    in human-friendly language. Include exact failed or skipped commands,
+    unresolved feedback, or check dispositions only when they explain what needs
+    attention.
 
 ## Stop Conditions
 

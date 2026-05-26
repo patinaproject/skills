@@ -248,6 +248,13 @@ Remove or minimize:
 - Mergeability, review, or unrelated dirty-file status unless it changes what
   the human should do next.
 
+When child skills return detailed readiness evidence, translate child skill
+reports into the final-report vocabulary above. Do not forward child-skill gate
+inventories. Do not repeat `finish-pr` readiness gates such as clean worktree,
+head SHA equality, merge state, check inventory, or review-thread count when
+they all passed; collapse them into the verification line unless a failed gate
+changes what the human should do next.
+
 ### Good final output
 
 ```md
