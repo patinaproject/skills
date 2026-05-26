@@ -128,7 +128,7 @@ fi
 exit 0
 SH
 chmod +x "$stale_lock_repo/bin/git"
-printf '{"pid":999999,"command":"pnpm skills:install"}\n' >"$stale_lock_repo/.skills-install.lock"
+printf '{"pid":%s,"createdAt":"1970-01-01T00:00:00.000Z","command":"pnpm skills:install"}\n' "$$" >"$stale_lock_repo/.skills-install.lock"
 
 if (cd "$stale_lock_repo" && PATH="$stale_lock_repo/bin:$PATH" PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=not-a-number bash scripts/install-skills.sh >"$stale_lock_repo/skill-install-stale-lock.out" 2>"$stale_lock_repo/skill-install-stale-lock.err"); then
   echo "FAIL: stale-lock fixture should stop at fake git fetch failure" >&2
@@ -136,7 +136,7 @@ if (cd "$stale_lock_repo" && PATH="$stale_lock_repo/bin:$PATH" PATINA_SKILL_INST
 fi
 
 if grep -q "already running" "$stale_lock_repo/skill-install-stale-lock.err"; then
-  echo "FAIL: pnpm skills:install must recover a stale lock whose PID is gone" >&2
+  echo "FAIL: pnpm skills:install must recover an expired stale lock even if the PID was reused" >&2
   exit 1
 fi
 

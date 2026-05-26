@@ -88,6 +88,7 @@ function run(command, args, options = {}) {
   execFileSync(command, args, {
     cwd: options.cwd || repoRoot,
     stdio: options.stdio || "inherit",
+    timeout: gitTimeoutMs(),
     env: process.env,
   });
 }
@@ -132,28 +133,46 @@ function gitTimeoutMs() {
 
 function lockInfoFromDisk() {
   let raw;
+  let stat;
   try {
+    stat = fs.statSync(installLockPath);
     raw = fs.readFileSync(installLockPath, "utf8").trim();
   } catch (error) {
     if (error.code === "ENOENT") {
-      return { pid: undefined, raw: undefined };
+      return { pid: undefined, raw: undefined, createdAtMs: undefined };
     }
 
     throw error;
   }
 
   if (!raw) {
-    return { pid: undefined, raw };
+    return { pid: undefined, raw, createdAtMs: stat.mtimeMs };
   }
 
   try {
     const parsed = JSON.parse(raw);
     const pid = Number.parseInt(typeof parsed === "number" ? parsed : parsed.pid, 10);
-    return { pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined, raw };
+    const createdAtMs =
+      typeof parsed === "object" && parsed !== null && typeof parsed.createdAt === "string"
+        ? Date.parse(parsed.createdAt)
+        : undefined;
+    return {
+      pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined,
+      raw,
+      createdAtMs: Number.isFinite(createdAtMs) ? createdAtMs : stat.mtimeMs,
+    };
   } catch {
     const pid = Number.parseInt(raw, 10);
-    return { pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined, raw };
+    return {
+      pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined,
+      raw,
+      createdAtMs: stat.mtimeMs,
+    };
   }
+}
+
+function staleLockTtlMs() {
+  return Math.max(gitTimeoutMs() * Math.max(groups.size, 1) * 2, 10 * 60 * 1000);
 }
 
 function isProcessActive(pid) {
@@ -175,8 +194,19 @@ function isProcessActive(pid) {
   }
 }
 
+function isLockOwnerActive(lockInfo) {
+  if (lockInfo.pid === undefined || !isProcessActive(lockInfo.pid)) {
+    return false;
+  }
+
+  const ageMs = Date.now() - (lockInfo.createdAtMs || 0);
+  return ageMs <= staleLockTtlMs();
+}
+
 function acquireInstallLock() {
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    // Keep candidate/stale lock names under `.skills-install.lock.*.tmp`;
+    // `.gitignore` intentionally covers this family for interrupted runs.
     const candidateLockPath = path.join(
       repoRoot,
       `.skills-install.lock.${process.pid}-${randomBytes(4).toString("hex")}.tmp`,
@@ -201,7 +231,7 @@ function acquireInstallLock() {
       }
 
       const lockInfo = lockInfoFromDisk();
-      if (lockInfo.pid !== undefined && isProcessActive(lockInfo.pid)) {
+      if (isLockOwnerActive(lockInfo)) {
         throw new Error(`another skills:install process is already running with pid ${lockInfo.pid}`);
       }
 
@@ -217,6 +247,17 @@ function acquireInstallLock() {
 
       try {
         fs.renameSync(installLockPath, staleLockPath);
+        const movedRaw = fs.readFileSync(staleLockPath, "utf8").trim();
+        if (movedRaw !== lockInfo.raw) {
+          try {
+            fs.linkSync(staleLockPath, installLockPath);
+          } catch (restoreError) {
+            if (restoreError.code !== "EEXIST") {
+              throw restoreError;
+            }
+          }
+          continue;
+        }
       } catch (renameError) {
         if (renameError.code !== "ENOENT") {
           throw renameError;
