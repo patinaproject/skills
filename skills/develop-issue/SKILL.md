@@ -128,6 +128,14 @@ or otherwise needs judgment not recorded in the issue.
     `ready-for-agent`, `ready-for-human`, or `wontfix` disposition; inherit
     every halt. Never merge the pull request.
 
+During long-running or resumable execution, keep compact checkpoint state using
+the final-report vocabulary: issue reference and URL, branch name, child skill
+status, verification results, local review status, review finding dispositions,
+blockers, and PR readiness when available. Resume from that state and continue
+until a terminal workflow state is reached: PR ready for human review through
+`finish-pr`, a documented human-owned blocker, or no reviewable local changes
+and no PR-ready work to publish.
+
 ## Review Finding Router
 
 Classify findings into exactly one of these outcomes:
