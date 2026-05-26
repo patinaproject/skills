@@ -21,7 +21,7 @@ pull request.
 ## Terminal Goal
 
 Production-ready implementation, all visible PR checks passing, and all local
-plus PR review comments addressed.
+review findings plus PR review comments addressed.
 
 Treat production-ready as an evidence-backed readiness case, not a guarantee of
 zero risk. Do not make unsupported certainty claims such as absolute certainty
@@ -218,5 +218,3 @@ When the workflow stops, report:
 - `wontfix` explanations, if any
 - Residual risks or test gaps, or `none identified`
 - PR URL and readiness status, when `finish-pr` runs
-
-Never merge the pull request.

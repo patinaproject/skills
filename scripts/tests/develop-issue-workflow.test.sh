@@ -78,7 +78,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'Use `prototype` only when the issue explicitly asks for throwaway exploration' "$SKILL"
   assert_match 'Delete or absorb prototype output before local review' "$SKILL"
   assert_match '## Terminal Goal' "$SKILL"
-  assert_match 'Production-ready implementation, all visible PR checks passing, and all local[[:space:]]+plus PR review comments addressed' "$SKILL"
+  assert_match 'Production-ready implementation, all visible PR checks passing, and all local[[:space:]]+review findings plus PR review comments addressed' "$SKILL"
   assert_match '## Terminal States' "$SKILL"
   assert_match '`goal-met`' "$SKILL"
   assert_match '`human-blocked`' "$SKILL"
@@ -128,7 +128,7 @@ if [ -f "$SKILL" ]; then
   assert_no_match '/goal' "$SKILL"
   assert_no_match 'background-agent operation' "$SKILL"
   assert_no_match 'spawn a fresh Explorer' "$SKILL"
-  assert_match 'Never merge the pull request' "$SKILL"
+  assert_match 'never merges a[[:space:]]+pull request' "$SKILL"
 
   assert_order 'Satisfy the branch setup precondition using `new-branch` when needed' 'Use `finish-pr` for commit' "$SKILL"
 
