@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # This test intentionally runs the public lifecycle command, so it is
-# network-backed while restoring locked skills from their immutable Git refs.
+# network-backed while restoring locked skills from their immutable Git refs. It
+# rewrites ignored local `.agents/skills/*` and `.claude/skills/*` overlays.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"

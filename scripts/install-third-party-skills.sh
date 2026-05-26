@@ -152,6 +152,10 @@ for (const [name, entry] of entries) {
   assertSafeRelative(name, "skill name");
   assertSafeRelative(entry.skillPath, `${name}.skillPath`);
 
+  if (path.dirname(entry.skillPath) === ".") {
+    throw new Error(`${name}.skillPath must point to a skill directory, not a repository-root SKILL.md`);
+  }
+
   if (fs.existsSync(path.join(repoRoot, "skills", name, "SKILL.md"))) {
     throw new Error(`${name} is an in-repo skill; do not lock a third-party skill with the same name`);
   }
