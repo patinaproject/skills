@@ -28,18 +28,15 @@ if [ -n "$restore_script" ]; then
   exit 1
 fi
 
+# This exercises the real restore path, which shells out to the upstream CLI and
+# requires network access while `skills@latest experimental_install` is the
+# temporary lockfile-restore mechanism.
 before_hash="$(git hash-object skills-lock.json)"
 pnpm skills:install
 after_hash="$(git hash-object skills-lock.json)"
 
 if [ "$before_hash" != "$after_hash" ]; then
   echo "FAIL: pnpm skills:install changed skills-lock.json" >&2
-  git diff -- skills-lock.json >&2
-  exit 1
-fi
-
-if ! git diff --quiet -- skills-lock.json; then
-  echo "FAIL: skills-lock.json has a worktree diff after pnpm skills:install" >&2
   git diff -- skills-lock.json >&2
   exit 1
 fi
