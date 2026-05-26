@@ -26,7 +26,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `postinstall: bash scripts/install-third-party-skills.sh`, and `skills:restore: bash scripts/install-third-party-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
+| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `postinstall: pnpm skills:install`, and `skills:install: bash scripts/install-third-party-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
 | `pnpm-lock.yaml` | yes | present |
 | `skills-lock.json` | yes | present; valid JSON; records project-local skills restored by the skills CLI, or an empty `skills` object when no shared skills are locked yet |
 | `scripts/install-third-party-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise runs `npx --yes skills@latest experimental_install --yes` from the repo root |
@@ -104,9 +104,9 @@ skills restore after `pnpm install`.
 |---|---|---|
 | `skills-lock.json` | yes | present; records every vendored skill that should be restored into the project overlay, or an empty `skills` object if none are installed yet |
 | `scripts/install-third-party-skills.sh` | yes | present; runs `npx --yes skills@latest experimental_install --yes` from the repo root |
-| `package.json` | yes | includes `postinstall: bash scripts/install-third-party-skills.sh` and `skills:restore: bash scripts/install-third-party-skills.sh` |
+| `package.json` | yes | includes `postinstall: pnpm skills:install` and `skills:install: bash scripts/install-third-party-skills.sh` |
 | `.gitignore` | yes | ignores generated `.agents/skills/*` and `.claude/skills/*` payloads while keeping committed in-repo skill symlinks unignored |
-| `pnpm skills:restore` | yes | run after accepting lifecycle drift when one or more skills are locked; installs all locked vendored skills into the local project overlay |
+| `pnpm skills:install` | yes | run after accepting lifecycle drift when one or more skills are locked; installs all locked vendored skills into the local project overlay |
 | `npx --yes skills@latest list --json` | yes | verify restored locked vendored skills are present alongside any in-repo overlay symlinks |
 
 ## Area 6 – Deprecated workflow cleanup

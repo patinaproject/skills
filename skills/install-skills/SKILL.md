@@ -1,12 +1,20 @@
 ---
 name: install-skills
-description: Install one or more agent skills into the current repository with the skills CLI. Use when adding, refreshing, or restoring project-local skills, when a user names a skill source, or when a repository needs shared skills installed without mutating global agent state.
+description: Install one or more agent skills into the current repository with the skills CLI. Use when adding or refreshing locked project-local skills, when a user names a skill source, or when a repository needs shared skills installed without mutating global agent state.
 ---
 
 # install-skills
 
 Install skills project-locally so the repository, not the operator's global
 environment, owns the shared workflow catalog.
+
+This skill changes the locked skill set and may update `skills-lock.json`.
+For routine setup or repair from an existing lockfile, use the repository's
+public lifecycle command instead:
+
+```bash
+pnpm skills:install
+```
 
 ## Preflight
 

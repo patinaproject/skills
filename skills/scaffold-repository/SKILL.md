@@ -71,9 +71,9 @@ Behavior:
   6. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`, and agent-plugin release workflow when applicable.
 - Include skills installation in every scaffold and realignment. Emit or
   realign `skills-lock.json`, `scripts/install-third-party-skills.sh`,
-  `.gitignore`, and the `package.json` `postinstall` / `skills:restore` scripts
+  `.gitignore`, and the `package.json` `postinstall` / `skills:install` scripts
   so project-local skills restore after `pnpm install`. After accepted changes
-  to those files, run `pnpm skills:restore` when the lockfile records one or
+  to those files, run `pnpm skills:install` when the lockfile records one or
   more skills, then verify `npx --yes skills@latest list --json` includes the
   restored project-local skills.
 
@@ -191,15 +191,15 @@ retired workflow dependencies.
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
-- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `postinstall: "bash scripts/install-third-party-skills.sh"`, `skills:restore: "bash scripts/install-third-party-skills.sh"`, and `lint:md` script.
+- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `postinstall: "pnpm skills:install"`, `skills:install: "bash scripts/install-third-party-skills.sh"`, and `lint:md` script.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Shared skill lifecycle**: scaffolded repositories include
   `skills-lock.json` plus `scripts/install-third-party-skills.sh` so
   project-local skills restore after `pnpm install`. The script is idempotent:
   an empty or absent lockfile is a no-op, while a populated lockfile restores
   every locked skill through `npx --yes skills@latest experimental_install
-  --yes`. Realignment must add missing `postinstall` and `skills:restore`
-  package scripts, run `pnpm skills:restore` after accepted lifecycle changes
+  --yes`. Realignment must add missing `postinstall` and `skills:install`
+  package scripts, run `pnpm skills:install` after accepted lifecycle changes
   when skills are locked, and verify the restored overlay with
   `npx --yes skills@latest list --json`.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.

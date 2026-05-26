@@ -122,6 +122,7 @@ for live_reference_path in \
   scripts/tests/pull-request-workflow.test.sh \
   scripts/tests/review-code-skill.test.sh \
   scripts/tests/scaffold-cleanup.test.sh \
+  scripts/tests/skill-install-lifecycle.test.sh \
   scripts/tests/suite.test.sh \
   scripts/tests/workflow-cleanup.test.sh \
   skills-lock.json
@@ -175,11 +176,14 @@ assert_match "scripts/install-third-party-skills\\.sh" \
 assert_match "skills-lock\\.json" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
-assert_match "postinstall: \"bash scripts/install-third-party-skills\\.sh\"" \
+assert_match "postinstall: \"pnpm skills:install\"" \
   skills/scaffold-repository/SKILL.md
 
-assert_match "skills:restore: \"bash scripts/install-third-party-skills\\.sh\"" \
+assert_match "skills:install: \"bash scripts/install-third-party-skills\\.sh\"" \
   skills/scaffold-repository/SKILL.md
+
+assert_no_match "skills:restore" \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

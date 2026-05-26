@@ -3,7 +3,7 @@
 #
 # Restore the third-party vendored skills recorded in `skills-lock.json`.
 # Run automatically as a pnpm `postinstall` hook (and on demand via
-# `pnpm skills:restore`). Idempotent — re-runs are a no-op when the skills
+# `pnpm skills:install`). Idempotent — re-runs are a no-op when the skills
 # are already present.
 #
 # Why this script exists: the eight in-repo `patinaproject-skills` are tracked

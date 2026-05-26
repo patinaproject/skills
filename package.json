@@ -16,13 +16,13 @@
   },
   "scripts": {
     "prepare": "husky",
-    "postinstall": "bash scripts/install-third-party-skills.sh",
+    "postinstall": "pnpm skills:install",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
     "test": "bash scripts/tests/suite.test.sh",
-    "skills:restore": "bash scripts/install-third-party-skills.sh"
+    "skills:install": "bash scripts/install-third-party-skills.sh"
   },
   "config": {
     "commitizen": {

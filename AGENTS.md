@@ -43,6 +43,7 @@ This is a single-context repository; domain docs are optional and created lazily
 ## Build, Test, and Development Commands
 
 - `pnpm install`: install dev tooling and initialize Husky
+- `pnpm skills:install`: restore locked project-local skills from `skills-lock.json`
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
