@@ -150,19 +150,29 @@ For this skill, all visible PR checks include required and optional checks.
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
 2. Validate the single same-repository issue reference and required child
    skills.
-3. Satisfy the branch setup precondition using `new-branch` when needed.
-4. Apply triggered conditional routes from the Conditional Routes section.
-5. Choose the next capability by naming the current gap between actual state and
+3. Inspect the issue's existing GitHub Projects membership and GitHub Project items
+   before branch setup. For each existing GitHub Project item, use
+   project-item inspection to find a compatible single-select status field with
+   the exact option Status = `In progress` and update that project item to
+   `In progress`. Do not add the issue to projects. Do not create project fields or status options.
+   Skip incompatible project items and continue when
+   the project lacks a compatible status field, lacks the `In progress` option,
+   or project-item inspection or update permission failures occur. Record the
+   project status update result, including each updated item and skipped item
+   reason, for the final report.
+4. Satisfy the branch setup precondition using `new-branch` when needed.
+5. Apply triggered conditional routes from the Conditional Routes section.
+6. Choose the next capability by naming the current gap between actual state and
    the terminal goal.
-6. Do not treat implementation, diagnosis, local review, or publishing as a
+7. Do not treat implementation, diagnosis, local review, or publishing as a
    fixed mandatory sequence. Invoke the capability that removes the current
    blocker or readiness gap.
-7. Run repository-documented verification before local review and before final
+8. Run repository-documented verification before local review and before final
    publishing readiness decisions.
-8. Check for reviewable local changes: committed branch diff from the
+9. Check for reviewable local changes: committed branch diff from the
    default-branch merge base, staged changes, unstaged changes, or untracked
    files.
-9. When reviewable local changes exist, invoke `review-code` and inherit its
+10. When reviewable local changes exist, invoke `review-code` and inherit its
    full contract. Explicit use of `develop-issue` is sufficient approval for
    this required local review gate: dispatch the fresh read-only reviewer
    without asking for another user confirmation. Preserve the `review-code`
@@ -170,14 +180,14 @@ For this skill, all visible PR checks include required and optional checks.
    commits, pushes, PR comments, review-thread mutation, or other worktree
    mutation. Halt if fresh reviewer dispatch is unavailable or if `review-code`
    reports a halt condition.
-10. Route local review findings through the Review Finding Router.
-11. Use `finish-pr` for commit, push, PR creation or update, visible check
+11. Route local review findings through the Review Finding Router.
+12. Use `finish-pr` for commit, push, PR creation or update, visible check
     observation, PR feedback loops, and ready-to-merge reporting. Invoke
     `finish-pr` only after local verification and `review-code` are clean,
     skipped because no reviewable local changes exist, or every local finding
     has a recorded `ready-for-agent`, `ready-for-human`, or `wontfix`
     disposition.
-12. Loop until the terminal goal is met or a human-owned blocker prevents
+13. Loop until the terminal goal is met or a human-owned blocker prevents
     further progress.
 
 During long-running or resumable execution, keep compact checkpoint state using
@@ -207,6 +217,8 @@ When the workflow stops, report:
 
 - Issue reference and URL
 - Branch name
+- Project status update result, including updated existing GitHub Projects and
+  skipped project items with reasons
 - Child skills invoked, with halt reason if any
 - Terminal state: `goal-met` or `human-blocked`
 - Production-readiness case
