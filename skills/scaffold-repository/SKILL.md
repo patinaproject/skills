@@ -195,13 +195,12 @@ retired workflow dependencies.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Shared skill lifecycle**: scaffolded repositories include
   `skills-lock.json` plus `scripts/install-skills.sh` so
-  project-local skills restore after `pnpm install`. The script is idempotent:
+  project-local skills restore after `pnpm install`; `git` must be available
+  on `PATH` in install environments. The script is idempotent:
   an empty or absent lockfile is a no-op, while a populated lockfile restores
   every locked skill from the immutable Git `ref` recorded on each lock entry,
   verifies the restored payload hash against `computedHash`, and then promotes
   the restored payloads into both `.agents/skills/` and `.claude/skills/`.
-  Because restore fetches those immutable refs directly, `git` must be
-  available on `PATH` during `pnpm install`.
   The script must treat
   `skills-lock.json` as restore-only input and must not call a lifecycle command
   that refreshes or rewrites the lockfile. Realignment must add missing

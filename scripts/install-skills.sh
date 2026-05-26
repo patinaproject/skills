@@ -7,6 +7,12 @@
 # refreshes or rewrites the committed lockfile. Use the install-skills workflow
 # for add/update flows.
 #
+# A live lock normally cleans up on process exit. After SIGKILL or host crash,
+# stale locks recover automatically after a bounded TTL based on the Git fetch
+# timeout and locked source count; deleting `.skills-install.lock` manually is
+# only needed when a contributor wants to bypass that wait after confirming no
+# install is active.
+#
 # Why this script exists: the eight in-repo `patinaproject-skills` are tracked
 # in `skills/<name>/`; third-party skills from external skill catalogs are tracked
 # only as pinned entries in `skills-lock.json` to avoid bloating
@@ -348,6 +354,9 @@ function copyDirectory(source, target) {
         return false;
       }
 
+      // Keep copy behavior in lockstep with the upstream-compatible hash:
+      // symlinks and other non-file/non-directory entries are intentionally
+      // omitted instead of dereferenced or hashed.
       const stat = fs.lstatSync(sourcePath);
       return stat.isDirectory() || stat.isFile();
     },
