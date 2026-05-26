@@ -67,6 +67,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'Read `AGENTS\.md` and `CLAUDE\.md` if present' "$SKILL"
   assert_match 'existing GitHub Projects' "$SKILL"
   assert_match 'GitHub Project items' "$SKILL"
+  assert_match '`projectItems`' "$SKILL"
   assert_match 'Status = `In progress`' "$SKILL"
   assert_match 'project-item inspection' "$SKILL"
   assert_match 'Do not add the issue to projects' "$SKILL"
