@@ -293,3 +293,5 @@ Verification:
 Child skills invoked: new-branch, write-a-skill, tdd, review-code, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
+
+Use the bad shape only as an anti-example; do not mirror its structure.
