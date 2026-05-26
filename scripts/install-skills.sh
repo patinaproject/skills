@@ -102,7 +102,7 @@ function runWithCapturedOutput(command, args, options = {}) {
   }
 }
 
-function acquireInstallLock() {
+function acquireInstallLock(attempt = 1) {
   try {
     installLockHandle = fs.openSync(installLockPath, "wx");
     fs.writeFileSync(installLockHandle, `${process.pid}\n`);
@@ -123,8 +123,17 @@ function acquireInstallLock() {
       }
 
       fs.rmSync(installLockPath, { force: true });
-      installLockHandle = fs.openSync(installLockPath, "wx");
-      fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+      try {
+        installLockHandle = fs.openSync(installLockPath, "wx");
+        fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+      } catch (retryError) {
+        if (retryError.code === "EEXIST" && attempt < 3) {
+          acquireInstallLock(attempt + 1);
+          return;
+        }
+
+        throw retryError;
+      }
       return;
     }
 
