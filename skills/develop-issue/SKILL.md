@@ -117,9 +117,11 @@ or otherwise needs judgment not recorded in the issue.
 - Local `review-code` findings are fixed or dispositioned.
 - GitHub PR review comments and hosted review comments surfaced by `finish-pr`
   are fixed or dispositioned.
-- After `finish-pr`, all currently visible required and optional PR checks pass.
+- After `finish-pr`, all currently visible required and optional PR checks pass
+  for `goal-met`.
 - PR check failures outside branch scope have a concrete disposition in a
-  `human-blocked` final report.
+  `human-blocked` final report; do not report `goal-met` while any visible PR
+  check is still failing.
 - Residual risks and test gaps are named, even when the answer is
   `none identified`.
 
@@ -170,7 +172,11 @@ For this skill, all visible PR checks include required and optional checks.
    reports a halt condition.
 10. Route local review findings through the Review Finding Router.
 11. Use `finish-pr` for commit, push, PR creation or update, visible check
-    observation, PR feedback loops, and ready-to-merge reporting.
+    observation, PR feedback loops, and ready-to-merge reporting. Invoke
+    `finish-pr` only after local verification and `review-code` are clean,
+    skipped because no reviewable local changes exist, or every local finding
+    has a recorded `ready-for-agent`, `ready-for-human`, or `wontfix`
+    disposition.
 12. Loop until the terminal goal is met or a human-owned blocker prevents
     further progress.
 
