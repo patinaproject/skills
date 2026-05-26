@@ -108,45 +108,16 @@ function runWithCapturedOutput(command, args, options = {}) {
 }
 
 function acquireInstallLock() {
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      installLockHandle = fs.openSync(installLockPath, "wx");
-      fs.writeFileSync(installLockHandle, `${process.pid}\n`);
-      return;
-    } catch (error) {
-      if (error.code !== "EEXIST") {
-        throw error;
-      }
-
-      const lockPid = Number.parseInt(fs.readFileSync(installLockPath, "utf8"), 10);
-      const lockIsActive = Number.isInteger(lockPid) && (() => {
-        try {
-          process.kill(lockPid, 0);
-          return true;
-        } catch {
-          return false;
-        }
-      })();
-
-      if (lockIsActive) {
-        throw new Error(`another skills:install process is already running with pid ${lockPid}`);
-      }
-
-      fs.rmSync(installLockPath, { force: true });
-
-      try {
-        installLockHandle = fs.openSync(installLockPath, "wx");
-        fs.writeFileSync(installLockHandle, `${process.pid}\n`);
-        return;
-      } catch (retryError) {
-        if (retryError.code !== "EEXIST") {
-          throw retryError;
-        }
-      }
+  try {
+    installLockHandle = fs.openSync(installLockPath, "wx");
+    fs.writeFileSync(installLockHandle, `${process.pid}\n`);
+  } catch (error) {
+    if (error.code === "EEXIST") {
+      throw new Error("another skills:install process may be running; remove .skills-install.lock manually only after confirming no restore is active");
     }
-  }
 
-  throw new Error("could not acquire .skills-install.lock after 3 attempts");
+    throw error;
+  }
 }
 
 function repoUrlForSource(source) {
@@ -195,9 +166,10 @@ function computeSkillFolderHash(skillDir) {
   files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
 
   const hash = createHash("sha256");
-  // Match the upstream skills CLI lock hash exactly so existing computedHash
-  // values remain meaningful. The immutable Git ref is the primary integrity
-  // anchor; this hash confirms the restored payload matches the committed lock.
+  // Match skills@1.5.7's computeSkillFolderHash implementation exactly so
+  // skills-lock.json values produced by the upstream CLI remain meaningful.
+  // The immutable Git ref is the primary integrity anchor; this hash confirms
+  // the restored payload matches the committed lock.
   for (const file of files) {
     hash.update(file.relativePath);
     hash.update(file.content);

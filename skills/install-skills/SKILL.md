@@ -68,16 +68,18 @@ The current restore lifecycle reads `skills-lock.json` directly, fetches that
 exact ref, and verifies `computedHash`; branch names, tags, or missing refs are
 not reproducible enough for `pnpm skills:install`.
 
-If the skills CLI writes a lock entry without a full commit SHA, resolve the
-source revision that produced the installed content before committing:
+If the skills CLI writes a lock entry without a full commit SHA, record the
+exact commit from the local checkout or CLI output that produced the installed
+payload before committing:
 
 ```bash
-gh api repos/<owner>/<repo>/commits/<branch-or-tag> --jq .sha
+git -C <local-skills-source-clone> rev-parse HEAD
 ```
 
-Record that SHA as the entry's `ref`, then run `pnpm skills:install` to prove
-the lockfile can restore the exact recorded skills without changing
-`skills-lock.json`.
+Do not re-resolve a branch or tag later through the GitHub API; its target may
+have moved after the payload was installed. Record the producing commit SHA as
+the entry's `ref`, then run `pnpm skills:install` to prove the lockfile can
+restore the exact recorded skills without changing `skills-lock.json`.
 
 ## Patina Sources
 
