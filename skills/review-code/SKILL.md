@@ -61,6 +61,14 @@ the Explorer or reviewer agent after its final report is consumed. Do not let
 old review agents pile up, and do not start a duplicate reviewer for the same
 unresolved review pass.
 
+Before spawning a new reviewer, close or mark inactive any prior review-code
+Explorer, reviewer, or worker agents whose output has already been consumed,
+canceled, or superseded. Do not leave stale prior-run agents visible as if they
+belong to the current review. If the host cannot close a prior agent, label it
+inactive or superseded before starting the next review, so the visible agent
+list should communicate only the current review state without requiring the
+human to mentally filter old agents.
+
 Pass only:
 
 - Repository path
