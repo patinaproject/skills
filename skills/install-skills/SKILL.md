@@ -16,6 +16,9 @@ public lifecycle command instead:
 pnpm skills:install
 ```
 
+Use this skill instead of `pnpm skills:install` only when adding, removing,
+refreshing, or otherwise changing the locked skill set.
+
 ## Preflight
 
 1. Read repository guidance first: `AGENTS.md`, `CLAUDE.md` if present, and
