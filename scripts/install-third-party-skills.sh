@@ -112,7 +112,8 @@ function computeSkillFolderHash(skillDir) {
 
   const hash = createHash("sha256");
   // Match the upstream skills CLI lock hash exactly so existing computedHash
-  // values remain meaningful.
+  // values remain meaningful. The immutable Git ref is the primary integrity
+  // anchor; this hash confirms the restored payload matches the committed lock.
   for (const file of files) {
     hash.update(file.relativePath);
     hash.update(file.content);
@@ -137,6 +138,10 @@ const groups = new Map();
 for (const [name, entry] of entries) {
   assertSafeRelative(name, "skill name");
   assertSafeRelative(entry.skillPath, `${name}.skillPath`);
+
+  if (fs.existsSync(path.join(repoRoot, "skills", name, "SKILL.md"))) {
+    throw new Error(`${name} is an in-repo skill; do not lock a third-party skill with the same name`);
+  }
 
   if (entry.sourceType !== "github") {
     throw new Error(`${name} has unsupported sourceType ${entry.sourceType}; only github lock entries can be restored`);
@@ -174,7 +179,12 @@ for (const group of groups.values()) {
 
   run("git", ["init", "-q"], { cwd: checkoutDir });
   run("git", ["remote", "add", "origin", repoUrlForSource(group.source)], { cwd: checkoutDir });
-  run("git", ["fetch", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
+  try {
+    run("git", ["fetch", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
+  } catch (error) {
+    const skillNames = group.skills.map(({ name }) => name).join(", ");
+    throw new Error(`${skillNames}: ref ${group.ref} was not found in ${group.source}`);
+  }
 
   const skillDirs = [...new Set(group.skills.map(({ entry }) => path.dirname(entry.skillPath)))];
   run("git", ["checkout", "FETCH_HEAD", "--", ...skillDirs], { cwd: checkoutDir });

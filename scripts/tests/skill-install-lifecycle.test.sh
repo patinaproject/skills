@@ -37,6 +37,35 @@ if [ "$locked_skill_count" = "0" ]; then
   exit 0
 fi
 
+temp_repo="$(mktemp -d)"
+cleanup() {
+  rm -rf "$temp_repo"
+}
+trap cleanup EXIT
+
+mkdir -p "$temp_repo/scripts" "$temp_repo/skills/develop-issue"
+cp scripts/install-third-party-skills.sh "$temp_repo/scripts/"
+printf '# develop-issue\n' >"$temp_repo/skills/develop-issue/SKILL.md"
+cat >"$temp_repo/skills-lock.json" <<'JSON'
+{
+  "version": 1,
+  "skills": {
+    "develop-issue": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
+      "skillPath": "skills/engineering/diagnose/SKILL.md",
+      "computedHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}
+JSON
+
+if (cd "$temp_repo" && bash scripts/install-third-party-skills.sh >/tmp/skill-install-collision.out 2>/tmp/skill-install-collision.err); then
+  echo "FAIL: pnpm skills:install must reject third-party locks that collide with in-repo skills" >&2
+  exit 1
+fi
+
 node <<'NODE'
 const lock = require("./skills-lock.json");
 for (const [name, entry] of Object.entries(lock.skills || {})) {
