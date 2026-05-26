@@ -72,7 +72,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'Do not add the issue to projects' "$SKILL"
   assert_match 'Do not create project fields or status options' "$SKILL"
   assert_match 'Skip incompatible project items' "$SKILL"
-  assert_match 'project-item inspection or update permission failures' "$SKILL"
+  assert_match 'project-item inspection or updates fail due to permissions' "$SKILL"
   assert_match 'project status update result' "$SKILL"
   assert_match 'Conditional routes are not blanket prerequisites' "$SKILL"
   assert_match 'mattpocock/skills@write-a-skill' "$SKILL"

@@ -152,12 +152,13 @@ For this skill, all visible PR checks include required and optional checks.
    skills.
 3. Inspect the issue's existing GitHub Projects membership and GitHub Project items
    before branch setup. For each existing GitHub Project item, use
-   project-item inspection to find a compatible single-select status field with
-   the exact option Status = `In progress` and update that project item to
-   `In progress`. Do not add the issue to projects. Do not create project fields or status options.
+   project-item inspection to find a compatible single-select `Status` field
+   that offers the exact `In progress` option (Status = `In progress`) and
+   update that project item to `In progress`. Do not add the issue to projects.
+   Do not create project fields or status options.
    Skip incompatible project items and continue when
    the project lacks a compatible status field, lacks the `In progress` option,
-   or project-item inspection or update permission failures occur. Record the
+   or project-item inspection or updates fail due to permissions. Record the
    project status update result, including each updated item and skipped item
    reason, for the final report.
 4. Satisfy the branch setup precondition using `new-branch` when needed.
