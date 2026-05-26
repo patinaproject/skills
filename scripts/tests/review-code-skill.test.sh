@@ -41,7 +41,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'Before spawning a new reviewer,[[:space:]]+close or mark inactive any prior review-code[[:space:]]+Explorer, reviewer, or worker agents whose output has already been consumed,[[:space:]]+canceled, or superseded' "$SKILL"
   assert_match 'Do not leave stale prior-run agents visible as if they[[:space:]]+belong to the current review' "$SKILL"
   assert_match 'If the host cannot close a prior agent, label it[[:space:]]+inactive or superseded before starting the next review' "$SKILL"
-  assert_match 'visible agent[[:space:]]+list should communicate only the current review state' "$SKILL"
+  assert_match 'visible agent[[:space:]]+list[[:space:]]+must communicate only the current review state' "$SKILL"
   assert_match 'If fresh reviewer dispatch is unavailable, halt' "$SKILL"
   assert_match 'Do not fall back to same-thread review' "$SKILL"
   assert_match 'read-only and findings-only' "$SKILL"
