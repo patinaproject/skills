@@ -130,6 +130,8 @@ if [ -f "$SKILL" ]; then
   assert_no_match 'spawn a fresh Explorer' "$SKILL"
   assert_match 'Never merge the pull request' "$SKILL"
 
+  assert_order 'Satisfy the branch setup precondition using `new-branch` when needed' 'Use `finish-pr` for commit' "$SKILL"
+
   for outcome in ready-for-agent ready-for-human wontfix; do
     assert_match "\`$outcome\`" "$SKILL"
   done
