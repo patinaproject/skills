@@ -68,7 +68,10 @@ trap cleanup EXIT
 
 (
   cd "$temp_repo"
-  node <<'NODE'
+  cat > mutate-lockfile.sh <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+node <<'NODE'
 const fs = require("fs");
 const lock = require("./skills-lock.json");
 const names = Object.keys(lock.skills || {});
@@ -80,10 +83,13 @@ if (names.length < 2) {
 lock.skills[names[0]].computedHash = lock.skills[names[1]].computedHash;
 fs.writeFileSync("skills-lock.json", JSON.stringify(lock, null, 2) + "\n");
 NODE
+SH
+  chmod +x mutate-lockfile.sh
 
   stale_hash="$(git hash-object skills-lock.json)"
   set +e
-  bash scripts/install-third-party-skills.sh >/tmp/skill-install-lifecycle-stale.out 2>/tmp/skill-install-lifecycle-stale.err
+  PATINA_SKILL_INSTALL_RESTORE_COMMAND="$temp_repo/mutate-lockfile.sh" \
+    bash scripts/install-third-party-skills.sh >/tmp/skill-install-lifecycle-stale.out 2>/tmp/skill-install-lifecycle-stale.err
   stale_status=$?
   set -e
   guarded_hash="$(git hash-object skills-lock.json)"

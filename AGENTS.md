@@ -77,6 +77,9 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - `pnpm test` includes network-backed skills CLI canaries and the
   `skills:install` lifecycle check.
 - Validate paths with `find` or `rg`
+- Run `bash scripts/tests/skill-install-lifecycle.test.sh` after changing
+  `scripts/install-third-party-skills.sh`, `package.json` `postinstall`, or the
+  `skills:install` package script.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/new-branch-workflow.test.sh` after changing `skills/new-branch/**`

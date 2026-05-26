@@ -51,7 +51,13 @@ trap cleanup EXIT
 # restoring, put the committed lockfile back and fail visibly.
 echo "install-third-party-skills: restoring vendored skills from skills-lock.json..."
 set +e
-pnpm dlx skills@latest experimental_install --yes
+# Test hook: lets the lifecycle test force a lockfile mutation without relying
+# on current upstream `skills@latest` behavior.
+if [ -n "${PATINA_SKILL_INSTALL_RESTORE_COMMAND:-}" ]; then
+  "$PATINA_SKILL_INSTALL_RESTORE_COMMAND"
+else
+  pnpm dlx skills@latest experimental_install --yes
+fi
 install_status=$?
 set -e
 
@@ -59,7 +65,7 @@ after_hash="$(git hash-object skills-lock.json)"
 
 if [ "$before_hash" != "$after_hash" ]; then
   cp "$lock_backup" skills-lock.json
-  echo "install-third-party-skills: upstream restore attempted to mutate skills-lock.json; restored original lockfile" >&2
+  echo "install-third-party-skills: restore command exited $install_status and mutated skills-lock.json; restored original lockfile" >&2
   exit 1
 fi
 
