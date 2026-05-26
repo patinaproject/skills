@@ -151,17 +151,19 @@ There is no `needs-info` state in v1. Insufficient information maps to
 
 ## Final Report
 
-When the workflow stops, write for a human first and a process log never. Lead
-with the outcome. Keep the default report short, direct, and human-readable, and
+When the workflow stops, write for a human first, not as a process log. Lead with
+the outcome. Keep the default report short, direct, and human-readable, and
 surface only details that change what the reader needs to understand or do.
 
 Include:
 
 - What changed, in 1-3 meaningful bullets.
-- Where the work ended up: include the issue, PR, and branch links when
-  available.
+- Where the work ended up: include the issue, PR, and branch links. Link them
+  when URLs are available; name them plainly when not.
 - Verification commands and results, summarized at the highest useful level.
   Collapse routine verification into one concise line when everything passed.
+- Child skill halt reasons, only when a halt changes what the human should do
+  next.
 - Latest `review-code` result, or that it was skipped because no reviewable
   local changes existed, only when it affects reviewer confidence or next
   action.
@@ -200,7 +202,7 @@ Changed:
 - Routine verification is collapsed unless something failed, skipped, or needs
   human attention.
 
-Verified: targeted tests, lint, type-check, and PR checks passed.
+Verified: routine checks passed (targeted tests, lint, type-check, PR checks).
 
 Needs human attention: none before review.
 ```
