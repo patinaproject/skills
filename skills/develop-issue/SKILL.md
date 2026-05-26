@@ -150,34 +150,47 @@ For this skill, all visible PR checks include required and optional checks.
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
 2. Validate the single same-repository issue reference and required child
    skills.
-3. Satisfy the branch setup precondition using `new-branch` when needed.
-4. Apply triggered conditional routes from the Conditional Routes section.
-5. Choose the next capability by naming the current gap between actual state and
+3. Inspect the issue's existing GitHub Projects through its GitHub Project items
+   before branch setup, using the issue's `projectItems` data. For each
+   existing GitHub Project item:
+   - Use project-item inspection to find a compatible field where
+     Status = `In progress` is offered as an exact option and update that
+     project item to `In progress`.
+   - Do not add the issue to projects. Do not create project fields or status
+     options.
+   - Skip incompatible project items and continue when the project lacks a
+     compatible status field, lacks the `In progress` option, or project-item
+     inspection or updates fail due to permissions.
+   - Record the project status update result, including each updated item and
+     skipped item reason, for the final report.
+4. Satisfy the branch setup precondition using `new-branch` when needed.
+5. Apply triggered conditional routes from the Conditional Routes section.
+6. Choose the next capability by naming the current gap between actual state and
    the terminal goal.
-6. Do not treat implementation, diagnosis, local review, or publishing as a
+7. Do not treat implementation, diagnosis, local review, or publishing as a
    fixed mandatory sequence. Invoke the capability that removes the current
    blocker or readiness gap.
-7. Run repository-documented verification before local review and before final
+8. Run repository-documented verification before local review and before final
    publishing readiness decisions.
-8. Check for reviewable local changes: committed branch diff from the
+9. Check for reviewable local changes: committed branch diff from the
    default-branch merge base, staged changes, unstaged changes, or untracked
    files.
-9. When reviewable local changes exist, invoke `review-code` and inherit its
-   full contract. Explicit use of `develop-issue` is sufficient approval for
-   this required local review gate: dispatch the fresh read-only reviewer
-   without asking for another user confirmation. Preserve the `review-code`
-   boundary exactly: no same-thread fallback and no file edits, staging,
-   commits, pushes, PR comments, review-thread mutation, or other worktree
-   mutation. Halt if fresh reviewer dispatch is unavailable or if `review-code`
-   reports a halt condition.
-10. Route local review findings through the Review Finding Router.
-11. Use `finish-pr` for commit, push, PR creation or update, visible check
+10. When reviewable local changes exist, invoke `review-code` and inherit its
+    full contract. Explicit use of `develop-issue` is sufficient approval for
+    this required local review gate: dispatch the fresh read-only reviewer
+    without asking for another user confirmation. Preserve the `review-code`
+    boundary exactly: no same-thread fallback and no file edits, staging,
+    commits, pushes, PR comments, review-thread mutation, or other worktree
+    mutation. Halt if fresh reviewer dispatch is unavailable or if `review-code`
+    reports a halt condition.
+11. Route local review findings through the Review Finding Router.
+12. Use `finish-pr` for commit, push, PR creation or update, visible check
     observation, PR feedback loops, and ready-to-merge reporting. Invoke
     `finish-pr` only after local verification and `review-code` are clean,
     skipped because no reviewable local changes exist, or every local finding
     has a recorded `ready-for-agent`, `ready-for-human`, or `wontfix`
     disposition.
-12. Loop until the terminal goal is met or a human-owned blocker prevents
+13. Loop until the terminal goal is met or a human-owned blocker prevents
     further progress.
 
 During long-running or resumable execution, keep compact checkpoint state using
@@ -203,18 +216,97 @@ There is no `needs-info` state in v1. Insufficient information maps to
 
 ## Final Report
 
-When the workflow stops, report:
+When the workflow stops, write for a human first, not as a process log. Lead with
+the outcome. Keep the default report short, direct, and human-readable, and
+surface only details that change what the reader needs to understand or do.
 
-- Issue reference and URL
-- Branch name
-- Child skills invoked, with halt reason if any
-- Terminal state: `goal-met` or `human-blocked`
-- Production-readiness case
-- Verification commands and results
-- Relevant tests added or updated
-- Local review result and finding dispositions
-- PR review and check feedback status
-- Human-owned blockers, if any
-- `wontfix` explanations, if any
-- Residual risks or test gaps, or `none identified`
-- PR URL and readiness status, when `finish-pr` runs
+Include:
+
+- What changed, in 1-3 meaningful bullets.
+- Where the work ended up: include the issue, PR, and branch links. Link them
+  when URLs are available; name them plainly when not.
+- Project status update result, including updated existing GitHub Projects and
+  skipped project items with reasons.
+- Terminal state: `goal-met` or `human-blocked`.
+- Production-readiness case.
+- Verification commands and results, summarized at the highest useful level.
+  Collapse routine verification into one concise line when everything passed.
+- Relevant tests added or updated.
+- Child skill halt reasons, only when a halt changes what the human should do
+  next.
+- Local review result and finding dispositions.
+- PR review and check feedback status.
+- Latest `review-code` result, or that it was skipped because no reviewable
+  local changes existed, only when it affects reviewer confidence or next
+  action.
+- Human-owned blockers, if any.
+- `wontfix` explanations, if any.
+- Residual risks or test gaps, or `none identified`.
+- PR URL and readiness status, when `finish-pr` runs.
+
+Keep visible and specific:
+
+- Failed checks, skipped checks, unresolved risks, or human action still needed.
+- The exact command and blocker for any verification that did not run or did not
+  pass.
+- Runtime-required token or budget reporting, but place token or budget
+  reporting after the result so it does not dominate the message.
+
+Remove or minimize:
+
+- Long lists of every command run when all passed.
+- Repeated statements that lint, typecheck, tests, hooks, and PR checks were
+  each verified.
+- Generic process narration such as "I inspected status, reviewed diffs, ran
+  checks."
+- Full PR check inventories when they are all green.
+- Mergeability, review, or unrelated dirty-file status unless it changes what
+  the human should do next.
+
+When child skills return detailed readiness evidence, translate child skill
+reports into the final-report vocabulary above. Do not forward child-skill gate
+inventories. Do not repeat `finish-pr` readiness gates such as clean worktree,
+head SHA equality, merge state, check inventory, or review-thread count when
+they all passed; collapse them into the verification line unless a failed gate
+changes what the human should do next.
+
+### Good final output
+
+Example for issue 190:
+
+```md
+Done: [#190](https://github.com/patinaproject/skills/issues/190) is implemented
+on [PR #197](https://github.com/patinaproject/skills/pull/197)
+([branch `190-human-focused-final-output`](https://github.com/patinaproject/skills/tree/190-human-focused-final-output)).
+
+Changed:
+- `develop-issue` final reports now lead with outcome and meaningful changes.
+- Routine verification is collapsed unless something failed, skipped, or needs
+  human attention.
+
+Verified: routine checks passed (targeted tests, lint, type-check, PR checks).
+
+Needs human attention: none before review.
+```
+
+### Bad final output
+
+Avoid final output shaped like a process transcript:
+
+```md
+Implemented issue #190.
+
+Verification:
+- develop-issue workflow test passed.
+- markdownlint passed.
+- type-check passed.
+- commit hook passed.
+- PR check Test Gate passed.
+- PR check code-review passed.
+- PR is MERGEABLE and CLEAN.
+
+Child skills invoked: new-branch, write-a-skill, tdd, review-code, finish-pr.
+No unrelated dirty files except local config. Goal marked complete.
+```
+
+Use the bad shape only as an anti-example; do not mirror its structure.

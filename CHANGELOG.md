@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.1...patinaproject-skills-v2.4.2) (2026-05-26)
+
+
+### Bug Fixes
+
+* [#192](https://github.com/patinaproject/skills/issues/192) clean up stale review subagents ([#195](https://github.com/patinaproject/skills/issues/195)) ([73c7885](https://github.com/patinaproject/skills/commit/73c788540ca32bf76cd070b4947be6f121c99fd6))
+
 ## [2.4.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.0...patinaproject-skills-v2.4.1) (2026-05-25)
 
 

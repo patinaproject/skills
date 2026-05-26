@@ -23,7 +23,8 @@ not halt the skill by themselves. It never merges the PR.
 Before the final response, the workflow must run a strict final ready-to-merge
 check. If any final gate fails, report the PR as not ready-to-merge and list the
 blocker in human-friendly language; do not imply success, and must not call it
-finished.
+finished. If every final gate passes, compress ready-to-merge evidence into a
+human line instead of listing the gates.
 
 ## Workflow
 
