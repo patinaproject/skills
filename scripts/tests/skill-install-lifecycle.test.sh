@@ -103,6 +103,11 @@ SH
     echo "FAIL: stale skills-lock.json guard did not restore the original lockfile" >&2
     exit 1
   fi
+
+  if [ -e ".agents/skills/$locked_skill/SKILL.md" ]; then
+    echo "FAIL: stale skills-lock.json restore promoted generated skills" >&2
+    exit 1
+  fi
 )
 
 echo "OK: pnpm skills:install restores locked skills and leaves skills-lock.json unchanged"
