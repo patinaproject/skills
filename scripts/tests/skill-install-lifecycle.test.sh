@@ -28,9 +28,9 @@ if [ -n "$restore_script" ]; then
   exit 1
 fi
 
-# This exercises the real restore path, which shells out to the upstream CLI and
-# requires network access while `skills@latest experimental_install` is the
-# temporary lockfile-restore mechanism.
+# This test intentionally exercises the real restore path. It requires network
+# access because `skills@latest experimental_install` is the temporary
+# lockfile-restore mechanism behind the public lifecycle command.
 before_hash="$(git hash-object skills-lock.json)"
 pnpm skills:install
 after_hash="$(git hash-object skills-lock.json)"
