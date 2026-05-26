@@ -83,7 +83,7 @@ assert_no_match "skills:restore" \
   docs skills/scaffold-repository skills/install-skills scripts/install-third-party-skills.sh
 
 assert_match "skills:install" \
-  AGENTS.md
+  AGENTS.md skills/scaffold-repository/SKILL.md skills/install-skills/SKILL.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
