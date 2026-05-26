@@ -151,7 +151,7 @@ For this skill, all visible PR checks include required and optional checks.
 2. Validate the single same-repository issue reference and required child
    skills.
 3. Satisfy the branch setup precondition using `new-branch` when needed.
-4. Apply triggered conditional routes.
+4. Apply triggered conditional routes from the Conditional Routes section.
 5. Choose the next capability by naming the current gap between actual state and
    the terminal goal.
 6. Do not treat implementation, diagnosis, local review, or publishing as a

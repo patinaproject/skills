@@ -105,6 +105,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'Branch setup is an automatic[[:space:]]+precondition' "$SKILL"
   assert_match 'Run[[:space:]]+`new-branch` when the worktree is not already on the correct issue-linked[[:space:]]+branch' "$SKILL"
   assert_match 'Skip `new-branch` when the current worktree is already correctly[[:space:]]+prepared' "$SKILL"
+  assert_match 'Apply triggered conditional routes from the Conditional Routes section' "$SKILL"
   assert_match 'Choose the next capability by naming the current gap between actual state and[[:space:]]+the terminal goal' "$SKILL"
   assert_match 'Do not treat implementation, diagnosis, local review, or publishing as a[[:space:]]+fixed mandatory sequence' "$SKILL"
   assert_match 'Check for reviewable local changes' "$SKILL"
