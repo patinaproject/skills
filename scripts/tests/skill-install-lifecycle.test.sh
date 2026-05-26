@@ -83,6 +83,51 @@ for (const [name, entry] of Object.entries(lock.skills || {})) {
 }
 NODE
 
+hash_fixture="$(mktemp -d)"
+mkdir -p "$hash_fixture/nested"
+printf 'one\n' >"$hash_fixture/a.txt"
+printf 'two\n' >"$hash_fixture/nested/b.txt"
+
+actual_fixture_hash="$(node - "$hash_fixture" <<'NODE'
+const { createHash } = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const fixture = process.argv[2];
+const files = [];
+
+function collectFiles(baseDir, currentDir) {
+  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+    const fullPath = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      collectFiles(baseDir, fullPath);
+    } else if (entry.isFile()) {
+      files.push({
+        relativePath: path.relative(baseDir, fullPath).split(path.sep).join("/"),
+        content: fs.readFileSync(fullPath),
+      });
+    }
+  }
+}
+
+collectFiles(fixture, fixture);
+files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+
+const hash = createHash("sha256");
+for (const file of files) {
+  hash.update(file.relativePath);
+  hash.update(file.content);
+}
+console.log(hash.digest("hex"));
+NODE
+)"
+rm -rf "$hash_fixture"
+
+if [ "$actual_fixture_hash" != "e9681f55c66c75c49763c16d64ddbb695ccbed02c8f32e4355d75e58e7fc7fdf" ]; then
+  echo "FAIL: skill folder hash fixture changed" >&2
+  exit 1
+fi
+
 # This runs the real restore path because the issue requires the public install
 # command to prove locked skills are restored while the committed lockfile stays
 # unchanged.

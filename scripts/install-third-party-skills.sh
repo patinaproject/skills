@@ -30,8 +30,8 @@ if [ ! -f skills-lock.json ]; then
 fi
 
 node <<'NODE'
-const { execFileSync } = require("node:child_process");
-const { createHash } = require("node:crypto");
+const { execFileSync, spawnSync } = require("node:child_process");
+const { createHash, randomBytes } = require("node:crypto");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -69,15 +69,24 @@ function run(command, args, options = {}) {
 }
 
 function runWithCapturedOutput(command, args, options = {}) {
-  const output = execFileSync(command, args, {
+  const result = spawnSync(command, args, {
     cwd: options.cwd || repoRoot,
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
     env: process.env,
   });
 
-  if (output) {
-    process.stdout.write(output);
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
+  }
+
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
+
+  if (result.status !== 0) {
+    const error = new Error(`Command failed: ${command} ${args.join(" ")}`);
+    error.stderr = result.stderr;
+    throw error;
   }
 }
 
@@ -236,7 +245,7 @@ for (const targetSkillsRoot of targetSkillsRoots) {
   for (const [name] of entries) {
     const stagedDir = path.join(stagedSkillsRoot, name);
     const targetDir = path.join(targetSkillsRoot, name);
-    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}`);
+    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${randomBytes(4).toString("hex")}`);
 
     copyDirectory(stagedDir, tempTargetDir);
     fs.rmSync(targetDir, { recursive: true, force: true });
