@@ -74,6 +74,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 ## Testing Guidelines
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
+- `pnpm test` includes network-backed skills CLI canaries and the
+  `skills:install` lifecycle check.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
