@@ -123,7 +123,7 @@ if [ -f "$SKILL" ]; then
   assert_match 'include the issue, PR, and branch links' "$SKILL"
   assert_match 'Child skill halt reasons, only when a halt changes' "$SKILL"
   assert_match '\[#190\]\(https://github\.com/patinaproject/skills/issues/190\)' "$SKILL"
-  assert_match '\[PR #191\]\(https://github\.com/patinaproject/skills/pull/191\)' "$SKILL"
+  assert_match '\[PR #197\]\(https://github\.com/patinaproject/skills/pull/197\)' "$SKILL"
   assert_match '\[branch `190-human-focused-final-output`\]\(https://github\.com/patinaproject/skills/tree/190-human-focused-final-output\)' "$SKILL"
   assert_match '[Ff]ailed checks, skipped checks, unresolved risks' "$SKILL"
   assert_match 'token or budget[[:space:]]+reporting after the result' "$SKILL"

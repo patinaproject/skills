@@ -194,7 +194,7 @@ Remove or minimize:
 
 ```md
 Done: [#190](https://github.com/patinaproject/skills/issues/190) is implemented
-on [PR #191](https://github.com/patinaproject/skills/pull/191)
+on [PR #197](https://github.com/patinaproject/skills/pull/197)
 ([branch `190-human-focused-final-output`](https://github.com/patinaproject/skills/tree/190-human-focused-final-output)).
 
 Changed:
