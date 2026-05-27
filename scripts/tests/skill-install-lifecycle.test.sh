@@ -334,10 +334,31 @@ for (const name of Object.keys(lock.skills || {})) {
 }
 NODE
 
-if [ -e .agents/skills/.stale-test.old-123-abcdef12 ] ||
-  [ -e .claude/skills/.stale-test.tmp-123-abcdef12 ] ||
-  [ -L .claude/skills/.stale-link.tmp-123-abcdef12 ]; then
-  echo "FAIL: pnpm skills:install did not clean stale promotion entries" >&2
+stale_promotion_entry="$(node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const candidates = [
+  path.join(".agents", "skills", ".stale-test.old-123-abcdef12"),
+  path.join(".claude", "skills", ".stale-test.tmp-123-abcdef12"),
+  path.join(".claude", "skills", ".stale-link.tmp-123-abcdef12"),
+];
+
+for (const candidate of candidates) {
+  try {
+    fs.lstatSync(candidate);
+    console.log(candidate);
+    process.exit(0);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+}
+NODE
+)"
+
+if [ -n "$stale_promotion_entry" ]; then
+  echo "FAIL: pnpm skills:install did not clean stale promotion entry: $stale_promotion_entry" >&2
   exit 1
 fi
 

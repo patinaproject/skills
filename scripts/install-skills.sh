@@ -278,7 +278,7 @@ function acquireInstallLock(groupCount) {
   );
 }
 
-function removeStalePromotionDirs() {
+function removeStalePromotionEntries() {
   const stalePromotionPattern = new RegExp(`^\\.[^.].*\\.(old|tmp)-\\d+-${promotionTokenPattern}$`);
 
   for (const root of [path.join(repoRoot, ".agents", "skills"), path.join(repoRoot, ".claude", "skills")]) {
@@ -287,8 +287,10 @@ function removeStalePromotionDirs() {
     }
 
     for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-      if ((entry.isDirectory() || entry.isSymbolicLink()) && stalePromotionPattern.test(entry.name)) {
-        fs.rmSync(path.join(root, entry.name), { recursive: true, force: true });
+      if (stalePromotionPattern.test(entry.name)) {
+        const stalePath = path.join(root, entry.name);
+        fs.lstatSync(stalePath);
+        fs.rmSync(stalePath, { recursive: true, force: true });
       }
     }
   }
@@ -471,7 +473,7 @@ for (const [name, entry] of entries) {
 
 console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
 acquireInstallLock(groups.size);
-removeStalePromotionDirs();
+removeStalePromotionEntries();
 removeUnlockedSkillDirs(new Set(entries.map(([name]) => name)));
 
 const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
