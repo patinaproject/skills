@@ -26,10 +26,11 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `postinstall: pnpm skills:install`, and `skills:install: bash scripts/install-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
+| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `postinstall: pnpm skills:install`, `clean: bash scripts/clean.sh`, and `skills:install: bash scripts/install-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
 | `pnpm-lock.yaml` | yes | present |
 | `skills-lock.json` | yes | present; valid JSON; records project-local skills with immutable `ref` values and `computedHash` values, or an empty `skills` object when no shared skills are locked yet |
-| `scripts/install-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise requires `git` on `PATH`, fetches each locked source at its immutable `ref`, verifies each restored skill against `computedHash`, promotes restored payloads into `.agents/skills/`, creates relative `.claude/skills/` symlinks to the matching shared payloads, and never mutates `skills-lock.json` |
+| `scripts/install-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise fetches each locked GitHub source at its immutable `ref` without writing project-local transient installer files, verifies each restored skill against `computedHash`, writes restored payloads into `.agents/skills/`, creates relative `.claude/skills/` symlinks to the matching shared payloads, and never mutates `skills-lock.json` |
+| `scripts/clean.sh` | yes | present; executable; removes generated dependency and skill install files, including `node_modules/`, generated third-party overlay entries, and stale legacy installer lock files, while preserving in-repo skill overlay entries |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `docs/release-flow.md` | yes | present; documents the release-please flow |
 
@@ -103,8 +104,9 @@ skills restore after `pnpm install`.
 | File / command | Required | Check |
 |---|---|---|
 | `skills-lock.json` | yes | present; records every vendored skill that should be restored into the project overlays with an immutable `ref`, or an empty `skills` object if none are installed yet |
-| `scripts/install-skills.sh` | yes | present; requires `git` on `PATH`, fetches each locked source at its immutable `ref`, verifies restored skill payloads against `computedHash`, promotes matching shared payloads into `.agents/skills/`, creates relative `.claude/skills/` symlinks to them, and never mutates `skills-lock.json` |
-| `package.json` | yes | includes `postinstall: pnpm skills:install` and `skills:install: bash scripts/install-skills.sh` |
+| `scripts/install-skills.sh` | yes | present; fetches each locked GitHub source at its immutable `ref` without writing project-local transient installer files, verifies restored skill payloads against `computedHash`, writes matching shared payloads into `.agents/skills/`, creates relative `.claude/skills/` symlinks to them, and never mutates `skills-lock.json` |
+| `scripts/clean.sh` | yes | present; removes generated dependency and skill install files while preserving in-repo skill overlay entries |
+| `package.json` | yes | includes `postinstall: pnpm skills:install`, `skills:install: bash scripts/install-skills.sh`, and `clean: bash scripts/clean.sh` |
 | `.gitignore` | yes | ignores generated `.agents/skills/*` and `.claude/skills/*` payloads while keeping committed in-repo skill symlinks unignored |
 | `pnpm skills:install` | yes | run after accepting lifecycle drift when one or more skills are locked; installs all locked vendored skills into the local project overlays |
 | `npx --yes skills@latest list --json` | yes | verify restored locked vendored skills are present alongside any in-repo overlay symlinks |

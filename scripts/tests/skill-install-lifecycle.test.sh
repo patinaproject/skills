@@ -14,6 +14,7 @@ fi
 
 postinstall_script="$(node -e "console.log(require('./package.json').scripts.postinstall || '')")"
 install_script="$(node -e "console.log(require('./package.json').scripts['skills:install'] || '')")"
+clean_script="$(node -e "console.log(require('./package.json').scripts.clean || '')")"
 restore_script="$(node -e "console.log(require('./package.json').scripts['skills:restore'] || '')")"
 
 if [ "$postinstall_script" != "pnpm skills:install" ]; then
@@ -23,6 +24,11 @@ fi
 
 if [ "$install_script" != "bash scripts/install-skills.sh" ]; then
   echo "FAIL: package.json skills:install must run the restore implementation" >&2
+  exit 1
+fi
+
+if [ "$clean_script" != "bash scripts/clean.sh" ]; then
+  echo "FAIL: package.json clean must run the project cleanup implementation" >&2
   exit 1
 fi
 
@@ -70,80 +76,52 @@ if (cd "$temp_repo" && bash scripts/install-skills.sh >"$collision_out" 2>"$coll
   exit 1
 fi
 
-lock_repo="$temp_repo/lock-check"
-mkdir -p "$lock_repo/scripts"
-cp scripts/install-skills.sh "$lock_repo/scripts/"
-cat >"$lock_repo/skills-lock.json" <<'JSON'
-{
-  "version": 1,
-  "skills": {
-    "diagnose": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
-      "skillPath": "skills/engineering/diagnose/SKILL.md",
-      "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
-    }
+clean_repo="$temp_repo/clean-check"
+mkdir -p \
+  "$clean_repo/scripts" \
+  "$clean_repo/node_modules/example" \
+  "$clean_repo/skills/in-repo" \
+  "$clean_repo/.agents/skills" \
+  "$clean_repo/.agents/skills/third-party" \
+  "$clean_repo/.claude/skills" \
+  "$clean_repo/.claude/skills/third-party"
+cp scripts/clean.sh "$clean_repo/scripts/"
+printf '# in repo\n' >"$clean_repo/skills/in-repo/SKILL.md"
+ln -s ../../skills/in-repo "$clean_repo/.agents/skills/in-repo"
+ln -s ../../skills/in-repo "$clean_repo/.claude/skills/in-repo"
+printf '# third party\n' >"$clean_repo/.agents/skills/third-party/SKILL.md"
+printf '# third party\n' >"$clean_repo/.claude/skills/third-party/SKILL.md"
+printf 'lock\n' >"$clean_repo/.skills-install.lock"
+printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
+
+(cd "$clean_repo" && bash scripts/clean.sh >clean.out)
+
+if [ -e "$clean_repo/node_modules" ] ||
+  [ -e "$clean_repo/.agents/skills/third-party" ] ||
+  [ -e "$clean_repo/.claude/skills/third-party" ] ||
+  [ -e "$clean_repo/.skills-install.lock" ] ||
+  [ -e "$clean_repo/.skills-install.lock.1234-deadbeef.tmp" ]; then
+  echo "FAIL: pnpm clean must remove generated dependency and skill install files" >&2
+  exit 1
+fi
+
+node - "$clean_repo" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const repo = process.argv[2];
+for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
+  const overlayPath = path.join(repo, overlayRoot, "in-repo");
+  if (!fs.lstatSync(overlayPath).isSymbolicLink()) {
+    throw new Error(`${overlayPath} must remain a symlink after clean`);
+  }
+
+  const target = fs.readlinkSync(overlayPath);
+  if (target !== "../../skills/in-repo") {
+    throw new Error(`${overlayPath} target changed to ${target}`);
   }
 }
-JSON
-printf '%s\n' "$$" >"$lock_repo/.skills-install.lock"
-
-if (cd "$lock_repo" && bash scripts/install-skills.sh >"$lock_repo/skill-install-lock.out" 2>"$lock_repo/skill-install-lock.err"); then
-  echo "FAIL: pnpm skills:install must reject concurrent restore attempts" >&2
-  exit 1
-fi
-
-if [ ! -f "$lock_repo/.skills-install.lock" ]; then
-  echo "FAIL: pnpm skills:install must not remove another process lock" >&2
-  exit 1
-fi
-
-stale_lock_repo="$temp_repo/stale-lock-check"
-mkdir -p "$stale_lock_repo/scripts" "$stale_lock_repo/bin"
-cp scripts/install-skills.sh "$stale_lock_repo/scripts/"
-cat >"$stale_lock_repo/skills-lock.json" <<'JSON'
-{
-  "version": 1,
-  "skills": {
-    "diagnose": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
-      "skillPath": "skills/engineering/diagnose/SKILL.md",
-      "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
-    }
-  }
-}
-JSON
-cat >"$stale_lock_repo/bin/git" <<'SH'
-#!/usr/bin/env bash
-set -euo pipefail
-
-if [ "${1:-}" = "fetch" ]; then
-  echo "forced fake git fetch failure" >&2
-  exit 42
-fi
-
-exit 0
-SH
-chmod +x "$stale_lock_repo/bin/git"
-printf '{"pid":%s,"createdAt":"1970-01-01T00:00:00.000Z","command":"pnpm skills:install"}\n' "$$" >"$stale_lock_repo/.skills-install.lock"
-
-if (cd "$stale_lock_repo" && PATH="$stale_lock_repo/bin:$PATH" PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=not-a-number bash scripts/install-skills.sh >"$stale_lock_repo/skill-install-stale-lock.out" 2>"$stale_lock_repo/skill-install-stale-lock.err"); then
-  echo "FAIL: stale-lock fixture should stop at fake git fetch failure" >&2
-  exit 1
-fi
-
-if grep -q "already running" "$stale_lock_repo/skill-install-stale-lock.err"; then
-  echo "FAIL: pnpm skills:install must recover an expired stale lock even if the PID was reused" >&2
-  exit 1
-fi
-
-if [ -f "$stale_lock_repo/.skills-install.lock" ]; then
-  echo "FAIL: pnpm skills:install must clean up a recovered stale lock after exit" >&2
-  exit 1
-fi
+NODE
 
 node <<'NODE'
 const lock = require("./skills-lock.json");
@@ -333,6 +311,12 @@ for (const name of Object.keys(lock.skills || {})) {
   }
 }
 NODE
+
+if compgen -G ".skills-install.lock*" >/dev/null; then
+  echo "FAIL: pnpm skills:install must not create transient install lock files" >&2
+  compgen -G ".skills-install.lock*" >&2
+  exit 1
+fi
 
 stale_promotion_entry="$(node <<'NODE'
 const fs = require("fs");

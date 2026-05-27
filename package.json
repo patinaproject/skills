@@ -17,6 +17,7 @@
   "scripts": {
     "prepare": "husky",
     "postinstall": "pnpm skills:install",
+    "clean": "bash scripts/clean.sh",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",

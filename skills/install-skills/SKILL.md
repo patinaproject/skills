@@ -64,9 +64,11 @@ npm_config_ignore_scripts=true npx --yes skills@latest add <source> --skill '*' 
 ```
 
 GitHub lock entries must be committed with an immutable 40-character `ref`.
-The current restore lifecycle reads `skills-lock.json` directly, fetches that
-exact ref, and verifies `computedHash`; branch names, tags, or missing refs are
-not reproducible enough for `pnpm skills:install`.
+The current restore lifecycle reads `skills-lock.json` directly, downloads that
+exact GitHub ref, verifies `computedHash`, writes verified payloads into
+`.agents/skills/`, and creates relative `.claude/skills/` symlinks to them
+without project-local transient installer files. Branch names, tags, or missing
+refs are not reproducible enough for `pnpm skills:install`.
 
 When the desired source is already known, pin the add command to the producing
 commit ref:
