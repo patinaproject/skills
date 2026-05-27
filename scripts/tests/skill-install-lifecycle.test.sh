@@ -37,6 +37,8 @@ if [ -n "$restore_script" ]; then
   exit 1
 fi
 
+PATINA_SKILL_INSTALL_SELF_TEST=1 bash scripts/install-skills.sh >/dev/null
+
 locked_skill_count="$(node -e "const lock = require('./skills-lock.json'); console.log(Object.keys(lock.skills || {}).length)")"
 
 if [ "$locked_skill_count" = "0" ]; then

@@ -42,6 +42,7 @@ const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
 const promotionTokenPattern = "[0-9a-f]{8}";
 const fetchRetryDelayMs = 500;
+const fetchAttempts = 3;
 const maxCompressedArchiveBytes = 50 * 1024 * 1024;
 const maxExtractedArchiveBytes = 200 * 1024 * 1024;
 
@@ -136,17 +137,15 @@ function fetchBufferOnce(url, redirectCount = 0) {
 }
 
 async function fetchBuffer(url) {
-  const attempts = 2;
-
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+  for (let attempt = 1; attempt <= fetchAttempts; attempt += 1) {
     try {
       return await fetchBufferOnce(url);
     } catch (error) {
-      if (attempt === attempts || !isRetryableFetchError(error)) {
+      if (attempt === fetchAttempts || !isRetryableFetchError(error)) {
         throw error;
       }
 
-      await wait(fetchRetryDelayMs);
+      await wait(fetchRetryDelayMs * 2 ** (attempt - 1));
     }
   }
 
@@ -207,6 +206,8 @@ function parseTarEntries(buffer) {
     offset += Math.ceil(size / 512) * 512;
 
     if (type === "g") {
+      pendingPaxPath = undefined;
+      pendingLongPath = undefined;
       continue;
     }
 
@@ -221,6 +222,8 @@ function parseTarEntries(buffer) {
     }
 
     if (type === "K") {
+      pendingPaxPath = undefined;
+      pendingLongPath = undefined;
       continue;
     }
 
@@ -343,7 +346,7 @@ function writeSkillFiles(files, targetDir) {
   for (const file of files) {
     const targetPath = path.join(targetDir, file.relativePath);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.writeFileSync(targetPath, file.content, { mode: file.mode || 0o644 });
+    fs.writeFileSync(targetPath, file.content, { mode: 0o644 });
   }
 }
 
@@ -352,6 +355,99 @@ function linkDirectory(sourceDir, targetDir) {
 
   removeGeneratedPath(targetDir);
   fs.symlinkSync(relativeSource, targetDir, "dir");
+}
+
+function selfTestTarEntry(name, content, type = "0") {
+  const body = Buffer.from(content);
+  const header = Buffer.alloc(512);
+  header.write(name, 0, 100, "utf8");
+  header.write("0000644\0", 100, 8, "ascii");
+  header.write("0000000\0", 108, 8, "ascii");
+  header.write("0000000\0", 116, 8, "ascii");
+  header.write(body.length.toString(8).padStart(11, "0") + "\0", 124, 12, "ascii");
+  header.write("00000000000\0", 136, 12, "ascii");
+  header.fill(0x20, 148, 156);
+  header.write(type, 156, 1, "ascii");
+  header.write("ustar\0", 257, 6, "ascii");
+  header.write("00", 263, 2, "ascii");
+
+  let checksum = 0;
+  for (const byte of header) {
+    checksum += byte;
+  }
+  header.write(checksum.toString(8).padStart(6, "0") + "\0 ", 148, 8, "ascii");
+
+  return Buffer.concat([header, body, Buffer.alloc((512 - (body.length % 512)) % 512)]);
+}
+
+function selfTestTar(entries) {
+  return Buffer.concat([...entries, Buffer.alloc(1024)]);
+}
+
+function selfTestPaxRecord(key, value) {
+  let record = `${key}=${value}\n`;
+  let length = Buffer.byteLength(record) + String(Buffer.byteLength(record)).length + 1;
+
+  while (true) {
+    const candidate = `${length} ${record}`;
+    const candidateLength = Buffer.byteLength(candidate);
+    if (candidateLength === length) {
+      return candidate;
+    }
+    length = candidateLength;
+  }
+}
+
+function runSelfTests() {
+  const regular = parseTarEntries(selfTestTar([selfTestTarEntry("archive-root/skill/SKILL.md", "# skill\n")]));
+  if (regular[0]?.path !== "archive-root/skill/SKILL.md") {
+    throw new Error("self-test: regular tar entry path was not parsed");
+  }
+
+  const paxPath = "archive-root/skill/references/" + "a".repeat(120) + ".md";
+  const pax = parseTarEntries(selfTestTar([
+    selfTestTarEntry("PaxHeader", selfTestPaxRecord("path", paxPath), "x"),
+    selfTestTarEntry("ignored", "content\n"),
+  ]));
+  if (pax[0]?.path !== paxPath) {
+    throw new Error("self-test: pax path was not applied");
+  }
+
+  const longPath = "archive-root/skill/" + "b".repeat(120) + ".md";
+  const gnuLong = parseTarEntries(selfTestTar([
+    selfTestTarEntry("././@LongLink", `${longPath}\0`, "L"),
+    selfTestTarEntry("ignored", "content\n"),
+  ]));
+  if (gnuLong[0]?.path !== longPath) {
+    throw new Error("self-test: GNU long path was not applied");
+  }
+
+  try {
+    assertSafeRelative("../escape", "self-test path");
+    throw new Error("self-test: unsafe relative path was accepted");
+  } catch (error) {
+    if (!error.message.includes("safe relative path")) {
+      throw error;
+    }
+  }
+
+  try {
+    zlib.gunzipSync(zlib.gzipSync(Buffer.alloc(2)), {
+      maxOutputLength: 1,
+    });
+    throw new Error("self-test: oversized extracted archive was accepted");
+  } catch (error) {
+    if (error.code !== "ERR_BUFFER_TOO_LARGE" && !String(error.message).includes("maxOutputLength")) {
+      throw error;
+    }
+  }
+
+  console.log("skills:install: self-test passed");
+}
+
+if (process.env.PATINA_SKILL_INSTALL_SELF_TEST === "1") {
+  runSelfTests();
+  process.exit(0);
 }
 
 const groups = new Map();
