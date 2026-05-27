@@ -284,6 +284,8 @@ function removeGeneratedPath(target) {
 }
 
 function writeSkillFiles(files, targetDir) {
+  // This deliberately writes directly to generated overlay paths: if interrupted,
+  // rerun `pnpm skills:install` to restore from the verified lockfile.
   removeGeneratedPath(targetDir);
   fs.mkdirSync(targetDir, { recursive: true });
 
@@ -368,12 +370,16 @@ async function main() {
       const sourcePrefix = `${archiveRoot}/${path.dirname(entry.skillPath).split(path.sep).join("/")}/`;
       const skillFiles = archiveFiles
         .filter((file) => file.path.startsWith(sourcePrefix))
-        .map((file) => ({
-          relativePath: file.path.slice(sourcePrefix.length),
-          content: file.content,
-          mode: file.mode,
-        }))
-        .filter((file) => file.relativePath && !file.relativePath.split("/").includes(".git") && !file.relativePath.split("/").includes("node_modules"));
+      .map((file) => ({
+        relativePath: file.path.slice(sourcePrefix.length),
+        content: file.content,
+        mode: file.mode,
+      }))
+      .filter((file) => file.relativePath && !file.relativePath.split("/").includes(".git") && !file.relativePath.split("/").includes("node_modules"));
+
+      for (const file of skillFiles) {
+        assertSafeRelative(file.relativePath, `${name} archive path`);
+      }
 
       if (!skillFiles.some((file) => file.relativePath === "SKILL.md")) {
         throw new Error(`${name} ref ${group.ref} does not contain ${entry.skillPath}`);
