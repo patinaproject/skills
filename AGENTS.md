@@ -45,7 +45,9 @@ This is a single-context repository; domain docs are optional and created lazily
 - `pnpm install`: install dev tooling and initialize Husky
 - `pnpm skills:install`: restore locked project-local skills from `skills-lock.json`
   without creating project-local transient installer files. Concurrent
-  invocations are unsupported; rerun if interrupted.
+  invocations are unsupported; rerun if interrupted. Prefer
+  `PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS` for fetch timeouts; the old
+  `PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS` fallback is only for existing wrappers.
 - `pnpm clean`: remove generated dependency and skill install files
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually

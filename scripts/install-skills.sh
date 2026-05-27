@@ -217,8 +217,8 @@ function parseTarEntries(buffer) {
     pendingPaxPath = undefined;
     pendingLongPath = undefined;
 
-    // Only regular files participate in the upstream skills hash; directories,
-    // links, and other metadata entries are intentionally ignored.
+    // Non-regular entries are dropped to match upstream skills hashing:
+    // directories, links, and metadata entries never contribute payload bytes.
     if (type === "0" || type === "") {
       files.push({ path: name, mode, content: Buffer.from(content) });
     }
