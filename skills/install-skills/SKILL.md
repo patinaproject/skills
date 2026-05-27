@@ -70,6 +70,10 @@ exact GitHub ref, verifies `computedHash`, writes verified payloads into
 without project-local transient installer files. Branch names, tags, or missing
 refs are not reproducible enough for `pnpm skills:install`.
 
+Because the restore path intentionally creates no lock or staging files,
+concurrent `pnpm skills:install` invocations are unsupported. If an install is
+interrupted, rerun `pnpm skills:install` to restore the locked overlay.
+
 When the desired source is already known, pin the add command to the producing
 commit ref:
 

@@ -41,6 +41,7 @@ const lockPath = path.join(repoRoot, "skills-lock.json");
 const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
 const promotionTokenPattern = "[0-9a-f]{8}";
+const fetchRetryDelayMs = 500;
 
 if (entries.length === 0) {
   console.log("skills:install: skills-lock.json has no skills, nothing to do");
@@ -61,7 +62,22 @@ function fetchTimeoutMs() {
   return parsed;
 }
 
-function fetchBuffer(url, redirectCount = 0) {
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableFetchError(error) {
+  return (
+    error.statusCode === 429 ||
+    error.statusCode >= 500 ||
+    error.code === "ECONNRESET" ||
+    error.code === "ETIMEDOUT" ||
+    error.code === "EAI_AGAIN" ||
+    error.message.startsWith("timed out fetching ")
+  );
+}
+
+function fetchBufferOnce(url, redirectCount = 0) {
   return new Promise((resolve, reject) => {
     const request = https.get(
       url,
@@ -83,13 +99,15 @@ function fetchBuffer(url, redirectCount = 0) {
             return;
           }
 
-          fetchBuffer(new URL(response.headers.location, url).toString(), redirectCount + 1).then(resolve, reject);
+          fetchBufferOnce(new URL(response.headers.location, url).toString(), redirectCount + 1).then(resolve, reject);
           return;
         }
 
         if (response.statusCode !== 200) {
           response.resume();
-          reject(new Error(`HTTP ${response.statusCode} while fetching ${url}`));
+          const error = new Error(`HTTP ${response.statusCode} while fetching ${url}`);
+          error.statusCode = response.statusCode;
+          reject(error);
           return;
         }
 
@@ -104,6 +122,24 @@ function fetchBuffer(url, redirectCount = 0) {
     });
     request.on("error", reject);
   });
+}
+
+async function fetchBuffer(url) {
+  const attempts = 2;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await fetchBufferOnce(url);
+    } catch (error) {
+      if (attempt === attempts || !isRetryableFetchError(error)) {
+        throw error;
+      }
+
+      await wait(fetchRetryDelayMs);
+    }
+  }
+
+  throw new Error(`could not fetch ${url}`);
 }
 
 function parseOctal(value) {
@@ -181,6 +217,8 @@ function parseTarEntries(buffer) {
     pendingPaxPath = undefined;
     pendingLongPath = undefined;
 
+    // Only regular files participate in the upstream skills hash; directories,
+    // links, and other metadata entries are intentionally ignored.
     if (type === "0" || type === "") {
       files.push({ path: name, mode, content: Buffer.from(content) });
     }
@@ -347,6 +385,8 @@ for (const [name, entry] of entries) {
 
 async function main() {
   console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
+  // No project-local lock or staging files are created. Concurrent invocations
+  // are unsupported; rerun `pnpm skills:install` if an install is interrupted.
   removeStalePromotionEntries();
   removeUnlockedSkillDirs(new Set(entries.map(([name]) => name)));
 
@@ -370,12 +410,12 @@ async function main() {
       const sourcePrefix = `${archiveRoot}/${path.dirname(entry.skillPath).split(path.sep).join("/")}/`;
       const skillFiles = archiveFiles
         .filter((file) => file.path.startsWith(sourcePrefix))
-      .map((file) => ({
-        relativePath: file.path.slice(sourcePrefix.length),
-        content: file.content,
-        mode: file.mode,
-      }))
-      .filter((file) => file.relativePath && !file.relativePath.split("/").includes(".git") && !file.relativePath.split("/").includes("node_modules"));
+        .map((file) => ({
+          relativePath: file.path.slice(sourcePrefix.length),
+          content: file.content,
+          mode: file.mode,
+        }))
+        .filter((file) => file.relativePath && !file.relativePath.split("/").includes(".git") && !file.relativePath.split("/").includes("node_modules"));
 
       for (const file of skillFiles) {
         assertSafeRelative(file.relativePath, `${name} archive path`);
