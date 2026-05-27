@@ -47,8 +47,11 @@ if (entries.length === 0) {
   process.exit(0);
 }
 
-function gitTimeoutMs() {
-  const value = process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS;
+function fetchTimeoutMs() {
+  const value =
+    process.env.PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS ||
+    // Preserve the old knob so existing CI and local wrappers keep working.
+    process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS;
   const parsed = value === undefined ? 120000 : Number.parseInt(value, 10);
 
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
@@ -66,7 +69,7 @@ function fetchBuffer(url, redirectCount = 0) {
         headers: {
           "User-Agent": "patina-skills-install",
         },
-        timeout: gitTimeoutMs(),
+        timeout: fetchTimeoutMs(),
       },
       (response) => {
         if (
@@ -108,8 +111,36 @@ function parseOctal(value) {
   return text ? Number.parseInt(text, 8) : 0;
 }
 
+function parsePaxRecords(content) {
+  const records = {};
+  let offset = 0;
+
+  while (offset < content.length) {
+    const spaceIndex = content.indexOf(0x20, offset);
+    if (spaceIndex === -1) {
+      break;
+    }
+
+    const length = Number.parseInt(content.subarray(offset, spaceIndex).toString("utf8"), 10);
+    if (!Number.isSafeInteger(length) || length <= 0 || offset + length > content.length) {
+      break;
+    }
+
+    const record = content.subarray(spaceIndex + 1, offset + length - 1).toString("utf8");
+    const equalsIndex = record.indexOf("=");
+    if (equalsIndex !== -1) {
+      records[record.slice(0, equalsIndex)] = record.slice(equalsIndex + 1);
+    }
+    offset += length;
+  }
+
+  return records;
+}
+
 function parseTarEntries(buffer) {
   const files = [];
+  let pendingLongPath;
+  let pendingPaxPath;
 
   for (let offset = 0; offset + 512 <= buffer.length; ) {
     const header = buffer.subarray(offset, offset + 512);
@@ -121,12 +152,34 @@ function parseTarEntries(buffer) {
 
     const rawName = header.subarray(0, 100).toString("utf8").replace(/\0.*$/, "");
     const rawPrefix = header.subarray(345, 500).toString("utf8").replace(/\0.*$/, "");
-    const name = rawPrefix ? `${rawPrefix}/${rawName}` : rawName;
+    const headerName = rawPrefix ? `${rawPrefix}/${rawName}` : rawName;
     const mode = parseOctal(header.subarray(100, 108));
     const size = parseOctal(header.subarray(124, 136));
     const type = header.subarray(156, 157).toString("utf8") || "0";
     const content = buffer.subarray(offset, offset + size);
     offset += Math.ceil(size / 512) * 512;
+
+    if (type === "g") {
+      continue;
+    }
+
+    if (type === "x") {
+      pendingPaxPath = parsePaxRecords(content).path;
+      continue;
+    }
+
+    if (type === "L") {
+      pendingLongPath = content.toString("utf8").replace(/\0.*$/, "");
+      continue;
+    }
+
+    if (type === "K") {
+      continue;
+    }
+
+    const name = pendingPaxPath || pendingLongPath || headerName;
+    pendingPaxPath = undefined;
+    pendingLongPath = undefined;
 
     if (type === "0" || type === "") {
       files.push({ path: name, mode, content: Buffer.from(content) });
