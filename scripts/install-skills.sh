@@ -46,11 +46,6 @@ const fetchAttempts = 3;
 const maxCompressedArchiveBytes = 50 * 1024 * 1024;
 const maxExtractedArchiveBytes = 200 * 1024 * 1024;
 
-if (entries.length === 0) {
-  console.log("skills:install: skills-lock.json has no skills, nothing to do");
-  process.exit(0);
-}
-
 function fetchTimeoutMs() {
   const value =
     process.env.PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS ||
@@ -75,8 +70,8 @@ function isRetryableFetchError(error) {
     error.statusCode >= 500 ||
     error.code === "ECONNRESET" ||
     error.code === "ETIMEDOUT" ||
-    error.code === "EAI_AGAIN" ||
-    error.message.startsWith("timed out fetching ")
+    error.code === "ETIMEDOUT_FETCH" ||
+    error.code === "EAI_AGAIN"
   );
 }
 
@@ -130,7 +125,9 @@ function fetchBufferOnce(url, redirectCount = 0) {
     );
 
     request.on("timeout", () => {
-      request.destroy(new Error(`timed out fetching ${url}`));
+      const error = new Error(`timed out fetching ${url}`);
+      error.code = "ETIMEDOUT_FETCH";
+      request.destroy(error);
     });
     request.on("error", reject);
   });
@@ -346,7 +343,7 @@ function writeSkillFiles(files, targetDir) {
   for (const file of files) {
     const targetPath = path.join(targetDir, file.relativePath);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.writeFileSync(targetPath, file.content, { mode: 0o644 });
+    fs.writeFileSync(targetPath, file.content, { mode: file.mode & 0o111 ? 0o755 : 0o644 });
   }
 }
 
@@ -447,6 +444,11 @@ function runSelfTests() {
 
 if (process.env.PATINA_SKILL_INSTALL_SELF_TEST === "1") {
   runSelfTests();
+  process.exit(0);
+}
+
+if (entries.length === 0) {
+  console.log("skills:install: skills-lock.json has no skills, nothing to do");
   process.exit(0);
 }
 
