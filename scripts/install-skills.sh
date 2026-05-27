@@ -103,7 +103,13 @@ function fetchBufferOnce(url, redirectCount = 0) {
             return;
           }
 
-          fetchBufferOnce(new URL(response.headers.location, url).toString(), redirectCount + 1).then(resolve, reject);
+          const redirectUrl = new URL(response.headers.location, url);
+          if (redirectUrl.hostname !== "codeload.github.com" && !redirectUrl.hostname.endsWith(".github.com")) {
+            reject(new Error(`refusing redirect from ${url} to ${redirectUrl.toString()}`));
+            return;
+          }
+
+          fetchBufferOnce(redirectUrl.toString(), redirectCount + 1).then(resolve, reject);
           return;
         }
 
@@ -245,8 +251,22 @@ function parseTarEntries(buffer) {
 
 async function fetchGitHubArchive(source, ref) {
   const url = `https://codeload.github.com/${source}/tar.gz/${ref}`;
-  const archive = await fetchBuffer(url);
-  return parseTarEntries(zlib.gunzipSync(archive, { maxOutputLength: maxExtractedArchiveBytes }));
+
+  for (let attempt = 1; attempt <= fetchAttempts; attempt += 1) {
+    try {
+      const archive = await fetchBuffer(url);
+      return parseTarEntries(zlib.gunzipSync(archive, { maxOutputLength: maxExtractedArchiveBytes }));
+    } catch (error) {
+      const retryableDecodeError = error.code === "Z_BUF_ERROR" || error.code === "Z_DATA_ERROR";
+      if (attempt === fetchAttempts || !retryableDecodeError) {
+        throw error;
+      }
+
+      await wait(fetchRetryDelayMs * 2 ** (attempt - 1));
+    }
+  }
+
+  throw new Error(`could not parse archive from ${url}`);
 }
 
 function removeStalePromotionEntries() {

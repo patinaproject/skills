@@ -11,6 +11,7 @@ const path = require("node:path");
 
 const repoRoot = process.cwd();
 const inRepoSkillRoots = new Set();
+let skillsRootExists = false;
 
 function removePath(target) {
   fs.rmSync(target, { recursive: true, force: true });
@@ -21,6 +22,7 @@ function collectInRepoSkills() {
   if (!fs.existsSync(skillsRoot)) {
     return;
   }
+  skillsRootExists = true;
 
   for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
     if (entry.isDirectory() && fs.existsSync(path.join(skillsRoot, entry.name, "SKILL.md"))) {
@@ -50,8 +52,12 @@ for (const entry of fs.readdirSync(repoRoot, { withFileTypes: true })) {
   }
 }
 
-cleanSkillOverlay(path.join(repoRoot, ".agents", "skills"));
-cleanSkillOverlay(path.join(repoRoot, ".claude", "skills"));
+if (skillsRootExists && inRepoSkillRoots.size === 0) {
+  console.warn("clean: skills/ exists but no in-repo skills were detected; skipping overlay pruning");
+} else {
+  cleanSkillOverlay(path.join(repoRoot, ".agents", "skills"));
+  cleanSkillOverlay(path.join(repoRoot, ".claude", "skills"));
+}
 NODE
 
 echo "clean: removed generated dependency and skill install files"
