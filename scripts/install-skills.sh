@@ -42,6 +42,8 @@ const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
 const promotionTokenPattern = "[0-9a-f]{8}";
 const fetchRetryDelayMs = 500;
+const maxCompressedArchiveBytes = 50 * 1024 * 1024;
+const maxExtractedArchiveBytes = 200 * 1024 * 1024;
 
 if (entries.length === 0) {
   console.log("skills:install: skills-lock.json has no skills, nothing to do");
@@ -112,7 +114,16 @@ function fetchBufferOnce(url, redirectCount = 0) {
         }
 
         const chunks = [];
-        response.on("data", (chunk) => chunks.push(chunk));
+        let totalBytes = 0;
+        response.on("data", (chunk) => {
+          totalBytes += chunk.length;
+          if (totalBytes > maxCompressedArchiveBytes) {
+            request.destroy(new Error(`archive exceeds ${maxCompressedArchiveBytes} compressed bytes while fetching ${url}`));
+            return;
+          }
+
+          chunks.push(chunk);
+        });
         response.on("end", () => resolve(Buffer.concat(chunks)));
       },
     );
@@ -230,7 +241,7 @@ function parseTarEntries(buffer) {
 async function fetchGitHubArchive(source, ref) {
   const url = `https://codeload.github.com/${source}/tar.gz/${ref}`;
   const archive = await fetchBuffer(url);
-  return parseTarEntries(zlib.gunzipSync(archive));
+  return parseTarEntries(zlib.gunzipSync(archive, { maxOutputLength: maxExtractedArchiveBytes }));
 }
 
 function removeStalePromotionEntries() {
@@ -323,7 +334,9 @@ function removeGeneratedPath(target) {
 
 function writeSkillFiles(files, targetDir) {
   // This deliberately writes directly to generated overlay paths: if interrupted,
-  // rerun `pnpm skills:install` to restore from the verified lockfile.
+  // rerun `pnpm skills:install` to restore from the verified lockfile. A sibling
+  // temp-dir rename would be more crash-safe, but would reintroduce transient
+  // installer files that this restore path is designed to avoid.
   removeGeneratedPath(targetDir);
   fs.mkdirSync(targetDir, { recursive: true });
 
