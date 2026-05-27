@@ -417,7 +417,6 @@ function stageSymlinkPromotion(targetDir, sourceDir) {
   const tempTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.tmp-${process.pid}-${promotionToken}`);
   const relativeSource = path.relative(path.dirname(targetDir), sourceDir).split(path.sep).join("/");
 
-  fs.rmSync(tempTargetDir, { recursive: true, force: true });
   fs.symlinkSync(relativeSource, tempTargetDir, "dir");
   promotionTempDirs.push(tempTargetDir);
   return { targetDir, tempTargetDir };
