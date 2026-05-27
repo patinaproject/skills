@@ -200,7 +200,8 @@ retired workflow dependencies.
   an empty or absent lockfile is a no-op, while a populated lockfile restores
   every locked skill from the immutable Git `ref` recorded on each lock entry,
   verifies the restored payload hash against `computedHash`, and then promotes
-  the restored payloads into both `.agents/skills/` and `.claude/skills/`.
+  the restored payloads into `.agents/skills/`; `.claude/skills/` entries are
+  portable relative symlinks to the matching shared payloads.
   The script must treat
   `skills-lock.json` as restore-only input and must not call a lifecycle command
   that refreshes or rewrites the lockfile. Realignment must add missing

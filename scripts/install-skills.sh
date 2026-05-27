@@ -287,7 +287,7 @@ function removeStalePromotionDirs() {
     }
 
     for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-      if (entry.isDirectory() && stalePromotionPattern.test(entry.name)) {
+      if ((entry.isDirectory() || entry.isSymbolicLink()) && stalePromotionPattern.test(entry.name)) {
         fs.rmSync(path.join(root, entry.name), { recursive: true, force: true });
       }
     }
@@ -388,6 +388,39 @@ function copyDirectory(source, target) {
   });
 }
 
+function pathExists(target) {
+  try {
+    fs.lstatSync(target);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return false;
+    }
+
+    throw error;
+  }
+}
+
+function stageDirectoryPromotion(sourceDir, targetDir) {
+  const promotionToken = randomBytes(4).toString("hex");
+  const tempTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.tmp-${process.pid}-${promotionToken}`);
+
+  copyDirectory(sourceDir, tempTargetDir);
+  promotionTempDirs.push(tempTargetDir);
+  return { targetDir, tempTargetDir };
+}
+
+function stageSymlinkPromotion(targetDir, sourceDir) {
+  const promotionToken = randomBytes(4).toString("hex");
+  const tempTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.tmp-${process.pid}-${promotionToken}`);
+  const relativeSource = path.relative(path.dirname(targetDir), sourceDir).split(path.sep).join("/");
+
+  fs.rmSync(tempTargetDir, { recursive: true, force: true });
+  fs.symlinkSync(relativeSource, tempTargetDir, "dir");
+  promotionTempDirs.push(tempTargetDir);
+  return { targetDir, tempTargetDir };
+}
+
 function forgetPromotionTempDir(tempDir) {
   const index = promotionTempDirs.indexOf(tempDir);
   if (index !== -1) {
@@ -481,25 +514,22 @@ for (const group of groups.values()) {
   }
 }
 
-const targetSkillsRoots = [
-  path.join(repoRoot, ".agents", "skills"),
-  path.join(repoRoot, ".claude", "skills"),
-];
+const agentsSkillsRoot = path.join(repoRoot, ".agents", "skills");
+const claudeSkillsRoot = path.join(repoRoot, ".claude", "skills");
 const promotions = [];
 
-for (const targetSkillsRoot of targetSkillsRoots) {
-  fs.mkdirSync(targetSkillsRoot, { recursive: true });
+fs.mkdirSync(agentsSkillsRoot, { recursive: true });
+fs.mkdirSync(claudeSkillsRoot, { recursive: true });
 
-  for (const [name] of entries) {
-    const stagedDir = path.join(stagedSkillsRoot, name);
-    const targetDir = path.join(targetSkillsRoot, name);
-    const promotionToken = randomBytes(4).toString("hex");
-    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${promotionToken}`);
+for (const [name] of entries) {
+  const stagedDir = path.join(stagedSkillsRoot, name);
+  const agentTargetDir = path.join(agentsSkillsRoot, name);
+  const claudeTargetDir = path.join(claudeSkillsRoot, name);
 
-    copyDirectory(stagedDir, tempTargetDir);
-    promotionTempDirs.push(tempTargetDir);
-    promotions.push({ targetDir, tempTargetDir });
-  }
+  // The verified payload is promoted once into `.agents/skills`; Claude entries
+  // are portable relative symlinks to that shared project-local payload.
+  promotions.push(stageDirectoryPromotion(stagedDir, agentTargetDir));
+  promotions.push(stageSymlinkPromotion(claudeTargetDir, agentTargetDir));
 }
 
 // Promotion is idempotent but not fully transactional across every skill and
@@ -510,7 +540,7 @@ for (const { targetDir, tempTargetDir } of promotions) {
   const backupTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.old-${process.pid}-${promotionToken}`);
   let hasBackup = false;
 
-  if (fs.existsSync(targetDir)) {
+  if (pathExists(targetDir)) {
     fs.renameSync(targetDir, backupTargetDir);
     hasBackup = true;
     promotionTempDirs.push(backupTargetDir);
@@ -520,7 +550,7 @@ for (const { targetDir, tempTargetDir } of promotions) {
     fs.renameSync(tempTargetDir, targetDir);
     forgetPromotionTempDir(tempTargetDir);
   } catch (error) {
-    if (hasBackup && !fs.existsSync(targetDir)) {
+    if (hasBackup && !pathExists(targetDir)) {
       fs.renameSync(backupTargetDir, targetDir);
       forgetPromotionTempDir(backupTargetDir);
     }

@@ -217,20 +217,27 @@ for (const source of new Set(Object.values(lock.skills || {}).map((entry) => ent
 }
 NODE
 
+network_available=1
 while IFS= read -r source; do
   if ! git ls-remote "https://github.com/${source}.git" HEAD >/dev/null 2>&1; then
-    rm -f "$locked_sources"
-    echo "SKIP: no network for live pnpm skills:install restore"
-    exit 0
+    network_available=0
+    break
   fi
 done <"$locked_sources"
 rm -f "$locked_sources"
+
+if [ "$network_available" = "0" ]; then
+  echo "SKIP: no network for live pnpm skills:install restore"
+  exit 0
+fi
 
 # This runs the real restore path because the issue requires the public install
 # command to prove locked skills are restored while the committed lockfile stays
 # unchanged.
 before_hash="$(git hash-object skills-lock.json)"
 mkdir -p .agents/skills/.stale-test.old-123-abcdef12 .claude/skills/.stale-test.tmp-123-abcdef12
+rm -f .claude/skills/.stale-link.tmp-123-abcdef12
+ln -s ../.agents/skills/stale-link .claude/skills/.stale-link.tmp-123-abcdef12
 mkdir -p .agents/skills/stale-third-party .claude/skills/stale-third-party
 printf '# stale\n' >.agents/skills/stale-third-party/SKILL.md
 printf '# stale\n' >.claude/skills/stale-third-party/SKILL.md
@@ -259,8 +266,78 @@ if [ -n "$missing_skill" ]; then
   exit 1
 fi
 
-if [ -e .agents/skills/.stale-test.old-123-abcdef12 ] || [ -e .claude/skills/.stale-test.tmp-123-abcdef12 ]; then
-  echo "FAIL: pnpm skills:install did not clean stale promotion directories" >&2
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+const names = Object.keys(lock.skills || {});
+
+for (const name of names) {
+  const agentPath = path.join(".agents", "skills", name);
+  const claudePath = path.join(".claude", "skills", name);
+  const stat = fs.lstatSync(claudePath);
+
+  if (!stat.isSymbolicLink()) {
+    throw new Error(`${claudePath} must be a symlink`);
+  }
+
+  const target = fs.readlinkSync(claudePath);
+  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
+
+  if (path.isAbsolute(target) || target !== expectedTarget) {
+    throw new Error(`${claudePath} must link to ${expectedTarget}, got ${target}`);
+  }
+
+  const realAgent = fs.realpathSync(agentPath);
+  const realClaude = fs.realpathSync(claudePath);
+
+  if (realClaude !== realAgent) {
+    throw new Error(`${claudePath} resolves to ${realClaude}, expected ${realAgent}`);
+  }
+
+  if (!fs.existsSync(path.join(claudePath, "SKILL.md"))) {
+    throw new Error(`${claudePath}/SKILL.md must be readable through the symlink`);
+  }
+}
+
+const claudeEntries = fs.readdirSync(path.join(".claude", "skills"), { withFileTypes: true });
+const lockedSymlinks = claudeEntries.filter((entry) => names.includes(entry.name) && entry.isSymbolicLink());
+if (lockedSymlinks.length !== names.length) {
+  throw new Error(`expected ${names.length} locked Claude symlinks, found ${lockedSymlinks.length}`);
+}
+NODE
+
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+for (const name of Object.keys(lock.skills || {})) {
+  fs.rmSync(path.join(".claude", "skills", name), { recursive: true, force: true });
+}
+NODE
+pnpm skills:install
+
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+for (const name of Object.keys(lock.skills || {})) {
+  const agentPath = path.join(".agents", "skills", name);
+  const claudePath = path.join(".claude", "skills", name);
+  const stat = fs.lstatSync(claudePath);
+  const target = fs.readlinkSync(claudePath);
+  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
+
+  if (!stat.isSymbolicLink() || target !== expectedTarget || !fs.existsSync(path.join(claudePath, "SKILL.md"))) {
+    throw new Error(`${claudePath} was not recreated as a readable symlink to ${expectedTarget}`);
+  }
+}
+NODE
+
+if [ -e .agents/skills/.stale-test.old-123-abcdef12 ] ||
+  [ -e .claude/skills/.stale-test.tmp-123-abcdef12 ] ||
+  [ -L .claude/skills/.stale-link.tmp-123-abcdef12 ]; then
+  echo "FAIL: pnpm skills:install did not clean stale promotion entries" >&2
   exit 1
 fi
 
