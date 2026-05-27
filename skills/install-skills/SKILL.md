@@ -69,6 +69,8 @@ exact GitHub ref, verifies `computedHash`, writes verified payloads into
 `.agents/skills/`, and creates relative `.claude/skills/` symlinks to them
 without project-local transient installer files. Branch names, tags, or missing
 refs are not reproducible enough for `pnpm skills:install`.
+Locked GitHub sources must be publicly readable because restore uses GitHub
+archive downloads rather than local `git` credentials.
 
 Because the restore path intentionally creates no lock or staging files,
 concurrent `pnpm skills:install` invocations are unsupported. If an install is

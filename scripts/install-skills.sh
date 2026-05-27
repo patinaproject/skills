@@ -77,6 +77,12 @@ function isRetryableFetchError(error) {
 
 function fetchBufferOnce(url, redirectCount = 0) {
   return new Promise((resolve, reject) => {
+    const deadlineTimer = setTimeout(() => {
+      const error = new Error(`timed out fetching ${url}`);
+      error.code = "ETIMEDOUT_FETCH";
+      request.destroy(error);
+    }, fetchTimeoutMs());
+
     const request = https.get(
       url,
       {
@@ -129,6 +135,7 @@ function fetchBufferOnce(url, redirectCount = 0) {
       error.code = "ETIMEDOUT_FETCH";
       request.destroy(error);
     });
+    request.on("close", () => clearTimeout(deadlineTimer));
     request.on("error", reject);
   });
 }
