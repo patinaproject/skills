@@ -226,8 +226,6 @@ function parseTarEntries(buffer) {
     }
 
     if (type === "K") {
-      pendingPaxPath = undefined;
-      pendingLongPath = undefined;
       continue;
     }
 
@@ -424,6 +422,15 @@ function runSelfTests() {
   ]));
   if (gnuLong[0]?.path !== longPath) {
     throw new Error("self-test: GNU long path was not applied");
+  }
+
+  const gnuLongBeforeLongLink = parseTarEntries(selfTestTar([
+    selfTestTarEntry("././@LongLink", `${longPath}\0`, "L"),
+    selfTestTarEntry("././@LongLink", "ignored-link-target\0", "K"),
+    selfTestTarEntry("ignored", "content\n"),
+  ]));
+  if (gnuLongBeforeLongLink[0]?.path !== longPath) {
+    throw new Error("self-test: GNU long-link metadata consumed a pending long path");
   }
 
   try {
