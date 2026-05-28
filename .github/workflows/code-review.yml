@@ -163,23 +163,29 @@ jobs:
               unclear contracts, or likely agent workflow regressions
             - **Minor (Nice to Have):** Style, wording, or documentation polish
 
-            ## Step 5: Consolidate and post findings
+            ## Step 5: Consolidate and report findings
 
             Merge all findings. Deduplicate overlapping findings.
             Do NOT duplicate output from CI lint/test pipelines.
             Do not edit files, stage changes, commit changes, or push branches.
+            Do not create standalone PR summary comments. The Claude Code
+            action owns the single action-managed sticky comment.
 
-            For each Critical and Major finding, include a focused entry in the
-            summary comment. Each finding must include:
+            Post all actionable line-specific findings inline using
+            mcp__github_inline_comment__create_inline_comment with
+            confirmed: true whenever the finding has a valid diff location.
+            Each inline finding must include:
             - The severity label (C1:, M1:, M2:, etc.)
-            - The file and line or nearest stable location when available
             - A clear description of the issue
             - A concrete suggested fix
 
-            Post one summary comment using:
-              gh pr comment ${{ env.PR_NUMBER }} --body "..."
+            Return one final Markdown review summary for the action-managed
+            sticky comment. Keep the sticky summary concise: include review
+            context, affected areas, risk, finding counts, and brief notes for
+            findings that cannot be placed inline. Do not fully duplicate
+            inline finding details in the sticky summary.
 
-            Use this structure for the summary:
+            Use this structure for the final sticky summary:
 
             ## Code Review
 
@@ -197,8 +203,9 @@ jobs:
             - Major: [N]
             - Minor: [N]
 
-            [List each actionable finding briefly here. Include Minor findings
-            only when they are concrete enough to act on.]
+            [Briefly note where detailed findings were posted inline. Include
+            only summary-only notes for findings that could not be attached to
+            a diff line.]
 
             ## Important comment formatting rules
 
@@ -213,5 +220,5 @@ jobs:
             --model claude-opus-4-7
             --effort medium
             --max-turns 25
-            --allowedTools Read,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
+            --allowedTools Read,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
             --append-system-prompt "CI NON-INTERACTIVE MODE: Do not prompt for human confirmation. Proceed through the review steps automatically and report findings using only the allowed tools."
