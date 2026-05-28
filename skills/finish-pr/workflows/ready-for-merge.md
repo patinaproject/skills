@@ -28,6 +28,21 @@ Progress reports should name the current checkpoint, evidence gathered, next
 action, and blocker status. Keep stop reports concrete enough for a human to
 decide the next move.
 
+## Human Relevance Filter
+
+Apply this filter to progress reports and final handoffs. Keep the full command
+results, check snapshots, and gate evidence available for workflow decisions.
+User-visible details belong only when work failed, skipped, interrupted, or
+otherwise changes readiness, explains a blocker, identifies residual risk, or
+creates a human next action.
+
+Do not include command inventories, pass counts, green check names, or gate
+inventories when everything passes. Hide exact verification commands when they all pass.
+Progress reports should mention the current checkpoint and next action without
+repeated check lists. Show exact commands, failed check names, skipped
+verification, interrupted runs, or unresolved feedback only when they explain a
+blocker or tell the human what to do next.
+
 ## Steps
 
 1. Resolve context:
@@ -356,8 +371,7 @@ decide the next move.
     Updated the branch with latest `main`, resolved the skill guidance conflict,
     and pushed `2635d83`.
 
-    Verified: local suite and PR checks passed. No human action needed before
-    merge.
+    Verified: routine checks passed. No human action needed before merge.
     ```
 
     Avoid final output shaped like a readiness checklist:

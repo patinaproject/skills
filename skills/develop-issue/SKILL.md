@@ -122,8 +122,8 @@ or otherwise needs judgment not recorded in the issue.
 - PR check failures outside branch scope have a concrete disposition in a
   `human-blocked` final report; do not report `goal-met` while any visible PR
   check is still failing.
-- Residual risks and test gaps are named, even when the answer is
-  `none identified`.
+- Residual risks and test gaps are reported only when they are concrete,
+  relevant to the issue, and useful for a human decision.
 
 For this skill, all visible PR checks include required and optional checks.
 
@@ -194,10 +194,9 @@ For this skill, all visible PR checks include required and optional checks.
     further progress.
 
 During long-running or resumable execution, keep compact checkpoint state using
-the final-report vocabulary: issue reference and URL, branch name, child skill
-status, verification results, local review status, PR review status, check
-status, finding dispositions, blockers, and PR readiness. Resume from that
-state and continue until a terminal workflow state is reached:
+the final-report vocabulary: issue reference and URL, branch name, terminal
+state, meaningful changes, readiness, blockers, and next action. Resume from
+that state and continue until a terminal workflow state is reached:
 production-readiness evidence supports `goal-met` or there is a documented
 `human-blocked` stop.
 
@@ -216,6 +215,22 @@ There is no `needs-info` state in v1. Insufficient information maps to
 
 ## Final Report
 
+### Human Relevance Filter
+
+Apply this filter to progress updates, resumable checkpoints, and final
+handoffs. Keep verification evidence internally for decisions, but include it
+in user-visible output only when it failed, skipped, interrupted, changes
+readiness, explains a blocker, identifies residual risk, or creates a human
+next action.
+
+Do not include command inventories, pass counts, green check names, child-skill
+gate lists, routine head SHAs, or project-status details that do not affect what
+the human needs to know. Translate child-skill output into outcome, readiness,
+blocker, and next-action language. Progress updates should name the current
+checkpoint and next action without repeating check lists. When verification is
+interrupted, mention it only when the interruption changes readiness or asks the
+human to decide something.
+
 When the workflow stops, write for a human first, not as a process log. Lead with
 the outcome. Keep the default report short, direct, and human-readable, and
 surface only details that change what the reader needs to understand or do.
@@ -225,8 +240,8 @@ Include:
 - What changed, in 1-3 meaningful bullets.
 - Where the work ended up: include the issue, PR, and branch links. Link them
   when URLs are available; name them plainly when not.
-- Project status update result, including updated existing GitHub Projects and
-  skipped project items with reasons.
+- Project status update result only when it changed readiness, failed, skipped,
+  explains a blocker, or creates a human next action.
 - Terminal state: `goal-met` or `human-blocked`.
 - Production-readiness case.
 - Verification commands and results, summarized at the highest useful level.
@@ -237,11 +252,11 @@ Include:
 - Local review result and finding dispositions.
 - PR review and check feedback status.
 - Latest `review-code` result, or that it was skipped because no reviewable
-  local changes existed, only when it affects reviewer confidence or next
+  local changes existed, only when it changes reviewer confidence or next
   action.
 - Human-owned blockers, if any.
 - `wontfix` explanations, if any.
-- Residual risks or test gaps, or `none identified`.
+- Residual risks or test gaps, only when they are concrete and relevant.
 - PR URL and readiness status, when `finish-pr` runs.
 
 Keep visible and specific:
@@ -284,7 +299,7 @@ Changed:
 - Routine verification is collapsed unless something failed, skipped, or needs
   human attention.
 
-Verified: routine checks passed (targeted tests, lint, type-check, PR checks).
+Verified: routine checks passed; no human action needed before review.
 
 Needs human attention: none before review.
 ```
