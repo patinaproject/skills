@@ -7,12 +7,6 @@
 # refreshes or rewrites the committed lockfile. Use the install-skills workflow
 # for add/update flows.
 #
-# A live lock normally cleans up on process exit. After SIGKILL or host crash,
-# stale locks recover automatically after a bounded TTL: the greater of 10
-# minutes or twice the Git fetch timeout per locked source group. Deleting
-# `.skills-install.lock` manually is only needed when a contributor wants to
-# bypass that wait after confirming no install is active.
-#
 # Why this script exists: the eight in-repo `patinaproject-skills` are tracked
 # in `skills/<name>/`; third-party skills from external skill catalogs are tracked
 # only as pinned entries in `skills-lock.json` to avoid bloating
@@ -36,94 +30,27 @@ if [ ! -f skills-lock.json ]; then
 fi
 
 node <<'NODE'
-const { execFileSync, spawnSync } = require("node:child_process");
-const { createHash, randomBytes } = require("node:crypto");
+const { createHash } = require("node:crypto");
 const fs = require("node:fs");
-const os = require("node:os");
+const https = require("node:https");
 const path = require("node:path");
+const zlib = require("node:zlib");
 
 const repoRoot = process.cwd();
 const lockPath = path.join(repoRoot, "skills-lock.json");
 const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
 const entries = Object.entries(lock.skills || {});
-const installLockPath = path.join(repoRoot, ".skills-install.lock");
-const installLockAttempts = 8;
 const promotionTokenPattern = "[0-9a-f]{8}";
+const fetchRetryDelayMs = 500;
+const fetchAttempts = 3;
+const maxCompressedArchiveBytes = 50 * 1024 * 1024;
+const maxExtractedArchiveBytes = 200 * 1024 * 1024;
 
-if (entries.length === 0) {
-  console.log("skills:install: skills-lock.json has no skills, nothing to do");
-  process.exit(0);
-}
-
-const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "patina-skills-install-"));
-let installLockOwned = false;
-const promotionTempDirs = [];
-
-function cleanup() {
-  for (const tempDir of promotionTempDirs) {
-    try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
-    } catch {
-      // Best-effort cleanup must not mask the original install failure.
-    }
-  }
-
-  if (installLockOwned) {
-    try {
-      fs.rmSync(installLockPath, { force: true });
-    } catch {
-      // Best-effort cleanup must not mask the original install failure.
-    }
-    installLockOwned = false;
-  }
-
-  try {
-    fs.rmSync(stageRoot, { recursive: true, force: true });
-  } catch {
-    // Best-effort cleanup must not mask the original install failure.
-  }
-}
-
-process.on("exit", cleanup);
-process.on("SIGINT", () => {
-  process.exit(130);
-});
-process.on("SIGTERM", () => {
-  process.exit(143);
-});
-
-function run(command, args, options = {}) {
-  execFileSync(command, args, {
-    cwd: options.cwd || repoRoot,
-    stdio: options.stdio || "inherit",
-    timeout: gitTimeoutMs(),
-    env: process.env,
-  });
-}
-
-function runWithCapturedOutput(command, args, options = {}) {
-  const result = spawnSync(command, args, {
-    cwd: options.cwd || repoRoot,
-    encoding: "utf8",
-    timeout: gitTimeoutMs(),
-    env: process.env,
-  });
-
-  if (result.error) {
-    throw result.error;
-  }
-
-  if (result.status !== 0) {
-    const error = new Error(`Command failed: ${command} ${args.join(" ")}`);
-    error.stderr = result.stderr;
-    throw error;
-  }
-
-  return result;
-}
-
-function gitTimeoutMs() {
-  const value = process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS;
+function fetchTimeoutMs() {
+  const value =
+    process.env.PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS ||
+    // Preserve the old knob so existing CI and local wrappers keep working.
+    process.env.PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS;
   const parsed = value === undefined ? 120000 : Number.parseInt(value, 10);
 
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
@@ -133,152 +60,216 @@ function gitTimeoutMs() {
   return parsed;
 }
 
-function lockInfoFromDisk() {
-  let raw;
-  let stat;
-  try {
-    stat = fs.statSync(installLockPath);
-    raw = fs.readFileSync(installLockPath, "utf8").trim();
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      return { pid: undefined, raw: undefined, createdAtMs: undefined };
-    }
-
-    throw error;
-  }
-
-  if (!raw) {
-    return { pid: undefined, raw, createdAtMs: stat.mtimeMs };
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    const pid = Number.parseInt(typeof parsed === "number" ? parsed : parsed.pid, 10);
-    const createdAtMs =
-      typeof parsed === "object" && parsed !== null && typeof parsed.createdAt === "string"
-        ? Date.parse(parsed.createdAt)
-        : undefined;
-    return {
-      pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined,
-      raw,
-      createdAtMs: Number.isFinite(createdAtMs) ? createdAtMs : stat.mtimeMs,
-    };
-  } catch {
-    const pid = Number.parseInt(raw, 10);
-    return {
-      pid: Number.isSafeInteger(pid) && pid > 0 ? pid : undefined,
-      raw,
-      createdAtMs: stat.mtimeMs,
-    };
-  }
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function staleLockTtlMs(groupCount) {
-  return Math.max(gitTimeoutMs() * Math.max(groupCount, 1) * 2, 10 * 60 * 1000);
-}
-
-function isProcessActive(pid) {
-  if (!Number.isSafeInteger(pid) || pid <= 0) {
-    return false;
-  }
-
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    if (error.code === "ESRCH") {
-      return false;
-    }
-
-    // EPERM and unknown errors mean a process may still own the lock. Fail
-    // closed instead of deleting a live install lock we cannot inspect.
-    return true;
-  }
-}
-
-function isLockOwnerActive(lockInfo, groupCount) {
-  if (lockInfo.pid === undefined || !isProcessActive(lockInfo.pid)) {
-    return false;
-  }
-
-  const ageMs = Date.now() - (lockInfo.createdAtMs || 0);
-  return ageMs <= staleLockTtlMs(groupCount);
-}
-
-function acquireInstallLock(groupCount) {
-  for (let attempt = 0; attempt < installLockAttempts; attempt += 1) {
-    // Keep candidate/stale lock names under `.skills-install.lock.*.tmp`;
-    // `.gitignore` intentionally covers this family for interrupted runs.
-    const candidateLockPath = path.join(
-      repoRoot,
-      `.skills-install.lock.${process.pid}-${randomBytes(4).toString("hex")}.tmp`,
-    );
-
-    try {
-      fs.writeFileSync(
-        candidateLockPath,
-        `${JSON.stringify({
-          pid: process.pid,
-          createdAt: new Date().toISOString(),
-          command: "pnpm skills:install",
-        })}\n`,
-        { mode: 0o600 },
-      );
-      fs.linkSync(candidateLockPath, installLockPath);
-      installLockOwned = true;
-      return;
-    } catch (error) {
-      if (error.code !== "EEXIST") {
-        throw error;
-      }
-
-      const lockInfo = lockInfoFromDisk();
-      if (isLockOwnerActive(lockInfo, groupCount)) {
-        throw new Error(`another skills:install process is already running with pid ${lockInfo.pid}`);
-      }
-
-      const currentLock = lockInfoFromDisk();
-      if (currentLock.raw !== lockInfo.raw) {
-        continue;
-      }
-
-      const staleLockPath = path.join(
-        repoRoot,
-        `.skills-install.lock.stale-${process.pid}-${randomBytes(4).toString("hex")}.tmp`,
-      );
-
-      try {
-        fs.renameSync(installLockPath, staleLockPath);
-        const movedRaw = fs.readFileSync(staleLockPath, "utf8").trim();
-        if (movedRaw !== lockInfo.raw) {
-          try {
-            fs.linkSync(staleLockPath, installLockPath);
-          } catch (restoreError) {
-            if (restoreError.code !== "EEXIST") {
-              throw restoreError;
-            }
-          }
-          continue;
-        }
-      } catch (renameError) {
-        if (renameError.code !== "ENOENT") {
-          throw renameError;
-        }
-      } finally {
-        fs.rmSync(staleLockPath, { force: true });
-      }
-    } finally {
-      fs.rmSync(candidateLockPath, { force: true });
-    }
-  }
-
-  throw new Error(
-    `could not acquire ${path.relative(repoRoot, installLockPath)} after ${installLockAttempts} attempts; ` +
-      "confirm no install is active, then wait for stale-lock recovery or delete the lock manually",
+function isRetryableFetchError(error) {
+  return (
+    error.statusCode === 429 ||
+    error.statusCode >= 500 ||
+    error.code === "ECONNRESET" ||
+    error.code === "ETIMEDOUT" ||
+    error.code === "ETIMEDOUT_FETCH" ||
+    error.code === "EAI_AGAIN"
   );
 }
 
-function removeStalePromotionDirs() {
+function fetchBufferOnce(url, redirectCount = 0) {
+  return new Promise((resolve, reject) => {
+    const deadlineTimer = setTimeout(() => {
+      const error = new Error(`timed out fetching ${url}`);
+      error.code = "ETIMEDOUT_FETCH";
+      request.destroy(error);
+    }, fetchTimeoutMs());
+
+    const request = https.get(
+      url,
+      {
+        headers: {
+          "User-Agent": "patina-skills-install",
+        },
+        timeout: fetchTimeoutMs(),
+      },
+      (response) => {
+        if (
+          response.statusCode >= 300 &&
+          response.statusCode < 400 &&
+          typeof response.headers.location === "string"
+        ) {
+          response.resume();
+          if (redirectCount >= 5) {
+            reject(new Error(`too many redirects while fetching ${url}`));
+            return;
+          }
+
+          const redirectUrl = new URL(response.headers.location, url);
+          if (redirectUrl.hostname !== "codeload.github.com" && !redirectUrl.hostname.endsWith(".github.com")) {
+            reject(new Error(`refusing redirect from ${url} to ${redirectUrl.toString()}`));
+            return;
+          }
+
+          fetchBufferOnce(redirectUrl.toString(), redirectCount + 1).then(resolve, reject);
+          return;
+        }
+
+        if (response.statusCode !== 200) {
+          response.resume();
+          const error = new Error(`HTTP ${response.statusCode} while fetching ${url}`);
+          error.statusCode = response.statusCode;
+          reject(error);
+          return;
+        }
+
+        const chunks = [];
+        let totalBytes = 0;
+        response.on("data", (chunk) => {
+          totalBytes += chunk.length;
+          if (totalBytes > maxCompressedArchiveBytes) {
+            request.destroy(new Error(`archive exceeds ${maxCompressedArchiveBytes} compressed bytes while fetching ${url}`));
+            return;
+          }
+
+          chunks.push(chunk);
+        });
+        response.on("end", () => resolve(Buffer.concat(chunks)));
+      },
+    );
+
+    request.on("timeout", () => {
+      const error = new Error(`timed out fetching ${url}`);
+      error.code = "ETIMEDOUT_FETCH";
+      request.destroy(error);
+    });
+    request.on("close", () => clearTimeout(deadlineTimer));
+    request.on("error", reject);
+  });
+}
+
+async function fetchBuffer(url) {
+  for (let attempt = 1; attempt <= fetchAttempts; attempt += 1) {
+    try {
+      return await fetchBufferOnce(url);
+    } catch (error) {
+      if (attempt === fetchAttempts || !isRetryableFetchError(error)) {
+        throw error;
+      }
+
+      await wait(fetchRetryDelayMs * 2 ** (attempt - 1));
+    }
+  }
+
+  throw new Error(`could not fetch ${url}`);
+}
+
+function parseOctal(value) {
+  const text = value.toString("utf8").replace(/\0.*$/, "").trim();
+  return text ? Number.parseInt(text, 8) : 0;
+}
+
+function parsePaxRecords(content) {
+  const records = {};
+  let offset = 0;
+
+  while (offset < content.length) {
+    const spaceIndex = content.indexOf(0x20, offset);
+    if (spaceIndex === -1) {
+      break;
+    }
+
+    const length = Number.parseInt(content.subarray(offset, spaceIndex).toString("utf8"), 10);
+    if (!Number.isSafeInteger(length) || length <= 0 || offset + length > content.length) {
+      break;
+    }
+
+    const record = content.subarray(spaceIndex + 1, offset + length - 1).toString("utf8");
+    const equalsIndex = record.indexOf("=");
+    if (equalsIndex !== -1) {
+      records[record.slice(0, equalsIndex)] = record.slice(equalsIndex + 1);
+    }
+    offset += length;
+  }
+
+  return records;
+}
+
+function parseTarEntries(buffer) {
+  const files = [];
+  let pendingLongPath;
+  let pendingPaxPath;
+
+  for (let offset = 0; offset + 512 <= buffer.length; ) {
+    const header = buffer.subarray(offset, offset + 512);
+    offset += 512;
+
+    if (header.every((byte) => byte === 0)) {
+      break;
+    }
+
+    const rawName = header.subarray(0, 100).toString("utf8").replace(/\0.*$/, "");
+    const rawPrefix = header.subarray(345, 500).toString("utf8").replace(/\0.*$/, "");
+    const headerName = rawPrefix ? `${rawPrefix}/${rawName}` : rawName;
+    const mode = parseOctal(header.subarray(100, 108));
+    const size = parseOctal(header.subarray(124, 136));
+    const type = header.subarray(156, 157).toString("utf8") || "0";
+    const content = buffer.subarray(offset, offset + size);
+    offset += Math.ceil(size / 512) * 512;
+
+    if (type === "g") {
+      pendingPaxPath = undefined;
+      pendingLongPath = undefined;
+      continue;
+    }
+
+    if (type === "x") {
+      pendingPaxPath = parsePaxRecords(content).path;
+      continue;
+    }
+
+    if (type === "L") {
+      pendingLongPath = content.toString("utf8").replace(/\0.*$/, "");
+      continue;
+    }
+
+    if (type === "K") {
+      continue;
+    }
+
+    const name = pendingPaxPath || pendingLongPath || headerName;
+    pendingPaxPath = undefined;
+    pendingLongPath = undefined;
+
+    // Non-regular entries are dropped to match upstream skills hashing:
+    // directories, links, and metadata entries never contribute payload bytes.
+    if (type === "0" || type === "") {
+      files.push({ path: name, mode, content: Buffer.from(content) });
+    }
+  }
+
+  return files;
+}
+
+async function fetchGitHubArchive(source, ref) {
+  const url = `https://codeload.github.com/${source}/tar.gz/${ref}`;
+
+  for (let attempt = 1; attempt <= fetchAttempts; attempt += 1) {
+    try {
+      const archive = await fetchBuffer(url);
+      return parseTarEntries(zlib.gunzipSync(archive, { maxOutputLength: maxExtractedArchiveBytes }));
+    } catch (error) {
+      const retryableDecodeError = error.code === "Z_BUF_ERROR" || error.code === "Z_DATA_ERROR";
+      if (attempt === fetchAttempts || !retryableDecodeError) {
+        throw error;
+      }
+
+      await wait(fetchRetryDelayMs * 2 ** (attempt - 1));
+    }
+  }
+
+  throw new Error(`could not parse archive from ${url}`);
+}
+
+function removeStalePromotionEntries() {
   const stalePromotionPattern = new RegExp(`^\\.[^.].*\\.(old|tmp)-\\d+-${promotionTokenPattern}$`);
 
   for (const root of [path.join(repoRoot, ".agents", "skills"), path.join(repoRoot, ".claude", "skills")]) {
@@ -287,8 +278,9 @@ function removeStalePromotionDirs() {
     }
 
     for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-      if (entry.isDirectory() && stalePromotionPattern.test(entry.name)) {
-        fs.rmSync(path.join(root, entry.name), { recursive: true, force: true });
+      if (stalePromotionPattern.test(entry.name)) {
+        const stalePath = path.join(root, entry.name);
+        removeGeneratedPath(stalePath);
       }
     }
   }
@@ -314,12 +306,10 @@ function removeUnlockedSkillDirs(lockedSkillNames) {
   }
 }
 
-function repoUrlForSource(source) {
+function assertGithubSource(source) {
   if (typeof source !== "string" || !/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(source)) {
     throw new Error(`lock entry source must be a GitHub owner/repo slug: ${source}`);
   }
-
-  return `https://github.com/${source}.git`;
 }
 
 function assertSafeRelative(value, label) {
@@ -333,66 +323,167 @@ function assertSafeRelative(value, label) {
   }
 }
 
-function collectFiles(baseDir, currentDir, results) {
-  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
-    if (entry.name === ".git" || entry.name === "node_modules") {
-      continue;
-    }
-
-    const fullPath = path.join(currentDir, entry.name);
-    if (entry.isDirectory()) {
-      collectFiles(baseDir, fullPath, results);
-    } else if (entry.isFile()) {
-      results.push({
-        relativePath: path.relative(baseDir, fullPath).split(path.sep).join("/"),
-        content: fs.readFileSync(fullPath),
-      });
-    }
-  }
-}
-
-function computeSkillFolderHash(skillDir) {
-  const files = [];
-  collectFiles(skillDir, skillDir, files);
-  files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+function computeSkillFilesHash(files) {
+  const sortedFiles = [...files].sort((a, b) => a.relativePath.localeCompare(b.relativePath));
 
   const hash = createHash("sha256");
   // Match skills@1.5.7's computeSkillFolderHash implementation exactly so
   // skills-lock.json values produced by the upstream CLI remain meaningful.
   // The immutable Git ref is the primary integrity anchor; this checksum
   // confirms the restored payload matches the committed lock.
-  for (const file of files) {
+  for (const file of sortedFiles) {
     hash.update(file.relativePath);
     hash.update(file.content);
   }
   return hash.digest("hex");
 }
 
-function copyDirectory(source, target) {
-  fs.rmSync(target, { recursive: true, force: true });
-  fs.cpSync(source, target, {
-    recursive: true,
-    preserveTimestamps: false,
-    filter: (sourcePath) => {
-      const parts = path.relative(source, sourcePath).split(path.sep);
-      if (parts.includes(".git") || parts.includes("node_modules")) {
-        return false;
-      }
+function removeGeneratedPath(target) {
+  let stat;
+  try {
+    stat = fs.lstatSync(target);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return;
+    }
 
-      // Keep copy behavior in lockstep with the upstream-compatible hash:
-      // symlinks and other non-file/non-directory entries are intentionally
-      // omitted instead of dereferenced or hashed.
-      const stat = fs.lstatSync(sourcePath);
-      return stat.isDirectory() || stat.isFile();
-    },
-  });
+    throw error;
+  }
+
+  if (stat.isDirectory() && !stat.isSymbolicLink()) {
+    fs.rmSync(target, { recursive: true, force: true });
+  } else {
+    fs.unlinkSync(target);
+  }
 }
 
-function forgetPromotionTempDir(tempDir) {
-  const index = promotionTempDirs.indexOf(tempDir);
-  if (index !== -1) {
-    promotionTempDirs.splice(index, 1);
+function writeSkillFiles(files, targetDir) {
+  // This deliberately writes directly to generated overlay paths: if interrupted,
+  // rerun `pnpm skills:install` to restore from the verified lockfile. A sibling
+  // temp-dir rename would be more crash-safe, but would reintroduce transient
+  // installer files that this restore path is designed to avoid.
+  removeGeneratedPath(targetDir);
+  fs.mkdirSync(targetDir, { recursive: true });
+
+  for (const file of files) {
+    const targetPath = path.join(targetDir, file.relativePath);
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+    fs.writeFileSync(targetPath, file.content, { mode: file.mode & 0o111 ? 0o755 : 0o644 });
   }
+}
+
+function linkDirectory(sourceDir, targetDir) {
+  const relativeSource = path.relative(path.dirname(targetDir), sourceDir).split(path.sep).join("/");
+
+  removeGeneratedPath(targetDir);
+  fs.symlinkSync(relativeSource, targetDir, "dir");
+}
+
+function selfTestTarEntry(name, content, type = "0") {
+  const body = Buffer.from(content);
+  const header = Buffer.alloc(512);
+  header.write(name, 0, 100, "utf8");
+  header.write("0000644\0", 100, 8, "ascii");
+  header.write("0000000\0", 108, 8, "ascii");
+  header.write("0000000\0", 116, 8, "ascii");
+  header.write(body.length.toString(8).padStart(11, "0") + "\0", 124, 12, "ascii");
+  header.write("00000000000\0", 136, 12, "ascii");
+  header.fill(0x20, 148, 156);
+  header.write(type, 156, 1, "ascii");
+  header.write("ustar\0", 257, 6, "ascii");
+  header.write("00", 263, 2, "ascii");
+
+  let checksum = 0;
+  for (const byte of header) {
+    checksum += byte;
+  }
+  header.write(checksum.toString(8).padStart(6, "0") + "\0 ", 148, 8, "ascii");
+
+  return Buffer.concat([header, body, Buffer.alloc((512 - (body.length % 512)) % 512)]);
+}
+
+function selfTestTar(entries) {
+  return Buffer.concat([...entries, Buffer.alloc(1024)]);
+}
+
+function selfTestPaxRecord(key, value) {
+  let record = `${key}=${value}\n`;
+  let length = Buffer.byteLength(record) + String(Buffer.byteLength(record)).length + 1;
+
+  while (true) {
+    const candidate = `${length} ${record}`;
+    const candidateLength = Buffer.byteLength(candidate);
+    if (candidateLength === length) {
+      return candidate;
+    }
+    length = candidateLength;
+  }
+}
+
+function runSelfTests() {
+  const regular = parseTarEntries(selfTestTar([selfTestTarEntry("archive-root/skill/SKILL.md", "# skill\n")]));
+  if (regular[0]?.path !== "archive-root/skill/SKILL.md") {
+    throw new Error("self-test: regular tar entry path was not parsed");
+  }
+
+  const paxPath = "archive-root/skill/references/" + "a".repeat(120) + ".md";
+  const pax = parseTarEntries(selfTestTar([
+    selfTestTarEntry("PaxHeader", selfTestPaxRecord("path", paxPath), "x"),
+    selfTestTarEntry("ignored", "content\n"),
+  ]));
+  if (pax[0]?.path !== paxPath) {
+    throw new Error("self-test: pax path was not applied");
+  }
+
+  const longPath = "archive-root/skill/" + "b".repeat(120) + ".md";
+  const gnuLong = parseTarEntries(selfTestTar([
+    selfTestTarEntry("././@LongLink", `${longPath}\0`, "L"),
+    selfTestTarEntry("ignored", "content\n"),
+  ]));
+  if (gnuLong[0]?.path !== longPath) {
+    throw new Error("self-test: GNU long path was not applied");
+  }
+
+  const gnuLongBeforeLongLink = parseTarEntries(selfTestTar([
+    selfTestTarEntry("././@LongLink", `${longPath}\0`, "L"),
+    selfTestTarEntry("././@LongLink", "ignored-link-target\0", "K"),
+    selfTestTarEntry("ignored", "content\n"),
+  ]));
+  if (gnuLongBeforeLongLink[0]?.path !== longPath) {
+    throw new Error("self-test: GNU long-link metadata consumed a pending long path");
+  }
+
+  try {
+    assertSafeRelative("../escape", "self-test path");
+    throw new Error("self-test: unsafe relative path was accepted");
+  } catch (error) {
+    if (!error.message.includes("safe relative path")) {
+      throw error;
+    }
+  }
+
+  try {
+    zlib.gunzipSync(zlib.gzipSync(Buffer.alloc(2)), {
+      maxOutputLength: 1,
+    });
+    throw new Error("self-test: oversized extracted archive was accepted");
+  } catch (error) {
+    if (error.code !== "ERR_BUFFER_TOO_LARGE" && !String(error.message).includes("maxOutputLength")) {
+      throw error;
+    }
+  }
+
+  console.log("skills:install: self-test passed");
+}
+
+if (process.env.PATINA_SKILL_INSTALL_SELF_TEST === "1") {
+  runSelfTests();
+  process.exit(0);
+}
+
+if (entries.length === 0) {
+  console.log("skills:install: skills-lock.json has no skills, nothing to do");
+  process.exit(0);
 }
 
 const groups = new Map();
@@ -416,6 +507,7 @@ for (const [name, entry] of entries) {
   if (entry.sourceType !== "github") {
     throw new Error(`${name} has unsupported sourceType ${entry.sourceType}; only github lock entries can be restored`);
   }
+  assertGithubSource(entry.source);
 
   const ref = entry.ref;
   if (typeof ref !== "string" || !/^[0-9a-f]{40}$/i.test(ref)) {
@@ -436,103 +528,79 @@ for (const [name, entry] of entries) {
   groups.set(groupKey, group);
 }
 
-console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
-acquireInstallLock(groups.size);
-removeStalePromotionDirs();
-removeUnlockedSkillDirs(new Set(entries.map(([name]) => name)));
+async function main() {
+  console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
+  // No project-local lock or staging files are created. Concurrent invocations
+  // are unsupported; rerun `pnpm skills:install` if an install is interrupted.
+  removeStalePromotionEntries();
+  removeUnlockedSkillDirs(new Set(entries.map(([name]) => name)));
 
-const stagedSkillsRoot = path.join(stageRoot, ".agents", "skills");
-fs.mkdirSync(stagedSkillsRoot, { recursive: true });
+  const restoredSkills = new Map();
 
-let groupIndex = 0;
-for (const group of groups.values()) {
-  groupIndex += 1;
-  const checkoutDir = path.join(stageRoot, `checkout-${groupIndex}`);
-  fs.mkdirSync(checkoutDir, { recursive: true });
-
-  run("git", ["init", "-q"], { cwd: checkoutDir });
-  run("git", ["remote", "add", "origin", repoUrlForSource(group.source)], { cwd: checkoutDir });
-  try {
-    runWithCapturedOutput("git", ["fetch", "-q", "--depth", "1", "origin", group.ref], { cwd: checkoutDir });
-  } catch (error) {
-    const skillNames = group.skills.map(({ name }) => name).join(", ");
-    const stderr = error.stderr?.toString().trim();
-    const details = stderr || error.message;
-    throw new Error(`${skillNames}: could not fetch ref ${group.ref} from ${group.source}: ${details}`);
-  }
-
-  const skillDirs = [...new Set(group.skills.map(({ entry }) => path.dirname(entry.skillPath)))];
-  run("git", ["checkout", "-q", "FETCH_HEAD", "--", ...skillDirs], { cwd: checkoutDir });
-
-  for (const { name, entry } of group.skills) {
-    const sourceDir = path.join(checkoutDir, path.dirname(entry.skillPath));
-    const stagedDir = path.join(stagedSkillsRoot, name);
-
-    if (!fs.existsSync(path.join(sourceDir, "SKILL.md"))) {
-      throw new Error(`${name} ref ${group.ref} does not contain ${entry.skillPath}`);
+  for (const group of groups.values()) {
+    let archiveFiles;
+    try {
+      archiveFiles = await fetchGitHubArchive(group.source, group.ref);
+    } catch (error) {
+      const skillNames = group.skills.map(({ name }) => name).join(", ");
+      throw new Error(`${skillNames}: could not fetch ref ${group.ref} from ${group.source}: ${error.message}`);
     }
 
-    copyDirectory(sourceDir, stagedDir);
+    const archiveRoot = archiveFiles[0]?.path.split("/")[0];
+    if (!archiveRoot) {
+      throw new Error(`${group.source}@${group.ref} archive was empty`);
+    }
 
-    const actualHash = computeSkillFolderHash(stagedDir);
-    if (actualHash !== entry.computedHash) {
-      throw new Error(`${name} hash mismatch for ${group.source}@${group.ref}: expected ${entry.computedHash}, got ${actualHash}`);
+    for (const { name, entry } of group.skills) {
+      const sourcePrefix = `${archiveRoot}/${path.dirname(entry.skillPath).split(path.sep).join("/")}/`;
+      const skillFiles = archiveFiles
+        .filter((file) => file.path.startsWith(sourcePrefix))
+        .map((file) => ({
+          relativePath: file.path.slice(sourcePrefix.length),
+          content: file.content,
+          mode: file.mode,
+        }))
+        .filter((file) => file.relativePath && !file.relativePath.split("/").includes(".git") && !file.relativePath.split("/").includes("node_modules"));
+
+      for (const file of skillFiles) {
+        assertSafeRelative(file.relativePath, `${name} archive path`);
+      }
+
+      if (!skillFiles.some((file) => file.relativePath === "SKILL.md")) {
+        throw new Error(`${name} ref ${group.ref} does not contain ${entry.skillPath}`);
+      }
+
+      const actualHash = computeSkillFilesHash(skillFiles);
+      if (actualHash !== entry.computedHash) {
+        throw new Error(`${name} hash mismatch for ${group.source}@${group.ref}: expected ${entry.computedHash}, got ${actualHash}`);
+      }
+
+      restoredSkills.set(name, skillFiles);
     }
   }
-}
 
-const targetSkillsRoots = [
-  path.join(repoRoot, ".agents", "skills"),
-  path.join(repoRoot, ".claude", "skills"),
-];
-const promotions = [];
+  const agentsSkillsRoot = path.join(repoRoot, ".agents", "skills");
+  const claudeSkillsRoot = path.join(repoRoot, ".claude", "skills");
 
-for (const targetSkillsRoot of targetSkillsRoots) {
-  fs.mkdirSync(targetSkillsRoot, { recursive: true });
+  fs.mkdirSync(agentsSkillsRoot, { recursive: true });
+  fs.mkdirSync(claudeSkillsRoot, { recursive: true });
 
   for (const [name] of entries) {
-    const stagedDir = path.join(stagedSkillsRoot, name);
-    const targetDir = path.join(targetSkillsRoot, name);
-    const promotionToken = randomBytes(4).toString("hex");
-    const tempTargetDir = path.join(targetSkillsRoot, `.${name}.tmp-${process.pid}-${promotionToken}`);
+    const agentTargetDir = path.join(agentsSkillsRoot, name);
+    const claudeTargetDir = path.join(claudeSkillsRoot, name);
+    const skillFiles = restoredSkills.get(name);
 
-    copyDirectory(stagedDir, tempTargetDir);
-    promotionTempDirs.push(tempTargetDir);
-    promotions.push({ targetDir, tempTargetDir });
+    // The verified payload is written once into `.agents/skills`; Claude entries
+    // are portable relative symlinks to that shared project-local payload.
+    writeSkillFiles(skillFiles, agentTargetDir);
+    linkDirectory(agentTargetDir, claudeTargetDir);
   }
+
+  console.log("skills:install: done");
 }
 
-// Promotion is idempotent but not fully transactional across every skill and
-// overlay. If a process dies mid-promotion, rerunning restores all targets from
-// the lockfile; per-target backups cover ordinary rename failures.
-for (const { targetDir, tempTargetDir } of promotions) {
-  const promotionToken = randomBytes(4).toString("hex");
-  const backupTargetDir = path.join(path.dirname(targetDir), `.${path.basename(targetDir)}.old-${process.pid}-${promotionToken}`);
-  let hasBackup = false;
-
-  if (fs.existsSync(targetDir)) {
-    fs.renameSync(targetDir, backupTargetDir);
-    hasBackup = true;
-    promotionTempDirs.push(backupTargetDir);
-  }
-
-  try {
-    fs.renameSync(tempTargetDir, targetDir);
-    forgetPromotionTempDir(tempTargetDir);
-  } catch (error) {
-    if (hasBackup && !fs.existsSync(targetDir)) {
-      fs.renameSync(backupTargetDir, targetDir);
-      forgetPromotionTempDir(backupTargetDir);
-    }
-
-    throw error;
-  }
-
-  if (hasBackup) {
-    fs.rmSync(backupTargetDir, { recursive: true, force: true });
-    forgetPromotionTempDir(backupTargetDir);
-  }
-}
-
-console.log("skills:install: done");
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
 NODE

@@ -111,6 +111,7 @@ for live_reference_path in \
   docs/release-flow.md \
   docs/wiki-index.md \
   package.json \
+  scripts/clean.sh \
   scripts/install-skills.sh \
   scripts/tests/code-review-workflow.test.sh \
   scripts/tests/develop-issue-workflow.test.sh \
@@ -173,6 +174,9 @@ assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-
 assert_match "scripts/install-skills\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
+assert_match "scripts/clean\\.sh" \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
 assert_match "skills-lock\\.json" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
@@ -180,6 +184,9 @@ assert_match "postinstall: \"pnpm skills:install\"" \
   skills/scaffold-repository/SKILL.md
 
 assert_match "skills:install: \"bash scripts/install-skills\\.sh\"" \
+  skills/scaffold-repository/SKILL.md
+
+assert_match "clean: \"bash scripts/clean\\.sh\"" \
   skills/scaffold-repository/SKILL.md
 
 assert_no_match "skills:restore" \

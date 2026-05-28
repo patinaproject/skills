@@ -14,6 +14,7 @@ fi
 
 postinstall_script="$(node -e "console.log(require('./package.json').scripts.postinstall || '')")"
 install_script="$(node -e "console.log(require('./package.json').scripts['skills:install'] || '')")"
+clean_script="$(node -e "console.log(require('./package.json').scripts.clean || '')")"
 restore_script="$(node -e "console.log(require('./package.json').scripts['skills:restore'] || '')")"
 
 if [ "$postinstall_script" != "pnpm skills:install" ]; then
@@ -26,10 +27,17 @@ if [ "$install_script" != "bash scripts/install-skills.sh" ]; then
   exit 1
 fi
 
+if [ "$clean_script" != "bash scripts/clean.sh" ]; then
+  echo "FAIL: package.json clean must run the project cleanup implementation" >&2
+  exit 1
+fi
+
 if [ -n "$restore_script" ]; then
   echo "FAIL: package.json must not expose retired skills:restore script" >&2
   exit 1
 fi
+
+PATINA_SKILL_INSTALL_SELF_TEST=1 bash scripts/install-skills.sh >/dev/null
 
 locked_skill_count="$(node -e "const lock = require('./skills-lock.json'); console.log(Object.keys(lock.skills || {}).length)")"
 
@@ -70,80 +78,52 @@ if (cd "$temp_repo" && bash scripts/install-skills.sh >"$collision_out" 2>"$coll
   exit 1
 fi
 
-lock_repo="$temp_repo/lock-check"
-mkdir -p "$lock_repo/scripts"
-cp scripts/install-skills.sh "$lock_repo/scripts/"
-cat >"$lock_repo/skills-lock.json" <<'JSON'
-{
-  "version": 1,
-  "skills": {
-    "diagnose": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
-      "skillPath": "skills/engineering/diagnose/SKILL.md",
-      "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
-    }
+clean_repo="$temp_repo/clean-check"
+mkdir -p \
+  "$clean_repo/scripts" \
+  "$clean_repo/node_modules/example" \
+  "$clean_repo/skills/in-repo" \
+  "$clean_repo/.agents/skills" \
+  "$clean_repo/.agents/skills/third-party" \
+  "$clean_repo/.claude/skills" \
+  "$clean_repo/.claude/skills/third-party"
+cp scripts/clean.sh "$clean_repo/scripts/"
+printf '# in repo\n' >"$clean_repo/skills/in-repo/SKILL.md"
+ln -s ../../skills/in-repo "$clean_repo/.agents/skills/in-repo"
+ln -s ../../skills/in-repo "$clean_repo/.claude/skills/in-repo"
+printf '# third party\n' >"$clean_repo/.agents/skills/third-party/SKILL.md"
+printf '# third party\n' >"$clean_repo/.claude/skills/third-party/SKILL.md"
+printf 'lock\n' >"$clean_repo/.skills-install.lock"
+printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
+
+(cd "$clean_repo" && bash scripts/clean.sh >clean.out)
+
+if [ -e "$clean_repo/node_modules" ] ||
+  [ -e "$clean_repo/.agents/skills/third-party" ] ||
+  [ -e "$clean_repo/.claude/skills/third-party" ] ||
+  [ -e "$clean_repo/.skills-install.lock" ] ||
+  [ -e "$clean_repo/.skills-install.lock.1234-deadbeef.tmp" ]; then
+  echo "FAIL: pnpm clean must remove generated dependency and skill install files" >&2
+  exit 1
+fi
+
+node - "$clean_repo" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const repo = process.argv[2];
+for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
+  const overlayPath = path.join(repo, overlayRoot, "in-repo");
+  if (!fs.lstatSync(overlayPath).isSymbolicLink()) {
+    throw new Error(`${overlayPath} must remain a symlink after clean`);
+  }
+
+  const target = fs.readlinkSync(overlayPath);
+  if (target !== "../../skills/in-repo") {
+    throw new Error(`${overlayPath} target changed to ${target}`);
   }
 }
-JSON
-printf '%s\n' "$$" >"$lock_repo/.skills-install.lock"
-
-if (cd "$lock_repo" && bash scripts/install-skills.sh >"$lock_repo/skill-install-lock.out" 2>"$lock_repo/skill-install-lock.err"); then
-  echo "FAIL: pnpm skills:install must reject concurrent restore attempts" >&2
-  exit 1
-fi
-
-if [ ! -f "$lock_repo/.skills-install.lock" ]; then
-  echo "FAIL: pnpm skills:install must not remove another process lock" >&2
-  exit 1
-fi
-
-stale_lock_repo="$temp_repo/stale-lock-check"
-mkdir -p "$stale_lock_repo/scripts" "$stale_lock_repo/bin"
-cp scripts/install-skills.sh "$stale_lock_repo/scripts/"
-cat >"$stale_lock_repo/skills-lock.json" <<'JSON'
-{
-  "version": 1,
-  "skills": {
-    "diagnose": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
-      "skillPath": "skills/engineering/diagnose/SKILL.md",
-      "computedHash": "15939a26f86edec2d4862042b8564e5a062cb81d04e047a0cea6305c8830b5f5"
-    }
-  }
-}
-JSON
-cat >"$stale_lock_repo/bin/git" <<'SH'
-#!/usr/bin/env bash
-set -euo pipefail
-
-if [ "${1:-}" = "fetch" ]; then
-  echo "forced fake git fetch failure" >&2
-  exit 42
-fi
-
-exit 0
-SH
-chmod +x "$stale_lock_repo/bin/git"
-printf '{"pid":%s,"createdAt":"1970-01-01T00:00:00.000Z","command":"pnpm skills:install"}\n' "$$" >"$stale_lock_repo/.skills-install.lock"
-
-if (cd "$stale_lock_repo" && PATH="$stale_lock_repo/bin:$PATH" PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS=not-a-number bash scripts/install-skills.sh >"$stale_lock_repo/skill-install-stale-lock.out" 2>"$stale_lock_repo/skill-install-stale-lock.err"); then
-  echo "FAIL: stale-lock fixture should stop at fake git fetch failure" >&2
-  exit 1
-fi
-
-if grep -q "already running" "$stale_lock_repo/skill-install-stale-lock.err"; then
-  echo "FAIL: pnpm skills:install must recover an expired stale lock even if the PID was reused" >&2
-  exit 1
-fi
-
-if [ -f "$stale_lock_repo/.skills-install.lock" ]; then
-  echo "FAIL: pnpm skills:install must clean up a recovered stale lock after exit" >&2
-  exit 1
-fi
+NODE
 
 node <<'NODE'
 const lock = require("./skills-lock.json");
@@ -217,20 +197,27 @@ for (const source of new Set(Object.values(lock.skills || {}).map((entry) => ent
 }
 NODE
 
+network_available=1
 while IFS= read -r source; do
   if ! git ls-remote "https://github.com/${source}.git" HEAD >/dev/null 2>&1; then
-    rm -f "$locked_sources"
-    echo "SKIP: no network for live pnpm skills:install restore"
-    exit 0
+    network_available=0
+    break
   fi
 done <"$locked_sources"
 rm -f "$locked_sources"
+
+if [ "$network_available" = "0" ]; then
+  echo "SKIP: no network for live pnpm skills:install restore"
+  exit 0
+fi
 
 # This runs the real restore path because the issue requires the public install
 # command to prove locked skills are restored while the committed lockfile stays
 # unchanged.
 before_hash="$(git hash-object skills-lock.json)"
 mkdir -p .agents/skills/.stale-test.old-123-abcdef12 .claude/skills/.stale-test.tmp-123-abcdef12
+rm -f .claude/skills/.stale-link.tmp-123-abcdef12
+ln -s ../.agents/skills/stale-link .claude/skills/.stale-link.tmp-123-abcdef12
 mkdir -p .agents/skills/stale-third-party .claude/skills/stale-third-party
 printf '# stale\n' >.agents/skills/stale-third-party/SKILL.md
 printf '# stale\n' >.claude/skills/stale-third-party/SKILL.md
@@ -259,8 +246,105 @@ if [ -n "$missing_skill" ]; then
   exit 1
 fi
 
-if [ -e .agents/skills/.stale-test.old-123-abcdef12 ] || [ -e .claude/skills/.stale-test.tmp-123-abcdef12 ]; then
-  echo "FAIL: pnpm skills:install did not clean stale promotion directories" >&2
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+const names = Object.keys(lock.skills || {});
+
+for (const name of names) {
+  const agentPath = path.join(".agents", "skills", name);
+  const claudePath = path.join(".claude", "skills", name);
+  const stat = fs.lstatSync(claudePath);
+
+  if (!stat.isSymbolicLink()) {
+    throw new Error(`${claudePath} must be a symlink`);
+  }
+
+  const target = fs.readlinkSync(claudePath);
+  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
+
+  if (path.isAbsolute(target) || target !== expectedTarget) {
+    throw new Error(`${claudePath} must link to ${expectedTarget}, got ${target}`);
+  }
+
+  const realAgent = fs.realpathSync(agentPath);
+  const realClaude = fs.realpathSync(claudePath);
+
+  if (realClaude !== realAgent) {
+    throw new Error(`${claudePath} resolves to ${realClaude}, expected ${realAgent}`);
+  }
+
+  if (!fs.existsSync(path.join(claudePath, "SKILL.md"))) {
+    throw new Error(`${claudePath}/SKILL.md must be readable through the symlink`);
+  }
+}
+
+const claudeEntries = fs.readdirSync(path.join(".claude", "skills"), { withFileTypes: true });
+const lockedSymlinks = claudeEntries.filter((entry) => names.includes(entry.name) && entry.isSymbolicLink());
+if (lockedSymlinks.length !== names.length) {
+  throw new Error(`expected ${names.length} locked Claude symlinks, found ${lockedSymlinks.length}`);
+}
+NODE
+
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+for (const name of Object.keys(lock.skills || {})) {
+  fs.rmSync(path.join(".claude", "skills", name), { recursive: true, force: true });
+}
+NODE
+pnpm skills:install
+
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+for (const name of Object.keys(lock.skills || {})) {
+  const agentPath = path.join(".agents", "skills", name);
+  const claudePath = path.join(".claude", "skills", name);
+  const stat = fs.lstatSync(claudePath);
+  const target = fs.readlinkSync(claudePath);
+  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
+
+  if (!stat.isSymbolicLink() || target !== expectedTarget || !fs.existsSync(path.join(claudePath, "SKILL.md"))) {
+    throw new Error(`${claudePath} was not recreated as a readable symlink to ${expectedTarget}`);
+  }
+}
+NODE
+
+if compgen -G ".skills-install.lock*" >/dev/null; then
+  echo "FAIL: pnpm skills:install must not create transient install lock files" >&2
+  compgen -G ".skills-install.lock*" >&2
+  exit 1
+fi
+
+stale_promotion_entry="$(node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const candidates = [
+  path.join(".agents", "skills", ".stale-test.old-123-abcdef12"),
+  path.join(".claude", "skills", ".stale-test.tmp-123-abcdef12"),
+  path.join(".claude", "skills", ".stale-link.tmp-123-abcdef12"),
+];
+
+for (const candidate of candidates) {
+  try {
+    fs.lstatSync(candidate);
+    console.log(candidate);
+    process.exit(0);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+}
+NODE
+)"
+
+if [ -n "$stale_promotion_entry" ]; then
+  echo "FAIL: pnpm skills:install did not clean stale promotion entry: $stale_promotion_entry" >&2
   exit 1
 fi
 
