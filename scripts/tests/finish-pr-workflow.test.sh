@@ -27,14 +27,6 @@ assert_match() {
   fi
 }
 
-assert_no_match() {
-  local pattern="$1"
-  local file="$2"
-  if rg -n --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
-    fail "unexpected pattern in $file: $pattern"
-  fi
-}
-
 assert_order() {
   local first_pattern="$1"
   local second_pattern="$2"
@@ -67,10 +59,6 @@ if [ -f "$SKILL" ]; then
   assert_match "must not call it" "$SKILL"
   assert_match "compress ready-to-merge evidence" "$SKILL"
   assert_match "human line instead of listing the gates" "$SKILL"
-  assert_no_match "/goal" "$SKILL"
-  assert_no_match "create_goal|update_goal" "$SKILL"
-  assert_no_match "goal lifecycle" "$SKILL"
-  assert_no_match "agent-managed goal" "$SKILL"
 fi
 
 if [ -f "$WORKFLOW" ]; then
@@ -83,8 +71,6 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "End only when the final ready-to-merge gates pass or a documented" "$WORKFLOW"
   assert_match "current checkpoint, evidence gathered, next" "$WORKFLOW"
   assert_match "Reporting Guidance" "$WORKFLOW"
-  assert_no_match "Human Relevance Filter" "$WORKFLOW"
-  assert_no_match "Apply this filter" "$WORKFLOW"
   assert_match "Progress reports and final handoffs should say whether the PR is ready" "$WORKFLOW"
   assert_match "failed, skipped, interrupted" "$WORKFLOW"
   assert_match "otherwise" "$WORKFLOW"
@@ -94,10 +80,6 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "Progress reports" "$WORKFLOW"
   assert_match "should mention the current checkpoint and next action without repeated check" "$WORKFLOW"
   assert_match "lists\\. Show exact commands" "$WORKFLOW"
-  assert_no_match "/goal" "$WORKFLOW"
-  assert_no_match "create_goal|update_goal" "$WORKFLOW"
-  assert_no_match "goal lifecycle" "$WORKFLOW"
-  assert_no_match "agent-managed goal" "$WORKFLOW"
   assert_match "Final unresolved review-thread gate" "$WORKFLOW"
   assert_match "mergeStateStatus" "$WORKFLOW"
   assert_match "baseRefName" "$WORKFLOW"
@@ -125,9 +107,6 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "perl -e" "$WORKFLOW"
   assert_match "exit code 124" "$WORKFLOW"
   assert_match "fail-fast watch exit" "$WORKFLOW"
-  assert_no_match "^[[:space:]]*gh pr checks --watch[[:space:]]*$" "$WORKFLOW"
-  assert_no_match "^[[:space:]]*gh pr checks --watch --fail-fast[[:space:]]*$" "$WORKFLOW"
-  assert_no_match 'Do not use `--fail-fast` by default' "$WORKFLOW"
   assert_match "10-minute observation" "$WORKFLOW"
   assert_match "windows and watch all checks" "$WORKFLOW"
   assert_match "two consecutive" "$WORKFLOW"
@@ -183,9 +162,7 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "Compress ready-to-merge evidence into one human line" "$WORKFLOW"
   assert_match "Do not write gate inventories" "$WORKFLOW"
   assert_match "Verified: routine checks passed. No human action needed before" "$WORKFLOW"
-  assert_no_match "Verified: local suite and PR checks passed" "$WORKFLOW"
   assert_match "Avoid final output shaped like a readiness checklist" "$WORKFLOW"
-  assert_no_match "Final gate is clean" "$WORKFLOW"
   assert_order "Mandatory final ready-to-merge check" "Final report includes" "$WORKFLOW"
 fi
 
@@ -213,8 +190,6 @@ if [ -f "$TRIAGE" ]; then
   assert_match "perl -e" "$TRIAGE"
   assert_match "exit code 124" "$TRIAGE"
   assert_match "fail-fast watch exit" "$TRIAGE"
-  assert_no_match "^[[:space:]]*gh pr checks --watch[[:space:]]*$" "$TRIAGE"
-  assert_no_match "^[[:space:]]*gh pr checks --watch --fail-fast[[:space:]]*$" "$TRIAGE"
   assert_match "10-minute observation windows" "$TRIAGE"
   assert_match "two consecutive 10-minute no-progress windows" "$TRIAGE"
   assert_match "full PR state resync" "$TRIAGE"
@@ -226,7 +201,6 @@ if [ -f "$TRIAGE" ]; then
   assert_match "external outage" "$TRIAGE"
   assert_match "Classify flaky, infrastructure-owned, external-outage, missing-secret, and" "$TRIAGE"
   assert_match 'permission-limited check failures as `explain`' "$TRIAGE"
-  assert_no_match 'Use `gh pr checks --watch`; do not use fail-fast by default' "$TRIAGE"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

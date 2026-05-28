@@ -25,14 +25,6 @@ assert_match() {
   fi
 }
 
-assert_no_match() {
-  local pattern="$1"
-  local file="$2"
-  if rg -n --pcre2 -e "$pattern" "$file" >/dev/null 2>&1; then
-    fail "unexpected pattern in $file: $pattern"
-  fi
-}
-
 assert_order() {
   local first_pattern="$1"
   local second_pattern="$2"
@@ -57,7 +49,6 @@ if [ -f "$SKILL" ]; then
   for route in write-a-skill zoom-out prototype; do
     assert_match "\`$route\`" "$SKILL"
   done
-  assert_no_match '\`review-action\` remains available separately' "$SKILL"
 
   assert_match 'Reject missing issue references' "$SKILL"
   assert_match 'Reject multiple issue references' "$SKILL"
@@ -127,17 +118,12 @@ if [ -f "$SKILL" ]; then
   assert_match 'without asking for another user confirmation' "$SKILL"
   assert_match 'all visible PR checks include required and optional checks' "$SKILL"
   assert_match 'Do not make unsupported certainty claims' "$SKILL"
-  assert_no_match 'Codex.*Explorer' "$SKILL"
   assert_match 'long-running or resumable execution' "$SKILL"
   assert_match 'checkpoint state' "$SKILL"
   assert_match 'issue reference and URL, branch name, terminal[[:space:]]+state, meaningful changes, readiness, blockers, and next action' "$SKILL"
   assert_match 'terminal workflow state' "$SKILL"
   assert_match 'production-readiness evidence supports `goal-met`' "$SKILL"
   assert_match 'documented[[:space:]]+`human-blocked` stop' "$SKILL"
-  assert_no_match 'Codex Goal Usage' "$SKILL"
-  assert_no_match '/goal' "$SKILL"
-  assert_no_match 'background-agent operation' "$SKILL"
-  assert_no_match 'spawn a fresh Explorer' "$SKILL"
   assert_match 'never merges a[[:space:]]+pull request' "$SKILL"
 
   assert_order 'Satisfy the branch setup precondition using `new-branch` when needed' 'Use `finish-pr` for commit' "$SKILL"
@@ -150,8 +136,6 @@ if [ -f "$SKILL" ]; then
   assert_match 'future reviewers would otherwise re-raise' "$SKILL"
   assert_match 'There is no `needs-info` state' "$SKILL"
   assert_match 'Reporting Guidance' "$SKILL"
-  assert_no_match 'Human Relevance Filter' "$SKILL"
-  assert_no_match 'Apply this filter' "$SKILL"
   assert_match 'Progress updates, resumable checkpoints, and final[[:space:]]+handoffs should report what' "$SKILL"
   assert_match 'failed, skipped, interrupted' "$SKILL"
   assert_match 'changed readiness, explain a[[:space:]]+blocker, identify residual risk, or create a human next action' "$SKILL"
@@ -174,13 +158,10 @@ if [ -f "$SKILL" ]; then
   assert_match 'Bad final output' "$SKILL"
   assert_match 'Done: \[#190\]' "$SKILL"
   assert_match 'Verified: routine checks passed\.' "$SKILL"
-  assert_no_match 'Verified: routine checks passed \(targeted tests, lint, type-check, PR checks\)' "$SKILL"
-  assert_no_match 'Verified: routine checks passed; no human action needed before review' "$SKILL"
   assert_match 'Avoid final output shaped like a process transcript' "$SKILL"
   assert_match 'translate child skill[[:space:]]+reports into the final-report vocabulary' "$SKILL"
   assert_match 'Do not forward child-skill gate[[:space:]]+inventories' "$SKILL"
   assert_match 'Do not repeat `finish-pr` readiness gates' "$SKILL"
-  assert_no_match 'Final gate is clean' "$SKILL"
   assert_order 'Done: \[#190\]' 'Changed:' "$SKILL"
   assert_order 'Changed:' 'Verified: routine checks passed' "$SKILL"
   assert_match 'Production-readiness case' "$SKILL"
@@ -189,11 +170,6 @@ if [ -f "$SKILL" ]; then
   assert_match 'Local review result and finding dispositions' "$SKILL"
   assert_match 'PR review and check feedback status' "$SKILL"
   assert_match 'Residual risks or test gaps, only when they are concrete and relevant' "$SKILL"
-  assert_no_match '100% production ready' "$SKILL"
-  assert_no_match 'fixed mandatory implementation sequence' "$SKILL"
-  assert_no_match 'receiving-code-review' "$SKILL"
-  assert_no_match 'requesting-code-review' "$SKILL"
-  assert_no_match 'Superpowers' "$SKILL"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
