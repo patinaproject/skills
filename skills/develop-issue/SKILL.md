@@ -215,17 +215,17 @@ There is no `needs-info` state in v1. Insufficient information maps to
 
 ## Final Report
 
-### Human Relevance Filter
+### Reporting Guidance
 
-Apply this filter to progress updates, resumable checkpoints, and final
-handoffs. Keep verification evidence internally for decisions, but include it
-in user-visible output only when it failed, skipped, interrupted, changes
-readiness, explains a blocker, identifies residual risk, or creates a human
-next action.
+Progress updates, resumable checkpoints, and final handoffs should report what
+changed, whether the work is ready or blocked, and what the human should do
+next. Keep verification evidence internally for decisions. Report verification
+details when they failed, skipped, interrupted, changed readiness, explain a
+blocker, identify residual risk, or create a human next action.
 
-Do not include command inventories, pass counts, green check names, child-skill
-gate lists, routine head SHAs, or project-status details that do not affect what
-the human needs to know. Translate child-skill output into outcome, readiness,
+Leave out command inventories, pass counts, green check names, child-skill gate
+lists, routine head SHAs, and project-status details that do not affect what the
+human needs to know. Translate child-skill output into outcome, readiness,
 blocker, and next-action language. Progress updates should name the current
 checkpoint and next action without repeating check lists. When verification is
 interrupted, mention it only when the interruption changes readiness or asks the

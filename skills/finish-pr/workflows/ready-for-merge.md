@@ -28,20 +28,21 @@ Progress reports should name the current checkpoint, evidence gathered, next
 action, and blocker status. Keep stop reports concrete enough for a human to
 decide the next move.
 
-## Human Relevance Filter
+## Reporting Guidance
 
-Apply this filter to progress reports and final handoffs. Keep the full command
+Progress reports and final handoffs should say whether the PR is ready to
+merge, not ready to merge, or waiting on a human decision. Keep the full command
 results, check snapshots, and gate evidence available for workflow decisions.
-User-visible details belong only when work failed, skipped, interrupted, or
-otherwise changes readiness, explains a blocker, identifies residual risk, or
-creates a human next action.
+Report user-visible details when work failed, skipped, interrupted, otherwise
+changes readiness, explains a blocker, identifies residual risk, or creates a
+human next action.
 
-Do not include exact verification commands, command inventories, pass counts,
-green check names, or gate inventories when everything passes. Progress reports
+Leave out exact verification commands, command inventories, pass counts, green
+check names, and gate inventories when everything passes. Progress reports
 should mention the current checkpoint and next action without repeated check
-lists. Show exact commands, failed check names, skipped
-verification, interrupted runs, or unresolved feedback only when they explain a
-blocker or tell the human what to do next.
+lists. Show exact commands, failed check names, skipped verification,
+interrupted runs, or unresolved feedback only when they explain a blocker or
+tell the human what to do next.
 
 ## Steps
 
