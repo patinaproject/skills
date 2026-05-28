@@ -299,7 +299,7 @@ Changed:
 - Routine verification is collapsed unless something failed, skipped, or needs
   human attention.
 
-Verified: routine checks passed; no human action needed before review.
+Verified: routine checks passed.
 
 Needs human attention: none before review.
 ```
