@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.0...patinaproject-skills-v2.5.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* [#203](https://github.com/patinaproject/skills/issues/203) remove transient skill installer files ([#204](https://github.com/patinaproject/skills/issues/204)) ([df532c5](https://github.com/patinaproject/skills/commit/df532c57f26552bc49840aec64a6771a2a5c89f5))
+
 ## [2.5.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.2...patinaproject-skills-v2.5.0) (2026-05-26)
 
 
