@@ -77,11 +77,12 @@ function isRetryableFetchError(error) {
 
 function fetchBufferOnce(url, redirectCount = 0) {
   return new Promise((resolve, reject) => {
+    const timeoutMs = fetchTimeoutMs();
     const deadlineTimer = setTimeout(() => {
       const error = new Error(`timed out fetching ${url}`);
       error.code = "ETIMEDOUT_FETCH";
       request.destroy(error);
-    }, fetchTimeoutMs());
+    }, timeoutMs);
 
     const request = https.get(
       url,
@@ -89,7 +90,7 @@ function fetchBufferOnce(url, redirectCount = 0) {
         headers: {
           "User-Agent": "patina-skills-install",
         },
-        timeout: fetchTimeoutMs(),
+        timeout: timeoutMs,
       },
       (response) => {
         if (
@@ -252,6 +253,8 @@ function parseTarEntries(buffer) {
 async function fetchGitHubArchive(source, ref) {
   const url = `https://codeload.github.com/${source}/tar.gz/${ref}`;
 
+  // Transport retries happen inside fetchBuffer; this loop only retries
+  // archive decode failures from a truncated or otherwise invalid response.
   for (let attempt = 1; attempt <= fetchAttempts; attempt += 1) {
     try {
       const archive = await fetchBuffer(url);
