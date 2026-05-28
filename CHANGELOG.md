@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.1...patinaproject-skills-v2.5.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* [#206](https://github.com/patinaproject/skills/issues/206) clarify archive fetch retries ([#207](https://github.com/patinaproject/skills/issues/207)) ([3ba6bde](https://github.com/patinaproject/skills/commit/3ba6bde0f251db2e8456f2c019af1d7cf1366277))
+* [#208](https://github.com/patinaproject/skills/issues/208) use sticky summary for code review ([#210](https://github.com/patinaproject/skills/issues/210)) ([40f6a2f](https://github.com/patinaproject/skills/commit/40f6a2f3aaca425962ac9e430624588c4f3c5f33))
+
 ## [2.5.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.0...patinaproject-skills-v2.5.1) (2026-05-28)
 
 
