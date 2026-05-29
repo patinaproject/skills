@@ -20,7 +20,8 @@ cd "$REPO_ROOT"
 
 if git fetch --prune origin main; then
   if git merge-base --is-ancestor HEAD origin/main; then
-    git merge --ff-only origin/main
+    git merge --ff-only origin/main ||
+      echo "worktree-setup: warning: fast-forward failed; skipping branch sync" >&2
   fi
 else
   echo "worktree-setup: warning: could not fetch origin/main; skipping branch sync" >&2

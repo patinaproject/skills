@@ -235,7 +235,8 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   ```bash
   if git fetch --prune origin <default-branch>; then
     if git merge-base --is-ancestor HEAD origin/<default-branch>; then
-      git merge --ff-only origin/<default-branch>
+      git merge --ff-only origin/<default-branch> ||
+        echo "worktree-setup: warning: fast-forward failed; skipping branch sync" >&2
     fi
   else
     echo "worktree-setup: warning: could not fetch origin/<default-branch>; skipping branch sync" >&2
