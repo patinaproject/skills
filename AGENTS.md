@@ -94,8 +94,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
   `skills:refresh` lifecycle check.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/tests/skill-install-lifecycle.test.sh` after changing
-  `scripts/install-skills.sh`, `scripts/clean.sh`, `scripts/worktree-setup.sh`,
-  package lifecycle scripts, or the skill install/clean package scripts.
+  `scripts/install-skills.sh`, `scripts/clean.sh`, package lifecycle scripts,
+  or the skill install/clean package scripts.
+- Run `bash scripts/tests/worktree-setup.test.sh` after changing
+  `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/new-branch-workflow.test.sh` after changing `skills/new-branch/**`
