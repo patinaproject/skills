@@ -26,10 +26,9 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
 | `.husky/pre-commit` | yes | present; runs `pnpm exec lint-staged` |
-| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `env:setup: pnpm install`, `clean: bash scripts/clean.sh`, and `skills:refresh: bash scripts/install-skills.sh`; must NOT carry a `postinstall` skill-restore hook or any retired skill-restore package scripts; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
+| `package.json` | yes | present; has `author.name`; `author.email`; `author.url`; `type: module`; `packageManager: pnpm@10.x`; `engines.node >= 24`; scripts include `lint:md`, `env:setup: pnpm install`, `clean: bash scripts/clean.sh`, and `skills:install: pnpm dlx skills@latest experimental_install --yes`; must NOT carry a `postinstall` skill-restore hook, any retired skill-restore package scripts, or a custom `scripts/install-skills.sh`; repo-specific `test` scripts are recommended only when the target owns meaningful verifiers |
 | `pnpm-lock.yaml` | yes | present |
-| `skills-lock.json` | yes | present; valid JSON; records project-local skills with immutable `ref` values and `computedHash` values, or an empty `skills` object when no shared skills are locked yet |
-| `scripts/install-skills.sh` | yes | present; executable; exits successfully when `skills-lock.json` is absent or empty; otherwise fetches each locked GitHub source at its immutable `ref` without writing project-local transient installer files, verifies each restored skill against `computedHash`, writes restored payloads into `.agents/skills/`, creates relative `.claude/skills/` symlinks to the matching shared payloads, and never mutates `skills-lock.json` |
+| `skills-lock.json` | yes | present; valid JSON; records project-local skills with a GitHub `source` and `skillPath` (the upstream skills CLI tracks each source's default branch, so no immutable `ref` is pinned), or an empty `skills` object when no shared skills are locked yet |
 | `scripts/clean.sh` | yes | present; executable; removes only generated dependency and transient install files (`node_modules/`, `.skills-install.lock*`); must never prune committed `.agents/skills/**` or `.claude/skills/**` overlay entries |
 | `scripts/worktree-setup.sh` | yes | present; executable; idempotent; fast-forwards onto the target repo default branch then runs `pnpm env:setup`; wired into both the Claude `SessionStart` hook and the Codex `[setup]` block; does not hardcode `main` |
 | `.codex/environments/environment.toml` | yes | present; `[setup]` runs `bash scripts/worktree-setup.sh` |
@@ -108,13 +107,12 @@ in a fresh worktree without an install step.
 
 | File / command | Required | Check |
 |---|---|---|
-| `skills-lock.json` | yes | present; records every vendored skill that should be re-vendored into the project overlays with an immutable `ref`, or an empty `skills` object if none are installed yet |
+| `skills-lock.json` | yes | present; records every vendored skill that should be re-vendored into the project overlays with a GitHub `source` and `skillPath` (the upstream skills CLI tracks each source's default branch, so no immutable `ref` is pinned), or an empty `skills` object if none are installed yet |
 | Committed overlays | yes | `.agents/skills/<name>/` real directories and matching `.claude/skills/<name>` relative symlinks are tracked in git for every locked skill |
-| `scripts/install-skills.sh` | yes | present; manual `skills:refresh` tool (not a `pnpm install` hook); fetches each locked GitHub source at its immutable `ref` without writing project-local transient installer files, verifies restored skill payloads against `computedHash`, writes matching payloads into `.agents/skills/`, recreates relative `.claude/skills/` symlinks, and never mutates `skills-lock.json` |
 | `scripts/clean.sh` | yes | present; removes only generated dependency and transient install files; never prunes committed overlay entries |
-| `package.json` | yes | includes `env:setup: pnpm install`, `skills:refresh: bash scripts/install-skills.sh`, and `clean: bash scripts/clean.sh`; no `postinstall` skill-restore hook |
+| `package.json` | yes | includes `env:setup: pnpm install`, `skills:install: pnpm dlx skills@latest experimental_install --yes`, and `clean: bash scripts/clean.sh`; no `postinstall` skill-restore hook and no custom `scripts/install-skills.sh` |
 | `.gitignore` | yes | does not ignore `.agents/skills/**` or `.claude/skills/**`; ignores `node_modules/` and `.skills-install.lock*` |
-| `pnpm skills:refresh` | yes | run after accepting `skills-lock.json` drift when one or more skills are locked; re-vendors the committed overlays, which must then be committed |
+| `pnpm skills:install` | yes | run after accepting `skills-lock.json` drift when one or more skills are locked; re-vendors the committed overlays via the upstream skills CLI (`skills experimental_install`), which must then be committed |
 | `npx --yes skills@latest list --json` | yes | verify vendored skills are present alongside any in-repo overlay symlinks |
 
 ## Area 6 – Deprecated workflow cleanup
@@ -172,7 +170,7 @@ Group recommendations into ordered batches and offer them in this sequence (matc
 
 1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
 2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, stale GitHub issue templates)
-3. PNPM tooling and skills installation (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-skills.sh`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`)
+3. PNPM tooling and skills installation (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`)
 4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)
 6. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`, and agent-plugin `release-please.yml` when applicable)

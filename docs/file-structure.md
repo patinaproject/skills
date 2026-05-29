@@ -69,9 +69,10 @@ Repo-owned skills (the eight in `skills/`) appear as one-hop symlinks:
 
 Vendored third-party skills (recorded in `skills-lock.json`) are committed as
 real directories under `.agents/skills/<name>`, with `.claude/skills/<name>`
-as a relative symlink into `../../.agents/skills/<name>`. `pnpm skills:refresh`
-re-vendors them from their pinned refs; the refreshed overlays are then
-committed. `scripts/clean.sh` never prunes these committed overlays.
+as a relative symlink into `../../.agents/skills/<name>`. `pnpm skills:install`
+re-vendors them from their sources via the upstream skills CLI
+(`skills experimental_install`); the refreshed overlays are then committed.
+`scripts/clean.sh` never prunes these committed overlays.
 
 ## Symlink hygiene
 

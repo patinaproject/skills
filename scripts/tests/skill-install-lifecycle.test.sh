@@ -1,32 +1,39 @@
 #!/usr/bin/env bash
-# This test intentionally runs the manual `skills:refresh` command, so it is
-# network-backed while restoring locked skills from their immutable Git refs. It
-# rewrites the committed `.agents/skills/*` and `.claude/skills/*` overlays in
-# place, which is why it runs only as part of the explicit verification suite.
+# Validate the committed-skill lifecycle: vendored third-party skills are
+# committed to the repo, restored on demand by the upstream skills CLI
+# (`pnpm skills:install` -> `skills experimental_install`), and never pruned by
+# `pnpm clean`. This test is static plus a clean.sh sandbox; the network-backed
+# install behavior is covered by the CLI canaries in suite.test.sh.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-if [ ! -f skills-lock.json ]; then
-  echo "OK: no skills-lock.json, lifecycle install has nothing to restore"
-  exit 0
-fi
-
+# --- package.json script shape -------------------------------------------------
 postinstall_script="$(node -e "console.log(require('./package.json').scripts.postinstall || '')")"
+install_script="$(node -e "console.log(require('./package.json').scripts['skills:install'] || '')")"
 refresh_script="$(node -e "console.log(require('./package.json').scripts['skills:refresh'] || '')")"
+restore_script="$(node -e "console.log(require('./package.json').scripts['skills:restore'] || '')")"
 env_setup_script="$(node -e "console.log(require('./package.json').scripts['env:setup'] || '')")"
 clean_script="$(node -e "console.log(require('./package.json').scripts.clean || '')")"
-install_script="$(node -e "console.log(require('./package.json').scripts['skills:install'] || '')")"
-restore_script="$(node -e "console.log(require('./package.json').scripts['skills:restore'] || '')")"
 
 if [ -n "$postinstall_script" ]; then
   echo "FAIL: package.json must not auto-restore committed skills via postinstall" >&2
   exit 1
 fi
 
-if [ "$refresh_script" != "bash scripts/install-skills.sh" ]; then
-  echo "FAIL: package.json skills:refresh must run the restore implementation" >&2
+if [ "$install_script" != "pnpm dlx skills@latest experimental_install --yes" ]; then
+  echo "FAIL: package.json skills:install must run the upstream skills experimental_install" >&2
+  exit 1
+fi
+
+if [ -n "$refresh_script" ]; then
+  echo "FAIL: package.json must not expose the retired skills:refresh script" >&2
+  exit 1
+fi
+
+if [ -n "$restore_script" ]; then
+  echo "FAIL: package.json must not expose the retired skills:restore script" >&2
   exit 1
 fi
 
@@ -40,56 +47,84 @@ if [ "$clean_script" != "bash scripts/clean.sh" ]; then
   exit 1
 fi
 
-if [ -n "$install_script" ]; then
-  echo "FAIL: package.json must not expose retired skills:install script" >&2
+# The custom restore script is retired; experimental_install owns restoration.
+if [ -e scripts/install-skills.sh ]; then
+  echo "FAIL: scripts/install-skills.sh must be removed in favor of skills experimental_install" >&2
   exit 1
 fi
 
-if [ -n "$restore_script" ]; then
-  echo "FAIL: package.json must not expose retired skills:restore script" >&2
-  exit 1
-fi
-
-PATINA_SKILL_INSTALL_SELF_TEST=1 bash scripts/install-skills.sh >/dev/null
-
-locked_skill_count="$(node -e "const lock = require('./skills-lock.json'); console.log(Object.keys(lock.skills || {}).length)")"
-
-if [ "$locked_skill_count" = "0" ]; then
-  echo "OK: skills-lock.json has no locked skills, lifecycle install has nothing to restore"
+if [ ! -f skills-lock.json ]; then
+  echo "OK: no skills-lock.json; committed-skill lifecycle has nothing to validate"
   exit 0
 fi
 
+# --- skills-lock.json shape ----------------------------------------------------
+# experimental_install restores from the lockfile by cloning each source's
+# default branch (latest), so entries pin a GitHub source but no immutable ref.
+node <<'NODE'
+const lock = require("./skills-lock.json");
+for (const [name, entry] of Object.entries(lock.skills || {})) {
+  if (!/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(entry.source || "")) {
+    throw new Error(`${name} must include a GitHub owner/repo source`);
+  }
+  if (entry.sourceType !== "github") {
+    throw new Error(`${name} must declare sourceType "github"`);
+  }
+  if (typeof entry.skillPath !== "string" || !entry.skillPath.endsWith("SKILL.md")) {
+    throw new Error(`${name}.skillPath must point to a SKILL.md file`);
+  }
+}
+NODE
+
+locked_skill_count="$(node -e "const lock = require('./skills-lock.json'); console.log(Object.keys(lock.skills || {}).length)")"
+if [ "$locked_skill_count" = "0" ]; then
+  echo "OK: skills-lock.json has no locked skills; committed-skill lifecycle has nothing to validate"
+  exit 0
+fi
+
+# --- committed overlay layout (real repo) -------------------------------------
+# Each locked skill is committed as a real directory under .agents/skills and a
+# relative symlink under .claude/skills pointing at the shared payload.
+node <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lock = require("./skills-lock.json");
+
+for (const name of Object.keys(lock.skills || {})) {
+  const agentPath = path.join(".agents", "skills", name);
+  const claudePath = path.join(".claude", "skills", name);
+
+  const agentStat = fs.lstatSync(agentPath);
+  if (agentStat.isSymbolicLink() || !agentStat.isDirectory()) {
+    throw new Error(`${agentPath} must be a committed real directory`);
+  }
+  if (!fs.existsSync(path.join(agentPath, "SKILL.md"))) {
+    throw new Error(`${agentPath}/SKILL.md must be committed`);
+  }
+
+  const claudeStat = fs.lstatSync(claudePath);
+  if (!claudeStat.isSymbolicLink()) {
+    throw new Error(`${claudePath} must be a symlink`);
+  }
+  const target = fs.readlinkSync(claudePath);
+  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
+  if (path.isAbsolute(target) || target !== expectedTarget) {
+    throw new Error(`${claudePath} must link to ${expectedTarget}, got ${target}`);
+  }
+  if (!fs.existsSync(path.join(claudePath, "SKILL.md"))) {
+    throw new Error(`${claudePath}/SKILL.md must be readable through the symlink`);
+  }
+}
+NODE
+
+# --- clean.sh sandbox ----------------------------------------------------------
+# clean removes generated dependency and transient install files only; it must
+# never prune the committed skill overlays or rewrite in-repo overlay symlinks.
 temp_repo="$(mktemp -d)"
 cleanup() {
   rm -rf "$temp_repo"
 }
 trap cleanup EXIT
-
-mkdir -p "$temp_repo/scripts" "$temp_repo/skills/develop-issue"
-cp scripts/install-skills.sh "$temp_repo/scripts/"
-printf '# develop-issue\n' >"$temp_repo/skills/develop-issue/SKILL.md"
-cat >"$temp_repo/skills-lock.json" <<'JSON'
-{
-  "version": 1,
-  "skills": {
-    "develop-issue": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "ref": "b8be62ffacb0118fa3eaa29a0923c87c8c11985c",
-      "skillPath": "skills/engineering/diagnose/SKILL.md",
-      "computedHash": "0000000000000000000000000000000000000000000000000000000000000000"
-    }
-  }
-}
-JSON
-
-collision_out="$temp_repo/skill-install-collision.out"
-collision_err="$temp_repo/skill-install-collision.err"
-
-if (cd "$temp_repo" && bash scripts/install-skills.sh >"$collision_out" 2>"$collision_err"); then
-  echo "FAIL: pnpm skills:refresh must reject third-party locks that collide with in-repo skills" >&2
-  exit 1
-fi
 
 clean_repo="$temp_repo/clean-check"
 mkdir -p \
@@ -111,7 +146,6 @@ printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
 
 (cd "$clean_repo" && bash scripts/clean.sh >clean.out)
 
-# clean removes generated dependency and transient install files only.
 if [ -e "$clean_repo/node_modules" ] ||
   [ -e "$clean_repo/.skills-install.lock" ] ||
   [ -e "$clean_repo/.skills-install.lock.1234-deadbeef.tmp" ]; then
@@ -119,8 +153,6 @@ if [ -e "$clean_repo/node_modules" ] ||
   exit 1
 fi
 
-# clean must never prune committed skill overlays. The vendored third-party
-# skills live in version control now, so both overlay roots must survive.
 if [ ! -e "$clean_repo/.agents/skills/third-party/SKILL.md" ] ||
   [ ! -e "$clean_repo/.claude/skills/third-party/SKILL.md" ]; then
   echo "FAIL: pnpm clean must preserve committed third-party skill overlays" >&2
@@ -145,238 +177,4 @@ for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
 }
 NODE
 
-node <<'NODE'
-const lock = require("./skills-lock.json");
-for (const [name, entry] of Object.entries(lock.skills || {})) {
-  if (!/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(entry.source || "")) {
-    throw new Error(`${name} must include a GitHub owner/repo source`);
-  }
-
-  if (!/^[0-9a-f]{40}$/i.test(entry.ref || "")) {
-    throw new Error(`${name} must include an immutable 40-character ref`);
-  }
-}
-NODE
-
-hash_fixture="$(mktemp -d)"
-mkdir -p "$hash_fixture/nested"
-printf 'one\n' >"$hash_fixture/a.txt"
-printf 'two\n' >"$hash_fixture/nested/b.txt"
-ln -s a.txt "$hash_fixture/symlink-to-a"
-
-actual_fixture_hash="$(node - "$hash_fixture" <<'NODE'
-const { createHash } = require("node:crypto");
-const fs = require("node:fs");
-const path = require("node:path");
-
-const fixture = process.argv[2];
-const files = [];
-
-function collectFiles(baseDir, currentDir) {
-  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
-    const fullPath = path.join(currentDir, entry.name);
-    if (entry.isDirectory()) {
-      collectFiles(baseDir, fullPath);
-    } else if (entry.isFile()) {
-      files.push({
-        relativePath: path.relative(baseDir, fullPath).split(path.sep).join("/"),
-        content: fs.readFileSync(fullPath),
-      });
-    }
-  }
-}
-
-collectFiles(fixture, fixture);
-files.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
-
-const hash = createHash("sha256");
-for (const file of files) {
-  hash.update(file.relativePath);
-  hash.update(file.content);
-}
-console.log(hash.digest("hex"));
-NODE
-)"
-rm -rf "$hash_fixture"
-
-if [ "$actual_fixture_hash" != "e9681f55c66c75c49763c16d64ddbb695ccbed02c8f32e4355d75e58e7fc7fdf" ]; then
-  echo "FAIL: skill folder hash fixture changed" >&2
-  exit 1
-fi
-
-if [ "${PATINA_SKILL_INSTALL_OFFLINE:-0}" = "1" ]; then
-  echo "OK: PATINA_SKILL_INSTALL_OFFLINE=1, skipped live pnpm skills:refresh restore"
-  exit 0
-fi
-
-locked_sources="$(mktemp)"
-node <<'NODE' >"$locked_sources"
-const lock = require("./skills-lock.json");
-for (const source of new Set(Object.values(lock.skills || {}).map((entry) => entry.source))) {
-  console.log(source);
-}
-NODE
-
-network_available=1
-while IFS= read -r source; do
-  if ! git ls-remote "https://github.com/${source}.git" HEAD >/dev/null 2>&1; then
-    network_available=0
-    break
-  fi
-done <"$locked_sources"
-rm -f "$locked_sources"
-
-if [ "$network_available" = "0" ]; then
-  echo "SKIP: no network for live pnpm skills:refresh restore"
-  exit 0
-fi
-
-# This runs the real restore path because the issue requires the public install
-# command to prove locked skills are restored while the committed lockfile stays
-# unchanged.
-before_hash="$(git hash-object skills-lock.json)"
-mkdir -p .agents/skills/.stale-test.old-123-abcdef12 .claude/skills/.stale-test.tmp-123-abcdef12
-rm -f .claude/skills/.stale-link.tmp-123-abcdef12
-ln -s ../.agents/skills/stale-link .claude/skills/.stale-link.tmp-123-abcdef12
-mkdir -p .agents/skills/stale-third-party .claude/skills/stale-third-party
-printf '# stale\n' >.agents/skills/stale-third-party/SKILL.md
-printf '# stale\n' >.claude/skills/stale-third-party/SKILL.md
-pnpm skills:refresh
-after_hash="$(git hash-object skills-lock.json)"
-
-missing_skill="$(node <<'NODE'
-const fs = require("fs");
-const lock = require("./skills-lock.json");
-for (const name of Object.keys(lock.skills || {})) {
-  if (!fs.existsSync(`.agents/skills/${name}/SKILL.md`)) {
-    console.log(`.agents/skills/${name}/SKILL.md`);
-    process.exit(0);
-  }
-
-  if (!fs.existsSync(`.claude/skills/${name}/SKILL.md`)) {
-    console.log(`.claude/skills/${name}/SKILL.md`);
-    process.exit(0);
-  }
-}
-NODE
-)"
-
-if [ -n "$missing_skill" ]; then
-  echo "FAIL: pnpm skills:refresh did not restore locked skill path: $missing_skill" >&2
-  exit 1
-fi
-
-node <<'NODE'
-const fs = require("fs");
-const path = require("path");
-const lock = require("./skills-lock.json");
-const names = Object.keys(lock.skills || {});
-
-for (const name of names) {
-  const agentPath = path.join(".agents", "skills", name);
-  const claudePath = path.join(".claude", "skills", name);
-  const stat = fs.lstatSync(claudePath);
-
-  if (!stat.isSymbolicLink()) {
-    throw new Error(`${claudePath} must be a symlink`);
-  }
-
-  const target = fs.readlinkSync(claudePath);
-  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
-
-  if (path.isAbsolute(target) || target !== expectedTarget) {
-    throw new Error(`${claudePath} must link to ${expectedTarget}, got ${target}`);
-  }
-
-  const realAgent = fs.realpathSync(agentPath);
-  const realClaude = fs.realpathSync(claudePath);
-
-  if (realClaude !== realAgent) {
-    throw new Error(`${claudePath} resolves to ${realClaude}, expected ${realAgent}`);
-  }
-
-  if (!fs.existsSync(path.join(claudePath, "SKILL.md"))) {
-    throw new Error(`${claudePath}/SKILL.md must be readable through the symlink`);
-  }
-}
-
-const claudeEntries = fs.readdirSync(path.join(".claude", "skills"), { withFileTypes: true });
-const lockedSymlinks = claudeEntries.filter((entry) => names.includes(entry.name) && entry.isSymbolicLink());
-if (lockedSymlinks.length !== names.length) {
-  throw new Error(`expected ${names.length} locked Claude symlinks, found ${lockedSymlinks.length}`);
-}
-NODE
-
-node <<'NODE'
-const fs = require("fs");
-const path = require("path");
-const lock = require("./skills-lock.json");
-for (const name of Object.keys(lock.skills || {})) {
-  fs.rmSync(path.join(".claude", "skills", name), { recursive: true, force: true });
-}
-NODE
-pnpm skills:refresh
-
-node <<'NODE'
-const fs = require("fs");
-const path = require("path");
-const lock = require("./skills-lock.json");
-for (const name of Object.keys(lock.skills || {})) {
-  const agentPath = path.join(".agents", "skills", name);
-  const claudePath = path.join(".claude", "skills", name);
-  const stat = fs.lstatSync(claudePath);
-  const target = fs.readlinkSync(claudePath);
-  const expectedTarget = path.relative(path.dirname(claudePath), agentPath).split(path.sep).join("/");
-
-  if (!stat.isSymbolicLink() || target !== expectedTarget || !fs.existsSync(path.join(claudePath, "SKILL.md"))) {
-    throw new Error(`${claudePath} was not recreated as a readable symlink to ${expectedTarget}`);
-  }
-}
-NODE
-
-if compgen -G ".skills-install.lock*" >/dev/null; then
-  echo "FAIL: pnpm skills:refresh must not create transient install lock files" >&2
-  compgen -G ".skills-install.lock*" >&2
-  exit 1
-fi
-
-stale_promotion_entry="$(node <<'NODE'
-const fs = require("fs");
-const path = require("path");
-const candidates = [
-  path.join(".agents", "skills", ".stale-test.old-123-abcdef12"),
-  path.join(".claude", "skills", ".stale-test.tmp-123-abcdef12"),
-  path.join(".claude", "skills", ".stale-link.tmp-123-abcdef12"),
-];
-
-for (const candidate of candidates) {
-  try {
-    fs.lstatSync(candidate);
-    console.log(candidate);
-    process.exit(0);
-  } catch (error) {
-    if (error.code !== "ENOENT") {
-      throw error;
-    }
-  }
-}
-NODE
-)"
-
-if [ -n "$stale_promotion_entry" ]; then
-  echo "FAIL: pnpm skills:refresh did not clean stale promotion entry: $stale_promotion_entry" >&2
-  exit 1
-fi
-
-if [ -e .agents/skills/stale-third-party ] || [ -e .claude/skills/stale-third-party ]; then
-  echo "FAIL: pnpm skills:refresh did not prune unlocked third-party skill overlays" >&2
-  exit 1
-fi
-
-if [ "$before_hash" != "$after_hash" ]; then
-  echo "FAIL: pnpm skills:refresh changed skills-lock.json" >&2
-  git diff -- skills-lock.json >&2
-  exit 1
-fi
-
-echo "OK: pnpm skills:refresh restores locked skills and leaves skills-lock.json unchanged"
+echo "OK: committed-skill lifecycle (package scripts, overlays, clean) validated"

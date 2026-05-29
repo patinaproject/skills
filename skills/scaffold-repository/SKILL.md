@@ -65,20 +65,22 @@ Behavior:
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
   2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
-  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-skills.sh`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.gitignore`.
+  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.gitignore`.
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
   6. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`, and agent-plugin release workflow when applicable.
 - Include skills installation in every scaffold and realignment. Emit or
-  realign `skills-lock.json`, `scripts/install-skills.sh`, `scripts/clean.sh`,
-  `scripts/worktree-setup.sh`, `.gitignore`, and the `package.json`
-  `env:setup` / `skills:refresh` / `clean` scripts. Vendored project-local
-  skills are committed to the repo (real directories under `.agents/skills/`
-  with portable relative symlinks under `.claude/skills/`), so they load
-  immediately in a fresh worktree without a restore step. After accepted
-  changes to `skills-lock.json`, run `pnpm skills:refresh` when the lockfile
-  records one or more skills to re-vendor the committed overlays, then verify
-  `npx --yes skills@latest list --json` includes the project-local skills and
+  realign `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`,
+  `.gitignore`, and the `package.json` `env:setup` / `skills:install` / `clean`
+  scripts. Vendored project-local skills are committed to the repo (real
+  directories under `.agents/skills/` with portable relative symlinks under
+  `.claude/skills/`), so they load immediately in a fresh worktree without a
+  restore step. Re-vendoring uses the upstream skills CLI rather than a custom
+  script: `skills:install` runs `pnpm dlx skills@latest experimental_install
+  --yes`, which restores the committed overlays from `skills-lock.json`. After
+  accepted changes to `skills-lock.json`, run `pnpm skills:install` when the
+  lockfile records one or more skills, verify
+  `npx --yes skills@latest list --json` includes the project-local skills, and
   commit the refreshed overlays.
 
 ## Prompts
@@ -137,7 +139,6 @@ docs/release-flow.md
 docs/wiki-index.md
 package.json
 pnpm-lock.yaml
-scripts/install-skills.sh
 scripts/clean.sh
 scripts/worktree-setup.sh
 skills-lock.json
@@ -198,7 +199,7 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
-- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `env:setup: "pnpm install"`, `clean: "bash scripts/clean.sh"`, `skills:refresh: "bash scripts/install-skills.sh"`, and `lint:md` script. There is no `postinstall` skill-restore hook: vendored skills are committed, so `pnpm install` does not re-vendor them.
+- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `env:setup: "pnpm install"`, `clean: "bash scripts/clean.sh"`, `skills:install: "pnpm dlx skills@latest experimental_install --yes"`, and `lint:md` script. There is no `postinstall` skill-restore hook: vendored skills are committed, so `pnpm install` does not re-vendor them.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Committed vendored skills**: scaffolded repositories commit their vendored
   project-local skills to version control so they load immediately in a fresh
@@ -210,20 +211,20 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   (`node_modules`, `.skills-install.lock*`); it must never prune the committed
   overlay directories. `.gitignore` must not exclude `.agents/skills/**` or
   `.claude/skills/**`.
-- **Skill refresh (`skills:refresh`)**: `scripts/install-skills.sh` is a manual
-  re-vendoring tool, not a `pnpm install` hook. It is idempotent: an empty or
-  absent lockfile is a no-op, while a populated lockfile restores every locked
-  skill from the immutable GitHub `ref` recorded on each lock entry without
-  writing project-local transient installer files, verifies the restored
-  payload hash against `computedHash`, writes the payloads into `.agents/skills/`,
-  and recreates the `.claude/skills/` relative symlinks. It treats
-  `skills-lock.json` as restore-only input and must not call a lifecycle command
-  that rewrites the lockfile. After running it, commit the refreshed overlays.
-  Realignment must add missing `env:setup`, `skills:refresh`, and `clean`
-  package scripts, remove any retired auto-restore `postinstall` hook and
-  retired skill-restore package scripts, re-vendor with `pnpm skills:refresh`
-  after accepted lockfile changes, and verify with
-  `npx --yes skills@latest list --json`.
+- **Skill refresh (`skills:install`)**: re-vendoring uses the upstream skills
+  CLI, not a custom script. `skills:install` runs
+  `pnpm dlx skills@latest experimental_install --yes`, which reads
+  `skills-lock.json` and restores each locked skill from its source's default
+  branch into `.agents/skills/`, with `.claude/skills/` relative symlinks to the
+  matching payloads. It is a manual maintenance command, not a `pnpm install`
+  hook: an empty or absent lockfile is a no-op, and a populated lockfile pulls
+  the latest upstream content for the recorded sources. After running it, commit
+  the refreshed overlays. Realignment must add missing `env:setup`,
+  `skills:install`, and `clean` package scripts, remove any retired auto-restore
+  `postinstall` hook, retired skill-restore package scripts, and any retired
+  custom `scripts/install-skills.sh`, re-vendor with `pnpm skills:install` after
+  accepted lockfile changes, and verify with `npx --yes skills@latest list
+  --json`.
 - **Shared worktree setup (`scripts/worktree-setup.sh`)**: scaffolded
   repositories ship a single idempotent setup script wired into both agent
   surfaces — the Claude Code `SessionStart` (`startup`) hook in

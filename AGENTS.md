@@ -14,7 +14,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
-  real directories restored by `pnpm skills:refresh`. All entries are tracked.
+  real directories restored by `pnpm skills:install`. All entries are tracked.
 - `.claude/skills/<name>/`: committed Claude Code overlay. Repo-owned skills
   symlink into `../../skills/<name>/`; vendored third-party skills are relative
   symlinks into `../../.agents/skills/<name>`. All entries are tracked.
@@ -48,13 +48,12 @@ This is a single-context repository; domain docs are optional and created lazily
 
 - `pnpm install` (alias `pnpm env:setup`): install dev tooling and initialize
   Husky. It does not restore skills — vendored skills are committed.
-- `pnpm skills:refresh`: re-vendor locked project-local skills from
-  `skills-lock.json` without creating project-local transient installer files,
-  then commit the refreshed `.agents/skills/**` and `.claude/skills/**`
-  overlays. This is a manual maintenance command, not a `pnpm install` hook.
-  Concurrent invocations are unsupported; rerun if interrupted. Prefer
-  `PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS` for fetch timeouts; the old
-  `PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS` fallback is only for existing wrappers.
+- `pnpm skills:install`: re-vendor locked project-local skills from
+  `skills-lock.json` using the upstream skills CLI
+  (`pnpm dlx skills@latest experimental_install --yes`), then commit the
+  refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
+  manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
+  its source's default branch (latest), so re-running picks up upstream updates.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -91,11 +90,11 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - `pnpm test` includes network-backed skills CLI canaries and the
-  `skills:refresh` lifecycle check.
+  committed-skill lifecycle check.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/tests/skill-install-lifecycle.test.sh` after changing
-  `scripts/install-skills.sh`, `scripts/clean.sh`, package lifecycle scripts,
-  or the skill install/clean package scripts.
+  `scripts/clean.sh`, package lifecycle scripts, or the skill install/clean
+  package scripts.
 - Run `bash scripts/tests/worktree-setup.test.sh` after changing
   `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check

@@ -14,12 +14,12 @@ To re-vendor the committed overlays from an existing lockfile, use the
 repository's manual maintenance command instead:
 
 ```bash
-pnpm skills:refresh
+pnpm skills:install
 ```
 
 Use this skill when the desired result is a changed skill catalog: adding,
 removing, refreshing, or otherwise updating the entries recorded in
-`skills-lock.json`. After changing the lockfile, run `pnpm skills:refresh` and
+`skills-lock.json`. After changing the lockfile, run `pnpm skills:install` and
 commit the refreshed `.agents/skills/**` and `.claude/skills/**` overlays.
 
 ## Preflight
@@ -65,41 +65,22 @@ For all skills from a source, prefer an explicit all-agent install:
 npm_config_ignore_scripts=true npx --yes skills@latest add <source> --skill '*' --agent '*' --yes
 ```
 
-GitHub lock entries must be committed with an immutable 40-character `ref`.
-The refresh lifecycle reads `skills-lock.json` directly, downloads that
-exact GitHub ref, verifies `computedHash`, writes verified payloads into
-`.agents/skills/`, and creates relative `.claude/skills/` symlinks to them
-without project-local transient installer files. Branch names, tags, or missing
-refs are not reproducible enough for `pnpm skills:refresh`.
-Locked GitHub sources must be publicly readable because refresh uses GitHub
-archive downloads rather than local `git` credentials.
+GitHub lock entries record a `source` and `skillPath`. The upstream skills CLI
+(`skills experimental_install`) restores them by cloning each source's default
+branch, so the lock does not pin an immutable `ref`; re-running picks up the
+latest upstream commit on that branch. Locked GitHub sources must be publicly
+readable because restore clones from the public GitHub source.
 
-Because the refresh path intentionally creates no lock or staging files,
-concurrent `pnpm skills:refresh` invocations are unsupported. If a refresh is
-interrupted, rerun `pnpm skills:refresh` to restore the locked overlay.
-Use `PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS` to tune archive fetch timeouts; the
-older `PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS` name is still accepted only for
-existing CI wrappers.
-
-When the desired source is already known, pin the add command to the producing
-commit ref:
+To re-vendor the committed overlays from the lockfile, run:
 
 ```bash
-npm_config_ignore_scripts=true npx --yes skills@latest add owner/repo#0123456789abcdef0123456789abcdef01234567 --skill <skill-name> --agent '*' --yes
+pnpm skills:install
 ```
 
-If the skills CLI writes a lock entry without a full commit SHA, record the
-exact commit from the local checkout or CLI output that produced the installed
-payload before committing:
-
-```bash
-git -C <local-skills-source-clone> rev-parse HEAD
-```
-
-Do not re-resolve a branch or tag later through the GitHub API; its target may
-have moved after the payload was installed. Record the producing commit SHA as
-the entry's `ref`, then run `pnpm skills:refresh` to prove the lockfile can
-restore the exact recorded skills without changing `skills-lock.json`.
+This runs `pnpm dlx skills@latest experimental_install --yes`, which reads
+`skills-lock.json`, restores each locked skill into `.agents/skills/`, and
+maintains the relative `.claude/skills/` symlinks. Commit the refreshed
+overlays afterward.
 
 ## Patina Sources
 
@@ -123,12 +104,6 @@ After installing, prove what changed:
 ```bash
 npm_config_ignore_scripts=true npx --yes skills@latest list --json
 git status --short
-```
-
-If the repository exposes wrapper scripts, also run:
-
-```bash
-pnpm skills:list
 ```
 
 Report the installed skills, the source used, and the changed lockfile or agent

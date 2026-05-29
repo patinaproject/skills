@@ -78,11 +78,14 @@ assert_no_match "review-action|office-hours|plan-ceo-review|superteam-non-intera
   AGENTS.md README.md docs .claude-plugin/marketplace.json .claude-plugin/plugin.json \
   .codex-plugin/plugin.json .agents/plugins/marketplace.json \
   skills/develop-issue skills/review-code skills/install-skills
-assert_no_match "skills:restore" \
+assert_no_match "skills:restore|skills:refresh" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
-  docs skills/scaffold-repository skills/install-skills scripts/install-skills.sh
+  docs skills/scaffold-repository skills/install-skills
 
-assert_match "skills:refresh" \
+test ! -e scripts/install-skills.sh ||
+  fail "scripts/install-skills.sh should be removed in favor of skills experimental_install"
+
+assert_match "skills:install" \
   AGENTS.md skills/scaffold-repository/SKILL.md skills/install-skills/SKILL.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
