@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.6.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.2...patinaproject-skills-v2.6.0) (2026-05-29)
+
+
+### Features
+
+* [#214](https://github.com/patinaproject/skills/issues/214) commit vendored skills and add shared worktree setup ([#215](https://github.com/patinaproject/skills/issues/215)) ([ce3b17d](https://github.com/patinaproject/skills/commit/ce3b17d21462452c378541d8c99c2284a73d7915))
+
+
+### Bug Fixes
+
+* [#211](https://github.com/patinaproject/skills/issues/211) make skill output human-relevant ([#212](https://github.com/patinaproject/skills/issues/212)) ([4a1a2f3](https://github.com/patinaproject/skills/commit/4a1a2f3c7bd8f6b2c5a5918426fd1d1722cb3739))
+
 ## [2.5.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.1...patinaproject-skills-v2.5.2) (2026-05-28)
 
 
