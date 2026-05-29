@@ -182,8 +182,8 @@ skills/
   finish-pr/
   review-code/
   update-branch/
-.agents/skills/<name>/               Symlinks to ../../skills/<name>/
-.claude/skills/<name>/               Symlinks to ../../skills/<name>/
+.agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
+.claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
 .claude-plugin/
   marketplace.json                   Claude marketplace catalog
   plugin.json                        Claude plugin manifest

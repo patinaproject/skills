@@ -12,8 +12,12 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/review-code/`: isolated local branch-diff review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
-- `.agents/skills/<name>/`: symlinks into `../../skills/<name>/` (dogfood overlay)
-- `.claude/skills/<name>/`: symlinks into `../../skills/<name>/` (Claude Code overlay)
+- `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
+  into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
+  real directories restored by `pnpm skills:refresh`. All entries are tracked.
+- `.claude/skills/<name>/`: committed Claude Code overlay. Repo-owned skills
+  symlink into `../../skills/<name>/`; vendored third-party skills are relative
+  symlinks into `../../.agents/skills/<name>`. All entries are tracked.
 - `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all eight skill paths
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
@@ -42,13 +46,20 @@ This is a single-context repository; domain docs are optional and created lazily
 
 ## Build, Test, and Development Commands
 
-- `pnpm install`: install dev tooling and initialize Husky
-- `pnpm skills:install`: restore locked project-local skills from `skills-lock.json`
-  without creating project-local transient installer files. Concurrent
-  invocations are unsupported; rerun if interrupted. Prefer
+- `pnpm install` (alias `pnpm env:setup`): install dev tooling and initialize
+  Husky. It does not restore skills — vendored skills are committed.
+- `pnpm skills:refresh`: re-vendor locked project-local skills from
+  `skills-lock.json` without creating project-local transient installer files,
+  then commit the refreshed `.agents/skills/**` and `.claude/skills/**`
+  overlays. This is a manual maintenance command, not a `pnpm install` hook.
+  Concurrent invocations are unsupported; rerun if interrupted. Prefer
   `PATINA_SKILL_INSTALL_FETCH_TIMEOUT_MS` for fetch timeouts; the old
   `PATINA_SKILL_INSTALL_GIT_TIMEOUT_MS` fallback is only for existing wrappers.
-- `pnpm clean`: remove generated dependency and skill install files
+- `pnpm clean`: remove generated dependency and transient install files
+  (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
+- `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
+  `origin/main`, then `pnpm env:setup`), wired into the Claude `SessionStart`
+  hook and the Codex `[setup]` block
 - `pnpm commit`: create a guided conventional commit with issue tagging
 - `pnpm exec commitlint --edit <path>`: validate commit messages manually
 - `pnpm lint:md`: lint all tracked Markdown files with `markdownlint-cli2`
@@ -80,11 +91,11 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - `pnpm test` includes network-backed skills CLI canaries and the
-  `skills:install` lifecycle check.
+  `skills:refresh` lifecycle check.
 - Validate paths with `find` or `rg`
 - Run `bash scripts/tests/skill-install-lifecycle.test.sh` after changing
-  `scripts/install-skills.sh`, `scripts/clean.sh`, package lifecycle scripts,
-  or the skill install/clean package scripts.
+  `scripts/install-skills.sh`, `scripts/clean.sh`, `scripts/worktree-setup.sh`,
+  package lifecycle scripts, or the skill install/clean package scripts.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/new-branch-workflow.test.sh` after changing `skills/new-branch/**`

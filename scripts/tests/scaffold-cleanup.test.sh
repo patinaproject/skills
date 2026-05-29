@@ -113,6 +113,7 @@ for live_reference_path in \
   package.json \
   scripts/clean.sh \
   scripts/install-skills.sh \
+  scripts/worktree-setup.sh \
   scripts/tests/code-review-workflow.test.sh \
   scripts/tests/develop-issue-workflow.test.sh \
   scripts/tests/dogfood.test.sh \
@@ -180,16 +181,25 @@ assert_match "scripts/clean\\.sh" \
 assert_match "skills-lock\\.json" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
-assert_match "postinstall: \"pnpm skills:install\"" \
+assert_match "env:setup: \"pnpm install\"" \
   skills/scaffold-repository/SKILL.md
 
-assert_match "skills:install: \"bash scripts/install-skills\\.sh\"" \
+assert_match "skills:refresh: \"bash scripts/install-skills\\.sh\"" \
   skills/scaffold-repository/SKILL.md
 
 assert_match "clean: \"bash scripts/clean\\.sh\"" \
   skills/scaffold-repository/SKILL.md
 
-assert_no_match "skills:restore" \
+# The committed-vendored model drops the auto-restore postinstall hook and the
+# retired skills:install/skills:restore package scripts.
+assert_no_match "postinstall: \"pnpm skills:install\"" \
+  skills/scaffold-repository/SKILL.md
+
+assert_no_match "skills:install:|skills:restore" \
+  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
+
+# Scaffold must wire the shared worktree setup script into both agent surfaces.
+assert_match "scripts/worktree-setup\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

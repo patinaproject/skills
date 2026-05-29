@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 # install-skills.sh
 #
-# Restore the third-party vendored skills recorded in `skills-lock.json`.
-# Run automatically as a pnpm `postinstall` hook (and on demand via
-# `pnpm skills:install`). Re-runs restore the recorded skills; this script never
-# refreshes or rewrites the committed lockfile. Use the install-skills workflow
-# for add/update flows.
+# Refresh the third-party vendored skills recorded in `skills-lock.json` from
+# their pinned sources. The vendored skills are committed to the repo, so this
+# is a manual refresh tool (`pnpm skills:refresh`), NOT a postinstall hook:
+# a fresh checkout or worktree already has the skills and does not fetch them.
+# Re-runs rewrite the committed payload from the lockfile; this script never
+# rewrites the lockfile itself. Use the install-skills workflow for add/update.
 #
-# Why this script exists: the eight in-repo `patinaproject-skills` are tracked
-# in `skills/<name>/`; third-party skills from external skill catalogs are tracked
-# only as pinned entries in `skills-lock.json` to avoid bloating
-# `npx skills add patinaproject/skills` consumer installs with skills from
-# other repos.
+# Why this script exists rather than `skills experimental_install`: the upstream
+# CLI restores via `git clone --branch <ref>`, which cannot resolve the
+# immutable 40-character commit SHAs this repo pins in `skills-lock.json`. This
+# script fetches each GitHub tarball at the exact SHA and verifies its hash.
 
 set -euo pipefail
 
 # Skip if CI explicitly opts out (e.g., when only running unrelated jobs).
 if [ "${PATINA_SKIP_SKILL_INSTALL:-0}" = "1" ]; then
-  echo "skills:install: PATINA_SKIP_SKILL_INSTALL=1, skipping"
+  echo "skills:refresh: PATINA_SKIP_SKILL_INSTALL=1, skipping"
   exit 0
 fi
 
@@ -25,7 +25,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
 if [ ! -f skills-lock.json ]; then
-  echo "skills:install: no skills-lock.json, nothing to do"
+  echo "skills:refresh: no skills-lock.json, nothing to do"
   exit 0
 fi
 
@@ -362,7 +362,7 @@ function removeGeneratedPath(target) {
 
 function writeSkillFiles(files, targetDir) {
   // This deliberately writes directly to generated overlay paths: if interrupted,
-  // rerun `pnpm skills:install` to restore from the verified lockfile. A sibling
+  // rerun `pnpm skills:refresh` to restore from the verified lockfile. A sibling
   // temp-dir rename would be more crash-safe, but would reintroduce transient
   // installer files that this restore path is designed to avoid.
   removeGeneratedPath(targetDir);
@@ -476,7 +476,7 @@ function runSelfTests() {
     }
   }
 
-  console.log("skills:install: self-test passed");
+  console.log("skills:refresh: self-test passed");
 }
 
 if (process.env.PATINA_SKILL_INSTALL_SELF_TEST === "1") {
@@ -485,7 +485,7 @@ if (process.env.PATINA_SKILL_INSTALL_SELF_TEST === "1") {
 }
 
 if (entries.length === 0) {
-  console.log("skills:install: skills-lock.json has no skills, nothing to do");
+  console.log("skills:refresh: skills-lock.json has no skills, nothing to do");
   process.exit(0);
 }
 
@@ -532,9 +532,9 @@ for (const [name, entry] of entries) {
 }
 
 async function main() {
-  console.log(`skills:install: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
+  console.log(`skills:refresh: restoring ${entries.length} locked skill${entries.length === 1 ? "" : "s"} from skills-lock.json...`);
   // No project-local lock or staging files are created. Concurrent invocations
-  // are unsupported; rerun `pnpm skills:install` if an install is interrupted.
+  // are unsupported; rerun `pnpm skills:refresh` if an install is interrupted.
   removeStalePromotionEntries();
   removeUnlockedSkillDirs(new Set(entries.map(([name]) => name)));
 
@@ -599,7 +599,7 @@ async function main() {
     linkDirectory(agentTargetDir, claudeTargetDir);
   }
 
-  console.log("skills:install: done");
+  console.log("skills:refresh: done");
 }
 
 main().catch((error) => {

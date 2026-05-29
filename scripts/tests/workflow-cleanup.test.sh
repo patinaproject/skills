@@ -82,7 +82,7 @@ assert_no_match "skills:restore" \
   AGENTS.md CONTRIBUTING.md README.md .claude/settings.json \
   docs skills/scaffold-repository skills/install-skills scripts/install-skills.sh
 
-assert_match "skills:install" \
+assert_match "skills:refresh" \
   AGENTS.md skills/scaffold-repository/SKILL.md skills/install-skills/SKILL.md
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

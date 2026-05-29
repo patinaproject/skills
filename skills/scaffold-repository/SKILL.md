@@ -65,17 +65,21 @@ Behavior:
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
   2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
-  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-skills.sh`, `scripts/clean.sh`, `.gitignore`.
+  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/install-skills.sh`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.gitignore`.
   4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
   6. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`, and agent-plugin release workflow when applicable.
 - Include skills installation in every scaffold and realignment. Emit or
   realign `skills-lock.json`, `scripts/install-skills.sh`, `scripts/clean.sh`,
-  `.gitignore`, and the `package.json` `postinstall` / `skills:install` / `clean` scripts
-  so project-local skills restore after `pnpm install`. After accepted changes
-  to those files, run `pnpm skills:install` when the lockfile records one or
-  more skills, then verify `npx --yes skills@latest list --json` includes the
-  restored project-local skills.
+  `scripts/worktree-setup.sh`, `.gitignore`, and the `package.json`
+  `env:setup` / `skills:refresh` / `clean` scripts. Vendored project-local
+  skills are committed to the repo (real directories under `.agents/skills/`
+  with portable relative symlinks under `.claude/skills/`), so they load
+  immediately in a fresh worktree without a restore step. After accepted
+  changes to `skills-lock.json`, run `pnpm skills:refresh` when the lockfile
+  records one or more skills to re-vendor the committed overlays, then verify
+  `npx --yes skills@latest list --json` includes the project-local skills and
+  commit the refreshed overlays.
 
 ## Prompts
 
@@ -135,6 +139,7 @@ package.json
 pnpm-lock.yaml
 scripts/install-skills.sh
 scripts/clean.sh
+scripts/worktree-setup.sh
 skills-lock.json
 ```
 
@@ -174,9 +179,10 @@ only when they exist in the live baseline.
 }
 ```
 
-The emitted `.claude/settings.json` is intentionally empty by default. Projects
-may opt into host plugins later, but the scaffold does not auto-enable
-retired workflow dependencies.
+The emitted `.claude/settings.json` enables no host plugins by default, but it
+does register the shared worktree setup as a `SessionStart` (`startup`) hook
+that runs `bash scripts/worktree-setup.sh`. Projects may opt into host plugins
+later, but the scaffold does not auto-enable retired workflow dependencies.
 
 ## Conventions encoded
 
@@ -192,24 +198,57 @@ retired workflow dependencies.
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
-- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `postinstall: "pnpm skills:install"`, `clean: "bash scripts/clean.sh"`, `skills:install: "bash scripts/install-skills.sh"`, and `lint:md` script.
+- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `env:setup: "pnpm install"`, `clean: "bash scripts/clean.sh"`, `skills:refresh: "bash scripts/install-skills.sh"`, and `lint:md` script. There is no `postinstall` skill-restore hook: vendored skills are committed, so `pnpm install` does not re-vendor them.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
-- **Shared skill lifecycle**: scaffolded repositories include
-  `skills-lock.json`, `scripts/install-skills.sh`, and `scripts/clean.sh` so
-  project-local skills restore after `pnpm install` and generated install
-  artifacts can be removed with `pnpm clean`. The install script is idempotent:
-  an empty or absent lockfile is a no-op, while a populated lockfile restores
-  every locked skill from the immutable GitHub `ref` recorded on each lock
-  entry without writing project-local transient installer files, verifies the
-  restored payload hash against `computedHash`, and then writes the restored
-  payloads into `.agents/skills/`; `.claude/skills/` entries are
-  portable relative symlinks to the matching shared payloads.
-  The script must treat
+- **Committed vendored skills**: scaffolded repositories commit their vendored
+  project-local skills to version control so they load immediately in a fresh
+  clone or worktree, with no install step required. Real skill directories live
+  under `.agents/skills/<name>/`; `.claude/skills/<name>` entries are portable
+  relative symlinks (`../../.agents/skills/<name>`) to the matching payloads.
+  Repo-owned skills stay isolated under `skills/<name>/`. `scripts/clean.sh`
+  removes only generated dependency and transient install files
+  (`node_modules`, `.skills-install.lock*`); it must never prune the committed
+  overlay directories. `.gitignore` must not exclude `.agents/skills/**` or
+  `.claude/skills/**`.
+- **Skill refresh (`skills:refresh`)**: `scripts/install-skills.sh` is a manual
+  re-vendoring tool, not a `pnpm install` hook. It is idempotent: an empty or
+  absent lockfile is a no-op, while a populated lockfile restores every locked
+  skill from the immutable GitHub `ref` recorded on each lock entry without
+  writing project-local transient installer files, verifies the restored
+  payload hash against `computedHash`, writes the payloads into `.agents/skills/`,
+  and recreates the `.claude/skills/` relative symlinks. It treats
   `skills-lock.json` as restore-only input and must not call a lifecycle command
-  that refreshes or rewrites the lockfile. Realignment must add missing
-  `postinstall`, `skills:install`, and `clean` package scripts, run `pnpm skills:install`
-  after accepted lifecycle changes when skills are locked, and verify the
-  restored overlays with `npx --yes skills@latest list --json`.
+  that rewrites the lockfile. After running it, commit the refreshed overlays.
+  Realignment must add missing `env:setup`, `skills:refresh`, and `clean`
+  package scripts, remove any retired auto-restore `postinstall` hook and
+  retired skill-restore package scripts, re-vendor with `pnpm skills:refresh`
+  after accepted lockfile changes, and verify with
+  `npx --yes skills@latest list --json`.
+- **Shared worktree setup (`scripts/worktree-setup.sh`)**: scaffolded
+  repositories ship a single idempotent setup script wired into both agent
+  surfaces — the Claude Code `SessionStart` (`startup`) hook in
+  `.claude/settings.json` and the Codex `[setup]` block in
+  `.codex/environments/environment.toml` — so every new worktree is prepared the
+  same way. The script fast-forwards the worktree onto the target repository's
+  default branch and runs `pnpm env:setup`:
+
+  ```bash
+  if git fetch --prune origin <default-branch>; then
+    if git merge-base --is-ancestor HEAD origin/<default-branch>; then
+      git merge --ff-only origin/<default-branch>
+    fi
+  else
+    echo "worktree-setup: warning: could not fetch origin/<default-branch>; skipping branch sync" >&2
+  fi
+  pnpm env:setup
+  ```
+
+  The branch sync is best-effort: because it runs as a `SessionStart` hook, a
+  network or remote failure must warn rather than abort under `set -euo
+  pipefail`, so the essential `pnpm env:setup` step still runs offline. Resolve
+  `<default-branch>` at scaffold time from the target repository (for example
+  `git symbolic-ref --short refs/remotes/origin/HEAD` or
+  `gh repo view --json defaultBranchRef`); never hardcode `main`.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
 - **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).

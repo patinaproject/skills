@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# This test intentionally runs the public lifecycle command, so it is
+# This test intentionally runs the manual `skills:refresh` command, so it is
 # network-backed while restoring locked skills from their immutable Git refs. It
-# rewrites ignored local `.agents/skills/*` and `.claude/skills/*` overlays.
+# rewrites the committed `.agents/skills/*` and `.claude/skills/*` overlays in
+# place, which is why it runs only as part of the explicit verification suite.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
@@ -13,22 +14,34 @@ if [ ! -f skills-lock.json ]; then
 fi
 
 postinstall_script="$(node -e "console.log(require('./package.json').scripts.postinstall || '')")"
-install_script="$(node -e "console.log(require('./package.json').scripts['skills:install'] || '')")"
+refresh_script="$(node -e "console.log(require('./package.json').scripts['skills:refresh'] || '')")"
+env_setup_script="$(node -e "console.log(require('./package.json').scripts['env:setup'] || '')")"
 clean_script="$(node -e "console.log(require('./package.json').scripts.clean || '')")"
+install_script="$(node -e "console.log(require('./package.json').scripts['skills:install'] || '')")"
 restore_script="$(node -e "console.log(require('./package.json').scripts['skills:restore'] || '')")"
 
-if [ "$postinstall_script" != "pnpm skills:install" ]; then
-  echo "FAIL: package.json postinstall must delegate to pnpm skills:install" >&2
+if [ -n "$postinstall_script" ]; then
+  echo "FAIL: package.json must not auto-restore committed skills via postinstall" >&2
   exit 1
 fi
 
-if [ "$install_script" != "bash scripts/install-skills.sh" ]; then
-  echo "FAIL: package.json skills:install must run the restore implementation" >&2
+if [ "$refresh_script" != "bash scripts/install-skills.sh" ]; then
+  echo "FAIL: package.json skills:refresh must run the restore implementation" >&2
+  exit 1
+fi
+
+if [ "$env_setup_script" != "pnpm install" ]; then
+  echo "FAIL: package.json env:setup must install dev tooling" >&2
   exit 1
 fi
 
 if [ "$clean_script" != "bash scripts/clean.sh" ]; then
   echo "FAIL: package.json clean must run the project cleanup implementation" >&2
+  exit 1
+fi
+
+if [ -n "$install_script" ]; then
+  echo "FAIL: package.json must not expose retired skills:install script" >&2
   exit 1
 fi
 
@@ -74,7 +87,7 @@ collision_out="$temp_repo/skill-install-collision.out"
 collision_err="$temp_repo/skill-install-collision.err"
 
 if (cd "$temp_repo" && bash scripts/install-skills.sh >"$collision_out" 2>"$collision_err"); then
-  echo "FAIL: pnpm skills:install must reject third-party locks that collide with in-repo skills" >&2
+  echo "FAIL: pnpm skills:refresh must reject third-party locks that collide with in-repo skills" >&2
   exit 1
 fi
 
@@ -98,12 +111,19 @@ printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
 
 (cd "$clean_repo" && bash scripts/clean.sh >clean.out)
 
+# clean removes generated dependency and transient install files only.
 if [ -e "$clean_repo/node_modules" ] ||
-  [ -e "$clean_repo/.agents/skills/third-party" ] ||
-  [ -e "$clean_repo/.claude/skills/third-party" ] ||
   [ -e "$clean_repo/.skills-install.lock" ] ||
   [ -e "$clean_repo/.skills-install.lock.1234-deadbeef.tmp" ]; then
-  echo "FAIL: pnpm clean must remove generated dependency and skill install files" >&2
+  echo "FAIL: pnpm clean must remove generated dependency and transient install files" >&2
+  exit 1
+fi
+
+# clean must never prune committed skill overlays. The vendored third-party
+# skills live in version control now, so both overlay roots must survive.
+if [ ! -e "$clean_repo/.agents/skills/third-party/SKILL.md" ] ||
+  [ ! -e "$clean_repo/.claude/skills/third-party/SKILL.md" ]; then
+  echo "FAIL: pnpm clean must preserve committed third-party skill overlays" >&2
   exit 1
 fi
 
@@ -185,7 +205,7 @@ if [ "$actual_fixture_hash" != "e9681f55c66c75c49763c16d64ddbb695ccbed02c8f32e43
 fi
 
 if [ "${PATINA_SKILL_INSTALL_OFFLINE:-0}" = "1" ]; then
-  echo "OK: PATINA_SKILL_INSTALL_OFFLINE=1, skipped live pnpm skills:install restore"
+  echo "OK: PATINA_SKILL_INSTALL_OFFLINE=1, skipped live pnpm skills:refresh restore"
   exit 0
 fi
 
@@ -207,7 +227,7 @@ done <"$locked_sources"
 rm -f "$locked_sources"
 
 if [ "$network_available" = "0" ]; then
-  echo "SKIP: no network for live pnpm skills:install restore"
+  echo "SKIP: no network for live pnpm skills:refresh restore"
   exit 0
 fi
 
@@ -221,7 +241,7 @@ ln -s ../.agents/skills/stale-link .claude/skills/.stale-link.tmp-123-abcdef12
 mkdir -p .agents/skills/stale-third-party .claude/skills/stale-third-party
 printf '# stale\n' >.agents/skills/stale-third-party/SKILL.md
 printf '# stale\n' >.claude/skills/stale-third-party/SKILL.md
-pnpm skills:install
+pnpm skills:refresh
 after_hash="$(git hash-object skills-lock.json)"
 
 missing_skill="$(node <<'NODE'
@@ -242,7 +262,7 @@ NODE
 )"
 
 if [ -n "$missing_skill" ]; then
-  echo "FAIL: pnpm skills:install did not restore locked skill path: $missing_skill" >&2
+  echo "FAIL: pnpm skills:refresh did not restore locked skill path: $missing_skill" >&2
   exit 1
 fi
 
@@ -295,7 +315,7 @@ for (const name of Object.keys(lock.skills || {})) {
   fs.rmSync(path.join(".claude", "skills", name), { recursive: true, force: true });
 }
 NODE
-pnpm skills:install
+pnpm skills:refresh
 
 node <<'NODE'
 const fs = require("fs");
@@ -315,7 +335,7 @@ for (const name of Object.keys(lock.skills || {})) {
 NODE
 
 if compgen -G ".skills-install.lock*" >/dev/null; then
-  echo "FAIL: pnpm skills:install must not create transient install lock files" >&2
+  echo "FAIL: pnpm skills:refresh must not create transient install lock files" >&2
   compgen -G ".skills-install.lock*" >&2
   exit 1
 fi
@@ -344,19 +364,19 @@ NODE
 )"
 
 if [ -n "$stale_promotion_entry" ]; then
-  echo "FAIL: pnpm skills:install did not clean stale promotion entry: $stale_promotion_entry" >&2
+  echo "FAIL: pnpm skills:refresh did not clean stale promotion entry: $stale_promotion_entry" >&2
   exit 1
 fi
 
 if [ -e .agents/skills/stale-third-party ] || [ -e .claude/skills/stale-third-party ]; then
-  echo "FAIL: pnpm skills:install did not prune unlocked third-party skill overlays" >&2
+  echo "FAIL: pnpm skills:refresh did not prune unlocked third-party skill overlays" >&2
   exit 1
 fi
 
 if [ "$before_hash" != "$after_hash" ]; then
-  echo "FAIL: pnpm skills:install changed skills-lock.json" >&2
+  echo "FAIL: pnpm skills:refresh changed skills-lock.json" >&2
   git diff -- skills-lock.json >&2
   exit 1
 fi
 
-echo "OK: pnpm skills:install restores locked skills and leaves skills-lock.json unchanged"
+echo "OK: pnpm skills:refresh restores locked skills and leaves skills-lock.json unchanged"

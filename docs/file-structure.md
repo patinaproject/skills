@@ -14,8 +14,11 @@ flat layout.
 - `skills/review-code/`: isolated local branch-diff review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
-- `.agents/skills/<name>/`: committed symlinks into `../../skills/<name>/`
-- `.claude/skills/<name>/`: committed symlinks into `../../skills/<name>/`
+- `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
+  into `../../skills/<name>/`, vendored third-party skills are real directories
+- `.claude/skills/<name>/`: committed overlay; repo-owned skills symlink into
+  `../../skills/<name>/`, vendored third-party skills symlink into
+  `../../.agents/skills/<name>`
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing all eight skill paths
 - `.codex-plugin/plugin.json`: Codex plugin manifest listing all eight skill paths
@@ -51,21 +54,24 @@ Each `skills/<name>/` directory contains at minimum a `SKILL.md` with YAML
 frontmatter including `name: <name>` and `description:` fields. Supporting
 files such as templates, agents, and workflow docs live alongside `SKILL.md`.
 
-## Dogfood overlay layout
+## Overlay layout
 
-The eight in-repo skills are also accessible through two overlay directories
-via one-hop committed symlinks:
+The agent runtime discovers skills through two committed overlay directories.
+Both repo-owned and vendored third-party skills are committed, so they load
+immediately in a fresh clone or worktree with no install step.
+
+Repo-owned skills (the eight in `skills/`) appear as one-hop symlinks:
 
 | Overlay path | Symlink target | Mode |
 | --- | --- | --- |
 | `.agents/skills/<name>` | `../../skills/<name>` | `120000` |
 | `.claude/skills/<name>` | `../../skills/<name>` | `120000` |
 
-These symlinks allow the agent runtime to discover the in-repo skills alongside
-any third-party skills installed by the vercel-labs CLI.
-
-Third-party CLI-installed skills are untracked; only the eight in-repo overlay
-symlinks are committed.
+Vendored third-party skills (recorded in `skills-lock.json`) are committed as
+real directories under `.agents/skills/<name>`, with `.claude/skills/<name>`
+as a relative symlink into `../../.agents/skills/<name>`. `pnpm skills:refresh`
+re-vendors them from their pinned refs; the refreshed overlays are then
+committed. `scripts/clean.sh` never prunes these committed overlays.
 
 ## Symlink hygiene
 

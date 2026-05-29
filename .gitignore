@@ -1,24 +1,9 @@
 node_modules/
 
-# Third-party skills (installed via `npx skills add` on demand) are not
-# committed to the repo. The pnpm `postinstall` script restores them from
-# `skills-lock.json` so editors get them after `pnpm install`. Only the eight
-# in-repo `patinaproject-skills` overlay symlinks are tracked.
-.agents/skills/*
-!.agents/skills/scaffold-repository
-!.agents/skills/using-github
-!.agents/skills/new-branch
-!.agents/skills/develop-issue
-!.agents/skills/finish-pr
-!.agents/skills/review-code
-!.agents/skills/update-branch
-!.agents/skills/install-skills
-.claude/skills/*
-!.claude/skills/scaffold-repository
-!.claude/skills/using-github
-!.claude/skills/new-branch
-!.claude/skills/develop-issue
-!.claude/skills/finish-pr
-!.claude/skills/review-code
-!.claude/skills/update-branch
-!.claude/skills/install-skills
+# Local agent worktrees created by the harness under .claude/.
+.claude/worktrees/
+
+# Transient skills install lock/staging files. The committed installer avoids
+# creating these, but ignore them defensively so they are never staged.
+.skills-install.lock
+.skills-install.lock.*.tmp
