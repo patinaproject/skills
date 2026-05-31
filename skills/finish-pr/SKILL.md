@@ -51,6 +51,9 @@ human line instead of listing the gates.
 
 ## Guardrails
 
+- Do not resolve a review thread without an evidence-bearing reply, including
+  code-fix dispositions; verify pattern-based feedback with a direct search or
+  check before resolving when feasible.
 - Do not rewrite branch history or force-push by default.
 - Do not use browser conflict resolution or merge the pull request itself.
 - Do not create follow-up issues from PR feedback.
