@@ -1,11 +1,11 @@
 ---
 name: scaffold-repository
-description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, release-please, agent docs (AGENTS.md, CLAUDE.md), or AI agent plugin manifests for Claude Code and Codex. Triggers on phrases like "scaffold this repo", "scaffold a Patina plugin", "realign with the baseline", "audit our repo conventions", "set up commitlint and husky", or "add Claude/Codex plugin surfaces".
+description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, or agent docs (AGENTS.md, CLAUDE.md). Triggers on phrases like "scaffold this repo", "realign with the baseline", "audit our repo conventions", or "set up commitlint and husky".
 ---
 
 # scaffold-repository
 
-`scaffold-repository` scaffolds a repository – new or existing – to the Patina Project baseline: a dual-plugin repository root, a self-contained `skills/` directory, conventional-commits-with-issue-ref enforcement, a PR template, `AGENTS.md` + `CLAUDE.md`, a human-readable `README.md`, a `docs/file-structure.md` contributor reference, and PNPM + Husky + markdownlint tooling.
+`scaffold-repository` scaffolds a repository – new or existing – to the Patina Project baseline: conventional-commits-with-issue-ref enforcement, a PR template, `AGENTS.md` + `CLAUDE.md`, a human-readable `README.md`, a `docs/file-structure.md` contributor reference, and PNPM + Husky + markdownlint tooling.
 
 There is no committed template bundle. The live
 [`patinaproject/skills`](https://github.com/patinaproject/skills) repository
@@ -40,12 +40,11 @@ The skill detects which mode to run based on target-repo state.
 Preconditions:
 
 - Target is a git repository (may be empty or just initialized).
-- No prior `.claude-plugin/` or `.codex-plugin/` manifests.
+- No prior Patina baseline files (for example `AGENTS.md`, `commitlint.config.js`, or a `package.json` with the baseline scripts).
 
 Behavior:
 
 - Emit the full [core baseline](#core-baseline) tree from the live repository baseline, filtering out marketplace-internal verification and dogfood tooling.
-- If the user answers yes to "Is this an AI agent plugin?", additionally emit the [agent-plugin surfaces](#agent-plugin-surfaces).
 - Run `pnpm install` to generate `pnpm-lock.yaml` and wire Husky.
 - Leave all emitted files staged but uncommitted so the user owns the first commit.
 
@@ -60,15 +59,12 @@ Behavior:
 - Walk [`audit-checklist.md`](./audit-checklist.md) against the target repo.
 - Classify each baseline item as `missing`, `stale`, or `divergent`.
 - For each gap, produce a concrete recommendation on how to realign with the current baseline.
-- Detect whether the repo is an AI agent plugin (by presence of a Claude or Codex plugin manifest). When detected, additionally recommend any currently-supported plugin manifest or marketplace catalog that is missing from the live baseline.
 - For each recommendation, show a diff preview and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
-  1. Plugin manifests: `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`.
-  2. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
-  3. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.gitignore`.
-  4. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
-  5. Marketplace catalogs: `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`.
-  6. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`, and agent-plugin release workflow when applicable.
+  1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
+  2. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`.
+  3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
+  4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
 - Include skills installation in every scaffold and realignment. Emit or
   realign `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`,
   `.gitignore`, and the `package.json` `env:setup` / `skills:install` / `clean`
@@ -93,7 +89,6 @@ The skill collects the following inputs. Author name, author email, and the secu
 | `<repo>` | from `git remote get-url origin` | repository name |
 | `<repo-description>` | – | one-line description |
 | `<visibility>` | public | public \| private |
-| `<is-agent-plugin>` | no | yes emits plugin/config surfaces for every supported AI coding tool |
 | `<codeowner>` | `@<owner>` | written into `.github/CODEOWNERS` |
 | `<security-contact>` | from `git config user.email` | public repos only; written into `SECURITY.md` |
 | `<author-name>` | from `git config user.name` | written into every `author` block |
@@ -130,7 +125,7 @@ CHANGELOG.md
 CLAUDE.md
 CONTRIBUTING.md
 LICENSE
-README.md                   (core variant; replaced by agent-plugin variant when <is-agent-plugin>=yes)
+README.md
 SECURITY.md                 (public repos only)
 commitizen.config.json
 commitlint.config.js
@@ -151,26 +146,6 @@ reference implementation tooling. Do not emit them into a generic scaffolded
 consumer repo unless that repo explicitly opts into the same marketplace
 maintenance role. Consumer workflows must be adapted to the files they actually
 receive.
-
-## Agent plugin surfaces
-
-Emitted only when `<is-agent-plugin>` is yes:
-
-```text
-.claude-plugin/marketplace.json     (Claude marketplace catalog)
-.claude-plugin/plugin.json          (Claude Code plugin manifest)
-.agents/plugins/marketplace.json    (Codex marketplace catalog)
-.codex-plugin/plugin.json           (Codex plugin manifest)
-.github/workflows/release-please.yml (release-please)
-README.md                           (includes installation instructions)
-release-please-config.json
-.release-please-manifest.json
-```
-
-Agent-plugin mode does not generate starter skills or editor-specific side
-surfaces. Aider, Zed, Cline, Codex CLI, and Opencode read `AGENTS.md` natively
-and are covered by the core baseline. Additional editor surfaces should be added
-only when they exist in the live baseline.
 
 ## Plugin enablement
 
@@ -257,10 +232,7 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 - **Workflow linting**: `.github/workflows/actions.yml` runs `actionlint` on PRs that touch `.github/workflows/**` or `.github/actionlint.yaml`. Catches malformed refs, invalid expressions, permission mistakes, and (alongside our SHA-pin convention) supply-chain drift.
 - **GitHub Actions pinning**: every `uses:` in emitted workflows references a full 40-char commit SHA with a `# <action>@<version>` comment above it, rather than a mutable tag. Documented in `AGENTS.md`.
 - **Labels**: `AGENTS.md` directs contributors to use `gh label list` and the repository's label descriptions as the source of truth when labeling issues and PRs.
-- **Author identity**: `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` use the same human author record: name and email from `git config`, plus `https://github.com/<author-handle>` from `gh api user --jq .login` or the required author-handle prompt. Repository-level URLs (`homepage`, `repository`, and Codex interface URLs) continue to use `<owner>/<repo>`.
-- **Releases (agent-plugin mode)**: [`release-please`](https://github.com/googleapis/release-please) reads conventional commits since the last tag, opens a standing release PR that bumps `package.json` + both plugin manifests + `CHANGELOG.md`, and publishes a GitHub Release on merge. Semver level is derived from commit types; there is no manual patch/minor/major choice.
-- **Distribution via `patinaproject/skills`**: Patina-Project plugins are vendored directly into `patinaproject/skills` via `git subtree` and ship through that repo's release-please flow. There is no cross-repo dispatch from individual plugin repos to the marketplace; the marketplace is updated as part of the consolidation/release flow in `patinaproject/skills` itself. The emitted Patina supplement therefore no longer carries the old `notify-patinaproject-skills` dispatch job — only the standard `release-please` job.
-- **Version canonicalization**: `.release-please-manifest.json`, `.claude-plugin/marketplace.json`, and `.codex-plugin/plugin.json` carry the marketplace version and are kept in lockstep by release-please.
+- **Author identity**: `package.json` carries a human author record: name and email from `git config`, plus `https://github.com/<author-handle>` from `gh api user --jq .login` or the required author-handle prompt. Repository-level URLs (`homepage`, `repository`) continue to use `<owner>/<repo>`.
 
 ## GitHub repository settings
 
@@ -275,7 +247,7 @@ Every scaffold-managed repo should carry these merge settings:
 | `squash_merge_commit_message` | `COMMIT_MESSAGES` | Preserves commit-level context (useful for review and git blame) in the squash body. |
 | `delete_branch_on_merge` | true | Keeps the branch list tidy after each squash. |
 | `allow_update_branch` | true | Surfaces an "Update branch" button on stale PRs so reviewers can sync without leaving the UI. |
-| Release immutability | enabled | Prevents published release assets and tags from being modified after the fact – critical for marketplace consumers pinning to a tag. UI-only: not exposed via the standard REST `repos` endpoint. |
+| Release immutability | enabled | Prevents published release assets and tags from being modified after the fact – critical for downstream consumers pinning to a tag. UI-only: not exposed via the standard REST `repos` endpoint. |
 
 ### Checking current settings
 
@@ -345,7 +317,7 @@ Repository settings drift detected. Open:
 Proceed to apply via `gh api` (if available), or confirm after applying via UI?
 ```
 
-In realignment mode, report which check path was used (`gh`, `curl`, or `skipped`) and the full list of diverging fields. Never modify settings without explicit user confirmation. When package or plugin author URLs point to the repository owner instead of the resolved author handle, report the author block as divergent and offer the normal interactive rewrite.
+In realignment mode, report which check path was used (`gh`, `curl`, or `skipped`) and the full list of diverging fields. Never modify settings without explicit user confirmation. When the `package.json` author URL points to the repository owner instead of the resolved author handle, report the author block as divergent and offer the normal interactive rewrite.
 
 ### Reserved labels
 
