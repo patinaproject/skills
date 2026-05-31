@@ -184,14 +184,22 @@ tell the human what to do next.
     optional; unaddressed findings are blockers until they have a disposition
     recorded in the PR or final report.
 
-11. Resolve eligible inline threads once the disposition is valid. Explanation,
-    stale, and deferral dispositions are eligible after an evidence-bearing
-    reply is present on the latest head. Code-fix dispositions are eligible
-    after the fix is present on the latest head and local verification passes.
-    Use GraphQL `resolveReviewThread`, then verify GraphQL `isResolved` after
-    resolving. If permissions do not allow resolution, leave an
-    evidence-bearing reply and report the unresolved state. Do not treat
-    replies as resolution.
+11. Resolve eligible inline threads once the disposition is valid and an
+    evidence-bearing reply for that disposition is present on the latest head.
+    Every resolved thread carries a reply first; never resolve a thread
+    silently. Explanation, stale, and deferral dispositions are eligible after
+    their evidence-bearing reply is present on the latest head. Code-fix
+    dispositions are eligible only after the fix is present on the latest head,
+    local verification passes, and an evidence-bearing reply is posted that
+    names what changed, the commit or verification result when useful, and
+    whether the fix covers only the commented line or the broader pattern. For
+    pattern-based feedback that names a construct, helper, or anti-pattern, run
+    a direct semantic or pattern check before resolving when feasible: a repo
+    search, an AST query, or a lint rule. Account for every remaining match in
+    the reply and do not resolve while unexplained matches remain. Use GraphQL
+    `resolveReviewThread`, then verify GraphQL `isResolved` after resolving. If
+    permissions do not allow resolution, leave the evidence-bearing reply and
+    report the unresolved state. Do not treat replies as resolution.
 
 12. Watch all checks only through the fail-fast bounded-watch policy. Before
     each watch window, confirm all currently available feedback and known
@@ -249,9 +257,10 @@ tell the human what to do next.
 15. Final unresolved review-thread gate: immediately before declaring the PR
     ready, re-query paginated GraphQL review threads for the latest PR head.
     Distinguish unresolved actionable feedback from outdated or stale feedback
-    that is already fixed on the latest head. For stale fixed threads, resolve
-    them with `resolveReviewThread` when permissions allow, then verify
-    `isResolved: true` from GraphQL. If any thread remains unresolved because it
+    that is already fixed on the latest head. For stale fixed threads, post a
+    brief current-head evidence reply first, then resolve them with
+    `resolveReviewThread` when permissions allow, and verify `isResolved: true`
+    from GraphQL. If any thread remains unresolved because it
     still needs action, cannot be resolved automatically, lacks current-head
     evidence, or needs human judgment, report it as a blocker instead of
     reporting ready-to-merge. Restart the readiness loop after branch-local
@@ -356,6 +365,10 @@ tell the human what to do next.
       per-finding disposition for every top-level review finding and
       per-failing-check dispositions when they change what the human should
       know.
+    - For resolved review threads, report each as resolved after an
+      evidence-bearing reply. Distinguish threads resolved after an evidence
+      reply from any thread that was fixed silently, and flag a silent
+      resolution as a defect to correct rather than a completed disposition.
     - Human blockers, if any.
 
     Compress ready-to-merge evidence into one human line when every final gate

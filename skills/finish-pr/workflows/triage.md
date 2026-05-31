@@ -37,8 +37,20 @@ executing the state action.
 - Route requirement, acceptance-criteria, scope, or user-visible behavior
   changes through the repository's planning owner before implementation.
 - Reply concisely to every handled human comment.
-- Resolve inline threads only after the fix, explanation, stale evidence, or
-  deferral evidence is present on latest head.
+- Every resolved review thread must carry an evidence-bearing reply before
+  `resolveReviewThread`, including code-fix dispositions. Silent resolution is
+  not allowed for any disposition.
+- For a code-fix disposition, the reply must name what changed, the commit or
+  verification result when useful, and whether the fix covers only the
+  commented line or the broader pattern.
+- For pattern-based feedback that names a construct, helper, or anti-pattern
+  (for example, feedback that `definedOrThrow` is unacceptable), run a direct
+  semantic or pattern check before resolving when feasible: a repo search, an
+  AST query, or a lint rule. Account for every remaining match in the reply,
+  and do not resolve while unexplained matches remain.
+- Resolve inline threads only after both the disposition evidence (fix,
+  explanation, stale evidence, or deferral evidence) is present on latest head
+  and an evidence-bearing reply for that disposition is posted.
 - Verify `isResolved: true` after calling `resolveReviewThread`; unresolved
   threads remain blockers unless permission-blocked and explicitly reported.
 - Track handled top-level comments and review bodies in memory during the run so
