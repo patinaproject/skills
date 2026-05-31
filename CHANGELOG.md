@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.7.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.6.0...patinaproject-skills-v2.7.0) (2026-05-31)
+
+
+### Features
+
+* [#217](https://github.com/patinaproject/skills/issues/217) drop agent-plugin mode from scaffold-repository ([#220](https://github.com/patinaproject/skills/issues/220)) ([354b461](https://github.com/patinaproject/skills/commit/354b4619d93b27b036e2e03b99b22b990bc68edd))
+
+
+### Bug Fixes
+
+* [#216](https://github.com/patinaproject/skills/issues/216) require evidence replies before resolving review threads ([#218](https://github.com/patinaproject/skills/issues/218)) ([34e25d0](https://github.com/patinaproject/skills/commit/34e25d0c82911ac846b257ae99fd7d00083193ba))
+
 ## [2.6.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.2...patinaproject-skills-v2.6.0) (2026-05-29)
 
 
