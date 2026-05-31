@@ -80,26 +80,7 @@ project-specific plugin entries only when the repository explicitly opts in. The
 `SessionStart` worktree-setup hook is part of the baseline and pairs with the
 Codex `[setup]` block so both agents prepare new worktrees identically.
 
-## Area 5 – AI agent plugin surfaces
-
-Detection: this repo is an AI agent plugin if **any** of these exist:
-`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, or `skills/`.
-
-When detected, the following surfaces should all be present. Missing platforms are recommended as additions so existing plugins stay aligned with the current supported set.
-
-| File | Required (agent plugin) | Check |
-|---|---|---|
-| `.claude-plugin/plugin.json` | yes | valid JSON; has `name`, `description`, `author.name`, `author.email`, `author.url`, and `skills` |
-| `.codex-plugin/plugin.json` | yes | valid JSON; has `name`, `version`, `description`, `author.name`, `author.email`, `author.url`, `skills`, and `interface`; `version` matches `.claude-plugin/marketplace.json` metadata |
-| `.claude-plugin/marketplace.json` | yes | valid JSON; marketplace entry name matches plugin name |
-| `.agents/plugins/marketplace.json` | yes | valid JSON; marketplace entry name matches plugin name |
-| `.github/workflows/release-please.yml` | yes | present; runs `release-please` on push to default branch |
-| `release-please-config.json` | yes | valid JSON; lists both plugin manifests under `extra-files` for version sync |
-| `.release-please-manifest.json` | yes | valid JSON; `.` version matches `.codex-plugin/plugin.json` and `.claude-plugin/marketplace.json` |
-
-Author URLs in `package.json`, `.claude-plugin/plugin.json`, and `.codex-plugin/plugin.json` must point to the resolved `https://github.com/<author-handle>`, not the repository owner URL. Repository-level URLs such as `homepage`, `repository`, and Codex interface URLs stay on `https://github.com/<owner>/<repo>`.
-
-### Shared skill lifecycle
+## Area 5 – Shared skill lifecycle
 
 This check applies to every scaffolded or realigned repository. Vendored
 project-local skills are committed to version control so they load immediately
@@ -124,7 +105,7 @@ Detection: look for retired workflow scaffolding in active repo guidance.
 | `docs/superpowers/` | no | absent from new scaffolded repos; if present, classify as `stale` unless the repository explicitly keeps historical artifacts |
 | `package.json` | no | does not install retired workflow dependencies by default |
 | `AGENTS.md` | yes | directs durable issue context to GitHub issues instead of committed design/plan artifacts |
-| Agent-plugin install docs | agent plugin only | do not require Superpowers for new installs |
+| Install docs | no | do not require Superpowers for new installs |
 
 ## Area 7 – GitHub repository merge settings
 
@@ -168,10 +149,8 @@ For each gap, emit:
 
 Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
 
-1. Plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/`, `release-please-config.json`, `.release-please-manifest.json`)
-2. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, stale GitHub issue templates)
-3. PNPM tooling and skills installation (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`)
-4. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
-5. Marketplace catalogs (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`)
-6. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`, and agent-plugin `release-please.yml` when applicable)
-7. Deprecated workflow cleanup
+1. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, stale GitHub issue templates)
+2. PNPM tooling and skills installation (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`)
+3. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
+4. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`)
+5. Deprecated workflow cleanup

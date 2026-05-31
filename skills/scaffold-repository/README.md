@@ -2,7 +2,7 @@
 
 Scaffold a new repository – or realign an existing one – to the Patina Project baseline. One invocation, consistent conventions, portable across every major AI coding tool.
 
-`scaffold-repository` is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, plugin manifests, release flow, GitHub repo settings) and keeps existing repos aligned with the latest live baseline on rerun.
+`scaffold-repository` is distributed through the [`patinaproject/skills`](https://github.com/patinaproject/skills) marketplace. It ships a single skill that scaffolds a complete Patina Project baseline repository (commit + PR conventions, PNPM + Husky + markdownlint, agent docs, GitHub repo settings) and keeps existing repos aligned with the latest live baseline on rerun.
 
 ## How scaffold-repository works
 
@@ -15,7 +15,6 @@ flowchart TD
     newrepo["New repo"]
     realign["Realignment"]
     scaffold["Scaffold core baseline"]
-    optional["Optional add-ons"]:::artifact
     audit["Walk audit-checklist.md"]
     recommend["Recommendations"]:::artifact
     confirm["User confirmation"]
@@ -25,8 +24,7 @@ flowchart TD
     detect --> newrepo
     detect --> realign
     newrepo --> scaffold
-    scaffold --> optional
-    optional --> repo
+    scaffold --> repo
     realign --> audit
     audit --> recommend
     recommend --> confirm
@@ -49,14 +47,6 @@ flowchart TD
 - **Claude Code project settings** – `.claude/settings.json` with no plugins enabled by default.
 - **CODEOWNERS + issue/PR templates** under `.github/`.
 
-### AI agent plugin add-ons
-
-When the repo is itself a plugin, `scaffold-repository` additionally emits the live Claude Code and Codex marketplace/plugin manifests. Aider, Zed, Cline, Codex CLI, and Opencode are covered by the core `AGENTS.md`.
-
-### Release flow
-
-For plugins, `scaffold-repository` wires a complete [release-please](https://github.com/googleapis/release-please) flow – standing release PR, auto-generated `CHANGELOG.md` and GitHub Release notes, with marketplace versions kept in lockstep on every bump.
-
 ### GitHub repository settings
 
 `scaffold-repository` walks the target repo's merge settings (via `gh api`, `curl`, or visual inspection) and walks the user through the GitHub UI with a deep-link to bring them into alignment. Full matrix in [SKILL.md](./SKILL.md#github-repository-settings).
@@ -70,13 +60,12 @@ For plugins, `scaffold-repository` wires a complete [release-please](https://git
 
 | Tool | Surface | Covered by |
 |---|---|---|
-| [Claude Code](#claude-code) | `.claude-plugin/plugin.json` | Plugin manifest |
-| [OpenAI Codex CLI](#openai-codex-cli) | `.codex-plugin/plugin.json` | Plugin manifest |
-| [OpenAI Codex App](#openai-codex-app) | `.codex-plugin/plugin.json` | Plugin manifest |
-| [Aider](#aider) | `AGENTS.md` | Native |
-| [Zed](#zed) | `AGENTS.md` | Native |
-| [Cline](#cline) | `AGENTS.md` | Native |
-| [Opencode](#opencode) | `AGENTS.md` | Native |
+| Claude Code | `.claude/settings.json`, `AGENTS.md` (`CLAUDE.md`) | Project settings + native |
+| OpenAI Codex | `.codex/environments/environment.toml`, `AGENTS.md` | Workspace setup + native |
+| Aider | `AGENTS.md` | Native |
+| Zed | `AGENTS.md` | Native |
+| Cline | `AGENTS.md` | Native |
+| Opencode | `AGENTS.md` | Native |
 
 ## Install
 
@@ -99,7 +88,6 @@ After installing, run `scaffold-repository` from a cloned repository. The skill 
 
 - `<owner>`, `<repo>`, `<repo-description>`
 - `<visibility>` – public or private
-- `<is-agent-plugin>` – yes emits the live Claude Code and Codex marketplace/plugin manifests
 
 Author name, author email, and `SECURITY.md` contact default from `git config user.name` / `git config user.email`.
 

@@ -117,9 +117,8 @@ See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 ### scaffold-repository
 
 Teams spend disproportionate time on repo plumbing - commit conventions,
-markdown linting, PR templates, Husky hooks, release-please wiring, and AI
-agent plugin manifests. `scaffold-repository` emits the full Patina Project
-baseline and keeps it aligned on rerun.
+markdown linting, PR templates, and Husky hooks. `scaffold-repository` emits the
+full Patina Project baseline and keeps it aligned on rerun.
 
 See [./skills/scaffold-repository/](./skills/scaffold-repository/) for the full
 README and skill contract.

@@ -199,6 +199,20 @@ assert_no_match "skills:refresh|skills:restore" \
 assert_match "scripts/worktree-setup\\.sh" \
   skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
 
+# scaffold-repository no longer scaffolds or audits AI-agent-plugin repos. The
+# plugin emit mode, the audit-checklist plugin area, and the plugin-version
+# lockstep release machinery must all be gone from the skill surface.
+assert_no_match "is-agent-plugin|agent[ -]plugin|Agent plugin surfaces" \
+  skills/scaffold-repository/SKILL.md \
+  skills/scaffold-repository/audit-checklist.md \
+  skills/scaffold-repository/README.md \
+  skills/scaffold-repository/agent-spawn-template.md
+
+assert_no_match "release-please-config|release-please-manifest|claude-plugin|codex-plugin|plugins/marketplace" \
+  skills/scaffold-repository/SKILL.md \
+  skills/scaffold-repository/audit-checklist.md \
+  skills/scaffold-repository/README.md
+
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
   echo "FAIL: $FAIL_COUNT scaffold cleanup assertion(s) failed" >&2
