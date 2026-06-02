@@ -63,6 +63,7 @@ Classify stale PR templates when they encourage command transcripts, routine aut
 | File | Required | Check |
 |---|---|---|
 | `AGENTS.md` | yes | present; covers project structure, commands, conventions, commits, PRs; "Commit type selection" section leads with the product-surface glob list and one-sentence path-first rule BEFORE the type table, contains a rationalization table, a red-flags STOP block, and at least one WRONG → RIGHT pair. Verify with a parity grep across agent-facing surfaces. |
+| `AGENTS.md` testing rule | yes | "Testing Guidelines" states that tests must not assert on the prose content of documentation files (code behavior and machine-consumed contracts only; markdown linting is exempt). Realignment must add this rule if absent. |
 | `CLAUDE.md` | yes | present; imports `@AGENTS.md`; Claude-only guidance below |
 | `CONTRIBUTING.md` | yes | present; pointer to `AGENTS.md` |
 | `SECURITY.md` | public only | public repo → present; private → absent |

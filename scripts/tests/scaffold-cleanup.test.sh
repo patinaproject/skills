@@ -50,21 +50,6 @@ assert_no_match() {
   fi
 }
 
-assert_match() {
-  local pattern="$1"
-  local output
-  local status
-  shift
-  set +e
-  output="$(rg -n -U -e "$pattern" "$@" 2>&1)"
-  status=$?
-  set -e
-  if [ "$status" -ne 0 ]; then
-    fail "expected scaffold reference did not match: $pattern"
-    printf '%s\n' "$output" >&2
-  fi
-}
-
 require_command "rg"
 
 assert_absent_path "skills/scaffold-repository/templates"
@@ -115,14 +100,10 @@ for live_reference_path in \
   scripts/clean.sh \
   scripts/worktree-setup.sh \
   scripts/tests/code-review-workflow.test.sh \
-  scripts/tests/develop-issue-workflow.test.sh \
   scripts/tests/dogfood.test.sh \
   scripts/tests/esm-tooling.test.sh \
-  scripts/tests/finish-pr-workflow.test.sh \
   scripts/tests/marketplace.test.sh \
-  scripts/tests/pr-body-policy.test.sh \
   scripts/tests/pull-request-workflow.test.sh \
-  scripts/tests/review-code-skill.test.sh \
   scripts/tests/scaffold-cleanup.test.sh \
   scripts/tests/skill-install-lifecycle.test.sh \
   scripts/tests/suite.test.sh \
@@ -139,79 +120,19 @@ for test_file in scripts/tests/*.test.sh; do
   fi
 done
 
+# Per the "no tests on documentation content" rule (docs/adr/0001), this test
+# asserts only on filesystem state and non-`.md` config/code targets. Stale
+# scaffold references inside skill prose are covered by `lint:md`, not here.
 assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-repository self-apply" \
-  AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
-  "${test_files[@]}" \
-  skills/scaffold-repository
+  package.json .github/workflows \
+  "${test_files[@]}"
 
 assert_no_match "skills/scaffold-repository/templates|skills/bootstrap/templates|\\.tmpl" \
-  AGENTS.md CLAUDE.md README.md docs package.json .github/workflows \
-  "${test_files[@]}" \
-  skills/scaffold-repository
-
-assert_no_match "Cursor|Windsurf|Continue\\.dev|\\.cursor/|\\.windsurfrules|\\.continue/" \
-  skills/scaffold-repository
+  package.json .github/workflows \
+  "${test_files[@]}"
 
 assert_no_match "skills@[0-9]+\\.[0-9]+\\.[0-9]+" \
-  README.md docs/release-flow.md .github/workflows/verify.yml
-
-assert_no_match "obra/superpowers" \
-  AGENTS.md skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
-
-assert_no_match "ISSUE_TEMPLATE|bug_report|feature_request|gh issue create --template|docs/issue-filing-style\\.md" \
-  AGENTS.md docs/agents/issue-tracker.md \
-  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md \
-  skills/using-github/SKILL.md skills/using-github/workflows
-
-assert_match "(?s)## Parent.*## What to build.*## Acceptance criteria.*- \\[ \\].*## Blocked by" \
-  skills/using-github/workflows/new-issue.md
-
-assert_no_match "#cursor|#windsurf|#github-copilot|#continuedev" \
-  skills/scaffold-repository/README.md
-
-assert_no_match "scripts/(test|verify-code-review-workflow|verify-develop-issue-workflow|verify-dogfood|verify-esm-tooling|verify-finish-pr-workflow|verify-marketplace|verify-review-code-skill|verify-scaffold-cleanup|verify-workflow-cleanup)\\.sh" \
-  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
-
-assert_match "scripts/clean\\.sh" \
-  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
-
-assert_match "skills-lock\\.json" \
-  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
-
-assert_match "env:setup: \"pnpm install\"" \
-  skills/scaffold-repository/SKILL.md
-
-assert_match "skills:install: \"pnpm dlx skills@latest experimental_install --yes\"" \
-  skills/scaffold-repository/SKILL.md
-
-assert_match "clean: \"bash scripts/clean\\.sh\"" \
-  skills/scaffold-repository/SKILL.md
-
-# The committed-vendored model drops the auto-restore postinstall hook and the
-# retired skills:refresh/skills:restore package scripts.
-assert_no_match "postinstall: \"pnpm skills:install\"" \
-  skills/scaffold-repository/SKILL.md
-
-assert_no_match "skills:refresh|skills:restore" \
-  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
-
-# Scaffold must wire the shared worktree setup script into both agent surfaces.
-assert_match "scripts/worktree-setup\\.sh" \
-  skills/scaffold-repository/SKILL.md skills/scaffold-repository/audit-checklist.md
-
-# scaffold-repository no longer scaffolds or audits AI-agent-plugin repos. The
-# plugin emit mode, the audit-checklist plugin area, and the plugin-version
-# lockstep release machinery must all be gone from the skill surface.
-assert_no_match "is-agent-plugin|agent[ -]plugin|Agent plugin surfaces" \
-  skills/scaffold-repository/SKILL.md \
-  skills/scaffold-repository/audit-checklist.md \
-  skills/scaffold-repository/README.md \
-  skills/scaffold-repository/agent-spawn-template.md
-
-assert_no_match "release-please-config|release-please-manifest|claude-plugin|codex-plugin|plugins/marketplace" \
-  skills/scaffold-repository/SKILL.md \
-  skills/scaffold-repository/audit-checklist.md \
-  skills/scaffold-repository/README.md
+  .github/workflows/verify.yml
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
