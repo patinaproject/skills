@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.7.0...patinaproject-skills-v2.8.0) (2026-06-02)
+
+
+### Features
+
+* [#221](https://github.com/patinaproject/skills/issues/221) auto-assign issue to current user in develop-issue ([#222](https://github.com/patinaproject/skills/issues/222)) ([f30dc84](https://github.com/patinaproject/skills/commit/f30dc849697f7149dcb66e014abb14e9fc414589))
+
 ## [2.7.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.6.0...patinaproject-skills-v2.7.0) (2026-05-31)
 
 
