@@ -150,19 +150,41 @@ For this skill, all visible PR checks include required and optional checks.
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
 2. Validate the single same-repository issue reference and required child
    skills.
-3. Inspect the issue's existing GitHub Projects through its GitHub Project items
-   before branch setup, using the issue's `projectItems` data. For each
-   existing GitHub Project item:
-   - Use project-item inspection to find a compatible field where
-     Status = `In progress` is offered as an exact option and update that
-     project item to `In progress`.
-   - Do not add the issue to projects. Do not create project fields or status
-     options.
-   - Skip incompatible project items and continue when the project lacks a
-     compatible status field, lacks the `In progress` option, or project-item
-     inspection or updates fail due to permissions.
-   - Record the project status update result, including each updated item and
-     skipped item reason, for the final report.
+3. Mark the issue as started before branch setup. This "I am starting work"
+   step has two independent actions: self-assignment and GitHub Project status.
+   Run each on a best-effort basis; neither blocks real work, and neither
+   causes a `human-blocked` halt.
+
+   Self-assignment:
+   - Read the issue's current assignees from its `assignees` field (for example
+     `gh issue view <number> --json assignees`). Assign only when that list is
+     empty.
+   - When the issue has zero assignees, assign it to the current
+     `gh`-authenticated user with a single issue-level call,
+     `gh issue edit <number> --add-assignee @me`, run once. Resolve "myself" to
+     `@me`; never hardcode a username, so the skill stays reusable across every
+     consumer.
+   - When the issue already has one or more assignees — `@me` or anyone else —
+     do nothing. Do not add `@me` as an additional assignee.
+   - This is one issue-level call, not a per-project-item operation. Do not add
+     assignment to `new-branch`, which stays a pure local-branch tool.
+   - If the assignment call fails (permissions, missing write access, API
+     error), skip and record the reason, then continue to branch setup and
+     implementation.
+
+   GitHub Project status:
+   - Inspect the issue's existing GitHub Projects through its GitHub Project items
+     (the issue's `projectItems` data). For each existing GitHub Project item:
+     - Use project-item inspection to find a compatible field where
+       Status = `In progress` is offered as an exact option and update that
+       project item to `In progress`.
+     - Do not add the issue to projects. Do not create project fields or status
+       options.
+     - Skip incompatible project items and continue when the project lacks a
+       compatible status field, lacks the `In progress` option, or project-item
+       inspection or updates fail due to permissions.
+   - Record the project status update result and the self-assignment result,
+     including each updated item and skipped item reason, for the final report.
 4. Satisfy the branch setup precondition using `new-branch` when needed.
 5. Apply triggered conditional routes from the Conditional Routes section.
 6. Choose the next capability by naming the current gap between actual state and
@@ -242,6 +264,8 @@ Include:
   when URLs are available; name them plainly when not.
 - Project status update result only when it changed readiness, failed, skipped,
   explains a blocker, or creates a human next action.
+- Issue self-assignment result only when it failed, changed readiness, or
+  created a human next action. Stay silent on successful assignment.
 - Terminal state: `goal-met` or `human-blocked`.
 - Production-readiness case.
 - Verification commands and results, summarized at the highest useful level.
