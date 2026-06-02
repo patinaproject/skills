@@ -88,6 +88,13 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 
 ## Testing Guidelines
 
+- **Tests must not assert on the prose content of documentation files.** Tests
+  validate code behavior and machine-consumed contracts only: shell/JS behavior,
+  valid JSON/YAML config, `.md` *frontmatter* schema (for example `name:` matches
+  the folder), symlink resolution, and required-file existence. A documentation
+  file's prose body must be freely editable without breaking a test. Markdown
+  *linting* (`pnpm lint:md`) is unaffected — linting is not testing. See
+  [docs/adr/0001-no-tests-on-documentation-content.md](docs/adr/0001-no-tests-on-documentation-content.md).
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - `pnpm test` includes network-backed skills CLI canaries and the
   committed-skill lifecycle check.
@@ -99,19 +106,11 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
   `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm all eight in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
-- Run `bash scripts/tests/new-branch-workflow.test.sh` after changing `skills/new-branch/**`
-- Run `bash scripts/tests/develop-issue-workflow.test.sh` after changing `skills/develop-issue/**`
-- Run `bash scripts/tests/finish-pr-workflow.test.sh` after changing `skills/finish-pr/**`
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
-- Run `bash scripts/tests/pr-body-policy.test.sh` after changing PR body policy,
-  `.github/pull_request_template.md`, `CONTRIBUTING.md`, `finish-pr` PR-body
-  guidance, or scaffold PR-body guidance
-- Run `bash scripts/tests/review-code-skill.test.sh` after changing `skills/review-code/**`
-- Run `bash scripts/tests/update-branch-workflow.test.sh` after changing `skills/update-branch/**`
 - Run `bash scripts/tests/code-review-workflow.test.sh` after changing `.github/workflows/code-review.yml`
 - Run `bash scripts/tests/pull-request-workflow.test.sh` after changing `.github/workflows/pull-request.yml`
-- Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior
-- Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior
+- Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
+- Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
 
 ## Issue and PR labels
 

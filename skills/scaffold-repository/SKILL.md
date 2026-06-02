@@ -174,6 +174,13 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
+- **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
+  content of documentation files. Tests validate code behavior and
+  machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
+  *frontmatter* schema, symlink resolution, required-file existence); a doc's
+  prose body stays freely editable. Markdown linting is unaffected — linting is
+  not testing. The scaffold propagates the written rule only; it does not emit a
+  test harness to consumer repos.
 - **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `env:setup: "pnpm install"`, `clean: "bash scripts/clean.sh"`, `skills:install: "pnpm dlx skills@latest experimental_install --yes"`, and `lint:md` script. There is no `postinstall` skill-restore hook: vendored skills are committed, so `pnpm install` does not re-vendor them.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Committed vendored skills**: scaffolded repositories commit their vendored
