@@ -1,10 +1,10 @@
 # Skills used by the Patina Project team
 
-Eight installable agent skills for repository scaffolding, project-local skill
+Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, issue branch setup, issue development, PR
-finishing, isolated local code review, and local branch updating. They are
-available across Claude Code, Codex, and any agent runtime that reads
-`AGENTS.md`.
+finishing, Codex PR feedback polling, isolated local code review, and local
+branch updating. They are available across Claude Code, Codex, and any agent
+runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
@@ -104,6 +104,17 @@ stops at ready-to-merge.
 
 See [./skills/finish-pr/](./skills/finish-pr/) for the skill contract.
 
+### codex-pr-feedback-loop
+
+PR review follow-up should preserve the Codex app chat context after the first
+successful push. `codex-pr-feedback-loop` creates a thread automation that
+polls the current PR, handles actionable review feedback and objective low-risk
+cleanup, pushes verified fixes, replies with evidence, and stops when no
+actionable work remains.
+
+See [./skills/codex-pr-feedback-loop/](./skills/codex-pr-feedback-loop/) for
+the skill contract.
+
 ### update-branch
 
 Keeping a work branch current should be a local git operation unless an
@@ -131,6 +142,7 @@ README and skill contract.
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [develop-issue](./skills/develop-issue/) | Develop one issue through local review and PR readiness |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
+| [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [review-code](./skills/review-code/) | Run isolated local branch-diff review |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
@@ -155,6 +167,7 @@ npx skills@latest add ./skills/install-skills --list
 npx skills@latest add ./skills/review-code --list
 npx skills@latest add ./skills/update-branch --list
 npx skills@latest add ./skills/develop-issue --list
+npx skills@latest add ./skills/codex-pr-feedback-loop --list
 ```
 
 ### Check b - scaffold-repository cleanup contract
@@ -163,7 +176,7 @@ npx skills@latest add ./skills/develop-issue --list
 bash scripts/tests/scaffold-cleanup.test.sh
 ```
 
-### Check c - dogfood verification, all eight skills
+### Check c - dogfood verification, all in-repo skills
 
 ```sh
 bash scripts/tests/dogfood.test.sh
@@ -179,6 +192,7 @@ skills/
   new-branch/
   develop-issue/
   finish-pr/
+  codex-pr-feedback-loop/
   review-code/
   update-branch/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs

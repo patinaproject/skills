@@ -41,6 +41,7 @@ run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/review-code
 run_cli_canary ./skills/update-branch
 run_cli_canary ./skills/develop-issue 'develop-issue'
+run_cli_canary ./skills/codex-pr-feedback-loop 'codex-pr-feedback-loop'
 
 run_cli_install_canary() {
   local repo_root tmpdir status

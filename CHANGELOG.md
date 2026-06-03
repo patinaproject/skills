@@ -2,18 +2,15 @@
 
 ## [2.8.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.7.0...patinaproject-skills-v2.8.0) (2026-06-02)
 
-
 ### Features
 
 * [#221](https://github.com/patinaproject/skills/issues/221) auto-assign issue to current user in develop-issue ([#222](https://github.com/patinaproject/skills/issues/222)) ([f30dc84](https://github.com/patinaproject/skills/commit/f30dc849697f7149dcb66e014abb14e9fc414589))
 
 ## [2.7.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.6.0...patinaproject-skills-v2.7.0) (2026-05-31)
 
-
 ### Features
 
 * [#217](https://github.com/patinaproject/skills/issues/217) drop agent-plugin mode from scaffold-repository ([#220](https://github.com/patinaproject/skills/issues/220)) ([354b461](https://github.com/patinaproject/skills/commit/354b4619d93b27b036e2e03b99b22b990bc68edd))
-
 
 ### Bug Fixes
 
@@ -21,18 +18,15 @@
 
 ## [2.6.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.2...patinaproject-skills-v2.6.0) (2026-05-29)
 
-
 ### Features
 
 * [#214](https://github.com/patinaproject/skills/issues/214) commit vendored skills and add shared worktree setup ([#215](https://github.com/patinaproject/skills/issues/215)) ([ce3b17d](https://github.com/patinaproject/skills/commit/ce3b17d21462452c378541d8c99c2284a73d7915))
-
 
 ### Bug Fixes
 
 * [#211](https://github.com/patinaproject/skills/issues/211) make skill output human-relevant ([#212](https://github.com/patinaproject/skills/issues/212)) ([4a1a2f3](https://github.com/patinaproject/skills/commit/4a1a2f3c7bd8f6b2c5a5918426fd1d1722cb3739))
 
 ## [2.5.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.1...patinaproject-skills-v2.5.2) (2026-05-28)
-
 
 ### Bug Fixes
 
@@ -41,13 +35,11 @@
 
 ## [2.5.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.5.0...patinaproject-skills-v2.5.1) (2026-05-28)
 
-
 ### Bug Fixes
 
 * [#203](https://github.com/patinaproject/skills/issues/203) remove transient skill installer files ([#204](https://github.com/patinaproject/skills/issues/204)) ([df532c5](https://github.com/patinaproject/skills/commit/df532c57f26552bc49840aec64a6771a2a5c89f5))
 
 ## [2.5.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.2...patinaproject-skills-v2.5.0) (2026-05-26)
-
 
 ### Features
 
@@ -55,20 +47,17 @@
 
 ## [2.4.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.1...patinaproject-skills-v2.4.2) (2026-05-26)
 
-
 ### Bug Fixes
 
 * [#192](https://github.com/patinaproject/skills/issues/192) clean up stale review subagents ([#195](https://github.com/patinaproject/skills/issues/195)) ([73c7885](https://github.com/patinaproject/skills/commit/73c788540ca32bf76cd070b4947be6f121c99fd6))
 
 ## [2.4.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.4.0...patinaproject-skills-v2.4.1) (2026-05-25)
 
-
 ### Bug Fixes
 
 * [#170](https://github.com/patinaproject/skills/issues/170) enforce blocked-by gate exit ([#175](https://github.com/patinaproject/skills/issues/175)) ([9e5f64a](https://github.com/patinaproject/skills/commit/9e5f64a7a53c550e3564de910752e339d15f2492))
 
 ## [2.4.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.3.0...patinaproject-skills-v2.4.0) (2026-05-25)
-
 
 ### Features
 

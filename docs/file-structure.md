@@ -1,8 +1,8 @@
 # Repository File Structure
 
 This repository is the marketplace surface for Patina Project plugins and
-related install documentation. Eight skills live under `skills/<name>/` in a
-flat layout.
+related install documentation. Skills live under `skills/<name>/` in a flat
+layout.
 
 ## Top level
 
@@ -11,6 +11,7 @@ flat layout.
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/develop-issue/`: issue development orchestration skill
 - `skills/finish-pr/`: PR finishing skill
+- `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
 - `skills/review-code/`: isolated local branch-diff review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
@@ -20,8 +21,8 @@ flat layout.
   `../../skills/<name>/`, vendored third-party skills symlink into
   `../../.agents/skills/<name>`
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing all eight skill paths
-- `.codex-plugin/plugin.json`: Codex plugin manifest listing all eight skill paths
+- `.claude-plugin/plugin.json`: Claude plugin manifest listing skill paths
+- `.codex-plugin/plugin.json`: Codex plugin manifest listing skill paths
 - `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `skills-lock.json`: vercel-labs CLI install lockfile
@@ -33,7 +34,7 @@ flat layout.
 
 ## Flat skill layout
 
-Eight skills are owned by this repository:
+Skills owned by this repository:
 
 | Skill | Canonical path | Description |
 | --- | --- | --- |
@@ -42,6 +43,7 @@ Eight skills are owned by this repository:
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
 | `develop-issue` | `skills/develop-issue/` | Issue development orchestration |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
+| `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
 | `review-code` | `skills/review-code/` | Isolated local branch-diff review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
@@ -60,7 +62,7 @@ The agent runtime discovers skills through two committed overlay directories.
 Both repo-owned and vendored third-party skills are committed, so they load
 immediately in a fresh clone or worktree with no install step.
 
-Repo-owned skills (the eight in `skills/`) appear as one-hop symlinks:
+Repo-owned skills in `skills/` appear as one-hop symlinks:
 
 | Overlay path | Symlink target | Mode |
 | --- | --- | --- |

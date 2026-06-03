@@ -6,6 +6,7 @@
     "./skills/new-branch",
     "./skills/develop-issue",
     "./skills/finish-pr",
+    "./skills/codex-pr-feedback-loop",
     "./skills/review-code",
     "./skills/update-branch",
     "./skills/install-skills"
