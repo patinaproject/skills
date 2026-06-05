@@ -3,10 +3,9 @@
 The Patina Project skills repo releases via `release-please` with a single root package
 (`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-Skills live flat at `skills/<name>/` in this repo. Eight in-repo skills ship as
-`patinaproject-skills`: active skills `scaffold-repository`, `using-github`,
-`new-branch`, `develop-issue`, `finish-pr`, `review-code`, `update-branch`, and `install-skills`. All eight are
-versioned together as a single marketplace surface. On each release,
+Skills live flat at `skills/<name>/` in this repo. In-repo skills ship as
+`patinaproject-skills` and are versioned together as a single marketplace
+surface. On each release,
 `release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json` via the
 `extra-files` block in `release-please-config.json`. `find-skills` is no longer part of
 `patinaproject-skills`; install it separately from `vercel-labs/skills` (see root README).
@@ -72,7 +71,7 @@ The vercel-labs CLI consumer pins a specific tag via `#<git-ref>`:
 npx skills@latest add patinaproject/skills#v1.0.0 --skill scaffold-repository
 ```
 
-The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all eight
+The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all
 skills live under `skills/<name>/SKILL.md` in the same repo, one tag pins the full set.
 `skills-lock.json`'s `computedHash` records per-skill content provenance for reproducible
 re-installs within a given tag.
@@ -81,8 +80,7 @@ re-installs within a given tag.
 
 - An untagged skill is not pinnable. The first `v<X.Y.Z>` tag is what introduces the repo
   to the install path with a pinnable `#<ref>`.
-- In-repo skills (`scaffold-repository`, `using-github`, `new-branch`,
-  `develop-issue`, `finish-pr`, `review-code`, `update-branch`, and `install-skills`) are not separate release-please packages;
+- In-repo skills are not separate release-please packages;
   they share the single root `patinaproject-skills` release and tag.
   Third-party skills such as `find-skills` are installed separately from their
   source repo's default branch or a specific `#<git-ref>`.

@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "patinaproject-skills",
-      "description": "Skills used by the Patina Project team — scaffold-repository, using-github, new-branch, develop-issue, finish-pr, review-code, update-branch, and install-skills",
+      "description": "Skills used by the Patina Project team",
       "source": "./"
     }
   ]
