@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Skills used by the Patina Project team",
-    "version": "2.8.0",
+    "version": "2.9.0",
     "repository": "https://github.com/patinaproject/skills"
   },
   "plugins": [
