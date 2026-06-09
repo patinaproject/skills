@@ -14,6 +14,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
+- `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
   real directories restored by `pnpm skills:install`. All entries are tracked.
@@ -67,7 +68,12 @@ do not edit the vendored payloads under `.agents/skills/**`.
   its source's default branch (latest), so re-running picks up upstream updates.
   When a re-vendor changes `grill-with-docs`'s `CONTEXT-FORMAT.md` or
   `ADR-FORMAT.md`, copy the changed file over the bundled `write-docs` copy by
-  hand; `write-docs-format-sync.test.sh` fails until the two match again.
+  hand; `write-docs-format-sync.test.sh` fails until the two match again. The
+  same hand-copy applies to `improve-branch-architecture`'s five bundled copies
+  (`LANGUAGE.md`, `DEEPENING.md`, `INTERFACE-DESIGN.md` from
+  `improve-codebase-architecture`; `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` from
+  `grill-with-docs`); `improve-branch-architecture-format-sync.test.sh` fails
+  until each copy matches its vendored upstream again.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -130,6 +136,12 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
   it asserts byte-equality between the two copies (a machine-consumed mirror
   contract, never their prose — see
   [docs/adr/ADR-232-format-sync-mirror-contract.md](docs/adr/ADR-232-format-sync-mirror-contract.md))
+- Run `bash scripts/tests/improve-branch-architecture-format-sync.test.sh` after
+  changing the `improve-branch-architecture` bundled reference files or their
+  vendored upstreams (`improve-codebase-architecture` and `grill-with-docs`); it
+  asserts byte-equality of the five bundled copies against their vendored sources
+  (a machine-consumed mirror contract, never their prose — same ADR-232 carve-out
+  as the `write-docs` sync test)
 
 ## Issue and PR labels
 
@@ -198,6 +210,7 @@ This repo owns these skills at flat paths:
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | write-docs | `skills/write-docs/` |
+| improve-branch-architecture | `skills/improve-branch-architecture/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.

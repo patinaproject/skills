@@ -23,6 +23,7 @@ SKILLS=(
   review-code
   update-branch
   write-docs
+  improve-branch-architecture
 )
 FAIL_COUNT=0
 
