@@ -130,10 +130,17 @@ For this skill, all visible PR checks include required and optional checks.
 ## Capability Map
 
 - `new-branch`: issue-linked branch setup. Branch setup is an automatic
-  precondition before implementation or publishing work begins. Run
-  `new-branch` when the worktree is not already on the correct issue-linked
-  branch. Skip `new-branch` when the current worktree is already correctly
-  prepared.
+  precondition before implementation or publishing work begins. The worktree is
+  "correctly prepared" only when the current branch name encodes the target
+  issue number per the `<issue>-<slug>` convention `new-branch` produces — not
+  merely when the branch differs from the default branch. Skip `new-branch` only
+  when that issue-linked check passes for the target issue. When the current
+  branch is non-default but not issue-linked (for example a host- or
+  tool-generated name like `claude/<slug>`), run `new-branch` to establish the
+  issue-linked branch instead of treating it as prepared. If a host-provided
+  branch cannot or should not be renamed to the issue-linked name, surface that
+  deviation in the report rather than developing the issue silently on a
+  non-issue-linked branch.
 - `tdd`: clear behavior implementation and behavior-level tests.
 - `diagnose`: unclear root cause, missing reproduction, flaky behavior, or
   performance regressions.
@@ -185,7 +192,13 @@ For this skill, all visible PR checks include required and optional checks.
        inspection or updates fail due to permissions.
    - Record the project status update result and the self-assignment result,
      including each updated item and skipped item reason, for the final report.
-4. Satisfy the branch setup precondition using `new-branch` when needed.
+4. Satisfy the branch setup precondition: verify the current branch is the
+   issue-linked branch for the target issue (its name encodes the issue number
+   per the `<issue>-<slug>` convention `new-branch` produces). Skip `new-branch`
+   only when that check passes; otherwise — including when the worktree starts
+   on a non-default but non-issue-linked branch — run `new-branch` to establish
+   the issue-linked branch, or surface the deviation when a host-provided branch
+   cannot or should not be renamed.
 5. Apply triggered conditional routes from the Conditional Routes section.
 6. Choose the next capability by naming the current gap between actual state and
    the terminal goal.
