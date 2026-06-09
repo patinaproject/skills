@@ -11,6 +11,7 @@
     "./skills/review-code",
     "./skills/update-branch",
     "./skills/install-skills",
-    "./skills/write-docs"
+    "./skills/write-docs",
+    "./skills/improve-branch-architecture"
   ]
 }
