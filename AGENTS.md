@@ -45,6 +45,15 @@ Triage roles map to this repository's existing GitHub labels, without inventing 
 
 This is a single-context repository; domain docs are optional and created lazily when useful. See `docs/agents/domain.md`.
 
+### Architecture decision records
+
+Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
+single source of truth for ADR naming in this repository. It supersedes the
+sequential `0001`-increment guidance still embedded in the vendored shared
+skills (`grill-with-docs`, `setup-matt-pocock-skills`): name every ADR after its
+originating GitHub issue (`ADR-<issue>-<slug>.md`), never scan-and-increment, and
+do not edit the vendored payloads under `.agents/skills/**`.
+
 ## Build, Test, and Development Commands
 
 - `pnpm install` (alias `pnpm env:setup`): install dev tooling and initialize
@@ -95,7 +104,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
   the folder), symlink resolution, and required-file existence. A documentation
   file's prose body must be freely editable without breaking a test. Markdown
   *linting* (`pnpm lint:md`) is unaffected — linting is not testing. See
-  [docs/adr/0001-no-tests-on-documentation-content.md](docs/adr/0001-no-tests-on-documentation-content.md).
+  [docs/adr/ADR-224-no-tests-on-documentation-content.md](docs/adr/ADR-224-no-tests-on-documentation-content.md).
 - Run `pnpm test` to run the full suite, or use the targeted commands below while iterating.
 - `pnpm test` includes network-backed skills CLI canaries and the
   committed-skill lifecycle check.

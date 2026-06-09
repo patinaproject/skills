@@ -120,7 +120,7 @@ for test_file in scripts/tests/*.test.sh; do
   fi
 done
 
-# Per the "no tests on documentation content" rule (docs/adr/0001), this test
+# Per the "no tests on documentation content" rule (ADR-224), this test
 # asserts only on filesystem state and non-`.md` config/code targets. Stale
 # scaffold references inside skill prose are covered by `lint:md`, not here.
 assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-repository self-apply" \
