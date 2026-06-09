@@ -21,7 +21,7 @@ assert_no_match() {
   fi
 }
 
-# Per the "no tests on documentation content" rule (docs/adr/0001), this test
+# Per the "no tests on documentation content" rule (ADR-224), this test
 # asserts only on filesystem state and non-`.md` config targets. Retired
 # references inside agent/skill prose are covered by `lint:md`, not here.
 ACTIVE_CONFIG_PATHS=(

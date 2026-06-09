@@ -1,4 +1,4 @@
-# 1. Do not test documentation content
+# ADR-224: Do not test documentation content
 
 - Status: accepted
 - Date: 2026-06-02
