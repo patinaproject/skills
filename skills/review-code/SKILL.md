@@ -89,6 +89,18 @@ If the host runtime cannot create a fresh reviewer or equivalent isolated
 review surface, halt and report that isolation is unavailable. Do not ask the
 current implementation conversation to perform the review.
 
+## Reviewer Model
+
+Select the reviewer model explicitly at dispatch. Do not inherit whatever model
+the host's fresh-context primitive happens to default to: a host whose default
+is a small model would silently downgrade this gate, which is a primary quality
+control. Require a capable model and prefer the session or main model over a
+subagent's default. Keep the choice host-abstracted — set it through whatever
+the dispatch surface exposes, such as a subagent or Agent `model` parameter, an
+explorer model, or a CLI `--model` flag. Capture the model the reviewer actually
+ran on so it can be reported, making any downgrade observable without inspecting
+host UI.
+
 ## Reviewer Contract
 
 The reviewer should inspect the scoped diff for merge-relevant risk:
@@ -120,5 +132,6 @@ workflows own their own prompt, permissions, and PR-commenting contract.
   origin/main only`)
 - Changed files, including staged, unstaged, and untracked files
 - Fresh reviewer dispatch mechanism, or halt reason
+- Reviewer model the review actually ran on
 - Findings grouped by severity
 - Low-signal paths skipped or reviewed with rationale
