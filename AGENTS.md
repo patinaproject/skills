@@ -13,6 +13,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/review-code/`: isolated local branch-diff review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
+- `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
   real directories restored by `pnpm skills:install`. All entries are tracked.
@@ -64,6 +65,9 @@ do not edit the vendored payloads under `.agents/skills/**`.
   refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
+  A `postskills:install` hook re-runs `scripts/sync-write-docs-format.sh`, which
+  re-copies the bundled `write-docs` format files from the refreshed vendored
+  `grill-with-docs` originals so the byte-equality mirror contract stays green.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -121,6 +125,11 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - Run `bash scripts/tests/pull-request-workflow.test.sh` after changing `.github/workflows/pull-request.yml`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
+- Run `bash scripts/tests/write-docs-format-sync.test.sh` after changing the
+  `write-docs` bundled format files or the vendored `grill-with-docs` originals;
+  it asserts byte-equality between the two copies (a machine-consumed mirror
+  contract, never their prose — see
+  [docs/adr/ADR-232-format-sync-mirror-contract.md](docs/adr/ADR-232-format-sync-mirror-contract.md))
 
 ## Issue and PR labels
 
@@ -188,6 +197,7 @@ This repo owns these skills at flat paths:
 | review-code | `skills/review-code/` |
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
+| write-docs | `skills/write-docs/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
