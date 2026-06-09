@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.8.0...patinaproject-skills-v2.9.0) (2026-06-09)
+
+
+### Features
+
+* [#227](https://github.com/patinaproject/skills/issues/227) add codex pr feedback loop skill ([#228](https://github.com/patinaproject/skills/issues/228)) ([1f75528](https://github.com/patinaproject/skills/commit/1f7552866fbb0e248052fb891bf608319e0227c7))
+
 ## [2.8.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.7.0...patinaproject-skills-v2.8.0) (2026-06-02)
 
 ### Features
