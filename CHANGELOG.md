@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.10.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.9.0...patinaproject-skills-v2.10.0) (2026-06-09)
+
+
+### Features
+
+* [#232](https://github.com/patinaproject/skills/issues/232) add write-docs skill ([#234](https://github.com/patinaproject/skills/issues/234)) ([31944d7](https://github.com/patinaproject/skills/commit/31944d7d83f629def0e56a876f67ee0391c8cf77))
+
+
+### Bug Fixes
+
+* [#226](https://github.com/patinaproject/skills/issues/226) verify issue-linked branch in develop-issue setup ([#238](https://github.com/patinaproject/skills/issues/238)) ([e666a39](https://github.com/patinaproject/skills/commit/e666a39592a1ca212517a1340e27037c030b230d))
+* [#229](https://github.com/patinaproject/skills/issues/229) pin and report review-code reviewer model ([#237](https://github.com/patinaproject/skills/issues/237)) ([4d6778a](https://github.com/patinaproject/skills/commit/4d6778ab44e2d4d38c405ec8e57161d7655a4355))
+
 ## [2.9.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.8.0...patinaproject-skills-v2.9.0) (2026-06-09)
 
 
