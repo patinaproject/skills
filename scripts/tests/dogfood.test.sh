@@ -22,6 +22,7 @@ SKILLS=(
   codex-pr-feedback-loop
   review-code
   update-branch
+  write-docs
 )
 FAIL_COUNT=0
 
