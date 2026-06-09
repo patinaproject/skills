@@ -33,16 +33,18 @@ sides move together. The bundled copies are, by definition, non-editable mirrors
 the contract is precisely that they are *not* freely editable, so ADR-224's
 "prose is freely editable" premise does not apply to them.
 
-To keep the mirror honest rather than drifting by hand, the copies are regenerated
-from the vendored originals by `scripts/sync-write-docs-format.sh`, which is wired
-into the `pnpm skills:install` maintenance flow.
+The copies are kept in sync by hand: when a re-vendor of `grill-with-docs` changes
+a format file, copy it over the bundled `write-docs` copy. No script or install
+hook automates this — the test is the whole contract, and a plain copy is the
+whole fix.
 
 ## Consequences
 
 - The sync test is a sanctioned exception to ADR-224, scoped narrowly to
   byte-equality mirror contracts against a vendored source — not a reopening of
   prose-content testing in general.
-- Re-vendoring `grill-with-docs` and re-running `pnpm skills:install` refreshes the
-  `write-docs` copies in the same step, so the test stays green by construction.
+- A re-vendor that changes a format file turns the test red until someone copies
+  the new content over the bundled copy; the test is the signal, the copy is the
+  fix.
 - If the upstream format files are renamed or removed, the sync test fails loudly,
   which is the intended signal to update the mirror rather than a false alarm.

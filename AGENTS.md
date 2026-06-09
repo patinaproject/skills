@@ -65,9 +65,9 @@ do not edit the vendored payloads under `.agents/skills/**`.
   refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
-  A `postskills:install` hook re-runs `scripts/sync-write-docs-format.sh`, which
-  re-copies the bundled `write-docs` format files from the refreshed vendored
-  `grill-with-docs` originals so the byte-equality mirror contract stays green.
+  When a re-vendor changes `grill-with-docs`'s `CONTEXT-FORMAT.md` or
+  `ADR-FORMAT.md`, copy the changed file over the bundled `write-docs` copy by
+  hand; `write-docs-format-sync.test.sh` fails until the two match again.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto

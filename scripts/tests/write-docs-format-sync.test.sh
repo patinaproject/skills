@@ -7,6 +7,9 @@
 # (docs/adr/ADR-232-format-sync-mirror-contract.md) for why this coexists with
 # ADR-224 (no tests on documentation content).
 #
+# The copies are kept in sync by hand: when this test fails after a re-vendor of
+# grill-with-docs, copy the changed file over the bundled copy.
+#
 # Exit 0: every bundled copy is byte-identical to its vendored original.
 # Exit 1: at least one copy diverged or is missing.
 
@@ -31,11 +34,11 @@ for f in "${FILES[@]}"; do
     continue
   fi
   if [ ! -f "$DST/$f" ]; then
-    fail "bundled copy $DST/$f is missing (run 'bash scripts/sync-write-docs-format.sh')"
+    fail "bundled copy $DST/$f is missing (copy it: cp '$SRC/$f' '$DST/$f')"
     continue
   fi
   if ! cmp -s "$SRC/$f" "$DST/$f"; then
-    fail "$DST/$f diverged from $SRC/$f (run 'bash scripts/sync-write-docs-format.sh')"
+    fail "$DST/$f diverged from $SRC/$f (re-copy it: cp '$SRC/$f' '$DST/$f')"
     continue
   fi
   echo "OK: $f matches the vendored grill-with-docs original"
