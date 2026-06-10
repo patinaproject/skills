@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.10.0...patinaproject-skills-v2.11.0) (2026-06-10)
+
+
+### Features
+
+* [#236](https://github.com/patinaproject/skills/issues/236) add improve-branch-architecture skill ([#239](https://github.com/patinaproject/skills/issues/239)) ([1acfa91](https://github.com/patinaproject/skills/commit/1acfa912c1326451df4684cdbbe0cc84e82dcc41))
+
+
+### Bug Fixes
+
+* [#241](https://github.com/patinaproject/skills/issues/241) restore Code Review posting and strengthen rubric ([#242](https://github.com/patinaproject/skills/issues/242)) ([7475ef2](https://github.com/patinaproject/skills/commit/7475ef25b5e252457cb9c037a3e9929d0024619f))
+
 ## [2.10.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.9.0...patinaproject-skills-v2.10.0) (2026-06-09)
 
 
