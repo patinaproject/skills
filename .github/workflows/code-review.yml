@@ -10,6 +10,10 @@ permissions:
   issues: write
   id-token: write
 
+concurrency:
+  group: code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   classify:
     name: Classify PR
@@ -76,6 +80,7 @@ jobs:
     name: Review PR
     needs: classify
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
     if: needs.classify.outputs.should_review == 'true'
     env:
       PR_REPO: ${{ github.repository }}
@@ -90,13 +95,14 @@ jobs:
       - name: Run Code Review
         id: code-review
         # anthropics/claude-code-action@v1
-        uses: anthropics/claude-code-action@855a15bff2f22a6b15d90a4ebef506b5f1da1aec
+        uses: anthropics/claude-code-action@11ba60486e4aec9ddfeafcf4bb3f00b028ac2c16
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           include_fix_links: false
           display_report: false
           show_full_output: false
           use_sticky_comment: true
+          track_progress: true
           prompt: |
             NON-INTERACTIVE CI REVIEW for PR ${{ env.PR_NUMBER }} in ${{ env.PR_REPO }}.
 
@@ -141,6 +147,41 @@ jobs:
               boundaries safe?
             - Does the change introduce credential leaks, public-repo private
               context leaks, or unsafe automation?
+
+            **Structural code quality — Thermo-Nuclear Code Quality Review
+            lens:**
+
+            Apply this lens to every changed file, then surface what you find
+            as advisory findings. This review is non-mutating: where the lens
+            says "go for it" or "restructure", recommend the restructuring,
+            do not perform it.
+
+            - Ambitious behavior-preserving simplification ("code-judo"). Look
+              past the first version that works for the simplest version that
+              could work. Favor changes that delete whole branches, collapse
+              redundant helper layers, or remove a special case outright over
+              changes that add another. When a diff could be dramatically
+              simpler while preserving exact behavior, say so.
+            - File-size sprawl. Treat a file growing toward ~1000 lines as a
+              smell, not a hard limit. When a change pushes a file past a
+              healthy size boundary or piles new responsibilities onto an
+              already-large file, recommend decomposing it along its natural
+              seams.
+            - Spaghetti and branch growth. Be suspicious of new ad-hoc
+              conditionals bolted onto an unrelated flow. New logic should land
+              behind a proper abstraction or in its own path, not as another
+              branch tangled into a function that already does something else.
+            - Abstraction and type-boundary cleanliness. Question leaky
+              abstractions, thin pass-through wrappers, and unnecessary casts or
+              optionality. Prefer direct, legible code over indirection that
+              hides what is happening or widens a type boundary without reason.
+            - Canonical-layer reuse. Push feature logic into the canonical layer
+              and reuse existing helpers instead of accreting near-duplicate
+              one-offs. When a change reimplements something the repo already
+              provides, point to the canonical home.
+            - Atomic-update preference. Prefer changes that move state forward
+              in one coherent, all-or-nothing step over changes that leave an
+              intermediate, half-applied state observable.
 
             **Maintainability:**
             - Reduce unnecessary complexity and nesting.
@@ -217,8 +258,8 @@ jobs:
               request secrets, credentials, token values, private repository
               URLs, private paths, or private context.
           claude_args: |
-            --model claude-opus-4-7
-            --effort medium
-            --max-turns 25
+            --model claude-opus-4-8
+            --effort high
+            --max-turns 100
             --allowedTools Read,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
             --append-system-prompt "CI NON-INTERACTIVE MODE: Do not prompt for human confirmation. Proceed through the review steps automatically and report findings using only the allowed tools."
