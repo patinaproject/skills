@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.11.0...patinaproject-skills-v2.12.0) (2026-06-11)
+
+
+### Features
+
+* [#243](https://github.com/patinaproject/skills/issues/243) add write-release-changelog skill ([#244](https://github.com/patinaproject/skills/issues/244)) ([8b3b9d3](https://github.com/patinaproject/skills/commit/8b3b9d3885d48c5bcdaa44517a833921270cadfe))
+
 ## [2.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.10.0...patinaproject-skills-v2.11.0) (2026-06-10)
 
 
