@@ -73,7 +73,9 @@ through the working directory's default `gh` repository.
    assemble the thank-you linking every resolved item.
 
 Re-running the ceremony for the same release is idempotent: items already
-replied-to or already complete are left alone, so posts are not duplicated.
+replied-to or already complete are left alone, and the changelog draft is keyed
+on the release identifier so a second run reuses the existing draft — so neither
+posts nor drafts are duplicated.
 
 ## Bundled Helper
 

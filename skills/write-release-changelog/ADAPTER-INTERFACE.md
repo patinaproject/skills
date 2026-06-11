@@ -41,7 +41,7 @@ exact shape is what the orchestration is tested against.
 ```js
 /**
  * @property resolveItem        ({link})  -> {id, status, hasResolutionComment}
- * @property createChangelogDraft ({title, body}) -> {draftId, published:false}
+ * @property createChangelogDraft ({title, body, key}) -> {draftId, published:false}
  * @property postComment        ({itemId, body, visibility:"public"|"private"}) -> {...}
  * @property setStatus          ({itemId, status})  -> {...}
  */
@@ -52,7 +52,12 @@ Contract the orchestration relies on:
 - `resolveItem` returns the item's current `status` and whether it already has a
   resolution comment, so re-runs are idempotent.
 - `createChangelogDraft` creates a **draft** (`published: false`); it never
-  publishes. The operator publishes out of band after review.
+  publishes. The operator publishes out of band after review. It must be
+  **idempotent on `key`** (a stable release identifier such as the version/tag):
+  if a draft already exists for that release, return it instead of creating a
+  second one, so re-running the ceremony does not pile up duplicate drafts. The
+  orchestration passes `key` on every call; an adapter that cannot express
+  dedupe should look up by title/version before creating.
 - `postComment` with `visibility: "public"` and `setStatus` to `complete` are
   public actions: the orchestration applies them only when the release is live
   **and** the operator approved that action class. A private note uses

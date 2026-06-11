@@ -24,7 +24,7 @@ the Featurebase API:
 | Operation | Featurebase action |
 | --- | --- |
 | `resolveItem({link})` | Resolve a post by its public URL; return its id, current status, and whether a resolution comment already exists. |
-| `createChangelogDraft({title, body})` | Create a Featurebase changelog entry as a **draft**. |
+| `createChangelogDraft({title, body, key})` | Create a Featurebase changelog entry as a **draft**, idempotent on `key`: if a draft for that release already exists, return it instead of creating a duplicate. |
 | `postComment({itemId, body, visibility})` | Comment on the post; `public` is operator-visible to reporters, `private` is an internal note. |
 | `setStatus({itemId, status})` | Set the post status; the ceremony uses `complete` at release time. |
 

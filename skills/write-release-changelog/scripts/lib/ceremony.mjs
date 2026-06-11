@@ -8,7 +8,9 @@
 //   - Public replies and status→complete are applied ONLY when the release is
 //     live AND the operator approved that class of action.
 //   - Re-runs are idempotent: items already replied-to or already complete are
-//     left alone, so running the ceremony twice does not duplicate posts.
+//     left alone, and the changelog draft is keyed on the release identifier so
+//     the adapter returns the existing draft instead of creating a duplicate —
+//     so running the ceremony twice does not duplicate posts or drafts.
 //   - Feedback-derived text is passed to the adapter as opaque data. Control
 //     flow is derived from the resolved-item set, never from feedback content,
 //     so injected instructions in a reply body cannot trigger extra actions.
@@ -28,7 +30,9 @@ const COMPLETE = "complete";
  *
  * @param {object} params
  * @param {Array<{feedbackLink: string, replyBody: string}>} params.resolvedItems
- * @param {{title: string, body: string}} params.changelog
+ * @param {{title: string, body: string, key?: string}} params.changelog
+ *   `key` is a stable release identifier (e.g. version/tag) used to dedupe the
+ *   draft across re-runs; it falls back to `title` when omitted.
  * @param {Adapter} params.adapter
  * @param {{replies?: boolean, status?: boolean}} params.approval
  * @param {boolean} params.releaseIsLive
@@ -41,11 +45,14 @@ export async function runReleaseCeremony({
   approval = {},
   releaseIsLive,
 }) {
-  // The changelog draft is not public content, so it is always created. The
-  // operator publishes it out of band once they have reviewed it.
+  // The changelog draft is not public content, so it is created (not published)
+  // every run. Passing the release key lets the adapter return an existing draft
+  // for this release instead of creating a duplicate; the operator publishes the
+  // single draft out of band once reviewed.
   const changelogDraft = await adapter.createChangelogDraft({
     title: changelog.title,
     body: changelog.body,
+    key: changelog.key ?? changelog.title,
   });
 
   const actions = [];

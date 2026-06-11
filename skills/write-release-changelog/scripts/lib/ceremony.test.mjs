@@ -7,6 +7,10 @@ import { runReleaseCeremony } from "./ceremony.mjs";
 // every call so tests can assert on exactly what the ceremony asked it to do.
 function makeFakeAdapter(items = {}) {
   const calls = [];
+  // Models the four-operation interface. createChangelogDraft is idempotent on
+  // `key` (create-or-return-existing), as the interface contract requires, so a
+  // re-run with the same release key returns the same draft.
+  const drafts = new Map();
   return {
     calls,
     async resolveItem({ link }) {
@@ -15,9 +19,12 @@ function makeFakeAdapter(items = {}) {
         items[link] ?? { id: `item-for-${link}`, status: "open", hasResolutionComment: false }
       );
     },
-    async createChangelogDraft({ title, body }) {
-      calls.push(["createChangelogDraft", { title, body }]);
-      return { draftId: "draft-1", published: false };
+    async createChangelogDraft({ title, body, key }) {
+      calls.push(["createChangelogDraft", { title, body, key }]);
+      if (drafts.has(key)) return drafts.get(key);
+      const draft = { draftId: `draft-${drafts.size + 1}`, published: false };
+      drafts.set(key, draft);
+      return draft;
     },
     async postComment({ itemId, body, visibility }) {
       calls.push(["postComment", { itemId, body, visibility }]);
@@ -55,6 +62,38 @@ test("a changelog draft is always created and never published", async () => {
       `unexpected adapter call: ${name}`,
     );
   }
+});
+
+test("re-running for the same release does not duplicate the changelog draft", async () => {
+  const adapter = makeFakeAdapter();
+  const params = {
+    resolvedItems: [],
+    changelog: { title: "v1.2.0", body: "Notes", key: "v1.2.0" },
+    adapter,
+    approval: { replies: true, status: true },
+    releaseIsLive: true,
+  };
+  const first = await runReleaseCeremony(params);
+  const second = await runReleaseCeremony(params);
+
+  assert.equal(first.changelogDraft.draftId, second.changelogDraft.draftId);
+  // The release key is passed through so the adapter can dedupe; it is the
+  // stable identifier, never the prose body.
+  const createCall = adapter.calls.find((c) => c[0] === "createChangelogDraft");
+  assert.equal(createCall[1].key, "v1.2.0");
+});
+
+test("the changelog key falls back to the title when none is given", async () => {
+  const adapter = makeFakeAdapter();
+  await runReleaseCeremony({
+    resolvedItems: [],
+    changelog: { title: "v9", body: "x" },
+    adapter,
+    approval: {},
+    releaseIsLive: false,
+  });
+  const createCall = adapter.calls.find((c) => c[0] === "createChangelogDraft");
+  assert.equal(createCall[1].key, "v9");
 });
 
 test("public reply and status→complete are applied when live and approved", async () => {
