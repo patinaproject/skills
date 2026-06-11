@@ -42,3 +42,17 @@ test("Featurebase link pattern resolves a real-shaped post URL from an issue bod
   );
   assert.equal(result.resolved[0].feedbackRef, "dark-mode");
 });
+
+test("Featurebase link pattern requires a real host boundary, rejecting lookalikes", () => {
+  const result = resolveFeedbackItems({
+    referencedIssues: [1, 2],
+    issues: {
+      1: { number: 1, body: "https://evilfeaturebase.app/p/phish" },
+      2: { number: 2, body: "https://featurebase.app/p/real" },
+    },
+    linkPattern: registry.featurebase.feedbackLinkPattern,
+  });
+  // The lookalike host must not resolve; the bare host must.
+  assert.deepEqual(result.resolved.map((r) => r.issueNumber), [2]);
+  assert.deepEqual(result.needsManualReview, [1]);
+});

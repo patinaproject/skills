@@ -3,9 +3,10 @@
 // here plus implementing the runtime adapter (see ADAPTER-INTERFACE.md);
 // neither detection nor traversal control flow changes.
 //
-// Featurebase is the reference adapter. The other entries are detection-only
-// stubs shipped as starting points; a real runtime adapter is still required
-// before the ceremony can write to them.
+// Featurebase is the reference adapter and the only entry shipped today. Add a
+// detection-only stub (fingerprints, no runtime adapter) as a starting point for
+// a new provider; a real runtime adapter is still required before the ceremony
+// can write to it.
 
 export const registry = {
   featurebase: {
@@ -15,8 +16,9 @@ export const registry = {
     dependencies: ["@featurebase/sdk", "featurebase"],
     secretNames: ["FEATUREBASE_API_KEY", "FEATUREBASE_ORG"],
     files: [],
-    // Matches a Featurebase post URL, capturing the post slug.
-    // e.g. https://acme.featurebase.app/p/dark-mode
-    feedbackLinkPattern: /https?:\/\/[^/\s]*featurebase\.app\/p\/([a-z0-9-]+)/i,
+    // Matches a Featurebase post URL, capturing the post slug. The optional
+    // subdomain group ends in a dot so lookalike hosts (e.g. evilfeaturebase.app)
+    // are rejected. e.g. https://acme.featurebase.app/p/dark-mode
+    feedbackLinkPattern: /https?:\/\/(?:[^/\s]*\.)?featurebase\.app\/p\/([a-z0-9-]+)/i,
   },
 };
