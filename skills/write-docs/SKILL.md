@@ -99,6 +99,7 @@ If any of the three is missing, skip the ADR. Use the
 The bundled [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md) and
 [ADR-FORMAT.md](./ADR-FORMAT.md) are copied verbatim from the `domain-modeling`
 skill in [`mattpocock/skills`](https://github.com/mattpocock/skills). This skill
-runs only the documentation-writing half of `grill-with-docs`/`grilling`.
+runs only the documentation-writing half — `domain-modeling`'s capture — without
+the `grilling` interview.
 
 </supporting-info>
