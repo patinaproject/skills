@@ -73,6 +73,12 @@
       "skillPath": "skills/engineering/prototype/SKILL.md",
       "computedHash": "40ff56e36bb13b5a9a16903efd6c78a02690ba430e10a8d1a65559100b77f475"
     },
+    "resolving-merge-conflicts": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/resolving-merge-conflicts/SKILL.md",
+      "computedHash": "bff6e06cec85897477759ed052410450aa91057644f5b70d888e26bc8b348847"
+    },
     "review": {
       "source": "mattpocock/skills",
       "sourceType": "github",
