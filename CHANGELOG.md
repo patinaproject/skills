@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.11.0...patinaproject-skills-v2.12.0) (2026-06-19)
+
+
+### Features
+
+* [#243](https://github.com/patinaproject/skills/issues/243) add write-release-changelog skill ([#244](https://github.com/patinaproject/skills/issues/244)) ([8b3b9d3](https://github.com/patinaproject/skills/commit/8b3b9d3885d48c5bcdaa44517a833921270cadfe))
+* [#247](https://github.com/patinaproject/skills/issues/247) upgrade Matt Pocock skills to v1 and improve Patina skills ([#248](https://github.com/patinaproject/skills/issues/248)) ([913af89](https://github.com/patinaproject/skills/commit/913af8936e6a40cb0289a7732c12622084063a40))
+
 ## [2.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.10.0...patinaproject-skills-v2.11.0) (2026-06-10)
 
 
