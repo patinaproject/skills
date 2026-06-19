@@ -53,7 +53,7 @@ This is a single-context repository; domain docs are optional and created lazily
 Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
 single source of truth for ADR naming in this repository. It supersedes the
 sequential `0001`-increment guidance still embedded in the vendored shared
-skills (`grill-with-docs`, `setup-matt-pocock-skills`): name every ADR after its
+skills (`domain-modeling`, `setup-matt-pocock-skills`): name every ADR after its
 originating GitHub issue (`ADR-<issue>-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 
@@ -67,14 +67,16 @@ do not edit the vendored payloads under `.agents/skills/**`.
   refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
-  When a re-vendor changes `grill-with-docs`'s `CONTEXT-FORMAT.md` or
+  When a re-vendor changes `domain-modeling`'s `CONTEXT-FORMAT.md` or
   `ADR-FORMAT.md`, copy the changed file over the bundled `write-docs` copy by
   hand; `write-docs-format-sync.test.sh` fails until the two match again. The
-  same hand-copy applies to `improve-branch-architecture`'s five bundled copies
-  (`LANGUAGE.md`, `DEEPENING.md`, `INTERFACE-DESIGN.md` from
-  `improve-codebase-architecture`; `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` from
-  `grill-with-docs`); `improve-branch-architecture-format-sync.test.sh` fails
-  until each copy matches its vendored upstream again.
+  same hand-copy applies to `improve-branch-architecture`'s three mirrored copies
+  (`DEEPENING.md` from `codebase-design`; `CONTEXT-FORMAT.md`, `ADR-FORMAT.md`
+  from `domain-modeling`); `improve-branch-architecture-format-sync.test.sh`
+  fails until each copy matches its vendored upstream again. That skill's
+  `LANGUAGE.md` and `INTERFACE-DESIGN.md` are owned outright — v1 dissolved their
+  standalone upstream files — so they are not mirrored and need no hand-copy
+  (see [docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md](docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md)).
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -97,14 +99,15 @@ do not edit the vendored payloads under `.agents/skills/**`.
 ## Working on skills
 
 When creating or editing any skill under `skills/`, first use the third-party
-`write-a-skill` skill as a structure and progressive-disclosure review. It helps
-check trigger descriptions, concise `SKILL.md` shape, examples, helper scripts,
-and when to split reference material out of the main skill file.
+`writing-great-skills` skill as a structure and progressive-disclosure review. It
+helps check trigger descriptions, concise `SKILL.md` shape, leading-word
+terminology, and when to split reference material out of the main skill file.
 
-If `write-a-skill` is not installed in the local agent environment, install it with:
+If `writing-great-skills` is not installed in the local agent environment, install
+it with:
 
 ```bash
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-skill -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-great-skills -y
 ```
 
 ## Testing Guidelines
@@ -133,16 +136,19 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-s
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
 - Run `bash scripts/tests/write-docs-format-sync.test.sh` after changing the
-  `write-docs` bundled format files or the vendored `grill-with-docs` originals;
+  `write-docs` bundled format files or the vendored `domain-modeling` originals;
   it asserts byte-equality between the two copies (a machine-consumed mirror
   contract, never their prose — see
   [docs/adr/ADR-232-format-sync-mirror-contract.md](docs/adr/ADR-232-format-sync-mirror-contract.md))
 - Run `bash scripts/tests/improve-branch-architecture-format-sync.test.sh` after
   changing the `improve-branch-architecture` bundled reference files or their
-  vendored upstreams (`improve-codebase-architecture` and `grill-with-docs`); it
-  asserts byte-equality of the five bundled copies against their vendored sources
-  (a machine-consumed mirror contract, never their prose — same ADR-232 carve-out
-  as the `write-docs` sync test)
+  vendored upstreams (`codebase-design` for `DEEPENING.md`; `domain-modeling` for
+  `CONTEXT-FORMAT.md` and `ADR-FORMAT.md`); it asserts byte-equality of the three
+  mirrored copies against their vendored sources (a machine-consumed mirror
+  contract, never their prose — same ADR-232 carve-out as the `write-docs` sync
+  test). The skill's `LANGUAGE.md` and `INTERFACE-DESIGN.md` are owned outright
+  and intentionally excluded from the mirror (see
+  [docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md](docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md))
 
 ## Issue and PR labels
 

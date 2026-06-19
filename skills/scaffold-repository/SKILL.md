@@ -1,17 +1,15 @@
 ---
 name: scaffold-repository
-description: Use when scaffolding a new repository (public or private) to the Patina Project baseline, when realigning an existing repository with that baseline, or when auditing or adding commit conventions, PR templates, husky + commitlint, PNPM tooling, or agent docs (AGENTS.md, CLAUDE.md). Triggers on phrases like "scaffold this repo", "realign with the baseline", "audit our repo conventions", or "set up commitlint and husky".
+description: Scaffold a new repository to the Patina Project baseline, realign an existing repository with that baseline, or audit and add baseline conventions (commit + PR rules, husky + commitlint, PNPM tooling, agent docs). Use when the user says "scaffold this repo", "realign with the baseline", "audit our repo conventions", or "set up commitlint and husky".
 ---
 
 # scaffold-repository
 
-`scaffold-repository` scaffolds a repository – new or existing – to the Patina Project baseline: conventional-commits-with-issue-ref enforcement, a PR template, `AGENTS.md` + `CLAUDE.md`, a human-readable `README.md`, a `docs/file-structure.md` contributor reference, and PNPM + Husky + markdownlint tooling.
-
 There is no committed template bundle. The live
 [`patinaproject/skills`](https://github.com/patinaproject/skills) repository
-root is the canonical baseline reference. When a scaffold or realignment needs
-file content, compare against the current maintained root files and manifests
-instead of reading copied baseline files from this skill directory.
+root is the canonical **baseline** reference. When a scaffold or realignment
+needs file content, compare against the current maintained root files and
+manifests instead of reading copied baseline files from this skill directory.
 
 ## Obtaining the baseline
 
@@ -59,25 +57,14 @@ Behavior:
 - Walk [`audit-checklist.md`](./audit-checklist.md) against the target repo.
 - Classify each baseline item as `missing`, `stale`, or `divergent`.
 - For each gap, produce a concrete recommendation on how to realign with the current baseline.
-- For each recommendation, show a diff preview and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
+- For each recommendation, show a **diff preview** and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
   2. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`.
   3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
-- Include skills installation in every scaffold and realignment. Emit or
-  realign `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`,
-  `.gitignore`, and the `package.json` `env:setup` / `skills:install` / `clean`
-  scripts. Vendored project-local skills are committed to the repo (real
-  directories under `.agents/skills/` with portable relative symlinks under
-  `.claude/skills/`), so they load immediately in a fresh worktree without a
-  restore step. Re-vendoring uses the upstream skills CLI rather than a custom
-  script: `skills:install` runs `pnpm dlx skills@latest experimental_install
-  --yes`, which restores the committed overlays from `skills-lock.json`. After
-  accepted changes to `skills-lock.json`, run `pnpm skills:install` when the
-  lockfile records one or more skills, verify
-  `npx --yes skills@latest list --json` includes the project-local skills, and
-  commit the refreshed overlays.
+
+Batch 2 always covers skills installation (see [Conventions encoded](#conventions-encoded) → committed vendored skills and skill refresh for the mechanics). After accepted changes to `skills-lock.json` that leave one or more skills locked, run `pnpm skills:install`, verify `npx --yes skills@latest list --json` includes the project-local skills, and commit the refreshed overlays.
 
 ## Prompts
 
@@ -99,9 +86,9 @@ The skill collects the following inputs. Author name, author email, and the secu
 
 Emitted for every target repo. Use the live repository root as the content
 reference, but filter out `patinaproject/skills` marketplace maintenance
-verifiers. Consumer repos should not receive dogfood, marketplace,
-finish-pr, scaffold-cleanup, or workflow-cleanup verifier scripts unless they
-are themselves this marketplace repository.
+verifiers: consumer repos should not receive dogfood, marketplace, finish-pr,
+scaffold-cleanup, or workflow-cleanup verifier scripts unless they are
+themselves this marketplace repository.
 
 ```text
 .claude/settings.json
@@ -139,13 +126,12 @@ scripts/worktree-setup.sh
 skills-lock.json
 ```
 
-Marketplace-internal verification and dogfood files in the live reference repo,
-including the repository test harness, verify scripts, generated agent overlays,
-code-review workflow, verify workflow, and marketplace release workflow, are
-reference implementation tooling. Do not emit them into a generic scaffolded
-consumer repo unless that repo explicitly opts into the same marketplace
-maintenance role. Consumer workflows must be adapted to the files they actually
-receive.
+The live reference repo also carries marketplace-internal tooling — the test
+harness, verify scripts, generated agent overlays, and the code-review, verify,
+and marketplace release workflows. These are reference-implementation only:
+omit them from a generic consumer repo unless it opts into the same marketplace
+maintenance role, and adapt the emitted consumer workflows to the files the
+repo actually receives.
 
 ## Plugin enablement
 
@@ -184,29 +170,25 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 - **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `env:setup: "pnpm install"`, `clean: "bash scripts/clean.sh"`, `skills:install: "pnpm dlx skills@latest experimental_install --yes"`, and `lint:md` script. There is no `postinstall` skill-restore hook: vendored skills are committed, so `pnpm install` does not re-vendor them.
 - **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
 - **Committed vendored skills**: scaffolded repositories commit their vendored
-  project-local skills to version control so they load immediately in a fresh
-  clone or worktree, with no install step required. Real skill directories live
-  under `.agents/skills/<name>/`; `.claude/skills/<name>` entries are portable
-  relative symlinks (`../../.agents/skills/<name>`) to the matching payloads.
-  Repo-owned skills stay isolated under `skills/<name>/`. `scripts/clean.sh`
-  removes only generated dependency and transient install files
-  (`node_modules`, `.skills-install.lock*`); it must never prune the committed
-  overlay directories. `.gitignore` must not exclude `.agents/skills/**` or
-  `.claude/skills/**`.
+  project-local skills, so they load immediately in a fresh clone or worktree
+  with no install step. Real skill directories live under `.agents/skills/<name>/`;
+  `.claude/skills/<name>` entries are portable relative symlinks
+  (`../../.agents/skills/<name>`) to the matching payloads. Repo-owned skills
+  stay isolated under `skills/<name>/`. `scripts/clean.sh` removes only generated
+  dependency and transient install files (`node_modules`, `.skills-install.lock*`)
+  and must never prune the committed overlay directories; `.gitignore` must not
+  exclude `.agents/skills/**` or `.claude/skills/**`.
 - **Skill refresh (`skills:install`)**: re-vendoring uses the upstream skills
   CLI, not a custom script. `skills:install` runs
   `pnpm dlx skills@latest experimental_install --yes`, which reads
   `skills-lock.json` and restores each locked skill from its source's default
   branch into `.agents/skills/`, with `.claude/skills/` relative symlinks to the
   matching payloads. It is a manual maintenance command, not a `pnpm install`
-  hook: an empty or absent lockfile is a no-op, and a populated lockfile pulls
-  the latest upstream content for the recorded sources. After running it, commit
-  the refreshed overlays. Realignment must add missing `env:setup`,
-  `skills:install`, and `clean` package scripts, remove any retired auto-restore
-  `postinstall` hook, retired skill-restore package scripts, and any retired
-  custom `scripts/install-skills.sh`, re-vendor with `pnpm skills:install` after
-  accepted lockfile changes, and verify with `npx --yes skills@latest list
-  --json`.
+  hook: an empty or absent lockfile is a no-op; a populated lockfile pulls the
+  latest upstream content. Realignment must add missing `env:setup`,
+  `skills:install`, and `clean` package scripts and remove any retired
+  auto-restore `postinstall` hook, retired skill-restore package scripts, or
+  custom `scripts/install-skills.sh`.
 - **Shared worktree setup (`scripts/worktree-setup.sh`)**: scaffolded
   repositories ship a single idempotent setup script wired into both agent
   surfaces — the Claude Code `SessionStart` (`startup`) hook in
@@ -343,10 +325,6 @@ echo "feat: #1 ok" | pnpm exec commitlint # exits zero
 ```
 
 Run `pnpm exec markdownlint-cli2 --fix "**/*.md" "#node_modules"` to auto-fix common markdown violations before committing.
-
-## Reference implementation
-
-This repository – [`patinaproject/skills`](https://github.com/patinaproject/skills) – is the canonical reference for every file this skill emits.
 
 ## Related documents
 

@@ -43,23 +43,29 @@ Before branch setup or implementation, confirm these installed skills are
 available in the agent environment:
 
 - `new-branch`
-- `tdd`
-- `diagnose`
+- `implement`
+- `diagnosing-bugs`
 - `review-code`
 - `finish-pr`
+
+`implement` reaches for `tdd` and `review` at agreed seams, so both must be
+installed too.
 
 If any are missing, halt before implementation. Report the missing skill names
 and install guidance:
 
 ```sh
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch --skill review-code --skill finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnose -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
 ```
 
-The `tdd`, `diagnose`, `write-a-skill`, `zoom-out`, and `prototype` install
-hints intentionally track their source catalog's default branch. Consumers who
-need a frozen install can add `#<git-ref>` to those sources.
+The `implement`, `tdd`, `review`, `diagnosing-bugs`, `writing-great-skills`, and
+`prototype` install hints intentionally track their source catalog's default
+branch. Consumers who need a frozen install can add `#<git-ref>` to those
+sources.
 
 ## Conditional Routes
 
@@ -70,20 +76,14 @@ name and install guidance only for a triggered missing route.
 Install guidance for triggered conditional routes:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-skill -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@zoom-out -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-great-skills -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@prototype -y
 ```
 
-- Route through `write-a-skill` when the issue changes an installable skill
+- Consult `writing-great-skills` when the issue changes an installable skill
   package surface: skill entry instructions, frontmatter or description,
   workflow contract text, examples, reference material, or bundled helper
-  scripts. For skill-package changes that include executable helper scripts,
-  run `write-a-skill` before `tdd`, then use `tdd` for executable behavior.
-- Use `zoom-out` for ad-hoc, read-only discovery when the agent cannot yet
-  explain the relevant modules, callers, and domain vocabulary. It may run in a
-  background explorer when the host supports that, but the main workflow must
-  consume the result before choosing an implementation route.
+  scripts. Apply its review before `implement` builds the change.
 - Use `prototype` only when the issue explicitly asks for throwaway exploration,
   state-model sanity checks, UI direction exploration, or equivalent prototype
   work. Delete or absorb prototype output before local review unless the issue
@@ -129,27 +129,18 @@ For this skill, all visible PR checks include required and optional checks.
 
 ## Capability Map
 
-- `new-branch`: issue-linked branch setup. Branch setup is an automatic
-  precondition before implementation or publishing work begins. The worktree is
-  "correctly prepared" only when the current branch name encodes the target
-  issue number per the `<issue>-<slug>` convention `new-branch` produces — not
-  merely when the branch differs from the default branch. Skip `new-branch` only
-  when that issue-linked check passes for the target issue. When the current
-  branch is non-default but not issue-linked (for example a host- or
-  tool-generated name like `claude/<slug>`), run `new-branch` to establish the
-  issue-linked branch instead of treating it as prepared. If a host-provided
-  branch cannot or should not be renamed to the issue-linked name, surface that
-  deviation in the report rather than developing the issue silently on a
-  non-issue-linked branch.
-- `tdd`: clear behavior implementation and behavior-level tests.
-- `diagnose`: unclear root cause, missing reproduction, flaky behavior, or
+- `new-branch`: issue-linked branch setup (see Workflow step 4 for the
+  precondition).
+- `implement`: build the issue's change from its acceptance criteria — uses
+  `tdd` at agreed seams, runs the documented verification, and commits to the
+  branch.
+- `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or
   performance regressions.
-- `review-code`: fresh-context local branch-diff review.
+- `review-code`: fresh-context local branch-diff review for correctness and
+  merge-relevant risk, independent of the builder's context.
 - `finish-pr`: commit, push, PR creation or update, PR checks, PR feedback
   loops, and ready-to-merge reporting.
-- `write-a-skill`: installable skill package surface changes.
-- `zoom-out`: read-only discovery when the agent cannot yet explain relevant
-  modules, workflows, or vocabulary.
+- `writing-great-skills`: installable skill package surface changes.
 - `prototype`: only explicit throwaway exploration requests.
 
 ## Workflow
@@ -241,7 +232,7 @@ Classify findings into exactly one of these outcomes:
 
 | Outcome | Use When | Next Action |
 |---|---|---|
-| `ready-for-agent` | The expected behavior is clear or evidence can be gathered locally | Route clear behavior changes to `tdd`; route unclear root cause, missing reproduction, flaky behavior, or performance regression to `diagnose` |
+| `ready-for-agent` | The expected behavior is clear or evidence can be gathered locally | Route clear behavior changes to `implement`; route unclear root cause, missing reproduction, flaky behavior, or performance regression to `diagnosing-bugs` |
 | `ready-for-human` | The finding needs judgment, external access, manual testing, design input, missing information, changed scope, product decisions, permissions, conflicting direction, or valid work outside the issue | Stop the loop and report the blocker with evidence checked |
 | `wontfix` | The finding is stale, incorrect, conflicts with repository rules, or is intentionally rejected | Explain politely in the report; add concise code comments only when future reviewers would otherwise re-raise the same concern |
 
@@ -258,17 +249,13 @@ next. Keep verification evidence internally for decisions. Report verification
 details when they failed, skipped, interrupted, changed readiness, explain a
 blocker, identify residual risk, or create a human next action.
 
-Leave out command inventories, pass counts, green check names, child-skill gate
-lists, routine head SHAs, and project-status details that do not affect what the
-human needs to know. Translate child-skill output into outcome, readiness,
-blocker, and next-action language. Progress updates should name the current
-checkpoint and next action without repeating check lists. When verification is
-interrupted, mention it only when the interruption changes readiness or asks the
-human to decide something.
+Translate child-skill output into outcome, readiness, blocker, and next-action
+language. Progress updates name the current checkpoint and next action without
+repeating check lists.
 
 When the workflow stops, write for a human first, not as a process log. Lead with
-the outcome. Keep the default report short, direct, and human-readable, and
-surface only details that change what the reader needs to understand or do.
+the outcome, and surface only details that change what the reader needs to
+understand or do.
 
 Include:
 
@@ -314,13 +301,10 @@ Remove or minimize:
 - Full PR check inventories when they are all green.
 - Mergeability, review, or unrelated dirty-file status unless it changes what
   the human should do next.
-
-When child skills return detailed readiness evidence, translate child skill
-reports into the final-report vocabulary above. Do not forward child-skill gate
-inventories. Do not repeat `finish-pr` readiness gates such as clean worktree,
-head SHA equality, merge state, check inventory, or review-thread count when
-they all passed; collapse them into the verification line unless a failed gate
-changes what the human should do next.
+- `finish-pr` readiness gates such as clean worktree, head SHA equality, merge
+  state, check inventory, or review-thread count when they all passed; collapse
+  them into the verification line unless a failed gate changes the human next
+  action.
 
 ### Good final output
 
@@ -357,7 +341,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: new-branch, write-a-skill, tdd, review-code, finish-pr.
+Child skills invoked: new-branch, implement, review-code, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 

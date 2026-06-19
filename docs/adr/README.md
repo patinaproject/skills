@@ -29,7 +29,7 @@ ADR-<issue>-<slug>.md      e.g. ADR-231-adr-id-scheme.md
   historical context: the problem framing, discussion, and PRs behind it.
 
 This supersedes the sequential `0001`-increment numbering guidance still embedded
-in the vendored shared skills (e.g. `grill-with-docs`,
+in the vendored shared skills (e.g. `domain-modeling`,
 `setup-matt-pocock-skills`). Those payloads are re-installed from
 `skills-lock.json` and are not edited; this doc, and the `AGENTS.md` pointer to
 it, are the authority. Do not scan for the highest number and increment.
