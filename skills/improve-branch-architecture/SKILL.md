@@ -1,11 +1,11 @@
 ---
 name: improve-branch-architecture
-description: Find deepening opportunities scoped to the current branch's changes and the radius that can fold into them, delivered as in-conversation markdown. Use when the user wants an architecture review of this branch or current changes, wants to deepen shallow modules before finishing a PR, or says "improve the architecture of my branch / current changes". For a whole-codebase audit, use improve-codebase-architecture instead.
+description: Find deepening opportunities scoped to the current branch's changes and the radius that can fold into them, delivered as in-conversation markdown. Use when the user wants an architecture review of this branch or current changes, or wants to deepen shallow modules before finishing a PR. For a whole-codebase audit, use improve-codebase-architecture instead.
 ---
 
 # Improve Branch Architecture
 
-Surface architectural friction and propose **deepening opportunities** — refactors that turn shallow modules into deep ones — scoped to **the current branch's changes** and the radius that can reasonably fold into this branch. The aim is testability and AI-navigability.
+Surface architectural friction and propose **deepening opportunities** — refactors that turn shallow modules into deep ones. The aim is testability and AI-navigability.
 
 This skill is the branch-scoped sibling of `improve-codebase-architecture`. It runs that skill's **entire approach** — the same three phases, the same vocabulary, the same deepening discipline, the same inline `CONTEXT.md`/ADR side effects — changed in exactly two ways:
 
@@ -14,24 +14,11 @@ This skill is the branch-scoped sibling of `improve-codebase-architecture`. It r
 
 For a whole-codebase audit, use `improve-codebase-architecture`. For a correctness/bug review of the branch, use `review-code`.
 
-## Glossary
+## Vocabulary
 
-Use these terms exactly in every suggestion. Consistent language is the point — don't drift into "component," "service," "API," or "boundary." Full definitions in [LANGUAGE.md](LANGUAGE.md).
+Every suggestion uses the deep-module vocabulary — **module**, **interface**, **depth** (**deep**/**shallow**), **seam**, **adapter**, **leverage**, **locality**. Use these terms exactly; don't drift into "component," "service," "API," or "boundary." Full definitions and principles are in [LANGUAGE.md](LANGUAGE.md) — read it before writing suggestions if any term above is unfamiliar.
 
-- **Module** — anything with an interface and an implementation (function, class, package, slice).
-- **Interface** — everything a caller must know to use the module: types, invariants, error modes, ordering, config. Not just the type signature.
-- **Implementation** — the code inside.
-- **Depth** — leverage at the interface: a lot of behaviour behind a small interface. **Deep** = high leverage. **Shallow** = interface nearly as complex as the implementation.
-- **Seam** — where an interface lives; a place behaviour can be altered without editing in place. (Use this, not "boundary.")
-- **Adapter** — a concrete thing satisfying an interface at a seam.
-- **Leverage** — what callers get from depth.
-- **Locality** — what maintainers get from depth: change, bugs, knowledge concentrated in one place.
-
-Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
-
-- **Deletion test**: imagine deleting the module. If complexity vanishes, it was a pass-through. If complexity reappears across N callers, it was earning its keep.
-- **The interface is the test surface.**
-- **One adapter = hypothetical seam. Two adapters = real seam.**
+The principle the Process below leans on hardest is the **deletion test**: imagine deleting the module — if complexity vanishes it was a pass-through, if complexity reappears across N callers it was earning its keep.
 
 This skill is _informed_ by the project's domain model. The domain language gives names to good seams; ADRs record decisions the skill should not re-litigate.
 

@@ -1,6 +1,6 @@
 ---
 name: update-branch
-description: Update the current local work branch by merging the latest base/default branch with pure git and no automatic push. Use when the user invokes `/update-branch`, says "update branch", or asks to merge the latest base branch or default branch into this branch.
+description: Update the current local work branch by merging the latest base or default branch with pure git and no push. Use when the user invokes `/update-branch`, says "update branch", or asks to merge the base or default branch into this branch.
 ---
 
 # Update Branch
@@ -15,17 +15,10 @@ Invoke from a local work branch:
 ```
 
 No argument means resolve the base from `origin/HEAD`. An optional base
-argument selects another branch or remote-tracking ref. The initial update
-request authorizes a clearly cohesive, branch-local, non-silent dirty-work
-auto-commit when no human judgment is needed; otherwise dirty work stops the
-update.
-Dependency refresh is conditional on dependency-related files changing during
-the merge; do not reinstall dependencies unconditionally on every branch
-update.
+argument selects another branch or remote-tracking ref.
 
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
-GitHub's remote update button, or any GitHub update API. Never push
-automatically.
+GitHub's remote update button, or any GitHub update API. Never push.
 
 ## Input Contract
 

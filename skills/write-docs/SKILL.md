@@ -1,25 +1,22 @@
 ---
 name: write-docs
-description: Capture an already-aligned design into CONTEXT.md glossary terms and ADRs, with no interview loop. Use when the user says "write the docs for this", "capture this in CONTEXT.md", or "record this decision as an ADR" and the decisions are already settled.
+description: Capture an already-settled design into CONTEXT.md glossary terms and ADRs. Use when the user says "write the docs for this", "capture this in CONTEXT.md", or "record this decision as an ADR".
 ---
 
 <what-to-do>
 
-Capture an *already-aligned* understanding into documentation. The decisions are
-already made and the terms are already settled — your job is to write them down,
-not to re-litigate them.
-
-Take the aligned understanding from the current conversation, a finished design
-discussion, or a merged decision, and record it:
+Capture an *already-settled* understanding into documentation. The decisions are
+made and the terms are agreed — write them down, do not re-litigate them. Take
+that understanding from the current conversation, a finished design discussion,
+or a merged decision, and record it:
 
 - Write or update `CONTEXT.md` glossary terms using
   [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
 - Offer ADRs sparingly using [ADR-FORMAT.md](./ADR-FORMAT.md).
 
-**Do not run an interview loop.** Do not walk the design tree one question at a
-time, and do not invent edge-case scenarios to force precision. That is grilling,
-and it is out of scope here. If a fact can be checked in the codebase, check it
-instead of asking.
+**No grilling.** Do not run an interview loop, walk the design tree one question
+at a time, or invent edge cases to force precision — that work is out of scope
+here. If a fact can be checked in the codebase, check it instead of asking.
 
 </what-to-do>
 
@@ -77,10 +74,9 @@ different things." Write the sharpened term, not the fuzzy one.
 ### Cross-reference with code (lightly)
 
 Do a *light* sanity check against the code before recording something — just
-enough to avoid capturing a claim the code plainly contradicts. If you find a
-clear contradiction, surface it: "The code cancels entire Orders, but this says
-partial cancellation is possible — which is right?" Do not turn this into an
-exhaustive audit.
+enough to catch a claim the code plainly contradicts, never an exhaustive audit.
+Surface any clear contradiction: "The code cancels entire Orders, but this says
+partial cancellation is possible — which is right?"
 
 ### Offer ADRs sparingly
 
@@ -103,7 +99,6 @@ If any of the three is missing, skip the ADR. Use the
 The bundled [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md) and
 [ADR-FORMAT.md](./ADR-FORMAT.md) are copied verbatim from the `domain-modeling`
 skill in [`mattpocock/skills`](https://github.com/mattpocock/skills). This skill
-runs only the documentation-writing half of `grill-with-docs`/`grilling`, without
-the interview.
+runs only the documentation-writing half of `grill-with-docs`/`grilling`.
 
 </supporting-info>

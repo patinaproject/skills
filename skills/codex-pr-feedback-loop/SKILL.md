@@ -1,23 +1,17 @@
 ---
 name: codex-pr-feedback-loop
-description: Keeps an issue-linked Codex app PR polling for unresolved review feedback, objective low-risk cleanup, verified fixes, replies, and pushed updates. Use when a Codex app worktree should continue iterating on an existing pull request after the first successful push.
+description: Loops a Codex app worktree on an existing PR's review feedback — polling, objective cleanup, verified fixes, threaded replies, and pushed updates. Use when a Codex app chat should keep iterating on a pull request after its first successful push.
 ---
 
 # PR Feedback Loop
 
-Use this skill when the user wants a Codex app worktree chat to develop an
-issue and then keep iterating on PR review feedback after the first push.
-
 ## Quick Start
 
-For issue-linked development, start with the repository's normal GitHub
-workflow through `new-branch` and `finish-pr`:
-
 1. Develop, verify, commit, push, and create or update the PR with the normal
-   issue workflow.
+   issue workflow (`new-branch` through `finish-pr`).
 2. After the first successful PR push, follow
-   [workflows/thread-automation.md](workflows/thread-automation.md) to create a
-   Codex app thread automation for the same chat.
+   [workflows/thread-automation.md](workflows/thread-automation.md) to start the
+   Codex app thread automation that runs the loop for this chat.
 
 Suggested user prompt:
 
@@ -27,15 +21,15 @@ Use $codex-pr-feedback-loop for issue #123.
 
 ## Automation Contract
 
-The automation is a Codex app thread automation attached to the current
-chat/worktree, not a GitHub webhook or CI workflow.
+The loop runs as a Codex app thread automation attached to the current
+chat/worktree — not a GitHub webhook or CI workflow.
 
-See [workflows/thread-automation.md](workflows/thread-automation.md) for the
-canonical create/fallback procedure, automation name, schedule, scope, stop
-condition, prompt, and guardrails. Keep this file as a routing summary, not a
-second copy of the runtime rules.
+[workflows/thread-automation.md](workflows/thread-automation.md) holds the
+canonical runtime rules: create/fallback procedure, automation name, schedule,
+scope, stop condition, the exact polling prompt, and guardrails. Read it before
+creating the automation.
 
-At this skill level, the durable boundaries are:
+The durable boundaries at this skill level:
 
 - Stay in the current working directory's default `gh` repository.
 - Preserve this chat's context with a thread automation.

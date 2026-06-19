@@ -1,26 +1,21 @@
 ---
 name: install-skills
-description: Install one or more agent skills into the current repository with the skills CLI. Use when adding or refreshing locked project-local skills, when a user names a skill source, or when a repository needs shared skills installed without mutating global agent state.
+description: Install agent skills project-locally with the skills CLI. Use when adding or refreshing locked skills in `skills-lock.json`, or when a user names a skill source to install into the current repository.
 ---
 
 # install-skills
 
 Install skills project-locally so the repository, not the operator's global
-environment, owns the shared workflow catalog.
+environment, owns the shared workflow catalog. Use this skill to change that
+catalog — add, remove, or refresh the entries recorded in `skills-lock.json`.
 
-This skill changes the locked skill set and may update `skills-lock.json`.
-Vendored skills are committed to the repo, so they load without an install step.
-To re-vendor the committed overlays from an existing lockfile, use the
-repository's manual maintenance command instead:
+Vendored skills are committed, so they load without an install step. When the
+goal is only to re-vendor the committed overlays from an unchanged lockfile, run
+the repository's manual maintenance command instead:
 
 ```bash
 pnpm skills:install
 ```
-
-Use this skill when the desired result is a changed skill catalog: adding,
-removing, refreshing, or otherwise updating the entries recorded in
-`skills-lock.json`. After changing the lockfile, run `pnpm skills:install` and
-commit the refreshed `.agents/skills/**` and `.claude/skills/**` overlays.
 
 ## Preflight
 

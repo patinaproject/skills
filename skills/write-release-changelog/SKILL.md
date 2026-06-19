@@ -1,19 +1,18 @@
 ---
 name: write-release-changelog
-description: Run the operator-invoked release ceremony — draft a community changelog and close the loop on the product-feedback items a release resolved: per-item replies, status set to complete, and a thank-you linking every item. Use when a release just shipped and you want to write its changelog and tell the people whose feedback it resolved, or when the user says "write the release changelog", "close the loop on feedback", or "run the release ceremony". Project-agnostic and provider-agnostic (Featurebase is the reference adapter); produces drafts for operator approval and never auto-publishes public content.
+description: Run the release ceremony — draft a community changelog and close the loop on the product-feedback items a release resolved (per-item replies, status set to complete, a thank-you linking every item). Use when a release just shipped and you want to write its changelog and tell the people whose feedback it resolved, or when the user says "write the release changelog", "close the loop on feedback", or "run the release ceremony".
 ---
 
 # Write Release Changelog
 
-This skill is portable. It works from instructions alone in any repository whose
-fixes ship through GitHub releases and whose product feedback lives in a
-dedicated tool (Featurebase, Canny, Productboard, Frill, …). Nothing about the
-repo, org, or tool is hardcoded.
+Portable across any repository whose fixes ship through GitHub releases and whose
+product feedback lives in a dedicated tool (Featurebase, Canny, Productboard,
+Frill, …) — nothing about the repo, org, or tool is hardcoded.
 
-It is the **release-time** half of a two-phase comms model. The close-time
-private note ("resolved in code") is a separate concern. This skill owns phase
-two ("delivered to users"): the public changelog, per-item public replies, and
-status → complete — none of which may happen before the release is live.
+The ceremony is the **release-time** comms phase: the public changelog, per-item
+public replies, and status → complete, none of which happens before the release
+is live. The close-time private note ("resolved in code") is a separate phase,
+out of scope here.
 
 ## Safety Boundary
 
@@ -79,9 +78,8 @@ posts nor drafts are duplicated.
 
 ## Bundled Helper
 
-The deterministic, reproducible mechanics live in `scripts/` so two runs over
-the same release produce the same resolved set; the model owns prose and
-judgement.
+The deterministic mechanics live in `scripts/` so two runs over the same release
+produce the same resolved set; the model owns prose and judgement.
 
 - `scripts/trace.mjs` — CLI: release notes + referenced-issue bodies → resolved
   feedback set.
@@ -90,7 +88,7 @@ judgement.
 - `scripts/lib/ceremony.mjs` — the approval-gated, release-live, idempotent
   write orchestration over a provider adapter.
 - `scripts/lib/registry.mjs` — per-provider fingerprints and feedback-link
-  patterns. Adding a provider is adding a registry entry plus a runtime adapter.
+  patterns.
 
 ## Adding a Provider
 

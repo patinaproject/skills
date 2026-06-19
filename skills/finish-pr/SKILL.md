@@ -1,6 +1,6 @@
 ---
 name: finish-pr
-description: Move completed local GitHub issue work to a ready-for-merge pull request. Use when development is complete, the user says finish PR, publish this branch, open a ready PR, or an agent has objective evidence the branch is ready for review.
+description: Finish completed branch work into a ready-to-merge pull request. Use when development is complete, when the user says finish PR, publish this branch, or open a ready PR, or when an agent has objective evidence the branch is ready for review.
 ---
 
 # Finish PR
@@ -8,23 +8,22 @@ description: Move completed local GitHub issue work to a ready-for-merge pull re
 ## Quick Start
 
 When local work is complete, follow
-[workflows/ready-for-merge.md](workflows/ready-for-merge.md).
+[workflows/ready-for-merge.md](workflows/ready-for-merge.md) — the authoritative
+procedure for every step below.
 
 Example: on branch `42-let-agents-use-github-more-ergonomically`, infer issue
 `#42`, verify the diff, commit as `feat: #42 ...`, push, and create or update
 the ready-for-review PR.
 
-This skill verifies, commits, pushes, creates or reuses a ready-for-review pull
-request, then loops through mergeability, currently available PR feedback,
-eligible conversation resolution, and checks until the PR is ready-to-merge or
-the current check state has been fully triaged and reported. Failing checks do
-not halt the skill by themselves. It never merges the PR.
+The skill verifies, commits, pushes, and creates or reuses a ready-for-review
+PR, then runs the readiness loop until the PR is ready-to-merge or every
+problematic check is triaged and reported. A failing check is evidence to
+triage, not a halt. It never merges the PR.
 
-Before the final response, the workflow must run a strict final ready-to-merge
-check. If any final gate fails, report the PR as not ready-to-merge and list the
-blocker in human-friendly language; do not imply success, and must not call it
-finished. If every final gate passes, compress ready-to-merge evidence into a
-human line instead of listing the gates.
+End on a strict final ready-to-merge gate. If any gate fails, report the PR as
+not ready-to-merge, name the blocker in human-friendly language, and do not
+imply success or call it finished. If every gate passes, compress the
+ready-to-merge evidence into one human line.
 
 ## Workflow
 
@@ -39,13 +38,11 @@ human line instead of listing the gates.
 8. Enter the readiness loop: detect merge conflicts, triage currently
    available PR feedback, resolve eligible conversations, watch all checks in
    fail-fast bounded observation windows, triage every problematic check,
-   re-query PR feedback after checks, re-query again after every watch exit or
-   timeout, fix branch-local issues, push, and repeat. When a failing check is
-   outside branch scope or cannot be fixed by the agent, record a concrete
-   disposition and continue to final reporting instead of halting.
-9. Mark draft PRs ready for review once all currently visible failing checks
-   have been fixed or dispositioned; ready-for-review is distinct from
-   ready-to-merge.
+   re-query PR feedback after checks and after every watch exit or timeout, fix
+   branch-local issues, push, and repeat. A check the agent cannot fix gets a
+   concrete disposition and continues to reporting, not a halt.
+9. Mark draft PRs ready for review once every visible failing check is fixed or
+   dispositioned; ready-for-review is distinct from ready-to-merge.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.
 

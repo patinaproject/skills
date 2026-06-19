@@ -123,18 +123,8 @@ For this skill, all visible PR checks include required and optional checks.
 
 ## Capability Map
 
-- `new-branch`: issue-linked branch setup. Branch setup is an automatic
-  precondition before implementation or publishing work begins. The worktree is
-  "correctly prepared" only when the current branch name encodes the target
-  issue number per the `<issue>-<slug>` convention `new-branch` produces — not
-  merely when the branch differs from the default branch. Skip `new-branch` only
-  when that issue-linked check passes for the target issue. When the current
-  branch is non-default but not issue-linked (for example a host- or
-  tool-generated name like `claude/<slug>`), run `new-branch` to establish the
-  issue-linked branch instead of treating it as prepared. If a host-provided
-  branch cannot or should not be renamed to the issue-linked name, surface that
-  deviation in the report rather than developing the issue silently on a
-  non-issue-linked branch.
+- `new-branch`: issue-linked branch setup (see Workflow step 4 for the
+  precondition).
 - `tdd`: clear behavior implementation and behavior-level tests.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or
   performance regressions.
@@ -250,17 +240,13 @@ next. Keep verification evidence internally for decisions. Report verification
 details when they failed, skipped, interrupted, changed readiness, explain a
 blocker, identify residual risk, or create a human next action.
 
-Leave out command inventories, pass counts, green check names, child-skill gate
-lists, routine head SHAs, and project-status details that do not affect what the
-human needs to know. Translate child-skill output into outcome, readiness,
-blocker, and next-action language. Progress updates should name the current
-checkpoint and next action without repeating check lists. When verification is
-interrupted, mention it only when the interruption changes readiness or asks the
-human to decide something.
+Translate child-skill output into outcome, readiness, blocker, and next-action
+language. Progress updates name the current checkpoint and next action without
+repeating check lists.
 
 When the workflow stops, write for a human first, not as a process log. Lead with
-the outcome. Keep the default report short, direct, and human-readable, and
-surface only details that change what the reader needs to understand or do.
+the outcome, and surface only details that change what the reader needs to
+understand or do.
 
 Include:
 
@@ -306,13 +292,10 @@ Remove or minimize:
 - Full PR check inventories when they are all green.
 - Mergeability, review, or unrelated dirty-file status unless it changes what
   the human should do next.
-
-When child skills return detailed readiness evidence, translate child skill
-reports into the final-report vocabulary above. Do not forward child-skill gate
-inventories. Do not repeat `finish-pr` readiness gates such as clean worktree,
-head SHA equality, merge state, check inventory, or review-thread count when
-they all passed; collapse them into the verification line unless a failed gate
-changes what the human should do next.
+- `finish-pr` readiness gates such as clean worktree, head SHA equality, merge
+  state, check inventory, or review-thread count when they all passed; collapse
+  them into the verification line unless a failed gate changes the human next
+  action.
 
 ### Good final output
 

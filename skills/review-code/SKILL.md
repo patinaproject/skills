@@ -1,12 +1,9 @@
 ---
 name: review-code
-description: Run a read-only, fresh-context branch-diff code review and report findings. Use when running /review-code, before finishing issue work, or when a local review gate should inspect committed, staged, unstaged, and untracked changes without mutating code or GitHub state.
+description: Run a read-only, fresh-context branch-diff code review and report findings. Use when running /review-code, before finishing issue work, or when a local review gate should inspect committed, staged, unstaged, and untracked changes.
 ---
 
 # Review Code
-
-This skill is portable. It works from instructions alone and should be usable in
-any repository with Git history and repository guidance.
 
 ## Safety Boundary
 
@@ -56,26 +53,18 @@ scope.
 
 In Codex, spawn a fresh Explorer background agent for the review without asking
 for another user confirmation when the caller has already requested local
-review, `/review-code`, or an issue workflow that reaches the review gate. Close
-the Explorer or reviewer agent after its final report is consumed. Do not let
-old review agents pile up, and do not start a duplicate reviewer for the same
-unresolved review pass.
+review, `/review-code`, or an issue workflow that reaches the review gate. Run
+one reviewer per pass — never a duplicate for the same unresolved pass.
 
-Cleanup is part of the review lifecycle: spawn the reviewer, wait for its
-result, consume and report that result, then close the reviewer once it is no
-longer needed. If the review times out or returns a requested partial result,
-close the Explorer or reviewer agent after capturing and reporting the useful
-output. Never close a reviewer before its final report, timeout notice, or
-requested partial result has been captured. Keep only reviewer agents that are
-still actively producing needed results visible during code review work.
-
-Before spawning a new reviewer, close or mark inactive any prior review-code
-Explorer, reviewer, or worker agents whose output has already been consumed,
-canceled, or superseded. Do not leave stale prior-run agents visible as if they
-belong to the current review. If the host cannot close a prior agent, label it
-inactive or superseded before starting the next review. The visible agent list
-must communicate only the current review state without requiring the human to
-mentally filter old agents.
+The reviewer has a lifecycle: spawn, wait, capture and report its result, then
+close. Never close before its final report, timeout notice, or requested partial
+result has been captured; on a timeout or requested partial result, capture and
+report the useful output, then close. Before spawning, close or mark inactive
+any prior review-code Explorer, reviewer, or worker agent whose output has
+already been consumed, canceled, or superseded — if the host cannot close it,
+label it inactive or superseded. The visible agent list must communicate only
+the current review state, never leaving stale prior-run agents for the human to
+mentally filter.
 
 Pass only:
 
@@ -119,10 +108,8 @@ so and mention residual risk or test gaps.
 
 `review-code` is a local isolated reviewer for branch-diff findings. It does
 not emulate `code-review.yml`, does not require a PR number, and does not post
-comments.
-
-This skill only covers local isolated branch-diff review. Hosted review
-workflows own their own prompt, permissions, and PR-commenting contract.
+comments. Hosted review workflows own their own prompt, permissions, and
+PR-commenting contract.
 
 ## Report
 
