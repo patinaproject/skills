@@ -81,7 +81,7 @@ See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 End-to-end issue work needs a single entrypoint without weakening the focused
 skills that already own branch setup, test-driven implementation, diagnosis,
 local review, and PR finishing. `develop-issue` takes exactly one same-repo
-issue reference, coordinates `new-branch`, `implement`, `diagnosing-bugs`, `review`,
+issue reference, coordinates `new-branch`, `implement`, `diagnosing-bugs`, `review-code`,
 and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
 
 See [./skills/develop-issue/](./skills/develop-issue/) for the skill contract.

@@ -45,23 +45,24 @@ available in the agent environment:
 - `new-branch`
 - `implement`
 - `diagnosing-bugs`
-- `review`
+- `review-code`
 - `finish-pr`
 
-`implement` reaches for `tdd` at agreed seams, so `tdd` must be installed too.
+`implement` reaches for `tdd` and `review` at agreed seams, so both must be
+installed too.
 
 If any are missing, halt before implementation. Report the missing skill names
 and install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch --skill finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch --skill review-code --skill finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
 ```
 
-The `implement`, `review`, `tdd`, `diagnosing-bugs`, `writing-great-skills`, and
+The `implement`, `tdd`, `review`, `diagnosing-bugs`, `writing-great-skills`, and
 `prototype` install hints intentionally track their source catalog's default
 branch. Consumers who need a frozen install can add `#<git-ref>` to those
 sources.
@@ -113,7 +114,7 @@ or otherwise needs judgment not recorded in the issue.
 - Issue scope and acceptance criteria are covered.
 - Repository-documented verification has run and results are recorded.
 - Relevant tests are added or updated when the change has executable behavior.
-- Local `review` findings are fixed or dispositioned.
+- Local `review-code` findings are fixed or dispositioned.
 - GitHub PR review comments and hosted review comments surfaced by `finish-pr`
   are fixed or dispositioned.
 - After `finish-pr`, all currently visible required and optional PR checks pass
@@ -135,8 +136,8 @@ For this skill, all visible PR checks include required and optional checks.
   branch.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or
   performance regressions.
-- `review`: two-axis Standards/Spec review of the branch diff against the
-  default-branch merge-base.
+- `review-code`: fresh-context local branch-diff review for correctness and
+  merge-relevant risk, independent of the builder's context.
 - `finish-pr`: commit, push, PR creation or update, PR checks, PR feedback
   loops, and ready-to-merge reporting.
 - `writing-great-skills`: installable skill package surface changes.
@@ -200,16 +201,18 @@ For this skill, all visible PR checks include required and optional checks.
 9. Check for reviewable local changes: committed branch diff from the
    default-branch merge base, staged changes, unstaged changes, or untracked
    files.
-10. When reviewable local changes exist, invoke `review` with the default-branch
-    merge-base as the fixed point. Explicit use of `develop-issue` is sufficient
-    approval for this required review gate: run it without asking for another
-    confirmation. `review` runs its Standards and Spec sub-agents and reports
-    findings without mutating the worktree; route every finding through the
-    Review Finding Router. Halt if `review` reports a halt condition.
+10. When reviewable local changes exist, invoke `review-code` and inherit its
+    full contract. Explicit use of `develop-issue` is sufficient approval for
+    this required local review gate: dispatch the fresh read-only reviewer
+    without asking for another user confirmation. Preserve the `review-code`
+    boundary exactly: no same-thread fallback and no file edits, staging,
+    commits, pushes, PR comments, review-thread mutation, or other worktree
+    mutation. Halt if fresh reviewer dispatch is unavailable or if `review-code`
+    reports a halt condition.
 11. Route local review findings through the Review Finding Router.
 12. Use `finish-pr` for commit, push, PR creation or update, visible check
     observation, PR feedback loops, and ready-to-merge reporting. Invoke
-    `finish-pr` only after local verification and `review` are clean,
+    `finish-pr` only after local verification and `review-code` are clean,
     skipped because no reviewable local changes exist, or every local finding
     has a recorded `ready-for-agent`, `ready-for-human`, or `wontfix`
     disposition.
@@ -272,7 +275,7 @@ Include:
   next.
 - Local review result and finding dispositions.
 - PR review and check feedback status.
-- Latest `review` result, or that it was skipped because no reviewable
+- Latest `review-code` result, or that it was skipped because no reviewable
   local changes existed, only when it changes reviewer confidence or next
   action.
 - Human-owned blockers, if any.
@@ -338,7 +341,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: new-branch, implement, review, finish-pr.
+Child skills invoked: new-branch, implement, review-code, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 
