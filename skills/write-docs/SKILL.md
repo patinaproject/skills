@@ -101,8 +101,9 @@ If any of the three is missing, skip the ADR. Use the
 ## Attribution
 
 The bundled [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md) and
-[ADR-FORMAT.md](./ADR-FORMAT.md) are copied verbatim from the `grill-with-docs`
+[ADR-FORMAT.md](./ADR-FORMAT.md) are copied verbatim from the `domain-modeling`
 skill in [`mattpocock/skills`](https://github.com/mattpocock/skills). This skill
-runs only the documentation-writing half of that skill, without the interview.
+runs only the documentation-writing half of `grill-with-docs`/`grilling`, without
+the interview.
 
 </supporting-info>

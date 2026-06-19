@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # write-docs-format-sync.test.sh — Assert the bundled format reference files in
-# skills/write-docs/ are byte-identical to the vendored grill-with-docs originals.
+# skills/write-docs/ are byte-identical to the vendored domain-modeling originals.
 #
 # This is a machine-consumed mirror contract, NOT a prose assertion: it checks
 # only that the files MATCH, never WHAT they say. See ADR-232
 # (docs/adr/ADR-232-format-sync-mirror-contract.md) for why this coexists with
-# ADR-224 (no tests on documentation content).
+# ADR-224 (no tests on documentation content). ADR-247 records the v1 re-point:
+# these formats moved upstream from grill-with-docs to domain-modeling.
 #
 # The copies are kept in sync by hand: when this test fails after a re-vendor of
-# grill-with-docs, copy the changed file over the bundled copy.
+# domain-modeling, copy the changed file over the bundled copy.
 #
 # Exit 0: every bundled copy is byte-identical to its vendored original.
 # Exit 1: at least one copy diverged or is missing.
@@ -18,7 +19,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-SRC=".agents/skills/grill-with-docs"
+SRC=".agents/skills/domain-modeling"
 DST="skills/write-docs"
 FILES=(CONTEXT-FORMAT.md ADR-FORMAT.md)
 FAIL_COUNT=0
@@ -41,7 +42,7 @@ for f in "${FILES[@]}"; do
     fail "$DST/$f diverged from $SRC/$f (re-copy it: cp '$SRC/$f' '$DST/$f')"
     continue
   fi
-  echo "OK: $f matches the vendored grill-with-docs original"
+  echo "OK: $f matches the vendored domain-modeling original"
 done
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
@@ -51,5 +52,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: write-docs format files in sync with vendored grill-with-docs"
+echo "OK: write-docs format files in sync with vendored domain-modeling"
 exit 0

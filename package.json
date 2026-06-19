@@ -21,7 +21,7 @@
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
     "commitlint": "commitlint",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#CHANGELOG.md\" \"#skills/**\" \"#.agents/skills/**\" \"#.claude/skills/**\"",
     "test": "bash scripts/tests/suite.test.sh",
     "skills:install": "pnpm dlx skills@latest experimental_install --yes"
   },

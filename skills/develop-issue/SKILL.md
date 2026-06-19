@@ -44,7 +44,7 @@ available in the agent environment:
 
 - `new-branch`
 - `tdd`
-- `diagnose`
+- `diagnosing-bugs`
 - `review-code`
 - `finish-pr`
 
@@ -54,10 +54,10 @@ and install guidance:
 ```sh
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch --skill review-code --skill finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnose -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
 ```
 
-The `tdd`, `diagnose`, `write-a-skill`, `zoom-out`, and `prototype` install
+The `tdd`, `diagnosing-bugs`, `writing-great-skills`, and `prototype` install
 hints intentionally track their source catalog's default branch. Consumers who
 need a frozen install can add `#<git-ref>` to those sources.
 
@@ -70,20 +70,14 @@ name and install guidance only for a triggered missing route.
 Install guidance for triggered conditional routes:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@write-a-skill -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@zoom-out -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-great-skills -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@prototype -y
 ```
 
-- Route through `write-a-skill` when the issue changes an installable skill
+- Consult `writing-great-skills` when the issue changes an installable skill
   package surface: skill entry instructions, frontmatter or description,
   workflow contract text, examples, reference material, or bundled helper
-  scripts. For skill-package changes that include executable helper scripts,
-  run `write-a-skill` before `tdd`, then use `tdd` for executable behavior.
-- Use `zoom-out` for ad-hoc, read-only discovery when the agent cannot yet
-  explain the relevant modules, callers, and domain vocabulary. It may run in a
-  background explorer when the host supports that, but the main workflow must
-  consume the result before choosing an implementation route.
+  scripts. Apply its review before `tdd`, then use `tdd` for executable behavior.
 - Use `prototype` only when the issue explicitly asks for throwaway exploration,
   state-model sanity checks, UI direction exploration, or equivalent prototype
   work. Delete or absorb prototype output before local review unless the issue
@@ -142,14 +136,12 @@ For this skill, all visible PR checks include required and optional checks.
   deviation in the report rather than developing the issue silently on a
   non-issue-linked branch.
 - `tdd`: clear behavior implementation and behavior-level tests.
-- `diagnose`: unclear root cause, missing reproduction, flaky behavior, or
+- `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or
   performance regressions.
 - `review-code`: fresh-context local branch-diff review.
 - `finish-pr`: commit, push, PR creation or update, PR checks, PR feedback
   loops, and ready-to-merge reporting.
-- `write-a-skill`: installable skill package surface changes.
-- `zoom-out`: read-only discovery when the agent cannot yet explain relevant
-  modules, workflows, or vocabulary.
+- `writing-great-skills`: installable skill package surface changes.
 - `prototype`: only explicit throwaway exploration requests.
 
 ## Workflow
@@ -241,7 +233,7 @@ Classify findings into exactly one of these outcomes:
 
 | Outcome | Use When | Next Action |
 |---|---|---|
-| `ready-for-agent` | The expected behavior is clear or evidence can be gathered locally | Route clear behavior changes to `tdd`; route unclear root cause, missing reproduction, flaky behavior, or performance regression to `diagnose` |
+| `ready-for-agent` | The expected behavior is clear or evidence can be gathered locally | Route clear behavior changes to `tdd`; route unclear root cause, missing reproduction, flaky behavior, or performance regression to `diagnosing-bugs` |
 | `ready-for-human` | The finding needs judgment, external access, manual testing, design input, missing information, changed scope, product decisions, permissions, conflicting direction, or valid work outside the issue | Stop the loop and report the blocker with evidence checked |
 | `wontfix` | The finding is stale, incorrect, conflicts with repository rules, or is intentionally rejected | Explain politely in the report; add concise code comments only when future reviewers would otherwise re-raise the same concern |
 
@@ -357,7 +349,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: new-branch, write-a-skill, tdd, review-code, finish-pr.
+Child skills invoked: new-branch, writing-great-skills, tdd, review-code, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 

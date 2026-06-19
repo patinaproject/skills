@@ -109,9 +109,10 @@ Side effects happen inline as decisions crystallize:
 
 ## Attribution
 
-This skill mirrors the `improve-codebase-architecture` and `grill-with-docs` skills in [`mattpocock/skills`](https://github.com/mattpocock/skills). Its bundled reference files are copied verbatim from those skills:
+This skill mirrors the `improve-codebase-architecture`, `codebase-design`, and `domain-modeling` skills in [`mattpocock/skills`](https://github.com/mattpocock/skills). Some bundled reference files are copied verbatim from upstream; two are owned outright because the v1 reorganisation dissolved their standalone upstream files:
 
-- [LANGUAGE.md](LANGUAGE.md), [DEEPENING.md](DEEPENING.md), and [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md) from `improve-codebase-architecture`.
-- [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md) and [ADR-FORMAT.md](ADR-FORMAT.md) from `grill-with-docs`.
+- [DEEPENING.md](DEEPENING.md) from `codebase-design`.
+- [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md) and [ADR-FORMAT.md](ADR-FORMAT.md) from `domain-modeling`.
+- [LANGUAGE.md](LANGUAGE.md) and [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md) are **owned by this skill** — in v1 the deep-module vocabulary folded into `codebase-design/SKILL.md` and the interface-design pass became `codebase-design/DESIGN-IT-TWICE.md`, leaving no standalone file to mirror (see [ADR-247](../../docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md)).
 
 The parent's `HTML-REPORT.md` is intentionally **not** copied — this skill emits in-conversation markdown, never HTML.
