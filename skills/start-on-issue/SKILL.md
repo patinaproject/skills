@@ -26,6 +26,12 @@ pull request. The controller that calls it owns those decisions.
 
 - `new-branch`: issue-linked branch setup.
 
+If `new-branch` is missing, halt and report the install guidance:
+
+```sh
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch -y
+```
+
 ## Input Contract
 
 1. Accept one bare issue number, `#<number>`, or same-repository GitHub issue

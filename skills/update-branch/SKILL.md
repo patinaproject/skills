@@ -20,11 +20,13 @@ argument selects another branch or remote-tracking ref.
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push.
 
-## Required Child Skill
+## Conditional Child Skill
 
-- `resolving-merge-conflicts`: resolves in-scope merge conflicts with one shared
-  discipline, so branch updates and slice integration resolve conflicts the same
-  way.
+- `resolving-merge-conflicts`: engaged only when a merge actually conflicts
+  (Workflow step 7), to resolve in-scope conflicts with one shared discipline so
+  branch updates and slice integration resolve conflicts the same way. Most
+  `/update-branch` runs never reach it. Install if missing:
+  `npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y`.
 
 ## Input Contract
 

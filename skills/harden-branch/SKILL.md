@@ -35,6 +35,16 @@ owns publishing.
 - `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
 
+If any are missing, halt before running and report the missing skill names and
+install guidance:
+
+```sh
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill review-branch improve-branch-architecture -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
+```
+
 ## Phase 1 — Deepen until settled
 
 Run `improve-branch-architecture` in **autonomous-accept** mode. Route every
