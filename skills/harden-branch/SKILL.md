@@ -1,6 +1,6 @@
 ---
 name: harden-branch
-description: "Ready a branch for human review with two ordered settle-phases — deepen its architecture, then review it to green. Use when finishing issue work before a PR, when you run /harden-branch on a branch, or when a controller skill needs the pre-PR quality gate."
+description: "Ready a branch for human review with two ordered settle-phases — deepen its architecture, then review it to green. Use when finishing issue work before a PR, when readying any branch for review on its own, or when a controller skill needs the pre-PR quality gate."
 ---
 
 # Harden Branch
@@ -42,12 +42,12 @@ accepted deepening to `implement` (which reaches `tdd` at agreed seams). Re-run
 the architecture pass after applying the accepted deepenings. Repeat until a
 pass accepts **zero** candidates — that zero is the settle signal.
 
-- Autonomous-accept mode applies a conservative rubric: accept only `Strong`,
-  deletion-test-passing depth gains that improve locality or test surface and
-  fit the foldable radius; reject overengineering; default to reject when
-  uncertain. The rubric is owned by `improve-branch-architecture`; that
-  conservatism is what makes this loop terminate instead of gold-plating the
-  branch.
+- Autonomous-accept mode applies a conservative rubric: accept deletion-test-passing
+  depth gains that improve locality or test surface and fit the foldable radius —
+  `Strong`, or `Worth exploring` only when it clearly passes the deletion test;
+  reject `Speculative` and overengineering; default to reject when uncertain. The
+  full rubric is owned by `improve-branch-architecture`; that conservatism is what
+  makes this loop terminate instead of gold-plating the branch.
 - Run repository-documented verification after each round of applied deepenings.
 
 ## Phase 2 — Review until green

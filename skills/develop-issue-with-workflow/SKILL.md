@@ -1,6 +1,6 @@
 ---
 name: develop-issue-with-workflow
-description: "Build one GitHub issue into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you run /develop-issue-with-workflow, or when you deliberately want an issue's independent slices built in parallel and converged onto one branch."
+description: "Build one GitHub issue into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you deliberately want an issue's independent slices built in parallel and converged onto one branch instead of building it serially."
 ---
 
 # Develop Issue With Workflow
