@@ -41,7 +41,7 @@ run_cli_canary() {
 
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
-run_cli_canary ./skills/review-code
+run_cli_canary ./skills/review-branch
 run_cli_canary ./skills/update-branch
 run_cli_canary ./skills/develop-issue 'develop-issue'
 run_cli_canary ./skills/codex-pr-feedback-loop 'codex-pr-feedback-loop'

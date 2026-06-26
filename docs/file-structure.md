@@ -12,7 +12,7 @@ layout.
 - `skills/develop-issue/`: issue development orchestration skill
 - `skills/finish-pr/`: PR finishing skill
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/review-code/`: isolated local branch-diff review skill
+- `skills/review-branch/`: isolated local branch-diff review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
@@ -44,7 +44,7 @@ Skills owned by this repository:
 | `develop-issue` | `skills/develop-issue/` | Issue development orchestration |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
-| `review-code` | `skills/review-code/` | Isolated local branch-diff review |
+| `review-branch` | `skills/review-branch/` | Isolated local branch-diff review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 

@@ -12,7 +12,7 @@ This skill is the branch-scoped sibling of `improve-codebase-architecture`. It r
 1. **Scope** is the current branch's changes plus the foldable radius, not the whole codebase.
 2. **Medium** is in-conversation markdown with ASCII before→after sketches, not a self-contained HTML report.
 
-For a whole-codebase audit, use `improve-codebase-architecture`. For a correctness/bug review of the branch, use `review-code`.
+For a whole-codebase audit, use `improve-codebase-architecture`. For a correctness/bug review of the branch, use `review-branch`.
 
 ## Vocabulary
 
@@ -28,7 +28,7 @@ This skill is _informed_ by the project's domain model. The domain language give
 
 Read the project's domain glossary (`CONTEXT.md`, if any) and any ADRs in `docs/adr/` for the area you're touching first, so recommendations use the project's domain language and do not re-litigate recorded decisions.
 
-**Resolve branch scope exactly as `review-code` does:**
+**Resolve branch scope exactly as `review-branch` does:**
 
 1. Resolve the repository default branch with `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` or `git rev-parse --abbrev-ref origin/HEAD`, stripping any leading `origin/`.
 2. Compute the review base with `git merge-base origin/<default-branch> HEAD`.
@@ -93,6 +93,44 @@ Side effects happen inline as decisions crystallize:
 - **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones. See [ADR-FORMAT.md](ADR-FORMAT.md).
   - When the repo documents its own ADR file-naming scheme (this repo names ADRs after the originating issue — see `docs/adr/README.md`), follow the repo over the default in [ADR-FORMAT.md](ADR-FORMAT.md).
 - **Want to explore alternative interfaces for the deepened module?** Use the parallel sub-agent interface-design pass in [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
+
+## Autonomous-accept mode
+
+The Process above is **interactive** by default: it presents cards, asks the
+user which candidate to explore, and drops into a grilling loop. An orchestrator
+that needs the rubric without a human picking candidates — for example
+`harden-branch`'s deepen-until-settled phase — triggers **autonomous-accept**
+mode instead.
+
+In this mode, run the exploration in Process step 1 unchanged, then apply the
+rubric below to each candidate automatically and emit the **accepted** set for
+the orchestrator to route to `implement`/`tdd`. Skip the card-presentation
+question and the grilling loop, and skip their inline `CONTEXT.md`/ADR offers —
+those are grilling-driven. Still honor existing ADRs: never re-litigate a
+recorded decision.
+
+**Accept** a candidate only when it:
+
+- passes the **deletion test** — deleting the module concentrates complexity rather than just moving it,
+- increases **depth**,
+- improves **locality** or the **test surface**,
+- fits the **foldable radius** — rides along in this branch without sprawling, and
+- is badged `Strong` (`Worth exploring` qualifies only when it clearly passes the deletion test; never accept `Speculative`).
+
+**Reject as overengineering** any candidate that is:
+
+- pass-through or indirection that only moves complexity rather than concentrating it,
+- speculative generality for needs the branch does not have,
+- deepening that complicates the **interface** instead of hiding complexity behind it,
+- sprawl beyond the foldable radius, or
+- a contradiction of an existing ADR without load-bearing cause.
+
+**Default to reject when uncertain.** A conservative gate that terminates beats
+one that gold-plates the branch.
+
+Emit the accepted candidates — each with the deepening to apply — and the
+rejected ones with a one-line reason. When a pass accepts **zero** candidates,
+the branch has settled.
 
 ## Attribution
 

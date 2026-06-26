@@ -1,9 +1,9 @@
 ---
-name: review-code
-description: Run a read-only, fresh-context branch-diff code review and report findings. Use when running /review-code, before finishing issue work, or when a local review gate should inspect committed, staged, unstaged, and untracked changes.
+name: review-branch
+description: Run a read-only, fresh-context branch-diff review and report findings. Use when running /review-branch, before finishing issue work, or when a local review gate should inspect committed, staged, unstaged, and untracked changes.
 ---
 
-# Review Code
+# Review Branch
 
 ## Safety Boundary
 
@@ -53,14 +53,14 @@ scope.
 
 In Codex, spawn a fresh Explorer background agent for the review without asking
 for another user confirmation when the caller has already requested local
-review, `/review-code`, or an issue workflow that reaches the review gate. Run
+review, `/review-branch`, or an issue workflow that reaches the review gate. Run
 one reviewer per pass — never a duplicate for the same unresolved pass.
 
 The reviewer has a lifecycle: spawn, wait, capture and report its result, then
 close. Never close before its final report, timeout notice, or requested partial
 result has been captured; on a timeout or requested partial result, capture and
 report the useful output, then close. Before spawning, close or mark inactive
-any prior review-code Explorer, reviewer, or worker agent whose output has
+any prior review-branch Explorer, reviewer, or worker agent whose output has
 already been consumed, canceled, or superseded — if the host cannot close it,
 label it inactive or superseded. The visible agent list must communicate only
 the current review state, never leaving stale prior-run agents for the human to
@@ -106,7 +106,7 @@ so and mention residual risk or test gaps.
 
 ## Distinction From Hosted Review
 
-`review-code` is a local isolated reviewer for branch-diff findings. It does
+`review-branch` is a local isolated reviewer for branch-diff findings. It does
 not emulate `code-review.yml`, does not require a PR number, and does not post
 comments. Hosted review workflows own their own prompt, permissions, and
 PR-commenting contract.

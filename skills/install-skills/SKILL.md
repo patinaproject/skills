@@ -89,7 +89,7 @@ Active Patina scaffold defaults are:
 - `new-branch`
 - `develop-issue`
 - `finish-pr`
-- `review-code`
+- `review-branch`
 - `install-skills`
 
 ## Verify

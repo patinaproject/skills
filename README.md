@@ -81,19 +81,19 @@ See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 End-to-end issue work needs a single entrypoint without weakening the focused
 skills that already own branch setup, test-driven implementation, diagnosis,
 local review, and PR finishing. `develop-issue` takes exactly one same-repo
-issue reference, coordinates `new-branch`, `implement`, `diagnosing-bugs`, `review-code`,
+issue reference, coordinates `start-on-issue`, `implement`, `harden-branch`,
 and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
 
 See [./skills/develop-issue/](./skills/develop-issue/) for the skill contract.
 
-### review-code
+### review-branch
 
-Local issue work needs a fresh review pass before publishing. `review-code`
+Local issue work needs a fresh review pass before publishing. `review-branch`
 computes the default-branch merge-base, includes committed, staged, unstaged,
 and untracked changes, then dispatches a fresh read-only reviewer to report
 findings without editing files or mutating GitHub state.
 
-See [./skills/review-code/](./skills/review-code/) for the skill contract.
+See [./skills/review-branch/](./skills/review-branch/) for the skill contract.
 
 ### finish-pr
 
@@ -143,7 +143,7 @@ README and skill contract.
 | [develop-issue](./skills/develop-issue/) | Develop one issue through local review and PR readiness |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
-| [review-code](./skills/review-code/) | Run isolated local branch-diff review |
+| [review-branch](./skills/review-branch/) | Run isolated local branch-diff review |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -164,7 +164,7 @@ pnpm test
 ```sh
 npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/install-skills --list
-npx skills@latest add ./skills/review-code --list
+npx skills@latest add ./skills/review-branch --list
 npx skills@latest add ./skills/update-branch --list
 npx skills@latest add ./skills/develop-issue --list
 npx skills@latest add ./skills/codex-pr-feedback-loop --list
@@ -193,7 +193,7 @@ skills/
   develop-issue/
   finish-pr/
   codex-pr-feedback-loop/
-  review-code/
+  review-branch/
   update-branch/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
