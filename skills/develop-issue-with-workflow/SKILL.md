@@ -38,6 +38,20 @@ a ready-for-review PR.
 Planning aid, read but not invoked: `to-issues`' vertical-slice + `Blocked by`
 methodology.
 
+If any are missing, halt before building and report the missing skill names and
+install guidance:
+
+```sh
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill start-on-issue new-branch -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-issues -y
+```
+
+The `implement`, `tdd`, `resolving-merge-conflicts`, and `to-issues` install
+hints track their source catalog's default branch; add `#<git-ref>` to freeze.
+
 ## Workflow
 
 1. **Begin work.** Ensure `start-on-issue`'s postcondition: on the issue's

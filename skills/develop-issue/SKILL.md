@@ -67,7 +67,7 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill start-on-issue new-branch review-branch harden-branch finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill start-on-issue new-branch review-branch harden-branch improve-branch-architecture finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
