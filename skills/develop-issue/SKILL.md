@@ -107,19 +107,17 @@ explicitly asks for them.
 
 ## Input Contract
 
-1. Accept one bare issue number, `#<number>`, or same-repository GitHub issue
-   URL.
-2. Reject missing issue references.
-3. Reject multiple issue references.
-4. Reject cross-repository issue URLs.
-5. Resolve the issue through the current working directory's default `gh`
-   repository.
-6. Treat the issue as prior approval for implementation only when acceptance
-   criteria, scope, repository rules, and design decisions are actionable.
+`start-on-issue` owns reference validation: accept one bare issue number,
+`#<number>`, or same-repository GitHub issue URL; reject a missing, multiple, or
+cross-repository reference; resolve through the current working directory's
+default `gh` repository.
 
-Pause for a human when the issue lacks actionable acceptance criteria, conflicts
-with repository rules, requires a design decision, depends on external access,
-or otherwise needs judgment not recorded in the issue.
+This controller adds the actionability judgment: treat the issue as prior
+approval for implementation only when acceptance criteria, scope, repository
+rules, and design decisions are actionable. Pause for a human when the issue
+lacks actionable acceptance criteria, conflicts with repository rules, requires
+a design decision, depends on external access, or otherwise needs judgment not
+recorded in the issue.
 
 ## Required Exit Gates
 
