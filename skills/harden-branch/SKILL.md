@@ -52,12 +52,9 @@ accepted deepening to `implement` (which reaches `tdd` at agreed seams). Re-run
 the architecture pass after applying the accepted deepenings. Repeat until a
 pass accepts **zero** candidates — that zero is the settle signal.
 
-- Autonomous-accept mode applies a conservative rubric: accept deletion-test-passing
-  depth gains that improve locality or test surface and fit the foldable radius —
-  `Strong`, or `Worth exploring` only when it clearly passes the deletion test;
-  reject `Speculative` and overengineering; default to reject when uncertain. The
-  full rubric is owned by `improve-branch-architecture`; that conservatism is what
-  makes this loop terminate instead of gold-plating the branch.
+- Autonomous-accept mode applies a conservative accept/reject rubric owned by
+  `improve-branch-architecture` — it defaults to rejecting when uncertain, which
+  is what makes this loop terminate instead of gold-plating the branch.
 - Run repository-documented verification after each round of applied deepenings.
 
 ## Phase 2 — Review until green
