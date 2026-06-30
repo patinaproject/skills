@@ -45,12 +45,14 @@ install guidance:
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill start-on-issue new-branch -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-issues -y
 ```
 
-The `implement`, `tdd`, `resolving-merge-conflicts`, and `to-issues` install
-hints track their source catalog's default branch; add `#<git-ref>` to freeze.
+The `implement`, `tdd`, `review`, `resolving-merge-conflicts`, and `to-issues`
+install hints track their source catalog's default branch; add `#<git-ref>` to
+freeze.
 
 The downstream handoff is separate from the build: this skill stops at the
 converged branch, then directs you to `harden-branch` (which reaches

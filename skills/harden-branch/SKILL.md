@@ -42,6 +42,7 @@ install guidance:
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill review-branch improve-branch-architecture -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
 ```
 
