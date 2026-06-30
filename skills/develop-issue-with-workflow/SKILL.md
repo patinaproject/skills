@@ -52,6 +52,15 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-issues
 The `implement`, `tdd`, `resolving-merge-conflicts`, and `to-issues` install
 hints track their source catalog's default branch; add `#<git-ref>` to freeze.
 
+The downstream handoff is separate from the build: this skill stops at the
+converged branch, then directs you to `harden-branch` (which reaches
+`improve-branch-architecture` and `review-branch`) and `finish-pr`. Install
+those too so a standalone run does not dead-end at the handoff:
+
+```sh
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill harden-branch improve-branch-architecture review-branch finish-pr -y
+```
+
 ## Workflow
 
 1. **Begin work.** Ensure `start-on-issue`'s postcondition: on the issue's
