@@ -17,11 +17,18 @@ rules.
 - **`/using-github`** — The single supported entry point for GitHub work. It
   reads repository rules and routes issue, branch, PR, and changelog work to
   the right workflow.
-- **`/new-branch`** — The issue branch setup path. It prepares a clean local
-  branch from the repository default branch without pushing or installing.
-- **`/finish-pr`** — The completed-work path. It verifies, publishes, opens or
-  updates the PR, watches checks, handles existing feedback, and stops before
-  merge.
+- **`/start-on-issue`** — The begin-work step. It validates the issue, marks it
+  started (best-effort self-assign and Project status), and lands on the
+  issue-linked branch, using `/new-branch` underneath.
+- **`/develop-issue`** — The end-to-end controller: `start-on-issue` → build →
+  `harden-branch` → `finish-pr`, stopping before merge.
+- **`/harden-branch`** — The pre-PR readiness gate. It deepens the branch
+  architecture until settled, then reviews it to green via `/review-branch`.
+- **`/finish-pr`** — The publish step. It verifies, pushes, opens or updates the
+  PR, watches checks, handles existing feedback, and stops before merge.
+- **`/new-branch`** — The low-level issue-branch primitive `start-on-issue`
+  uses. It prepares a clean local branch from the repository default branch
+  without pushing or installing.
 
 ## Install
 
@@ -50,16 +57,17 @@ New issue: the homepage CTA button is broken.
 Create a new branch then fix.
 ```
 
-The guide applies the correct workflow for filing issues, routing branch setup
-to `new-branch`, editing issues, writing changelogs, and routing completed work
-to `finish-pr`.
+The guide applies the correct workflow for filing issues, routing begin-work to
+`start-on-issue` (which uses `new-branch`), end-to-end issue development to the
+`develop-issue` controller, pre-PR readying to `harden-branch`, editing issues,
+writing changelogs, and publishing completed work with `finish-pr`.
 
 ## Breaking change
 
 `using-github` replaces the former `github-flows` plugin identity. The issue and
-changelog workflows remain under `using-github`; issue branch setup and PR
-finishing are now first-class `new-branch` and `finish-pr` skills that
-`using-github` routes to by default.
+changelog workflows remain under `using-github`; beginning issue work and PR
+finishing are now first-class skills — `start-on-issue` (which uses `new-branch`)
+and `finish-pr` — that `using-github` routes to by default.
 
 GitHub redirects old `patinaproject/github-flows` repository URLs after the
 rename, but existing local checkouts should update their remotes:

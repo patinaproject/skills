@@ -86,7 +86,7 @@ The skill collects the following inputs. Author name, author email, and the secu
 
 Emitted for every target repo. Use the live repository root as the content
 reference, but filter out `patinaproject/skills` marketplace maintenance
-verifiers: consumer repos should not receive dogfood, marketplace, finish-pr,
+verifiers: consumer repos should not receive dogfood, marketplace,
 scaffold-cleanup, or workflow-cleanup verifier scripts unless they are
 themselves this marketplace repository.
 

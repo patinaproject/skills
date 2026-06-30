@@ -1,10 +1,12 @@
 # Skills used by the Patina Project team
 
 Installable agent skills for repository scaffolding, project-local skill
-installation, GitHub workflows, issue branch setup, issue development, PR
-finishing, Codex PR feedback polling, isolated local code review, and local
-branch updating. They are available across Claude Code, Codex, and any agent
-runtime that reads `AGENTS.md`.
+installation, GitHub workflows, beginning issue work, issue branch setup, issue
+development (serial and Workflow-parallel), pre-PR branch hardening, branch
+architecture deepening, isolated local branch-diff review, PR finishing, Codex
+PR feedback polling, settled-design documentation capture, release changelog
+ceremonies, and local branch updating. They are available across Claude Code,
+Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
@@ -76,6 +78,16 @@ creating a PR.
 
 See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
+### start-on-issue
+
+Every controller needs the same begin-work step. `start-on-issue` takes one
+same-repo issue reference, validates it, marks it started on a best-effort basis
+(self-assign when unassigned, move a compatible Project item to "In progress"),
+and lands on the issue-linked branch via `new-branch`. Sharing this step keeps
+every entrypoint starting work identically.
+
+See [./skills/start-on-issue/](./skills/start-on-issue/) for the skill contract.
+
 ### develop-issue
 
 End-to-end issue work needs a single entrypoint without weakening the focused
@@ -86,6 +98,17 @@ and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
 
 See [./skills/develop-issue/](./skills/develop-issue/) for the skill contract.
 
+### develop-issue-with-workflow
+
+Some issues decompose into independent vertical slices that finish faster built
+in parallel. `develop-issue-with-workflow` is the explicit opt-in to the Claude
+Workflow tool: it splits one issue into independent slices, builds them
+concurrently in isolated worktrees, and converges them onto one branch so the
+one-issue-one-PR convention still holds.
+
+See [./skills/develop-issue-with-workflow/](./skills/develop-issue-with-workflow/)
+for the skill contract.
+
 ### review-branch
 
 Local issue work needs a fresh review pass before publishing. `review-branch`
@@ -94,6 +117,26 @@ and untracked changes, then dispatches a fresh read-only reviewer to report
 findings without editing files or mutating GitHub state.
 
 See [./skills/review-branch/](./skills/review-branch/) for the skill contract.
+
+### improve-branch-architecture
+
+Shallow modules are cheapest to deepen while the change is still in flight.
+`improve-branch-architecture` scopes deepening-opportunity recommendations to
+the current branch's changes plus the radius that can fold into them, delivered
+as in-conversation markdown rather than silent edits.
+
+See [./skills/improve-branch-architecture/](./skills/improve-branch-architecture/)
+for the skill contract.
+
+### harden-branch
+
+A human should only ever see a structurally-settled, self-reviewed branch.
+`harden-branch` runs two ordered settle-phases — first deepen the branch's
+architecture until a pass accepts nothing more, then review it to green via
+`review-branch` — so finished work and controller pipelines hit the same pre-PR
+readiness bar.
+
+See [./skills/harden-branch/](./skills/harden-branch/) for the skill contract.
 
 ### finish-pr
 
@@ -125,6 +168,24 @@ run later.
 
 See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 
+### write-docs
+
+Settled designs decay when they live only in chat. `write-docs` captures an
+already-agreed understanding into CONTEXT.md glossary terms and, sparingly,
+ADRs — recording decisions and terminology without re-litigating them.
+
+See [./skills/write-docs/](./skills/write-docs/) for the skill contract.
+
+### write-release-changelog
+
+Shipping a release should close the loop with the people whose feedback it
+resolved. `write-release-changelog` runs the release ceremony: it drafts a
+community changelog and posts per-item replies, sets resolved feedback to
+complete, and links every resolved item in a thank-you.
+
+See [./skills/write-release-changelog/](./skills/write-release-changelog/) for
+the skill contract.
+
 ### scaffold-repository
 
 Teams spend disproportionate time on repo plumbing - commit conventions,
@@ -140,12 +201,18 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [develop-issue](./skills/develop-issue/) | Develop one issue through local review and PR readiness |
+| [start-on-issue](./skills/start-on-issue/) | Begin one issue: validate, mark started, land on its branch |
+| [develop-issue](./skills/develop-issue/) | Drive one issue end to end via start-on-issue, build, harden-branch, and finish-pr |
+| [develop-issue-with-workflow](./skills/develop-issue-with-workflow/) | Build one issue's independent slices in parallel onto one converged branch |
+| [harden-branch](./skills/harden-branch/) | Ready a branch for review: deepen architecture, then review to green |
+| [review-branch](./skills/review-branch/) | Run isolated local branch-diff review |
+| [improve-branch-architecture](./skills/improve-branch-architecture/) | Recommend branch-scoped deepening opportunities as in-conversation markdown |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
-| [review-branch](./skills/review-branch/) | Run isolated local branch-diff review |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
+| [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
+| [write-release-changelog](./skills/write-release-changelog/) | Run the release ceremony: changelog plus feedback loop-closing |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
@@ -190,11 +257,17 @@ skills/
   install-skills/
   using-github/
   new-branch/
+  start-on-issue/
   develop-issue/
+  develop-issue-with-workflow/
   finish-pr/
   codex-pr-feedback-loop/
   review-branch/
+  harden-branch/
   update-branch/
+  write-docs/
+  improve-branch-architecture/
+  write-release-changelog/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
 .claude-plugin/
