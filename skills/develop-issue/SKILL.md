@@ -141,8 +141,9 @@ For this skill, all visible PR checks include required and optional checks.
 ## Workflow
 
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
-2. Validate the single same-repository issue reference and required child
-   skills.
+2. Confirm the required child skills are available. Reference validation belongs
+   to `start-on-issue` (see Input Contract); the controller does not re-validate
+   it here.
 3. Run `start-on-issue` to begin work: it validates the reference, marks the
    issue started (self-assignment and GitHub Project status, both best-effort
    and non-blocking), and lands you on the issue-linked branch.
