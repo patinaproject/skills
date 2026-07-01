@@ -80,21 +80,23 @@ See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
 ### working-on-github-issue
 
-Every controller needs the same begin-work step. `working-on-github-issue` takes one
-same-repo issue reference, validates it, marks it started on a best-effort basis
-(self-assign when unassigned, move a compatible Project item to "In progress"),
-and lands on the issue-linked branch via `new-branch`. Sharing this step keeps
-every entrypoint starting work identically.
+Every controller needs the same begin-work step. `working-on-github-issue`
+resolves the issue best-effort — from an explicit reference or the current
+branch — then aligns GitHub state: marks it started (self-assign when
+unassigned, move a compatible Project item to "In progress") and lands on the
+issue-linked branch via `new-branch`. It returns cleanly when there is no issue
+and never edits the issue body, so every entrypoint aligns work identically.
 
 See [./skills/working-on-github-issue/](./skills/working-on-github-issue/) for the skill contract.
 
 ### develop
 
-End-to-end issue work needs a single entrypoint without weakening the focused
-skills that already own branch setup, test-driven implementation, diagnosis,
-local review, and PR finishing. `develop` takes exactly one same-repo
-issue reference, coordinates `working-on-github-issue`, `implement`, `harden-branch`,
-and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
+End-to-end work needs a single entrypoint without weakening the focused skills
+that already own branch setup, test-driven implementation, diagnosis, local
+review, and PR finishing. `develop` takes a **scope** — an issue reference,
+free-form instructions, or both — coordinates `working-on-github-issue`,
+`implement`, `harden-branch`, and `finish-pr`, and stops for human-owned
+ambiguity instead of inventing scope.
 
 See [./skills/develop/](./skills/develop/) for the skill contract.
 
@@ -201,9 +203,9 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [working-on-github-issue](./skills/working-on-github-issue/) | Begin one issue: validate, mark started, land on its branch |
-| [develop](./skills/develop/) | Drive one issue end to end via working-on-github-issue, build, harden-branch, and finish-pr |
-| [develop-with-workflow](./skills/develop-with-workflow/) | Build one issue's independent slices in parallel onto one converged branch |
+| [working-on-github-issue](./skills/working-on-github-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
+| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-github-issue, build, harden-branch, and finish-pr |
+| [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [harden-branch](./skills/harden-branch/) | Ready a branch for review: deepen architecture, then review to green |
 | [review-branch](./skills/review-branch/) | Run isolated local branch-diff review |
 | [improve-branch-architecture](./skills/improve-branch-architecture/) | Recommend branch-scoped deepening opportunities as in-conversation markdown |

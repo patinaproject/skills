@@ -7,7 +7,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-github-issue/`: shared begin-work skill (validate, mark started, branch)
+- `skills/working-on-github-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill

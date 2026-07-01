@@ -43,8 +43,9 @@ installable skills.
 
 Route to `working-on-github-issue` when the user provides an issue reference and asks to
 start work, implement, fix, build, investigate, or otherwise begin issue-linked
-development; it validates the reference, marks the issue started, and lands on
-the issue-linked branch. `working-on-github-issue` is idempotent: if already on the
+development; it resolves the issue (from the reference or the current branch),
+marks it started, and lands on the issue-linked branch. `working-on-github-issue`
+is idempotent: if already on the
 computed issue branch it stays put. If on a different issue branch, ask before
 changing context. When the user wants one issue driven end to end (or invokes
 `/develop`), route to the `develop` controller instead.

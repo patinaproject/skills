@@ -9,7 +9,7 @@ layout.
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-github-issue/`: shared begin-work skill (validate, mark started, branch)
+- `skills/working-on-github-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
@@ -47,7 +47,7 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
-| `working-on-github-issue` | `skills/working-on-github-issue/` | Shared begin-work step: validate, mark started, branch |
+| `working-on-github-issue` | `skills/working-on-github-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
 | `develop` | `skills/develop/` | Issue development orchestration |
 | `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
