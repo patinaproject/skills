@@ -1,6 +1,6 @@
 ---
-name: develop-issue
-description: "Drive one same-repository GitHub issue to an evidence-backed production-ready PR outcome. Use when the user invokes `/develop-issue #123`, `/develop-issue https://github.com/<owner>/<repo>/issues/123`, or asks to develop exactly one issue end to end."
+name: develop
+description: "Drive one same-repository GitHub issue to an evidence-backed production-ready PR outcome. Use when the user invokes `/develop #123`, `/develop https://github.com/<owner>/<repo>/issues/123`, or asks to develop exactly one issue end to end."
 ---
 
 # Develop Issue
@@ -10,24 +10,24 @@ description: "Drive one same-repository GitHub issue to an evidence-backed produ
 Invoke with exactly one same-repository GitHub issue reference:
 
 ```text
-/develop-issue #123
-/develop-issue https://github.com/<owner>/<repo>/issues/123
+/develop #123
+/develop https://github.com/<owner>/<repo>/issues/123
 ```
 
 This skill is a thin, goal-directed **controller**. It drives one issue to a
 ready-for-review PR through a predictable pipeline of named, reusable skills:
 
 ```text
-start-on-issue → build (implement) → harden-branch → finish-pr
+working-on-github-issue → build (implement) → harden-branch → finish-pr
    (begin)         (build the change)   (make ready)    (publish)
 ```
 
 It coordinates those skills, preserves their contracts and repository
 guardrails, and never merges a pull request.
 
-`develop-issue` builds with plain `implement`; it never triggers multi-agent
+`develop` builds with plain `implement`; it never triggers multi-agent
 workflow fan-out on its own. Parallel slice builds are a separate, deliberate
-opt-in: invoke `develop-issue-with-workflow` directly when you want them.
+opt-in: invoke `develop-with-workflow` directly when you want them.
 
 ## Terminal Goal
 
@@ -53,12 +53,12 @@ Do not report `goal-met` while unresolved human-owned blockers remain.
 Before building, confirm these installed skills are available in the agent
 environment:
 
-- `start-on-issue`: begin work — validate the issue, mark it started, land on the issue-linked branch.
+- `working-on-github-issue`: begin work — validate the issue, mark it started, land on the issue-linked branch.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
 - `harden-branch`: pre-PR gate — deepen architecture until settled, then review to green.
 - `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
-`start-on-issue` reaches `new-branch`; `harden-branch` reaches
+`working-on-github-issue` reaches `new-branch`; `harden-branch` reaches
 `improve-branch-architecture`, `review-branch`, `implement`, and
 `diagnosing-bugs`; `implement` reaches `tdd` and `review`. Confirm those are
 installed too.
@@ -67,7 +67,7 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill start-on-issue new-branch review-branch harden-branch improve-branch-architecture finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch review-branch harden-branch improve-branch-architecture finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
@@ -101,13 +101,13 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-g
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@prototype -y
 ```
 
-Do not add normal `/develop-issue` routes for upstream planning, triage,
+Do not add normal `/develop` routes for upstream planning, triage,
 architecture review, handoff, or conversation-mode skills unless the issue
 explicitly asks for them.
 
 ## Input Contract
 
-`start-on-issue` owns reference validation: accept one bare issue number,
+`working-on-github-issue` owns reference validation: accept one bare issue number,
 `#<number>`, or same-repository GitHub issue URL; reject a missing, multiple, or
 cross-repository reference; resolve through the current working directory's
 default `gh` repository.
@@ -142,9 +142,9 @@ For this skill, all visible PR checks include required and optional checks.
 
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
 2. Confirm the required child skills are available. Reference validation belongs
-   to `start-on-issue` (see Input Contract); the controller does not re-validate
+   to `working-on-github-issue` (see Input Contract); the controller does not re-validate
    it here.
-3. Run `start-on-issue` to begin work: it validates the reference, marks the
+3. Run `working-on-github-issue` to begin work: it validates the reference, marks the
    issue started (self-assignment and GitHub Project status, both best-effort
    and non-blocking), and lands you on the issue-linked branch.
 4. Judge actionability against the Input Contract. Pause for a human when the
@@ -154,7 +154,7 @@ For this skill, all visible PR checks include required and optional checks.
    the issue's acceptance criteria, then run repository-documented verification.
 7. Run `harden-branch` to ready the branch: it deepens the architecture until
    settled, then reviews to green via `review-branch`, routing findings through
-   its Finding Router. Invoking `develop-issue` is sufficient approval for
+   its Finding Router. Invoking `develop` is sufficient approval for
    `harden-branch`'s review gate; dispatch it without asking for another
    confirmation. A `ready-for-human` finding stops the loop as `human-blocked`.
 8. Run `finish-pr` for commit, push, PR creation or update, visible check
@@ -177,7 +177,7 @@ production-readiness evidence supports `goal-met` or there is a documented
 `harden-branch` classifies review findings through its Finding Router
 (`ready-for-agent` → `implement`/`diagnosing-bugs`; `ready-for-human` → stop;
 `wontfix` → explain). At the controller level, any `ready-for-human` blocker —
-from `start-on-issue`, the actionability judgment, the build, `harden-branch`,
+from `working-on-github-issue`, the actionability judgment, the build, `harden-branch`,
 or `finish-pr` — stops the pipeline in the `human-blocked` terminal state. There
 is no `needs-info` state; insufficient information maps to `ready-for-human`.
 
@@ -258,7 +258,7 @@ on [PR #197](https://github.com/patinaproject/skills/pull/197)
 ([branch `190-human-focused-final-output`](https://github.com/patinaproject/skills/tree/190-human-focused-final-output)).
 
 Changed:
-- `develop-issue` final reports now lead with outcome and meaningful changes.
+- `develop` final reports now lead with outcome and meaningful changes.
 - Routine verification is collapsed unless something failed, skipped, or needs
   human attention.
 
@@ -275,7 +275,7 @@ Avoid final output shaped like a process transcript:
 Implemented issue #190.
 
 Verification:
-- develop-issue workflow test passed.
+- develop workflow test passed.
 - markdownlint passed.
 - type-check passed.
 - commit hook passed.
@@ -283,7 +283,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: start-on-issue, implement, harden-branch, finish-pr.
+Child skills invoked: working-on-github-issue, implement, harden-branch, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 

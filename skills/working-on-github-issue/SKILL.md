@@ -1,5 +1,5 @@
 ---
-name: start-on-issue
+name: working-on-github-issue
 description: "Begin work on one same-repository GitHub issue: validate the reference, mark it started (self-assign and Project status, best-effort), and land on its issue-linked branch. Use when starting issue-linked work, or when a controller skill needs the shared begin-work step before building."
 ---
 
@@ -10,8 +10,8 @@ description: "Begin work on one same-repository GitHub issue: validate the refer
 Invoke with exactly one same-repository GitHub issue reference:
 
 ```text
-/start-on-issue #123
-/start-on-issue https://github.com/<owner>/<repo>/issues/123
+/working-on-github-issue #123
+/working-on-github-issue https://github.com/<owner>/<repo>/issues/123
 ```
 
 This skill is the shared **begin-work** step: validate the issue, mark it

@@ -17,9 +17,9 @@ SKILLS=(
   install-skills
   using-github
   new-branch
-  start-on-issue
-  develop-issue
-  develop-issue-with-workflow
+  working-on-github-issue
+  develop
+  develop-with-workflow
   finish-pr
   codex-pr-feedback-loop
   review-branch

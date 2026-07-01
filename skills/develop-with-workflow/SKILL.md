@@ -1,5 +1,5 @@
 ---
-name: develop-issue-with-workflow
+name: develop-with-workflow
 description: "Build one GitHub issue into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you deliberately want an issue's independent slices built in parallel and converged onto one branch instead of building it serially."
 ---
 
@@ -10,7 +10,7 @@ description: "Build one GitHub issue into one converged branch by decomposing it
 Invoke with exactly one same-repository GitHub issue reference:
 
 ```text
-/develop-issue-with-workflow #123
+/develop-with-workflow #123
 ```
 
 Build one issue into **one converged branch** — destined for one PR — by
@@ -19,7 +19,7 @@ parallel.
 
 This skill is the explicit **opt-in to the Claude Workflow tool**. Invoking it
 authorizes the multi-agent fan-out; the heavy parallel build never runs unless
-you deliberately reach for this skill. `develop-issue` does not route here — it
+you deliberately reach for this skill. `develop` does not route here — it
 builds with plain `implement` — so workflow fan-out is always a deliberate
 choice.
 
@@ -30,7 +30,7 @@ a ready-for-review PR.
 
 ## Required Child Skills
 
-- `start-on-issue`: shared begin-work step (validate, mark started, land on the issue branch).
+- `working-on-github-issue`: shared begin-work step (validate, mark started, land on the issue branch).
 - `implement`: build each slice — reaches `tdd` at agreed seams.
 - `resolving-merge-conflicts`: integrate each slice's worktree onto the one branch.
 - The **Claude Workflow tool**: this skill is its authorization for this run.
@@ -42,7 +42,7 @@ If any are missing, halt before building and report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill start-on-issue new-branch -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
@@ -65,8 +65,8 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 
 ## Workflow
 
-1. **Begin work.** Ensure `start-on-issue`'s postcondition: on the issue's
-   branch, with the issue marked started. `start-on-issue` is idempotent, so run
+1. **Begin work.** Ensure `working-on-github-issue`'s postcondition: on the issue's
+   branch, with the issue marked started. `working-on-github-issue` is idempotent, so run
    it unconditionally — it does the real begin-work, and is a no-op when you are
    already started and on the issue branch.
 

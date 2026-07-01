@@ -78,35 +78,35 @@ creating a PR.
 
 See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
-### start-on-issue
+### working-on-github-issue
 
-Every controller needs the same begin-work step. `start-on-issue` takes one
+Every controller needs the same begin-work step. `working-on-github-issue` takes one
 same-repo issue reference, validates it, marks it started on a best-effort basis
 (self-assign when unassigned, move a compatible Project item to "In progress"),
 and lands on the issue-linked branch via `new-branch`. Sharing this step keeps
 every entrypoint starting work identically.
 
-See [./skills/start-on-issue/](./skills/start-on-issue/) for the skill contract.
+See [./skills/working-on-github-issue/](./skills/working-on-github-issue/) for the skill contract.
 
-### develop-issue
+### develop
 
 End-to-end issue work needs a single entrypoint without weakening the focused
 skills that already own branch setup, test-driven implementation, diagnosis,
-local review, and PR finishing. `develop-issue` takes exactly one same-repo
-issue reference, coordinates `start-on-issue`, `implement`, `harden-branch`,
+local review, and PR finishing. `develop` takes exactly one same-repo
+issue reference, coordinates `working-on-github-issue`, `implement`, `harden-branch`,
 and `finish-pr`, and stops for human-owned ambiguity instead of inventing scope.
 
-See [./skills/develop-issue/](./skills/develop-issue/) for the skill contract.
+See [./skills/develop/](./skills/develop/) for the skill contract.
 
-### develop-issue-with-workflow
+### develop-with-workflow
 
 Some issues decompose into independent vertical slices that finish faster built
-in parallel. `develop-issue-with-workflow` is the explicit opt-in to the Claude
+in parallel. `develop-with-workflow` is the explicit opt-in to the Claude
 Workflow tool: it splits one issue into independent slices, builds them
 concurrently in isolated worktrees, and converges them onto one branch so the
 one-issue-one-PR convention still holds.
 
-See [./skills/develop-issue-with-workflow/](./skills/develop-issue-with-workflow/)
+See [./skills/develop-with-workflow/](./skills/develop-with-workflow/)
 for the skill contract.
 
 ### review-branch
@@ -201,9 +201,9 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [start-on-issue](./skills/start-on-issue/) | Begin one issue: validate, mark started, land on its branch |
-| [develop-issue](./skills/develop-issue/) | Drive one issue end to end via start-on-issue, build, harden-branch, and finish-pr |
-| [develop-issue-with-workflow](./skills/develop-issue-with-workflow/) | Build one issue's independent slices in parallel onto one converged branch |
+| [working-on-github-issue](./skills/working-on-github-issue/) | Begin one issue: validate, mark started, land on its branch |
+| [develop](./skills/develop/) | Drive one issue end to end via working-on-github-issue, build, harden-branch, and finish-pr |
+| [develop-with-workflow](./skills/develop-with-workflow/) | Build one issue's independent slices in parallel onto one converged branch |
 | [harden-branch](./skills/harden-branch/) | Ready a branch for review: deepen architecture, then review to green |
 | [review-branch](./skills/review-branch/) | Run isolated local branch-diff review |
 | [improve-branch-architecture](./skills/improve-branch-architecture/) | Recommend branch-scoped deepening opportunities as in-conversation markdown |
@@ -233,7 +233,7 @@ npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/install-skills --list
 npx skills@latest add ./skills/review-branch --list
 npx skills@latest add ./skills/update-branch --list
-npx skills@latest add ./skills/develop-issue --list
+npx skills@latest add ./skills/develop --list
 npx skills@latest add ./skills/codex-pr-feedback-loop --list
 ```
 
@@ -257,9 +257,9 @@ skills/
   install-skills/
   using-github/
   new-branch/
-  start-on-issue/
-  develop-issue/
-  develop-issue-with-workflow/
+  working-on-github-issue/
+  develop/
+  develop-with-workflow/
   finish-pr/
   codex-pr-feedback-loop/
   review-branch/

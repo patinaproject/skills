@@ -24,11 +24,11 @@ installable skills.
 - New issue: follow `workflows/new-issue.md`.
 - Existing issue edit: follow `workflows/edit-issue.md`.
 - Start issue work (begin-work): follow `workflows/begin-work.md` — route to
-  the `start-on-issue` skill, which validates the issue reference, marks it
+  the `working-on-github-issue` skill, which validates the issue reference, marks it
   started (self-assign and Project status, best-effort), and lands on the
   issue-linked branch, delegating branch creation to `new-branch`.
-- Develop an issue end to end: route to the `develop-issue` controller, which
-  drives `start-on-issue` → build → `harden-branch` → `finish-pr`.
+- Develop an issue end to end: route to the `develop` controller, which
+  drives `working-on-github-issue` → build → `harden-branch` → `finish-pr`.
 - Milestone changelog: follow `workflows/write-changelog.md`.
 - PR comments: follow `workflows/pr-comments.md` before replying to,
   resolving, or reporting PR review feedback handled.
@@ -40,13 +40,13 @@ installable skills.
 
 ## Routing Defaults
 
-Route to `start-on-issue` when the user provides an issue reference and asks to
+Route to `working-on-github-issue` when the user provides an issue reference and asks to
 start work, implement, fix, build, investigate, or otherwise begin issue-linked
 development; it validates the reference, marks the issue started, and lands on
-the issue-linked branch. `start-on-issue` is idempotent: if already on the
+the issue-linked branch. `working-on-github-issue` is idempotent: if already on the
 computed issue branch it stays put. If on a different issue branch, ask before
 changing context. When the user wants one issue driven end to end (or invokes
-`/develop-issue`), route to the `develop-issue` controller instead.
+`/develop`), route to the `develop` controller instead.
 
 Route to `harden-branch` when the build is complete and the branch needs
 readying for review before a PR — it deepens the architecture until settled,
