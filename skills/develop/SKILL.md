@@ -124,7 +124,10 @@ scope, and treat any issue as best-effort association, not a separate path.
 - **Issue association is best-effort.** `working-on-github-issue` resolves the
   issue from a reference in the scope, else the current branch, and aligns the
   branch, assignment, and Project status. When it resolves no issue, **warn and
-  continue** — do not halt.
+  continue** — do not halt. In a repository that requires issue-tagged commits
+  (as this one does), a no-issue run still builds and hardens but stops before
+  the PR (see the Workflow's finish step); where no such rule applies, it
+  finishes normally.
 - **Actionability judgment, relaxed for instructions.** Treat the scope as prior
   approval for implementation only when it is actionable. Pause for a human when
   the scope — issue or instructions — is genuinely ambiguous, conflicts with
@@ -182,12 +185,15 @@ For this skill, all visible PR checks include required and optional checks.
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
    `finish-pr` only after `harden-branch` reports the branch settled and green,
    or every finding has a recorded `ready-for-agent`, `ready-for-human`, or
-   `wontfix` disposition. **When step 3 resolved no issue, stop before
-   `finish-pr`**: the repository's `type: #<issue>` commit convention cannot be
-   satisfied without an issue, so report the built-and-hardened branch and that
-   finishing needs an issue, rather than committing. When an issue is present and
-   the built scope diverged from its body, include the reconciliation offer
-   (Scope Contract) in the final report.
+   `wontfix` disposition. **When step 3 resolved no issue**, consult the
+   repository guidance read in step 1: if it requires an issue tag on commits or
+   PRs (as this repo does with `type: #<issue>`), stop before `finish-pr` — that
+   convention cannot be satisfied without an issue — and report the
+   built-and-hardened branch plus that finishing needs an issue, rather than
+   committing. If the repository imposes no such requirement, finish normally
+   with a conventional commit. When an issue is present and the built scope
+   diverged from its body, include the reconciliation offer (Scope Contract) in
+   the final report.
 9. Loop until the terminal goal is met or a human-owned blocker prevents further
    progress.
 
