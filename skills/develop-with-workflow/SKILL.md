@@ -33,7 +33,7 @@ a ready-for-review PR.
 
 ## Required Child Skills
 
-- `working-on-github-issue`: align GitHub state (resolve the issue from the scope or branch, land on its branch, mark it started); best-effort, returns cleanly when there is no issue.
+- `working-on-github-issue`: align GitHub state (resolve the issue from the scope or branch, land on its branch, mark it started); best-effort, returns cleanly when there is no issue. Reaches `new-branch` for branch setup.
 - `implement`: build each slice — reaches `tdd` at agreed seams.
 - `resolving-merge-conflicts`: integrate each slice's worktree onto the one branch.
 - The **Claude Workflow tool**: this skill is its authorization for this run.
