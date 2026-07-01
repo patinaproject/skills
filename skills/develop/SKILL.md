@@ -1,26 +1,33 @@
 ---
 name: develop
-description: "Drive one same-repository GitHub issue to an evidence-backed production-ready PR outcome. Use when the user invokes `/develop #123`, `/develop https://github.com/<owner>/<repo>/issues/123`, or asks to develop exactly one issue end to end."
+description: "Drive one scope — a GitHub issue reference, free-form instructions, or both — to an evidence-backed production-ready PR outcome on its branch. Use when the user invokes `/develop <scope>`, or asks to develop one issue or one set of instructions end to end."
 ---
 
-# Develop Issue
+# Develop
 
 ## Quick Start
 
-Invoke with exactly one same-repository GitHub issue reference:
+Invoke with a **scope** — an issue reference, free-form instructions, or both:
 
 ```text
 /develop #123
-/develop https://github.com/<owner>/<repo>/issues/123
+/develop "add null-checks to the login handler"
+/develop #123 focus only on the validation path
 ```
 
-This skill is a thin, goal-directed **controller**. It drives one issue to a
+This skill is a thin, goal-directed **controller**. It drives one scope to a
 ready-for-review PR through a predictable pipeline of named, reusable skills:
 
 ```text
 working-on-github-issue → build (implement) → harden-branch → finish-pr
-   (begin)         (build the change)   (make ready)    (publish)
+   (align)              (build the scope)      (make ready)     (publish)
 ```
+
+The **scope** is what to build, and it is authoritative for the run. Any
+associated issue is a *separate, best-effort* concern used for the branch, the
+`#<issue>` commit tags, and the PR close — resolved from a reference in the scope
+or from the current branch by `working-on-github-issue`. When instructions and an
+issue body disagree, the instructions win.
 
 It coordinates those skills, preserves their contracts and repository
 guardrails, and never merges a pull request.
@@ -44,7 +51,7 @@ or similar wording.
   exit gates are satisfied and all visible required and optional PR checks pass.
 - `human-blocked`: progress requires human judgment, external access, product
   or design decisions, permissions, secrets, conflicting direction, or valid
-  work outside the issue.
+  work outside the run's scope.
 
 Do not report `goal-met` while unresolved human-owned blockers remain.
 
@@ -53,7 +60,7 @@ Do not report `goal-met` while unresolved human-owned blockers remain.
 Before building, confirm these installed skills are available in the agent
 environment:
 
-- `working-on-github-issue`: begin work — validate the issue, mark it started, land on the issue-linked branch.
+- `working-on-github-issue`: align GitHub state — resolve the issue (from the scope or the current branch), land on its branch, mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
 - `harden-branch`: pre-PR gate — deepen architecture until settled, then review to green.
 - `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
@@ -82,16 +89,16 @@ sources.
 ## Conditional Routes
 
 Conditional routes are not blanket prerequisites. Check that the named skill is
-available only when the issue triggers that route; halt with the missing skill
+available only when the scope triggers that route; halt with the missing skill
 name and install guidance only for a triggered missing route.
 
-- Consult `writing-great-skills` when the issue changes an installable skill
+- Consult `writing-great-skills` when the scope changes an installable skill
   package surface: skill entry instructions, frontmatter or description,
   workflow contract text, examples, reference material, or bundled helper
   scripts. Apply its review before the build route builds the change.
-- Use `prototype` only when the issue explicitly asks for throwaway exploration,
+- Use `prototype` only when the scope explicitly asks for throwaway exploration,
   state-model sanity checks, UI direction exploration, or equivalent prototype
-  work. Delete or absorb prototype output before `harden-branch` unless the issue
+  work. Delete or absorb prototype output before `harden-branch` unless the scope
   explicitly asks to commit prototype artifacts.
 
 Install guidance for these triggered routes:
@@ -102,26 +109,38 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@prototype
 ```
 
 Do not add normal `/develop` routes for upstream planning, triage,
-architecture review, handoff, or conversation-mode skills unless the issue
+architecture review, handoff, or conversation-mode skills unless the scope
 explicitly asks for them.
 
-## Input Contract
+## Scope Contract
 
-`working-on-github-issue` owns reference validation: accept one bare issue number,
-`#<number>`, or same-repository GitHub issue URL; reject a missing, multiple, or
-cross-repository reference; resolve through the current working directory's
-default `gh` repository.
+The parameter is a **scope** — a free-form string that may be an issue reference,
+instructions, or both. There are no modes: treat the parameter uniformly as
+scope, and treat any issue as best-effort association, not a separate path.
 
-This controller adds the actionability judgment: treat the issue as prior
-approval for implementation only when acceptance criteria, scope, repository
-rules, and design decisions are actionable. Pause for a human when the issue
-lacks actionable acceptance criteria, conflicts with repository rules, requires
-a design decision, depends on external access, or otherwise needs judgment not
-recorded in the issue.
+- **Scope is authoritative.** Build to the scope. When it references or associates
+  an issue and the instructions diverge from the issue body, the instructions
+  win; the issue body is context, not a competing spec.
+- **Issue association is best-effort.** `working-on-github-issue` resolves the
+  issue from a reference in the scope, else the current branch, and aligns the
+  branch, assignment, and Project status. When it resolves no issue, **warn and
+  continue** — do not halt.
+- **Actionability judgment, relaxed for instructions.** Treat the scope as prior
+  approval for implementation only when it is actionable. Pause for a human when
+  the scope — issue or instructions — is genuinely ambiguous, conflicts with
+  repository rules, requires a product or design decision, or depends on external
+  access. Explicit instructions are strong approval: do not demand a formal
+  acceptance-criteria structure for them; pause only when the scope is too vague
+  to build without inventing scope.
+- **Divergence is surfaced, not silently absorbed.** When the built scope
+  materially diverges from the resolved issue body, keep `Closes #<issue>` and
+  **offer** in the final report to update the issue body to match. Never edit the
+  issue body without the human's go-ahead, and never block on it.
 
 ## Required Exit Gates
 
-- Issue scope and acceptance criteria are covered.
+- The run's scope is covered — the issue's acceptance criteria, the
+  instructions, or both.
 - Repository-documented verification has run and results are recorded.
 - Relevant tests are added or updated when the change has executable behavior.
 - `harden-branch` ran and reached a settled, green branch: architecture deepened
@@ -134,24 +153,26 @@ recorded in the issue.
   `human-blocked` final report; do not report `goal-met` while any visible PR
   check is still failing.
 - Residual risks and test gaps are reported only when they are concrete,
-  relevant to the issue, and useful for a human decision.
+  relevant to the scope, and useful for a human decision.
 
 For this skill, all visible PR checks include required and optional checks.
 
 ## Workflow
 
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
-2. Confirm the required child skills are available. Reference validation belongs
-   to `working-on-github-issue` (see Input Contract); the controller does not re-validate
-   it here.
-3. Run `working-on-github-issue` to begin work: it validates the reference, marks the
-   issue started (self-assignment and GitHub Project status, both best-effort
-   and non-blocking), and lands you on the issue-linked branch.
-4. Judge actionability against the Input Contract. Pause for a human when the
-   issue is not actionable; do not invent scope.
+2. Confirm the required child skills are available. Issue resolution belongs to
+   `working-on-github-issue` (see Scope Contract); the controller does not
+   re-resolve it here.
+3. Run `working-on-github-issue` to align: it resolves the issue from the scope
+   or the current branch and aligns the branch, assignment, and Project status,
+   all best-effort. If it resolves **no issue**, warn that commits and a PR
+   cannot be issue-tagged, then continue on the current branch (see step 8).
+4. Judge actionability against the Scope Contract. Pause for a human when the
+   scope is not actionable; do not invent scope.
 5. Apply triggered conditional routes.
-6. Build the change with `implement` (which reaches `tdd` at agreed seams), to
-   the issue's acceptance criteria, then run repository-documented verification.
+6. Build the scope with `implement` (which reaches `tdd` at agreed seams) —
+   instructions authoritative over any issue body — then run
+   repository-documented verification.
 7. Run `harden-branch` to ready the branch: it deepens the architecture until
    settled, then reviews to green via `review-branch`, routing findings through
    its Finding Router. Invoking `develop` is sufficient approval for
@@ -161,16 +182,21 @@ For this skill, all visible PR checks include required and optional checks.
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
    `finish-pr` only after `harden-branch` reports the branch settled and green,
    or every finding has a recorded `ready-for-agent`, `ready-for-human`, or
-   `wontfix` disposition.
+   `wontfix` disposition. **When step 3 resolved no issue, stop before
+   `finish-pr`**: the repository's `type: #<issue>` commit convention cannot be
+   satisfied without an issue, so report the built-and-hardened branch and that
+   finishing needs an issue, rather than committing. When an issue is present and
+   the built scope diverged from its body, include the reconciliation offer
+   (Scope Contract) in the final report.
 9. Loop until the terminal goal is met or a human-owned blocker prevents further
    progress.
 
 During long-running or resumable execution, keep compact checkpoint state using
-the final-report vocabulary: issue reference and URL, branch name, terminal
-state, meaningful changes, readiness, blockers, and next action. Resume from
-that state and continue until a terminal workflow state is reached:
-production-readiness evidence supports `goal-met` or there is a documented
-`human-blocked` stop.
+the final-report vocabulary: the scope, the resolved issue reference and URL (if
+any), branch name, terminal state, meaningful changes, readiness, blockers, and
+next action. Resume from that state and continue until a terminal workflow state
+is reached: production-readiness evidence supports `goal-met` or there is a
+documented `human-blocked` stop.
 
 ## Terminal-state routing
 

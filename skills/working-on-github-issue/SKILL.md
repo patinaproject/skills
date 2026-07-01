@@ -1,26 +1,28 @@
 ---
 name: working-on-github-issue
-description: "Begin work on one same-repository GitHub issue: validate the reference, mark it started (self-assign and Project status, best-effort), and land on its issue-linked branch. Use when starting issue-linked work, or when a controller skill needs the shared begin-work step before building."
+description: "Align GitHub state to the fact you are working an issue: resolve the issue from a reference or the current branch, then land on its branch and mark it started (self-assign and Project status, best-effort). Use as the shared begin/resume step whenever a controller works a scope that may map to an issue."
 ---
 
-# Start On Issue
+# Working On GitHub Issue
 
 ## Quick Start
 
-Invoke with exactly one same-repository GitHub issue reference:
+Invoke with an optional issue reference; run it whenever you start or resume work:
 
 ```text
 /working-on-github-issue #123
-/working-on-github-issue https://github.com/<owner>/<repo>/issues/123
+/working-on-github-issue            # resolve the issue from the current branch
 ```
 
-This skill is the shared **begin-work** step: validate the issue, mark it
-started, and land on the issue-linked branch. It is idempotent — re-running
-while already started and on the issue branch is a no-op, so a controller can
-call it unconditionally.
+This is the shared **align** step: resolve which issue you are working, then make
+GitHub reflect that — land on the issue-linked branch and mark it started. It is
+**idempotent** and **best-effort**, so a controller can call it unconditionally
+every run: re-running while already aligned is a no-op, and it never blocks the
+caller.
 
-It does not judge acceptance-criteria actionability, build, review, or open a
-pull request. The controller that calls it owns those decisions.
+It is a mechanical aligner. It does not judge scope actionability, edit the issue
+body, build, review, or open a pull request — the controller that calls it owns
+those decisions.
 
 ## Required Child Skill
 
@@ -32,24 +34,43 @@ If `new-branch` is missing, halt and report the install guidance:
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill new-branch -y
 ```
 
-## Input Contract
+## Resolve the issue (best-effort)
 
-1. Accept one bare issue number, `#<number>`, or same-repository GitHub issue
-   URL.
-2. Reject a missing issue reference.
-3. Reject multiple issue references.
-4. Reject a cross-repository issue URL.
-5. Resolve the issue through the current working directory's default `gh`
-   repository.
+Resolve exactly one issue to align, in order:
 
-Actionability and prior-approval judgment belong to the calling controller, not
-to this skill.
+1. **Explicit reference.** If the caller supplies a bare issue number,
+   `#<number>`, or same-repository GitHub issue URL, use it.
+2. **Current branch.** Otherwise infer the issue from the current branch when its
+   name encodes an issue number per the `<issue>-<slug>` convention `new-branch`
+   produces.
+3. **None.** Otherwise there is no issue to align. Report `no-issue` and return
+   — do not reject, do not halt. The caller decides whether to warn and continue.
 
-## Mark Started
+Resolution is best-effort **association**, not input gatekeeping. Reject only a
+genuinely unusable *explicit* reference: multiple references, or a
+cross-repository URL. Resolve through the current working directory's default
+`gh` repository.
 
-Marking started has two independent actions: self-assignment and GitHub Project
-status. Run each on a best-effort basis; neither blocks branch setup, and
-neither causes a halt.
+## Align (best-effort, idempotent)
+
+When an issue resolves, align GitHub state. Branch, self-assignment, and Project
+status are independent best-effort actions; none blocks the others or the caller,
+and none causes a halt. When no issue resolves, skip this section entirely.
+
+### Branch
+
+Verify the current branch is the issue-linked branch for the resolved issue — its
+name encodes the issue number per the `<issue>-<slug>` convention `new-branch`
+produces.
+
+- When it already matches, stay on it; do not run `new-branch`.
+- Otherwise — including when the worktree starts on a non-default but
+  non-issue-linked branch — run `new-branch` to establish the issue-linked
+  branch.
+- When a host-provided branch cannot or should not be renamed onto the
+  issue-linked name, surface that deviation instead of forcing a switch.
+
+End on the issue-linked branch.
 
 ### Self-assignment
 
@@ -65,7 +86,7 @@ neither causes a halt.
   nothing. Do not add `@me` as an additional assignee.
 - This is one issue-level call, not a per-project-item operation.
 - If the assignment call fails (permissions, missing write access, API error),
-  skip and record the reason, then continue to branch setup.
+  skip and record the reason, then continue.
 
 ### GitHub Project status
 
@@ -82,26 +103,18 @@ neither causes a halt.
 - Record the project status update result and the self-assignment result,
   including each updated item and skipped item reason, for the caller's report.
 
-## Branch
+## Do not touch the issue body
 
-Verify the current branch is the issue-linked branch for the target issue — its
-name encodes the issue number per the `<issue>-<slug>` convention `new-branch`
-produces.
-
-- When it already matches, stay on it; do not run `new-branch`.
-- Otherwise — including when the worktree starts on a non-default but
-  non-issue-linked branch — run `new-branch` to establish the issue-linked
-  branch.
-- When a host-provided branch cannot or should not be renamed onto the
-  issue-linked name, surface that deviation instead of forcing a switch.
-
-End on the issue-linked branch.
+This skill aligns *mechanical* state only — branch, assignment, status. It never
+edits the issue title or body. Requirement changes and scope divergence are the
+controller's concern, not alignment.
 
 ## Final Report
 
 Report for the caller:
 
-- Issue reference, URL, and resolved title.
+- The resolved issue reference, URL, and title — or `no-issue` when none
+  resolved, so the caller can warn and continue.
 - Branch landed on, and whether `new-branch` ran.
 - Self-assignment result only when it failed or created a human next action;
   stay silent on a successful assignment or one skipped because the issue was

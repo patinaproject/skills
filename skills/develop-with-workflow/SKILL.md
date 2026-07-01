@@ -1,21 +1,24 @@
 ---
 name: develop-with-workflow
-description: "Build one GitHub issue into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you deliberately want an issue's independent slices built in parallel and converged onto one branch instead of building it serially."
+description: "Build one scope — a GitHub issue reference, free-form instructions, or both — into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you deliberately want a scope's independent slices built in parallel and converged onto one branch instead of building it serially."
 ---
 
-# Develop Issue With Workflow
+# Develop With Workflow
 
 ## Quick Start
 
-Invoke with exactly one same-repository GitHub issue reference:
+Invoke with a **scope** — an issue reference, free-form instructions, or both:
 
 ```text
 /develop-with-workflow #123
+/develop-with-workflow "port the API handlers to the new client, one per resource"
 ```
 
-Build one issue into **one converged branch** — destined for one PR — by
+Build one scope into **one converged branch** — destined for one PR — by
 decomposing it into independent **vertical slices** and building them in
-parallel.
+parallel. The scope is authoritative; any associated issue is resolved
+best-effort by `working-on-github-issue` for the branch and tagging, exactly as
+`develop` does.
 
 This skill is the explicit **opt-in to the Claude Workflow tool**. Invoking it
 authorizes the multi-agent fan-out; the heavy parallel build never runs unless
@@ -23,14 +26,14 @@ you deliberately reach for this skill. `develop` does not route here — it
 builds with plain `implement` — so workflow fan-out is always a deliberate
 choice.
 
-Its deliverable is a converged branch: every slice integrated onto the one issue
+Its deliverable is a converged branch: every slice integrated onto the one
 branch, with repository verification passing. It does **not** harden the branch
 or open a pull request. Follow it with `harden-branch` then `finish-pr` to reach
 a ready-for-review PR.
 
 ## Required Child Skills
 
-- `working-on-github-issue`: shared begin-work step (validate, mark started, land on the issue branch).
+- `working-on-github-issue`: align GitHub state (resolve the issue from the scope or branch, land on its branch, mark it started); best-effort, returns cleanly when there is no issue.
 - `implement`: build each slice — reaches `tdd` at agreed seams.
 - `resolving-merge-conflicts`: integrate each slice's worktree onto the one branch.
 - The **Claude Workflow tool**: this skill is its authorization for this run.
@@ -65,12 +68,13 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 
 ## Workflow
 
-1. **Begin work.** Ensure `working-on-github-issue`'s postcondition: on the issue's
-   branch, with the issue marked started. `working-on-github-issue` is idempotent, so run
-   it unconditionally — it does the real begin-work, and is a no-op when you are
-   already started and on the issue branch.
+1. **Align.** Run `working-on-github-issue` unconditionally (it is idempotent):
+   it resolves the issue from the scope or the current branch and aligns the
+   branch, assignment, and Project status, all best-effort. If it resolves no
+   issue, warn that the converged branch cannot be issue-tagged downstream, then
+   continue on the current branch.
 
-2. **Decompose into vertical slices — planning only.** Apply `to-issues`'
+2. **Decompose the scope into vertical slices — planning only.** Apply `to-issues`'
    methodology: tracer-bullet vertical slices that each cut end-to-end through
    every layer, with `Blocked by` dependencies between them. Do **not** publish
    any issues. This decomposition is in-memory planning that shapes the
@@ -84,7 +88,7 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 4. **Check the parallel precondition.** The fan-out pays off only with **two or
    more independent slices** (slices with no `Blocked by` among them). If the
    approved breakdown has fewer than two independent slices, do not fan out:
-   build the issue with plain `implement` (which reaches `tdd`) on the one
+   build the scope with plain `implement` (which reaches `tdd`) on the one
    branch, then go to step 6.
 
 5. **Author and run the workflow.** Express the approved dependency DAG as
@@ -95,11 +99,11 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
    - Each slice agent builds via `implement`/`tdd` scoped to that slice's
      what-to-build and acceptance criteria, nothing wider.
    - Each wave ends with an **integration stage** that merges every completed
-     slice's worktree onto the one issue branch with `resolving-merge-conflicts`,
+     slice's worktree onto the one branch with `resolving-merge-conflicts`,
      then runs repository-documented verification. `resolving-merge-conflicts`
      resolves the mechanical conflicts; **escalate to the user** any conflict
      that needs product judgment rather than guessing semantics.
-   - Dependent slices run in later waves, branched from the **integrated** issue
+   - Dependent slices run in later waves, branched from the **integrated**
      branch, so each dependent builds on its blockers' merged work.
 
 6. **Hand back the converged branch.** Report the integrated branch and the
@@ -115,7 +119,7 @@ for (const wave of waves) {
   // build each independent slice concurrently, each in its own worktree
   await parallel(wave.slices.map(slice => () =>
     agent(buildPrompt(slice), { isolation: 'worktree', label: `build:${slice.id}` })))
-  // integrate this wave onto the one issue branch, then verify
+  // integrate this wave onto the one branch, then verify
   await agent(integratePrompt(wave), { label: `integrate:${wave.id}` })
 }
 ```

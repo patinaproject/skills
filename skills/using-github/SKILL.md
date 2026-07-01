@@ -24,9 +24,10 @@ installable skills.
 - New issue: follow `workflows/new-issue.md`.
 - Existing issue edit: follow `workflows/edit-issue.md`.
 - Start issue work (begin-work): follow `workflows/begin-work.md` — route to
-  the `working-on-github-issue` skill, which validates the issue reference, marks it
-  started (self-assign and Project status, best-effort), and lands on the
-  issue-linked branch, delegating branch creation to `new-branch`.
+  the `working-on-github-issue` skill, which resolves the issue (from the
+  reference or the current branch), marks it started (self-assign and Project
+  status, best-effort), and lands on the issue-linked branch, delegating branch
+  creation to `new-branch`.
 - Develop an issue end to end: route to the `develop` controller, which
   drives `working-on-github-issue` → build → `harden-branch` → `finish-pr`.
 - Milestone changelog: follow `workflows/write-changelog.md`.

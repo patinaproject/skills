@@ -17,9 +17,10 @@ rules.
 - **`/using-github`** — The single supported entry point for GitHub work. It
   reads repository rules and routes issue, branch, PR, and changelog work to
   the right workflow.
-- **`/working-on-github-issue`** — The begin-work step. It validates the issue, marks it
-  started (best-effort self-assign and Project status), and lands on the
-  issue-linked branch, using `/new-branch` underneath.
+- **`/working-on-github-issue`** — The begin-work step. It resolves the issue
+  (from a reference or the current branch), marks it started (best-effort
+  self-assign and Project status), and lands on the issue-linked branch, using
+  `/new-branch` underneath.
 - **`/develop`** — The end-to-end controller: `working-on-github-issue` → build →
   `harden-branch` → `finish-pr`, stopping before merge.
 - **`/harden-branch`** — The pre-PR readiness gate. It deepens the branch
