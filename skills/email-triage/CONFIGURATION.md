@@ -57,5 +57,6 @@ runs to trust the bucketing:
    `INBOX` removed. Unsure threads and hard keeps (starred, `Triaged/Action`)
    are still never archived.
 
-To reverse an archiving run, search `label:Triaged/Archived` and restore `INBOX`
-on the results.
+To reverse an archiving run, search the configured archived label
+(`label:<labels.archived>`, default `label:Triaged/Archived`) and restore
+`INBOX` on the results.
