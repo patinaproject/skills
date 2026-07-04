@@ -26,6 +26,7 @@ A minimal `docs/EMAIL_TRIAGE.md` in an installing project:
 
 # Optional
 - referenceDestination: "Notes/Inbox reference"
+- labels.record: Triaged/Recorded   # required whenever referenceDestination is set
 - window: 30d
 ```
 
@@ -37,8 +38,9 @@ A minimal `docs/EMAIL_TRIAGE.md` in an installing project:
 | `tool` | yes | The Gmail tool interface that provides the sanctioned operations (see below) — a connected Gmail MCP server or a CLI. Names the provider, not a hardcoded binary path chosen by the skill. |
 | `labels.action` | yes | Concrete name bound to the `Triaged/Action` role. |
 | `labels.archived` | yes | Concrete name bound to the `Triaged/Archived` role. |
+| `labels.record` | with `referenceDestination` | Processed mark applied when a Record note is written, so re-runs skip the thread and never duplicate the append. Required whenever `referenceDestination` is set; optional otherwise. |
 | `labels.*` | no | Optional per-bucket label names (e.g. `labels.fyi`), additive. |
-| `referenceDestination` | no | An **existing** note the Record bucket appends to. When absent, Record threads are labeled and listed only. |
+| `referenceDestination` | no | An **existing** note the Record bucket appends to. When set, `labels.record` is required so note writes are gated and never duplicated. When absent, Record threads are labeled and listed only. |
 | `mode` | no | `keep-and-flag` (default) or `archive`. Start supervised on `keep-and-flag`; switch to `archive` only after supervised runs. |
 | `window` | no | Scan window. Defaults to the last 30 days on the first run; deeper backfill is a separate explicit run. |
 
