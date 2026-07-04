@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.12.0...patinaproject-skills-v2.13.0) (2026-07-04)
+
+
+### Features
+
+* [#253](https://github.com/patinaproject/skills/issues/253) add email-triage skill ([#254](https://github.com/patinaproject/skills/issues/254)) ([79e3f8d](https://github.com/patinaproject/skills/commit/79e3f8de54eb5088353ec537adea70abd95ced16))
+
 ## [2.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.11.0...patinaproject-skills-v2.12.0) (2026-06-19)
 
 
