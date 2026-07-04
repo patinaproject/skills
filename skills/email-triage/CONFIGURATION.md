@@ -2,9 +2,32 @@
 
 Every account-specific value the skill needs is an **input**, supplied by the
 installing repository — never hardcoded in the skill. This file defines the
-schema and the tool-interface contract. Bind the values wherever the installing
-repo keeps skill configuration (a documented config file, environment, or the
-operator's connected-tool settings), then point the skill at them.
+schema and the tool-interface contract.
+
+## Where the values live
+
+The installing project supplies the values in **`docs/EMAIL_TRIAGE.md`** — the
+default location the skill loads each run (workflow step 1). A project that keeps
+skill config elsewhere (environment, connected-tool settings, another documented
+file) may do so, as long as it documents where; the skill halts and asks rather
+than guessing. `docs/EMAIL_TRIAGE.md` is a plain human-edited Markdown doc, not a
+machine-parsed manifest — keep it readable.
+
+A minimal `docs/EMAIL_TRIAGE.md` in an installing project:
+
+```markdown
+# Email Triage configuration
+
+- mailbox: me@example.com
+- tool: gmail-mcp            # the connected Gmail MCP server or CLI to drive
+- labels.action: Triaged/Action
+- labels.archived: Triaged/Archived
+- mode: keep-and-flag        # switch to `archive` only after supervised runs
+
+# Optional
+- referenceDestination: "Notes/Inbox reference"
+- window: 30d
+```
 
 ## Configuration schema
 

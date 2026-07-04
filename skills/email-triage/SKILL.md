@@ -41,8 +41,11 @@ once, not re-decided every run.
 
 ## Configuration
 
-Every account-specific value is an input, resolved from
-[CONFIGURATION.md](CONFIGURATION.md) — not chosen at runtime:
+Every account-specific value is an input, not chosen at runtime. The installing
+project supplies them in **`docs/EMAIL_TRIAGE.md`** — the default location the
+skill reads each run — or in another location it documents. See
+[CONFIGURATION.md](CONFIGURATION.md) for the schema and a worked example. The
+values:
 
 - **Mailbox identity** — which connected account to act on.
 - **Tool interface** — the connected Gmail MCP server or CLI that provides the
@@ -134,7 +137,8 @@ silently re-deciding them each run.
 
 ## Workflow
 
-1. **Load configuration** and repository guidance (`AGENTS.md`, `CLAUDE.md` if
+1. **Load configuration** from `docs/EMAIL_TRIAGE.md` (or the location the
+   project documents) and repository guidance (`AGENTS.md`, `CLAUDE.md` if
    present). Resolve the mailbox, tool interface, label set, optional reference
    destination, and mode. Halt on missing required configuration.
 2. **Ensure configured labels exist.** Create any missing configured role label
