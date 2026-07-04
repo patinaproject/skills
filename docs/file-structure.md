@@ -21,6 +21,7 @@ layout.
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
 - `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
+- `skills/email-triage/`: account-agnostic Gmail five-bucket triage skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
   into `../../skills/<name>/`, vendored third-party skills are real directories
 - `.claude/skills/<name>/`: committed overlay; repo-owned skills symlink into
@@ -59,6 +60,7 @@ Skills owned by this repository:
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
 | `improve-branch-architecture` | `skills/improve-branch-architecture/` | Branch-scoped deepening recommendations |
 | `write-release-changelog` | `skills/write-release-changelog/` | Release changelog and product-feedback loop-closing ceremony |
+| `email-triage` | `skills/email-triage/` | Account-agnostic Gmail five-bucket triage |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
 installed via the vercel-labs CLI and is not owned by this repository. Install
