@@ -167,7 +167,7 @@ Scanned: N threads
 
 Reconciliation: a + r + f + x + u = N   (must hold; investigate if not)
 
-Skipped (already Triaged/Action, no new reply): s
+Skipped (already action-labeled and read): s
 Filter candidates (recurring pure-noise senders): <senders, if any>
 
 Action items:
