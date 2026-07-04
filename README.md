@@ -2,7 +2,8 @@
 
 Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
-development (serial and Workflow-parallel), pre-PR branch hardening, branch
+or instruction development (serial and Workflow-parallel), pre-PR branch
+hardening, branch
 architecture deepening, isolated local branch-diff review, PR finishing, Codex
 PR feedback polling, settled-design documentation capture, release changelog
 ceremonies, and local branch updating. They are available across Claude Code,
@@ -102,11 +103,11 @@ See [./skills/develop/](./skills/develop/) for the skill contract.
 
 ### develop-with-workflow
 
-Some issues decompose into independent vertical slices that finish faster built
-in parallel. `develop-with-workflow` is the explicit opt-in to the Claude
-Workflow tool: it splits one issue into independent slices, builds them
-concurrently in isolated worktrees, and converges them onto one branch so the
-one-issue-one-PR convention still holds.
+A large scope often decomposes into independent vertical slices that build
+faster in parallel. `develop-with-workflow` is the explicit opt-in to the Claude
+Workflow tool: it splits one scope into those slices, builds them concurrently in
+isolated worktrees, and converges them onto one branch, so one scope still yields
+one PR.
 
 See [./skills/develop-with-workflow/](./skills/develop-with-workflow/)
 for the skill contract.
