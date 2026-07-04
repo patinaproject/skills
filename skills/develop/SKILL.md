@@ -188,10 +188,11 @@ For this skill, all visible PR checks include required and optional checks.
    `wontfix` disposition. **When step 3 resolved no issue**, consult the
    repository guidance read in step 1: if it requires an issue tag on commits or
    PRs (as this repo does with `type: #<issue>`), stop before `finish-pr` — that
-   convention cannot be satisfied without an issue — and report the
-   built-and-hardened branch plus that finishing needs an issue, rather than
-   committing. If the repository imposes no such requirement, finish normally
-   with a conventional commit. When an issue is present and the built scope
+   convention cannot be satisfied without an issue — and report `human-blocked`
+   (finishing needs an issue): the built-and-hardened branch, and that a human
+   must supply or create an issue to finish, rather than committing. If the
+   repository imposes no such requirement, finish normally with a conventional
+   commit. When an issue is present and the built scope
    diverged from its body, include the reconciliation offer (Scope Contract) in
    the final report.
 9. Loop until the terminal goal is met or a human-owned blocker prevents further
