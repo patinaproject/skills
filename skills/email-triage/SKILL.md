@@ -27,7 +27,7 @@ once, not re-decided every run.
   place stays in `INBOX`, in the Unsure bucket. Low confidence is never a reason
   to archive.
 - **Hard keeps are never auto-archived.** Starred threads and anything already
-  labeled `Triaged/Action` stay in the inbox regardless of bucket.
+  carrying the configured action label stay in the inbox regardless of bucket.
 - **Recoverable by construction.** Before `INBOX` is ever removed, the thread is
   labeled with the configured archived label, so one search for that label
   (`label:<labels.archived>`, default `label:Triaged/Archived`) restores an
@@ -63,7 +63,7 @@ Each thread in the run lands in **exactly one** bucket.
 
 | Bucket | Means | Action taken |
 | --- | --- | --- |
-| **Action** | The thread still needs *you* to do or decide something | Apply `Triaged/Action`; surface it in the run summary. **Flag, do not create a task** — the user decides whether to make one. |
+| **Action** | The thread still needs *you* to do or decide something | Apply the configured action label; surface it in the run summary. **Flag, do not create a task** — the user decides whether to make one. |
 | **Record** | Reference worth keeping, no action needed | Update the configured note if present; otherwise apply the configured Record label if one exists, and always list it in the summary. |
 | **FYI** | Informational, safe to let pass | Keep in inbox (or archive in `archive` mode). |
 | **Noise** | Recurring, low-value, nothing needed from you | Keep in inbox (or archive in `archive` mode). |
@@ -122,8 +122,9 @@ silently re-deciding them each run.
 - **`keep-and-flag`** *(default)* — no thread is ever archived. Every thread is
   bucketed and labeled; the inbox is untouched except for labels. This is the
   supervised default for initial runs.
-- **`archive`** — FYI and Noise threads are archived: label `Triaged/Archived`,
-  then remove `INBOX`. Unsure and hard keeps are still never archived. Enable it
+- **`archive`** — FYI and Noise threads are archived: apply the configured
+  archived label, then remove `INBOX`. Unsure and hard keeps are still never
+  archived. Enable it
   only after supervised `keep-and-flag` runs by setting `mode: archive` in
   configuration (see [CONFIGURATION.md](CONFIGURATION.md)).
 
@@ -132,15 +133,15 @@ silently re-deciding them each run.
 1. **Load configuration** and repository guidance (`AGENTS.md`, `CLAUDE.md` if
    present). Resolve the mailbox, tool interface, label set, optional reference
    destination, and mode. Halt on missing required configuration.
-2. **Ensure configured labels exist.** Create any missing role label
-   (`Triaged/Action`, `Triaged/Archived`, and any configured bucket labels).
+2. **Ensure configured labels exist.** Create any missing configured role label
+   (the action and archived labels, plus any configured bucket labels).
 3. **Select the scan set.** The **first run scans the last 30 days only**;
    deeper backfill is a separate, explicitly requested run. Exclude threads
    skipped by [Idempotency](#idempotency) from the scan set.
 4. **Bucket each thread** into exactly one of the five buckets using the rules
    above, honoring hard keeps and the Unsure floor.
-5. **Apply the sanctioned action** for each bucket's mode. Always label
-   `Triaged/Archived` before removing `INBOX`.
+5. **Apply the sanctioned action** for each bucket's mode. Always apply the
+   configured archived label before removing `INBOX`.
 6. **Emit the run summary** below and stop. Do not create tasks, draft replies,
    or take any unsanctioned action.
 

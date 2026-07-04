@@ -53,9 +53,9 @@ change the inbox beyond labels. After you have watched enough `keep-and-flag`
 runs to trust the bucketing:
 
 1. Set `mode: archive` in configuration.
-2. Re-run. FYI and Noise threads are now labeled `Triaged/Archived` and have
-   `INBOX` removed. Unsure threads and hard keeps (starred, `Triaged/Action`)
-   are still never archived.
+2. Re-run. FYI and Noise threads are now labeled with the configured archived
+   label and have `INBOX` removed. Unsure threads and hard keeps (starred, or
+   carrying the configured action label) are still never archived.
 
 To reverse an archiving run, search the configured archived label
 (`label:<labels.archived>`, default `label:Triaged/Archived`) and restore
