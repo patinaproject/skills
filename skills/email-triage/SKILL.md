@@ -95,9 +95,13 @@ threads is cheap and safe. Unlabeled buckets — FYI and Noise in `keep-and-flag
 mode, and Record threads with no configured note or label — carry no mark and are
 re-evaluated on every run by design:
 
-- A thread already labeled with the action role is **re-triaged only when a new
-  unread reply has arrived** since it was labeled. A re-triaged thread re-enters
-  the scan set and counts in its new bucket (inside `N`). Otherwise it is left
+- A thread already labeled with the action role is **re-triaged only while it is
+  currently unread** — a new reply makes a read thread unread again, and unread
+  state (not a label timestamp) is what the `read thread` contract actually
+  exposes. An Action thread that has stayed unread since it was labeled remains
+  re-triage-eligible until read; re-examining a still-unread action item is
+  harmless, since it stays Action. A re-triaged thread re-enters the scan set and
+  counts in its new bucket (inside `N`). A read, already-labeled thread is left
   untouched and reported as skipped (in `s`, outside `N`) — never both.
 - A thread already labeled with the archived role is not re-processed.
 
