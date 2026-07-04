@@ -67,7 +67,7 @@ environment:
 
 `working-on-github-issue` reaches `new-branch`; `harden-branch` reaches
 `improve-branch-architecture`, `review-branch`, `implement`, and
-`diagnosing-bugs`; `implement` reaches `tdd` and `review`. Confirm those are
+`diagnosing-bugs`; `implement` reaches `tdd` and `code-review`. Confirm those are
 installed too.
 
 If any are missing, halt before building. Report the missing skill names and
@@ -77,11 +77,11 @@ install guidance:
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch review-branch harden-branch improve-branch-architecture finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
 ```
 
-The `implement`, `tdd`, `review`, `diagnosing-bugs`, `writing-great-skills`, and
+The `implement`, `tdd`, `code-review`, `diagnosing-bugs`, `writing-great-skills`, and
 `prototype` install hints intentionally track their source catalog's default
 branch. Consumers who need a frozen install can add `#<git-ref>` to those
 sources.

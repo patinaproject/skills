@@ -48,12 +48,12 @@ install guidance:
 npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@review -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-issues -y
 ```
 
-The `implement`, `tdd`, `review`, `resolving-merge-conflicts`, and `to-issues`
+The `implement`, `tdd`, `code-review`, `resolving-merge-conflicts`, and `to-issues`
 install hints track their source catalog's default branch; add `#<git-ref>` to
 freeze.
 
