@@ -180,7 +180,7 @@ Scanned: N threads
 
 Reconciliation: a + r + f + x + u = N   (must hold; investigate if not)
 
-Skipped (already action-labeled and read): s
+Skipped (already processed, excluded from N — action-labeled+read, Record-labeled, or archived): s
 Filter candidates (recurring pure-noise senders): <senders, if any>
 
 Action items:
