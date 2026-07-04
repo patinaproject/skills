@@ -67,7 +67,7 @@ Each thread in the run lands in **exactly one** bucket.
 | Bucket | Means | Action taken |
 | --- | --- | --- |
 | **Action** | The thread still needs *you* to do or decide something | Apply the configured action label; surface it in the run summary. **Flag, do not create a task** — the user decides whether to make one. |
-| **Record** | Reference worth keeping, no action needed | If a reference destination is configured, update the note **and apply the configured Record label in the same step** so the append happens exactly once; otherwise apply the configured Record label if one exists. Always list it in the summary. |
+| **Record** | Reference worth keeping, no action needed | If a reference destination is configured, append to the note and apply the configured Record label so the append is not repeated (see [Idempotency](#idempotency) for the once-only caveat); otherwise apply the configured Record label if one exists. Always list it in the summary. |
 | **FYI** | Informational, safe to let pass | Keep in inbox (or archive in `archive` mode). |
 | **Noise** | Recurring, low-value, nothing needed from you | Keep in inbox (or archive in `archive` mode). |
 | **Unsure** | Cannot confidently place | **Leave in `INBOX`.** Never archived. |
@@ -98,11 +98,11 @@ Other configured labels (e.g. per-bucket tags) are optional and additive.
 ## Idempotency
 
 The action, archived, and Record labels are the memory, so a re-run over
-*labeled* threads is cheap and safe — including note writes, which are gated by
-the Record label so they are never appended twice. Unlabeled buckets — FYI and
-Noise in `keep-and-flag` mode, and Record threads when no reference destination
-and no Record label are configured — carry no mark and are re-evaluated on every
-run by design:
+*labeled* threads is cheap and safe — including note writes, which the Record
+label gates so they are not re-appended. Unlabeled buckets — FYI and Noise in
+`keep-and-flag` mode, and Record threads when no reference destination and no
+Record label are configured — carry no mark and are re-evaluated on every run by
+design:
 
 - A thread already labeled with the action role is **re-triaged only while it is
   currently unread** — a new reply makes a read thread unread again, and unread
@@ -112,8 +112,13 @@ run by design:
   harmless, since it stays Action. A re-triaged thread re-enters the scan set and
   counts in its new bucket (inside `N`). A read, already-labeled thread is left
   untouched and reported as skipped (in `s`, outside `N`) — never both.
-- A thread carrying the Record label has already had its note write applied and
-  is not re-appended on later runs.
+- A Record-labeled thread is re-triaged **only while it is currently unread**,
+  the same rule as the action role — so an unread reply can move a recorded
+  thread to Action rather than silently dropping it. Re-triage never re-appends
+  the note: the Record label gates the append. Because the note append and the
+  Record label are two separate writes, the once-only guarantee is best-effort —
+  a crash between them can duplicate the append (note written, label not) on the
+  next run, so prefer a reference destination whose append is idempotent.
 - A thread already labeled with the archived role is not re-processed.
 
 ## Deterministic filters vs the ambiguous middle
@@ -180,7 +185,7 @@ Scanned: N threads
 
 Reconciliation: a + r + f + x + u = N   (must hold; investigate if not)
 
-Skipped (already processed, excluded from N — action-labeled+read, Record-labeled, or archived): s
+Skipped (already processed, excluded from N — action-labeled+read, Record-labeled+read, or archived): s
 Filter candidates (recurring pure-noise senders): <senders, if any>
 
 Action items:
