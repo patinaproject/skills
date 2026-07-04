@@ -159,8 +159,8 @@ to the scan total:
 Email triage — <mailbox> — <window> — mode: <keep-and-flag|archive>
 Scanned: N threads
 
-  Action   a   → labeled Triaged/Action (listed below)
-  Record   r   → note updated / labeled
+  Action   a   → labeled <labels.action> (default Triaged/Action; listed below)
+  Record   r   → note updated / <labels.record> if set
   FYI      f   → kept | archived
   Noise    x   → kept | archived
   Unsure   u   → left in inbox
