@@ -7,10 +7,13 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/develop-issue/`: issue development orchestration skill
+- `skills/working-on-github-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/develop/`: issue development orchestration skill
+- `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/review-code/`: isolated local branch-diff review skill
+- `skills/review-branch/`: isolated local branch-diff review skill
+- `skills/harden-branch/`: pre-PR deepen-then-review readiness gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
@@ -211,10 +214,13 @@ This repo owns these skills at flat paths:
 | scaffold-repository | `skills/scaffold-repository/` |
 | using-github | `skills/using-github/` |
 | new-branch | `skills/new-branch/` |
-| develop-issue | `skills/develop-issue/` |
+| working-on-github-issue | `skills/working-on-github-issue/` |
+| develop | `skills/develop/` |
+| develop-with-workflow | `skills/develop-with-workflow/` |
 | finish-pr | `skills/finish-pr/` |
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
-| review-code | `skills/review-code/` |
+| review-branch | `skills/review-branch/` |
+| harden-branch | `skills/harden-branch/` |
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | write-docs | `skills/write-docs/` |

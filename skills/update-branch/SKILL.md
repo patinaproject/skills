@@ -20,6 +20,14 @@ argument selects another branch or remote-tracking ref.
 This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
 GitHub's remote update button, or any GitHub update API. Never push.
 
+## Conditional Child Skill
+
+- `resolving-merge-conflicts`: engaged only when a merge actually conflicts
+  (Workflow step 7), to resolve in-scope conflicts with one shared discipline so
+  branch updates and slice integration resolve conflicts the same way. Most
+  `/update-branch` runs never reach it. Install if missing:
+  `npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y`.
+
 ## Input Contract
 
 1. Accept no argument or one optional base ref.
@@ -66,8 +74,11 @@ GitHub's remote update button, or any GitHub update API. Never push.
    - Run `git merge --no-ff <base-ref>`.
    - If Git reports `Already up to date`, report that no merge commit was
      needed.
-7. Resolve conflicts only when the correct resolution is obvious, branch-local,
-   in scope, and mechanically verifiable. Stop for product judgment, unrelated
+7. Resolve conflicts by delegating to `resolving-merge-conflicts`, but keep
+   ownership of *when* to engage versus stop. First screen the conflicts: hand
+   `resolving-merge-conflicts` only the hunks that are branch-local, in scope for
+   this update, and mechanically verifiable. Escalate rather than force-resolve a
+   hunk that needs product judgment, and stop (see Conflict Rules) for unrelated
    scope, permissions, secrets, generated-file uncertainty, or unverifiable
    semantics.
 8. After a successful merge or conflict resolution, inspect whether dependency
@@ -91,7 +102,12 @@ GitHub's remote update button, or any GitHub update API. Never push.
 
 ## Conflict Rules
 
-- Keep the merge in progress only while resolving clear branch-local conflicts.
+- Keep the merge in progress only while `resolving-merge-conflicts` works the
+  clear branch-local conflicts.
+- `update-branch`'s stop rules **override** `resolving-merge-conflicts`' "always
+  resolve; never `--abort`" directive. When a conflict needs product judgment or
+  falls outside this update's scope, `git merge --abort` and stop rather than
+  resolving it.
 - Use `git merge --abort` before stopping when the branch should be restored to
   its pre-merge state.
 - Do not rebase, force-push, or rewrite history.

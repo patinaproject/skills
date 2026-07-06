@@ -23,18 +23,36 @@ installable skills.
 
 - New issue: follow `workflows/new-issue.md`.
 - Existing issue edit: follow `workflows/edit-issue.md`.
-- Start issue work: route to the `new-branch` skill.
+- Start issue work (begin-work): follow `workflows/begin-work.md` — route to
+  the `working-on-github-issue` skill, which resolves the issue (from the
+  reference or the current branch), marks it started (self-assign and Project
+  status, best-effort), and lands on the issue-linked branch, delegating branch
+  creation to `new-branch`.
+- Develop an issue end to end: route to the `develop` controller, which
+  drives `working-on-github-issue` → build → `harden-branch` → `finish-pr`.
 - Milestone changelog: follow `workflows/write-changelog.md`.
 - PR comments: follow `workflows/pr-comments.md` before replying to,
   resolving, or reporting PR review feedback handled.
-- Finish completed work: route to the `finish-pr` skill.
+- Ready a branch for review (pre-PR gate): route to the `harden-branch` skill —
+  it deepens the branch architecture until settled, then reviews it to green via
+  `review-branch`, before finishing.
+- Finish completed work: route to the `finish-pr` skill (it runs after
+  `harden-branch`).
 
 ## Routing Defaults
 
-Route to `new-branch` when the user provides an issue reference and asks to
+Route to `working-on-github-issue` when the user provides an issue reference and asks to
 start work, implement, fix, build, investigate, or otherwise begin issue-linked
-development. If already on the computed issue branch, continue without switching.
-If on a different issue branch, ask before changing context.
+development; it resolves the issue (from the reference or the current branch),
+marks it started, and lands on the issue-linked branch. `working-on-github-issue`
+is idempotent: if already on the
+computed issue branch it stays put. If on a different issue branch, ask before
+changing context. When the user wants one issue driven end to end (or invokes
+`/develop`), route to the `develop` controller instead.
+
+Route to `harden-branch` when the build is complete and the branch needs
+readying for review before a PR — it deepens the architecture until settled,
+then reviews to green. `harden-branch` runs before `finish-pr`.
 
 Route to `finish-pr` when the user explicitly says the work is complete, asks to
 publish or open a ready PR, or objective evidence shows implementation and local

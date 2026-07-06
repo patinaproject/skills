@@ -17,10 +17,13 @@ SKILLS=(
   install-skills
   using-github
   new-branch
-  develop-issue
+  working-on-github-issue
+  develop
+  develop-with-workflow
   finish-pr
   codex-pr-feedback-loop
-  review-code
+  review-branch
+  harden-branch
   update-branch
   write-docs
   improve-branch-architecture

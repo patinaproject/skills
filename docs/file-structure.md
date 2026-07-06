@@ -9,12 +9,19 @@ layout.
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/develop-issue/`: issue development orchestration skill
+- `skills/working-on-github-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/develop/`: issue development orchestration skill
+- `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/review-code/`: isolated local branch-diff review skill
+- `skills/review-branch/`: isolated local branch-diff review skill
+- `skills/harden-branch/`: pre-PR deepen-then-review readiness gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
+- `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
+- `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
+- `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
+- `skills/email-triage/`: account-agnostic Gmail five-bucket triage skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
   into `../../skills/<name>/`, vendored third-party skills are real directories
 - `.claude/skills/<name>/`: committed overlay; repo-owned skills symlink into
@@ -41,12 +48,19 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
-| `develop-issue` | `skills/develop-issue/` | Issue development orchestration |
+| `working-on-github-issue` | `skills/working-on-github-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
+| `develop` | `skills/develop/` | Issue development orchestration |
+| `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
-| `review-code` | `skills/review-code/` | Isolated local branch-diff review |
+| `review-branch` | `skills/review-branch/` | Isolated local branch-diff review |
+| `harden-branch` | `skills/harden-branch/` | Pre-PR deepen-then-review readiness gate |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
+| `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
+| `improve-branch-architecture` | `skills/improve-branch-architecture/` | Branch-scoped deepening recommendations |
+| `write-release-changelog` | `skills/write-release-changelog/` | Release changelog and product-feedback loop-closing ceremony |
+| `email-triage` | `skills/email-triage/` | Account-agnostic Gmail five-bucket triage |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
 installed via the vercel-labs CLI and is not owned by this repository. Install
