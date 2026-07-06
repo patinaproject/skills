@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.13.0...patinaproject-skills-v2.14.0) (2026-07-06)
+
+
+### Features
+
+* [#249](https://github.com/patinaproject/skills/issues/249) compose develop into a scope-first skill pipeline ([#250](https://github.com/patinaproject/skills/issues/250)) ([ed0d015](https://github.com/patinaproject/skills/commit/ed0d01511284818dd3e9df88d4e671cf94e8353a))
+
 ## [2.13.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.12.0...patinaproject-skills-v2.13.0) (2026-07-04)
 
 
