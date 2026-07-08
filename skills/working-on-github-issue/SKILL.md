@@ -73,9 +73,9 @@ produces.
   declaration must arrive as an explicit natural-language caller instruction in
   the invocation context — the scope or arguments you were invoked with; never
   infer it from the branch's name or origin, so a `claude/*` or other
-  host-provided name is never a declaration on its own. Only an explicit immutable declaration keeps
-  the current branch; when it applies, you **must** report the deviation (see
-  Final Report), never keep it silently.
+  host-provided name is never a declaration on its own. When such a declaration
+  applies, you **must** report the deviation (see Final Report), never keep the
+  branch silently.
 
 End on the issue-linked branch — or, only when the caller declared the current
 branch immutable, on that branch with the deviation reported.
