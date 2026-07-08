@@ -64,13 +64,21 @@ name encodes the issue number per the `<issue>-<slug>` convention `new-branch`
 produces.
 
 - When it already matches, stay on it; do not run `new-branch`.
-- Otherwise — including when the worktree starts on a non-default but
-  non-issue-linked branch — run `new-branch` to establish the issue-linked
-  branch.
-- When a host-provided branch cannot or should not be renamed onto the
-  issue-linked name, surface that deviation instead of forcing a switch.
+- Otherwise, run `new-branch` to establish the issue-linked branch. This is the
+  default for **any** non-issue-linked starting branch, including a harness or
+  session branch such as `claude/*` that the worktree merely started on. A
+  branch being host-provided is not itself a reason to keep it.
+- The one exception is a branch the caller has **explicitly declared
+  immutable** — a ref it cannot rename, such as a CI-provided branch. This
+  declaration must arrive as an explicit natural-language caller instruction in
+  the invocation context — the scope or arguments you were invoked with; never
+  infer it from the branch's name or origin, so a `claude/*` or other
+  host-provided name is never a declaration on its own. When such a declaration
+  applies, you **must** report the deviation (see Final Report), never keep the
+  branch silently.
 
-End on the issue-linked branch.
+End on the issue-linked branch — or, only when the caller declared the current
+branch immutable, on that branch with the deviation reported.
 
 ### Self-assignment
 
@@ -121,5 +129,8 @@ Report for the caller:
   already assigned.
 - Project status result only when it changed readiness, failed, or was skipped
   for a reason the caller needs.
-- Any deviation that needs human attention, such as a host branch that could not
-  be renamed onto the issue-linked name.
+- Branch deviation, required whenever it happens: when the caller declared the
+  current branch immutable and you kept it instead of the issue-linked branch,
+  name the retained branch and why. This report is mandatory, not optional. Also
+  surface any other ending on a non-issue-linked branch that needs human
+  attention, such as `new-branch` failing to establish the issue-linked branch.
