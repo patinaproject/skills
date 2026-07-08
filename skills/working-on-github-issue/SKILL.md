@@ -130,4 +130,6 @@ Report for the caller:
   for a reason the caller needs.
 - Branch deviation, required whenever it happens: when the caller declared the
   current branch immutable and you kept it instead of the issue-linked branch,
-  name the retained branch and why. This report is mandatory, not optional.
+  name the retained branch and why. This report is mandatory, not optional. Also
+  surface any other ending on a non-issue-linked branch that needs human
+  attention, such as `new-branch` failing to establish the issue-linked branch.
