@@ -36,10 +36,12 @@ pnpm lint:md
 ## Pull requests
 
 - Keep the PR title in commitlint format.
-- Fill in the [PR template](./.github/pull_request_template.md).
+- Fill in the [PR template](./.github/pull_request_template.md): a `Linked issue`
+  closing keyword and a plain-prose `What changed` for a reader who has not seen
+  the work.
 - Treat GitHub Checks as the source of truth for routine automated verification.
-- Use `Testing steps` only for meaningful human-owned behavior or artifact
-  checks.
+- Add `Testing steps` only ad hoc, when a produced artifact needs human
+  inspection (rendered docs, generated files, a template, release notes).
 - Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 ## Further reading
