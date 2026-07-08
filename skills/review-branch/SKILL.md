@@ -104,6 +104,23 @@ finding must include a file and line reference, rationale, and suggested fix.
 Keep praise-heavy commentary out of the report. If there are no findings, say
 so and mention residual risk or test gaps.
 
+### Bad-smell baseline
+
+Alongside whatever the repository documents, the reviewer carries an always-on
+baseline of high-signal code smells (Fowler, *Refactoring* — "Bad Smells in
+Code") to anchor the clarity and maintainability pass: Mysterious Name,
+Duplicated Code, Feature Envy, Data Clumps, Primitive Obsession, Repeated
+Switches, Shotgun Surgery, Divergent Change, Speculative Generality, Message
+Chains, Middle Man, Refused Bequest.
+
+Two rules bind the baseline:
+
+- A documented repository standard overrides it. When a repo instruction speaks
+  to the same concern, the repo standard wins and the baseline stays silent.
+- Every smell is a judgement call, never a hard violation. Report a smell as a
+  non-blocking or low-severity observation with rationale, not as a blocking
+  finding, unless it also breaks correctness or a documented standard.
+
 ## Distinction From Hosted Review
 
 `review-branch` is a local isolated reviewer for branch-diff findings. It does

@@ -59,7 +59,7 @@ human line.
 - Do not use browser conflict resolution or merge the pull request itself.
 - Do not create follow-up issues from PR feedback.
 - Do not wait indefinitely for new human review comments.
-- Do not use required-check-only watching; optional checks remain in scope.
+- Watch all checks, including optional ones; optional checks remain in scope.
 - Stop after the documented no-progress threshold instead of watching
   indefinitely.
 - Do not stop solely because a check failed, was canceled, or is out of scope;

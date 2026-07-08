@@ -174,8 +174,8 @@ not invent parallel PR structure.
 - Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`.
   The PR body must use the template's section headings in the order the template defines,
   even when the body is passed inline via `--body`.
-- Issues: body structure is owned by the skill creating the issue. Prefer `to-prd`
-  for PRD-shaped issues and `to-issues` or `using-github` for implementation-slice
+- Issues: body structure is owned by the skill creating the issue. Prefer `to-spec`
+  for spec/PRD-shaped issues and `to-tickets` or `using-github` for implementation-slice
   issues. Manual GitHub issues are allowed when they contain enough context to act on.
 
 Recommended `gh` patterns:

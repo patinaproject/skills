@@ -38,7 +38,7 @@ a ready-for-review PR.
 - `resolving-merge-conflicts`: integrate each slice's worktree onto the one branch.
 - The **Claude Workflow tool**: this skill is its authorization for this run.
 
-Planning aid, read but not invoked: `to-issues`' vertical-slice + `Blocked by`
+Planning aid, read but not invoked: `to-tickets`' vertical-slice + `Blocked by`
 methodology.
 
 If any are missing, halt before building and report the missing skill names and
@@ -50,10 +50,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-issues -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-tickets -y
 ```
 
-The `implement`, `tdd`, `code-review`, `resolving-merge-conflicts`, and `to-issues`
+The `implement`, `tdd`, `code-review`, `resolving-merge-conflicts`, and `to-tickets`
 install hints track their source catalog's default branch; add `#<git-ref>` to
 freeze.
 
@@ -74,15 +74,27 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
    issue, warn that the converged branch cannot be issue-tagged downstream, then
    continue on the current branch.
 
-2. **Decompose the scope into vertical slices — planning only.** Apply `to-issues`'
+2. **Decompose the scope into vertical slices — planning only.** Apply `to-tickets`'
    methodology: tracer-bullet vertical slices that each cut end-to-end through
    every layer, with `Blocked by` dependencies between them. Do **not** publish
    any issues. This decomposition is in-memory planning that shapes the
    workflow; the tracker stays clean (no sub-issues).
 
+   **Wide refactors are the exception.** When the scope is one mechanical change
+   whose blast radius fans across the codebase — renaming a shared symbol,
+   retyping a widely-used interface — no vertical slice can land green, so
+   sequence it **expand–contract** instead: an expand slice adds the new form
+   beside the old, migrate slices move call sites in batches sized by blast
+   radius (each blocked by the expand), and a contract slice deletes the old
+   form once no caller remains (blocked by every migrate batch). The migrate
+   batches are the independent slices the fan-out parallelizes; expand and
+   contract are the serial edges. When even the batches cannot stay green
+   alone, keep the sequence but converge them on a final integrate-and-verify
+   slice that promises green.
+
 3. **Approve the breakdown with the user.** Present the proposed slices as a
    numbered list — Title, `Blocked by`, what-to-build, acceptance criteria — and
-   quiz the user on granularity and dependencies exactly as `to-issues` does.
+   quiz the user on granularity and dependencies exactly as `to-tickets` does.
    Iterate until the user approves. Build nothing before approval.
 
 4. **Check the parallel precondition.** The fan-out pays off only with **two or

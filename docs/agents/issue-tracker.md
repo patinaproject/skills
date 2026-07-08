@@ -5,8 +5,8 @@ Issues, PRDs, and durable product/design context for this repository live in Git
 ## Conventions
 
 - Create issues with the body shape required by the skill creating the issue.
-  Prefer PRD-shaped issues from `to-prd` and implementation-slice issues from
-  `to-issues` or `using-github`.
+  Prefer spec/PRD-shaped issues from `to-spec` and implementation-slice issues from
+  `to-tickets` or `using-github`.
 - Read issues with `gh issue view <number> --comments --json number,title,body,labels,comments,state,url`.
 - List issues with `gh issue list --state open --json number,title,labels,url`.
 - Comment with `gh issue comment <number> --body "..."`

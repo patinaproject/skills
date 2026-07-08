@@ -1,7 +1,7 @@
 # new issue procedure Workflow
 
 **Goal:** Create a well-structured GitHub issue using the same
-implementation-slice body shape as `to-issues`, while this workflow retains the
+implementation-slice body shape as `to-tickets`, while this workflow retains the
 procedural `gh`-driven steps. Authoritative inputs: this workflow for issue body
 shape and `gh label list` for the canonical remote label inventory.
 
@@ -165,7 +165,7 @@ Present as a numbered list so the user can confirm, adjust, or skip entirely:
 
 If the user says "none" or skips, proceed with an empty label set.
 
-Do NOT suggest labels not in the filtered list.
+Suggest only labels that appear in the filtered list.
 
 ---
 
@@ -303,11 +303,18 @@ Rules:
 - Include `## Parent` only when there is a parent issue.
 - Include at least one checked-list Acceptance criteria item, and leave every
   item unchecked.
-- Do not add unlisted sections.
+- Use only the sections listed in the shape above.
 - If `$contextSuffix` is non-empty (from `related-to` entries in Step 6),
   append it under `## Blocked by` after any blockers as `Relates to #N`.
 - If `$depSupported = false` and any `blocked-by`/`blocks` entries exist, also
   append `Blocked by #N` / `Blocks #N` lines to `## Blocked by`.
+- If the scope is a **wide refactor** — one mechanical change whose blast radius
+  fans across the codebase (renaming a shared symbol, retyping a widely-used
+  interface) — it does not fit one issue. Surface this to the user and file it
+  as an **expand–contract** sequence of linked issues (an expand issue, migrate
+  issues in batches sized by blast radius each blocked by the expand, and a
+  contract issue blocked by every migrate batch) so each lands green, following
+  `to-tickets`' wide-refactor slicing.
 
 Resolve the target repository before presenting the draft:
 
