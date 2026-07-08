@@ -72,7 +72,8 @@ Pass only:
 - Default branch, merge-base, head, and dirty/untracked scope
 - Changed file list and relevant diff commands
 - Repository instructions
-- This read-only review contract
+- This read-only review contract, including the Reviewer Contract and its
+  bad-smell baseline
 
 If the host runtime cannot create a fresh reviewer or equivalent isolated
 review surface, halt and report that isolation is unavailable. Do not ask the

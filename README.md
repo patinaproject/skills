@@ -198,15 +198,6 @@ full Patina Project baseline and keeps it aligned on rerun.
 See [./skills/scaffold-repository/](./skills/scaffold-repository/) for the full
 README and skill contract.
 
-### email-triage
-
-Inbox triage is repetitive and easy to get wrong in irreversible ways.
-`email-triage` sorts a Gmail inbox into five GTD-style buckets — Action, Record,
-FYI, Noise, Unsure — and takes only sanctioned, reversible actions: it labels,
-and never drafts or sends.
-
-See [./skills/email-triage/](./skills/email-triage/) for the skill contract.
-
 ## Skills
 
 | Skill | Description |
@@ -226,7 +217,6 @@ See [./skills/email-triage/](./skills/email-triage/) for the skill contract.
 | [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
 | [write-release-changelog](./skills/write-release-changelog/) | Run the release ceremony: changelog plus feedback loop-closing |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
-| [email-triage](./skills/email-triage/) | Triage a Gmail inbox into five GTD-style buckets, label-only |
 
 ## Local iteration
 
@@ -281,7 +271,6 @@ skills/
   write-docs/
   improve-branch-architecture/
   write-release-changelog/
-  email-triage/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
 .claude-plugin/

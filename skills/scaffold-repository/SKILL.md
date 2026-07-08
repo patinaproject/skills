@@ -1,6 +1,6 @@
 ---
 name: scaffold-repository
-description: Scaffold a new repository to the Patina Project baseline, realign an existing repository with that baseline, or audit and add baseline conventions (commit + PR rules, husky + commitlint, PNPM tooling, agent docs). Use when the user says "scaffold this repo", "realign with the baseline", "audit our repo conventions", or "set up commitlint and husky".
+description: Scaffold a new repository to the Patina Project baseline, or realign or audit an existing repository against that baseline (commit + PR rules, husky + commitlint, PNPM tooling, agent docs). Use when the user says "scaffold this repo", "realign with the baseline", "audit our repo conventions", or "set up commitlint and husky".
 ---
 
 # scaffold-repository

@@ -163,8 +163,6 @@ scope, and treat any issue as best-effort association, not a separate path.
 - Residual risks and test gaps are reported only when they are concrete,
   relevant to the scope, and useful for a human decision.
 
-For this skill, all visible PR checks include required and optional checks.
-
 ## Workflow
 
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.

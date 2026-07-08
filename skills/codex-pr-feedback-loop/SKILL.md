@@ -1,6 +1,6 @@
 ---
 name: codex-pr-feedback-loop
-description: Loops a Codex app worktree on an existing PR's review feedback — polling, objective cleanup, verified fixes, threaded replies, and pushed updates. Use when a Codex app chat should keep iterating on a pull request after its first successful push.
+description: Loops a Codex app worktree on an existing PR's review feedback. Use when a Codex app chat should keep iterating on a pull request after its first successful push.
 ---
 
 # PR Feedback Loop

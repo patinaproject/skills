@@ -19,7 +19,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
 - `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
-- `skills/email-triage/`: account-agnostic Gmail five-bucket triage skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
   real directories restored by `pnpm skills:install`. All entries are tracked.
@@ -226,7 +225,6 @@ This repo owns these skills at flat paths:
 | write-docs | `skills/write-docs/` |
 | improve-branch-architecture | `skills/improve-branch-architecture/` |
 | write-release-changelog | `skills/write-release-changelog/` |
-| email-triage | `skills/email-triage/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.

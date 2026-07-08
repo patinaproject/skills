@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-github-issue","./skills/develop","./skills/develop-with-workflow","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/review-branch","./skills/harden-branch","./skills/update-branch","./skills/install-skills","./skills/write-docs","./skills/improve-branch-architecture","./skills/write-release-changelog","./skills/email-triage"]'
-retired_marketplace_skills='review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive'
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-github-issue","./skills/develop","./skills/develop-with-workflow","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/review-branch","./skills/harden-branch","./skills/update-branch","./skills/install-skills","./skills/write-docs","./skills/improve-branch-architecture","./skills/write-release-changelog"]'
+retired_marketplace_skills='review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage'
 
 # Validate the Claude Code marketplace catalog.
 test -f .claude-plugin/marketplace.json

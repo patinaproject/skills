@@ -1,6 +1,6 @@
 ---
 name: write-release-changelog
-description: Run the release ceremony — draft a community changelog and close the loop on the product-feedback items a release resolved (per-item replies, status set to complete, a thank-you linking every item). Use when a release just shipped and you want to write its changelog and tell the people whose feedback it resolved, or when the user says "write the release changelog", "close the loop on feedback", or "run the release ceremony".
+description: Run the release ceremony — draft a community changelog and close the loop on the product-feedback items a release resolved. Use when a release just shipped and you want to write its changelog and tell the people whose feedback it resolved, or when the user says "write the release changelog", "close the loop on feedback", or "run the release ceremony".
 ---
 
 # Write Release Changelog
