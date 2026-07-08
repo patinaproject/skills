@@ -348,10 +348,10 @@ tell the human what to do next.
 
     The PR is `ready-to-merge` only when every final gate below is true:
 
-    - every uncommitted path has a provable disposition: in-scope paths are all
-      committed to the PR head, and every remaining uncommitted path is
-      out-of-scope with a named issue or branch attribution. Any ambiguous,
-      unattributed, or plausibly-in-scope path fails this gate.
+    - every uncommitted path has a provable disposition per the classification
+      above: in-scope paths are all committed to the PR head, every remaining
+      path is out-of-scope with a named issue or branch, and any ambiguous or
+      unattributed path fails this gate.
     - local branch equals the PR `headRefName`.
     - local `HEAD` equals the PR `headRefOid`.
     - `mergeStateStatus` is `CLEAN`.
