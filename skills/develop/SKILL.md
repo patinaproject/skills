@@ -155,6 +155,11 @@ scope, and treat any issue as best-effort association, not a separate path.
 - PR check failures outside branch scope have a concrete disposition in a
   `human-blocked` final report; do not report `goal-met` while any visible PR
   check is still failing.
+- When an issue is resolved, the PR is on its issue-linked branch, or the final
+  report explicitly names the retained non-issue-linked branch and why the
+  caller declared it immutable. Do not report `goal-met` on such a branch
+  without that explicit, reasoned callout. A no-issue run that finished on the
+  current branch per the no-issue path has no issue-linked branch to require.
 - Residual risks and test gaps are reported only when they are concrete,
   relevant to the scope, and useful for a human decision.
 
@@ -237,6 +242,10 @@ Include:
 - What changed, in 1-3 meaningful bullets.
 - Where the work ended up: include the issue, PR, and branch links. Link them
   when URLs are available; name them plainly when not.
+- Branch identity, called out only when it deviates: when the PR is on a
+  retained non-issue-linked branch, name that branch and why the caller declared
+  it immutable. When it is the normal issue-linked branch, a plain link is
+  enough — do not editorialize.
 - Project status update result only when it changed readiness, failed, skipped,
   explains a blocker, or creates a human next action.
 - Issue self-assignment result only when it failed, changed readiness, or
