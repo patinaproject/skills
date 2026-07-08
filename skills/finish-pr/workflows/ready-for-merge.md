@@ -326,9 +326,32 @@ tell the human what to do next.
       }'
     ```
 
+    Classify the worktree before the gate. Enumerate every uncommitted path
+    from `git status --short` — tracked modifications and untracked (`??`) paths
+    alike — and give each path exactly one provable disposition:
+
+    - **in-scope**: the path is part of this PR's change. It must be committed
+      and pushed to the PR head before ready-to-merge. An in-scope path left
+      uncommitted means the PR is not finished — commit it (looping back through
+      verification and the readiness loop on the new head) or report
+      `not ready-to-merge`.
+    - **out-of-scope**: the path provably belongs to a different issue or
+      branch. Name that issue or branch as the attribution. A path is
+      out-of-scope only when the attribution is provable; "probably unrelated,"
+      "looks like leftover," or "belongs to the other batch" is not proof.
+
+    A path that is ambiguous, unattributed, or plausibly in-scope is treated as
+    in-scope: it forces `not ready-to-merge`, or a halt for the human when
+    committing it needs judgment the workflow does not have. Never fold an
+    unattributed path into "clean," and never self-classify an in-scope change
+    as belonging to a different PR to pass the gate.
+
     The PR is `ready-to-merge` only when every final gate below is true:
 
-    - local worktree is clean.
+    - every uncommitted path has a provable disposition: in-scope paths are all
+      committed to the PR head, and every remaining uncommitted path is
+      out-of-scope with a named issue or branch attribution. Any ambiguous,
+      unattributed, or plausibly-in-scope path fails this gate.
     - local branch equals the PR `headRefName`.
     - local `HEAD` equals the PR `headRefOid`.
     - `mergeStateStatus` is `CLEAN`.
@@ -361,6 +384,9 @@ tell the human what to do next.
       resolution or feedback fixes.
     - Verification commands and results, summarized at the highest useful
       level.
+    - When the worktree legitimately holds another branch's uncommitted work,
+      the out-of-scope paths and the issue or branch they belong to. Do not call
+      the worktree "clean" while such paths remain.
     - Feedback handled, deferred, stale, explained, or blocked, including a
       per-finding disposition for every top-level review finding and
       per-failing-check dispositions when they change what the human should
@@ -394,7 +420,7 @@ tell the human what to do next.
     PR #197 is ready-to-merge.
 
     Final readiness:
-    - local worktree is clean
+    - every uncommitted path has a provable disposition
     - local branch equals `headRefName`
     - local HEAD equals `headRefOid`
     - mergeStateStatus is CLEAN
@@ -411,6 +437,8 @@ tell the human what to do next.
 
 - Issue inference is ambiguous.
 - Change staging would include unrelated or ambiguous files.
+- An uncommitted path cannot be provably attributed to a different issue or
+  branch, and committing it in-scope needs judgment the workflow does not have.
 - Local verification fails for a reason that is not branch-local or in scope.
 - Merge conflict resolution requires product judgment, secrets, permissions,
   destructive git operations, unrelated scope, or unverifiable semantic choices.

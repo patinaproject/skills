@@ -20,10 +20,14 @@ PR, then runs the readiness loop until the PR is ready-to-merge or every
 problematic check is triaged and reported. A failing check is evidence to
 triage, not a halt. It never merges the PR.
 
-End on a strict final ready-to-merge gate. If any gate fails, report the PR as
-not ready-to-merge, name the blocker in human-friendly language, and do not
-imply success or call it finished. If every gate passes, compress the
-ready-to-merge evidence into one human line.
+End on a strict final ready-to-merge gate. The gate enumerates every
+uncommitted path and requires a provable per-path disposition — in-scope paths
+must be committed, out-of-scope paths must name the issue or branch they belong
+to — so an ambiguous or plausibly-in-scope change can never pass as a "clean"
+worktree. If any gate fails, report the PR as not ready-to-merge, name the
+blocker in human-friendly language, and do not imply success or call it
+finished. If every gate passes, compress the ready-to-merge evidence into one
+human line.
 
 ## Workflow
 
