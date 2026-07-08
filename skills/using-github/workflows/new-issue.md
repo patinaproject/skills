@@ -70,6 +70,15 @@ Use the issue body shape in Step 7 from this point onward.
 
 Wait for the response before proceeding.
 
+**Wide-refactor check.** Classify the scope before drafting. If it is a **wide
+refactor** — one mechanical change whose blast radius fans across the codebase
+(renaming a shared symbol, retyping a widely-used interface) — it does not fit
+one issue. Surface this to the user and hand off to `to-tickets` to file it as
+an **expand–contract** sequence of linked issues (an expand issue, migrate
+issues in batches sized by blast radius each blocked by the expand, and a
+contract issue blocked by every migrate batch) so each lands green; this
+single-issue workflow does not emit the sequence itself.
+
 ---
 
 ## Step 3: Duplicate check
@@ -308,13 +317,6 @@ Rules:
   append it under `## Blocked by` after any blockers as `Relates to #N`.
 - If `$depSupported = false` and any `blocked-by`/`blocks` entries exist, also
   append `Blocked by #N` / `Blocks #N` lines to `## Blocked by`.
-- If the scope is a **wide refactor** — one mechanical change whose blast radius
-  fans across the codebase (renaming a shared symbol, retyping a widely-used
-  interface) — it does not fit one issue. Surface this to the user and hand off
-  to `to-tickets` to file it as an **expand–contract** sequence of linked issues
-  (an expand issue, migrate issues in batches sized by blast radius each blocked
-  by the expand, and a contract issue blocked by every migrate batch) so each
-  lands green; this single-issue workflow does not emit the sequence itself.
 
 Resolve the target repository before presenting the draft:
 
