@@ -310,11 +310,12 @@ Rules:
   append `Blocked by #N` / `Blocks #N` lines to `## Blocked by`.
 - If the scope is a **wide refactor** — one mechanical change whose blast radius
   fans across the codebase (renaming a shared symbol, retyping a widely-used
-  interface) — it does not fit one issue. Surface this to the user and file it
-  as an **expand–contract** sequence of linked issues (an expand issue, migrate
-  issues in batches sized by blast radius each blocked by the expand, and a
-  contract issue blocked by every migrate batch) so each lands green, following
-  `to-tickets`' wide-refactor slicing.
+  interface) — it does not fit one issue. Surface this to the user and hand off
+  to `to-tickets` (or `develop-with-workflow`) to file it as an **expand–contract**
+  sequence of linked issues (an expand issue, migrate issues in batches sized by
+  blast radius each blocked by the expand, and a contract issue blocked by every
+  migrate batch) so each lands green; this single-issue workflow does not emit
+  the sequence itself.
 
 Resolve the target repository before presenting the draft:
 
