@@ -155,8 +155,8 @@ scope, and treat any issue as best-effort association, not a separate path.
 - PR check failures outside branch scope have a concrete disposition in a
   `human-blocked` final report; do not report `goal-met` while any visible PR
   check is still failing.
-- When an issue is resolved, the PR is on its issue-linked branch, or the final
-  report explicitly names the retained non-issue-linked branch and why the
+- When an issue is resolved, either the PR is on its issue-linked branch, or the
+  final report explicitly names the retained non-issue-linked branch and why the
   caller declared it immutable. Do not report `goal-met` on such a branch
   without that explicit, reasoned callout. A no-issue run that finished on the
   current branch per the no-issue path has no issue-linked branch to require.
