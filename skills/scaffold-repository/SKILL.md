@@ -150,12 +150,18 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 
 - **Commits**: Conventional Commits with no scope, required `#<issue>` tag, 72-char max. Enforced by commitlint + husky `commit-msg`.
 - **PR titles**: same format, so squash commits reuse them verbatim.
-- **PR body**: required closing keywords for normal PRs, additional
-  linked-issue relationships (`Related to`, `Blocks`, `Partially satisfies`),
-  a concise `What changed` summary, optional `Testing steps` only for
-  human-owned behavior or artifact checks, and optional `Do before merging` for
-  work-specific pre-merge operator chores. GitHub Checks are the source of truth for routine automated verification; PR bodies should not repeat
-  successful lint, test, type-check, hook, package, or similar command results.
+- **PR body**: a slim baseline shared by docs and code repos alike — required
+  closing keywords for normal PRs, additional linked-issue relationships
+  (`Related to`, `Blocks`, `Partially satisfies`), and a free-prose
+  `What changed` summary written for a reader who has not seen the work (no
+  `Context:` line or `- <change> - <why>` contract). `Testing steps` is not a
+  standing section; add it ad hoc only when a produced artifact needs human
+  inspection, and use optional `Do before merging` for work-specific pre-merge
+  operator chores. GitHub Checks are the source of truth for routine automated
+  verification; PR bodies should not repeat successful lint, test, type-check,
+  hook, package, or similar command results. See
+  [ADR-257](../../docs/adr/ADR-257-slim-baseline-pr-template.md) for the
+  single-baseline decision.
 - **Issue titles and bodies**: titles are plain-language, no commit-style
   prefix. Body structure is owned by the skill creating the issue; do not emit
   GitHub issue templates as a baseline convention.

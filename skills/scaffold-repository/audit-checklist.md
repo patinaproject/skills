@@ -39,7 +39,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.github/pull_request_template.md` | yes | present; includes required closing-keyword guidance plus additional linked-issue guidance, `## What changed`, optional `## Testing steps`, no dedicated automated-verification section, no pre-checked testing-step guidance, GitHub Checks as the routine automated verification surface, and `type: #123 short description` rule |
+| `.github/pull_request_template.md` | yes | present and slim; `## Linked issue` with required closing-keyword guidance plus additional linked-issue relationships, and a free-prose `## What changed` (no `Context:` line or `- <change> - <why>` contract). No standing `## Testing steps` section — it is an ad hoc addition for produced-artifact inspection only. GitHub Checks as the routine automated verification surface, and the `type: #123 short description` title rule |
 | Old GitHub issue templates | no | absent; existing issue templates are stale baseline artifacts and should be offered for deletion with a reviewable diff |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
 | `.github/workflows/pull-request.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
