@@ -70,9 +70,10 @@ produces.
   branch being host-provided is not itself a reason to keep it.
 - The one exception is a branch the caller has **explicitly declared
   immutable** — a ref it cannot rename, such as a CI-provided branch. This
-  declaration must arrive as an explicit caller instruction; never infer it from
-  the branch's name or origin, so a `claude/*` or other host-provided name is
-  never a declaration on its own. Only an explicit immutable declaration keeps
+  declaration must arrive as an explicit natural-language caller instruction in
+  the invocation context — the scope or arguments you were invoked with; never
+  infer it from the branch's name or origin, so a `claude/*` or other
+  host-provided name is never a declaration on its own. Only an explicit immutable declaration keeps
   the current branch; when it applies, you **must** report the deviation (see
   Final Report), never keep it silently.
 
