@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.14.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.14.0...patinaproject-skills-v2.14.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* [#246](https://github.com/patinaproject/skills/issues/246) harden finish-pr ready-to-merge worktree gate ([#259](https://github.com/patinaproject/skills/issues/259)) ([05c92b5](https://github.com/patinaproject/skills/commit/05c92b5cd36fcdd154823d5596e50b479e67a633))
+* [#258](https://github.com/patinaproject/skills/issues/258) gate non-issue-linked branch deviation ([#261](https://github.com/patinaproject/skills/issues/261)) ([5c04c6b](https://github.com/patinaproject/skills/commit/5c04c6bc8d390ddf3035c29f8a045d954e2e59d5))
+
 ## [2.14.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.13.0...patinaproject-skills-v2.14.0) (2026-07-06)
 
 
