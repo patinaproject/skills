@@ -32,7 +32,7 @@ owns publishing.
 
 - `improve-branch-architecture`: branch-scoped deepening, run in autonomous-accept mode.
 - `review-branch`: fresh-context, read-only branch-diff correctness review.
-- `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams.
+- `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams and `code-review` when done.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
 
 If any are missing, halt before running and report the missing skill names and

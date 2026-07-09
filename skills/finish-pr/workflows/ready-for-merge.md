@@ -217,7 +217,7 @@ tell the human what to do next.
     Treat exit code 124 from the timeout tool as a watch timeout. Treat a
     non-zero `gh` exit before the timeout as a fail-fast watch exit.
 
-    Do not filter to required checks only; optional checks can produce review
+    Watch all checks, including optional ones; optional checks can produce review
     comments or useful blocking evidence. After any watch command exit,
     immediately snapshot all check states and perform a full PR state resync:
     all check buckets, unresolved review threads, top-level PR comments, review

@@ -19,7 +19,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
 - `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
-- `skills/email-triage/`: account-agnostic Gmail five-bucket triage skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
   real directories restored by `pnpm skills:install`. All entries are tracked.
@@ -174,8 +173,8 @@ not invent parallel PR structure.
 - Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`.
   The PR body must use the template's section headings in the order the template defines,
   even when the body is passed inline via `--body`.
-- Issues: body structure is owned by the skill creating the issue. Prefer `to-prd`
-  for PRD-shaped issues and `to-issues` or `using-github` for implementation-slice
+- Issues: body structure is owned by the skill creating the issue. Prefer `to-spec`
+  for spec/PRD-shaped issues and `to-tickets` or `using-github` for implementation-slice
   issues. Manual GitHub issues are allowed when they contain enough context to act on.
 
 Recommended `gh` patterns:
@@ -226,7 +225,6 @@ This repo owns these skills at flat paths:
 | write-docs | `skills/write-docs/` |
 | improve-branch-architecture | `skills/improve-branch-architecture/` |
 | write-release-changelog | `skills/write-release-changelog/` |
-| email-triage | `skills/email-triage/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
@@ -240,6 +238,15 @@ The in-repo skills share the single root `patinaproject-skills` release and
 tag; they are not separate release-please packages. Third-party skills such as
 `find-skills` are installed separately from their source repo's default branch
 or a specific `#<git-ref>`.
+
+Adding or removing a repo-owned skill is a normal catalog change, not a breaking
+change: version it with the fitting conventional type (usually `feat:`), never a
+breaking `type!` / major bump. Skills are agent instructions, not a runtime API —
+a removed skill simply leaves the catalog (recorded in the marketplace tests'
+`retired_marketplace_skills` guard) and breaks nothing at runtime for consumers,
+who re-vendor from the lockfile. Reserve `type!` for changes that actually break
+a machine-consumed contract (for example the plugin-manifest schema or the
+install lockfile shape).
 
 Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
 auto-merges Release PRs after required checks pass.

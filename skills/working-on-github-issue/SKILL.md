@@ -1,6 +1,6 @@
 ---
 name: working-on-github-issue
-description: "Align GitHub state to the fact you are working an issue: resolve the issue from a reference or the current branch, then land on its branch and mark it started (self-assign and Project status, best-effort). Use as the shared begin/resume step whenever a controller works a scope that may map to an issue."
+description: "Align GitHub state to the fact you are working an issue: resolve the issue from a reference or the current branch, then land on its branch and mark it started. Use as the shared begin/resume step whenever a controller works a scope that may map to an issue."
 ---
 
 # Working On GitHub Issue

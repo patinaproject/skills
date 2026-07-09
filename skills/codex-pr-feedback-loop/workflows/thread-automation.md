@@ -54,9 +54,9 @@ Classify each unresolved item as actionable/blocking, requirement-changing, scop
 
 Automatically fix actionable/blocking feedback and objective low-severity cleanup that preserves accepted requirements, accepted scope, implementation strategy, test strategy, dependency-security conclusions, CI/workflow contracts, and product behavior.
 
-Stop and report human input is required if feedback changes requirements, accepted scope, implementation strategy, test strategy, dependency-security conclusions, CI/workflow contracts, or product behavior. Also stop for secrets, permission blockers, policy blockers, merge conflicts that cannot be resolved cleanly, or if packages/app/fingerprint.json becomes staged or must be committed.
+Stop and report human input is required if feedback changes requirements, accepted scope, implementation strategy, test strategy, dependency-security conclusions, CI/workflow contracts, or product behavior. Also stop for secrets, permission blockers, policy blockers, or merge conflicts that cannot be resolved cleanly.
 
-For each actionable/blocking item, inspect the latest head and current file context before editing. Implement the smallest correct root-cause fix. Follow AGENTS.md, docs/project-context.md, package AGENTS.md files, docs/testing-standards.md, docs/commit-style.md, and the first-party mock ban. Prefer offensive fixes over defensive workarounds.
+For each actionable/blocking item, inspect the latest head and current file context before editing. Implement the smallest correct root-cause fix. Follow the repository's documented guidance — `AGENTS.md`/`CLAUDE.md` and the docs they import — and its commit and test conventions. Prefer offensive fixes over defensive workarounds.
 
 After edits, run the narrowest local verification command that covers the changed behavior. Do not use hidden skip env vars, broad bypass knobs, or --no-verify. If local verification is blocked, report the exact blocker instead of claiming success.
 

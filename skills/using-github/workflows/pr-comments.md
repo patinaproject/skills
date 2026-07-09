@@ -314,5 +314,5 @@ Stop and do not reply, resolve, or report feedback handled when:
 | Using a GraphQL node ID in the REST reply URL | Use the numeric `databaseId` review comment ID. |
 | Omitting fix evidence | Include a fix SHA or concrete non-blocking evidence. |
 | Resolving before verification | Resolve only after latest-head handling evidence exists. |
-| Implementing requirement changes directly | Route through `Brainstormer -> Planner -> Executor`. |
+| Implementing requirement changes directly | Route back to the owning workflow (the controller that owns requirements). |
 | Reporting green CI as handled feedback | Report latest-head verification and GitHub-visible evidence. |

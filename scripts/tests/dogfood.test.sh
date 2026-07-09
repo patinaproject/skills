@@ -28,7 +28,6 @@ SKILLS=(
   write-docs
   improve-branch-architecture
   write-release-changelog
-  email-triage
 )
 FAIL_COUNT=0
 
