@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.17.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.16.0...patinaproject-skills-v2.17.0) (2026-07-09)
+
+
+### Features
+
+* [#273](https://github.com/patinaproject/skills/issues/273) adopt a standard skill catalog-change convention ([#275](https://github.com/patinaproject/skills/issues/275)) ([fbbe1b3](https://github.com/patinaproject/skills/commit/fbbe1b39d236b7b764ea261754d6ff093ecaa0ce))
+* [#274](https://github.com/patinaproject/skills/issues/274) rename polish-branch to polish with develop-style scope resolution ([#276](https://github.com/patinaproject/skills/issues/276)) ([8559440](https://github.com/patinaproject/skills/commit/8559440f72e7ce84031eb9c3782d63acbc9458a6))
+
 ## [2.16.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.15.0...patinaproject-skills-v2.16.0) (2026-07-09)
 
 
