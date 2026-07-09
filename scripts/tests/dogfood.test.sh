@@ -25,7 +25,6 @@ SKILLS=(
   harden-branch
   update-branch
   write-docs
-  improve-branch-architecture
   write-release-changelog
 )
 FAIL_COUNT=0

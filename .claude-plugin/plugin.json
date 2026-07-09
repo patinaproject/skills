@@ -13,7 +13,6 @@
     "./skills/update-branch",
     "./skills/install-skills",
     "./skills/write-docs",
-    "./skills/improve-branch-architecture",
     "./skills/write-release-changelog"
   ]
 }

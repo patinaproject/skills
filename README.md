@@ -112,16 +112,6 @@ one PR.
 See [./skills/develop-with-workflow/](./skills/develop-with-workflow/)
 for the skill contract.
 
-### improve-branch-architecture
-
-Shallow modules are cheapest to deepen while the change is still in flight.
-`improve-branch-architecture` scopes deepening-opportunity recommendations to
-the current branch's changes plus the radius that can fold into them, delivered
-as in-conversation markdown rather than silent edits.
-
-See [./skills/improve-branch-architecture/](./skills/improve-branch-architecture/)
-for the skill contract.
-
 ### harden-branch
 
 A human should only ever see a structurally-settled, self-reviewed branch.
@@ -199,7 +189,6 @@ README and skill contract.
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-github-issue, build, harden-branch, and finish-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [harden-branch](./skills/harden-branch/) | Ready a branch for review: deepen architecture, then review to green |
-| [improve-branch-architecture](./skills/improve-branch-architecture/) | Recommend branch-scoped deepening opportunities as in-conversation markdown |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
@@ -257,7 +246,6 @@ skills/
   harden-branch/
   update-branch/
   write-docs/
-  improve-branch-architecture/
   write-release-changelog/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>

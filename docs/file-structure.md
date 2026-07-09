@@ -18,7 +18,6 @@ layout.
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
-- `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
 - `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
   into `../../skills/<name>/`, vendored third-party skills are real directories
@@ -55,7 +54,6 @@ Skills owned by this repository:
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
-| `improve-branch-architecture` | `skills/improve-branch-architecture/` | Branch-scoped deepening recommendations |
 | `write-release-changelog` | `skills/write-release-changelog/` | Release changelog and product-feedback loop-closing ceremony |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is

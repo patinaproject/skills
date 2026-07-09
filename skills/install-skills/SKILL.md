@@ -91,7 +91,6 @@ Active Patina scaffold defaults are:
 - `develop`
 - `finish-pr`
 - `harden-branch`
-- `improve-branch-architecture`
 - `install-skills`
 
 ## Verify
