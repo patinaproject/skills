@@ -112,15 +112,6 @@ one PR.
 See [./skills/develop-with-workflow/](./skills/develop-with-workflow/)
 for the skill contract.
 
-### review-branch
-
-Local issue work needs a fresh review pass before publishing. `review-branch`
-computes the default-branch merge-base, includes committed, staged, unstaged,
-and untracked changes, then dispatches a fresh read-only reviewer to report
-findings without editing files or mutating GitHub state.
-
-See [./skills/review-branch/](./skills/review-branch/) for the skill contract.
-
 ### improve-branch-architecture
 
 Shallow modules are cheapest to deepen while the change is still in flight.
@@ -136,7 +127,7 @@ for the skill contract.
 A human should only ever see a structurally-settled, self-reviewed branch.
 `harden-branch` runs two ordered settle-phases — first deepen the branch's
 architecture until a pass accepts nothing more, then review it to green via
-`review-branch` — so finished work and controller pipelines hit the same pre-PR
+`code-review` — so finished work and controller pipelines hit the same pre-PR
 readiness bar.
 
 See [./skills/harden-branch/](./skills/harden-branch/) for the skill contract.
@@ -208,7 +199,6 @@ README and skill contract.
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-github-issue, build, harden-branch, and finish-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [harden-branch](./skills/harden-branch/) | Ready a branch for review: deepen architecture, then review to green |
-| [review-branch](./skills/review-branch/) | Run isolated local branch-diff review |
 | [improve-branch-architecture](./skills/improve-branch-architecture/) | Recommend branch-scoped deepening opportunities as in-conversation markdown |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
@@ -234,7 +224,6 @@ pnpm test
 ```sh
 npx skills@latest add ./skills/scaffold-repository --list
 npx skills@latest add ./skills/install-skills --list
-npx skills@latest add ./skills/review-branch --list
 npx skills@latest add ./skills/update-branch --list
 npx skills@latest add ./skills/develop --list
 npx skills@latest add ./skills/codex-pr-feedback-loop --list
@@ -265,7 +254,6 @@ skills/
   develop-with-workflow/
   finish-pr/
   codex-pr-feedback-loop/
-  review-branch/
   harden-branch/
   update-branch/
   write-docs/

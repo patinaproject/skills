@@ -22,7 +22,6 @@ SKILLS=(
   develop-with-workflow
   finish-pr
   codex-pr-feedback-loop
-  review-branch
   harden-branch
   update-branch
   write-docs

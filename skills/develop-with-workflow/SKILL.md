@@ -59,11 +59,12 @@ freeze.
 
 The downstream handoff is separate from the build: this skill stops at the
 converged branch, then directs you to `harden-branch` (which reaches
-`improve-branch-architecture` and `review-branch`) and `finish-pr`. Install
+`improve-branch-architecture` and `code-review`) and `finish-pr`. Install
 those too so a standalone run does not dead-end at the handoff:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill harden-branch improve-branch-architecture review-branch finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill harden-branch improve-branch-architecture finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 ```
 
 ## Workflow

@@ -35,7 +35,7 @@ installable skills.
   resolving, or reporting PR review feedback handled.
 - Ready a branch for review (pre-PR gate): route to the `harden-branch` skill —
   it deepens the branch architecture until settled, then reviews it to green via
-  `review-branch`, before finishing.
+  `code-review`, before finishing.
 - Finish completed work: route to the `finish-pr` skill (it runs after
   `harden-branch`).
 

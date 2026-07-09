@@ -66,7 +66,7 @@ environment:
 - `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
 `working-on-github-issue` reaches `new-branch`; `harden-branch` reaches
-`improve-branch-architecture`, `review-branch`, `implement`, and
+`improve-branch-architecture`, `code-review`, `implement`, and
 `diagnosing-bugs`; `implement` reaches `tdd` and `code-review`. Confirm those are
 installed too.
 
@@ -74,7 +74,7 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch review-branch harden-branch improve-branch-architecture finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch harden-branch improve-branch-architecture finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
@@ -147,7 +147,7 @@ scope, and treat any issue as best-effort association, not a separate path.
 - Repository-documented verification has run and results are recorded.
 - Relevant tests are added or updated when the change has executable behavior.
 - `harden-branch` ran and reached a settled, green branch: architecture deepened
-  until settled, and `review-branch` findings fixed or dispositioned.
+  until settled, and `code-review` findings fixed or dispositioned.
 - GitHub PR review comments and hosted review comments surfaced by `finish-pr`
   are fixed or dispositioned.
 - After `finish-pr`, all currently visible required and optional PR checks pass
@@ -180,7 +180,7 @@ scope, and treat any issue as best-effort association, not a separate path.
    instructions authoritative over any issue body — then run
    repository-documented verification.
 7. Run `harden-branch` to ready the branch: it deepens the architecture until
-   settled, then reviews to green via `review-branch`, routing findings through
+   settled, then reviews to green via `code-review`, routing findings through
    its Finding Router. Invoking `develop` is sufficient approval for
    `harden-branch`'s review gate; dispatch it without asking for another
    confirmation. A `ready-for-human` finding stops the loop as `human-blocked`.
@@ -255,10 +255,10 @@ Include:
 - Relevant tests added or updated.
 - Child skill halt reasons, only when a halt changes what the human should do
   next.
-- `harden-branch` result: architecture deepenings applied and `review-branch`
+- `harden-branch` result: architecture deepenings applied and `code-review`
   finding dispositions.
 - PR review and check feedback status.
-- Latest `review-branch` result from `harden-branch`, or that the gate found
+- Latest `code-review` result from `harden-branch`, or that the gate found
   nothing to change, only when it changes reviewer confidence or next action.
 - Human-owned blockers, if any.
 - `wontfix` explanations, if any.
