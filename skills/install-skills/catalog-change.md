@@ -28,7 +28,9 @@ never refresh without auditing after.
    ```
 
 2. **Add new skills.** Install any newly requested skill from its source with
-   the `install-skills` `add` command, updating `skills-lock.json`.
+   the `skills add` command this skill documents
+   (`npx --yes skills@latest add <source> --skill <name> …`), which updates
+   `skills-lock.json`.
 
 3. **Remove or migrate renamed or deleted skills.** When an upstream skill was
    renamed or removed, drop its stale lock entry. If it was renamed, add the
@@ -92,9 +94,12 @@ Staleness audit: all M locked skillPaths resolve on their source default
 branches.
 ```
 
-Omit an empty section rather than writing "none". Every `Removed` entry states
-its replacement (`use <successor> instead`) or that it was retired upstream, so a
-reader knows where the capability went.
+Itemize the delta as above; the surrounding `What changed` narrative stays plain
+prose per the repository's PR guidance — this list is a catalog diff a reader
+scans, not a reintroduced `- <change> - <why>` contract. Omit an empty section
+rather than writing "none". Every `Removed` entry states its replacement
+(`use <successor> instead`) or that it was retired upstream, so a reader knows
+where the capability went.
 
 ## Verification
 
