@@ -195,6 +195,16 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   `skills:install`, and `clean` package scripts and remove any retired
   auto-restore `postinstall` hook, retired skill-restore package scripts, or
   custom `scripts/install-skills.sh`.
+- **Skill catalog changes**: every change to a repo's vendored catalog
+  (`skills-lock.json` add, remove, rename, or refresh) follows one shared method
+  and PR shape — the ordered reconciliation method, the staleness audit that
+  surfaces a skill renamed or deleted upstream instead of leaving it silently
+  stale, and the Added / Removed / Refreshed / Unchanged catalog-delta PR
+  description. The `install-skills` skill owns this convention in its
+  `catalog-change.md`; a repo inherits it just-in-time by vendoring
+  `install-skills`, which carries that file. Realignment confirms the convention
+  travels with the repo (see [`audit-checklist.md`](./audit-checklist.md) →
+  Area 5).
 - **Shared worktree setup (`scripts/worktree-setup.sh`)**: scaffolded
   repositories ship a single idempotent setup script wired into both agent
   surfaces — the Claude Code `SessionStart` (`startup`) hook in
