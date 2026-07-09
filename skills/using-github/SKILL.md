@@ -29,15 +29,15 @@ installable skills.
   status, best-effort), and lands on the issue-linked branch, delegating branch
   creation to `new-branch`.
 - Develop an issue end to end: route to the `develop` controller, which
-  drives `working-on-github-issue` → build → `harden-branch` → `finish-pr`.
+  drives `working-on-github-issue` → build → `polish-branch` → `finish-pr`.
 - Milestone changelog: follow `workflows/write-changelog.md`.
 - PR comments: follow `workflows/pr-comments.md` before replying to,
   resolving, or reporting PR review feedback handled.
-- Ready a branch for review (pre-PR gate): route to the `harden-branch` skill —
+- Ready a branch for review (pre-PR gate): route to the `polish-branch` skill —
   it deepens the branch architecture until settled, then reviews it to green via
   `code-review`, before finishing.
 - Finish completed work: route to the `finish-pr` skill (it runs after
-  `harden-branch`).
+  `polish-branch`).
 
 ## Routing Defaults
 
@@ -50,9 +50,9 @@ computed issue branch it stays put. If on a different issue branch, ask before
 changing context. When the user wants one issue driven end to end (or invokes
 `/develop`), route to the `develop` controller instead.
 
-Route to `harden-branch` when the build is complete and the branch needs
+Route to `polish-branch` when the build is complete and the branch needs
 readying for review before a PR — it deepens the architecture until settled,
-then reviews to green. `harden-branch` runs before `finish-pr`.
+then reviews to green. `polish-branch` runs before `finish-pr`.
 
 Route to `finish-pr` when the user explicitly says the work is complete, asks to
 publish or open a ready PR, or objective evidence shows implementation and local

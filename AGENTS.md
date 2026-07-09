@@ -12,7 +12,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/harden-branch/`: pre-PR deepen-then-review readiness gate skill
+- `skills/polish-branch/`: pre-PR deepen-then-review readiness gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
@@ -200,7 +200,7 @@ This repo owns these skills at flat paths:
 | develop-with-workflow | `skills/develop-with-workflow/` |
 | finish-pr | `skills/finish-pr/` |
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
-| harden-branch | `skills/harden-branch/` |
+| polish-branch | `skills/polish-branch/` |
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | write-docs | `skills/write-docs/` |
