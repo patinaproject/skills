@@ -95,7 +95,7 @@ End-to-end work needs a single entrypoint without weakening the focused skills
 that already own branch setup, test-driven implementation, diagnosis, local
 review, and PR finishing. `develop` takes a **scope** — an issue reference,
 free-form instructions, or both — coordinates `working-on-github-issue`,
-`implement`, `polish-branch`, and `finish-pr`, and stops for human-owned
+`implement`, `polish`, and `finish-pr`, and stops for human-owned
 ambiguity instead of inventing scope.
 
 See [./skills/develop/](./skills/develop/) for the skill contract.
@@ -111,15 +111,15 @@ one PR.
 See [./skills/develop-with-workflow/](./skills/develop-with-workflow/)
 for the skill contract.
 
-### polish-branch
+### polish
 
 A human should only ever see a structurally-settled, self-reviewed branch.
-`polish-branch` runs two ordered settle-phases — first deepen the branch's
+`polish` runs two ordered settle-phases — first deepen the branch's
 architecture until a pass accepts nothing more, then review it to green via
 `code-review` — so finished work and controller pipelines hit the same pre-PR
 readiness bar.
 
-See [./skills/polish-branch/](./skills/polish-branch/) for the skill contract.
+See [./skills/polish/](./skills/polish/) for the skill contract.
 
 ### finish-pr
 
@@ -185,9 +185,9 @@ README and skill contract.
 | [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [working-on-github-issue](./skills/working-on-github-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
-| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-github-issue, build, polish-branch, and finish-pr |
+| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-github-issue, build, polish, and finish-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
-| [polish-branch](./skills/polish-branch/) | Ready a branch for review: deepen architecture, then review to green |
+| [polish](./skills/polish/) | Ready a branch for review: deepen architecture, then review to green |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
@@ -242,7 +242,7 @@ skills/
   develop-with-workflow/
   finish-pr/
   codex-pr-feedback-loop/
-  polish-branch/
+  polish/
   update-branch/
   write-docs/
   write-release-changelog/

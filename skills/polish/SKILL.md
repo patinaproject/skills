@@ -1,5 +1,5 @@
 ---
-name: polish-branch
+name: polish
 description: "Ready a branch for human review with two ordered settle-phases — deepen its architecture, then review it to green. Use when finishing issue work before a PR, when readying any branch for review on its own, or when a controller skill needs the pre-PR quality gate."
 ---
 
@@ -7,10 +7,14 @@ description: "Ready a branch for human review with two ordered settle-phases —
 
 ## Quick Start
 
-Invoke on the branch you want to ready for review:
+Invoke on the branch you want to ready for review, with an **optional scope** —
+an issue reference, free-form instructions, or both:
 
 ```text
-/polish-branch
+/polish
+/polish #123
+/polish "focus on the validation path"
+/polish #123 focus on the parser
 ```
 
 **Polish** the current branch into something a human only ever sees once it is
@@ -28,17 +32,45 @@ fixes and deepens, it does not build the issue from scratch. It commits the
 fixes its phases produce. It does not push or open a pull request — `finish-pr`
 owns publishing.
 
+## Scope Contract
+
+The parameter is an **optional scope** — a free-form string that may be an issue
+reference, instructions, or both. It tells `polish` which issue to align to and
+what its phases attend to; it never adds build work.
+
+- **Scope is authoritative for focus.** When the scope carries free-form
+  instructions, they narrow what Phase 1 deepens and what Phase 2 prioritizes.
+  They scope attention within the branch's existing diff — `polish` deepens and
+  reviews what is already built rather than expanding the change.
+- **Issue association is best-effort.** `working-on-github-issue` resolves the
+  issue from a reference in the scope, else the current branch, and aligns the
+  branch, assignment, and status. When it resolves **no issue**, warn and
+  continue — Phase 2 simply skips the Spec axis; do not halt.
+- **Divergence is surfaced, not silently absorbed.** When the branch's built
+  work materially diverges from the resolved issue body, name it in the final
+  report rather than quietly reviewing around it. Leave the issue body to the
+  caller; this skill never edits it.
+
+`polish` deepens and reviews an already-built branch, so it omits `develop`'s
+build-only judgments — acceptance-criteria actionability gating and
+build-vs-issue construction precedence. It needs the issue *resolved*, not
+interpreted for construction.
+
 ## Required Child Skills
 
+- `working-on-github-issue`: resolve the issue (from the scope or the current branch) and land on its issue-linked branch, best-effort; returns cleanly when there is no issue.
 - `code-review`: two-axis Standards + Spec branch-diff review via parallel report-only sub-agents.
 - `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams and `code-review` when done.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
 - `codebase-design`: the deep-module vocabulary and principles Phase 1 deepens against (reference, not invoked).
 
+`working-on-github-issue` reaches `new-branch`; confirm it is installed too.
+
 If any are missing, halt before running and report the missing skill names and
 install guidance:
 
 ```sh
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
@@ -46,12 +78,30 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosin
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
+## Step 0 — Align to the scope
+
+Before Phase 1, run `working-on-github-issue` to resolve and align: it resolves
+the issue from a reference in the scope, else the current branch, then lands on
+the issue-linked branch and marks it started — all best-effort and idempotent.
+Re-running it while already aligned changes nothing, so a controller such as
+`develop` that already resolved the scope forwards it here as a cheap
+re-confirmation of the same branch and issue.
+
+- When it resolves an issue, carry that reference into Phase 2's Spec axis.
+- When it resolves **no issue**, warn that Spec conformance cannot be checked
+  against an issue, then continue — both phases still run, with the Spec axis
+  skipped.
+
+Then Phase 1 begins.
+
 ## Phase 1 — Deepen until settled
 
 Surface architectural friction in the branch's changes and apply the deepenings
 that clearly earn their place, re-running until a pass finds nothing more — that
 zero is the settle signal. Deepening runs **before** review so Phase 2 judges the
-settled shape.
+settled shape. When the scope carried free-form instructions, weight each pass
+toward the modules they name, still deepening only what the branch's own diff
+touches.
 
 Work in the **deep-module vocabulary** and its principles — **module**,
 **interface**, **depth** (**deep**/**shallow**), **seam**, **adapter**,
@@ -101,12 +151,12 @@ blocking findings remain — that is **green**.
   or `git rev-parse --abbrev-ref origin/HEAD` stripped of its leading `origin/`),
   then take its merge-base (`git merge-base origin/<default-branch> HEAD`) — and
   give it to `code-review` as the fixed point, so it never pauses to ask for one.
-  Let its **Spec** axis auto-discover the originating issue from the branch's
-  commit refs; when none is found, instruct `code-review` to **skip the Spec
-  axis rather than prompt** — this overrides its default of asking where the spec
-  is, keeping the run unattended. Invoking `polish-branch` (or a controller that
-  reaches it) is sufficient approval to run it; do not ask for another
-  confirmation.
+  Give its **Spec** axis the issue resolved in Step 0 as the originating issue,
+  superseding commit-ref archaeology; when Step 0 resolved **no issue**, instruct
+  `code-review` to **skip the Spec axis rather than prompt** — this overrides its
+  default of asking where the spec is, keeping the run unattended. Invoking
+  `polish` (or a controller that reaches it) is sufficient approval to run it; do
+  not ask for another confirmation.
 - **Map the two axes to the gate.** `code-review` reports along **Standards**
   (documented conventions plus a Fowler smell baseline) and **Spec** (does the
   diff implement the issue). Treat as **blocking**: Standards hard violations
@@ -114,7 +164,9 @@ blocking findings remain — that is **green**.
   findings. Treat as **non-blocking**: judgement-call smells and benign
   scope-creep notes (the diff did a little more than asked). A scope finding
   whose resolution needs a product or scope decision is different — route it
-  `ready-for-human` per the Finding Router. Green is no blocking findings left.
+  `ready-for-human` per the Finding Router. When the scope carried free-form
+  instructions, prioritize findings on the modules they name. Green is no
+  blocking findings left.
 - **Keep fixes out of the reviewer.** `code-review` runs its axes as
   report-only sub-agents; apply every fix through `implement` or
   `diagnosing-bugs`, never inside a reviewer sub-agent.
@@ -147,6 +199,8 @@ stops Phase 2 before green; report it as a human-owned blocker.
 
 Write for the caller, leading with whether the branch is polished:
 
+- Resolved issue reference, or that Step 0 found no issue and the Spec axis was
+  skipped.
 - Phase 1: rounds run and deepenings applied, or that it settled with zero
   candidates on the first pass.
 - Phase 2: review result and finding dispositions; name the blocker if it
@@ -154,4 +208,5 @@ Write for the caller, leading with whether the branch is polished:
 - Verification result, collapsed to one line when everything passed.
 - Human-owned blockers, if any.
 - `wontfix` explanations, if any.
+- Scope divergence from the resolved issue body, if any.
 - Residual risks or test gaps, only when concrete and relevant.
