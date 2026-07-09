@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.16.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.15.0...patinaproject-skills-v2.16.0) (2026-07-09)
+
+
+### Features
+
+* [#268](https://github.com/patinaproject/skills/issues/268) fold branch architecture deepening into harden-branch ([#269](https://github.com/patinaproject/skills/issues/269)) ([08f70a1](https://github.com/patinaproject/skills/commit/08f70a1573d0c73d94e18cd52ff36c9e349bf497))
+* [#271](https://github.com/patinaproject/skills/issues/271) rename harden-branch skill to polish-branch ([#272](https://github.com/patinaproject/skills/issues/272)) ([b5a3ad9](https://github.com/patinaproject/skills/commit/b5a3ad9b23ddc7b629a3fa809fa655ab1bcb8dbc))
+
 ## [2.15.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.14.1...patinaproject-skills-v2.15.0) (2026-07-09)
 
 
