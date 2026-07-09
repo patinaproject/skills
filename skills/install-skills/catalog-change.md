@@ -49,11 +49,14 @@ never refresh without auditing after.
 ## Staleness audit
 
 Confirm every locked `skillPath` still exists on its source's default branch. A
-GitHub source resolves through the Contents API; a `404` means the skill was
-renamed or deleted upstream and would be silently skipped on the next refresh:
+GitHub source (`sourceType: "github"`) resolves through the Contents API; a
+`404` means the skill was renamed or deleted upstream and would be silently
+skipped on the next refresh:
 
 ```bash
-jq -r '.skills | to_entries[] | "\(.key)\t\(.value.source)\t\(.value.skillPath)"' skills-lock.json |
+jq -r '.skills | to_entries[]
+  | select(.value.sourceType == "github")
+  | "\(.key)\t\(.value.source)\t\(.value.skillPath)"' skills-lock.json |
 while IFS=$'\t' read -r name source path; do
   if gh api "repos/${source}/contents/${path}" --jq .path >/dev/null 2>&1; then
     echo "ok    ${name}"
@@ -63,9 +66,10 @@ while IFS=$'\t' read -r name source path; do
 done
 ```
 
-Every entry must report `ok`. For each `STALE` entry, migrate to the successor
-(discover its new name and path with step 1's `--list`) or remove the entry, then
-re-run the audit until it is clean.
+The `select` keeps the Contents-API check to GitHub sources; audit any other
+`sourceType` against its own source of truth. Every entry must report `ok`. For
+each `STALE` entry, migrate to the successor (discover its new name and path with
+step 1's `--list`) or remove the entry, then re-run the audit until it is clean.
 
 ## Catalog-delta PR description
 

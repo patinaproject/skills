@@ -21,9 +21,8 @@ Any change to the catalog — add, remove, rename, or refresh — is a **catalog
 change**. Execute and describe every one by the shared
 [catalog change convention](./catalog-change.md): the ordered reconciliation
 method, the **staleness audit** that catches a skill renamed or deleted
-upstream, the Added / Removed / Refreshed / Unchanged **catalog-delta** PR
-description, and the verification gate. Follow it whenever this skill's steps
-below change `skills-lock.json`.
+upstream, the **catalog-delta** PR description, and the verification gate. Follow
+it whenever this skill's steps below change `skills-lock.json`.
 
 ## Preflight
 
