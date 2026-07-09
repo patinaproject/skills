@@ -96,6 +96,7 @@ in a fresh worktree without an install step.
 | `.gitignore` | yes | does not ignore `.agents/skills/**` or `.claude/skills/**`; ignores `node_modules/` and `.skills-install.lock*` |
 | `pnpm skills:install` | yes | run after accepting `skills-lock.json` drift when one or more skills are locked; re-vendors the committed overlays via the upstream skills CLI (`skills experimental_install`), which must then be committed |
 | `npx --yes skills@latest list --json` | yes | verify vendored skills are present alongside any in-repo overlay symlinks |
+| Catalog-change convention | when catalog non-empty | when `skills-lock.json` locks any skill, the skill-catalog-change convention must travel with the repo: `install-skills` is locked (its `catalog-change.md` carries the reconciliation method, staleness audit, and catalog-delta PR format). When a populated lock omits `install-skills`, recommend adding it so catalog changes stay executed and described the same way |
 
 ## Area 6 – Deprecated workflow cleanup
 
