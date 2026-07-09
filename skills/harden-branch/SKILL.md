@@ -31,7 +31,7 @@ owns publishing.
 ## Required Child Skills
 
 - `improve-branch-architecture`: branch-scoped deepening, run in autonomous-accept mode.
-- `code-review`: two-axis Standards + Spec branch-diff review via parallel read-only sub-agents.
+- `code-review`: two-axis Standards + Spec branch-diff review via parallel report-only sub-agents.
 - `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams and `code-review` when done.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
 
