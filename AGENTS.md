@@ -239,6 +239,15 @@ tag; they are not separate release-please packages. Third-party skills such as
 `find-skills` are installed separately from their source repo's default branch
 or a specific `#<git-ref>`.
 
+Adding or removing a repo-owned skill is a normal catalog change, not a breaking
+change: version it with the fitting conventional type (usually `feat:`), never a
+breaking `type!` / major bump. Skills are agent instructions, not a runtime API —
+a removed skill simply leaves the catalog (recorded in the marketplace tests'
+`retired_marketplace_skills` guard) and breaks nothing at runtime for consumers,
+who re-vendor from the lockfile. Reserve `type!` for changes that actually break
+a machine-consumed contract (for example the plugin-manifest schema or the
+install lockfile shape).
+
 Merging a Release PR tags the commit and publishes a GitHub Release. The workflow also
 auto-merges Release PRs after required checks pass.
 
