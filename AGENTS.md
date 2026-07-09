@@ -41,6 +41,20 @@ or in normal docs when it is broadly useful beyond one issue.
 
 Issues and PRDs are tracked in this repository's GitHub Issues using `gh`. See `docs/agents/issue-tracker.md`.
 
+### Working a GitHub issue
+
+When you begin or resume work tied to a GitHub issue, run the
+`working-on-github-issue` skill first, before branching, editing, or opening a
+pull request. It resolves the issue, lands you on its `<issue>-<slug>` branch,
+and marks it started (self-assign and Project status, best-effort). The skill is
+idempotent, so run it at the start of every issue-linked session even if you are
+unsure it has already run — re-running while already aligned is a no-op. A
+session or worktree branch the harness starts you on, such as `claude/<...>`, is
+not issue-linked: create the `<issue>-<slug>` branch (via `new-branch`) and work
+there rather than committing on the session branch. If a branch genuinely cannot
+move onto the issue-linked name, stop and state the deviation rather than
+proceeding silently.
+
 ### Triage labels
 
 Triage roles map to this repository's existing GitHub labels, without inventing new labels. See `docs/agents/triage-labels.md`.
