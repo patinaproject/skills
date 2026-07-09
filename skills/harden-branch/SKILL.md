@@ -77,8 +77,10 @@ blocking findings remain — that is **green**.
   (documented conventions plus a Fowler smell baseline) and **Spec** (does the
   diff implement the issue). Treat as **blocking**: Standards hard violations
   (documented-standard breaches) and Spec missing, partial, or wrong-requirement
-  findings. Treat as **non-blocking**: judgement-call smells and scope-creep
-  notes. Green is no blocking findings left.
+  findings. Treat as **non-blocking**: judgement-call smells and benign
+  scope-creep notes (the diff did a little more than asked). A scope finding
+  whose resolution needs a product or scope decision is different — route it
+  `ready-for-human` per the Finding Router. Green is no blocking findings left.
 - **Preserve the read-only boundary.** `code-review` runs its axes as read-only
   sub-agents that only report; apply every fix through `implement` or
   `diagnosing-bugs`, never inside a reviewer sub-agent.
