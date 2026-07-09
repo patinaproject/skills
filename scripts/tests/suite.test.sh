@@ -11,7 +11,6 @@ bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/code-review-workflow.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/write-docs-format-sync.test.sh
-bash scripts/tests/improve-branch-architecture-format-sync.test.sh
 bash scripts/tests/write-release-changelog-helper.test.sh
 
 # CLI compatibility canaries: representative network-backed samples that prove

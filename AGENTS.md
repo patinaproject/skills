@@ -16,7 +16,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
-- `skills/improve-branch-architecture/`: branch-scoped deepening recommendation skill
 - `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
@@ -71,14 +70,7 @@ do not edit the vendored payloads under `.agents/skills/**`.
   its source's default branch (latest), so re-running picks up upstream updates.
   When a re-vendor changes `domain-modeling`'s `CONTEXT-FORMAT.md` or
   `ADR-FORMAT.md`, copy the changed file over the bundled `write-docs` copy by
-  hand; `write-docs-format-sync.test.sh` fails until the two match again. The
-  same hand-copy applies to `improve-branch-architecture`'s three mirrored copies
-  (`DEEPENING.md` from `codebase-design`; `CONTEXT-FORMAT.md`, `ADR-FORMAT.md`
-  from `domain-modeling`); `improve-branch-architecture-format-sync.test.sh`
-  fails until each copy matches its vendored upstream again. That skill's
-  `LANGUAGE.md` and `INTERFACE-DESIGN.md` are owned outright — v1 dissolved their
-  standalone upstream files — so they are not mirrored and need no hand-copy
-  (see [docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md](docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md)).
+  hand; `write-docs-format-sync.test.sh` fails until the two match again.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -142,15 +134,6 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-g
   it asserts byte-equality between the two copies (a machine-consumed mirror
   contract, never their prose — see
   [docs/adr/ADR-232-format-sync-mirror-contract.md](docs/adr/ADR-232-format-sync-mirror-contract.md))
-- Run `bash scripts/tests/improve-branch-architecture-format-sync.test.sh` after
-  changing the `improve-branch-architecture` bundled reference files or their
-  vendored upstreams (`codebase-design` for `DEEPENING.md`; `domain-modeling` for
-  `CONTEXT-FORMAT.md` and `ADR-FORMAT.md`); it asserts byte-equality of the three
-  mirrored copies against their vendored sources (a machine-consumed mirror
-  contract, never their prose — same ADR-232 carve-out as the `write-docs` sync
-  test). The skill's `LANGUAGE.md` and `INTERFACE-DESIGN.md` are owned outright
-  and intentionally excluded from the mirror (see
-  [docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md](docs/adr/ADR-247-mattpocock-v1-format-sync-repoint.md))
 
 ## Issue and PR labels
 
@@ -221,7 +204,6 @@ This repo owns these skills at flat paths:
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | write-docs | `skills/write-docs/` |
-| improve-branch-architecture | `skills/improve-branch-architecture/` |
 | write-release-changelog | `skills/write-release-changelog/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not

@@ -30,32 +30,64 @@ owns publishing.
 
 ## Required Child Skills
 
-- `improve-branch-architecture`: branch-scoped deepening, run in autonomous-accept mode.
 - `code-review`: two-axis Standards + Spec branch-diff review via parallel report-only sub-agents.
 - `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams and `code-review` when done.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
+- `codebase-design`: the deep-module vocabulary and principles Phase 1 deepens against (reference, not invoked).
 
 If any are missing, halt before running and report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill improve-branch-architecture -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
 ## Phase 1 — Deepen until settled
 
-Run `improve-branch-architecture` in **autonomous-accept** mode. Route every
-accepted deepening to `implement` (which reaches `tdd` at agreed seams). Re-run
-the architecture pass after applying the accepted deepenings. Repeat until a
-pass accepts **zero** candidates — that zero is the settle signal.
+Surface architectural friction in the branch's changes and apply the deepenings
+that clearly earn their place, re-running until a pass finds nothing more — that
+zero is the settle signal. Deepening runs **before** review so Phase 2 judges the
+settled shape.
 
-- Autonomous-accept mode applies a conservative accept/reject rubric owned by
-  `improve-branch-architecture` — it defaults to rejecting when uncertain, which
-  is what makes this loop terminate instead of gold-plating the branch.
+Work in the **deep-module vocabulary** and its principles — **module**,
+**interface**, **depth** (**deep**/**shallow**), **seam**, **adapter**,
+**leverage**, **locality**, and the **deletion test** — from the vendored
+`codebase-design` skill; use those terms exactly rather than drifting into
+"component," "service," "API," or "boundary." Read the domain glossary
+(`CONTEXT.md`, if any) and the ADRs in `docs/adr/` for the area you are touching
+first, so deepenings use the project's names for seams and do not re-litigate
+recorded decisions.
+
+**Explore, branch-scoped.** Use the Agent tool with `subagent_type=Explore` to
+walk the branch's changes plus the unchanged neighbours they interface with —
+read past the diff hunks. Note where you feel friction:
+
+- Understanding one concept means bouncing between many small modules.
+- A module is **shallow** — its interface is nearly as complex as its
+  implementation.
+- Pure functions were extracted for testability, but the real bugs hide in how
+  they are called (no **locality**).
+- Tightly-coupled modules leak across their seams.
+- Part of the change is untested or hard to test through its current interface.
+
+Apply the **deletion test** to anything you suspect is shallow: would deleting
+the module concentrate complexity across its callers, or just move it?
+"Concentrates" is the signal to deepen.
+
+**Accept conservatively, then loop.** Accept a deepening only when it passes the
+deletion test, increases **depth**, improves **locality** or the test surface,
+and folds into this branch without sprawling into unrelated code. Reject
+speculative generality, pass-throughs that only move complexity, and anything
+that complicates the interface instead of hiding complexity behind it. **Default
+to reject when uncertain** — a conservative gate terminates instead of
+gold-plating the branch. Route each accepted deepening to `implement` (which
+reaches `tdd` at agreed seams), then re-run the pass; repeat until a pass accepts
+**zero**.
+
 - Run repository-documented verification after each round of applied deepenings.
 
 ## Phase 2 — Review until green

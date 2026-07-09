@@ -66,19 +66,20 @@ environment:
 - `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
 `working-on-github-issue` reaches `new-branch`; `harden-branch` reaches
-`improve-branch-architecture`, `code-review`, `implement`, and
-`diagnosing-bugs`; `implement` reaches `tdd` and `code-review`. Confirm those are
-installed too.
+`code-review`, `implement`, and `diagnosing-bugs`, and deepens against the
+`codebase-design` vocabulary; `implement` reaches `tdd` and `code-review`.
+Confirm those are installed too.
 
 If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch harden-branch improve-branch-architecture finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch harden-branch finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
 The `implement`, `tdd`, `code-review`, `diagnosing-bugs`, `writing-great-skills`, and
