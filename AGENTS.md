@@ -12,7 +12,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/polish-branch/`: pre-PR deepen-then-review readiness gate skill
+- `skills/polish/`: pre-PR deepen-then-review readiness gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
@@ -40,6 +40,20 @@ or in normal docs when it is broadly useful beyond one issue.
 ### Issue tracker
 
 Issues and PRDs are tracked in this repository's GitHub Issues using `gh`. See `docs/agents/issue-tracker.md`.
+
+### Working a GitHub issue
+
+When you begin or resume work tied to a GitHub issue, run the
+`working-on-github-issue` skill first, before branching, editing, or opening a
+pull request. It resolves the issue, lands you on its `<issue>-<slug>` branch,
+and marks it started (self-assign and Project status, best-effort). The skill is
+idempotent, so run it at the start of every issue-linked session even if you are
+unsure it has already run — re-running while already aligned is a no-op. A
+session or worktree branch the harness starts you on, such as `claude/<...>`, is
+not issue-linked: create the `<issue>-<slug>` branch (via `new-branch`) and work
+there rather than committing on the session branch. If a branch genuinely cannot
+move onto the issue-linked name, stop and state the deviation rather than
+proceeding silently.
 
 ### Triage labels
 
@@ -200,7 +214,7 @@ This repo owns these skills at flat paths:
 | develop-with-workflow | `skills/develop-with-workflow/` |
 | finish-pr | `skills/finish-pr/` |
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
-| polish-branch | `skills/polish-branch/` |
+| polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | write-docs | `skills/write-docs/` |

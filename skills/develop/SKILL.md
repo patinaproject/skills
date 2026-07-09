@@ -19,7 +19,7 @@ This skill is a thin, goal-directed **controller**. It drives one scope to a
 ready-for-review PR through a predictable pipeline of named, reusable skills:
 
 ```text
-working-on-github-issue → build (implement) → polish-branch → finish-pr
+working-on-github-issue → build (implement) → polish → finish-pr
    (align)              (build the scope)      (make ready)     (publish)
 ```
 
@@ -62,10 +62,10 @@ environment:
 
 - `working-on-github-issue`: align GitHub state — resolve the issue (from the scope or the current branch), land on its branch, mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
-- `polish-branch`: pre-PR gate — deepen architecture until settled, then review to green.
+- `polish`: pre-PR gate — deepen architecture until settled, then review to green.
 - `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
-`working-on-github-issue` reaches `new-branch`; `polish-branch` reaches
+`working-on-github-issue` reaches `new-branch`; `polish` reaches
 `code-review`, `implement`, and `diagnosing-bugs`, and deepens against the
 `codebase-design` vocabulary; `implement` reaches `tdd` and `code-review`.
 Confirm those are installed too.
@@ -74,7 +74,7 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch polish-branch finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch polish finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
@@ -99,7 +99,7 @@ name and install guidance only for a triggered missing route.
   scripts. Apply its review before the build route builds the change.
 - Use `prototype` only when the scope explicitly asks for throwaway exploration,
   state-model sanity checks, UI direction exploration, or equivalent prototype
-  work. Delete or absorb prototype output before `polish-branch` unless the scope
+  work. Delete or absorb prototype output before `polish` unless the scope
   explicitly asks to commit prototype artifacts.
 
 Install guidance for these triggered routes:
@@ -147,7 +147,7 @@ scope, and treat any issue as best-effort association, not a separate path.
   instructions, or both.
 - Repository-documented verification has run and results are recorded.
 - Relevant tests are added or updated when the change has executable behavior.
-- `polish-branch` ran and reached a settled, green branch: architecture deepened
+- `polish` ran and reached a settled, green branch: architecture deepened
   until settled, and `code-review` findings fixed or dispositioned.
 - GitHub PR review comments and hosted review comments surfaced by `finish-pr`
   are fixed or dispositioned.
@@ -180,14 +180,18 @@ scope, and treat any issue as best-effort association, not a separate path.
 6. Build the scope with `implement` (which reaches `tdd` at agreed seams) —
    instructions authoritative over any issue body — then run
    repository-documented verification.
-7. Run `polish-branch` to ready the branch: it deepens the architecture until
-   settled, then reviews to green via `code-review`, routing findings through
-   its Finding Router. Invoking `develop` is sufficient approval for
-   `polish-branch`'s review gate; dispatch it without asking for another
-   confirmation. A `ready-for-human` finding stops the loop as `human-blocked`.
+7. Run `polish`, forwarding the run's scope — the resolved issue reference and
+   any instructions — to ready the branch. Because `working-on-github-issue` is
+   idempotent, `polish`'s first-step alignment re-confirms the same branch and
+   issue at no cost, and its Spec axis then reviews against the issue you built
+   to. It deepens the architecture until settled, then reviews to green via
+   `code-review`, routing findings through its Finding Router. Invoking
+   `develop` is sufficient approval for `polish`'s review gate; dispatch it
+   without asking for another confirmation. A `ready-for-human` finding stops the
+   loop as `human-blocked`.
 8. Run `finish-pr` for commit, push, PR creation or update, visible check
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
-   `finish-pr` only after `polish-branch` reports the branch settled and green,
+   `finish-pr` only after `polish` reports the branch settled and green,
    or every finding has a recorded `ready-for-agent`, `ready-for-human`, or
    `wontfix` disposition. **When step 3 resolved no issue**, consult the
    repository guidance read in step 1: if it requires an issue tag on commits or
@@ -211,10 +215,10 @@ documented `human-blocked` stop.
 
 ## Terminal-state routing
 
-`polish-branch` classifies review findings through its Finding Router
+`polish` classifies review findings through its Finding Router
 (`ready-for-agent` → `implement`/`diagnosing-bugs`; `ready-for-human` → stop;
 `wontfix` → explain). At the controller level, any `ready-for-human` blocker —
-from `working-on-github-issue`, the actionability judgment, the build, `polish-branch`,
+from `working-on-github-issue`, the actionability judgment, the build, `polish`,
 or `finish-pr` — stops the pipeline in the `human-blocked` terminal state. There
 is no `needs-info` state; insufficient information maps to `ready-for-human`.
 
@@ -256,10 +260,10 @@ Include:
 - Relevant tests added or updated.
 - Child skill halt reasons, only when a halt changes what the human should do
   next.
-- `polish-branch` result: architecture deepenings applied and `code-review`
+- `polish` result: architecture deepenings applied and `code-review`
   finding dispositions.
 - PR review and check feedback status.
-- Latest `code-review` result from `polish-branch`, or that the gate found
+- Latest `code-review` result from `polish`, or that the gate found
   nothing to change, only when it changes reviewer confidence or next action.
 - Human-owned blockers, if any.
 - `wontfix` explanations, if any.
@@ -324,7 +328,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: working-on-github-issue, implement, polish-branch, finish-pr.
+Child skills invoked: working-on-github-issue, implement, polish, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 
