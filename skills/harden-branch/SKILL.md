@@ -64,8 +64,10 @@ Run `code-review` against the branch diff. Route its findings through the
 Finding Router below. Re-run `code-review` after applying fixes. Repeat until no
 blocking findings remain — that is **green**.
 
-- **Drive it unattended.** Compute the review base — the merge-base against the
-  repository default branch (`git merge-base origin/<default-branch> HEAD`) — and
+- **Drive it unattended.** Compute the review base — resolve the repository
+  default branch (`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`,
+  or `git rev-parse --abbrev-ref origin/HEAD` stripped of its leading `origin/`),
+  then take its merge-base (`git merge-base origin/<default-branch> HEAD`) — and
   give it to `code-review` as the fixed point, so it never pauses to ask for one.
   Let its **Spec** axis auto-discover the originating issue from the branch's
   commit refs; when none is found, instruct `code-review` to **skip the Spec
