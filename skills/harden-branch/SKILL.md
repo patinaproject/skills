@@ -81,8 +81,8 @@ blocking findings remain — that is **green**.
   scope-creep notes (the diff did a little more than asked). A scope finding
   whose resolution needs a product or scope decision is different — route it
   `ready-for-human` per the Finding Router. Green is no blocking findings left.
-- **Preserve the read-only boundary.** `code-review` runs its axes as read-only
-  sub-agents that only report; apply every fix through `implement` or
+- **Keep fixes out of the reviewer.** `code-review` runs its axes as
+  report-only sub-agents; apply every fix through `implement` or
   `diagnosing-bugs`, never inside a reviewer sub-agent.
 - Halt if `code-review` cannot resolve the fixed point or spawn its sub-agents.
 - Run repository-documented verification before declaring the branch green.
