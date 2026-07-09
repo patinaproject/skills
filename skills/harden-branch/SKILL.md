@@ -68,9 +68,11 @@ blocking findings remain — that is **green**.
   repository default branch (`git merge-base origin/<default-branch> HEAD`) — and
   give it to `code-review` as the fixed point, so it never pauses to ask for one.
   Let its **Spec** axis auto-discover the originating issue from the branch's
-  commit refs, and skip that axis when there is none. Invoking `harden-branch`
-  (or a controller that reaches it) is sufficient approval to run it; do not ask
-  for another confirmation.
+  commit refs; when none is found, instruct `code-review` to **skip the Spec
+  axis rather than prompt** — this overrides its default of asking where the spec
+  is, keeping the run unattended. Invoking `harden-branch` (or a controller that
+  reaches it) is sufficient approval to run it; do not ask for another
+  confirmation.
 - **Map the two axes to the gate.** `code-review` reports along **Standards**
   (documented conventions plus a Fowler smell baseline) and **Spec** (does the
   diff implement the issue). Treat as **blocking**: Standards hard violations
