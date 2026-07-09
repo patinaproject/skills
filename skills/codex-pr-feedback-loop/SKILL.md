@@ -8,7 +8,7 @@ description: Loops a Codex app worktree on an existing PR's review feedback. Use
 ## Quick Start
 
 1. Develop, verify, commit, push, and create or update the PR with the normal
-   issue pipeline (`working-on-github-issue` → build → `harden-branch` → `finish-pr`).
+   issue pipeline (`working-on-github-issue` → build → `polish-branch` → `finish-pr`).
 2. After the first successful PR push, follow
    [workflows/thread-automation.md](workflows/thread-automation.md) to start the
    Codex app thread automation that runs the loop for this chat.

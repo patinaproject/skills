@@ -4,7 +4,7 @@
 
 Accepted. Superseded in part by
 [#268](https://github.com/patinaproject/skills/issues/268): the
-`improve-branch-architecture` skill was later dissolved into `harden-branch`
+`improve-branch-architecture` skill was later dissolved into `polish-branch`
 Phase 1, and its bundled mirror files and
 `improve-branch-architecture-format-sync.test.sh` were removed. The `write-docs`
 mirror this ADR re-points is unaffected.

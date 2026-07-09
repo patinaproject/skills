@@ -27,8 +27,8 @@ builds with plain `implement` — so workflow fan-out is always a deliberate
 choice.
 
 Its deliverable is a converged branch: every slice integrated onto the one
-branch, with repository verification passing. It does **not** harden the branch
-or open a pull request. Follow it with `harden-branch` then `finish-pr` to reach
+branch, with repository verification passing. It does **not** polish the branch
+or open a pull request. Follow it with `polish-branch` then `finish-pr` to reach
 a ready-for-review PR.
 
 ## Required Child Skills
@@ -58,13 +58,13 @@ install hints track their source catalog's default branch; add `#<git-ref>` to
 freeze.
 
 The downstream handoff is separate from the build: this skill stops at the
-converged branch, then directs you to `harden-branch` (which reaches
+converged branch, then directs you to `polish-branch` (which reaches
 `code-review` and deepens against the `codebase-design` vocabulary) and
 `finish-pr`. Install those too so a standalone run does not dead-end at the
 handoff:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill harden-branch finish-pr -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill polish-branch finish-pr -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
 ```
@@ -146,4 +146,4 @@ for (const wave of waves) {
   `implement` because there were fewer than two independent slices.
 - Integration: conflicts resolved versus escalated, and the verification result.
 - Human-owned blockers, such as a judgment-needed conflict, if any.
-- The remaining pipeline to reach a PR: `harden-branch` → `finish-pr`.
+- The remaining pipeline to reach a PR: `polish-branch` → `finish-pr`.

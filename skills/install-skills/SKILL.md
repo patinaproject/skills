@@ -90,7 +90,7 @@ Active Patina scaffold defaults are:
 - `working-on-github-issue`
 - `develop`
 - `finish-pr`
-- `harden-branch`
+- `polish-branch`
 - `install-skills`
 
 ## Verify

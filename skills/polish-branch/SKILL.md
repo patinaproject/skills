@@ -1,19 +1,19 @@
 ---
-name: harden-branch
+name: polish-branch
 description: "Ready a branch for human review with two ordered settle-phases — deepen its architecture, then review it to green. Use when finishing issue work before a PR, when readying any branch for review on its own, or when a controller skill needs the pre-PR quality gate."
 ---
 
-# Harden Branch
+# Polish Branch
 
 ## Quick Start
 
 Invoke on the branch you want to ready for review:
 
 ```text
-/harden-branch
+/polish-branch
 ```
 
-**Harden** the current branch into something a human only ever sees once it is
+**Polish** the current branch into something a human only ever sees once it is
 structurally settled and self-reviewed. Two ordered settle-phases run in
 sequence:
 
@@ -104,7 +104,7 @@ blocking findings remain — that is **green**.
   Let its **Spec** axis auto-discover the originating issue from the branch's
   commit refs; when none is found, instruct `code-review` to **skip the Spec
   axis rather than prompt** — this overrides its default of asking where the spec
-  is, keeping the run unattended. Invoking `harden-branch` (or a controller that
+  is, keeping the run unattended. Invoking `polish-branch` (or a controller that
   reaches it) is sufficient approval to run it; do not ask for another
   confirmation.
 - **Map the two axes to the gate.** `code-review` reports along **Standards**
@@ -145,7 +145,7 @@ stops Phase 2 before green; report it as a human-owned blocker.
 
 ## Final Report
 
-Write for the caller, leading with whether the branch is hardened:
+Write for the caller, leading with whether the branch is polished:
 
 - Phase 1: rounds run and deepenings applied, or that it settled with zero
   candidates on the first pass.

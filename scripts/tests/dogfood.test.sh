@@ -22,7 +22,7 @@ SKILLS=(
   develop-with-workflow
   finish-pr
   codex-pr-feedback-loop
-  harden-branch
+  polish-branch
   update-branch
   write-docs
   write-release-changelog

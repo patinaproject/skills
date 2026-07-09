@@ -22,8 +22,8 @@ rules.
   self-assign and Project status), and lands on the issue-linked branch, using
   `/new-branch` underneath.
 - **`/develop`** — The end-to-end controller: `working-on-github-issue` → build →
-  `harden-branch` → `finish-pr`, stopping before merge.
-- **`/harden-branch`** — The pre-PR readiness gate. It deepens the branch
+  `polish-branch` → `finish-pr`, stopping before merge.
+- **`/polish-branch`** — The pre-PR readiness gate. It deepens the branch
   architecture until settled, then reviews it to green via `/code-review`.
 - **`/finish-pr`** — The publish step. It verifies, pushes, opens or updates the
   PR, watches checks, handles existing feedback, and stops before merge.
@@ -60,7 +60,7 @@ Create a new branch then fix.
 
 The guide applies the correct workflow for filing issues, routing begin-work to
 `working-on-github-issue` (which uses `new-branch`), end-to-end issue development to the
-`develop` controller, pre-PR readying to `harden-branch`, editing issues,
+`develop` controller, pre-PR readying to `polish-branch`, editing issues,
 writing changelogs, and publishing completed work with `finish-pr`.
 
 ## Breaking change
