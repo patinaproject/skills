@@ -3,8 +3,7 @@
 Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
-polishing, branch
-architecture deepening, isolated local branch-diff review, PR finishing, Codex
+polishing, isolated local branch-diff review, PR finishing, Codex
 PR feedback polling, settled-design documentation capture, release changelog
 ceremonies, and local branch updating. They are available across Claude Code,
 Codex, and any agent runtime that reads `AGENTS.md`.
