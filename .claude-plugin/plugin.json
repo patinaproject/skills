@@ -9,7 +9,6 @@
     "./skills/develop-with-workflow",
     "./skills/finish-pr",
     "./skills/codex-pr-feedback-loop",
-    "./skills/review-branch",
     "./skills/harden-branch",
     "./skills/update-branch",
     "./skills/install-skills",

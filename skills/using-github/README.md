@@ -24,7 +24,7 @@ rules.
 - **`/develop`** — The end-to-end controller: `working-on-github-issue` → build →
   `harden-branch` → `finish-pr`, stopping before merge.
 - **`/harden-branch`** — The pre-PR readiness gate. It deepens the branch
-  architecture until settled, then reviews it to green via `/review-branch`.
+  architecture until settled, then reviews it to green via `/code-review`.
 - **`/finish-pr`** — The publish step. It verifies, pushes, opens or updates the
   PR, watches checks, handles existing feedback, and stops before merge.
 - **`/new-branch`** — The low-level issue-branch primitive `working-on-github-issue`

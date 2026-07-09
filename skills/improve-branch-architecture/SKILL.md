@@ -12,7 +12,7 @@ This skill is the branch-scoped sibling of `improve-codebase-architecture`. It r
 1. **Scope** is the current branch's changes plus the foldable radius, not the whole codebase.
 2. **Medium** is in-conversation markdown with ASCII before→after sketches, not a self-contained HTML report.
 
-For a whole-codebase audit, use `improve-codebase-architecture`. For a correctness/bug review of the branch, use `review-branch`.
+For a whole-codebase audit, use `improve-codebase-architecture`. For a standards-and-spec review of the branch's changes, use `code-review`.
 
 ## Vocabulary
 
@@ -28,7 +28,7 @@ This skill is _informed_ by the project's domain model. The domain language give
 
 Read the project's domain glossary (`CONTEXT.md`, if any) and any ADRs in `docs/adr/` for the area you're touching first, so recommendations use the project's domain language and do not re-litigate recorded decisions.
 
-**Resolve branch scope exactly as `review-branch` does:**
+**Resolve branch scope from the default-branch merge-base:**
 
 1. Resolve the repository default branch with `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` or `git rev-parse --abbrev-ref origin/HEAD`, stripping any leading `origin/`.
 2. Compute the review base with `git merge-base origin/<default-branch> HEAD`.

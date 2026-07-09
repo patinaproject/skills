@@ -18,7 +18,7 @@ structurally settled and self-reviewed. Two ordered settle-phases run in
 sequence:
 
 1. **Deepen until settled** — improve the branch's architecture.
-2. **Review until green** — review the branch for correctness.
+2. **Review until green** — review the branch's diff for standards and spec conformance.
 
 Deepen runs **before** review so the review judges the final, structurally
 settled code rather than an intermediate shape.
@@ -31,7 +31,7 @@ owns publishing.
 ## Required Child Skills
 
 - `improve-branch-architecture`: branch-scoped deepening, run in autonomous-accept mode.
-- `review-branch`: fresh-context, read-only branch-diff correctness review.
+- `code-review`: two-axis Standards + Spec branch-diff review via parallel report-only sub-agents.
 - `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams and `code-review` when done.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
 
@@ -39,7 +39,7 @@ If any are missing, halt before running and report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill review-branch improve-branch-architecture -y
+npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill improve-branch-architecture -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
@@ -60,19 +60,38 @@ pass accepts **zero** candidates — that zero is the settle signal.
 
 ## Phase 2 — Review until green
 
-Run `review-branch`. Route its findings through the Finding Router below. Re-run
-`review-branch` after applying fixes. Repeat until no blocking findings remain —
-that is **green**.
+Run `code-review` against the branch diff. Route its findings through the
+Finding Router below. Re-run `code-review` after applying fixes. Repeat until no
+blocking findings remain — that is **green**.
 
-- Invoking `harden-branch` (or a controller that reaches it) is sufficient
-  approval to dispatch the fresh read-only reviewer; do not ask for another
-  confirmation. Inherit `review-branch`'s full contract and preserve its
-  boundary exactly: it never edits files, stages, commits, pushes, comments on
-  GitHub, or mutates review threads. Apply fixes through `implement` or
-  `diagnosing-bugs`, never inside the reviewer.
-- Halt if fresh reviewer dispatch is unavailable or `review-branch` reports a
-  halt condition.
+- **Drive it unattended.** Compute the review base — resolve the repository
+  default branch (`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`,
+  or `git rev-parse --abbrev-ref origin/HEAD` stripped of its leading `origin/`),
+  then take its merge-base (`git merge-base origin/<default-branch> HEAD`) — and
+  give it to `code-review` as the fixed point, so it never pauses to ask for one.
+  Let its **Spec** axis auto-discover the originating issue from the branch's
+  commit refs; when none is found, instruct `code-review` to **skip the Spec
+  axis rather than prompt** — this overrides its default of asking where the spec
+  is, keeping the run unattended. Invoking `harden-branch` (or a controller that
+  reaches it) is sufficient approval to run it; do not ask for another
+  confirmation.
+- **Map the two axes to the gate.** `code-review` reports along **Standards**
+  (documented conventions plus a Fowler smell baseline) and **Spec** (does the
+  diff implement the issue). Treat as **blocking**: Standards hard violations
+  (documented-standard breaches) and Spec missing, partial, or wrong-requirement
+  findings. Treat as **non-blocking**: judgement-call smells and benign
+  scope-creep notes (the diff did a little more than asked). A scope finding
+  whose resolution needs a product or scope decision is different — route it
+  `ready-for-human` per the Finding Router. Green is no blocking findings left.
+- **Keep fixes out of the reviewer.** `code-review` runs its axes as
+  report-only sub-agents; apply every fix through `implement` or
+  `diagnosing-bugs`, never inside a reviewer sub-agent.
+- Halt if `code-review` cannot resolve the fixed point or spawn its sub-agents.
 - Run repository-documented verification before declaring the branch green.
+
+This gate reviews standards and spec conformance, not general correctness:
+correctness, security, and data-loss risks are covered after the PR opens by the
+hosted review workflow and by the repository's tests.
 
 Residual risk: a Phase-2 fix can in principle introduce new shallowness. Accept
 that risk rather than re-coupling the phases into one interleaved loop — review
