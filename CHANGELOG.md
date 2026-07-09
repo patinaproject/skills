@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.15.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.14.1...patinaproject-skills-v2.15.0) (2026-07-09)
+
+
+### Features
+
+* [#263](https://github.com/patinaproject/skills/issues/263) upgrade Matt Pocock skills to v1.1, adopt capabilities, remove email-triage ([#264](https://github.com/patinaproject/skills/issues/264)) ([0a7b118](https://github.com/patinaproject/skills/commit/0a7b1183ca18a42345bf6df56dbb0f75aa71b8a4))
+* [#265](https://github.com/patinaproject/skills/issues/265) replace review-branch with code-review as the pre-PR gate ([#266](https://github.com/patinaproject/skills/issues/266)) ([6fb8b84](https://github.com/patinaproject/skills/commit/6fb8b84e77d7fe13112ef42f4e2a68d63e1537f6))
+
 ## [2.14.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.14.0...patinaproject-skills-v2.14.1) (2026-07-08)
 
 
