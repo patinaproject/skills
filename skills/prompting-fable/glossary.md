@@ -29,12 +29,12 @@ so a high cost score means cheap to run.
 
 | Model | Cost | Intelligence | Taste |
 | --- | --- | --- | --- |
-| gpt-5.5 (Codex CLI) | 9 | 8 | 5 |
+| gpt-5.6 (Codex CLI) | 9 | 8 | 5 |
 | sonnet-5 | 5 | 5 | 7 |
 | opus-4.8 | 4 | 7 | 8 |
 | fable-5 | 2 | 9 | 9 |
 
-gpt-5.5's cost 9 is a generous Codex sub scored as what he actually pays, not
+gpt-5.6's cost 9 is a generous Codex sub scored as what he actually pays, not
 list price. sonnet-5's token hunger often makes opus-4.8 cheaper in practice
 than the one-point gap suggests. Haiku is unscored: below the intelligence
 bar for real work — never route to it.

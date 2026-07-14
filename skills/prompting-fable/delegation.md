@@ -2,7 +2,7 @@
 
 Wiring mechanics for [prompting-fable](SKILL.md)'s routing: how work leaves
 Claude for a cheaper model and comes back trustworthy. Examples use Theo's
-stack — gpt-5.5 behind the Codex CLI — substitute the CLI at hand.
+stack — gpt-5.6 behind the Codex CLI — substitute the CLI at hand.
 
 ## Shelling out
 
@@ -32,7 +32,7 @@ The Workflow/Agent `model` parameter only takes Claude models, so wrap:
   return the report. Put `schema` on the wrapper to get structured output
   back.
 - Label every wrapper with the real worker's prefix, e.g.
-  `{label: 'gpt-5.5:review-auth'}`. The workflow UI shows the wrapper's
+  `{label: 'gpt-5.6:review-auth'}`. The workflow UI shows the wrapper's
   Claude model, so the label is the only visible sign of who did the work.
 - Delegated runs can exceed Bash's 10-minute timeout: pass an explicit
   timeout, or run in the background and poll for the report file.
