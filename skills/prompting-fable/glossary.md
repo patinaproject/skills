@@ -20,9 +20,7 @@ codebase — "writes TypeScript like a Python dev."
 
 How freely you can spend a model, scored against your own subscriptions and
 resets, not list price — a generous sub makes a frontier model effectively
-free. Cost never picks the model for what ships: it is a tiebreaker when the
-other axes agree, and a license to gather information cheaply before spending
-a smarter model.
+free.
 
 ## Worked example: Theo's scores, mid-2026
 
