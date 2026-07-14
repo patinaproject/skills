@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.17.0...patinaproject-skills-v2.18.0) (2026-07-14)
+
+
+### Features
+
+* [#279](https://github.com/patinaproject/skills/issues/279) add prompting-fable skill with Fable 5 prompting guidelines ([#280](https://github.com/patinaproject/skills/issues/280)) ([66da0bd](https://github.com/patinaproject/skills/commit/66da0bd7bdfecfde02c54f04285f21706c6f6913))
+
 ## [2.17.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.16.0...patinaproject-skills-v2.17.0) (2026-07-09)
 
 
