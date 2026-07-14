@@ -1,9 +1,8 @@
 # Glossary — judging axes and worked model scores
 
-The disclosed reference for [prompting-fable](SKILL.md)'s routing section, and
-a template: copy it into a CLAUDE.md, add any term you use when describing
-work that a model might misread, and re-score the table for the models and
-subscriptions actually at hand. The axes are durable; the scores go stale.
+The disclosed reference for [prompting-fable](SKILL.md)'s routing: the
+judging axes and a worked score table. The axes are durable; the scores go
+stale.
 
 ## Judging axes
 
@@ -25,11 +24,10 @@ free. Cost never picks the model for what ships: it is a tiebreaker when the
 other axes agree, and a license to gather information cheaply before spending
 a smarter model.
 
-## Worked example: Theo's scores
+## Worked example: Theo's scores, mid-2026
 
-From [Theo's Fable 5 workflow video](https://www.youtube.com/watch?v=8GRmLR__OGQ),
-mid-2026 — re-score for your stack. Rankings 1–10, higher = better on every
-axis, so a high cost score means cheap to run.
+Re-score for your own stack. Rankings 1–10, higher = better on every axis,
+so a high cost score means cheap to run.
 
 | Model | Cost | Intelligence | Taste |
 | --- | --- | --- | --- |
@@ -44,5 +42,4 @@ than the one-point gap suggests. Haiku is unscored: below the intelligence
 bar for real work — never route to it.
 
 Theo's threshold for "high taste": 7 or above on this scale. The routing and
-escalation rules that consume these scores live in [SKILL.md](SKILL.md);
-scores are defaults, not limits.
+escalation rules that consume these scores live in [SKILL.md](SKILL.md).
