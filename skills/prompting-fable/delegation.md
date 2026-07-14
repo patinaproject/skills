@@ -25,10 +25,12 @@ the CLI's non-interactive mode directly with a self-contained prompt (e.g.
 
 The Workflow/Agent `model` parameter only takes Claude models, so wrap:
 
-- Spawn a thin Claude wrapper on the cheapest tier at low effort (e.g.
-  `model: 'sonnet', effort: 'low'`) whose prompt is: write a self-contained
-  CLI prompt, run it via Bash, return the report. Put `schema` on the
-  wrapper to get structured output back.
+- Spawn a thin Claude wrapper on the cheapest tier at low effort — in a
+  workflow, literally `agent(prompt, {model: 'sonnet', effort: 'low'})`;
+  the standalone Agent tool has no `effort` opt and inherits the session's —
+  whose prompt is: write a self-contained CLI prompt, run it via Bash,
+  return the report. Put `schema` on the wrapper to get structured output
+  back.
 - Label every wrapper with the real worker's prefix, e.g.
   `{label: 'gpt-5.5:review-auth'}`. The workflow UI shows the wrapper's
   Claude model, so the label is the only visible sign of who did the work.
