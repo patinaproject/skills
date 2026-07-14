@@ -169,6 +169,16 @@ complete, and links every resolved item in a thank-you.
 See [./skills/write-release-changelog/](./skills/write-release-changelog/) for
 the skill contract.
 
+### prompting-fable
+
+Fable 5 rewards different prompting than earlier models. `prompting-fable`
+carries the guidelines — prompt for distance, cap reasoning effort at high,
+write run-until-done goals with permissions and gates, match orchestration to
+checkpoints, and route models by a glossary of cost, intelligence, and taste.
+
+See [./skills/prompting-fable/](./skills/prompting-fable/) for the skill
+contract.
+
 ### scaffold-repository
 
 Teams spend disproportionate time on repo plumbing - commit conventions,
@@ -194,6 +204,7 @@ README and skill contract.
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
 | [write-release-changelog](./skills/write-release-changelog/) | Run the release ceremony: changelog plus feedback loop-closing |
+| [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
@@ -246,6 +257,7 @@ skills/
   update-branch/
   write-docs/
   write-release-changelog/
+  prompting-fable/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
 .claude-plugin/

@@ -13,6 +13,7 @@
     "./skills/update-branch",
     "./skills/install-skills",
     "./skills/write-docs",
-    "./skills/write-release-changelog"
+    "./skills/write-release-changelog",
+    "./skills/prompting-fable"
   ]
 }

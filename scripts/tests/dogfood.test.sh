@@ -26,6 +26,7 @@ SKILLS=(
   update-branch
   write-docs
   write-release-changelog
+  prompting-fable
 )
 FAIL_COUNT=0
 
