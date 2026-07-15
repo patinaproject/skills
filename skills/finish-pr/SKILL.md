@@ -65,7 +65,8 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 5. Commit using the repository's required commit format.
 6. Push the branch when there is work to publish.
 7. Create or update the PR using the repository template. Open it as a draft by
-   default; open it non-draft only when the PR skips code review.
+   default; open it non-draft only when the PR runs no code-review loop on its
+   draft (see the overview and `ready-for-merge.md` step 6).
 8. Enter the readiness loop: detect merge conflicts, triage currently
    available PR feedback, resolve eligible conversations, watch all checks in
    fail-fast bounded observation windows, triage every problematic check,
