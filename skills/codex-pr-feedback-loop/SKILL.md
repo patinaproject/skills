@@ -34,8 +34,8 @@ The durable boundaries at this skill level:
 - Stay in the current working directory's default `gh` repository.
 - Preserve this chat's context with a thread automation.
 - At loop exit, run the completion step: when the review loop is clean (the
-  code-review run on the latest head has completed and no unresolved review
-  threads remain), flip the draft to ready and advance the linked issue to
+  code-review run on the latest head has actually reviewed it and no unresolved
+  review threads remain), flip the draft to ready and advance the linked issue to
   `In review` through `working-on-github-issue` with stage `in-review`. The flip
   is one-way and covers any agent-authored draft this loop operates on —
   including one a prior `finish-pr` run opened — never a human's work-in-progress

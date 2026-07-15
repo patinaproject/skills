@@ -23,8 +23,9 @@ halt. It never merges the PR.
 Agent-authored PRs open as drafts and stay drafts while the code-review loop
 runs, so draft means "agent loop still churning, not yet for humans." The skill
 flips a draft to ready exactly when the **review loop is clean** — the
-code-review run on the latest head has completed and no unresolved review
-threads remain — and advances the linked issue to `In review` in the same step.
+code-review run on the latest head has actually reviewed it and no unresolved
+review threads remain — and advances the linked issue to `In review` in the same
+step.
 The flip is one-way, and the skill flips only an **agent-authored draft** — a
 draft the agent pipeline opened, never a human's work-in-progress. The
 convention presumes the repository runs code review on draft PRs; a PR that
