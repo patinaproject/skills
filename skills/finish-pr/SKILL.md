@@ -26,11 +26,12 @@ flips a draft to ready exactly when the **review loop is clean** — the
 code-review run on the latest head has completed and no unresolved review
 threads remain — and advances the linked issue to `In review` in the same step.
 The flip is one-way, and the skill flips only an **agent-authored draft** — a
-draft the agent pipeline opened, never a human's work-in-progress. A PR that
-**runs no code-review loop** opens non-draft and sits outside this convention,
-because its predicate can never hold: this covers a repo with no code-review
-automation at all and a per-PR skip a repo defines (for example a
-`skip-code-review` label).
+draft the agent pipeline opened, never a human's work-in-progress. The
+convention presumes the repository runs code review on draft PRs; a PR that
+**runs no code-review loop on its draft** opens non-draft instead, because its
+predicate can never hold. That covers a repo with no code-review automation, a
+repo whose code review skips drafts, and a per-PR skip a repo defines (for
+example a `skip-code-review` label).
 
 End on a strict final ready-to-merge gate. The gate enumerates every
 uncommitted path and requires a provable per-path disposition — in-scope paths

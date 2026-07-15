@@ -97,14 +97,19 @@ tell the human what to do next.
    - Open the PR as a **draft** by default (`gh pr create --draft`). A draft
      signals "agent code-review loop still running, not yet for humans"; step 16
      is the one place that flips it to ready.
-   - The exception is any PR that **runs no code-review loop**: open it
-     non-draft, because the step 16 predicate can never hold and a draft would
-     strand forever. This covers a repository with no code-review automation at
-     all, and a per-PR skip the repository defines (for example a
-     `skip-code-review` label) and this PR carries. Identify the code-review run
-     as the repository's code-review check — the run that posts review threads on
-     the PR head; when the repository configures none, there is no loop to gate
-     on. Reuse an existing PR's draft state as-is rather than re-drafting it.
+   - This convention presumes the repository runs its **code-review loop on
+     draft PRs** (full CI on drafts) — that is the setup the step 16 predicate
+     gates on.
+   - The exception is any PR that **runs no code-review loop on its draft**:
+     open it non-draft, because the step 16 predicate can never hold and a draft
+     would otherwise strand forever. This covers a repository with no code-review
+     automation at all, a repository whose code-review automation is gated to
+     skip drafts (until it is configured to run on drafts), and a per-PR skip the
+     repository defines (for example a `skip-code-review` label) and this PR
+     carries. Identify the code-review run as the repository's code-review
+     check — the run that posts review threads on the PR head; when no such run
+     will appear on the draft, there is no loop to gate on. Reuse an existing
+     PR's draft state as-is rather than re-drafting it.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR
    head SHA, base branch, and GitHub mergeability state, then verifying local
@@ -289,8 +294,9 @@ tell the human what to do next.
       for the current head SHA has concluded, whatever its conclusion), and
     - **zero** unresolved GraphQL review threads remain on the latest head.
 
-    A PR that runs no code-review loop was opened non-draft in step 6 and has no
-    predicate to satisfy — never leave such a PR stranded as a draft.
+    A PR that runs no code-review loop on its draft was opened non-draft in
+    step 6 and has no predicate to satisfy — never leave such a PR stranded as a
+    draft.
 
     When the predicate holds:
 
