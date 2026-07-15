@@ -1,21 +1,25 @@
 ---
 name: working-on-github-issue
-description: "Align GitHub state to the fact you are working an issue: resolve the issue from a reference or the current branch, then land on its branch and mark it started. Use as the shared begin/resume step whenever a controller works a scope that may map to an issue."
+description: "Align GitHub state to the fact you are working an issue: resolve the issue from a reference or the current branch, land on its branch, and write its lifecycle Status. Use as the shared begin/resume step whenever a controller works a scope that may map to an issue, and as the single writer that advances the issue's board Status (started, in-review)."
 ---
 
 # Working On GitHub Issue
 
 ## Quick Start
 
-Invoke with an optional issue reference; run it whenever you start or resume work:
+Invoke with an optional issue reference and an optional stage; run it whenever
+you start, resume, or advance work:
 
 ```text
-/working-on-github-issue #123
-/working-on-github-issue            # resolve the issue from the current branch
+/working-on-github-issue #123                   # stage started (default)
+/working-on-github-issue                        # resolve the issue from the current branch
+/working-on-github-issue #123 stage in-review   # advance the board to In review
 ```
 
 This is the shared **align** step: resolve which issue you are working, then make
-GitHub reflect that — land on the issue-linked branch and mark it started. It is
+GitHub reflect that — land on the issue-linked branch and write its **lifecycle
+Status**. It is the **single writer of issue lifecycle state**: every board
+Status transition an agent makes goes through this one door. It is
 **idempotent** and **best-effort**, so a controller can call it unconditionally
 every run: re-running while already aligned is a no-op, and it never blocks the
 caller.
@@ -23,6 +27,21 @@ caller.
 It is a mechanical aligner. It does not judge scope actionability, edit the issue
 body, build, review, or open a pull request — the controller that calls it owns
 those decisions.
+
+## Stage
+
+An optional `stage` selects which lifecycle Status this alignment writes. It
+defaults to `started`, so every existing caller that passes no stage keeps
+today's contract unchanged.
+
+- `started` (default): the begin/resume alignment — land on the issue-linked
+  branch, self-assign, and set Status to `In progress`.
+- `in-review`: the work is now under review — set Status to `In review`. The
+  branch and self-assignment are already settled from the `started` run, so
+  re-confirm them idempotently; the meaningful change is the Status.
+
+`started` and `in-review` are the only values; treat any other stage as an
+unusable input and report it rather than guessing a Status.
 
 ## Required Child Skill
 
@@ -100,13 +119,14 @@ branch immutable, on that branch with the deviation reported.
 
 - Inspect the issue's existing GitHub Projects through its GitHub Project items
   (the issue's `projectItems` data). For each existing GitHub Project item:
-  - Use project-item inspection to find a compatible field where
-    Status = `In progress` is offered as an exact option and update that project
-    item to `In progress`.
+  - Use project-item inspection to find a compatible field where the stage's
+    target Status is offered as an exact option, and update that project item to
+    it. The target is `In progress` for stage `started` and `In review` for
+    stage `in-review`.
   - Do not add the issue to projects. Do not create project fields or status
     options.
   - Skip incompatible project items and continue when the project lacks a
-    compatible status field, lacks the `In progress` option, or project-item
+    compatible status field, lacks the target option, or project-item
     inspection or updates fail due to permissions.
 - Record the project status update result and the self-assignment result,
   including each updated item and skipped item reason, for the caller's report.
@@ -127,8 +147,9 @@ Report for the caller:
 - Self-assignment result only when it failed or created a human next action;
   stay silent on a successful assignment or one skipped because the issue was
   already assigned.
-- Project status result only when it changed readiness, failed, or was skipped
-  for a reason the caller needs.
+- Project status result — the stage's target Status and whether it was written —
+  only when it changed readiness, failed, or was skipped for a reason the caller
+  needs.
 - Branch deviation, required whenever it happens: when the caller declared the
   current branch immutable and you kept it instead of the issue-linked branch,
   name the retained branch and why. This report is mandatory, not optional. Also

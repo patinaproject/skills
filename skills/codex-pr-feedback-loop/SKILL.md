@@ -19,6 +19,18 @@ Suggested user prompt:
 Use $codex-pr-feedback-loop for issue #123.
 ```
 
+## Required Child Skill
+
+- `working-on-github-issue`: the single writer of issue lifecycle state. The
+  loop's completion step invokes it with stage `in-review` to advance the linked
+  issue's board Status rather than writing that state directly. If it is
+  missing, still flip the PR and report that the `In review` board move was
+  skipped:
+
+  ```sh
+  npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue -y
+  ```
+
 ## Automation Contract
 
 The loop runs as a Codex app thread automation attached to the current
@@ -33,4 +45,11 @@ The durable boundaries at this skill level:
 
 - Stay in the current working directory's default `gh` repository.
 - Preserve this chat's context with a thread automation.
+- At loop exit, run the completion step: when the review loop is clean (the
+  code-review run on the latest head has actually reviewed it and no unresolved
+  review threads remain), flip the draft to ready and advance the linked issue to
+  `In review` through `working-on-github-issue` with stage `in-review`. The flip
+  is one-way and covers any agent-authored draft this loop operates on —
+  including one a prior `finish-pr` run opened — never a human's work-in-progress
+  draft.
 - Do not merge the PR.

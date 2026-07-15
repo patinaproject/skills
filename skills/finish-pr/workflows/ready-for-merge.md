@@ -94,7 +94,22 @@ tell the human what to do next.
      outcome-oriented, and use command-based manual checks only when no
      realistic app or artifact review path exists; name the behavior or
      repository contract the command verifies.
-   - Create a ready-for-review PR by default.
+   - Open the PR as a **draft** by default (`gh pr create --draft`). A draft
+     signals "agent code-review loop still running, not yet for humans"; step 16
+     is the one place that flips it to ready.
+   - This convention presumes the repository runs its **code-review loop on
+     draft PRs** (full CI on drafts) — that is the setup the step 16 predicate
+     gates on.
+   - The exception is any PR that **runs no code-review loop on its draft**:
+     open it non-draft, because the step 16 predicate can never hold and a draft
+     would otherwise strand forever. This covers a repository with no code-review
+     automation at all, a repository whose code-review automation is gated to
+     skip drafts (until it is configured to run on drafts), and a per-PR skip the
+     repository defines (for example a `skip-code-review` label) and this PR
+     carries. Identify the code-review run as the repository's code-review
+     check — the run that posts review threads on the PR head; when no such run
+     will appear on the draft, there is no loop to gate on. Reuse an existing
+     PR's draft state as-is rather than re-drafting it.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR
    head SHA, base branch, and GitHub mergeability state, then verifying local
@@ -267,17 +282,50 @@ tell the human what to do next.
     fixes or newly pushed commits. Unresolved threads are blockers until they
     are resolved, fixed, or evidence-classified as stale or non-blocking.
 
-16. When all currently visible failing checks have been fixed or dispositioned,
-    mark a draft PR ready for review:
+16. Flip the draft to ready for review the moment the **review loop is clean**,
+    and advance the linked issue's board Status to `In review` in the same step.
+    This is the one canonical draft-to-ready flip.
+
+    The **readiness predicate** is the whole gate; do not flip on self-judgment.
+    The code-review run is the repository's code-review check — the run that
+    posts review threads on the PR head. Both must hold:
+
+    - that code-review run on the latest PR head has **actually reviewed** — its
+      check run for the current head SHA concluded `success` or `neutral`, or it
+      posted review threads that are now resolved. A run that errored, timed out,
+      or was cancelled without posting threads never reviewed, so the loop is not
+      clean: re-run it rather than flip.
+    - **zero** unresolved GraphQL review threads remain on the latest head.
+
+    A PR that runs no code-review loop on its draft was opened non-draft in
+    step 6 and has no predicate to satisfy — never leave such a PR stranded as a
+    draft.
+
+    When the predicate holds:
 
     ```sh
     gh pr ready
     ```
 
-    Ready-for-review is distinct from ready-to-merge. A draft PR can become
-    ready for review even when known failing checks remain, as long as each
-    failing check has a concrete disposition and no human-owned stop condition
-    remains.
+    then invoke `working-on-github-issue` with stage `in-review` to move the
+    linked issue's board Status to `In review` through the single writer of
+    issue lifecycle state — do not write that board state directly here. If
+    `working-on-github-issue` is unavailable, still flip the PR and report the
+    skipped board move.
+
+    The flip is **one-way**: never convert a ready PR back to draft, and flip
+    only an **agent-authored draft** — a draft the agent pipeline opened under
+    this convention, identified by the PR's agent author — never a human's
+    work-in-progress draft. The gate is that agent-authored draft state, not
+    which run opened it: a resumed session, or a later skill in the pipeline such
+    as the codex feedback loop operating on a `finish-pr`-opened draft, is a
+    legitimate flipper. A genuine major rework is re-drafted manually by the
+    author, after which this same flip applies again once the loop is clean.
+
+    Ready-for-review is distinct from ready-to-merge: the predicate can hold —
+    review loop clean — while other checks are still failing or dispositioned,
+    and the PR still flips to ready. Those checks gate ready-to-merge in
+    step 17, not this flip.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
