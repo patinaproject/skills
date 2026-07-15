@@ -19,6 +19,18 @@ Suggested user prompt:
 Use $codex-pr-feedback-loop for issue #123.
 ```
 
+## Required Child Skill
+
+- `working-on-github-issue`: the single writer of issue lifecycle state. The
+  loop's completion step invokes it with stage `in-review` to advance the linked
+  issue's board Status rather than writing that state directly. If it is
+  missing, still flip the PR and report that the `In review` board move was
+  skipped:
+
+  ```sh
+  npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue -y
+  ```
+
 ## Automation Contract
 
 The loop runs as a Codex app thread automation attached to the current
