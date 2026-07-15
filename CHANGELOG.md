@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.18.0...patinaproject-skills-v2.19.0) (2026-07-15)
+
+
+### Features
+
+* [#284](https://github.com/patinaproject/skills/issues/284) open agent PRs as drafts, flip to ready when review is clean ([#285](https://github.com/patinaproject/skills/issues/285)) ([567deee](https://github.com/patinaproject/skills/commit/567deeea7e7e7efbd4c8da9ed6e68b2fe94a6e7d))
+
 ## [2.18.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.17.0...patinaproject-skills-v2.18.0) (2026-07-14)
 
 
