@@ -3,7 +3,9 @@
 **Goal:** After the first successful PR push, create a Codex app thread
 automation that polls the current PR, fixes blocking review feedback and
 low-risk cleanup comments worth handling, pushes updates, replies with
-evidence, and stops when no actionable review work remains.
+evidence, and — when no actionable review work remains — runs the completion
+step that flips the draft to ready and moves the linked issue to `In review`
+before stopping.
 
 ## Preconditions
 
@@ -62,7 +64,9 @@ After edits, run the narrowest local verification command that covers the change
 
 When fixes are verified, commit focused changes with this repo's commit rules and push the PR branch. Reply to each handled review thread using the REST threaded replies endpoint with evidence: fix commit SHA, verification command, and how the latest head addresses the comment. Resolve eligible review threads through GraphQL only after latest-head verification succeeds.
 
-Stop this automation when no unresolved actionable/blocking review feedback remains and every low-severity item is either handled as objective cleanup or explicitly classified as stale, duplicate, already handled, informational, subjective/report-only, or requiring a human decision. Report the PR URL, latest head SHA, handled thread URLs, verification evidence, and any remaining non-blocking items with the reason they were left open.
+Before stopping, run the completion step. The readiness predicate is the whole gate: the code-review run on the latest PR head has completed (its check run for the current head SHA has concluded, whatever its conclusion) and zero unresolved GraphQL review threads remain on the latest head. When the predicate holds, flip the draft to ready with `gh pr ready`, then advance the linked issue's board Status to `In review` by invoking working-on-github-issue with stage in-review — the single writer of issue lifecycle state; do not write that board state directly. If working-on-github-issue is unavailable, still flip the PR and report the skipped board move. The flip is one-way: never re-draft a ready PR, and only flip a PR this run authored. A PR opened non-draft because it skips code review has no review loop to gate on; leave it and do not flip.
+
+Stop this automation when no unresolved actionable/blocking review feedback remains and every low-severity item is either handled as objective cleanup or explicitly classified as stale, duplicate, already handled, informational, subjective/report-only, or requiring a human decision, and the completion step above has run. Report the PR URL, latest head SHA, handled thread URLs, verification evidence, whether the PR was flipped to ready and the issue moved to In review, and any remaining non-blocking items with the reason they were left open.
 ```
 
 ## Manual Fallback
