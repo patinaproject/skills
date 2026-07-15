@@ -37,5 +37,7 @@ The durable boundaries at this skill level:
   code-review run on the latest head has completed and no unresolved review
   threads remain), flip the draft to ready and advance the linked issue to
   `In review` through `working-on-github-issue` with stage `in-review`. The flip
-  is one-way and covers only PRs this run authored.
+  is one-way and covers any agent-authored draft this loop operates on —
+  including one a prior `finish-pr` run opened — never a human's work-in-progress
+  draft.
 - Do not merge the PR.

@@ -25,10 +25,12 @@ runs, so draft means "agent loop still churning, not yet for humans." The skill
 flips a draft to ready exactly when the **review loop is clean** — the
 code-review run on the latest head has completed and no unresolved review
 threads remain — and advances the linked issue to `In review` in the same step.
-The flip is one-way, and the skill only flips PRs it authored. A PR that skips
-code review (a consuming repo may mark this with a `skip-code-review` label)
-opens non-draft and sits outside this convention, because its review loop never
-runs.
+The flip is one-way, and the skill flips only an **agent-authored draft** — a
+draft the agent pipeline opened, never a human's work-in-progress. A PR that
+**runs no code-review loop** opens non-draft and sits outside this convention,
+because its predicate can never hold: this covers a repo with no code-review
+automation at all and a per-PR skip a repo defines (for example a
+`skip-code-review` label).
 
 End on a strict final ready-to-merge gate. The gate enumerates every
 uncommitted path and requires a provable per-path disposition — in-scope paths
@@ -72,7 +74,8 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 9. Flip the draft to ready for review the moment the review loop is clean, and
    advance the linked issue to `In review` through `working-on-github-issue`
    with stage `in-review` in the same step. The flip is one-way and applies only
-   to a PR this run authored; ready-for-review is distinct from ready-to-merge.
+   to an agent-authored draft, never a human's; ready-for-review is distinct from
+   ready-to-merge.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.
 
