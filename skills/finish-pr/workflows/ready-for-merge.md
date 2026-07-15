@@ -290,11 +290,14 @@ tell the human what to do next.
     The code-review run is the repository's code-review check — the run that
     posts review threads on the PR head. Both must hold:
 
-    - that code-review run on the latest PR head has **actually reviewed** — its
-      check run for the current head SHA concluded `success` or `neutral`, or it
-      posted review threads that are now resolved. A run that errored, timed out,
-      or was cancelled without posting threads never reviewed, so the loop is not
-      clean: re-run it rather than flip.
+    - that code-review run on the latest PR head has **completed** and has
+      **actually reviewed**. Its check run for the current head SHA must have
+      status `completed`, and either it concluded `success` or `neutral`, or it
+      posted review threads that are now resolved. A queued or in-progress run
+      does not satisfy the predicate even if it has already posted threads. A
+      completed run that errored, timed out, or was cancelled without posting
+      threads never reviewed, so the loop is not clean: re-run it rather than
+      flip.
     - **zero** unresolved GraphQL review threads remain on the latest head.
 
     A PR that runs no code-review loop on its draft was opened non-draft in
