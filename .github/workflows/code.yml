@@ -1,0 +1,70 @@
+name: Code
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  code:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    # The delegated develop pipeline runs a fuller explore/implement/polish/finish
+    # loop than a one-shot prompt, so bound a runaway run explicitly rather than
+    # inheriting the 360-minute default.
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read # Required for the agent to read CI results on PRs
+
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.3.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        # pnpm/action-setup@v4.4.0
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+
+      - name: Setup Node.js
+        # actions/setup-node@v4.4.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Run Code
+        id: code
+        # anthropics/claude-code-action@v1.0.133
+        uses: anthropics/claude-code-action@787c5a0ce96a9a6cfb050ea0c8f4c05f2447c251
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_commit_signing: true
+
+          # This optional setting allows the agent to read CI results on PRs.
+          additional_permissions: |
+            actions: read
+
+          # Branch naming: {issue-number}-{kebab-case} per project convention
+          branch_name_template: '{{entityNumber}}-{{description}}'
+
+          # CI implementation: delegate to the repo-owned `develop` controller so
+          # CI and interactive agents run one pipeline. The prompt below carries
+          # only CI-forced overrides; the skills own the rest of the behavior.
+          claude_args: |
+            --max-turns 100
+            --model claude-opus-4-8
+            --effort high
+            --allowedTools Skill(develop),Skill(tdd),Skill(code-review),Skill(resolving-merge-conflicts),Task,Read,Glob,Grep,Edit,Write,Bash(gh:*),Bash(pnpm:*),Bash(git fetch:*),Bash(git rebase:*),Bash(git add:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git rev-parse:*),Bash(git commit:*),Bash(git push --force-with-lease:*)
+            --append-system-prompt "CI NON-INTERACTIVE MODE: You are running in CI with no human to interact with. Drive the triggering issue, comment, or review to a ready-for-review PR by invoking the develop skill through the Skill tool. develop owns the pipeline (working-on-github-issue -> implement -> polish -> finish-pr) and the vendored implement, tdd, code-review, diagnosing-bugs, and codebase-design skills it consumes; those skills own the workflow, and the overrides below are the only CI-forced changes on top of them. To read the current branch name, read the .git/HEAD file (it contains 'ref: refs/heads/{branch-name}'). (1) AUTO-PROCEED: Auto-proceed at every skill checkpoint, HALT condition, and options menu. Never wait for human confirmation or approval. When any step says HALT or presents an options menu, decide and continue automatically. (2) FROZEN SCOPE: The triggering issue/comment/review is the entire task specification. Work only on it. Never scan, survey, or pick from the issue backlog. (3) ALREADY BRANCHED: The action has already created and checked out the work branch; treat it as immutable. Align to the current branch — never run new-branch, re-branch, create, or switch branches. (4) GIT REBASE SAFETY: Only ever rebase and force-push the current feature/PR branch, never 'main' or any protected branch (confirm the current branch via .git/HEAD first). Force-push only with 'git push --force-with-lease'. If merge conflicts cannot be resolved cleanly, run 'git rebase --abort' and report the conflicting paths instead of guessing; the resolving-merge-conflicts skill owns conflict mechanics. (5) GITHUB COMMENT FORMATTING: When writing GitHub comments, NEVER use '#' immediately followed by a number (e.g. #1, #2) unless intentionally referencing a real GitHub issue or PR — GitHub auto-links '#N' and creates unwanted links. Use 'Fix 1:', 'Item 1:', or similar instead. (6) NEVER bypass hooks with '--no-verify'."

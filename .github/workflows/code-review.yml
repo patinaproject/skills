@@ -4,262 +4,137 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
-  id-token: write
-
 concurrency:
-  group: code-review-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   classify:
-    name: Classify PR
+    name: Check if review is needed
     runs-on: blacksmith-2vcpu-ubuntu-2404
     if: >-
       ${{
         github.event.pull_request.draft == false &&
-        github.event.pull_request.head.repo.fork == false &&
-        github.event.pull_request.user.login != 'dependabot[bot]'
+        github.event.pull_request.head.repo.fork == false
       }}
     permissions:
       contents: read
-      pull-requests: read
     outputs:
-      should_review: ${{ steps.changed-files.outputs.should_review }}
-      reason: ${{ steps.changed-files.outputs.reason }}
-    steps:
-      - name: Classify changed files
-        id: changed-files
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-
-          changed_files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-
-          if printf '%s\n' "$changed_files" | grep -qx '.github/workflows/code-review.yml'; then
-            {
-              echo "should_review=false"
-              echo "reason=review workflow changed"
-            } >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          reviewable=false
-          while IFS= read -r file; do
-            case "$file" in
-              ""|CHANGELOG.md|pnpm-lock.yaml|package-lock.json|yarn.lock|bun.lockb)
-                ;;
-              *.lock|*.lockb|*.snap|*.png|*.jpg|*.jpeg|*.gif|*.webp|*.svg)
-                ;;
-              *)
-                reviewable=true
-                ;;
-            esac
-          done <<< "$changed_files"
-
-          if [ "$reviewable" = false ]; then
-            {
-              echo "should_review=false"
-              echo "reason=only low-signal files changed"
-            } >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          {
-            echo "should_review=true"
-            echo "reason=reviewable changes detected"
-          } >> "$GITHUB_OUTPUT"
-
-  review:
-    name: Review PR
-    needs: classify
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 30
-    if: needs.classify.outputs.should_review == 'true'
-    env:
-      PR_REPO: ${{ github.repository }}
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      should-review: ${{ steps.changed-files.outputs.should-review }}
     steps:
       - name: Checkout repository
         # actions/checkout@v4.3.1
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: changed-files
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$PR_HEAD_REF" == release-please--* && "$PR_AUTHOR" == "github-actions[bot]" ]]; then
+            echo "Skipping Code Review: release-please"
+            echo "should-review=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$PR_AUTHOR" == "dependabot[bot]" ]]; then
+            echo "Skipping Code Review: dependabot"
+            echo "should-review=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if git log --name-only --format= "$PR_BASE_SHA..$PR_HEAD_SHA" -- .github/workflows/code-review.yml > reviewer-workflow-edits.txt; then
+            :
+          else
+            echo "Failed to inspect PR commit history for reviewer workflow edits" >&2
+            exit 1
+          fi
+
+          # The action's token exchange requires this workflow to match the default
+          # branch. If the PR branch committed a change to this workflow, skip
+          # the action and rely on local/manual review evidence for the PR.
+          if grep -Fxq ".github/workflows/code-review.yml" reviewer-workflow-edits.txt; then
+            echo "Skipping Code Review: reviewer-workflow-self-edit"
+            echo "should-review=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mapfile -t files < <(git diff --name-only "$PR_BASE_SHA..$PR_HEAD_SHA")
+          if [[ "${#files[@]}" -eq 0 ]]; then
+            echo "Skipping Code Review: empty-diff"
+            echo "should-review=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "should-review=true" >> "$GITHUB_OUTPUT"
+
+  code-review:
+    name: Review PR
+    needs: classify
+    if: ${{ needs.classify.outputs.should-review == 'true' }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    env:
+      PR_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+
+    steps:
+      - name: Checkout repository
+        # actions/checkout@v4.3.1
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
 
       - name: Run Code Review
         id: code-review
-        # anthropics/claude-code-action@v1
-        uses: anthropics/claude-code-action@11ba60486e4aec9ddfeafcf4bb3f00b028ac2c16
+        # anthropics/claude-code-action@v1.0.133
+        uses: anthropics/claude-code-action@787c5a0ce96a9a6cfb050ea0c8f4c05f2447c251
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          include_fix_links: false
-          display_report: false
-          show_full_output: false
-          use_sticky_comment: true
+          use_commit_signing: true
           track_progress: true
+          use_sticky_comment: true
+          allowed_bots: 'claude'
+
+          # Delegate to the vendored `code-review` skill; the prompt supplies only
+          # the CI-forced inputs and output contract, never a rubric of its own.
           prompt: |
             NON-INTERACTIVE CI REVIEW for PR ${{ env.PR_NUMBER }} in ${{ env.PR_REPO }}.
 
-            This review is non-mutating. Do not edit files, stage changes,
-            commit changes, or push branches.
+            Review this PR's diff by invoking the code-review skill through the Skill tool. It runs a two-axis review -- Standards (does the diff follow this repo's documented coding standards, plus the fixed Fowler code-smell baseline the skill carries) and Spec (does the diff match the originating issue) -- in two parallel sub-agents, then reports them side by side. The skill owns the rubric. Apply the CI-forced inputs and overrides below, which supply what the skill would otherwise ask a human for and take precedence over its interactive defaults.
 
-            ## Step 1: Load project context
+            ## CI-forced inputs and overrides
 
-            Read AGENTS.md, CLAUDE.md if present, and docs that govern changed
-            files.
+            1. NON-INTERACTIVE: There is no human to talk to. Never wait for confirmation or direction. Wherever the skill would ask the user for the fixed point, spec source, or standards sources, use the values below instead.
+            2. FIXED POINT: the PR base. Diff against the three-dot merge-base with `gh pr diff ${{ env.PR_NUMBER }}` (equivalently `git diff origin/${{ github.event.pull_request.base.ref }}...HEAD`), and read the PR with `gh pr view ${{ env.PR_NUMBER }}`. Treat that diff as the change under review. Read AGENTS.md and CLAUDE.md (plus any docs they import) for project context.
+            3. SPEC SOURCE: the issue this PR closes, resolved from the PR body's closing keyword (Closes/Fixes/Resolves) and fetched with `gh issue view <N>`. If the PR closes no issue, the Spec axis reports "no spec available" per the skill's own rule -- do not invent a spec.
+            4. SKIP PATHS: do not review CHANGELOG.md or release-please release metadata, pnpm-lock.yaml or any other lock files, the committed skill overlay trees (.agents/skills/** and .claude/skills/**), or generated marketplace output.
+            5. NO CI REPORTING: Do not inspect, summarize, or report CI/check failures -- CI jobs are the source of truth for lint, test, and workflow failures.
 
-            ## Step 2: Get PR diff
+            ## Output contract
 
-            Run:
-              gh pr view ${{ env.PR_NUMBER }}
-              gh pr diff ${{ env.PR_NUMBER }}
+            This review is advisory and non-mutating. Produce findings only. Do not edit files, stage changes, commit changes, or push branches. A completed review is an advisory completed check even when blocking findings exist; do not fail the workflow because findings exist.
 
-            Store the diff for use in the review below.
+            Post every finding that maps to a specific line of the diff as its own inline comment using mcp__github_inline_comment__create_inline_comment with `confirmed: true` on that line -- one inline comment per finding. Prefix each inline comment with its axis and index: `ST<n>:` for a Standards finding, `SP<n>:` for a Spec finding (for example `ST1:` or `SP2:`). Only findings that do not map to a specific line (cross-cutting or whole-PR concerns) may live in the summary alone. Do not call `gh pr comment` or create any standalone PR summary comment. Never write '#' immediately followed by a number (GitHub auto-links it to issues/PRs); use the ST/SP labels instead.
 
-            Skip these paths in all review passes:
-            - CHANGELOG.md and release-please generated release metadata
-            - pnpm-lock.yaml and other lock files
-            - .agents/skills/** and .claude/skills/** dogfood overlay paths
-            - generated marketplace output unless it reveals a concrete risk
+            End with one concise Markdown summary for the action-managed sticky comment, structured as two separate sections -- `## Standards` and `## Spec` -- that are never merged or reranked across axes. Report the two axes side by side exactly as the skill produces them.
 
-            ## Step 3: Compute base and head SHAs
-
-            Run:
-              BASE_SHA=$(gh pr view ${{ env.PR_NUMBER }} --json baseRefOid --jq .baseRefOid)
-              HEAD_SHA=$(gh pr view ${{ env.PR_NUMBER }} --json headRefOid --jq .headRefOid)
-
-            ## Step 4: Primary review
-
-            Apply the repository code-review rubric to the diff
-            (BASE_SHA..HEAD_SHA). Preserve exact functionality. Never ask for a
-            refactor that changes what the code does unless the current behavior
-            is a bug.
-
-            **Correctness and security:**
-            - Does the implementation match the issue intent?
-            - Are GitHub Actions permissions, pinned action SHAs, and secret
-              boundaries safe?
-            - Does the change introduce credential leaks, public-repo private
-              context leaks, or unsafe automation?
-
-            **Structural code quality — Thermo-Nuclear Code Quality Review
-            lens:**
-
-            Apply this lens to every changed file, then surface what you find
-            as advisory findings. This review is non-mutating: where the lens
-            says "go for it" or "restructure", recommend the restructuring,
-            do not perform it.
-
-            - Ambitious behavior-preserving simplification ("code-judo"). Look
-              past the first version that works for the simplest version that
-              could work. Favor changes that delete whole branches, collapse
-              redundant helper layers, or remove a special case outright over
-              changes that add another. When a diff could be dramatically
-              simpler while preserving exact behavior, say so.
-            - File-size sprawl. Treat a file growing toward ~1000 lines as a
-              smell, not a hard limit. When a change pushes a file past a
-              healthy size boundary or piles new responsibilities onto an
-              already-large file, recommend decomposing it along its natural
-              seams.
-            - Spaghetti and branch growth. Be suspicious of new ad-hoc
-              conditionals bolted onto an unrelated flow. New logic should land
-              behind a proper abstraction or in its own path, not as another
-              branch tangled into a function that already does something else.
-            - Abstraction and type-boundary cleanliness. Question leaky
-              abstractions, thin pass-through wrappers, and unnecessary casts or
-              optionality. Prefer direct, legible code over indirection that
-              hides what is happening or widens a type boundary without reason.
-            - Canonical-layer reuse. Push feature logic into the canonical layer
-              and reuse existing helpers instead of accreting near-duplicate
-              one-offs. When a change reimplements something the repo already
-              provides, point to the canonical home.
-            - Atomic-update preference. Prefer changes that move state forward
-              in one coherent, all-or-nothing step over changes that leave an
-              intermediate, half-applied state observable.
-
-            **Maintainability:**
-            - Reduce unnecessary complexity and nesting.
-            - Eliminate redundant wording, stale workflow names, and unclear
-              skill instructions.
-            - Preserve repository conventions for skills, marketplace manifests,
-              issue-linked commits, and PR templates.
-
-            **Testing:**
-            - Are changed workflow contracts covered by verification scripts?
-            - Are changed skill behaviors verified through discoverability,
-              marketplace, lint, or focused workflow checks?
-            - Do tests verify observable behavior rather than implementation
-              trivia?
-
-            Categorize findings as:
-            - **Critical (Must Fix):** Bugs, security issues, credential leaks,
-              broken workflows, or data loss risks
-            - **Major (Should Fix):** Missing verification, unsafe permissions,
-              unclear contracts, or likely agent workflow regressions
-            - **Minor (Nice to Have):** Style, wording, or documentation polish
-
-            ## Step 5: Consolidate and report findings
-
-            Merge all findings. Deduplicate overlapping findings.
-            Do NOT duplicate output from CI lint/test pipelines.
-            Do not edit files, stage changes, commit changes, or push branches.
-            Do not create standalone PR summary comments. The Claude Code
-            action owns the single action-managed sticky comment.
-
-            Post all actionable line-specific findings inline using
-            mcp__github_inline_comment__create_inline_comment with
-            confirmed: true whenever the finding has a valid diff location.
-            Each inline finding must include:
-            - The severity label (C1:, M1:, M2:, etc.)
-            - A clear description of the issue
-            - A concrete suggested fix
-
-            Return one final Markdown review summary for the action-managed
-            sticky comment. Keep the sticky summary concise: include review
-            context, affected areas, risk, finding counts, and brief notes for
-            findings that cannot be placed inline. Do not fully duplicate
-            inline finding details in the sticky summary.
-
-            Use this structure for the final sticky summary:
-
-            ## Code Review
-
-            ### Change Walkthrough
-            [Brief description per file or area changed]
-
-            ### Affected Areas
-            [List of skill, workflow, marketplace, or docs areas touched]
-
-            ### Risk: [Low/Medium/High]
-            [One sentence reasoning]
-
-            ### Findings
-            - Critical: [N]
-            - Major: [N]
-            - Minor: [N]
-
-            [Briefly note where detailed findings were posted inline. Include
-            only summary-only notes for findings that could not be attached to
-            a diff line.]
-
-            ## Important comment formatting rules
-
-            - NEVER write '#' followed by a number (for example, '#1' or '#2');
-              GitHub auto-links these to issues and PRs.
-            - Use C1:, M1:, and L1: style labels instead.
-            - Keep findings concise and actionable.
-            - This repository is public. Do not print, summarize, infer, or
-              request secrets, credentials, token values, private repository
-              URLs, private paths, or private context.
           claude_args: |
+            --max-turns 100
             --model claude-opus-4-8
             --effort high
-            --max-turns 100
-            --allowedTools Read,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*)
-            --append-system-prompt "CI NON-INTERACTIVE MODE: Do not prompt for human confirmation. Proceed through the review steps automatically and report findings using only the allowed tools."
+            --allowedTools Skill(code-review),Task,Read,Glob,Grep,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(git diff:*),Bash(git log:*),Bash(git rev-parse:*)
+            --append-system-prompt "CI NON-INTERACTIVE MODE: Never wait for human confirmation or approval. Proceed autonomously through every step to completion."
