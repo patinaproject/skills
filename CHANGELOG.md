@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.1...patinaproject-skills-v2.19.2) (2026-07-15)
+
+
+### Bug Fixes
+
+* [#284](https://github.com/patinaproject/skills/issues/284) persist agent draft provenance ([#291](https://github.com/patinaproject/skills/issues/291)) ([f05c295](https://github.com/patinaproject/skills/commit/f05c29575c50767e2a0b926368399606f23ea4a6))
+
 ## [2.19.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.0...patinaproject-skills-v2.19.1) (2026-07-15)
 
 
