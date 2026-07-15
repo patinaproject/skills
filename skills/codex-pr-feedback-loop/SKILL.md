@@ -47,10 +47,10 @@ The durable boundaries at this skill level:
 - Preserve this chat's context with a thread automation.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
-  and no unresolved review threads remain), flip the draft to ready and advance
-  the linked issue to `In review` through `working-on-github-issue` with stage
-  `in-review`. The flip is one-way and covers any agent-authored draft this loop
-  operates on —
-  including one a prior `finish-pr` run opened — never a human's work-in-progress
-  draft.
+  and no unresolved review threads remain), flip the draft to ready only when
+  its body contains the exact `<!-- patinaproject-agent-authored-pr -->` marker,
+  then advance the linked issue to `In review` through
+  `working-on-github-issue` with stage `in-review`. The flip is one-way and can
+  cover a marked draft that a prior `finish-pr` run opened. Never add the marker
+  retroactively or flip an unmarked human work-in-progress draft.
 - Do not merge the PR.
