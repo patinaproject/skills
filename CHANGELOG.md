@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.0...patinaproject-skills-v2.19.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* [#284](https://github.com/patinaproject/skills/issues/284) require completed review run before ready ([#289](https://github.com/patinaproject/skills/issues/289)) ([21a9d1d](https://github.com/patinaproject/skills/commit/21a9d1ddcdb2e0644a5e32e5c8db92509a4ad2ca))
+
 ## [2.19.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.18.0...patinaproject-skills-v2.19.0) (2026-07-15)
 
 
