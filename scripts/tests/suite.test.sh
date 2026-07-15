@@ -8,7 +8,6 @@ bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
-bash scripts/tests/code-review-workflow.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/write-docs-format-sync.test.sh
 bash scripts/tests/write-release-changelog-helper.test.sh

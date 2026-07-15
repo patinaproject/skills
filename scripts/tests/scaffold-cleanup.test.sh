@@ -72,6 +72,7 @@ for live_reference_path in \
   .github/pull_request_template.md \
   .github/workflows/actions.yml \
   .github/workflows/code-review.yml \
+  .github/workflows/code.yml \
   .github/workflows/markdown.yml \
   .github/workflows/pull-request.yml \
   .github/workflows/release-please.yml \
@@ -99,7 +100,6 @@ for live_reference_path in \
   package.json \
   scripts/clean.sh \
   scripts/worktree-setup.sh \
-  scripts/tests/code-review-workflow.test.sh \
   scripts/tests/dogfood.test.sh \
   scripts/tests/esm-tooling.test.sh \
   scripts/tests/marketplace.test.sh \
