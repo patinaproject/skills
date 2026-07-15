@@ -21,14 +21,17 @@ check is triaged and reported. A failing check is evidence to triage, not a
 halt. It never merges the PR.
 
 Agent-authored PRs open as drafts and stay drafts while the code-review loop
-runs, so draft means "agent loop still churning, not yet for humans." The skill
-flips a draft to ready exactly when the **review loop is clean** — the
-code-review run on the latest head has completed, has actually reviewed it, and
-no unresolved review threads remain — and advances the linked issue to
-`In review` in the same step.
-The flip is one-way, and the skill flips only an **agent-authored draft** — a
-draft the agent pipeline opened, never a human's work-in-progress. The
-convention presumes the repository runs code review on draft PRs; a PR that
+runs, so draft means "agent loop still churning, not yet for humans." A draft
+created by this skill carries the hidden
+`<!-- patinaproject-agent-authored-pr -->` marker in its PR body. The skill flips
+only a marked draft, and only when the **review loop is clean** — the code-review
+run on the latest head has completed, has actually reviewed it, and no
+unresolved review threads remain — then advances the linked issue to `In review`
+in the same step.
+The flip is one-way. A missing marker means provenance is unproven, so the skill
+never flips that draft or adds the marker retroactively; this leaves a human's
+work-in-progress untouched. The convention presumes the repository runs code
+review on draft PRs; a PR that
 **runs no code-review loop on its draft** opens non-draft instead, because its
 predicate can never hold. That covers a repo with no code-review automation, a
 repo whose code review skips drafts, and a per-PR skip a repo defines (for
@@ -66,8 +69,10 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 5. Commit using the repository's required commit format.
 6. Push the branch when there is work to publish.
 7. Create or update the PR using the repository template. Open it as a draft by
-   default; open it non-draft only when the PR runs no code-review loop on its
-   draft (see the overview and `ready-for-merge.md` step 6).
+   default and add the hidden agent-authored marker in that same creation
+   operation; preserve an existing marker on later body updates, but never add
+   one retroactively. Open it non-draft only when the PR runs no code-review
+   loop on its draft (see the overview and `ready-for-merge.md` step 6).
 8. Enter the readiness loop: detect merge conflicts, triage currently
    available PR feedback, resolve eligible conversations, watch all checks in
    fail-fast bounded observation windows, triage every problematic check,
@@ -77,7 +82,8 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
 9. Flip the draft to ready for review the moment the review loop is clean, and
    advance the linked issue to `In review` through `working-on-github-issue`
    with stage `in-review` in the same step. The flip is one-way and applies only
-   to an agent-authored draft, never a human's; ready-for-review is distinct from
+   when the PR body contains the exact agent-authored marker; a missing marker
+   means do not flip or move the issue. Ready-for-review is distinct from
    ready-to-merge.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.

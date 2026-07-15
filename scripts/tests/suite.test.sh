@@ -5,6 +5,7 @@ bash scripts/tests/dogfood.test.sh
 bash scripts/tests/esm-tooling.test.sh
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
+bash scripts/tests/pr-readiness-provenance.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
