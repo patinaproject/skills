@@ -11,9 +11,9 @@ When local work is complete, follow
 [workflows/ready-for-merge.md](workflows/ready-for-merge.md) — the authoritative
 procedure for every step below.
 
-Example: on branch `42-let-agents-use-github-more-ergonomically`, infer issue
-`#42`, verify the diff, commit as `feat: #42 ...`, push, and open the PR as a
-draft.
+Example: on an adapter-provided issue branch, resolve its issue, verify the
+diff, commit with the repository's required issue-reference format, push, and
+open the PR as a draft.
 
 The skill verifies, commits, pushes, and creates or reuses a **draft** PR, then
 runs the readiness loop until the PR is ready-to-merge or every problematic
@@ -26,8 +26,7 @@ created by this skill carries the hidden
 `<!-- patinaproject-agent-authored-pr -->` marker in its PR body. The skill flips
 only a marked draft, and only when the **review loop is clean** — the code-review
 run on the latest head has completed, has actually reviewed it, and no
-unresolved review threads remain — then advances the linked issue to `In review`
-in the same step.
+unresolved review threads remain.
 The flip is one-way. A missing marker means provenance is unproven, so the skill
 never flips that draft or adds the marker retroactively; this leaves a human's
 work-in-progress untouched. The convention presumes the repository runs code
@@ -45,19 +44,6 @@ worktree. If any gate fails, report the PR as not ready-to-merge, name the
 blocker in human-friendly language, and do not imply success or call it
 finished. If every gate passes, compress the ready-to-merge evidence into one
 human line.
-
-## Required Child Skill
-
-- `working-on-github-issue`: the single writer of issue lifecycle state. At the
-  draft-to-ready flip, finish-pr invokes it with stage `in-review` to advance
-  the linked issue's board Status rather than writing that state directly.
-
-If it is missing, still finish the PR, but report that the `In review` board
-move was skipped and name the install guidance:
-
-```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue -y
-```
 
 ## Workflow
 
@@ -79,12 +65,10 @@ npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skil
    re-query PR feedback after checks and after every watch exit or timeout, fix
    branch-local issues, push, and repeat. A check the agent cannot fix gets a
    concrete disposition and continues to reporting, not a halt.
-9. Flip the draft to ready for review the moment the review loop is clean, and
-   advance the linked issue to `In review` through `working-on-github-issue`
-   with stage `in-review` in the same step. The flip is one-way and applies only
-   when the PR body contains the exact agent-authored marker; a missing marker
-   means do not flip or move the issue. Ready-for-review is distinct from
-   ready-to-merge.
+9. Flip the draft to ready for review the moment the review loop is clean. The
+   flip is one-way and applies only when the PR body contains the exact
+   agent-authored marker; a missing marker means do not flip. The PR transition
+   is the complete review signal and does not write issue state.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.
 

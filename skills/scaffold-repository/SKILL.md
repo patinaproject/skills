@@ -59,8 +59,8 @@ Behavior:
 - For each gap, produce a concrete recommendation on how to realign with the current baseline.
 - For each recommendation, show a **diff preview** and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
-  1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be offered for deletion.
-  2. PNPM tooling and skills installation: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`.
+  1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be replaced by the Linear intake redirect.
+  2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/issue-publishing.md`, `docs/triage-workflow.md`, `.gitignore`.
   3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
 
@@ -92,9 +92,11 @@ themselves this marketplace repository.
 
 ```text
 .claude/settings.json
+.codex/config.toml
 .editorconfig
 .github/CODEOWNERS
 .github/actionlint.yaml
+.github/ISSUE_TEMPLATE/config.yml
 .github/pull_request_template.md
 .github/workflows/actions.yml
 .github/workflows/markdown.yml
@@ -107,6 +109,7 @@ themselves this marketplace repository.
 .markdownlint.jsonc
 .markdownlintignore
 .nvmrc
+.mcp.json
 AGENTS.md
 CHANGELOG.md
 CLAUDE.md
@@ -117,7 +120,12 @@ SECURITY.md                 (public repos only)
 commitizen.config.json
 commitlint.config.js
 docs/file-structure.md
+docs/agents/issue-tracker.md        (symlink to ../issue-tracker.md)
+docs/agents/triage-labels.md        (symlink to ../triage-workflow.md)
+docs/issue-publishing.md
+docs/issue-tracker.md
 docs/release-flow.md
+docs/triage-workflow.md
 docs/wiki-index.md
 package.json
 pnpm-lock.yaml
@@ -148,7 +156,7 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 
 ## Conventions encoded
 
-- **Commits**: Conventional Commits with no scope, required `#<issue>` tag, 72-char max. Enforced by commitlint + husky `commit-msg`.
+- **Commits**: Conventional Commits with no scope, required `PAT-N` tag, 72-char max. Enforced by commitlint + husky `commit-msg`.
 - **PR titles**: same format, so squash commits reuse them verbatim.
 - **PR body**: a slim baseline shared by docs and code repos alike — required
   closing keywords for normal PRs, additional linked-issue relationships
@@ -163,8 +171,9 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   [ADR-257](../../docs/adr/ADR-257-slim-baseline-pr-template.md) for the
   single-baseline decision.
 - **Issue titles and bodies**: titles are plain-language, no commit-style
-  prefix. Body structure is owned by the skill creating the issue; do not emit
-  GitHub issue templates as a baseline convention.
+  prefix. Body structure is owned by the tracker-agnostic skill creating the
+  issue. Emit a GitHub issue-template config that disables blank issues and
+  redirects intake to Linear; do not emit GitHub issue forms.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
@@ -232,11 +241,12 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   `git symbolic-ref --short refs/remotes/origin/HEAD` or
   `gh repo view --json defaultBranchRef`); never hardcode `main`.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
-- **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `#<issue>` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains a GitHub closing keyword.
+- **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `PAT-N` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains `Fixes PAT-N`.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).
 - **Workflow linting**: `.github/workflows/actions.yml` runs `actionlint` on PRs that touch `.github/workflows/**` or `.github/actionlint.yaml`. Catches malformed refs, invalid expressions, permission mistakes, and (alongside our SHA-pin convention) supply-chain drift.
 - **GitHub Actions pinning**: every `uses:` in emitted workflows references a full 40-char commit SHA with a `# <action>@<version>` comment above it, rather than a mutable tag. Documented in `AGENTS.md`.
-- **Labels**: `AGENTS.md` directs contributors to use `gh label list` and the repository's label descriptions as the source of truth when labeling issues and PRs.
+- **Labels**: issue labels resolve through `docs/issue-tracker.md`; pull-request
+  labels use `gh label list` and the repository's live descriptions.
 - **Author identity**: `package.json` carries a human author record: name and email from `git config`, plus `https://github.com/<author-handle>` from `gh api user --jq .login` or the required author-handle prompt. Repository-level URLs (`homepage`, `repository`) continue to use `<owner>/<repo>`.
 
 ## GitHub repository settings
@@ -337,7 +347,7 @@ pnpm install
 pnpm exec commitlint --help
 pnpm lint:md
 echo "feat: bad" | pnpm exec commitlint   # exits non-zero
-echo "feat: #1 ok" | pnpm exec commitlint # exits zero
+echo "feat: PAT-1 ok" | pnpm exec commitlint # exits zero
 ```
 
 Run `pnpm exec markdownlint-cli2 --fix "**/*.md" "#node_modules"` to auto-fix common markdown violations before committing.

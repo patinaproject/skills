@@ -55,7 +55,7 @@ and copy `skills/<name>/` directly into the agent's skill directory. No build st
    after required checks pass.
 
 Bot-generated release-please PRs from `release-please--*` branches are the only PRs that
-may omit a GitHub issue ID in the commit subject.
+may omit a Linear issue ID in the commit subject.
 
 ## Tag shape
 

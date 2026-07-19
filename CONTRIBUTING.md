@@ -12,16 +12,16 @@ This installs dev tooling and registers the Husky hooks (`commit-msg` + `pre-com
 
 ## Commit messages
 
-Commits must follow Conventional Commits with no scope and a required GitHub issue tag:
+Commits must follow Conventional Commits with no scope and a required Linear issue tag:
 
 ```text
-type: #123 short description
+type: PAT-123 short description
 ```
 
 Examples:
 
-- `feat: #42 add a feature`
-- `docs: #17 clarify install steps`
+- `feat: PAT-42 add a feature`
+- `docs: PAT-17 clarify install steps`
 
 The `commit-msg` hook enforces this. PR titles follow the same format so the squash commit can be reused verbatim.
 

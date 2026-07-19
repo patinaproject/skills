@@ -18,6 +18,11 @@ const commitizenConfig = JSON.parse(await readFile("commitizen.config.json", "ut
 assert.equal(typeof commitizenConfig, "object", "commitizen config must be JSON data");
 assert.ok(Array.isArray(commitizenConfig.types), "commitizen config must declare commit types");
 assert.equal(commitizenConfig.subjectLimit, 72, "commitizen config must preserve the subject limit");
+assert.equal(
+  commitizenConfig.ticketNumberRegExp,
+  "PAT-[1-9]\\d*",
+  "commitizen must require current Linear issue identifiers"
+);
 
 const commitlintConfig = await import("./commitlint.config.js");
 assert.equal(typeof commitlintConfig.default, "object", "commitlint config must export a default object");

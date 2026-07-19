@@ -98,6 +98,56 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch Linear issue spec
+        shell: bash
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          issue_id="$(printf '%s\n' "$PR_BODY" \
+            | grep -Eio '(Closes|Fixes|Resolves)[[:space:]]+PAT-[1-9][0-9]*' \
+            | grep -Eio 'PAT-[1-9][0-9]*' \
+            | head -n 1 || true)"
+          if [[ -z "$issue_id" ]]; then
+            issue_id="$(printf '%s\n' "$PR_HEAD_REF" \
+              | grep -Eio 'PAT-[1-9][0-9]*' \
+              | head -n 1 || true)"
+          fi
+
+          if [[ -z "$issue_id" ]]; then
+            printf '%s\n' '# No spec available' > .linear-spec.md
+            exit 0
+          fi
+          issue_id="${issue_id^^}"
+
+          if [[ -z "$LINEAR_API_KEY" ]]; then
+            echo 'LINEAR_API_KEY is required to fetch the linked issue spec' >&2
+            exit 1
+          fi
+
+          payload="$(jq -nc --arg id "$issue_id" '{
+            query: "query IssueSpec($id: String!) { issue(id: $id) { identifier title description url } }",
+            variables: { id: $id }
+          }')"
+          response="$(curl --fail-with-body --silent --show-error \
+            -H "Authorization: $LINEAR_API_KEY" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            https://api.linear.app/graphql)"
+          printf '%s\n' "$response" | jq -er '
+            if (((.errors // []) | length) > 0) then
+              error("Linear GraphQL returned errors")
+            elif .data.issue == null then
+              error("Linear issue was not found")
+            else
+              .data.issue
+              | "# \(.identifier): \(.title)\n\n\(.description // "")\n\n\(.url)"
+            end
+          ' > .linear-spec.md
+
       - name: Run Code Review
         id: code-review
         # anthropics/claude-code-action@v1.0.133
@@ -120,9 +170,10 @@ jobs:
 
             1. NON-INTERACTIVE: There is no human to talk to. Never wait for confirmation or direction. Wherever the skill would ask the user for the fixed point, spec source, or standards sources, use the values below instead.
             2. FIXED POINT: the PR base. Diff against the three-dot merge-base with `gh pr diff ${{ env.PR_NUMBER }}` (equivalently `git diff origin/${{ github.event.pull_request.base.ref }}...HEAD`), and read the PR with `gh pr view ${{ env.PR_NUMBER }}`. Treat that diff as the change under review. Read AGENTS.md and CLAUDE.md (plus any docs they import) for project context.
-            3. SPEC SOURCE: the issue this PR closes, resolved from the PR body's closing keyword (Closes/Fixes/Resolves) and fetched with `gh issue view <N>`. If the PR closes no issue, the Spec axis reports "no spec available" per the skill's own rule -- do not invent a spec.
-            4. SKIP PATHS: do not review CHANGELOG.md or release-please release metadata, pnpm-lock.yaml or any other lock files, the committed skill overlay trees (.agents/skills/** and .claude/skills/**), or generated marketplace output.
-            5. NO CI REPORTING: Do not inspect, summarize, or report CI/check failures -- CI jobs are the source of truth for lint, test, and workflow failures.
+            3. SPEC SOURCE: read `.linear-spec.md`, prepared by the preceding read-only Linear API step from the PR body's issue-closing reference or the issue-linked branch. If it says no spec is available, the Spec axis reports "no spec available" per the skill's own rule -- do not invent a spec.
+            4. ISSUE TRACKER DOC: the skill points at `docs/agents/issue-tracker.md`; this repo's canonical issue-tracker doc is `docs/issue-tracker.md`. Use that path and do not run `/setup-matt-pocock-skills`.
+            5. SKIP PATHS: do not review CHANGELOG.md or release-please release metadata, pnpm-lock.yaml or any other lock files, the committed skill overlay trees (.agents/skills/** and .claude/skills/**), or generated marketplace output.
+            6. NO CI REPORTING: Do not inspect, summarize, or report CI/check failures -- CI jobs are the source of truth for lint, test, and workflow failures.
 
             ## Output contract
 
@@ -136,5 +187,5 @@ jobs:
             --max-turns 100
             --model claude-opus-4-8
             --effort high
-            --allowedTools Skill(code-review),Task,Read,Glob,Grep,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue view:*),Bash(git diff:*),Bash(git log:*),Bash(git rev-parse:*)
+            --allowedTools Skill(code-review),Task,Read,Glob,Grep,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*),Bash(git log:*),Bash(git rev-parse:*)
             --append-system-prompt "CI NON-INTERACTIVE MODE: Never wait for human confirmation or approval. Proceed autonomously through every step to completion."

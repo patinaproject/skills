@@ -49,11 +49,9 @@ npx skills@latest add vercel-labs/skills@find-skills
 
 ### using-github
 
-GitHub work - filing issues, editing issues, starting branches, writing
-changelogs, preparing PRs - is repetitive and convention-sensitive. Without a
-shared skill, every agent session re-derives the same rules from scratch and
-produces inconsistent output. `using-github` reads repository rules and routes
-to the correct workflow for each task.
+GitHub forge work — repository and pull-request operations — is repetitive and
+convention-sensitive. `using-github` keeps those forge mechanics consistent;
+tracker operations are deliberately delegated to `docs/issue-tracker.md`.
 
 See [./skills/using-github/](./skills/using-github/) for the full README and
 skill contract.
@@ -71,30 +69,39 @@ See [./skills/install-skills/](./skills/install-skills/) for the skill contract.
 ### new-branch
 
 Issue-linked implementation should start from the repository default branch on
-a predictable local branch. `new-branch` resolves an issue, derives GitHub's
-default issue-branch name, refuses dirty worktrees, and creates or switches to
-the local branch without pushing, installing dependencies, committing, or
-creating a PR.
+the tracker's canonical local branch. `new-branch` resolves an issue, uses the
+adapter-provided branch name verbatim, refuses dirty worktrees, and creates or
+switches to the local branch without pushing, installing dependencies,
+committing, or creating a PR.
 
 See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
-### working-on-github-issue
+### working-on-issue
 
-Every controller needs the same begin-work step. `working-on-github-issue`
+Every controller needs the same begin-work step. `working-on-issue`
 resolves the issue best-effort — from an explicit reference or the current
-branch — then aligns GitHub state: marks it started (self-assign when
-unassigned, move a compatible Project item to "In progress") and lands on the
-issue-linked branch via `new-branch`. It returns cleanly when there is no issue
-and never edits the issue body, so every entrypoint aligns work identically.
+branch — then uses the tracker adapter to mark it started and lands on its
+canonical branch via `new-branch`. It returns cleanly when there is no issue and
+never edits the issue body, so every entrypoint aligns work identically.
 
-See [./skills/working-on-github-issue/](./skills/working-on-github-issue/) for the skill contract.
+See [./skills/working-on-issue/](./skills/working-on-issue/) for the skill contract.
+
+### new-issue and edit-issue
+
+Issue filing and updates should be provider-independent. `new-issue` drafts,
+checks duplicates, and publishes through the repository adapter; `edit-issue`
+applies verified field, lifecycle, label, and relationship changes through the
+same adapter.
+
+See [./skills/new-issue/](./skills/new-issue/) and
+[./skills/edit-issue/](./skills/edit-issue/) for their contracts.
 
 ### develop
 
 End-to-end work needs a single entrypoint without weakening the focused skills
 that already own branch setup, test-driven implementation, diagnosis, local
 review, and PR finishing. `develop` takes a **scope** — an issue reference,
-free-form instructions, or both — coordinates `working-on-github-issue`,
+free-form instructions, or both — coordinates `working-on-issue`,
 `implement`, `polish`, and `finish-pr`, and stops for human-owned
 ambiguity instead of inventing scope.
 
@@ -159,14 +166,14 @@ ADRs — recording decisions and terminology without re-litigating them.
 
 See [./skills/write-docs/](./skills/write-docs/) for the skill contract.
 
-### write-release-changelog
+### write-changelog
 
-Shipping a release should close the loop with the people whose feedback it
-resolved. `write-release-changelog` runs the release ceremony: it drafts a
-community changelog and posts per-item replies, sets resolved feedback to
-complete, and links every resolved item in a thank-you.
+Milestone and Release summaries should come from the canonical tracker rather
+than forge event reconstruction. `write-changelog` renders user-facing copy
+from a Linear project milestone or shipped Release and can publish Release
+notes through the tracker adapter.
 
-See [./skills/write-release-changelog/](./skills/write-release-changelog/) for
+See [./skills/write-changelog/](./skills/write-changelog/) for
 the skill contract.
 
 ### prompting-fable
@@ -192,10 +199,12 @@ README and skill contract.
 
 | Skill | Description |
 |---|---|
-| [using-github](./skills/using-github/) | Patina Project GitHub workflow conventions |
+| [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [working-on-github-issue](./skills/working-on-github-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
-| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-github-issue, build, polish, and finish-pr |
+| [working-on-issue](./skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
+| [new-issue](./skills/new-issue/) | Draft and publish issues through the tracker adapter |
+| [edit-issue](./skills/edit-issue/) | Safely update issues through the tracker adapter |
+| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and finish-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Ready a branch for review: deepen architecture, then review to green |
 | [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
@@ -203,7 +212,7 @@ README and skill contract.
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
-| [write-release-changelog](./skills/write-release-changelog/) | Run the release ceremony: changelog plus feedback loop-closing |
+| [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
@@ -248,7 +257,9 @@ skills/
   install-skills/
   using-github/
   new-branch/
-  working-on-github-issue/
+  working-on-issue/
+  new-issue/
+  edit-issue/
   develop/
   develop-with-workflow/
   finish-pr/
@@ -256,7 +267,7 @@ skills/
   polish/
   update-branch/
   write-docs/
-  write-release-changelog/
+  write-changelog/
   prompting-fable/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>

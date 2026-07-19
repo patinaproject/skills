@@ -11,7 +11,6 @@ bash scripts/tests/worktree-setup.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/write-docs-format-sync.test.sh
-bash scripts/tests/write-release-changelog-helper.test.sh
 
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.

@@ -21,6 +21,14 @@ assert_no_match() {
   fi
 }
 
+assert_match() {
+  local pattern="$1"
+  local file="$2"
+  if ! rg -n "$pattern" "$file" >/dev/null 2>&1; then
+    fail "missing expected workflow pattern '$pattern' in $file"
+  fi
+}
+
 # Per the "no tests on documentation content" rule (ADR-224), this test
 # asserts only on filesystem state and non-`.md` config targets. Retired
 # references inside agent/skill prose are covered by `lint:md`, not here.
@@ -66,6 +74,17 @@ assert_no_match "skills:restore|skills:refresh" \
 
 test ! -e scripts/install-skills.sh ||
   fail "scripts/install-skills.sh should be removed in favor of skills experimental_install"
+
+# PAT-2777 explicitly preserves the PR-facing Claude comment surfaces while
+# GitHub issue intake is frozen.
+assert_match '^  issue_comment:' .github/workflows/code.yml
+assert_match '^  pull_request_review_comment:' .github/workflows/code.yml
+assert_match '^  pull_request_review:' .github/workflows/code.yml
+
+# Hosted review resolves its specification from the canonical Linear issue.
+assert_match 'Fetch Linear issue spec' .github/workflows/code-review.yml
+assert_match 'LINEAR_API_KEY' .github/workflows/code-review.yml
+assert_match 'read `.linear-spec.md`' .github/workflows/code-review.yml
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

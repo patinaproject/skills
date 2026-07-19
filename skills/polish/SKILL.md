@@ -12,9 +12,9 @@ an issue reference, free-form instructions, or both:
 
 ```text
 /polish
-/polish #123
+/polish <issue-reference>
 /polish "focus on the validation path"
-/polish #123 focus on the parser
+/polish <issue-reference> focus on the parser
 ```
 
 **Polish** the current branch into something a human only ever sees once it is
@@ -42,9 +42,9 @@ what its phases attend to; it never adds build work.
   instructions, they narrow what Phase 1 deepens and what Phase 2 prioritizes.
   They scope attention within the branch's existing diff — `polish` deepens and
   reviews what is already built rather than expanding the change.
-- **Issue association is best-effort.** `working-on-github-issue` resolves the
+- **Issue association is best-effort.** `working-on-issue` resolves the
   issue from a reference in the scope, else the current branch, and aligns the
-  branch, assignment, and status. When it resolves **no issue**, warn and
+  branch, assignment, and started state. When it resolves **no issue**, warn and
   continue — Phase 2 simply skips the Spec axis; do not halt.
 - **Divergence is surfaced, not silently absorbed.** When the branch's built
   work materially diverges from the resolved issue body, name it in the final
@@ -58,29 +58,29 @@ interpreted for construction.
 
 ## Required Child Skills
 
-- `working-on-github-issue`: resolve the issue (from the scope or the current branch) and land on its issue-linked branch, best-effort; returns cleanly when there is no issue.
+- `working-on-issue`: resolve the issue (from the scope or the current branch) and land on its issue-linked branch, best-effort; returns cleanly when there is no issue.
 - `code-review`: two-axis Standards + Spec branch-diff review via parallel report-only sub-agents.
 - `implement`: apply accepted deepenings and clear behavior-change findings — reaches `tdd` at agreed seams and `code-review` when done.
 - `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
 - `codebase-design`: the deep-module vocabulary and principles Phase 1 deepens against (reference, not invoked).
 
-`working-on-github-issue` reaches `new-branch`; confirm it is installed too.
+`working-on-issue` reaches `new-branch`; confirm it is installed too.
 
 If any are missing, halt before running and report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
 ## Step 0 — Align to the scope
 
-Before Phase 1, run `working-on-github-issue` to resolve and align: it resolves
+Before Phase 1, run `working-on-issue` to resolve and align: it resolves
 the issue from a reference in the scope, else the current branch, then lands on
 the issue-linked branch and marks it started — all best-effort and idempotent.
 Re-running it while already aligned changes nothing, so a controller such as

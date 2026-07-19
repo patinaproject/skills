@@ -1,6 +1,6 @@
 ---
 name: develop
-description: "Drive one scope — a GitHub issue reference, free-form instructions, or both — to an evidence-backed production-ready PR outcome on its branch. Use when the user invokes `/develop <scope>`, or asks to develop one issue or one set of instructions end to end."
+description: "Drive one scope — an issue reference, free-form instructions, or both — to an evidence-backed production-ready PR outcome on its branch. Use when the user invokes `/develop`, or asks to develop one issue or one set of instructions end to end."
 ---
 
 # Develop
@@ -10,23 +10,23 @@ description: "Drive one scope — a GitHub issue reference, free-form instructio
 Invoke with a **scope** — an issue reference, free-form instructions, or both:
 
 ```text
-/develop #123
+/develop <issue-reference>
 /develop "add null-checks to the login handler"
-/develop #123 focus only on the validation path
+/develop <issue-reference> focus only on the validation path
 ```
 
 This skill is a thin, goal-directed **controller**. It drives one scope to a
 ready-for-review PR through a predictable pipeline of named, reusable skills:
 
 ```text
-working-on-github-issue → build (implement) → polish → finish-pr
+working-on-issue → build (implement) → polish → finish-pr
    (align)              (build the scope)      (make ready)     (publish)
 ```
 
 The **scope** is what to build, and it is authoritative for the run. Any
-associated issue is a *separate, best-effort* concern used for the branch, the
-`#<issue>` commit tags, and the PR close — resolved from a reference in the scope
-or from the current branch by `working-on-github-issue`. When instructions and an
+associated issue is a *separate, best-effort* concern used for the branch,
+repository-required commit reference, and PR association — resolved from a reference in the scope
+or from the current branch by `working-on-issue`. When instructions and an
 issue body disagree, the instructions win.
 
 It coordinates those skills, preserves their contracts and repository
@@ -60,12 +60,12 @@ Do not report `goal-met` while unresolved human-owned blockers remain.
 Before building, confirm these installed skills are available in the agent
 environment:
 
-- `working-on-github-issue`: align GitHub state — resolve the issue (from the scope or the current branch), land on its branch, mark it started; best-effort, returns cleanly when there is no issue.
+- `working-on-issue`: resolve the issue from the scope or current branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
 - `polish`: pre-PR gate — deepen architecture until settled, then review to green.
 - `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
-`working-on-github-issue` reaches `new-branch`; `polish` reaches
+`working-on-issue` reaches `new-branch`; `polish` reaches
 `code-review`, `implement`, and `diagnosing-bugs`, and deepens against the
 `codebase-design` vocabulary; `implement` reaches `tdd` and `code-review`.
 Confirm those are installed too.
@@ -74,12 +74,12 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch polish finish-pr -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@diagnosing-bugs -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish finish-pr -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
 The `implement`, `tdd`, `code-review`, `diagnosing-bugs`, `writing-great-skills`, and
@@ -105,8 +105,8 @@ name and install guidance only for a triggered missing route.
 Install guidance for these triggered routes:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-great-skills -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@prototype -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@writing-great-skills -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@prototype -y
 ```
 
 Do not add normal `/develop` routes for upstream planning, triage,
@@ -122,9 +122,9 @@ scope, and treat any issue as best-effort association, not a separate path.
 - **Scope is authoritative.** Build to the scope. When it references or associates
   an issue and the instructions diverge from the issue body, the instructions
   win; the issue body is context, not a competing spec.
-- **Issue association is best-effort.** `working-on-github-issue` resolves the
+- **Issue association is best-effort.** `working-on-issue` resolves the
   issue from a reference in the scope, else the current branch, and aligns the
-  branch, assignment, and Project status. When it resolves no issue, **warn and
+  branch, assignment, and started state. When it resolves no issue, **warn and
   continue** — do not halt. In a repository that requires issue-tagged commits
   (as this one does), a no-issue run still builds and polishes but stops before
   the PR (see the Workflow's finish step); where no such rule applies, it
@@ -137,7 +137,8 @@ scope, and treat any issue as best-effort association, not a separate path.
   acceptance-criteria structure for them; pause only when the scope is too vague
   to build without inventing scope.
 - **Divergence is surfaced, not silently absorbed.** When the built scope
-  materially diverges from the resolved issue body, keep `Closes #<issue>` and
+  materially diverges from the resolved issue body, keep the repository-required
+  closing reference and
   **offer** in the final report to update the issue body to match. Never edit the
   issue body without the human's go-ahead, and never block on it.
 
@@ -168,10 +169,10 @@ scope, and treat any issue as best-effort association, not a separate path.
 
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
 2. Confirm the required child skills are available. Issue resolution belongs to
-   `working-on-github-issue` (see Scope Contract); the controller does not
+   `working-on-issue` (see Scope Contract); the controller does not
    re-resolve it here.
-3. Run `working-on-github-issue` to align: it resolves the issue from the scope
-   or the current branch and aligns the branch, assignment, and Project status,
+3. Run `working-on-issue` to align: it resolves the issue from the scope
+   or the current branch and aligns the branch, assignment, and started state,
    all best-effort. If it resolves **no issue**, warn that commits and a PR
    cannot be issue-tagged, then continue on the current branch (see step 8).
 4. Judge actionability against the Scope Contract. Pause for a human when the
@@ -181,7 +182,7 @@ scope, and treat any issue as best-effort association, not a separate path.
    instructions authoritative over any issue body — then run
    repository-documented verification.
 7. Run `polish`, forwarding the run's scope — the resolved issue reference and
-   any instructions — to ready the branch. Because `working-on-github-issue` is
+   any instructions — to ready the branch. Because `working-on-issue` is
    idempotent, `polish`'s first-step alignment re-confirms the same branch and
    issue at no cost, and its Spec axis then reviews against the issue you built
    to. It deepens the architecture until settled, then reviews to green via
@@ -194,8 +195,8 @@ scope, and treat any issue as best-effort association, not a separate path.
    `finish-pr` only after `polish` reports the branch settled and green,
    or every finding has a recorded `ready-for-agent`, `ready-for-human`, or
    `wontfix` disposition. **When step 3 resolved no issue**, consult the
-   repository guidance read in step 1: if it requires an issue tag on commits or
-   PRs (as this repo does with `type: #<issue>`), stop before `finish-pr` — that
+   repository guidance read in step 1: if it requires an issue reference on commits or
+   PRs, stop before `finish-pr` — that
    convention cannot be satisfied without an issue — and report `human-blocked`
    (finishing needs an issue): the built-and-polished branch, and that a human
    must supply or create an issue to finish, rather than committing. If the
@@ -218,7 +219,7 @@ documented `human-blocked` stop.
 `polish` classifies review findings through its Finding Router
 (`ready-for-agent` → `implement`/`diagnosing-bugs`; `ready-for-human` → stop;
 `wontfix` → explain). At the controller level, any `ready-for-human` blocker —
-from `working-on-github-issue`, the actionability judgment, the build, `polish`,
+from `working-on-issue`, the actionability judgment, the build, `polish`,
 or `finish-pr` — stops the pipeline in the `human-blocked` terminal state. There
 is no `needs-info` state; insufficient information maps to `ready-for-human`.
 
@@ -249,7 +250,7 @@ Include:
   retained non-issue-linked branch, name that branch and why the caller declared
   it immutable. When it is the normal issue-linked branch, a plain link is
   enough — do not editorialize.
-- Project status update result only when it changed readiness, failed, skipped,
+- Issue-start update result only when it changed readiness, failed, skipped,
   explains a blocker, or creates a human next action.
 - Issue self-assignment result only when it failed, changed readiness, or
   created a human next action. Stay silent on successful assignment.
@@ -295,12 +296,12 @@ Remove or minimize:
 
 ### Good final output
 
-Example for issue 190:
+Example for one issue:
 
 ```md
-Done: [#190](https://github.com/patinaproject/skills/issues/190) is implemented
-on [PR #197](https://github.com/patinaproject/skills/pull/197)
-([branch `190-human-focused-final-output`](https://github.com/patinaproject/skills/tree/190-human-focused-final-output)).
+Done: the issue is implemented on
+[PR 197](https://github.com/patinaproject/skills/pull/197) on its issue-linked
+branch.
 
 Changed:
 - `develop` final reports now lead with outcome and meaningful changes.
@@ -317,7 +318,7 @@ Needs human attention: none before review.
 Avoid final output shaped like a process transcript:
 
 ```md
-Implemented issue #190.
+Implemented the issue.
 
 Verification:
 - develop workflow test passed.
@@ -328,7 +329,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: working-on-github-issue, implement, polish, finish-pr.
+Child skills invoked: working-on-issue, implement, polish, finish-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 

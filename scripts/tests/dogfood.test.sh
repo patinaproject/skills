@@ -17,7 +17,9 @@ SKILLS=(
   install-skills
   using-github
   new-branch
-  working-on-github-issue
+  working-on-issue
+  new-issue
+  edit-issue
   develop
   develop-with-workflow
   finish-pr
@@ -25,7 +27,7 @@ SKILLS=(
   polish
   update-branch
   write-docs
-  write-release-changelog
+  write-changelog
   prompting-fable
 )
 FAIL_COUNT=0
