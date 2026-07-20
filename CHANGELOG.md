@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.20.1](https://github.com/patinaproject/skills/compare/v2.20.0...v2.20.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* PAT-2776 remove component prefix from release tags ([#295](https://github.com/patinaproject/skills/issues/295)) ([87b8f7b](https://github.com/patinaproject/skills/commit/87b8f7be9e52155f7d89de63b07e617709670b5c))
+
 ## [2.20.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.2...patinaproject-skills-v2.20.0) (2026-07-20)
 
 
