@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.20.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.2...patinaproject-skills-v2.20.0) (2026-07-20)
+
+
+### Features
+
+* PAT-2777 complete Linear issue cutover ([#294](https://github.com/patinaproject/skills/issues/294)) ([63f7203](https://github.com/patinaproject/skills/commit/63f7203c4cce9355b8e54ef91e47bda156c86c46))
+
 ## [2.19.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.1...patinaproject-skills-v2.19.2) (2026-07-15)
 
 
