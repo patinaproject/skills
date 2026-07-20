@@ -76,6 +76,21 @@ skills live under `skills/<name>/SKILL.md` in the same repo, one tag pins the fu
 `skills-lock.json`'s `computedHash` records per-skill content provenance for reproducible
 re-installs within a given tag.
 
+### Historical tag migration
+
+Releases through `2.20.0` were published as immutable GitHub Releases with
+`patinaproject-skills-v<X.Y.Z>` tags. Keep those Releases and tags intact: their URLs,
+publication dates, and attestations are historical release records. Each historical tag
+also has a lightweight `v<X.Y.Z>` alias at the exact same commit. The unprefixed alias is
+the canonical consumer pin; the prefixed tag remains a compatibility ref.
+
+Do not move or delete either form of a historical tag, and do not create duplicate GitHub
+Releases for the aliases. New releases use only the unprefixed form. During the one-time
+migration, `bootstrap-sha` in `release-please-config.json` points to the commit recorded by
+the last prefixed release so release-please does not reconsider commits already included
+in the changelog. See
+[ADR-PAT-2776](adr/ADR-PAT-2776-preserve-immutable-release-history-with-alias-tags.md).
+
 ## Invariants
 
 - An untagged skill is not pinnable. The first `v<X.Y.Z>` tag is what introduces the repo
