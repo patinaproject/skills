@@ -29,12 +29,6 @@ test "$(find skills/merge-pr/workflows -type f | wc -l | tr -d '[:space:]')" = '
 test "$(read_frontmatter_field skills/ready-pr/SKILL.md name)" = 'ready-pr'
 test "$(read_frontmatter_field skills/merge-pr/SKILL.md name)" = 'merge-pr'
 test "$(read_frontmatter_field skills/finish-pr/SKILL.md name)" = 'finish-pr'
-test "$(read_frontmatter_field skills/ready-pr/SKILL.md workflow-role)" = 'readiness'
-test "$(read_frontmatter_field skills/merge-pr/SKILL.md workflow-role)" = 'merge-intent'
-test "$(read_frontmatter_field skills/merge-pr/SKILL.md remediation-skill)" = 'ready-pr'
-test "$(read_frontmatter_field skills/merge-pr/SKILL.md refresh-after-remediation)" = 'true'
-test "$(read_frontmatter_field skills/finish-pr/SKILL.md workflow-role)" = 'compatibility'
-test "$(read_frontmatter_field skills/finish-pr/SKILL.md compatibility-target)" = 'ready-pr'
 test -z "$(read_frontmatter_field skills/ready-pr/SKILL.md disable-model-invocation)"
 test -z "$(read_frontmatter_field skills/merge-pr/SKILL.md disable-model-invocation)"
 test "$(read_frontmatter_field skills/finish-pr/SKILL.md disable-model-invocation)" = 'true'

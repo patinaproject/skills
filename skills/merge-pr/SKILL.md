@@ -1,9 +1,6 @@
 ---
 name: merge-pr
 description: Merge a pull request through repository-managed auto-merge. Use when the caller expresses merge intent for a PR, or another workflow needs to land a ready PR.
-workflow-role: merge-intent
-remediation-skill: ready-pr
-refresh-after-remediation: true
 ---
 
 # Merge PR
