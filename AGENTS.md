@@ -7,7 +7,9 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-github-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/new-issue/`: tracker-agnostic issue filing skill
+- `skills/edit-issue/`: tracker-agnostic issue update skill
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
@@ -16,7 +18,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
-- `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
+- `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
@@ -32,33 +34,35 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
 - root config: `package.json`, `commitizen.config.json`, `commitlint.config.js`, and `.husky/`
 
-Use GitHub issues as the durable product and design record. Do not add committed
-design/plan artifacts for routine issue work; put durable context on the issue
-or in normal docs when it is broadly useful beyond one issue.
+Linear team PAT is the canonical issue tracker. GitHub Issues are a locked,
+read-only legacy reference. Do not add committed design or plan artifacts for
+routine issue work; put durable context on the Linear issue or in normal docs
+when it is broadly useful beyond one issue.
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues and PRDs are tracked in this repository's GitHub Issues using `gh`. See `docs/agents/issue-tracker.md`.
+Tracker operations are defined in the sole adapter, `docs/issue-tracker.md`.
 
-### Working a GitHub issue
+### Working an issue
 
-When you begin or resume work tied to a GitHub issue, run the
-`working-on-github-issue` skill first, before branching, editing, or opening a
-pull request. It resolves the issue, lands you on its `<issue>-<slug>` branch,
-and marks it started (self-assign and Project status, best-effort). The skill is
+When you begin or resume issue-linked work, run the
+`working-on-issue` skill first, before branching, editing, or opening a
+pull request. It resolves the issue, lands you on the tracker-provided branch,
+and marks it started (self-assign and started state, best-effort). The skill is
 idempotent, so run it at the start of every issue-linked session even if you are
 unsure it has already run — re-running while already aligned is a no-op. A
 session or worktree branch the harness starts you on, such as `claude/<...>`, is
-not issue-linked: create the `<issue>-<slug>` branch (via `new-branch`) and work
+not issue-linked: use `new-branch` to land on the adapter-provided branch and work
 there rather than committing on the session branch. If a branch genuinely cannot
 move onto the issue-linked name, stop and state the deviation rather than
 proceeding silently.
 
 ### Triage labels
 
-Triage roles map to this repository's existing GitHub labels, without inventing new labels. See `docs/agents/triage-labels.md`.
+Triage roles map through the tracker adapter and the repository's configured
+labels. See `docs/triage-workflow.md`.
 
 ### Domain docs
 
@@ -70,7 +74,7 @@ Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
 single source of truth for ADR naming in this repository. It supersedes the
 sequential `0001`-increment guidance still embedded in the vendored shared
 skills (`domain-modeling`, `setup-matt-pocock-skills`): name every ADR after its
-originating GitHub issue (`ADR-<issue>-<slug>.md`), never scan-and-increment, and
+originating Linear issue (`ADR-PAT-N-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 
 ## Build, Test, and Development Commands
@@ -149,11 +153,11 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-g
   contract, never their prose — see
   [docs/adr/ADR-232-format-sync-mirror-contract.md](docs/adr/ADR-232-format-sync-mirror-contract.md))
 
-## Issue and PR labels
+## Pull request labels
 
-Use `gh label list` to see the repository's canonical label set. Each label's `description`
-documents when to apply it. Rely on those descriptions when selecting labels for issues and
-PRs — do not invent new labels without updating the repository's label set first.
+Use `gh label list` to see the repository's pull-request label set. Each label's
+`description` documents when to apply it. Issue labels are live tracker data and
+must be resolved through `docs/issue-tracker.md`.
 
 Verify every label has a non-empty description:
 
@@ -169,18 +173,14 @@ not invent parallel PR structure.
 - Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`.
   The PR body must use the template's section headings in the order the template defines,
   even when the body is passed inline via `--body`.
-- Issues: body structure is owned by the skill creating the issue. Prefer `to-spec`
-  for spec/PRD-shaped issues and `to-tickets` or `using-github` for implementation-slice
-  issues. Manual GitHub issues are allowed when they contain enough context to act on.
+- Issues: use the tracker-agnostic issue skills, which consult
+  `docs/issue-tracker.md`; GitHub Issues are frozen.
 
 Recommended `gh` patterns:
 
 - PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered
   body must already follow the template. If you pass `--body` inline, copy every template
   section name and order verbatim before filling them in.
-- Issues: `gh issue create --title <title> --body-file <path-to-rendered-body>` keeps
-  the creating skill responsible for the issue body shape. Select labels from the remote
-  label inventory instead of hardcoding defaults.
 
 ## GitHub Actions pinning
 
@@ -209,7 +209,9 @@ This repo owns these skills at flat paths:
 | scaffold-repository | `skills/scaffold-repository/` |
 | using-github | `skills/using-github/` |
 | new-branch | `skills/new-branch/` |
-| working-on-github-issue | `skills/working-on-github-issue/` |
+| working-on-issue | `skills/working-on-issue/` |
+| new-issue | `skills/new-issue/` |
+| edit-issue | `skills/edit-issue/` |
 | develop | `skills/develop/` |
 | develop-with-workflow | `skills/develop-with-workflow/` |
 | finish-pr | `skills/finish-pr/` |
@@ -218,7 +220,7 @@ This repo owns these skills at flat paths:
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | write-docs | `skills/write-docs/` |
-| write-release-changelog | `skills/write-release-changelog/` |
+| write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
@@ -251,23 +253,23 @@ bump PRs from `bot/bump-*` branches are the only no-issue exceptions to the issu
 
 ## Commit & Pull Request Guidelines
 
-Commits must use conventional commit types, no scopes, and a required GitHub issue tag:
+Commits must use conventional commit types, no scopes, and a current Linear issue tag:
 
-`type: #123 short description`
+`type: PAT-123 short description`
 
 Examples:
 
-- `chore: #1 bootstrap marketplace repo`
-- `feat: #12 add GitHub workflow skill`
+- `chore: PAT-1 bootstrap marketplace repo`
+- `feat: PAT-12 add GitHub workflow skill`
 
 For squash-and-merge workflows, PR titles must match the commitlint commit format:
 
-`type: #123 short description`
+`type: PAT-123 short description`
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-Use the PR template as written: a `Linked issue` closing keyword and a
+Use the PR template as written: a `Fixes PAT-N` line and a
 `What changed` summary written for a reader who has not seen the work. There is
 no `Context:` line or `- <change> - <why>` contract — write plain prose.
 GitHub Checks are the source of truth for routine automated verification.

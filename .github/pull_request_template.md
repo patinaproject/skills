@@ -2,9 +2,9 @@
 
 <!--
   PR title rule (squash merges): use the exact commitlint/commitizen format so
-  the squash commit can be reused unchanged — `type: #123 short description`
-  (e.g. `docs: #12 add bootstrap skill guide`). This applies to PR titles only;
-  GitHub issue titles stay plain-language, no conventional-commit prefix.
+  the squash commit can be reused unchanged — `type: PAT-123 short description`
+  (e.g. `docs: PAT-12 add bootstrap skill guide`). This applies to PR titles only;
+  Linear issue titles stay plain-language, no conventional-commit prefix.
 
   Do not put an `@` immediately before an agent name such as Claude or Codex
   anywhere in this body unless you intend to trigger that agent.
@@ -12,11 +12,7 @@
 
 ## Linked issue
 
-At least one GitHub closing keyword is required for normal PRs — `Closes #<issue>`,
-`Fixes #<issue>`, or `Resolves #<issue>` — one line per issue this PR completes.
-`Related to #<issue>`, `Blocks #<issue>`, and `Partially satisfies #<issue>` are
-additional references, not replacements for the closing keyword; add a short note
-when the relationship is not obvious.
+Use one `Fixes PAT-N` line per completed issue. Bare `#N` references are legacy-only.
 
 ## What changed
 

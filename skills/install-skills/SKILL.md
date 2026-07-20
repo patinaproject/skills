@@ -94,7 +94,10 @@ Active Patina scaffold defaults are:
 - `scaffold-repository`
 - `using-github`
 - `new-branch`
-- `working-on-github-issue`
+- `working-on-issue`
+- `new-issue`
+- `edit-issue`
+- `write-changelog`
 - `develop`
 - `finish-pr`
 - `polish`

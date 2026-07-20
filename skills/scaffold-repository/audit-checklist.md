@@ -32,6 +32,8 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `scripts/clean.sh` | yes | present; executable; removes only generated dependency and transient install files (`node_modules/`, `.skills-install.lock*`); must never prune committed `.agents/skills/**` or `.claude/skills/**` overlay entries |
 | `scripts/worktree-setup.sh` | yes | present; executable; idempotent; fast-forwards onto the target repo default branch then runs `pnpm env:setup`; wired into both the Claude `SessionStart` hook and the Codex `[setup]` block; does not hardcode `main` |
 | `.codex/environments/environment.toml` | yes | present; `[setup]` runs `bash scripts/worktree-setup.sh` |
+| `.codex/config.toml` | yes | registers the hosted Linear MCP server |
+| `.mcp.json` | yes | registers the hosted Linear MCP server for supported hosts |
 | `CHANGELOG.md` | yes | present; compatible with release-please (no hand-edits to released sections) |
 | `docs/release-flow.md` | yes | present; documents the release-please flow |
 
@@ -39,8 +41,9 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 | File | Required | Check |
 |---|---|---|
-| `.github/pull_request_template.md` | yes | present and slim; `## Linked issue` with required closing-keyword guidance plus additional linked-issue relationships, and a free-prose `## What changed` (no `Context:` line or `- <change> - <why>` contract). No standing `## Testing steps` section — it is an ad hoc addition for produced-artifact inspection only. GitHub Checks as the routine automated verification surface, and the `type: #123 short description` title rule |
-| Old GitHub issue templates | no | absent; existing issue templates are stale baseline artifacts and should be offered for deletion with a reviewable diff |
+| `.github/pull_request_template.md` | yes | present and slim; `## Linked issue` requires `Fixes PAT-N`, plus a free-prose `## What changed`. No standing `## Testing steps` section — it is ad hoc for produced-artifact inspection only. GitHub Checks are the routine automated verification surface, and the title rule is `type: PAT-N short description` |
+| `.github/ISSUE_TEMPLATE/config.yml` | yes | disables blank issues and redirects issue intake to Linear |
+| GitHub issue forms | no | absent; GitHub Issues are a locked legacy reference |
 | `.github/CODEOWNERS` | yes | present; at least one non-comment rule |
 | `.github/workflows/pull-request.yml` | yes | present; validates PR title format, breaking-change marker consistency, closing keyword |
 | `.github/workflows/markdown.yml` | yes | present; runs `DavidAnson/markdownlint-cli2-action` on PRs |
@@ -69,6 +72,11 @@ Classify stale PR templates when they encourage command transcripts, routine aut
 | `SECURITY.md` | public only | public repo → present; private → absent |
 | `README.md` | yes | present; includes repo name, description, and conventions summary |
 | `docs/file-structure.md` | yes | present |
+| `docs/issue-tracker.md` | yes | sole provider-specific adapter; Linear team PAT is canonical and GitHub Issues are frozen |
+| `docs/agents/issue-tracker.md` | yes | relative compatibility symlink to `../issue-tracker.md`; contains no duplicate adapter content |
+| `docs/agents/triage-labels.md` | yes | relative compatibility symlink to `../triage-workflow.md`; contains no provider-specific label inventory |
+| `docs/issue-publishing.md` | yes | tracker-agnostic filing and publishing rules |
+| `docs/triage-workflow.md` | yes | tracker-agnostic shaping and ready-state rules |
 
 ## Area 4 – Claude Code configuration
 
@@ -106,7 +114,7 @@ Detection: look for retired workflow scaffolding in active repo guidance.
 |---|---|---|
 | `docs/superpowers/` | no | absent from new scaffolded repos; if present, classify as `stale` unless the repository explicitly keeps historical artifacts |
 | `package.json` | no | does not install retired workflow dependencies by default |
-| `AGENTS.md` | yes | directs durable issue context to GitHub issues instead of committed design/plan artifacts |
+| `AGENTS.md` | yes | directs durable issue context to Linear through the sole tracker adapter instead of committed design/plan artifacts |
 | Install docs | no | do not require Superpowers for new installs |
 
 ## Area 7 – GitHub repository merge settings
@@ -134,7 +142,7 @@ Writes always go through the UI (or `gh api -X PATCH`). Deep-link: `https://gith
 
 Sampled, not exhaustive:
 
-- Inspect the most recent 20 commits on the default branch. If more than half violate `type: #<issue> short description`, recommend adding the `commit-msg` hook and documenting the rule in `AGENTS.md`.
+- Inspect the most recent 20 commits on the default branch. If more than half violate `type: PAT-N short description`, recommend adding the `commit-msg` hook and documenting the rule in `AGENTS.md`.
 - Inspect the most recent 10 open PR titles. If any violate the format, note this in the realignment report; do not rewrite titles automatically.
 
 ## Recommendation output format
@@ -151,8 +159,8 @@ For each gap, emit:
 
 Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
 
-1. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, stale GitHub issue templates)
-2. PNPM tooling and skills installation (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/environments/environment.toml`, `.gitignore`)
+1. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, Linear intake redirect)
+2. PNPM tooling, skills installation, and tracker connection (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/issue-publishing.md`, `docs/triage-workflow.md`, `.gitignore`)
 3. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 4. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`)
 5. Deprecated workflow cleanup

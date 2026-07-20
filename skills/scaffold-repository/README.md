@@ -37,15 +37,15 @@ flowchart TD
 
 ### Core baseline – every repo
 
-- **Conventional Commits** with no scope and a required `#<issue>` tag; enforced locally by husky + commitlint and in CI by `pull-request.yml`.
-- **PR title hygiene** – ASCII-only, conventional format, `#<issue>` subject, breaking-change marker consistency, `Closes #<issue>` in body.
+- **Conventional Commits** with no scope and a required `PAT-N` tag; enforced locally by husky + commitlint and in CI by `pull-request.yml`.
+- **PR title hygiene** – ASCII-only, conventional format, `PAT-N` subject, breaking-change marker consistency, and `Fixes PAT-N` in the body.
 - **Markdown linting** via `markdownlint-cli2`; husky `pre-commit` + `lint-staged` locally, `markdown.yml` in CI.
 - **Workflow linting** via `actionlint` with `.github/actionlint.yaml`.
 - **GitHub Actions SHA pinning** – every `uses:` references a full commit SHA with a version comment; policy documented in `AGENTS.md`.
 - **PNPM toolchain** – `packageManager: pnpm@10.33.2`, `engines.node >=24`, `.nvmrc`, `.gitattributes`, `.editorconfig`.
 - **Agent + repo docs** – `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `SECURITY.md` (public only), `README.md`, `docs/file-structure.md`.
 - **Claude Code project settings** – `.claude/settings.json` with no plugins enabled by default.
-- **CODEOWNERS + issue/PR templates** under `.github/`.
+- **CODEOWNERS + pull-request template + Linear intake redirect** under `.github/`.
 
 ### GitHub repository settings
 
@@ -103,7 +103,7 @@ pnpm lint:md           # markdownlint-cli2
 pnpm commitlint        # one-off commit-message validation
 ```
 
-Commits and PR titles follow the enforced convention: `type: #<issue> short description`. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full rule; choose the commit type by product impact, not by file extension.
+Commits and PR titles follow the enforced convention: `type: PAT-N short description`. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full rule; choose the commit type by product impact, not by file extension.
 
 | Change | Type |
 |--------|------|

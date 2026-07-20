@@ -1,6 +1,6 @@
 ---
 name: develop-with-workflow
-description: "Build one scope — a GitHub issue reference, free-form instructions, or both — into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you deliberately want a scope's independent slices built in parallel and converged onto one branch instead of building it serially."
+description: "Build one scope — an issue reference, free-form instructions, or both — into one converged branch by decomposing it into independent vertical slices and building them in parallel with the Claude Workflow tool. Use when you deliberately want a scope's independent slices built in parallel and converged onto one branch instead of building it serially."
 ---
 
 # Develop With Workflow
@@ -10,14 +10,14 @@ description: "Build one scope — a GitHub issue reference, free-form instructio
 Invoke with a **scope** — an issue reference, free-form instructions, or both:
 
 ```text
-/develop-with-workflow #123
+/develop-with-workflow <issue-reference>
 /develop-with-workflow "port the API handlers to the new client, one per resource"
 ```
 
 Build one scope into **one converged branch** — destined for one PR — by
 decomposing it into independent **vertical slices** and building them in
 parallel. The scope is authoritative; any associated issue is resolved
-best-effort by `working-on-github-issue` for the branch and tagging, exactly as
+best-effort by `working-on-issue` for the branch and tagging, exactly as
 `develop` does.
 
 This skill is the explicit **opt-in to the Claude Workflow tool**. Invoking it
@@ -33,7 +33,7 @@ a ready-for-review PR.
 
 ## Required Child Skills
 
-- `working-on-github-issue`: align GitHub state (resolve the issue from the scope or branch, land on its branch, mark it started); best-effort, returns cleanly when there is no issue. Reaches `new-branch` for branch setup.
+- `working-on-issue`: resolve the issue from the scope or branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue. Reaches `new-branch` for branch setup.
 - `implement`: build each slice — reaches `tdd` at agreed seams and `code-review` when done.
 - `resolving-merge-conflicts`: integrate each slice's worktree onto the one branch.
 - The **Claude Workflow tool**: this skill is its authorization for this run.
@@ -45,12 +45,12 @@ If any are missing, halt before building and report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill working-on-github-issue new-branch -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@implement -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@to-tickets -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@resolving-merge-conflicts -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@to-tickets -y
 ```
 
 The `implement`, `tdd`, `code-review`, `resolving-merge-conflicts`, and `to-tickets`
@@ -64,16 +64,16 @@ converged branch, then directs you to `polish` (which reaches
 handoff:
 
 ```sh
-npm_config_ignore_scripts=true npx skills@latest add patinaproject/skills --skill polish finish-pr -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@code-review -y
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@codebase-design -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish finish-pr -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
 ## Workflow
 
-1. **Align.** Run `working-on-github-issue` unconditionally (it is idempotent):
+1. **Align.** Run `working-on-issue` unconditionally (it is idempotent):
    it resolves the issue from the scope or the current branch and aligns the
-   branch, assignment, and Project status, all best-effort. If it resolves no
+   branch, assignment, and started state, all best-effort. If it resolves no
    issue, warn that the converged branch cannot be issue-tagged downstream, then
    continue on the current branch.
 
