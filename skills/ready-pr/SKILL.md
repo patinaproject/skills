@@ -1,6 +1,7 @@
 ---
 name: ready-pr
 description: Ready completed branch work into a ready-to-merge pull request. Use when the caller wants to publish or ready a PR, or another skill needs the explicit PR-readiness workflow.
+workflow-role: readiness
 ---
 
 # Ready PR

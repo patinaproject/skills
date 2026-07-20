@@ -31,9 +31,10 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
    ```
 
    Stop as `human-blocked` when no PR resolves, the PR is closed without a
-   merge, the local branch differs from the PR head branch, or local `HEAD`
-   differs from the captured PR head SHA. If `mergedAt` is already present,
-   report `merged` without issuing another merge command.
+   merge, or the local branch differs from the PR head branch. Record a local
+   `HEAD` mismatch for readiness remediation instead of stopping here. If
+   `mergedAt` is already present, report `merged` without issuing another merge
+   command.
 
 2. Decide whether the PR needs readiness remediation. Invoke `ready-pr` when
    any of these conditions is visible:
@@ -42,15 +43,26 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
    - GitHub or a clean local base merge shows conflicts;
    - a completed check is not successful;
    - actionable or unresolved review feedback remains;
-   - a dirty worktree, unpublished commit, stale head, or another branch-local
-     condition prevents the latest head from satisfying readiness gates.
+   - local `HEAD` differs from the PR head because of unpublished commits, a
+     stale checkout, or another branch-local condition;
+   - a dirty worktree or another branch-local condition prevents the latest
+     head from satisfying readiness gates.
 
    Pending checks or outstanding required approvals alone do not require
    branch changes; repository-managed auto-merge may wait for them. When
    remediation is needed, pass the current PR and caller scope to `ready-pr`
    and wait for its terminal result. A `ready-pr` human blocker becomes this
-   workflow's `human-blocked` result. After `ready-pr` returns, repeat step 1
-   and make every later decision from the refreshed PR head and state.
+   workflow's `human-blocked` result.
+
+   Before delegating, record the local SHA, PR head SHA, and remediation reasons
+   in memory. After `ready-pr` returns, repeat step 1 and make every later
+   decision from the refreshed local and PR state. If the same SHA pair and
+   remediation reasons remain, stop as `human-blocked` with `ready-pr`'s
+   concrete non-ready disposition instead of delegating again. This no-progress
+   rule also applies when `ready-pr` reports `not ready-to-merge` without a
+   separately named human blocker. A new head may re-enter readiness once for
+   newly visible branch-local remediation; never delegate twice for unchanged
+   evidence.
 
 3. Resolve the repository-supported merge mode without inventing policy.
    Prefer an explicit mode in repository guidance. Otherwise inspect repository

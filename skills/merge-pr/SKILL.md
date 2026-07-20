@@ -1,6 +1,9 @@
 ---
 name: merge-pr
 description: Merge a pull request through repository-managed auto-merge. Use when the caller expresses merge intent for a PR, or another workflow needs to land a ready PR.
+workflow-role: merge-intent
+remediation-skill: ready-pr
+refresh-after-remediation: true
 ---
 
 # Merge PR
@@ -20,12 +23,8 @@ head. `ready-pr` is the single source of truth for publication, checks, review
 feedback, conflict remediation, and draft-to-ready handling; do not reproduce
 that loop here.
 
-Report exactly one observed outcome:
-
-- `merged`: GitHub reports the PR merged after auto-merge was enabled.
-- `queued`: GitHub reports an auto-merge request or merge-queue entry, but the
-  PR is still open.
-- `human-blocked`: auto-merge cannot be enabled or its state cannot be proven.
+Report only the observed outcome defined by the authoritative workflow and any
+human-owned blocker.
 
 Never force-merge, use administrator bypass, disable protections, merge with
 local git, or claim an open PR merged.

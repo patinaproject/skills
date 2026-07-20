@@ -2,6 +2,8 @@
 name: finish-pr
 description: Deprecated compatibility alias for ready-pr.
 disable-model-invocation: true
+workflow-role: compatibility
+compatibility-target: ready-pr
 ---
 
 # Finish PR (Deprecated)
