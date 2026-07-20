@@ -22,6 +22,8 @@ SKILLS=(
   edit-issue
   develop
   develop-with-workflow
+  ready-pr
+  merge-pr
   finish-pr
   codex-pr-feedback-loop
   polish

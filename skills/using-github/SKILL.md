@@ -23,9 +23,11 @@ tracker-agnostic skills (`new-issue`, `edit-issue`, `working-on-issue`, and
 
 - Pull request review feedback: read
   [the PR-comments workflow](workflows/pr-comments.md).
-- Ready a completed branch: run `polish`, then `finish-pr`.
-- Create or update a pull request: use `finish-pr` so the repository template,
+- Ready a completed branch: run `polish`, then `ready-pr`.
+- Create or update a pull request: use `ready-pr` so the repository template,
   draft convention, checks, and review loop remain one contract.
+- Merge a pull request: use `merge-pr` so merge intent stays behind repository
+  auto-merge, protection, review, and strategy policy.
 - Inspect checks, releases, repository settings, or other forge metadata with
   `gh` after reading the owning repository guidance.
 

@@ -15,8 +15,8 @@ directory's default `gh` repository.
 
 Treat this as one durable, resumable workflow. The objective is to carry
 completed branch-local work through PR publication, feedback, checks, and final
-readiness without broadening into unrelated issue work or merging the pull
-request.
+readiness without broadening into unrelated issue work, merging the pull
+request, or enabling auto-merge.
 
 The validation loop is the readiness loop below: inspect the current PR state,
 handle currently available feedback, observe all visible checks, triage every
@@ -152,7 +152,7 @@ tell the human what to do next.
    readiness loop on the new head. If verification fails on this clean merge,
    run `git merge --abort` and stop under the verification stop condition. If
    two consecutive base merges keep changing the branch without reaching a
-   stable PR head in the same finish-pr run, stop for operator feedback instead
+   stable PR head in the same ready-pr run, stop for operator feedback instead
    of pushing indefinitely.
 
    If the merge conflicts, resolve conflicts only when the correct result is
@@ -328,7 +328,7 @@ tell the human what to do next.
     The flip is **one-way**: never convert a ready PR back to draft. The durable
     marker, not which run opened the PR or which GitHub account authored it, is
     the provenance gate. A resumed session, or a later skill in the pipeline
-    such as the codex feedback loop operating on a marked `finish-pr` draft, is
+    such as the codex feedback loop operating on a marked `ready-pr` draft, is
     a legitimate flipper. A human's unmarked work-in-progress draft is not. A
     genuine major rework is re-drafted manually by the author, after which this
     same flip applies again once the loop is clean if the marker remains.
@@ -512,7 +512,7 @@ tell the human what to do next.
 
 ## Non-Goals
 
-Do not merge the PR, rebase or force-push by default, use browser conflict
-resolution, create follow-up issues, persist handled feedback state, wait
-indefinitely for new human comments after the PR is ready, or add agent
-attribution by default.
+Do not merge the PR, enable auto-merge, rebase or force-push by default, use
+browser conflict resolution, create follow-up issues, persist handled feedback
+state, wait indefinitely for new human comments after the PR is ready, or add
+agent attribution by default.

@@ -19,7 +19,7 @@ This skill is a thin, goal-directed **controller**. It drives one scope to a
 ready-for-review PR through a predictable pipeline of named, reusable skills:
 
 ```text
-working-on-issue → build (implement) → polish → finish-pr
+working-on-issue → build (implement) → polish → ready-pr
    (align)              (build the scope)      (make ready)     (publish)
 ```
 
@@ -63,7 +63,7 @@ environment:
 - `working-on-issue`: resolve the issue from the scope or current branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
 - `polish`: pre-PR gate — deepen architecture until settled, then review to green.
-- `finish-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
+- `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
 `working-on-issue` reaches `new-branch`; `polish` reaches
 `code-review`, `implement`, and `diagnosing-bugs`, and deepens against the
@@ -74,7 +74,7 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish finish-pr -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish ready-pr -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
@@ -150,9 +150,9 @@ scope, and treat any issue as best-effort association, not a separate path.
 - Relevant tests are added or updated when the change has executable behavior.
 - `polish` ran and reached a settled, green branch: architecture deepened
   until settled, and `code-review` findings fixed or dispositioned.
-- GitHub PR review comments and hosted review comments surfaced by `finish-pr`
+- GitHub PR review comments and hosted review comments surfaced by `ready-pr`
   are fixed or dispositioned.
-- After `finish-pr`, all currently visible required and optional PR checks pass
+- After `ready-pr`, all currently visible required and optional PR checks pass
   for `goal-met`.
 - PR check failures outside branch scope have a concrete disposition in a
   `human-blocked` final report; do not report `goal-met` while any visible PR
@@ -190,13 +190,13 @@ scope, and treat any issue as best-effort association, not a separate path.
    `develop` is sufficient approval for `polish`'s review gate; dispatch it
    without asking for another confirmation. A `ready-for-human` finding stops the
    loop as `human-blocked`.
-8. Run `finish-pr` for commit, push, PR creation or update, visible check
+8. Run `ready-pr` for commit, push, PR creation or update, visible check
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
-   `finish-pr` only after `polish` reports the branch settled and green,
+   `ready-pr` only after `polish` reports the branch settled and green,
    or every finding has a recorded `ready-for-agent`, `ready-for-human`, or
    `wontfix` disposition. **When step 3 resolved no issue**, consult the
    repository guidance read in step 1: if it requires an issue reference on commits or
-   PRs, stop before `finish-pr` — that
+   PRs, stop before `ready-pr` — that
    convention cannot be satisfied without an issue — and report `human-blocked`
    (finishing needs an issue): the built-and-polished branch, and that a human
    must supply or create an issue to finish, rather than committing. If the
@@ -220,7 +220,7 @@ documented `human-blocked` stop.
 (`ready-for-agent` → `implement`/`diagnosing-bugs`; `ready-for-human` → stop;
 `wontfix` → explain). At the controller level, any `ready-for-human` blocker —
 from `working-on-issue`, the actionability judgment, the build, `polish`,
-or `finish-pr` — stops the pipeline in the `human-blocked` terminal state. There
+or `ready-pr` — stops the pipeline in the `human-blocked` terminal state. There
 is no `needs-info` state; insufficient information maps to `ready-for-human`.
 
 ## Final Report
@@ -269,7 +269,7 @@ Include:
 - Human-owned blockers, if any.
 - `wontfix` explanations, if any.
 - Residual risks or test gaps, only when they are concrete and relevant.
-- PR URL and readiness status, when `finish-pr` runs.
+- PR URL and readiness status, when `ready-pr` runs.
 
 Keep visible and specific:
 
@@ -289,7 +289,7 @@ Remove or minimize:
 - Full PR check inventories when they are all green.
 - Mergeability, review, or unrelated dirty-file status unless it changes what
   the human should do next.
-- `finish-pr` readiness gates such as clean worktree, head SHA equality, merge
+- `ready-pr` readiness gates such as clean worktree, head SHA equality, merge
   state, check inventory, or review-thread count when they all passed; collapse
   them into the verification line unless a failed gate changes the human next
   action.
@@ -329,7 +329,7 @@ Verification:
 - PR check code-review passed.
 - PR is MERGEABLE and CLEAN.
 
-Child skills invoked: working-on-issue, implement, polish, finish-pr.
+Child skills invoked: working-on-issue, implement, polish, ready-pr.
 No unrelated dirty files except local config. Goal marked complete.
 ```
 

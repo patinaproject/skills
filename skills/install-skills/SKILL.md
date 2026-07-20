@@ -99,7 +99,8 @@ Active Patina scaffold defaults are:
 - `edit-issue`
 - `write-changelog`
 - `develop`
-- `finish-pr`
+- `ready-pr`
+- `merge-pr`
 - `polish`
 - `install-skills`
 

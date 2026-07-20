@@ -29,7 +29,7 @@ settled code rather than an intermediate shape.
 
 This skill assumes the branch's build is already complete and committed; it
 fixes and deepens, it does not build the issue from scratch. It commits the
-fixes its phases produce. It does not push or open a pull request — `finish-pr`
+fixes its phases produce. It does not push or open a pull request — `ready-pr`
 owns publishing.
 
 ## Scope Contract

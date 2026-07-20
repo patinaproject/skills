@@ -3,7 +3,7 @@
 Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
-polishing, isolated local branch-diff review, PR finishing, Codex
+polishing, isolated local branch-diff review, PR readiness and merging, Codex
 PR feedback polling, settled-design documentation capture, release changelog
 ceremonies, and local branch updating. They are available across Claude Code,
 Codex, and any agent runtime that reads `AGENTS.md`.
@@ -100,9 +100,9 @@ See [./skills/new-issue/](./skills/new-issue/) and
 
 End-to-end work needs a single entrypoint without weakening the focused skills
 that already own branch setup, test-driven implementation, diagnosis, local
-review, and PR finishing. `develop` takes a **scope** — an issue reference,
+review, and PR readiness. `develop` takes a **scope** — an issue reference,
 free-form instructions, or both — coordinates `working-on-issue`,
-`implement`, `polish`, and `finish-pr`, and stops for human-owned
+`implement`, `polish`, and `ready-pr`, and stops for human-owned
 ambiguity instead of inventing scope.
 
 See [./skills/develop/](./skills/develop/) for the skill contract.
@@ -128,14 +128,26 @@ readiness bar.
 
 See [./skills/polish/](./skills/polish/) for the skill contract.
 
-### finish-pr
+### ready-pr
 
-Finishing branch work is more than opening a pull request. `finish-pr` verifies
+Readying branch work is more than opening a pull request. `ready-pr` verifies
 the local diff, commits with the repository convention, pushes when needed,
 creates or updates a ready-for-review PR from the template, watches checks, and
 stops at ready-to-merge.
 
-See [./skills/finish-pr/](./skills/finish-pr/) for the skill contract.
+See [./skills/ready-pr/](./skills/ready-pr/) for the skill contract.
+
+### merge-pr
+
+Merge intent stays separate from readiness work. `merge-pr` enables the
+repository-supported auto-merge mode, delegates branch remediation to
+`ready-pr`, and reports whether GitHub merged the PR immediately or queued it
+behind repository protections.
+
+See [./skills/merge-pr/](./skills/merge-pr/) for the skill contract.
+
+`finish-pr` remains as a deprecated, user-invoked compatibility alias that
+routes directly to `ready-pr` and owns no independent workflow.
 
 ### codex-pr-feedback-loop
 
@@ -204,10 +216,12 @@ README and skill contract.
 | [working-on-issue](./skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
 | [new-issue](./skills/new-issue/) | Draft and publish issues through the tracker adapter |
 | [edit-issue](./skills/edit-issue/) | Safely update issues through the tracker adapter |
-| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and finish-pr |
+| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Ready a branch for review: deepen architecture, then review to green |
-| [finish-pr](./skills/finish-pr/) | Finish completed branch work through ready-to-merge PRs |
+| [ready-pr](./skills/ready-pr/) | Publish completed branch work and prove its PR ready to merge |
+| [merge-pr](./skills/merge-pr/) | Enable repository-managed auto-merge for a PR |
+| [finish-pr](./skills/finish-pr/) | Deprecated compatibility alias for ready-pr |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
@@ -262,6 +276,8 @@ skills/
   edit-issue/
   develop/
   develop-with-workflow/
+  ready-pr/
+  merge-pr/
   finish-pr/
   codex-pr-feedback-loop/
   polish/

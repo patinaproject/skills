@@ -9,6 +9,8 @@
     "./skills/edit-issue",
     "./skills/develop",
     "./skills/develop-with-workflow",
+    "./skills/ready-pr",
+    "./skills/merge-pr",
     "./skills/finish-pr",
     "./skills/codex-pr-feedback-loop",
     "./skills/polish",

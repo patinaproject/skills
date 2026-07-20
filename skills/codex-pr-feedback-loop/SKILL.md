@@ -8,7 +8,7 @@ description: Loops a Codex app worktree on an existing PR's review feedback. Use
 ## Quick Start
 
 1. Develop, verify, commit, push, and create or update the PR with the normal
-   issue pipeline (`working-on-issue` → build → `polish` → `finish-pr`).
+   issue pipeline (`working-on-issue` → build → `polish` → `ready-pr`).
 2. After the first successful PR push, follow
    [workflows/thread-automation.md](workflows/thread-automation.md) to start the
    Codex app thread automation that runs the loop for this chat.
@@ -37,7 +37,7 @@ The durable boundaries at this skill level:
   code-review run on the latest head has completed, has actually reviewed it,
   and no unresolved review threads remain), flip the draft to ready only when
   its body contains the exact `<!-- patinaproject-agent-authored-pr -->` marker.
-  The flip is one-way and can cover a marked draft that a prior `finish-pr` run
+  The flip is one-way and can cover a marked draft that a prior `ready-pr` run
   opened. Never add the marker retroactively, flip an unmarked human draft, or
   write issue state from the PR loop.
 - Do not merge the PR.
