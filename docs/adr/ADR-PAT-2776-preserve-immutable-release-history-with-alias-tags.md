@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Releases through `2.19.2` were published as immutable GitHub Releases under
+Releases through `2.20.0` were published as immutable GitHub Releases under
 `patinaproject-skills-v<X.Y.Z>` tags. Replacing them would discard stable release URLs,
 publication history, and attestations.
 

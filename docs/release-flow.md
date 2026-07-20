@@ -78,7 +78,7 @@ re-installs within a given tag.
 
 ### Historical tag migration
 
-Releases through `2.19.2` were published as immutable GitHub Releases with
+Releases through `2.20.0` were published as immutable GitHub Releases with
 `patinaproject-skills-v<X.Y.Z>` tags. Keep those Releases and tags intact: their URLs,
 publication dates, and attestations are historical release records. Each historical tag
 also has a lightweight `v<X.Y.Z>` alias at the exact same commit. The unprefixed alias is
