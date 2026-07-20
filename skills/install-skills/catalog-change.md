@@ -59,11 +59,11 @@ skipped on the next refresh:
 jq -r '.skills | to_entries[]
   | select(.value.sourceType == "github")
   | "\(.key)\t\(.value.source)\t\(.value.skillPath)"' skills-lock.json |
-while IFS=$'\t' read -r name source path; do
-  if gh api "repos/${source}/contents/${path}" --jq .path >/dev/null 2>&1; then
+while IFS=$'\t' read -r name source skill_path; do
+  if gh api "repos/${source}/contents/${skill_path}" --jq .path >/dev/null 2>&1; then
     echo "ok    ${name}"
   else
-    echo "STALE ${name} — ${source}/${path} not found on default branch"
+    echo "STALE ${name} — ${source}/${skill_path} not found on default branch"
   fi
 done
 ```

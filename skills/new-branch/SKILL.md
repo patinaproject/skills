@@ -1,16 +1,13 @@
 ---
 name: new-branch
-description: Branch for a GitHub issue locally from the repository default branch, named in GitHub's issue-branch style. Use when starting issue-linked work, or when an agent must move onto the correct issue branch before implementation.
+description: Create or switch to the tracker-provided branch for an issue from the repository default branch. Use for branch-only setup or when working-on-issue needs to establish the issue-linked branch.
 ---
 
 # New Branch
 
-Given an issue reference, follow [workflows/issue-branch.md](workflows/issue-branch.md)
-end to end — it owns the steps, refusals, and shell.
+Given one issue reference, follow
+[the issue-branch workflow](workflows/issue-branch.md) end to end.
 
-Example: issue `#42` titled `Let agents use GitHub more ergonomically`
-becomes local branch `42-let-agents-use-github-more-ergonomically`.
-
-This skill only creates or switches to the local issue branch. It does not
-install dependencies, push, commit, open a pull request, or start
-implementation work.
+Use the branch name returned by the issue-tracker adapter verbatim. This skill
+does not install dependencies, push, commit, open a pull request, or implement
+the issue.

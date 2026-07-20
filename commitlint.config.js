@@ -9,10 +9,10 @@ export default {
             return [false, 'Subject cannot be empty'];
           }
 
-          if (!/^#\d+\s+/.test(subject)) {
+          if (!/^PAT-[1-9]\d*\s+/.test(subject)) {
             return [
               false,
-              'Subject must start with a GitHub issue reference. Use `type: #123 description`.',
+              'Subject must start with a current issue reference. Use `type: PAT-123 description`.',
             ];
           }
 

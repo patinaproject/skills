@@ -44,11 +44,11 @@ jobs:
           requireScope: false
           disallowScopes: |
             .+
-          subjectPattern: '^#\d+ .+$'
+          subjectPattern: '^PAT-[1-9]\d* .+$'
           subjectPatternError: |
-            PR title subject must start with a GitHub issue reference. Example:
-              feat: #123 add boot timeline
-              fix: #456 restore search
+            PR title subject must start with a current issue reference. Example:
+              feat: PAT-123 add boot timeline
+              fix: PAT-456 restore search
             Scopes are not permitted. See AGENTS.md for conventions.
           ignoreLabels: |
             dependencies
@@ -59,7 +59,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           if [ -z "$PR_BODY" ]; then
-            echo "::error::PR body is empty. Add a GitHub closing keyword such as 'Closes #<issue>'."
+            echo '::error::PR body is empty. Add "Fixes PAT-N".'
             exit 1
           fi
           # Strip HTML comments, fenced code blocks, inline code, strikethrough, blockquotes.
@@ -71,13 +71,16 @@ jobs:
             | sed -E "s/${BT}[^${BT}]*${BT}//g" \
             | sed -E 's/~~[^~]*~~//g')
           sanitized=$(printf '%s' "$sanitized" | grep -vE '^[[:space:]]*>' || true)
-          # shellcheck disable=SC2016
-          if printf '%s' "$sanitized" | grep -qiE \
-            '(^|[^A-Za-z])(close[sd]?|fix(e[sd])?|resolve[sd]?)[ \t]+([A-Za-z0-9._-]+/[A-Za-z0-9._-]+)?#[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
-            echo "Closing keyword found."
+          if printf '%s' "$sanitized" | grep -qE '(^|[^A-Za-z0-9])#[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
+            echo '::error::PR body contains a bare #N legacy issue reference. Use PAT-N for current issues.'
+            exit 1
+          fi
+          if printf '%s' "$sanitized" | grep -qE \
+            '(^|[^A-Za-z])Fixes[ \t]+PAT-[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
+            echo "Linear issue-closing reference found."
             exit 0
           fi
-          echo "::error::PR body must contain a GitHub closing keyword (e.g. 'Closes #123') outside code blocks, HTML comments, strikethrough, and blockquotes."
+          echo '::error::PR body must contain "Fixes PAT-N" outside code blocks, HTML comments, strikethrough, and blockquotes.'
           exit 1
 
       - name: Compare title `!` with breaking-change markers
@@ -112,7 +115,7 @@ jobs:
             exit 1
           fi
           if [ "$breaking_has_footer" = true ] && [ "$title_has_bang" = false ]; then
-            echo "::error::PR body or commit messages include a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: #123 ...\`) so squash-merged commits carry the marker."
+            echo "::error::PR body or commit messages include a \`BREAKING CHANGE:\` footer but the title is missing the \`!\` marker. Add \`!\` to the type (e.g. \`feat!: PAT-123 ...\`) so squash-merged commits carry the marker."
             exit 1
           fi
           echo "Breaking change markers are consistent."

@@ -4,7 +4,9 @@
     "./skills/scaffold-repository",
     "./skills/using-github",
     "./skills/new-branch",
-    "./skills/working-on-github-issue",
+    "./skills/working-on-issue",
+    "./skills/new-issue",
+    "./skills/edit-issue",
     "./skills/develop",
     "./skills/develop-with-workflow",
     "./skills/finish-pr",
@@ -13,7 +15,7 @@
     "./skills/update-branch",
     "./skills/install-skills",
     "./skills/write-docs",
-    "./skills/write-release-changelog",
+    "./skills/write-changelog",
     "./skills/prompting-fable"
   ]
 }

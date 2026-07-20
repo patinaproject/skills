@@ -49,7 +49,7 @@ tell the human what to do next.
 1. Resolve context:
 
    - Current branch.
-   - Issue number, preferably from the branch prefix.
+   - Issue reference, from the existing PR association or issue-linked branch.
    - Existing PR for the branch, if any.
    - Repository visibility and default branch.
 
@@ -70,20 +70,21 @@ tell the human what to do next.
    in `AGENTS.md`, README files, or package scripts. Do not invent expensive or
    unrelated checks when guidance is absent.
 
-4. Commit, when there are staged changes, using the repository's required
-   format. For this repository, use:
-
-   ```text
-   type: #<issue> short description
-   ```
+4. Commit staged changes using the format read from repository guidance. Do not
+   hard-code one tracker's reference syntax in this shared skill.
 
 5. Push only when there are commits not present on the remote branch.
 
 6. Create or update the PR:
 
    - Read `.github/pull_request_template.md`.
-   - Use the repository's PR title format.
-   - Include `Closes #<issue>` or another required closing keyword.
+   - Derive the PR title, including its semantic type, from the final branch diff
+     against the PR base branch (`git diff <merge-base>...HEAD`) and the
+     repository's [commit and title guidance](../../../AGENTS.md).
+     When resuming an existing PR, treat its inherited title as a candidate:
+     re-derive the type and update a conflicting
+     title even when it already passes syntactic validation.
+   - Include the repository-required issue-closing line from the PR template.
    - Write a reviewer-friendly PR body: summarize what changed and why in
      `What changed` instead of narrating the implementation transcript.
    - GitHub Checks are the source of truth for routine automated verification.
@@ -286,14 +287,13 @@ tell the human what to do next.
     fixes or newly pushed commits. Unresolved threads are blockers until they
     are resolved, fixed, or evidence-classified as stale or non-blocking.
 
-16. Flip the draft to ready for review the moment the **review loop is clean**,
-    and advance the linked issue's board Status to `In review` in the same step.
+16. Flip the draft to ready for review the moment the **review loop is clean**.
     This is the one canonical draft-to-ready flip.
 
     First prove durable agent provenance. Before `gh pr ready`, require the PR body to contain the exact `<!-- patinaproject-agent-authored-pr -->` marker.
     Fetch the current body from GitHub rather than trusting local text. If the
-    marker is absent, do not add it, do not flip the draft, and do not move the
-    issue to `In review`; report that the PR is an unmarked draft whose agent
+    marker is absent, do not add it and do not flip the draft; report that the
+    PR is an unmarked draft whose agent
     provenance cannot be proven. GitHub author identity is not evidence because
     the agent and human operator can share one account.
 
@@ -321,11 +321,9 @@ tell the human what to do next.
     gh pr ready
     ```
 
-    then invoke `working-on-github-issue` with stage `in-review` to move the
-    linked issue's board Status to `In review` through the single writer of
-    issue lifecycle state — do not write that board state directly here. If
-    `working-on-github-issue` is unavailable, still flip the PR and report the
-    skipped board move.
+    The draft-to-ready transition is the entire review-phase signal. Do not
+    write issue state from this workflow; integration automation owns issue
+    transitions tied to the pull request lifecycle.
 
     The flip is **one-way**: never convert a ready PR back to draft. The durable
     marker, not which run opened the PR or which GitHub account authored it, is

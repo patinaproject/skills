@@ -9,7 +9,9 @@ layout.
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-github-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/new-issue/`: tracker-agnostic issue filing skill
+- `skills/edit-issue/`: tracker-agnostic issue update skill
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/finish-pr/`: PR finishing skill
@@ -18,7 +20,7 @@ layout.
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
-- `skills/write-release-changelog/`: operator-invoked release changelog and feedback loop-closing skill
+- `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
   into `../../skills/<name>/`, vendored third-party skills are real directories
@@ -30,8 +32,11 @@ layout.
 - `.codex-plugin/plugin.json`: Codex plugin manifest listing skill paths
 - `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
+- `.codex/config.toml`: Codex hosted Linear MCP registration
+- `.mcp.json`: hosted Linear MCP registration for supported agent hosts
 - `skills-lock.json`: vercel-labs CLI install lockfile
 - `docs/`: contributor-facing docs for skill maintenance
+- `docs/issue-tracker.md`: sole provider-specific tracker adapter
 - `package.json`, `commitizen.config.json`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
 - `.lintstagedrc.js`: lint-staged config that excludes vendored skill files
@@ -46,7 +51,9 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
-| `working-on-github-issue` | `skills/working-on-github-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
+| `working-on-issue` | `skills/working-on-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
+| `new-issue` | `skills/new-issue/` | Draft and publish issues through the tracker adapter |
+| `edit-issue` | `skills/edit-issue/` | Safely update issues through the tracker adapter |
 | `develop` | `skills/develop/` | Issue development orchestration |
 | `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
 | `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
@@ -55,7 +62,7 @@ Skills owned by this repository:
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
-| `write-release-changelog` | `skills/write-release-changelog/` | Release changelog and product-feedback loop-closing ceremony |
+| `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
@@ -103,10 +110,10 @@ Requirements:
 
 ## Migration history
 
-This repository was consolidated from separate upstream repositories in issue
-[#58](https://github.com/patinaproject/skills/issues/58). Historical design
-context now lives on related GitHub issues rather than in committed planning
-artifacts.
+This repository was consolidated from separate upstream repositories in legacy
+issue [#58](https://github.com/patinaproject/skills/issues/58). Current design
+context lives on related Linear issues rather than in committed planning
+artifacts; legacy GitHub issues remain read-only historical references.
 
 Release history remains available in [CHANGELOG.md](../CHANGELOG.md). Current
 release mechanics are documented in [release-flow.md](./release-flow.md).
