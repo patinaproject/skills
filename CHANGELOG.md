@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.21.0](https://github.com/patinaproject/skills/compare/v2.20.1...v2.21.0) (2026-07-21)
+
+
+### Features
+
+* PAT-2786 split PR readiness and merge workflows ([#298](https://github.com/patinaproject/skills/issues/298)) ([45e403a](https://github.com/patinaproject/skills/commit/45e403ae34bf61f5fc8a81219aec4a44d5562cb7))
+
 ## [2.20.1](https://github.com/patinaproject/skills/compare/v2.20.0...v2.20.1) (2026-07-20)
 
 
