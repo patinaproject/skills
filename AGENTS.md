@@ -12,7 +12,9 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/edit-issue/`: tracker-agnostic issue update skill
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
-- `skills/finish-pr/`: PR finishing skill
+- `skills/ready-pr/`: PR readiness and publication skill
+- `skills/merge-pr/`: repository-managed auto-merge skill
+- `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
 - `skills/polish/`: pre-PR deepen-then-review readiness gate skill
 - `skills/update-branch/`: local branch update skill
@@ -214,7 +216,9 @@ This repo owns these skills at flat paths:
 | edit-issue | `skills/edit-issue/` |
 | develop | `skills/develop/` |
 | develop-with-workflow | `skills/develop-with-workflow/` |
-| finish-pr | `skills/finish-pr/` |
+| ready-pr | `skills/ready-pr/` |
+| merge-pr | `skills/merge-pr/` |
+| finish-pr (deprecated alias) | `skills/finish-pr/` |
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |

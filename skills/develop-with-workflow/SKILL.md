@@ -28,7 +28,7 @@ choice.
 
 Its deliverable is a converged branch: every slice integrated onto the one
 branch, with repository verification passing. It does **not** polish the branch
-or open a pull request. Follow it with `polish` then `finish-pr` to reach
+or open a pull request. Follow it with `polish` then `ready-pr` to reach
 a ready-for-review PR.
 
 ## Required Child Skills
@@ -60,11 +60,11 @@ freeze.
 The downstream handoff is separate from the build: this skill stops at the
 converged branch, then directs you to `polish` (which reaches
 `code-review` and deepens against the `codebase-design` vocabulary) and
-`finish-pr`. Install those too so a standalone run does not dead-end at the
+`ready-pr`. Install those too so a standalone run does not dead-end at the
 handoff:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish finish-pr -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish ready-pr -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
 ```
@@ -146,4 +146,4 @@ for (const wave of waves) {
   `implement` because there were fewer than two independent slices.
 - Integration: conflicts resolved versus escalated, and the verification result.
 - Human-owned blockers, such as a judgment-needed conflict, if any.
-- The remaining pipeline to reach a PR: `polish` → `finish-pr`.
+- The remaining pipeline to reach a PR: `polish` → `ready-pr`.

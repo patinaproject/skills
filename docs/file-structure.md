@@ -14,7 +14,9 @@ layout.
 - `skills/edit-issue/`: tracker-agnostic issue update skill
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
-- `skills/finish-pr/`: PR finishing skill
+- `skills/ready-pr/`: PR readiness and publication skill
+- `skills/merge-pr/`: repository-managed auto-merge skill
+- `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
 - `skills/polish/`: pre-PR deepen-then-review readiness gate skill
 - `skills/update-branch/`: local branch update skill
@@ -56,7 +58,9 @@ Skills owned by this repository:
 | `edit-issue` | `skills/edit-issue/` | Safely update issues through the tracker adapter |
 | `develop` | `skills/develop/` | Issue development orchestration |
 | `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
-| `finish-pr` | `skills/finish-pr/` | Ready-for-merge PR finishing |
+| `ready-pr` | `skills/ready-pr/` | Publish and prove a PR ready to merge |
+| `merge-pr` | `skills/merge-pr/` | Enable repository-managed auto-merge |
+| `finish-pr` | `skills/finish-pr/` | Deprecated compatibility alias for `ready-pr` |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
 | `polish` | `skills/polish/` | Pre-PR deepen-then-review readiness gate |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
