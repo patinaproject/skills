@@ -189,6 +189,10 @@ tell the human what to do next.
    authors, body hash or update time when available, classification, and
    evidence status. Do not persist handled state in files.
 
+   Record each thread's authorship in that inventory — agent-authored or
+   human-authored per [triage.md](triage.md#thread-authorship) — because it
+   decides which threads this workflow may reply to and resolve.
+
 10. Triage every currently available feedback item with
     [triage.md](triage.md). A `fix-now` finding interrupts pending checks:
     patch, verify, commit, push, and restart the readiness loop on the new head
@@ -197,6 +201,11 @@ tell the human what to do next.
     `explain`, `stale`, and `defer` before checks unless the evidence itself
     depends on check results. Stop only when feedback returns `needs-human`.
 
+    Authorship changes where the disposition lands, not what it is. On an
+    agent-authored thread the disposition becomes a reply; on a human-authored
+    thread it becomes an operator-brief entry and stays off the pull request.
+    Fix the code either way.
+
     When a top-level review comment contains findings, handle each finding
     separately with a per-finding disposition: fixed in a named commit,
     explained with evidence, stale, deferred as out of scope, or blocked for
@@ -204,7 +213,8 @@ tell the human what to do next.
     optional; unaddressed findings are blockers until they have a disposition
     recorded in the PR or final report.
 
-11. Resolve eligible inline threads once the disposition is valid and an
+11. Resolve eligible inline threads — the agent-authored ones — once the
+    disposition is valid and an
     evidence-bearing reply for that disposition is present on the latest head.
     Every resolved thread carries a reply first; never resolve a thread
     silently. Explanation, stale, and deferral dispositions are eligible after
@@ -220,6 +230,11 @@ tell the human what to do next.
     `resolveReviewThread`, then verify GraphQL `isResolved` after resolving. If
     permissions do not allow resolution, leave the evidence-bearing reply and
     report the unresolved state. Do not treat replies as resolution.
+
+    A human-authored thread is never resolved here regardless of how strong the
+    evidence is. Carry it into the operator brief with its finding, its state on
+    the latest head, and a suggested reply, and leave the thread for its author
+    or the operator to close.
 
 12. Watch all checks only through the fail-fast bounded-watch policy. Before
     each watch window, confirm all currently available feedback and known
@@ -277,15 +292,21 @@ tell the human what to do next.
 15. Final unresolved review-thread gate: immediately before declaring the PR
     ready, re-query paginated GraphQL review threads for the latest PR head.
     Distinguish unresolved actionable feedback from outdated or stale feedback
-    that is already fixed on the latest head. For stale fixed threads, post a
+    that is already fixed on the latest head. For stale fixed agent-authored
+    threads, post a
     brief current-head evidence reply first, then resolve them with
     `resolveReviewThread` when permissions allow, and verify `isResolved: true`
-    from GraphQL. If any thread remains unresolved because it
+    from GraphQL. If any agent-authored thread remains unresolved because it
     still needs action, cannot be resolved automatically, lacks current-head
     evidence, or needs human judgment, report it as a blocker instead of
     reporting ready-to-merge. Restart the readiness loop after branch-local
-    fixes or newly pushed commits. Unresolved threads are blockers until they
-    are resolved, fixed, or evidence-classified as stale or non-blocking.
+    fixes or newly pushed commits. Unresolved agent-authored threads are
+    blockers until they are resolved, fixed, or evidence-classified as stale or
+    non-blocking.
+
+    An unresolved human-authored thread is a blocker this workflow cannot
+    clear. It keeps the PR out of ready-to-merge and appears in the operator
+    brief, whatever its state on the latest head.
 
 16. Flip the draft to ready for review the moment the **review loop is clean**.
     This is the one canonical draft-to-ready flip.
@@ -309,7 +330,10 @@ tell the human what to do next.
       completed run that errored, timed out, or was cancelled without posting
       threads never reviewed, so the loop is not clean: re-run it rather than
       flip.
-    - **zero** unresolved GraphQL review threads remain on the latest head.
+    - **zero** unresolved agent-authored GraphQL review threads remain on the
+      latest head. Human-authored threads sit outside this predicate: a human
+      who commented on the draft is already engaged, and flipping is what puts
+      the work formally in front of them.
 
     A PR that runs no code-review loop on its draft was opened non-draft in
     step 6 and has no predicate to satisfy — never leave such a PR stranded as a
@@ -358,7 +382,8 @@ tell the human what to do next.
     Also enumerate review threads with paginated GraphQL for the PR immediately
     before reporting. REST review comments are not sufficient, and replies do
     not count as resolution. Use this self-contained query shape, preserving the
-    pagination and fields needed to identify unresolved actionable feedback.
+    pagination and fields needed to identify unresolved actionable feedback and
+    each thread's authorship (`author.__typename`).
     Replace `<pr-number-or-url>`, `<owner>`, `<repo>`, and `<pr-number>` with
     the resolved PR identity from this workflow before running these commands:
 
@@ -375,7 +400,7 @@ tell the human what to do next.
                 path
                 line
                 comments(first:100){
-                  nodes{id author{login} body url createdAt path line originalLine diffHunk}
+                  nodes{id author{login __typename} body url createdAt path line originalLine diffHunk}
                 }
               }
               pageInfo{hasNextPage endCursor}
@@ -416,7 +441,11 @@ tell the human what to do next.
     - `mergeStateStatus` is `CLEAN`.
     - PR is not a draft.
     - every current check has status `COMPLETED` and conclusion `SUCCESS`.
-    - no paginated GraphQL review thread has `isResolved: false`.
+    - no paginated GraphQL review thread has `isResolved: false`, whoever
+      authored it. Agent-authored threads reach that state through this
+      workflow; human-authored threads reach it when their author or the
+      operator closes them, so an open one means the answer is
+      `not ready-to-merge` with the operator brief attached.
     - no human blocker or no-progress stop condition remains.
 
     If every gate passes, report `ready-to-merge`. If any gate fails, report
@@ -454,6 +483,10 @@ tell the human what to do next.
       evidence-bearing reply. Distinguish threads resolved after an evidence
       reply from any thread that was fixed silently, and flag a silent
       resolution as a defect to correct rather than a completed disposition.
+    - The operator brief: one entry per unresolved human-authored thread, in
+      the shape [triage.md](triage.md#operator-brief) defines. This is the only
+      place a human reviewer's feedback is answered, so keep it complete even
+      when everything else passed.
     - Human blockers, if any.
 
     Compress ready-to-merge evidence into one human line when every final gate

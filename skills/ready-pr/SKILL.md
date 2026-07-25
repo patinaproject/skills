@@ -26,7 +26,8 @@ created by this skill carries the hidden
 `<!-- patinaproject-agent-authored-pr -->` marker in its PR body. The skill flips
 only a marked draft, and only when the **review loop is clean** — the code-review
 run on the latest head has completed, has actually reviewed it, and no
-unresolved review threads remain.
+unresolved agent-authored review threads remain. A human's thread never gates
+the flip; getting the PR in front of humans is what the flip is for.
 The flip is one-way. A missing marker means provenance is unproven, so the skill
 never flips that draft or adds the marker retroactively; this leaves a human's
 work-in-progress untouched. The convention presumes the repository runs code
@@ -60,12 +61,14 @@ human line.
    one retroactively. Open it non-draft only when the PR runs no code-review
    loop on its draft (see the overview and `ready-for-merge.md` step 6).
 8. Enter the readiness loop: detect merge conflicts, triage currently
-   available PR feedback, resolve eligible conversations, watch all checks in
-   fail-fast bounded observation windows, triage every problematic check,
+   available PR feedback, resolve eligible conversations — the agent-authored
+   threads — brief the operator on every human-authored one, watch all checks
+   in fail-fast bounded observation windows, triage every problematic check,
    re-query PR feedback after checks and after every watch exit or timeout, fix
    branch-local issues, push, and repeat. A check the agent cannot fix gets a
    concrete disposition and continues to reporting, not a halt.
-9. Flip the draft to ready for review the moment the review loop is clean. The
+9. Flip the draft to ready for review the moment the review loop is clean, with
+   every agent-authored thread resolved. The
    flip is one-way and applies only when the PR body contains the exact
    agent-authored marker; a missing marker means do not flip. The PR transition
    is the complete review signal and does not write issue state.
@@ -74,6 +77,10 @@ human line.
 
 ## Guardrails
 
+- Reply on, resolve, dismiss, and re-request review only on agent-authored
+  threads. A human reviewer's thread is answered and closed by that human or
+  the operator; the agent fixes the code and hands the conversation over in the
+  operator brief.
 - Do not resolve a review thread without an evidence-bearing reply, including
   code-fix dispositions; verify pattern-based feedback with a direct search or
   check before resolving when feasible.

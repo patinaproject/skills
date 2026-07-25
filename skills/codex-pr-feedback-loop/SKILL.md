@@ -33,6 +33,12 @@ The durable boundaries at this skill level:
 
 - Stay in the current working directory's default `gh` repository.
 - Preserve this chat's context with a thread automation.
+- Reply on, resolve, dismiss, and re-request review only on **agent-authored**
+  threads — those whose first comment comes from a bot or GitHub App. A
+  **human-authored** thread belongs to its author: fix the code it asks for,
+  then report it to the operator with its state on the latest head and a
+  suggested reply, and leave the conversation for the operator to answer and
+  close.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
   and no unresolved review threads remain), flip the draft to ready only when
