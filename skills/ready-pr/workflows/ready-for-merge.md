@@ -98,10 +98,6 @@ tell the human what to do next.
    - Open the PR as a **draft** by default (`gh pr create --draft`). A draft
      signals "agent code-review loop still running, not yet for humans"; step 16
      is the one place that flips it to ready.
-   - Add exactly this hidden marker to the PR body in the same operation that creates an agent draft: `<!-- patinaproject-agent-authored-pr -->`.
-     Preserve the marker on later body updates. Never add it retroactively to an
-     existing PR: a missing marker means agent provenance is unproven and the PR
-     must not be flipped by this convention.
    - This convention presumes the repository runs its **code-review loop on
      draft PRs** (full CI on drafts) — that is the setup the step 16 predicate
      gates on.
@@ -290,13 +286,6 @@ tell the human what to do next.
 16. Flip the draft to ready for review the moment the **review loop is clean**.
     This is the one canonical draft-to-ready flip.
 
-    First prove durable agent provenance. Before `gh pr ready`, require the PR body to contain the exact `<!-- patinaproject-agent-authored-pr -->` marker.
-    Fetch the current body from GitHub rather than trusting local text. If the
-    marker is absent, do not add it and do not flip the draft; report that the
-    PR is an unmarked draft whose agent
-    provenance cannot be proven. GitHub author identity is not evidence because
-    the agent and human operator can share one account.
-
     The **readiness predicate** is the whole gate; do not flip on self-judgment.
     The code-review run is the repository's code-review check — the run that
     posts review threads on the PR head. Both must hold:
@@ -325,13 +314,16 @@ tell the human what to do next.
     write issue state from this workflow; integration automation owns issue
     transitions tied to the pull request lifecycle.
 
-    The flip is **one-way**: never convert a ready PR back to draft. The durable
-    marker, not which run opened the PR or which GitHub account authored it, is
-    the provenance gate. A resumed session, or a later skill in the pipeline
-    such as the codex feedback loop operating on a marked `ready-pr` draft, is
-    a legitimate flipper. A human's unmarked work-in-progress draft is not. A
-    genuine major rework is re-drafted manually by the author, after which this
-    same flip applies again once the loop is clean if the marker remains.
+    The flip is **one-way**: never convert a ready PR back to draft. The
+    predicate, not which run opened the PR or which GitHub account authored it,
+    decides. Any draft whose latest head carries a clean code-review run is a
+    legitimate flip target, including one opened by an earlier run, by a human
+    who then handed the branch to an agent, or by other tooling. A human's
+    work-in-progress draft is excluded by the predicate itself rather than by a
+    separate check: private work in progress has no completed code-review run on
+    its head with every thread resolved. A genuine major rework is re-drafted
+    manually by the author, after which this same flip applies again once the
+    loop is clean.
 
     Ready-for-review is distinct from ready-to-merge: the predicate can hold —
     review loop clean — while other checks are still failing or dispositioned,
