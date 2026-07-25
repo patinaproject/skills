@@ -24,8 +24,10 @@ Every review conversation (an inline thread, a top-level PR comment, or a
 review body) is **agent-authored** when the comment that opened it comes from a
 bot or a GitHub App, and **human-authored** otherwise. Read `author.__typename`
 of that opening comment from the GraphQL inventory: `Bot` is agent-authored and
-`User` is human-authored. An agent and its operator can share one GitHub
-account, so an unclear author is human-authored.
+`User` is human-authored. That switch is exhaustive for review authors, because
+a GitHub App's comments also resolve to `Bot`; "bot or GitHub App" is one case,
+not two. An agent and its operator can share one GitHub account, so an unclear
+author is human-authored.
 
 Authorship is fixed when the conversation opens and later replies never change
 it. A human replying on a bot's thread leaves it agent-authored, and a bot
