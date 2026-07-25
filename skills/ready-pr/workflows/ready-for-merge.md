@@ -214,8 +214,8 @@ tell the human what to do next.
     recorded in the PR or final report.
 
 11. Resolve eligible inline threads, the agent-authored ones, once the
-    disposition is valid and an
-    evidence-bearing reply for that disposition is present on the latest head.
+    disposition is valid and an evidence-bearing reply for that disposition is
+    present on the latest head.
     Every resolved thread carries a reply first; never resolve a thread
     silently. Explanation, stale, and deferral dispositions are eligible after
     their evidence-bearing reply is present on the latest head. Code-fix
