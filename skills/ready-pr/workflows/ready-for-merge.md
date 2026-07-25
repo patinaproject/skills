@@ -189,8 +189,8 @@ tell the human what to do next.
    authors, body hash or update time when available, classification, and
    evidence status. Do not persist handled state in files.
 
-   Record each thread's authorship in that inventory — agent-authored or
-   human-authored per [triage.md](triage.md#thread-authorship) — because it
+   Record each thread's authorship in that inventory, agent-authored or
+   human-authored per [triage.md](triage.md#thread-authorship), because it
    decides which threads this workflow may reply to and resolve.
 
 10. Triage every currently available feedback item with
@@ -213,7 +213,7 @@ tell the human what to do next.
     optional; unaddressed findings are blockers until they have a disposition
     recorded in the PR or final report.
 
-11. Resolve eligible inline threads — the agent-authored ones — once the
+11. Resolve eligible inline threads, the agent-authored ones, once the
     disposition is valid and an
     evidence-bearing reply for that disposition is present on the latest head.
     Every resolved thread carries a reply first; never resolve a thread

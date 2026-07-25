@@ -20,8 +20,8 @@ Authorship decides who may speak in a review conversation and who may close it.
 It never decides whether the feedback is valid: triage and fix both kinds the
 same way.
 
-Every review conversation — an inline thread, a top-level PR comment, or a
-review body — is **agent-authored** when it comes from a bot or a GitHub App,
+Every review conversation (an inline thread, a top-level PR comment, or a
+review body) is **agent-authored** when it comes from a bot or a GitHub App,
 and **human-authored** otherwise. Read `author.__typename` from the GraphQL
 inventory: `Bot` is agent-authored and `User` is human-authored. An agent and
 its operator can share one GitHub account, so an unclear author is
@@ -42,7 +42,7 @@ report rather than on the pull request:
 - the thread or comment link;
 - the finding or acceptance criterion it maps to;
 - the state of that finding on the latest head, and the evidence behind that
-  state — what changed, what verification ran, and where it ran;
+  state: what changed, what verification ran, and where it ran;
 - a suggested reply the operator edits before sending.
 
 Grade the evidence rather than the intent. Report what has been observed on the

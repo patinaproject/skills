@@ -62,7 +62,7 @@ For each actionable/blocking item, inspect the latest head and current file cont
 
 After edits, run the narrowest local verification command that covers the changed behavior. Do not use hidden skip env vars, broad bypass knobs, or --no-verify. If local verification is blocked, report the exact blocker instead of claiming success.
 
-When fixes are verified, commit focused changes with this repo's commit rules and push the PR branch. Reply to each handled agent-authored review thread using the REST threaded replies endpoint with evidence: fix commit SHA, verification command, and how the latest head addresses the comment. Resolve eligible review threads — the agent-authored ones — through GraphQL only after latest-head verification succeeds.
+When fixes are verified, commit focused changes with this repo's commit rules and push the PR branch. Reply to each handled agent-authored review thread using the REST threaded replies endpoint with evidence: fix commit SHA, verification command, and how the latest head addresses the comment. Resolve eligible review threads, the agent-authored ones, through GraphQL only after latest-head verification succeeds.
 
 Fix human-authored threads the same way, but leave the conversation alone: no reply, no resolve, no dismissal, and no re-requested review, however strong the evidence. Report each unresolved human-authored thread to the operator with its link, the finding it maps to, its state on the latest head with the evidence behind that state, and a suggested reply the operator edits before sending. Grade that evidence: say what has been observed on the latest head and what remains unverified, so the operator relays a claim they can stand behind.
 

@@ -61,8 +61,8 @@ human line.
    one retroactively. Open it non-draft only when the PR runs no code-review
    loop on its draft (see the overview and `ready-for-merge.md` step 6).
 8. Enter the readiness loop: detect merge conflicts, triage currently
-   available PR feedback, resolve eligible conversations — the agent-authored
-   threads — brief the operator on every human-authored one, watch all checks
+   available PR feedback, resolve eligible conversations (the agent-authored
+   threads), brief the operator on every human-authored one, watch all checks
    in fail-fast bounded observation windows, triage every problematic check,
    re-query PR feedback after checks and after every watch exit or timeout, fix
    branch-local issues, push, and repeat. A check the agent cannot fix gets a
