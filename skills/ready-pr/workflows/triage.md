@@ -21,11 +21,15 @@ It never decides whether the feedback is valid: triage and fix both kinds the
 same way.
 
 Every review conversation (an inline thread, a top-level PR comment, or a
-review body) is **agent-authored** when it comes from a bot or a GitHub App,
-and **human-authored** otherwise. Read `author.__typename` from the GraphQL
-inventory: `Bot` is agent-authored and `User` is human-authored. An agent and
-its operator can share one GitHub account, so an unclear author is
-human-authored.
+review body) is **agent-authored** when the comment that opened it comes from a
+bot or a GitHub App, and **human-authored** otherwise. Read `author.__typename`
+of that opening comment from the GraphQL inventory: `Bot` is agent-authored and
+`User` is human-authored. An agent and its operator can share one GitHub
+account, so an unclear author is human-authored.
+
+Authorship is fixed when the conversation opens and later replies never change
+it. A human replying on a bot's thread leaves it agent-authored, and a bot
+replying on a human's thread leaves it human-authored.
 
 - **Agent-authored conversations are the eligible ones.** Reply with evidence,
   then resolve them under the rules below.
