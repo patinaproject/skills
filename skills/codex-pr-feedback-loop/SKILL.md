@@ -41,8 +41,10 @@ The durable boundaries at this skill level:
   close.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
-  and no unresolved review threads remain), flip the draft to ready only when
-  its body contains the exact `<!-- patinaproject-agent-authored-pr -->` marker.
+  and no unresolved agent-authored review threads remain), flip the draft to
+  ready only when its body contains the exact
+  `<!-- patinaproject-agent-authored-pr -->` marker. A human's thread never
+  gates the flip; putting the work in front of humans is what the flip is for.
   The flip is one-way and can cover a marked draft that a prior `ready-pr` run
   opened. Never add the marker retroactively, flip an unmarked human draft, or
   write issue state from the PR loop.
