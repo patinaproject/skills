@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.21.1](https://github.com/patinaproject/skills/compare/v2.21.0...v2.21.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* PAT-2979 distinguish human from agent review threads ([#300](https://github.com/patinaproject/skills/issues/300)) ([22aabfc](https://github.com/patinaproject/skills/commit/22aabfcf85678d3fc9e2696bbb2bef0a20835e46))
+* PAT-2991 gate the draft-to-ready flip on the predicate alone ([#302](https://github.com/patinaproject/skills/issues/302)) ([77ee5bd](https://github.com/patinaproject/skills/commit/77ee5bda1fe3955c147668d8bc7fd7888ad50e7d))
+
 ## [2.21.0](https://github.com/patinaproject/skills/compare/v2.20.1...v2.21.0) (2026-07-21)
 
 
