@@ -39,6 +39,10 @@ The durable boundaries at this skill level:
   then report it to the operator with its state on the latest head and a
   suggested reply, and leave the conversation for the operator to answer and
   close.
+- A human report that a previously handled bug persists or has returned
+  invalidates the earlier verified disposition even when the PR head is
+  unchanged. Reproduce the latest report red before more fix work and green
+  after the fix, or report verification unmet in the operator brief.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
   and no unresolved agent-authored review threads remain), flip the draft to
