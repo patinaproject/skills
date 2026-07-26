@@ -14,6 +14,47 @@ review threads, top-level PR comments, and review bodies.
 For merge conflicts, apply the Merge Conflict Rules below when choosing and
 executing the state action.
 
+## Thread Authorship
+
+Authorship decides who may speak in a review conversation and who may close it.
+It never decides whether the feedback is valid: triage and fix both kinds the
+same way.
+
+Every review conversation (an inline thread, a top-level PR comment, or a
+review body) is **agent-authored** when the comment that opened it comes from a
+bot or a GitHub App, and **human-authored** otherwise. Read `author.__typename`
+of that opening comment from the GraphQL inventory: `Bot` is agent-authored and
+`User` is human-authored. That switch is exhaustive for review authors, because
+a GitHub App's comments also resolve to `Bot`; "bot or GitHub App" is one case,
+not two. An agent and its operator can share one GitHub account, so an unclear
+author is human-authored.
+
+Authorship is fixed when the conversation opens and later replies never change
+it. A human replying on a bot's thread leaves it agent-authored, and a bot
+replying on a human's thread leaves it human-authored.
+
+- **Agent-authored conversations are the eligible ones.** Reply with evidence,
+  then resolve them under the rules below.
+- **A human-authored conversation belongs to its author.** Fix what the comment
+  asks for, then hand the conversation to the operator through the brief below.
+  The operator replies, resolves, dismisses, and re-requests review; the agent
+  does none of those on a human's conversation, even when the fix is verified.
+
+### Operator brief
+
+Write one brief entry per unresolved human-authored conversation, in the run's
+report rather than on the pull request:
+
+- the thread or comment link;
+- the finding or acceptance criterion it maps to;
+- the state of that finding on the latest head, and the evidence behind that
+  state: what changed, what verification ran, and where it ran;
+- a suggested reply the operator edits before sending.
+
+Grade the evidence rather than the intent. Report what has been observed on the
+latest head and name what is still unverified, so the operator relays a claim
+they can stand behind.
+
 ## Required Evidence
 
 - Latest PR head SHA used for the decision.
@@ -36,7 +77,9 @@ executing the state action.
   when the evidence does not depend on check results.
 - Route requirement, acceptance-criteria, scope, or user-visible behavior
   changes through the repository's planning owner before implementation.
-- Reply concisely to every handled human comment.
+- Classify authorship before replying or resolving. Reply on agent-authored
+  conversations; carry every human-authored one into the operator brief
+  instead.
 - Every resolved review thread must carry an evidence-bearing reply before
   `resolveReviewThread`, including code-fix dispositions. Silent resolution is
   not allowed for any disposition.
@@ -48,11 +91,13 @@ executing the state action.
   semantic or pattern check before resolving when feasible: a repo search, an
   AST query, or a lint rule. Account for every remaining match in the reply,
   and do not resolve while unexplained matches remain.
-- Resolve inline threads only after both the disposition evidence (fix,
-  explanation, stale evidence, or deferral evidence) is present on latest head
-  and an evidence-bearing reply for that disposition is posted.
+- Resolve agent-authored inline threads only after both the disposition
+  evidence (fix, explanation, stale evidence, or deferral evidence) is present
+  on latest head and an evidence-bearing reply for that disposition is posted.
 - Verify `isResolved: true` after calling `resolveReviewThread`; unresolved
-  threads remain blockers unless permission-blocked and explicitly reported.
+  agent-authored threads remain blockers unless permission-blocked and
+  explicitly reported. An unresolved human-authored thread is a blocker its
+  operator clears, reported through the brief rather than acted on.
 - Track handled top-level comments and review bodies in memory during the run so
   loop passes do not post duplicate replies.
 

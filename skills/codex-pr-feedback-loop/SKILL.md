@@ -33,10 +33,18 @@ The durable boundaries at this skill level:
 
 - Stay in the current working directory's default `gh` repository.
 - Preserve this chat's context with a thread automation.
+- Reply on, resolve, dismiss, and re-request review only on **agent-authored**
+  threads, those whose first comment comes from a bot or GitHub App. A
+  **human-authored** thread belongs to its author: fix the code it asks for,
+  then report it to the operator with its state on the latest head and a
+  suggested reply, and leave the conversation for the operator to answer and
+  close.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
-  and no unresolved review threads remain), flip the draft to ready. That
-  predicate is the only precondition. The flip is one-way and covers any draft
-  that satisfies it, including one a prior `ready-pr` run opened. Never
-  re-draft a ready PR or write issue state from the PR loop.
+  and no unresolved agent-authored review threads remain), flip the draft to
+  ready. That predicate is the only precondition, and a human's thread never
+  gates it; putting the work in front of humans is what the flip is for. The
+  flip is one-way and covers any draft that satisfies the predicate, including
+  one a prior `ready-pr` run opened. Never re-draft a ready PR or write issue
+  state from the PR loop.
 - Do not merge the PR.
