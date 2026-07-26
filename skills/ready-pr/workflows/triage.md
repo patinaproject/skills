@@ -55,6 +55,31 @@ Grade the evidence rather than the intent. Report what has been observed on the
 latest head and name what is still unverified, so the operator relays a claim
 they can stand behind.
 
+### Renewed human bug report
+
+A human report that a previously handled bug persists or has returned is
+renewed evidence, not a duplicate, stale comment, or ordinary `fix-now` item.
+It immediately invalidates the earlier verified or fixed disposition for that
+finding, even when the PR head SHA has not changed.
+
+Before more fix work:
+
+1. Re-read the latest report and map it to the existing finding or acceptance
+   criterion; keep multiple reports of the same behavior together.
+2. Re-derive or amend the reproduction from the human's latest expected and
+   actual wording, following any repository-owned human-bug-report or
+   fix-claims contract.
+3. Observe the reproduction fail on the environment and exact build the human
+   used. A reproduction that does not fail leaves verification unmet; route
+   provenance, attribution, or conflicting expectations through the
+   repository's owner instead of preserving the earlier fixed claim.
+4. After the fix, verify the same reproduction passes on the deployed exact
+   final head.
+
+Carry the renewed report, the invalidated prior evidence, and the new red/green
+evidence or unmet state into the operator brief. The human-authored
+conversation remains untouched throughout.
+
 ## Required Evidence
 
 - Latest PR head SHA used for the decision.
@@ -80,6 +105,9 @@ they can stand behind.
 - Classify authorship before replying or resolving. Reply on agent-authored
   conversations; carry every human-authored one into the operator brief
   instead.
+- Apply the renewed-human-report rule before generic feedback triage. A report
+  that a handled bug persists cannot inherit an earlier `fix-now`, `stale`, or
+  verified disposition.
 - Every resolved review thread must carry an evidence-bearing reply before
   `resolveReviewThread`, including code-fix dispositions. Silent resolution is
   not allowed for any disposition.
