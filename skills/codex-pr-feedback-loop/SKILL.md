@@ -35,9 +35,8 @@ The durable boundaries at this skill level:
 - Preserve this chat's context with a thread automation.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
-  and no unresolved review threads remain), flip the draft to ready only when
-  its body contains the exact `<!-- patinaproject-agent-authored-pr -->` marker.
-  The flip is one-way and can cover a marked draft that a prior `ready-pr` run
-  opened. Never add the marker retroactively, flip an unmarked human draft, or
-  write issue state from the PR loop.
+  and no unresolved review threads remain), flip the draft to ready. That
+  predicate is the only precondition. The flip is one-way and covers any draft
+  that satisfies it, including one a prior `ready-pr` run opened. Never
+  re-draft a ready PR or write issue state from the PR loop.
 - Do not merge the PR.
