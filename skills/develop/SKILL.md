@@ -38,8 +38,8 @@ opt-in: invoke `develop-with-workflow` directly when you want them.
 
 ## Terminal Goal
 
-Production-ready implementation, all visible PR checks passing, and all local
-review findings plus PR review comments addressed.
+Production-ready implementation, all visible PR checks passing, and all PR
+review comments addressed.
 
 Treat production-ready as an evidence-backed readiness case, not a guarantee of
 zero risk. Do not make unsupported certainty claims such as absolute certainty
@@ -62,13 +62,12 @@ environment:
 
 - `working-on-issue`: resolve the issue from the scope or current branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
-- `polish`: pre-PR gate — deepen architecture until settled, then review to green.
+- `polish`: bounded pre-PR architecture gate.
 - `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
-`working-on-issue` reaches `new-branch`; `polish` reaches
-`code-review`, `implement`, and `diagnosing-bugs`, and deepens against the
-`codebase-design` vocabulary; `implement` reaches `tdd` and `code-review`.
-Confirm those are installed too.
+`working-on-issue` reaches `new-branch`; `polish` reaches `implement` and
+`diagnosing-bugs`, and deepens against the `codebase-design` vocabulary;
+`implement` reaches `tdd`. Confirm those are installed too.
 
 If any are missing, halt before building. Report the missing skill names and
 install guidance:
@@ -77,12 +76,11 @@ install guidance:
 npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish ready-pr -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
 ```
 
-The `implement`, `tdd`, `code-review`, `diagnosing-bugs`, `writing-great-skills`, and
+The `implement`, `tdd`, `diagnosing-bugs`, `writing-great-skills`, and
 `prototype` install hints intentionally track their source catalog's default
 branch. Consumers who need a frozen install can add `#<git-ref>` to those
 sources.
@@ -148,8 +146,8 @@ scope, and treat any issue as best-effort association, not a separate path.
   instructions, or both.
 - Repository-documented verification has run and results are recorded.
 - Relevant tests are added or updated when the change has executable behavior.
-- `polish` ran and reached a settled, green branch: architecture deepened
-  until settled, and `code-review` findings fixed or dispositioned.
+- `polish` ran its bounded architecture gate and applied or dispositioned every
+  accepted deepening.
 - GitHub PR review comments and hosted review comments surfaced by `ready-pr`
   are fixed or dispositioned.
 - After `ready-pr`, all currently visible required and optional PR checks pass
@@ -178,23 +176,22 @@ scope, and treat any issue as best-effort association, not a separate path.
 4. Judge actionability against the Scope Contract. Pause for a human when the
    scope is not actionable; do not invent scope.
 5. Apply triggered conditional routes.
-6. Build the scope with `implement` (which reaches `tdd` at agreed seams) —
-   instructions authoritative over any issue body — then run
-   repository-documented verification.
+6. Build the scope with the build/TDD portion of `implement` — instructions
+   authoritative over any issue body — then run repository-documented
+   verification. The pull request owns review, so skip `implement`'s standalone
+   `code-review` tail.
 7. Run `polish`, forwarding the run's scope — the resolved issue reference and
    any instructions — to ready the branch. Because `working-on-issue` is
    idempotent, `polish`'s first-step alignment re-confirms the same branch and
-   issue at no cost, and its Spec axis then reviews against the issue you built
-   to. It deepens the architecture until settled, then reviews to green via
-   `code-review`, routing findings through its Finding Router. Invoking
-   `develop` is sufficient approval for `polish`'s review gate; dispatch it
-   without asking for another confirmation. A `ready-for-human` finding stops the
-   loop as `human-blocked`.
+   issue at no cost. It runs one architecture pass and a second only when the
+   first accepted a deepening, routing candidates through its Finding Router.
+   Invoking `develop` is sufficient approval for this gate; dispatch it without
+   asking for another confirmation. A `ready-for-human` candidate stops the run
+   as `human-blocked`.
 8. Run `ready-pr` for commit, push, PR creation or update, visible check
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
-   `ready-pr` only after `polish` reports the branch settled and green,
-   or every finding has a recorded `ready-for-agent`, `ready-for-human`, or
-   `wontfix` disposition. **When step 3 resolved no issue**, consult the
+   `ready-pr` only after `polish` completes its bounded architecture gate.
+   **When step 3 resolved no issue**, consult the
    repository guidance read in step 1: if it requires an issue reference on commits or
    PRs, stop before `ready-pr` — that
    convention cannot be satisfied without an issue — and report `human-blocked`
@@ -216,7 +213,7 @@ documented `human-blocked` stop.
 
 ## Terminal-state routing
 
-`polish` classifies review findings through its Finding Router
+`polish` classifies architecture candidates through its Finding Router
 (`ready-for-agent` → `implement`/`diagnosing-bugs`; `ready-for-human` → stop;
 `wontfix` → explain). At the controller level, any `ready-for-human` blocker —
 from `working-on-issue`, the actionability judgment, the build, `polish`,
@@ -261,11 +258,9 @@ Include:
 - Relevant tests added or updated.
 - Child skill halt reasons, only when a halt changes what the human should do
   next.
-- `polish` result: architecture deepenings applied and `code-review`
-  finding dispositions.
+- `polish` result: passes run, architecture deepenings applied, and candidate
+  dispositions.
 - PR review and check feedback status.
-- Latest `code-review` result from `polish`, or that the gate found
-  nothing to change, only when it changes reviewer confidence or next action.
 - Human-owned blockers, if any.
 - `wontfix` explanations, if any.
 - Residual risks or test gaps, only when they are concrete and relevant.
