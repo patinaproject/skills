@@ -1,0 +1,99 @@
+{
+  "repository": "patinaproject/skills",
+  "extractedAt": "2026-07-27",
+  "refScope": {
+    "rewritable": ["refs/heads/*", "refs/tags/*"],
+    "immutable": ["refs/pull/*"]
+  },
+  "immutablePullRefs": {
+    "observedRefCount": 196,
+    "observedPullOnlyCommitCount": 738,
+    "referencedCommitCount": 23
+  },
+  "references": {
+    "PAT-971": {
+      "writableCommitMessages": [],
+      "immutablePullCommitMessages": [],
+      "mergedPullRequests": [294]
+    },
+    "PAT-2776": {
+      "writableCommitMessages": [
+        "87b8f7be9e52155f7d89de63b07e617709670b5c"
+      ],
+      "immutablePullCommitMessages": [
+        "062c9f2a6ebaba89b6cf86169cc44a6e0b4e51c9",
+        "a7bef39553a5148eaddd8094bcd7883c32335787",
+        "bb862680432ad9ceb0edd4e2dd9fdfa2d304a6bb"
+      ],
+      "mergedPullRequests": [295, 296, 297]
+    },
+    "PAT-2777": {
+      "writableCommitMessages": [
+        "63f7203c4cce9355b8e54ef91e47bda156c86c46"
+      ],
+      "immutablePullCommitMessages": [
+        "799859770ee69e87a5865f6deb7edcdd14c669c2"
+      ],
+      "mergedPullRequests": [294, 296]
+    },
+    "PAT-2786": {
+      "writableCommitMessages": [
+        "45e403ae34bf61f5fc8a81219aec4a44d5562cb7"
+      ],
+      "immutablePullCommitMessages": [
+        "4a1dafb9409e860910b0163345690bd29612e23f",
+        "574d633f0dadfbe40ca1dd6a7698ae771d7e37a6",
+        "a3c668c3dcba0b8c24d8c8e85e4549ba8bf3fb27",
+        "d7bca2de3792fdd5cfb401ee9a6107c3cf3fdccf"
+      ],
+      "mergedPullRequests": [298, 299]
+    },
+    "PAT-2979": {
+      "writableCommitMessages": [
+        "22aabfcf85678d3fc9e2696bbb2bef0a20835e46"
+      ],
+      "immutablePullCommitMessages": [
+        "012eb983229d2940b33aab87c733fb5a02f54565",
+        "17f7928e118c7b14784c9ceb647caa950e775f46",
+        "28616c280b1f5596d273713fb6858301a0c998e9",
+        "33e3fd18acf82cc0df5c9a1d17b9ad8e6194241f",
+        "4bbefd0dc08d575da09ffb6be74a2c3df77919ea",
+        "aa55ac47d4969051fa8f542aaa38900758bf15f5",
+        "bcd27e3f87a0905dc4ea60d5801d01b2e2e5f8ff",
+        "dcc553148a437b365abea6a99cabb6d8602f00fd"
+      ],
+      "mergedPullRequests": [300, 303]
+    },
+    "PAT-2980": {
+      "writableCommitMessages": [
+        "7eceb6866e018894c88e28013eb91932db874ef6"
+      ],
+      "immutablePullCommitMessages": [
+        "80b9914c95627b9a5b8cdde9c75ca4f727695787"
+      ],
+      "mergedPullRequests": [306]
+    },
+    "PAT-2991": {
+      "writableCommitMessages": [
+        "77ee5bda1fe3955c147668d8bc7fd7888ad50e7d"
+      ],
+      "immutablePullCommitMessages": [
+        "3920820331b683dfde61c76c13143c7cbd3d2977",
+        "432905e015037cbdf5e1a27283f49868c87853c0",
+        "7f3e45c5eb75d8bd882bf6418c4d525cf1d0481a"
+      ],
+      "mergedPullRequests": [302]
+    },
+    "PAT-3067": {
+      "writableCommitMessages": [
+        "a981d997bad40c5b30fbcd4b9c488d2276c30bb3"
+      ],
+      "immutablePullCommitMessages": [
+        "0c39165110a251f764de1e631bfe261284d8e944",
+        "da5b058b85439fe0fc58b406d8776bab06e38266",
+        "f428a52d24ff5479368f68c1eba5379299affab7"
+      ],
+      "mergedPullRequests": [307, 309]
+    }
+  }
+}

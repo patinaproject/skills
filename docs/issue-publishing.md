@@ -20,8 +20,10 @@ Acceptance criteria use Given / When / Then and describe observable behavior.
 - **Labels:** load the live inventory and never invent one.
 - **Assignee:** blank unless the filer is taking the work or assignment was
   explicitly confirmed.
-- **Lifecycle:** new work enters Triage unless it already meets the ready bar.
-- **Planning:** set a project and milestone only for a named delivery effort.
+- **Lifecycle:** new work enters the adapter's triage state unless it already
+  meets the ready bar.
+- **Planning:** set the adapter's planning fields only for a named delivery
+  effort.
 - **Relationships:** use native parent, blocker, related, and duplicate fields
   only when explicitly stated.
 

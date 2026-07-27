@@ -3,6 +3,9 @@ set -euo pipefail
 
 bash scripts/tests/dogfood.test.sh
 bash scripts/tests/esm-tooling.test.sh
+pnpm exec commitlint --version >/dev/null
+bash scripts/tests/issue-reference-contract.test.sh
+node scripts/tests/history-rewrite.test.mjs
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/pr-readiness-flip.test.sh

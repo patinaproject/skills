@@ -20,8 +20,8 @@ assert.ok(Array.isArray(commitizenConfig.types), "commitizen config must declare
 assert.equal(commitizenConfig.subjectLimit, 72, "commitizen config must preserve the subject limit");
 assert.equal(
   commitizenConfig.ticketNumberRegExp,
-  "PAT-[1-9]\\d*",
-  "commitizen must require current Linear issue identifiers"
+  "#[1-9]\\d*",
+  "commitizen must require current GitHub issue identifiers"
 );
 
 const commitlintConfig = await import("./commitlint.config.js");

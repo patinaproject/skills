@@ -1,4 +1,4 @@
-# ADR-PAT-2776: Preserve immutable release history with alias tags
+# ADR-293: Preserve immutable release history with alias tags
 
 ## Status
 
@@ -16,7 +16,8 @@ Keep every immutable legacy Release and prefixed tag. Add a lightweight `v<X.Y.Z
 at the exact same commit for each historical version, and treat the unprefixed form as the
 canonical consumer pin. Do not create duplicate GitHub Releases for the aliases.
 
-From PAT-2776 onward, release-please emits only `v<X.Y.Z>` tags. Bootstrap the migration
+From issue #293 onward, release-please emits only `v<X.Y.Z>` tags. Bootstrap
+the migration
 from the last prefixed release commit so version and changelog continuity do not depend on
 renaming immutable history.
 

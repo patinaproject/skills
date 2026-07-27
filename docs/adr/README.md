@@ -9,21 +9,21 @@ issue or plan locations.
 
 ## Naming
 
-Name a new ADR after its originating Linear issue:
+Name a new ADR after its originating GitHub issue:
 
 ```text
-ADR-PAT-N-<slug>.md      e.g. ADR-PAT-123-tracker-adapter.md
+ADR-N-<slug>.md      e.g. ADR-123-tracker-adapter.md
 ```
 
-- **The prefix is the Linear identifier, verbatim** — no padding, truncation,
+- **The prefix is the GitHub issue number, verbatim** — no padding, truncation,
   or normalization.
 - **The slug carries uniqueness; the full filename is the key.** The issue-number
   prefix is not required to be unique on its own. One issue that produces two
   ADRs uses two different slugs — there is no suffix, letter, or padding scheme.
-- **Every ADR must cite an originating issue.** Linear assigns the identifier,
-  so it is globally unique with no cross-branch coordination. If a decision has
-  no issue yet, publish one through the tracker adapter; do not invent a number.
-- **The prefix is a backlink.** Open `PAT-N` for the decision's full historical
+- **Every ADR must cite an originating issue.** GitHub assigns the number within
+  this repository. If a decision has no issue yet, publish one through the
+  tracker adapter; do not invent a number.
+- **The prefix is a backlink.** Open `#N` for the decision's full historical
   context: the problem framing, discussion, and pull requests behind it.
 
 Existing `ADR-<number>-<slug>.md` filenames are historical GitHub references and
@@ -42,17 +42,17 @@ A short ADR is enough. Prefer one to three direct sentences that record what was
 decided and why; add sections only when they make the decision easier to
 understand later.
 
-The heading matches the filename token: `# ADR-PAT-N: Title`. Reference an ADR
-in prose as `ADR-PAT-N` (it is clear you mean the decision record, not the
+The heading matches the filename token: `# ADR-N: Title`. Reference an ADR
+in prose as `ADR-N` (it is clear you mean the decision record, not the
 issue thread, even though they share a number). In the rare case where one issue
 produced more than one ADR, add the slug to disambiguate in both the heading and
-prose — `# ADR-PAT-N-<slug>: Title` and `ADR-PAT-N-<slug>` — so the slug
+prose — `# ADR-N-<slug>: Title` and `ADR-N-<slug>` — so the slug
 carries uniqueness consistently across filename, heading, and prose.
 
 Optional sections:
 
 ```markdown
-# ADR-PAT-N: Short Decision Title
+# ADR-N: Short Decision Title
 
 ## Status
 
