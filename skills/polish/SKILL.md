@@ -85,9 +85,7 @@ Then the first architecture pass begins.
 ## Bounded architecture passes
 
 Surface architectural friction in the branch's changes and apply the deepenings
-that clearly earn their place. When the scope carried free-form instructions,
-weight each pass toward the modules they name, still deepening only what the
-branch's own diff touches.
+that clearly earn their place.
 
 Work in the **deep-module vocabulary** and its principles — **module**,
 **interface**, **depth** (**deep**/**shallow**), **seam**, **adapter**,
