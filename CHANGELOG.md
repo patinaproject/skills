@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.22.0](https://github.com/patinaproject/skills/compare/v2.21.1...v2.22.0) (2026-07-27)
+
+
+### Features
+
+* PAT-3067 bound pre-PR architecture work ([#309](https://github.com/patinaproject/skills/issues/309)) ([a981d99](https://github.com/patinaproject/skills/commit/a981d997bad40c5b30fbcd4b9c488d2276c30bb3))
+
+
+### Bug Fixes
+
+* PAT-2980 repeat reproduction for renewed reports ([#306](https://github.com/patinaproject/skills/issues/306)) ([7eceb68](https://github.com/patinaproject/skills/commit/7eceb6866e018894c88e28013eb91932db874ef6))
+
 ## [2.21.1](https://github.com/patinaproject/skills/compare/v2.21.0...v2.21.1) (2026-07-26)
 
 
