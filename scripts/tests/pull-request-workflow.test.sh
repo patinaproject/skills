@@ -5,6 +5,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 WORKFLOW=".github/workflows/pull-request.yml"
+CODE_REVIEW_WORKFLOW=".github/workflows/code-review.yml"
 FAIL_COUNT=0
 
 fail() {
@@ -34,6 +35,7 @@ assert_no_match() {
 }
 
 assert_file "$WORKFLOW"
+assert_file "$CODE_REVIEW_WORKFLOW"
 
 if [ -f "$WORKFLOW" ]; then
   assert_match "name: Pull Request" "$WORKFLOW"
@@ -42,6 +44,8 @@ if [ -f "$WORKFLOW" ]; then
   assert_match "Validate conventional commits" "$WORKFLOW"
   assert_match 'subjectPattern:.*#\[1-9\]' "$WORKFLOW"
   assert_match 'Closes #N' "$WORKFLOW"
+  assert_match 'normalized=.*sanitized.*GITHUB_REPOSITORY' "$WORKFLOW"
+  assert_match 'printf.*normalized' "$WORKFLOW"
   assert_no_match 'PAT-' "$WORKFLOW"
   assert_match 'Compare title `!` with breaking-change markers' "$WORKFLOW"
   assert_match "GH_TOKEN: .*github.token" "$WORKFLOW"
@@ -54,6 +58,11 @@ if [ -f "$WORKFLOW" ]; then
   assert_match 'PR commit messages include.*BREAKING CHANGE.*footer' "$WORKFLOW"
   assert_match 'Add.*to the type' "$WORKFLOW"
   assert_no_match 'Compare title `!` with body BREAKING CHANGE footer' "$WORKFLOW"
+fi
+
+if [ -f "$CODE_REVIEW_WORKFLOW" ]; then
+  assert_match 'normalized_body=.*PR_BODY.*GITHUB_REPOSITORY' "$CODE_REVIEW_WORKFLOW"
+  assert_match 'printf.*normalized_body' "$CODE_REVIEW_WORKFLOW"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

@@ -107,7 +107,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          issue_number="$(printf '%s\n' "$PR_BODY" \
+          # GitHub Apps may qualify same-repository references as owner/repo#N.
+          normalized_body="${PR_BODY//$GITHUB_REPOSITORY#/#}"
+          issue_number="$(printf '%s\n' "$normalized_body" \
             | grep -Eio '(Closes|Fixes|Resolves)[[:space:]]+#[1-9][0-9]*' \
             | grep -Eo '[1-9][0-9]*' \
             | head -n 1 || true)"

@@ -71,7 +71,9 @@ jobs:
             | sed -E "s/${BT}[^${BT}]*${BT}//g" \
             | sed -E 's/~~[^~]*~~//g')
           sanitized=$(printf '%s' "$sanitized" | grep -vE '^[[:space:]]*>' || true)
-          if printf '%s' "$sanitized" | grep -qE \
+          # GitHub Apps may qualify same-repository references as owner/repo#N.
+          normalized="${sanitized//$GITHUB_REPOSITORY#/#}"
+          if printf '%s' "$normalized" | grep -qE \
             '(^|[^A-Za-z])(Closes|Fixes|Resolves)[ \t]+#[1-9][0-9]*([^0-9A-Za-z_]|$)'; then
             echo "GitHub issue-closing reference found."
             exit 0
