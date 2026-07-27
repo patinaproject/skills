@@ -58,14 +58,12 @@ install hints track their source catalog's default branch; add `#<git-ref>` to
 freeze.
 
 The downstream handoff is separate from the build: this skill stops at the
-converged branch, then directs you to `polish` (which reaches
-`code-review` and deepens against the `codebase-design` vocabulary) and
-`ready-pr`. Install those too so a standalone run does not dead-end at the
-handoff:
+converged branch, then directs you to `polish` (which runs its bounded
+architecture gate against the `codebase-design` vocabulary) and `ready-pr`.
+Install those too so a standalone run does not dead-end at the handoff:
 
 ```sh
 npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish ready-pr -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
 ```
 

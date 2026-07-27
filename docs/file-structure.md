@@ -18,7 +18,7 @@ layout.
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/polish/`: pre-PR deepen-then-review readiness gate skill
+- `skills/polish/`: bounded pre-PR architecture gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
@@ -62,7 +62,7 @@ Skills owned by this repository:
 | `merge-pr` | `skills/merge-pr/` | Enable repository-managed auto-merge |
 | `finish-pr` | `skills/finish-pr/` | Deprecated compatibility alias for `ready-pr` |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
-| `polish` | `skills/polish/` | Pre-PR deepen-then-review readiness gate |
+| `polish` | `skills/polish/` | Bounded pre-PR architecture gate |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
