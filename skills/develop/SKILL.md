@@ -62,8 +62,7 @@ environment:
 
 - `working-on-issue`: resolve the issue from the scope or current branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
-- `polish`: bounded pre-PR architecture gate — one pass, and a second only
-  after an accepted deepening.
+- `polish`: bounded pre-PR architecture gate.
 - `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
 `working-on-issue` reaches `new-branch`; `polish` reaches `implement` and
