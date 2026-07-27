@@ -25,13 +25,14 @@ Reject multiple explicit references. When no issue resolves, report `no-issue`
 and return; the caller decides whether issue association is required.
 
 Fetch the resolved ticket and relationships through the adapter. Record its
-identifier, URL, title, assignee, state, blockers, and `gitBranchName`.
+identifier, URL, title, assignee, state, blockers, and adapter-provided branch
+name.
 
 ## Align
 
 ### Branch
 
-Compare the current branch with `gitBranchName` from the fetched issue.
+Compare the current branch with the adapter-provided branch name.
 
 - If they match, stay on it.
 - Otherwise invoke `new-branch` with the resolved issue.

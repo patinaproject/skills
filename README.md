@@ -180,8 +180,8 @@ See [./skills/write-docs/](./skills/write-docs/) for the skill contract.
 
 Milestone and Release summaries should come from the canonical tracker rather
 than forge event reconstruction. `write-changelog` renders user-facing copy
-from a Linear project milestone or shipped Release and can publish Release
-notes through the tracker adapter.
+from the provider selected by the tracker adapter and resolves public `#N`
+references to GitHub issues.
 
 See [./skills/write-changelog/](./skills/write-changelog/) for
 the skill contract.

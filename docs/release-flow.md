@@ -54,8 +54,8 @@ and copy `skills/<name>/` directly into the agent's skill directory. No build st
 3. Auto-merge (`gh pr merge --auto --squash`) is enabled on each open release-please PR
    after required checks pass.
 
-Bot-generated release-please PRs from `release-please--*` branches are the only PRs that
-may omit a Linear issue ID in the commit subject.
+Bot-generated release-please PRs from `release-please--*` branches are the only
+PRs that may omit a GitHub issue reference in the commit subject.
 
 ## Tag shape
 
@@ -89,7 +89,7 @@ Releases for the aliases. New releases use only the unprefixed form. During the 
 migration, `bootstrap-sha` in `release-please-config.json` points to the commit recorded by
 the last prefixed release so release-please does not reconsider commits already included
 in the changelog. See
-[ADR-PAT-2776](adr/ADR-PAT-2776-preserve-immutable-release-history-with-alias-tags.md).
+[ADR-293](adr/ADR-293-preserve-immutable-release-history-with-alias-tags.md).
 
 ## Invariants
 

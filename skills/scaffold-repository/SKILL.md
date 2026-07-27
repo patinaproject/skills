@@ -59,7 +59,7 @@ Behavior:
 - For each gap, produce a concrete recommendation on how to realign with the current baseline.
 - For each recommendation, show a **diff preview** and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
-  1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; stale GitHub issue templates should be replaced by the Linear intake redirect.
+  1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; issue templates must match repository visibility.
   2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/issue-publishing.md`, `docs/triage-workflow.md`, `.gitignore`.
   3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
@@ -156,7 +156,9 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 
 ## Conventions encoded
 
-- **Commits**: Conventional Commits with no scope, required `PAT-N` tag, 72-char max. Enforced by commitlint + husky `commit-msg`.
+- **Commits**: Conventional Commits with no scope and a 72-character maximum.
+  Public repositories require `#N`; private repositories require `PAT-N`.
+  Commitlint plus Husky enforce the selected form.
 - **PR titles**: same format, so squash commits reuse them verbatim.
 - **PR body**: a slim baseline shared by docs and code repos alike — required
   closing keywords for normal PRs, additional linked-issue relationships
@@ -172,8 +174,8 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   single-baseline decision.
 - **Issue titles and bodies**: titles are plain-language, no commit-style
   prefix. Body structure is owned by the tracker-agnostic skill creating the
-  issue. Emit a GitHub issue-template config that disables blank issues and
-  redirects intake to Linear; do not emit GitHub issue forms.
+  issue. Public repositories enable GitHub issue intake. Private repositories
+  disable blank GitHub issues and redirect intake to Linear.
 - **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
@@ -241,7 +243,11 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   `git symbolic-ref --short refs/remotes/origin/HEAD` or
   `gh repo view --json defaultBranchRef`); never hardcode `main`.
 - **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
-- **PR title hygiene**: `.github/workflows/pull-request.yml` validates that every PR title is ASCII-only, follows conventional commits (no scopes), starts with a `PAT-N` ref, keeps breaking-change markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and that the body contains `Fixes PAT-N`.
+- **PR title hygiene**: `.github/workflows/pull-request.yml` validates that
+  every PR title is ASCII-only, follows conventional commits without scopes,
+  starts with the visibility-selected issue reference, keeps breaking-change
+  markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and contains
+  the selected provider's closing reference in the body.
 - **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).
 - **Workflow linting**: `.github/workflows/actions.yml` runs `actionlint` on PRs that touch `.github/workflows/**` or `.github/actionlint.yaml`. Catches malformed refs, invalid expressions, permission mistakes, and (alongside our SHA-pin convention) supply-chain drift.
 - **GitHub Actions pinning**: every `uses:` in emitted workflows references a full 40-char commit SHA with a `# <action>@<version>` comment above it, rather than a mutable tag. Documented in `AGENTS.md`.
@@ -347,8 +353,35 @@ pnpm install
 pnpm exec commitlint --help
 pnpm lint:md
 echo "feat: bad" | pnpm exec commitlint   # exits non-zero
-echo "feat: PAT-1 ok" | pnpm exec commitlint # exits zero
+echo "feat: #1 ok" | pnpm exec commitlint # public repo; exits zero
 ```
+
+## Making a repository public
+
+Changing visibility changes the source of issue truth. Treat it as a migration,
+not a settings toggle:
+
+1. Inventory current references, open work, pull requests, tags, releases,
+   forks, branch protection, and self-referential SHA pins.
+2. Configure one-way GitHub-to-Linear issue intake before advertising GitHub
+   intake. Record that native updates remain bidirectional and that operators
+   must not edit or close the Linear mirrors.
+3. Create the five canonical triage labels on GitHub with non-empty
+   descriptions.
+4. Re-file open repository-scoped Linear work on GitHub with back-links, then
+   close the Linear originals with pointers.
+5. Build and review a complete historical-reference mapping. Every reference
+   must resolve to a public GitHub object or explicit replacement text.
+6. Land or close every pull request, inventory forge-managed immutable refs,
+   create and restore-test a mirror backup, then run any approved history
+   rewrite across repository-owned branches and tags.
+7. Switch commit, PR, issue-template, ADR, agent, contributor, and adapter
+   conventions to the public form. Update merged PR metadata separately.
+8. Restore branch protection, re-pin self-references, verify Releases and the
+   next release computation, and notify fork holders.
+
+Never run step 6 from an ordinary realignment pass. It requires an explicit
+rewrite plan and reviewed mapping.
 
 Run `pnpm exec markdownlint-cli2 --fix "**/*.md" "#node_modules"` to auto-fix common markdown violations before committing.
 

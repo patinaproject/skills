@@ -11,8 +11,9 @@ Prepare the local issue-linked branch without mixing work or triggering CI.
 3. Inspect native blockers. Refuse when any blocker is non-completed unless the
    user explicitly says to start blocked work. If relationships cannot be read,
    refuse rather than assuming the issue is unblocked.
-4. Take the fetched ticket's `gitBranchName` verbatim. Refuse an empty branch
-   name; do not compose, normalize, shorten, or add a prefix.
+4. Ask the adapter for the issue's canonical branch name and use it verbatim.
+   Refuse an empty result; do not independently compose, normalize, shorten, or
+   add a prefix.
 5. Inspect `git branch --show-current` and `git status --porcelain`. Refuse a
    dirty worktree. If already on the target branch, report success. If on a
    different issue-linked branch, ask before changing issue context.

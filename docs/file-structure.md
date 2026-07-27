@@ -34,7 +34,8 @@ layout.
 - `.codex-plugin/plugin.json`: Codex plugin manifest listing skill paths
 - `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
-- `.codex/config.toml`: Codex hosted Linear MCP registration
+- `.codex/config.toml`: Codex hosted Linear MCP registration for private-repo
+  operations and mirror inspection
 - `.mcp.json`: hosted Linear MCP registration for supported agent hosts
 - `skills-lock.json`: vercel-labs CLI install lockfile
 - `docs/`: contributor-facing docs for skill maintenance
@@ -114,10 +115,9 @@ Requirements:
 
 ## Migration history
 
-This repository was consolidated from separate upstream repositories in legacy
-issue [#58](https://github.com/patinaproject/skills/issues/58). Current design
-context lives on related Linear issues rather than in committed planning
-artifacts; legacy GitHub issues remain read-only historical references.
+This repository was consolidated from separate upstream repositories in issue
+[#58](https://github.com/patinaproject/skills/issues/58). Current public work
+and its durable context live on GitHub issues.
 
 Release history remains available in [CHANGELOG.md](../CHANGELOG.md). Current
 release mechanics are documented in [release-flow.md](./release-flow.md).

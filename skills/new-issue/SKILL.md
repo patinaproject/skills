@@ -16,8 +16,8 @@ Read these canonical files before drafting:
 
 ## Workflow
 
-1. Resolve the destination team and load the live label inventory through the
-   adapter.
+1. Resolve the destination repository or team and load the live label
+   inventory through the adapter.
 2. Gather the problem, desired outcome, acceptance criteria, optional proposal
    and non-goals, labels, assignee, lifecycle state, planning target, and
    explicitly stated relationships.
@@ -28,8 +28,7 @@ Read these canonical files before drafting:
 5. Apply the confidentiality guard and validate every remote value.
 6. Present the complete mutation for approval when interactive. In unattended
    mode, proceed only when every value is unambiguous.
-7. Publish through the adapter. Remember that a label write replaces the full
-   set.
+7. Publish through the adapter, following its label mutation semantics.
 8. Apply native relationships and verify the result.
 9. If the issue was published ready, apply every ready-state side effect.
 10. Report the identifier, title, URL, lifecycle state, labels, planning fields,

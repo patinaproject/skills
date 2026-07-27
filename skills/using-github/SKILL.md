@@ -5,10 +5,11 @@ description: GitHub forge and pull-request operations in a patinaproject reposit
 
 # Using GitHub
 
-Use GitHub only as the source-code forge. Issue operations belong to the
-tracker-agnostic skills (`new-issue`, `edit-issue`, `working-on-issue`, and
-`write-changelog`), which consult
-[the issue-tracker adapter](../../docs/issue-tracker.md).
+Use GitHub as the source-code forge and, for public repositories, as the issue
+provider selected by
+[the issue-tracker adapter](../../docs/issue-tracker.md). Issue operations
+still belong to the tracker-agnostic skills (`new-issue`, `edit-issue`,
+`working-on-issue`, and `write-changelog`).
 
 ## First checks
 
@@ -35,6 +36,6 @@ Pull request bodies use the repository template headings in order. Commits and
 PR titles follow [the repository guidance](../../AGENTS.md). Public PR and release text must not
 leak private repository URLs, credentials, or private path-shaped content.
 
-Do not create, edit, label, assign, close, search, or relate issues through
-GitHub. Do not derive issue branches or issue state from forge metadata when an
-issue adapter operation exists.
+Route issue creation, editing, labels, assignment, closure, search,
+relationships, branches, and state through the adapter even when it selects
+GitHub.
