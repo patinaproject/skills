@@ -87,7 +87,7 @@ human-authored conversation remains untouched throughout.
 - Route requirement, acceptance-criteria, scope, or user-visible behavior
   changes through the repository's planning owner before implementation.
 - Classify authorship before replying or resolving. Reply on agent-authored
-  conversations; carry every human-authored one into the session handoff
+  conversations; carry every human-authored one into the human-thread handoff
   instead.
 - Apply the renewed-human-report rule before generic feedback triage. A report
   that a handled bug persists cannot inherit an earlier `fix-now`, `stale`, or

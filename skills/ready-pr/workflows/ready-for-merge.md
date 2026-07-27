@@ -199,7 +199,7 @@ tell the human what to do next.
 
     Authorship changes where the disposition lands, not what it is. On an
     agent-authored thread the disposition becomes a reply; on a human-authored
-    thread it becomes an operator-brief entry and stays off the pull request.
+    thread it becomes a human-thread handoff and stays off the pull request.
     Fix the code either way. Before generic triage, apply
     [the renewed-human-report rule](triage.md#renewed-human-bug-report): a human
     report that a handled bug persists invalidates the earlier verified
@@ -438,7 +438,7 @@ tell the human what to do next.
       authored it. Agent-authored threads reach that state through this
       workflow; human-authored threads reach it when their author or the
       operator closes them, so an open one means the answer is
-      `not ready-to-merge` and its session handoff must be reported.
+      `not ready-to-merge` and its human-thread handoff must be reported.
     - no human blocker or no-progress stop condition remains.
 
     If every gate passes, report `ready-to-merge`. If any gate fails, report
