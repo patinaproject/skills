@@ -1,0 +1,45 @@
+{
+  "repository": "patinaproject/skills",
+  "mappings": {
+    "PAT-971": {
+      "kind": "text",
+      "replacement": "the prior org-wide tracker migration",
+      "reason": "Contextual map reference with no repository-scoped GitHub issue"
+    },
+    "PAT-2776": {
+      "kind": "issue",
+      "replacement": "#293",
+      "url": "https://github.com/patinaproject/skills/issues/293"
+    },
+    "PAT-2777": {
+      "kind": "pull_request",
+      "replacement": "#294",
+      "url": "https://github.com/patinaproject/skills/pull/294"
+    },
+    "PAT-2786": {
+      "kind": "pull_request",
+      "replacement": "#298",
+      "url": "https://github.com/patinaproject/skills/pull/298"
+    },
+    "PAT-2979": {
+      "kind": "pull_request",
+      "replacement": "#300",
+      "url": "https://github.com/patinaproject/skills/pull/300"
+    },
+    "PAT-2980": {
+      "kind": "issue",
+      "replacement": "#305",
+      "url": "https://github.com/patinaproject/skills/issues/305"
+    },
+    "PAT-2991": {
+      "kind": "issue",
+      "replacement": "#301",
+      "url": "https://github.com/patinaproject/skills/issues/301"
+    },
+    "PAT-3067": {
+      "kind": "issue",
+      "replacement": "#308",
+      "url": "https://github.com/patinaproject/skills/issues/308"
+    }
+  }
+}

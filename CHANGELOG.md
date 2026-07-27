@@ -1,36 +1,41 @@
 # Changelog
 
-## [2.21.1](https://github.com/patinaproject/skills/compare/v2.21.0...v2.21.1) (2026-07-26)
+## [2.22.0](https://github.com/patinaproject/skills/compare/v2.21.1...v2.22.0) (2026-07-27)
 
+### Features
+
+* #308 bound pre-PR architecture work ([#309](https://github.com/patinaproject/skills/pull/309)) ([a981d99](https://github.com/patinaproject/skills/commit/a981d997bad40c5b30fbcd4b9c488d2276c30bb3))
 
 ### Bug Fixes
 
-* PAT-2979 distinguish human from agent review threads ([#300](https://github.com/patinaproject/skills/issues/300)) ([22aabfc](https://github.com/patinaproject/skills/commit/22aabfcf85678d3fc9e2696bbb2bef0a20835e46))
-* PAT-2991 gate the draft-to-ready flip on the predicate alone ([#302](https://github.com/patinaproject/skills/issues/302)) ([77ee5bd](https://github.com/patinaproject/skills/commit/77ee5bda1fe3955c147668d8bc7fd7888ad50e7d))
+* #305 repeat reproduction for renewed reports ([#306](https://github.com/patinaproject/skills/pull/306)) ([7eceb68](https://github.com/patinaproject/skills/commit/7eceb6866e018894c88e28013eb91932db874ef6))
+
+## [2.21.1](https://github.com/patinaproject/skills/compare/v2.21.0...v2.21.1) (2026-07-26)
+
+### Bug Fixes
+
+* #300 distinguish human from agent review threads ([#300](https://github.com/patinaproject/skills/pull/300)) ([22aabfc](https://github.com/patinaproject/skills/commit/22aabfcf85678d3fc9e2696bbb2bef0a20835e46))
+* #301 gate the draft-to-ready flip on the predicate alone ([#302](https://github.com/patinaproject/skills/pull/302)) ([77ee5bd](https://github.com/patinaproject/skills/commit/77ee5bda1fe3955c147668d8bc7fd7888ad50e7d))
 
 ## [2.21.0](https://github.com/patinaproject/skills/compare/v2.20.1...v2.21.0) (2026-07-21)
 
-
 ### Features
 
-* PAT-2786 split PR readiness and merge workflows ([#298](https://github.com/patinaproject/skills/issues/298)) ([45e403a](https://github.com/patinaproject/skills/commit/45e403ae34bf61f5fc8a81219aec4a44d5562cb7))
+* #298 split PR readiness and merge workflows ([#298](https://github.com/patinaproject/skills/pull/298)) ([45e403a](https://github.com/patinaproject/skills/commit/45e403ae34bf61f5fc8a81219aec4a44d5562cb7))
 
 ## [2.20.1](https://github.com/patinaproject/skills/compare/v2.20.0...v2.20.1) (2026-07-20)
 
-
 ### Bug Fixes
 
-* PAT-2776 remove component prefix from release tags ([#295](https://github.com/patinaproject/skills/issues/295)) ([87b8f7b](https://github.com/patinaproject/skills/commit/87b8f7be9e52155f7d89de63b07e617709670b5c))
+* #293 remove component prefix from release tags ([#295](https://github.com/patinaproject/skills/pull/295)) ([87b8f7b](https://github.com/patinaproject/skills/commit/87b8f7be9e52155f7d89de63b07e617709670b5c))
 
 ## [2.20.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.2...patinaproject-skills-v2.20.0) (2026-07-20)
 
-
 ### Features
 
-* PAT-2777 complete Linear issue cutover ([#294](https://github.com/patinaproject/skills/issues/294)) ([63f7203](https://github.com/patinaproject/skills/commit/63f7203c4cce9355b8e54ef91e47bda156c86c46))
+* #294 complete Linear issue cutover ([#294](https://github.com/patinaproject/skills/pull/294)) ([63f7203](https://github.com/patinaproject/skills/commit/63f7203c4cce9355b8e54ef91e47bda156c86c46))
 
 ## [2.19.2](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.1...patinaproject-skills-v2.19.2) (2026-07-15)
-
 
 ### Bug Fixes
 
@@ -38,13 +43,11 @@
 
 ## [2.19.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.19.0...patinaproject-skills-v2.19.1) (2026-07-15)
 
-
 ### Bug Fixes
 
 * [#284](https://github.com/patinaproject/skills/issues/284) require completed review run before ready ([#289](https://github.com/patinaproject/skills/issues/289)) ([21a9d1d](https://github.com/patinaproject/skills/commit/21a9d1ddcdb2e0644a5e32e5c8db92509a4ad2ca))
 
 ## [2.19.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.18.0...patinaproject-skills-v2.19.0) (2026-07-15)
-
 
 ### Features
 
@@ -52,13 +55,11 @@
 
 ## [2.18.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.17.0...patinaproject-skills-v2.18.0) (2026-07-14)
 
-
 ### Features
 
 * [#279](https://github.com/patinaproject/skills/issues/279) add prompting-fable skill with Fable 5 prompting guidelines ([#280](https://github.com/patinaproject/skills/issues/280)) ([66da0bd](https://github.com/patinaproject/skills/commit/66da0bd7bdfecfde02c54f04285f21706c6f6913))
 
 ## [2.17.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.16.0...patinaproject-skills-v2.17.0) (2026-07-09)
-
 
 ### Features
 
@@ -67,14 +68,12 @@
 
 ## [2.16.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.15.0...patinaproject-skills-v2.16.0) (2026-07-09)
 
-
 ### Features
 
 * [#268](https://github.com/patinaproject/skills/issues/268) fold branch architecture deepening into harden-branch ([#269](https://github.com/patinaproject/skills/issues/269)) ([08f70a1](https://github.com/patinaproject/skills/commit/08f70a1573d0c73d94e18cd52ff36c9e349bf497))
 * [#271](https://github.com/patinaproject/skills/issues/271) rename harden-branch skill to polish-branch ([#272](https://github.com/patinaproject/skills/issues/272)) ([b5a3ad9](https://github.com/patinaproject/skills/commit/b5a3ad9b23ddc7b629a3fa809fa655ab1bcb8dbc))
 
 ## [2.15.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.14.1...patinaproject-skills-v2.15.0) (2026-07-09)
-
 
 ### Features
 
@@ -83,7 +82,6 @@
 
 ## [2.14.1](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.14.0...patinaproject-skills-v2.14.1) (2026-07-08)
 
-
 ### Bug Fixes
 
 * [#246](https://github.com/patinaproject/skills/issues/246) harden finish-pr ready-to-merge worktree gate ([#259](https://github.com/patinaproject/skills/issues/259)) ([05c92b5](https://github.com/patinaproject/skills/commit/05c92b5cd36fcdd154823d5596e50b479e67a633))
@@ -91,20 +89,17 @@
 
 ## [2.14.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.13.0...patinaproject-skills-v2.14.0) (2026-07-06)
 
-
 ### Features
 
 * [#249](https://github.com/patinaproject/skills/issues/249) compose develop into a scope-first skill pipeline ([#250](https://github.com/patinaproject/skills/issues/250)) ([ed0d015](https://github.com/patinaproject/skills/commit/ed0d01511284818dd3e9df88d4e671cf94e8353a))
 
 ## [2.13.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.12.0...patinaproject-skills-v2.13.0) (2026-07-04)
 
-
 ### Features
 
 * [#253](https://github.com/patinaproject/skills/issues/253) add email-triage skill ([#254](https://github.com/patinaproject/skills/issues/254)) ([79e3f8d](https://github.com/patinaproject/skills/commit/79e3f8de54eb5088353ec537adea70abd95ced16))
 
 ## [2.12.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.11.0...patinaproject-skills-v2.12.0) (2026-06-19)
-
 
 ### Features
 
@@ -113,11 +108,9 @@
 
 ## [2.11.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.10.0...patinaproject-skills-v2.11.0) (2026-06-10)
 
-
 ### Features
 
 * [#236](https://github.com/patinaproject/skills/issues/236) add improve-branch-architecture skill ([#239](https://github.com/patinaproject/skills/issues/239)) ([1acfa91](https://github.com/patinaproject/skills/commit/1acfa912c1326451df4684cdbbe0cc84e82dcc41))
-
 
 ### Bug Fixes
 
@@ -125,11 +118,9 @@
 
 ## [2.10.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.9.0...patinaproject-skills-v2.10.0) (2026-06-09)
 
-
 ### Features
 
 * [#232](https://github.com/patinaproject/skills/issues/232) add write-docs skill ([#234](https://github.com/patinaproject/skills/issues/234)) ([31944d7](https://github.com/patinaproject/skills/commit/31944d7d83f629def0e56a876f67ee0391c8cf77))
-
 
 ### Bug Fixes
 
@@ -137,7 +128,6 @@
 * [#229](https://github.com/patinaproject/skills/issues/229) pin and report review-code reviewer model ([#237](https://github.com/patinaproject/skills/issues/237)) ([4d6778a](https://github.com/patinaproject/skills/commit/4d6778ab44e2d4d38c405ec8e57161d7655a4355))
 
 ## [2.9.0](https://github.com/patinaproject/skills/compare/patinaproject-skills-v2.8.0...patinaproject-skills-v2.9.0) (2026-06-09)
-
 
 ### Features
 

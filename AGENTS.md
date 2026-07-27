@@ -16,7 +16,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/polish/`: pre-PR deepen-then-review readiness gate skill
+- `skills/polish/`: bounded pre-PR architecture gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
@@ -36,10 +36,12 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - If `CLAUDE.md` exists, it should point contributors back to `AGENTS.md`
 - root config: `package.json`, `commitizen.config.json`, `commitlint.config.js`, and `.husky/`
 
-Linear team PAT is the canonical issue tracker. GitHub Issues are a locked,
-read-only legacy reference. Do not add committed design or plan artifacts for
-routine issue work; put durable context on the Linear issue or in normal docs
-when it is broadly useful beyond one issue.
+GitHub Issues are the canonical tracker for this public repository. Linear
+receives issues through one-way GitHub-to-Linear intake for team visibility
+and is not authoritative. Synced property updates are bidirectional, so do not
+edit or close public-repository issues in Linear. Do not add committed design
+or plan artifacts for routine issue work; put durable context on the GitHub
+issue or in normal docs when it is broadly useful beyond one issue.
 
 ## Agent skills
 
@@ -76,7 +78,7 @@ Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
 single source of truth for ADR naming in this repository. It supersedes the
 sequential `0001`-increment guidance still embedded in the vendored shared
 skills (`domain-modeling`, `setup-matt-pocock-skills`): name every ADR after its
-originating Linear issue (`ADR-PAT-N-<slug>.md`), never scan-and-increment, and
+originating GitHub issue (`ADR-N-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 
 ## Build, Test, and Development Commands
@@ -176,7 +178,7 @@ not invent parallel PR structure.
   The PR body must use the template's section headings in the order the template defines,
   even when the body is passed inline via `--body`.
 - Issues: use the tracker-agnostic issue skills, which consult
-  `docs/issue-tracker.md`; GitHub Issues are frozen.
+  `docs/issue-tracker.md`.
 
 Recommended `gh` patterns:
 
@@ -257,23 +259,25 @@ bump PRs from `bot/bump-*` branches are the only no-issue exceptions to the issu
 
 ## Commit & Pull Request Guidelines
 
-Commits must use conventional commit types, no scopes, and a current Linear issue tag:
+Commits must use conventional commit types, no scopes, and a current GitHub
+issue reference:
 
-`type: PAT-123 short description`
+`type: #123 short description`
 
 Examples:
 
-- `chore: PAT-1 bootstrap marketplace repo`
-- `feat: PAT-12 add GitHub workflow skill`
+- `chore: #1 bootstrap marketplace repo`
+- `feat: #12 add GitHub workflow skill`
 
 For squash-and-merge workflows, PR titles must match the commitlint commit format:
 
-`type: PAT-123 short description`
+`type: #123 short description`
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
 
-Use the PR template as written: a `Fixes PAT-N` line and a
+Use the PR template as written: one `Closes #N`, `Fixes #N`, or `Resolves #N`
+line and a
 `What changed` summary written for a reader who has not seen the work. There is
 no `Context:` line or `- <change> - <why>` contract — write plain prose.
 GitHub Checks are the source of truth for routine automated verification.

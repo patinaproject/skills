@@ -10,14 +10,14 @@ operations and repository brand-voice guidance before writing user-facing copy.
 
 ## Choose the source
 
-- **Planning milestone:** resolve one project and project milestone, then list
-  its issues. This answers what a delivery phase contains.
-- **Shipped Release:** fetch one Release and its attached issues, then create or
-  update the corresponding release notes through the adapter. This answers what
-  actually shipped.
+- **Planning milestone:** resolve one provider milestone, then list its issues.
+  This answers what a delivery phase contains.
+- **Shipped Release:** fetch one provider Release and resolve its `#N` or
+  `PAT-N` issue references according to the adapter, then create or update the
+  corresponding release notes. This answers what actually shipped.
 
-Do not use project milestones as proof of shipping. Do not reconstruct shipped
-content by walking forge event timelines. Release Please continues to own the
+Do not use milestones as proof of shipping. Do not reconstruct shipped content
+by walking forge event timelines. Release Please continues to own the
 commit-level `CHANGELOG.md`; this skill owns issue-level milestone and Release
 summaries.
 

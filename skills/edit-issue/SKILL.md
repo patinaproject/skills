@@ -17,14 +17,14 @@ the request changes lifecycle readiness.
 2. Parse the request into explicit field and relationship changes. Ask only
    when the requested end state is genuinely ambiguous.
 3. Validate every referenced remote entity before mutation.
-4. Compute the complete final label set because a label mutation replaces all
-   labels.
+4. Compute the final label change according to the selected provider's
+   mutation semantics.
 5. Present the intended before/after change set when interactive. An unattended
    path proceeds only when the request already determines the final state.
-6. Apply the smallest set of adapter mutations. Use native completed, canceled,
-   or duplicate states and set the duplicate relation when appropriate. When
-   moving an issue to Todo, apply every ready-state side effect from the triage
-   workflow.
+6. Apply the smallest set of adapter mutations. Use the provider's native
+   completed, canceled, or duplicate state and relationship when appropriate.
+   When making an issue ready, apply every ready-state side effect from the
+   triage workflow.
 7. Fetch the issue again and verify every requested field and relationship.
 8. Report the final identifier, URL, and changes; report partial failures
    precisely.

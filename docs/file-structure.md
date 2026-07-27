@@ -18,7 +18,7 @@ layout.
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/polish/`: pre-PR deepen-then-review readiness gate skill
+- `skills/polish/`: bounded pre-PR architecture gate skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
@@ -34,7 +34,8 @@ layout.
 - `.codex-plugin/plugin.json`: Codex plugin manifest listing skill paths
 - `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
-- `.codex/config.toml`: Codex hosted Linear MCP registration
+- `.codex/config.toml`: Codex hosted Linear MCP registration for private-repo
+  operations and mirror inspection
 - `.mcp.json`: hosted Linear MCP registration for supported agent hosts
 - `skills-lock.json`: vercel-labs CLI install lockfile
 - `docs/`: contributor-facing docs for skill maintenance
@@ -62,7 +63,7 @@ Skills owned by this repository:
 | `merge-pr` | `skills/merge-pr/` | Enable repository-managed auto-merge |
 | `finish-pr` | `skills/finish-pr/` | Deprecated compatibility alias for `ready-pr` |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
-| `polish` | `skills/polish/` | Pre-PR deepen-then-review readiness gate |
+| `polish` | `skills/polish/` | Bounded pre-PR architecture gate |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
@@ -114,10 +115,9 @@ Requirements:
 
 ## Migration history
 
-This repository was consolidated from separate upstream repositories in legacy
-issue [#58](https://github.com/patinaproject/skills/issues/58). Current design
-context lives on related Linear issues rather than in committed planning
-artifacts; legacy GitHub issues remain read-only historical references.
+This repository was consolidated from separate upstream repositories in issue
+[#58](https://github.com/patinaproject/skills/issues/58). Current public work
+and its durable context live on GitHub issues.
 
 Release history remains available in [CHANGELOG.md](../CHANGELOG.md). Current
 release mechanics are documented in [release-flow.md](./release-flow.md).

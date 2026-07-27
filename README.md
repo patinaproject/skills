@@ -99,11 +99,11 @@ See [./skills/new-issue/](./skills/new-issue/) and
 ### develop
 
 End-to-end work needs a single entrypoint without weakening the focused skills
-that already own branch setup, test-driven implementation, diagnosis, local
-review, and PR readiness. `develop` takes a **scope** — an issue reference,
-free-form instructions, or both — coordinates `working-on-issue`,
-`implement`, `polish`, and `ready-pr`, and stops for human-owned
-ambiguity instead of inventing scope.
+that already own branch setup, test-driven implementation, diagnosis,
+architecture polish, and PR readiness. `develop` takes a **scope** — an issue
+reference, free-form instructions, or both — coordinates `working-on-issue`,
+`implement`, `polish`, and `ready-pr`, and stops for human-owned ambiguity
+instead of inventing scope.
 
 See [./skills/develop/](./skills/develop/) for the skill contract.
 
@@ -120,11 +120,9 @@ for the skill contract.
 
 ### polish
 
-A human should only ever see a structurally-settled, self-reviewed branch.
-`polish` runs two ordered settle-phases — first deepen the branch's
-architecture until a pass accepts nothing more, then review it to green via
-`code-review` — so finished work and controller pipelines hit the same pre-PR
-readiness bar.
+`polish` runs one architecture pass before publication, and a second only when
+the first accepted and applied a deepening. It stops after that bounded gate;
+the pull request owns the review loop.
 
 See [./skills/polish/](./skills/polish/) for the skill contract.
 
@@ -182,8 +180,8 @@ See [./skills/write-docs/](./skills/write-docs/) for the skill contract.
 
 Milestone and Release summaries should come from the canonical tracker rather
 than forge event reconstruction. `write-changelog` renders user-facing copy
-from a Linear project milestone or shipped Release and can publish Release
-notes through the tracker adapter.
+from the provider selected by the tracker adapter and resolves public `#N`
+references to GitHub issues.
 
 See [./skills/write-changelog/](./skills/write-changelog/) for
 the skill contract.
@@ -218,7 +216,7 @@ README and skill contract.
 | [edit-issue](./skills/edit-issue/) | Safely update issues through the tracker adapter |
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
-| [polish](./skills/polish/) | Ready a branch for review: deepen architecture, then review to green |
+| [polish](./skills/polish/) | Ready a branch with a bounded pre-PR architecture gate |
 | [ready-pr](./skills/ready-pr/) | Publish completed branch work and prove its PR ready to merge |
 | [merge-pr](./skills/merge-pr/) | Enable repository-managed auto-merge for a PR |
 | [finish-pr](./skills/finish-pr/) | Deprecated compatibility alias for ready-pr |

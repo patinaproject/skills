@@ -5,31 +5,21 @@ This tracker-agnostic workflow delegates every mutation to
 
 ## Vendored role translation
 
-The vendored `triage` skill uses stable semantic roles. Translate them through
-the adapter instead of assuming each role is a provider label:
-
-| Vendored role | Repository meaning |
-| --- | --- |
-| `bug`, `enhancement` | Matching live category label, when available |
-| `needs-triage` | Native Triage inbox state |
-| `needs-info` | Backlog plus `needs-grilling` |
-| `ready-for-agent` | Todo without `ready-for-human` |
-| `ready-for-human` | Todo plus `ready-for-human` |
-| `wontfix` | Canceled, with the rationale recorded in a comment |
-
-Duplicate work uses the native Duplicate state and duplicate relationship.
-Blocking uses the native blocked-by relationship. Do not recreate either as a
-label.
+The vendored `triage` skill uses the stable roles `bug`, `enhancement`,
+`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and
+`wontfix`. Translate every role through the adapter instead of assuming it is
+a label or lifecycle state. Duplicate work and blocking use the selected
+provider's native relationships.
 
 In vendored triage guidance, interpret “GitHub issue” as the canonical tracker
-issue, and replace `gh issue` examples with the corresponding adapter query.
-Pull requests remain forge objects and are not issue-tracker intake.
+issue and route example commands through the adapter. Pull requests remain
+forge objects.
 
 ## Shaping and ready bar
 
-New work enters the native Triage inbox. Work that needs more evidence or a
-maintainer decision moves to Backlog with the appropriate live shaping labels.
-An issue enters Todo only when its shaping set is empty and an implementation
+New work enters the adapter's triage state or role. Work that needs more
+evidence or a maintainer decision carries the applicable shaping roles. An
+issue becomes ready only when its shaping set is empty and an implementation
 brief can be written without new decisions or missing evidence.
 
 When a shaping activity resolves:
@@ -43,8 +33,8 @@ When a shaping activity resolves:
 
 When an issue becomes ready, use the adapter to:
 
-1. move it to Todo;
-2. set or clear `ready-for-human` as appropriate;
+1. apply the adapter's ready state;
+2. select `ready-for-agent` or `ready-for-human`;
 3. choose the justified native priority; and
 4. set a project and milestone together when it belongs to a named effort.
 

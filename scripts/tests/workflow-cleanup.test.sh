@@ -75,16 +75,16 @@ assert_no_match "skills:restore|skills:refresh" \
 test ! -e scripts/install-skills.sh ||
   fail "scripts/install-skills.sh should be removed in favor of skills experimental_install"
 
-# PAT-2777 explicitly preserves the PR-facing Claude comment surfaces while
-# GitHub issue intake is frozen.
+# Preserve the PR-facing Claude comment surfaces while GitHub issue intake is
+# active.
 assert_match '^  issue_comment:' .github/workflows/code.yml
 assert_match '^  pull_request_review_comment:' .github/workflows/code.yml
 assert_match '^  pull_request_review:' .github/workflows/code.yml
 
-# Hosted review resolves its specification from the canonical Linear issue.
-assert_match 'Fetch Linear issue spec' .github/workflows/code-review.yml
-assert_match 'LINEAR_API_KEY' .github/workflows/code-review.yml
-assert_match 'read `.linear-spec.md`' .github/workflows/code-review.yml
+# Hosted review resolves its specification from the canonical GitHub issue.
+assert_match 'Fetch GitHub issue spec' .github/workflows/code-review.yml
+assert_match 'repos/\$GITHUB_REPOSITORY/issues/\$issue_number' .github/workflows/code-review.yml
+assert_match 'read `.issue-spec.md`' .github/workflows/code-review.yml
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

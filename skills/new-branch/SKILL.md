@@ -1,6 +1,6 @@
 ---
 name: new-branch
-description: Create or switch to the tracker-provided branch for an issue from the repository default branch. Use for branch-only setup or when working-on-issue needs to establish the issue-linked branch.
+description: Create or switch to the adapter-provided branch for an issue from the repository default branch. Use for branch-only setup or when working-on-issue needs to establish the issue-linked branch.
 ---
 
 # New Branch
