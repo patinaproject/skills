@@ -199,7 +199,7 @@ tell the human what to do next.
 
     Authorship changes where the disposition lands, not what it is. On an
     agent-authored thread the disposition becomes a reply; on a human-authored
-    thread it becomes an operator-brief entry and stays off the pull request.
+    thread it becomes a human-thread handoff and stays off the pull request.
     Fix the code either way. Before generic triage, apply
     [the renewed-human-report rule](triage.md#renewed-human-bug-report): a human
     report that a handled bug persists invalidates the earlier verified
@@ -438,7 +438,7 @@ tell the human what to do next.
       authored it. Agent-authored threads reach that state through this
       workflow; human-authored threads reach it when their author or the
       operator closes them, so an open one means the answer is
-      `not ready-to-merge` with the operator brief attached.
+      `not ready-to-merge` and its human-thread handoff must be reported.
     - no human blocker or no-progress stop condition remains.
 
     If every gate passes, report `ready-to-merge`. If any gate fails, report
@@ -476,10 +476,8 @@ tell the human what to do next.
       evidence-bearing reply. Distinguish threads resolved after an evidence
       reply from any thread that was fixed silently, and flag a silent
       resolution as a defect to correct rather than a completed disposition.
-    - The operator brief: one entry per unresolved human-authored thread, in
-      the shape [triage.md](triage.md#operator-brief) defines. This is the only
-      place a human reviewer's feedback is answered, so keep it complete even
-      when everything else passed.
+    - The human-thread handoff for every unresolved human-authored thread, in
+      the shape [triage.md](triage.md#human-thread-handoff) defines.
     - Human blockers, if any.
 
     Compress ready-to-merge evidence into one human line when every final gate

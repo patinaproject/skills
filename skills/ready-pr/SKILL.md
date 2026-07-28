@@ -63,13 +63,13 @@ human line.
    draft (see the overview and `ready-for-merge.md` step 6).
 8. Enter the readiness loop: detect merge conflicts, triage currently
    available PR feedback, resolve eligible conversations (the agent-authored
-   threads), brief the operator on every human-authored one, and reopen
-   reproduction when a human reports that a previously handled bug persists or
-   has returned. Watch all checks in fail-fast bounded observation windows,
-   triage every problematic check, re-query PR feedback after checks and after
-   every watch exit or timeout, fix branch-local issues, push, and repeat. A
-   check the agent cannot fix gets a concrete disposition and continues to
-   reporting, not a halt.
+   threads), hand every human-authored one to the operator in the session, and
+   restart reproduction when a human reports that a previously handled bug
+   persists or has returned. Watch all checks in fail-fast bounded observation
+   windows, triage every problematic check, re-query PR feedback after checks
+   and after every watch exit or timeout, fix branch-local issues, push, and
+   repeat. A check the agent cannot fix gets a concrete disposition and
+   continues to reporting, not a halt.
 9. Flip the draft to ready for review the moment the review loop is clean, with
    every agent-authored thread resolved. The flip is one-way, and the readiness
    predicate is its only precondition. The PR transition is the complete review
@@ -81,12 +81,12 @@ human line.
 
 - Reply on, resolve, dismiss, and re-request review only on agent-authored
   threads. A human reviewer's thread is answered and closed by that human or
-  the operator; the agent fixes the code and hands the conversation over in the
-  operator brief.
+  the operator; use
+  [triage's human-thread handoff](workflows/triage.md#human-thread-handoff).
 - Treat a human report that a previously handled bug persists or has returned
-  as renewed evidence. It invalidates the earlier verified disposition even
-  when the PR head is unchanged; reproduce the latest report red before more
-  fix work and green after the fix, or report verification unmet.
+  as a restarted bug-fix loop even when the PR head is unchanged. Follow the
+  repository's human-bug-report contract before more fix work, or report a
+  blocker.
 - Do not resolve a review thread without an evidence-bearing reply, including
   code-fix dispositions; verify pattern-based feedback with a direct search or
   check before resolving when feasible.

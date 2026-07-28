@@ -36,13 +36,12 @@ The durable boundaries at this skill level:
 - Reply on, resolve, dismiss, and re-request review only on **agent-authored**
   threads, those whose first comment comes from a bot or GitHub App. A
   **human-authored** thread belongs to its author: fix the code it asks for,
-  then report it to the operator with its state on the latest head and a
-  suggested reply, and leave the conversation for the operator to answer and
-  close.
+  then use
+  [`ready-pr`'s human-thread handoff](../ready-pr/workflows/triage.md#human-thread-handoff)
+  and leave the conversation for the operator to answer and close.
 - A human report that a previously handled bug persists or has returned
-  invalidates the earlier verified disposition even when the PR head is
-  unchanged. Reproduce the latest report red before more fix work and green
-  after the fix, or report verification unmet in the operator brief.
+  restarts the repository's human-bug-report loop even when the PR head is
+  unchanged. Follow that contract before more fix work, or report a blocker.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
   and no unresolved agent-authored review threads remain), flip the draft to

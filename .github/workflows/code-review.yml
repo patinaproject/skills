@@ -128,7 +128,7 @@ jobs:
             if .pull_request != null then
               error("closing reference resolves to a pull request, not an issue")
             else
-              "# #\(.number): \(.title)\n\n\(.body // \"\")\n\n\(.html_url)"
+              "# #\(.number): \(.title)\n\n\(.body // "")\n\n\(.html_url)"
             end
           ' > .issue-spec.md
 

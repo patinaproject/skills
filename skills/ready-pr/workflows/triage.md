@@ -36,49 +36,33 @@ replying on a human's thread leaves it human-authored.
 - **Agent-authored conversations are the eligible ones.** Reply with evidence,
   then resolve them under the rules below.
 - **A human-authored conversation belongs to its author.** Fix what the comment
-  asks for, then hand the conversation to the operator through the brief below.
+  asks for, then hand the conversation to the operator in the session.
   The operator replies, resolves, dismisses, and re-requests review; the agent
   does none of those on a human's conversation, even when the fix is verified.
 
-### Operator brief
+### Human thread handoff
 
-Write one brief entry per unresolved human-authored conversation, in the run's
-report rather than on the pull request:
+For each unresolved human-authored conversation, report:
 
 - the thread or comment link;
-- the finding or acceptance criterion it maps to;
-- the state of that finding on the latest head, and the evidence behind that
-  state: what changed, what verification ran, and where it ran;
-- a suggested reply the operator edits before sending.
-
-Grade the evidence rather than the intent. Report what has been observed on the
-latest head and name what is still unverified, so the operator relays a claim
-they can stand behind.
+- the repro or verification that ran;
+- its target and current-head result; and
+- any blocker.
 
 ### Renewed human bug report
 
 A human report that a previously handled bug persists or has returned is
-renewed evidence, not a duplicate, stale comment, or ordinary `fix-now` item.
-It immediately invalidates the earlier verified or fixed disposition for that
-finding, even when the PR head SHA has not changed.
+not a duplicate, stale comment, or ordinary `fix-now` item. Restart the
+repository's human-bug-report loop even when the PR head SHA has not changed.
 
 Before more fix work:
 
-1. Re-read the latest report and map it to the existing finding or acceptance
-   criterion; keep multiple reports of the same behavior together.
-2. Re-derive or amend the reproduction from the human's latest expected and
-   actual wording, following any repository-owned human-bug-report or
-   fix-claims contract.
-3. Observe the reproduction fail on the environment and exact build the human
-   used. A reproduction that does not fail leaves verification unmet; route
-   provenance, attribution, or conflicting expectations through the
-   repository's owner instead of preserving the earlier fixed claim.
-4. After the fix, verify the same reproduction passes on the deployed exact
-   final head.
+1. Re-read the latest report and update the repro when its expected or actual
+   behavior changed.
+2. Read and follow the repository's human-bug-report contract in full.
 
-Carry the renewed report, the invalidated prior evidence, and the new red/green
-evidence or unmet state into the operator brief. The human-authored
-conversation remains untouched throughout.
+Completion is a fresh red-then-green loop or a reported blocker. The
+human-authored conversation remains untouched throughout.
 
 ## Required Evidence
 
@@ -103,7 +87,7 @@ conversation remains untouched throughout.
 - Route requirement, acceptance-criteria, scope, or user-visible behavior
   changes through the repository's planning owner before implementation.
 - Classify authorship before replying or resolving. Reply on agent-authored
-  conversations; carry every human-authored one into the operator brief
+  conversations; carry every human-authored one into the human-thread handoff
   instead.
 - Apply the renewed-human-report rule before generic feedback triage. A report
   that a handled bug persists cannot inherit an earlier `fix-now`, `stale`, or
@@ -125,7 +109,7 @@ conversation remains untouched throughout.
 - Verify `isResolved: true` after calling `resolveReviewThread`; unresolved
   agent-authored threads remain blockers unless permission-blocked and
   explicitly reported. An unresolved human-authored thread is a blocker its
-  operator clears, reported through the brief rather than acted on.
+  operator clears, reported in the session rather than acted on.
 - Track handled top-level comments and review bodies in memory during the run so
   loop passes do not post duplicate replies.
 
