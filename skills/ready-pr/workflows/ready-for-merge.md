@@ -202,9 +202,8 @@ tell the human what to do next.
     thread it becomes a human-thread handoff and stays off the pull request.
     Fix the code either way. Before generic triage, apply
     [the renewed-human-report rule](triage.md#renewed-human-bug-report): a human
-    report that a handled bug persists invalidates the earlier verified
-    disposition even on the same head and must be reproduced again before more
-    fix work.
+    report that a handled bug persists restarts the repository's bug-fix loop
+    even on the same head and must be observed red again before more fix work.
 
     When a top-level review comment contains findings, handle each finding
     separately with a per-finding disposition: fixed in a named commit,

@@ -90,8 +90,7 @@ human-authored conversation remains untouched throughout.
   conversations; carry every human-authored one into the human-thread handoff
   instead.
 - Apply the renewed-human-report rule before generic feedback triage. A report
-  that a handled bug persists cannot inherit an earlier `fix-now`, `stale`, or
-  verified disposition.
+  that a handled bug persists restarts the bug-fix loop even on the same head.
 - Every resolved review thread must carry an evidence-bearing reply before
   `resolveReviewThread`, including code-fix dispositions. Silent resolution is
   not allowed for any disposition.
