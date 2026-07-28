@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.23.0](https://github.com/patinaproject/skills/compare/v2.22.0...v2.23.0) (2026-07-28)
+
+
+### Features
+
+* [#312](https://github.com/patinaproject/skills/issues/312) use GitHub issues for public repositories ([#313](https://github.com/patinaproject/skills/issues/313)) ([23e0384](https://github.com/patinaproject/skills/commit/23e0384055e767537c4ca0d3d10a2d27f7027e6d))
+
+
+### Bug Fixes
+
+* [#305](https://github.com/patinaproject/skills/issues/305) simplify renewed bug reproduction ([#315](https://github.com/patinaproject/skills/issues/315)) ([26f4a23](https://github.com/patinaproject/skills/commit/26f4a23c28203789fe64c5931c4c37d3d0b54622))
+
 ## [2.22.0](https://github.com/patinaproject/skills/compare/v2.21.1...v2.22.0) (2026-07-27)
 
 ### Features
