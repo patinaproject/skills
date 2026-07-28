@@ -230,8 +230,8 @@ tell the human what to do next.
     permissions do not allow resolution, leave the evidence-bearing reply and
     report the unresolved state. Do not treat replies as resolution.
 
-    Step 10's routing already sent the human-authored ones to the brief; no
-    strength of evidence pulls them back here.
+    Step 10's routing already sent the human-authored ones to the human-thread
+    handoff; no strength of evidence pulls them back here.
 
 12. Watch all checks only through the fail-fast bounded-watch policy. Before
     each watch window, confirm all currently available feedback and known
