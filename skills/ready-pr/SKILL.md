@@ -84,9 +84,9 @@ human line.
   the operator; use
   [triage's human-thread handoff](workflows/triage.md#human-thread-handoff).
 - Treat a human report that a previously handled bug persists or has returned
-  as a restarted bug-fix loop even when the PR head is unchanged. Follow the
-  repository's human-bug-report contract before more fix work, or report a
-  blocker.
+  as a restarted bug-fix loop even when the PR head is unchanged. Follow
+  `docs/pr-review-readiness.md#fix-claims-for-human-bug-reports` before more fix
+  work, or report a blocker.
 - Do not resolve a review thread without an evidence-bearing reply, including
   code-fix dispositions; verify pattern-based feedback with a direct search or
   check before resolving when feasible.

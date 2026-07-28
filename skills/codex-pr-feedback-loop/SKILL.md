@@ -40,8 +40,9 @@ The durable boundaries at this skill level:
   [`ready-pr`'s human-thread handoff](../ready-pr/workflows/triage.md#human-thread-handoff)
   and leave the conversation for the operator to answer and close.
 - A human report that a previously handled bug persists or has returned
-  restarts the repository's human-bug-report loop even when the PR head is
-  unchanged. Follow that contract before more fix work, or report a blocker.
+  restarts `docs/pr-review-readiness.md#fix-claims-for-human-bug-reports` even
+  when the PR head is unchanged. Follow that contract before more fix work, or
+  report a blocker.
 - At loop exit, run the completion step: when the review loop is clean (the
   code-review run on the latest head has completed, has actually reviewed it,
   and no unresolved agent-authored review threads remain), flip the draft to

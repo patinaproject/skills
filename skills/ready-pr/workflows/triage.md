@@ -52,14 +52,16 @@ For each unresolved human-authored conversation, report:
 ### Renewed human bug report
 
 A human report that a previously handled bug persists or has returned is
-not a duplicate, stale comment, or ordinary `fix-now` item. Restart the
-repository's human-bug-report loop even when the PR head SHA has not changed.
+not a duplicate, stale comment, or ordinary `fix-now` item. Restart
+`docs/pr-review-readiness.md#fix-claims-for-human-bug-reports` even when the PR
+head SHA has not changed.
 
 Before more fix work:
 
 1. Re-read the latest report and update the repro when its expected or actual
    behavior changed.
-2. Read and follow the repository's human-bug-report contract in full.
+2. Read and follow
+   `docs/pr-review-readiness.md#fix-claims-for-human-bug-reports` in full.
 
 Completion is a fresh red-then-green loop or a reported blocker. The
 human-authored conversation remains untouched throughout.
@@ -90,7 +92,9 @@ human-authored conversation remains untouched throughout.
   conversations; carry every human-authored one into the human-thread handoff
   instead.
 - Apply the renewed-human-report rule before generic feedback triage. A report
-  that a handled bug persists restarts the bug-fix loop even on the same head.
+  that a handled bug persists restarts
+  `docs/pr-review-readiness.md#fix-claims-for-human-bug-reports` even on the same
+  head.
 - Every resolved review thread must carry an evidence-bearing reply before
   `resolveReviewThread`, including code-fix dispositions. Silent resolution is
   not allowed for any disposition.
