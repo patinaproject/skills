@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.23.1](https://github.com/patinaproject/skills/compare/v2.23.0...v2.23.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* [#305](https://github.com/patinaproject/skills/issues/305) remove renewed-report bookkeeping ([#316](https://github.com/patinaproject/skills/issues/316)) ([7f698af](https://github.com/patinaproject/skills/commit/7f698af7f3838b4798271c14ea11e102c28b3afd))
+* [#305](https://github.com/patinaproject/skills/issues/305) repair human-thread handoff reference ([#318](https://github.com/patinaproject/skills/issues/318)) ([f342fd0](https://github.com/patinaproject/skills/commit/f342fd0fb2151ff6c3d753e05fe9b56a21d1cfc9))
+
 ## [2.23.0](https://github.com/patinaproject/skills/compare/v2.22.0...v2.23.0) (2026-07-28)
 
 
