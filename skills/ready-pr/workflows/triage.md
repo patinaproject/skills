@@ -36,14 +36,9 @@ replying on a human's thread leaves it human-authored.
 - **Agent-authored conversations are the eligible ones.** Reply with evidence,
   then resolve them under the rules below.
 - **A human-authored conversation belongs to its author.** Fix what the comment
-  asks for, then hand the conversation to the operator in the session.
+  asks for, then report it to the operator in the session.
   The operator replies, resolves, dismisses, and re-requests review; the agent
   does none of those on a human's conversation, even when the fix is verified.
-
-### Human thread handoff
-
-For each unresolved human-authored conversation, follow the repository's
-`docs/pr-review-readiness.md#who-owns-a-review-conversation` handoff contract.
 
 ### Renewed human bug report
 
@@ -83,8 +78,7 @@ human-authored conversation remains untouched throughout.
 - Route requirement, acceptance-criteria, scope, or user-visible behavior
   changes through the repository's planning owner before implementation.
 - Classify authorship before replying or resolving. Reply on agent-authored
-  conversations; carry every human-authored one into the human-thread handoff
-  instead.
+  conversations; report every human-authored one in the session instead.
 - Apply the renewed-human-report rule before generic feedback triage. A report
   that a handled bug persists restarts the bug-fix loop even on the same head.
 - Every resolved review thread must carry an evidence-bearing reply before
