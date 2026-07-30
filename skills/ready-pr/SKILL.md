@@ -81,8 +81,8 @@ human line.
 
 - Reply on, resolve, dismiss, and re-request review only on agent-authored
   threads. A human reviewer's thread is answered and closed by that human or
-  the operator; use
-  [triage's human-thread handoff](workflows/triage.md#human-thread-handoff).
+  the operator; use the repository's
+  `docs/pr-review-readiness.md#who-owns-a-review-conversation` handoff contract.
 - Treat a human report that a previously handled bug persists or has returned
   as a restarted bug-fix loop even when the PR head is unchanged. Follow the
   repository's human-bug-report contract before more fix work, or report a

@@ -42,12 +42,8 @@ replying on a human's thread leaves it human-authored.
 
 ### Human thread handoff
 
-For each unresolved human-authored conversation, report:
-
-- the thread or comment link;
-- the repro or verification that ran;
-- its target and current-head result; and
-- any blocker.
+For each unresolved human-authored conversation, follow the repository's
+`docs/pr-review-readiness.md#who-owns-a-review-conversation` handoff contract.
 
 ### Renewed human bug report
 

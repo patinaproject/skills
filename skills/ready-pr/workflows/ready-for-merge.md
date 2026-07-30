@@ -475,8 +475,9 @@ tell the human what to do next.
       evidence-bearing reply. Distinguish threads resolved after an evidence
       reply from any thread that was fixed silently, and flag a silent
       resolution as a defect to correct rather than a completed disposition.
-    - The human-thread handoff for every unresolved human-authored thread, in
-      the shape [triage.md](triage.md#human-thread-handoff) defines.
+    - The human-thread handoff for every unresolved human-authored thread, using
+      the repository's
+      `docs/pr-review-readiness.md#who-owns-a-review-conversation` contract.
     - Human blockers, if any.
 
     Compress ready-to-merge evidence into one human line when every final gate
