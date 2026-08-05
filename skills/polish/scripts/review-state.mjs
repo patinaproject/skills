@@ -196,6 +196,10 @@ function isFinding(value) {
   );
 }
 
+function isFindingArray(value) {
+  return Array.isArray(value) && value.every(isFinding);
+}
+
 function isAuthoritativeReview(value) {
   if (value === null) {
     return true;
@@ -203,12 +207,10 @@ function isAuthoritativeReview(value) {
   if (!isExactObject(value, ['findings', 'outcome', 'reviewedHead'])) {
     return false;
   }
-  const findingsAreValid =
-    Array.isArray(value.findings) && value.findings.every(isFinding);
   return (
     typeof value.reviewedHead === 'string' &&
     outcomes.has(value.outcome) &&
-    findingsAreValid &&
+    isFindingArray(value.findings) &&
     ((value.outcome === 'passed' && value.findings.length === 0) ||
       (value.outcome === 'changes_requested' && value.findings.length > 0))
   );
@@ -222,8 +224,7 @@ function isProvisionalReview(value) {
     isExactObject(value, ['candidateHead', 'findings']) &&
     typeof value.candidateHead === 'string' &&
     value.candidateHead.length > 0 &&
-    Array.isArray(value.findings) &&
-    value.findings.every(isFinding)
+    isFindingArray(value.findings)
   );
 }
 
@@ -300,6 +301,7 @@ function writeRecord(identity, record) {
 }
 
 function wait(milliseconds) {
+  // Atomics.wait provides a synchronous sleep without spawning a child process.
   Atomics.wait(
     new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT)),
     0,
@@ -446,7 +448,7 @@ function readFindings(path) {
       }`
     );
   }
-  if (!Array.isArray(value) || !value.every(isFinding)) {
+  if (!isFindingArray(value)) {
     throw new Error(
       `Findings file must contain a valid finding array: ${absolutePath}`
     );
