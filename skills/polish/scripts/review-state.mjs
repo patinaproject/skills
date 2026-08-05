@@ -86,13 +86,21 @@ function reviewDirectory() {
 }
 
 function recordPath(identity) {
+  const canonicalIdentity = {
+    repository: identity.repository,
+    sourceBranch: identity.sourceBranch,
+    targetBranch: identity.targetBranch,
+  };
   const key = createHash('sha256')
-    .update(JSON.stringify(identity))
+    .update(JSON.stringify(canonicalIdentity))
     .digest('hex');
   return join(reviewDirectory(), `${key}.json`);
 }
 
-function hasExactKeys(value, keys) {
+function isExactObject(value, keys) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
   const actual = Object.keys(value).sort();
   const expected = [...keys].sort();
   return (
@@ -102,11 +110,8 @@ function hasExactKeys(value, keys) {
 }
 
 function isFinding(value) {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
   return (
-    hasExactKeys(value, ['axis', 'id', 'location', 'summary']) &&
+    isExactObject(value, ['axis', 'id', 'location', 'summary']) &&
     axes.has(value.axis) &&
     typeof value.id === 'string' &&
     value.id.length > 0 &&
@@ -121,13 +126,12 @@ function isAuthoritativeReview(value) {
   if (value === null) {
     return true;
   }
-  if (!value || typeof value !== 'object') {
+  if (!isExactObject(value, ['findings', 'outcome', 'reviewedHead'])) {
     return false;
   }
   const findingsAreValid =
     Array.isArray(value.findings) && value.findings.every(isFinding);
   return (
-    hasExactKeys(value, ['findings', 'outcome', 'reviewedHead']) &&
     typeof value.reviewedHead === 'string' &&
     outcomes.has(value.outcome) &&
     findingsAreValid &&
@@ -140,11 +144,8 @@ function isProvisionalReview(value) {
   if (value === null) {
     return true;
   }
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
   return (
-    hasExactKeys(value, ['candidateHead', 'findings']) &&
+    isExactObject(value, ['candidateHead', 'findings']) &&
     typeof value.candidateHead === 'string' &&
     value.candidateHead.length > 0 &&
     Array.isArray(value.findings) &&
@@ -153,11 +154,8 @@ function isProvisionalReview(value) {
 }
 
 function isReviewRecord(value, identity) {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
   return (
-    hasExactKeys(value, [
+    isExactObject(value, [
       'authoritative',
       'provisional',
       'repository',
@@ -317,50 +315,41 @@ function selectScope(targetBranch) {
 
   const { authoritative, provisional } = loaded.record;
   const provisionalFindings = provisional?.findings ?? [];
+  let authoritativeFindings;
+  let base;
+  let mode;
+  let range;
+
   if (
     authoritative === null ||
     !headIsReviewedAncestor(authoritative.reviewedHead, head)
   ) {
-    return {
-      ...fallback,
-      provisionalFindings,
-      state: 'valid',
-    };
-  }
-
-  if (authoritative.reviewedHead !== head) {
-    return {
-      authoritativeFindings: authoritative.findings,
-      base: authoritative.reviewedHead,
-      head,
-      mode: 'incremental',
-      provisionalFindings,
-      range: `${authoritative.reviewedHead}..${head}`,
-      state: 'valid',
-    };
-  }
-
-  const hasFindings =
-    authoritative.findings.length > 0 || provisionalFindings.length > 0;
-  if (authoritative.outcome === 'passed' && !hasFindings) {
-    return {
-      authoritativeFindings: [],
-      base: head,
-      head,
-      mode: 'skip',
-      provisionalFindings: [],
-      range: null,
-      state: 'valid',
-    };
+    authoritativeFindings = [];
+    base = mergeBase;
+    mode = 'full';
+    range = `${mergeBase}..${head}`;
+  } else if (authoritative.reviewedHead !== head) {
+    authoritativeFindings = authoritative.findings;
+    base = authoritative.reviewedHead;
+    mode = 'incremental';
+    range = `${authoritative.reviewedHead}..${head}`;
+  } else {
+    const hasFindings =
+      authoritative.findings.length > 0 || provisionalFindings.length > 0;
+    authoritativeFindings = authoritative.findings;
+    base = head;
+    mode =
+      authoritative.outcome === 'passed' && !hasFindings ? 'skip' : 'recheck';
+    range = null;
   }
 
   return {
-    authoritativeFindings: authoritative.findings,
-    base: head,
+    authoritativeFindings,
+    base,
     head,
-    mode: 'recheck',
-    provisionalFindings,
-    range: null,
+    mode,
+    provisionalFindings: mode === 'skip' ? [] : provisionalFindings,
+    range,
     state: 'valid',
   };
 }
@@ -446,4 +435,9 @@ function main() {
   console.info(JSON.stringify(result));
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+}

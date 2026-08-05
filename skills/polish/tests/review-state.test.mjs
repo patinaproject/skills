@@ -398,7 +398,10 @@ try {
       'passed'
     );
     assert.equal(incomplete.status, 1);
-    assert.match(incomplete.stderr, /Review endpoint changed/);
+    assert.equal(
+      incomplete.stderr.trim(),
+      `Review endpoint changed: candidate ${candidate} does not equal HEAD ${newHead}.`
+    );
 
     reviewCommand(
       moving.root,
@@ -466,7 +469,10 @@ try {
       'HEAD~1'
     );
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /Target branch does not resolve: HEAD~1/);
+    assert.equal(
+      result.stderr.trim(),
+      'Target branch does not resolve: HEAD~1'
+    );
 
     const publicationGate = reviewCommandResult(
       invalidTarget.root,
@@ -476,7 +482,7 @@ try {
       'main'
     );
     assert.equal(publicationGate.status, 1);
-    assert.match(publicationGate.stderr, /Unknown command: gate/);
+    assert.equal(publicationGate.stderr.trim(), 'Unknown command: gate');
 
     const sensitiveFindings = findingsFile([
       { ...standardsFinding, sourceExcerpt: 'private source text' },
