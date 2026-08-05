@@ -247,6 +247,57 @@ try {
       'corrupt'
     );
 
+    const incompatible = createRepository();
+    const incompatibleHead = git(incompatible.root, 'rev-parse', 'HEAD');
+    reviewCommand(
+      incompatible.root,
+      incompatible.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      incompatibleHead,
+      '--outcome',
+      'passed'
+    );
+    const incompatibleFiles = recordFiles(incompatible.temporaryRoot);
+    assert.equal(incompatibleFiles.names.length, 1);
+    const incompatiblePath = join(
+      incompatibleFiles.directory,
+      incompatibleFiles.names[0]
+    );
+    const incompatibleRecord = JSON.parse(
+      readFileSync(incompatiblePath, 'utf8')
+    );
+    incompatibleRecord.authoritative.findings = [standardsFinding];
+    writeFileSync(incompatiblePath, JSON.stringify(incompatibleRecord));
+    const incompatibleMergeBase = git(
+      incompatible.root,
+      'merge-base',
+      'main',
+      'HEAD'
+    );
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          incompatible.root,
+          incompatible.temporaryRoot,
+          'scope',
+          '--target',
+          'main'
+        )
+      ),
+      {
+        authoritativeFindings: [],
+        base: incompatibleMergeBase,
+        head: incompatibleHead,
+        mode: 'full',
+        provisionalFindings: [],
+        range: `${incompatibleMergeBase}..${incompatibleHead}`,
+        state: 'corrupt',
+      }
+    );
+
     const rewritten = createRepository();
     const oldHead = git(rewritten.root, 'rev-parse', 'HEAD');
     reviewCommand(
@@ -426,6 +477,25 @@ try {
     );
     assert.equal(publicationGate.status, 1);
     assert.match(publicationGate.stderr, /Unknown command: gate/);
+
+    const sensitiveFindings = findingsFile([
+      { ...standardsFinding, sourceExcerpt: 'private source text' },
+    ]);
+    const sensitiveResult = reviewCommandResult(
+      invalidTarget.root,
+      invalidTarget.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      git(invalidTarget.root, 'rev-parse', 'HEAD'),
+      '--outcome',
+      'changes_requested',
+      '--findings',
+      sensitiveFindings
+    );
+    assert.equal(sensitiveResult.status, 1);
+    assert.match(sensitiveResult.stderr, /valid finding array/);
   }
 
   console.info('OK: incremental polish review-state contract passed');

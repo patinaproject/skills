@@ -19,7 +19,7 @@ issue reference, free-form instructions, or both.
 
 `polish` owns the complete local review loop. For each committed delta it runs:
 
-1. bounded architecture review;
+1. delta-bounded architecture review;
 2. repository verification; and
 3. fresh, report-only Standards and Spec review.
 
@@ -61,7 +61,7 @@ seven skills are installed before the run. If one is missing, stop and report
 the missing name with the install guidance:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --skill implement tdd code-review diagnosing-bugs codebase-design -y
 ```
 
@@ -106,21 +106,21 @@ Use the **deep-module vocabulary** from `codebase-design`: **module**,
 **leverage**, **locality**, and the **deletion test**. Read `CONTEXT.md` and the
 relevant ADRs before proposing a deepening.
 
-Accept a deepening only when it passes the deletion test, increases depth,
-improves locality or the test surface, and fits the selected change. Route each
-accepted deepening through the build/TDD portion of `implement`, commit it, and
-run exactly one second architecture pass. Stop after the second pass. When the
-first pass accepts none, skip the second.
+Report an architecture finding only when the proposed deepening passes the
+deletion test, increases depth, improves locality or the test surface, and fits
+the selected change. Keep this pass report-only. Carry every accepted finding
+into Step 5 so architecture, Standards, and Spec findings share one completed
+outcome and one fix loop.
 
 In `recheck` mode, revalidate named architecture findings without inventing an
 empty-delta architecture audit.
 
 ## Step 3 — Pin and Verify the Candidate
 
-After architecture work, require a clean committed worktree and capture the new
+After architecture review, require a clean committed worktree and capture
 `HEAD` as the candidate endpoint. Run repository-documented verification
-against that candidate. Accepted architecture commits extend the Standards and
-Spec subject from the iteration's Step 1 base through this final endpoint.
+against that candidate. Keep the Step 1 base and this endpoint fixed through
+the remaining review stages.
 
 A failed or interrupted verification leaves authoritative state unchanged.
 Save useful located findings as provisional state, then fix locally or report
@@ -152,9 +152,10 @@ authoritative record.
 ## Step 5 — Record, Route, and Repeat
 
 Confirm `HEAD` still equals the Step 3 candidate after both reviewers finish.
-Build the minimal finding array defined by the review-record reference: one
-stable ID, axis, current location, and concise summary per outstanding blocking
-finding. Store no source excerpts or reviewer transcript.
+Combine the architecture, Standards, and Spec reports. Build the minimal
+finding array defined by the review-record reference: one stable ID, axis,
+current location, and concise summary per outstanding blocking finding. Store
+no source excerpts or reviewer transcript.
 
 - No blocking findings: record `passed` at the candidate.
 - Blocking findings: record `changes_requested` at the candidate before routing
@@ -162,8 +163,9 @@ finding. Store no source excerpts or reviewer transcript.
 - Any incomplete stage or moving head: preserve authoritative state and save
   only useful provisional findings.
 
-Route completed findings through the Finding Router. Fix and commit
-agent-ready findings through `implement` or `diagnosing-bugs`, then restart at
+Route completed findings through the Finding Router. Fix architecture,
+Standards, and Spec findings only after the completed outcome is recorded. Use
+`implement` or `diagnosing-bugs`, verify and commit the fixes, then restart at
 Step 1. The next iteration reviews only that fix delta while rechecking the
 outstanding concerns. A human-owned finding records `changes_requested` and
 stops with a concrete blocker.

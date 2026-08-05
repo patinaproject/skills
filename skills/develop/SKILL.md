@@ -66,7 +66,7 @@ environment:
 - `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
 `working-on-issue` reaches `new-branch`; `polish` reaches `code-review`,
-`implement`, and `diagnosing-bugs`, and deepens against the `codebase-design`
+`implement`, and `diagnosing-bugs`, and reviews against the `codebase-design`
 vocabulary; `implement` reaches `tdd`. Confirm those are installed too.
 
 If any are missing, halt before building. Report the missing skill names and
@@ -184,7 +184,7 @@ scope, and treat any issue as best-effort association, not a separate path.
    `code-review` tail here.
 7. Run `polish`, forwarding the resolved issue and instructions. Its
    idempotent alignment re-confirms the branch, then it reviews the selected
-   committed delta through bounded architecture, verification, and fresh
+   committed delta through delta-bounded architecture, verification, and fresh
    Standards and Spec stages. It records every completed outcome, fixes and
    commits agent-ready findings, and repeats incrementally until the current
    head passes with no findings. Invoking `develop` approves this review loop;
@@ -263,7 +263,7 @@ Include:
 - Relevant tests added or updated.
 - Child skill halt reasons, only when a halt changes what the human should do
   next.
-- `polish` result: passes run, architecture deepenings applied, and candidate
+- `polish` result: iterations run, architecture findings fixed, and candidate
   dispositions.
 - PR review and check feedback status.
 - Human-owned blockers, if any.

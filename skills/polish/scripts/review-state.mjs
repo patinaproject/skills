@@ -92,11 +92,21 @@ function recordPath(identity) {
   return join(reviewDirectory(), `${key}.json`);
 }
 
+function hasExactKeys(value, keys) {
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  return (
+    actual.length === expected.length &&
+    actual.every((key, index) => key === expected[index])
+  );
+}
+
 function isFinding(value) {
   if (!value || typeof value !== 'object') {
     return false;
   }
   return (
+    hasExactKeys(value, ['axis', 'id', 'location', 'summary']) &&
     axes.has(value.axis) &&
     typeof value.id === 'string' &&
     value.id.length > 0 &&
@@ -114,11 +124,15 @@ function isAuthoritativeReview(value) {
   if (!value || typeof value !== 'object') {
     return false;
   }
+  const findingsAreValid =
+    Array.isArray(value.findings) && value.findings.every(isFinding);
   return (
+    hasExactKeys(value, ['findings', 'outcome', 'reviewedHead']) &&
     typeof value.reviewedHead === 'string' &&
     outcomes.has(value.outcome) &&
-    Array.isArray(value.findings) &&
-    value.findings.every(isFinding)
+    findingsAreValid &&
+    ((value.outcome === 'passed' && value.findings.length === 0) ||
+      (value.outcome === 'changes_requested' && value.findings.length > 0))
   );
 }
 
@@ -130,7 +144,9 @@ function isProvisionalReview(value) {
     return false;
   }
   return (
+    hasExactKeys(value, ['candidateHead', 'findings']) &&
     typeof value.candidateHead === 'string' &&
+    value.candidateHead.length > 0 &&
     Array.isArray(value.findings) &&
     value.findings.every(isFinding)
   );
@@ -141,6 +157,14 @@ function isReviewRecord(value, identity) {
     return false;
   }
   return (
+    hasExactKeys(value, [
+      'authoritative',
+      'provisional',
+      'repository',
+      'schemaVersion',
+      'sourceBranch',
+      'targetBranch',
+    ]) &&
     value.schemaVersion === schemaVersion &&
     value.repository === identity.repository &&
     value.sourceBranch === identity.sourceBranch &&
