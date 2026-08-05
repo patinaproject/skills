@@ -1,6 +1,6 @@
 ---
 name: update-branch
-description: Update the current local work branch by merging the latest base or default branch with pure git and no push. Use when the user invokes `/update-branch`, says "update branch", or asks to merge the base or default branch into this branch.
+description: Update the current work branch with pure Git, using an open pull request's target and pushing its updated head, or falling back to an explicit/default base locally. Use when the user invokes `/update-branch`, says "update branch", or asks to merge the base or default branch into this branch.
 ---
 
 # Update Branch
@@ -14,46 +14,56 @@ Invoke from a local work branch:
 /update-branch release/1.x
 ```
 
-No argument means resolve the base from `origin/HEAD`. An optional base
-argument selects another branch or remote-tracking ref.
+First resolve whether the current branch has one open pull request. Its target
+branch is the base, including when an optional base argument was supplied. With
+no open pull request, an optional argument selects the base and no argument
+falls back to `origin/HEAD`.
 
-This skill is local-first. Use pure `git`; do not use `gh pr update-branch`,
-GitHub's remote update button, or any GitHub update API. Never push.
+Use pure `git` for fetch, merge, and push. Use `gh` only to read pull request
+context; the bundled `scripts/update-context.sh` makes target selection and the
+configured-remote push deterministic. The open-PR path pushes only after the
+merge, dependency refresh, and verification succeed. The no-PR path remains
+local-only. GitHub's remote update button and update-branch APIs are outside
+this workflow.
 
-## Conditional Child Skill
+## Required Conflict Skill
 
-- `resolving-merge-conflicts`: engaged only when a merge actually conflicts
-  (Workflow step 7), to resolve in-scope conflicts with one shared discipline so
-  branch updates and slice integration resolve conflicts the same way. Most
-  `/update-branch` runs never reach it. Install if missing:
-  `npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@resolving-merge-conflicts -y`.
+`resolving-merge-conflicts` owns every merge-conflict resolution. Load and
+follow it whenever `git merge` conflicts. Before touching a conflicted hunk,
+run `scripts/update-context.sh require-conflict-skill`; if it reports the skill
+missing, follow its installation guidance and load the installed skill, or stop
+with that actionable error when installation cannot complete.
 
 ## Input Contract
 
 1. Accept no argument or one optional base ref.
 2. Refuse detached HEAD.
 3. Refuse a missing `origin` remote.
-4. When no base is supplied, refuse missing `origin/HEAD`; do not hardcode
-   `main`, `master`, or another default branch. Tell the operator to run
-   `git remote set-head origin -a` when `origin/HEAD` is missing.
-5. Refuse to update the repository default branch unless the user explicitly
+4. Require `gh` to resolve open pull requests. Treat a failed query as a hard
+   error rather than assuming there is no pull request.
+5. When the no-PR path has no base argument, refuse missing `origin/HEAD`; do
+   not hardcode `main`, `master`, or another default branch. The helper tells
+   the operator to run `git remote set-head origin -a` when it is missing.
+6. Refuse to update the repository default branch unless the user explicitly
    supplies a base and confirms they intend to mutate that branch.
 
 ## Workflow
 
 1. Read repository guidance for commit messages, verification, and protected
    branches.
-2. Record the current branch with `git branch --show-current`. Before fetch or
-   merge, compare it to the repository default branch. If they match, stop
+2. Record the current branch with `git branch --show-current`. Compare it to
+   the repository default branch before fetch or merge. If they match, stop
    unless the user supplied a base and explicitly confirmed they intend to
    update the default branch.
-3. Resolve the base:
-   - With an optional base argument, normalize any bare branch name, such as
-     `main`, `master`, `develop`, `trunk`, or `release/1.x`, to its
-     `origin/<name>` remote-tracking ref. Keep remote-tracking refs such as
-     `origin/release/1.x` as supplied.
-   - Without an argument, read `refs/remotes/origin/HEAD` and normalize it to
-     the remote-tracking branch it points at, such as `origin/main`.
+3. From the installed skill directory, run
+   `scripts/update-context.sh resolve [base-ref]` and record every returned
+   field: mode, current branch, normalized base ref, pull request number and
+   URL, and pull request head. The helper requires zero or one open pull request
+   for the current branch:
+   - `pull-request` mode uses that pull request's target, taking precedence over
+     the optional argument and `origin/HEAD`.
+   - `local-only` mode preserves the optional explicit base, or resolves
+     `origin/HEAD` when no base was supplied.
 4. Fetch the remote head name for the selected base from `origin`, stripping
    the leading `origin/` first. For example, fetch `main` for `origin/main` and
    `release/1.x` for `origin/release/1.x`.
@@ -74,13 +84,13 @@ GitHub's remote update button, or any GitHub update API. Never push.
    - Run `git merge --no-ff <base-ref>`.
    - If Git reports `Already up to date`, report that no merge commit was
      needed.
-7. Resolve conflicts by delegating to `resolving-merge-conflicts`, but keep
-   ownership of *when* to engage versus stop. First screen the conflicts: hand
-   `resolving-merge-conflicts` only the hunks that are branch-local, in scope for
-   this update, and mechanically verifiable. Escalate rather than force-resolve a
-   hunk that needs product judgment, and stop (see Conflict Rules) for unrelated
-   scope, permissions, secrets, generated-file uncertainty, or unverifiable
-   semantics.
+7. When the merge conflicts, run the conflict-skill availability check, then
+   invoke and follow `resolving-merge-conflicts` as the underlying workflow.
+   Keep ownership of *when* to engage versus stop: first screen the conflicts
+   and hand it only hunks that are branch-local, in scope for this update, and
+   mechanically verifiable. Escalate a hunk that needs product judgment, and
+   stop (see Conflict Rules) for unrelated scope, permissions, secrets,
+   generated-file uncertainty, or unverifiable semantics.
 8. After a successful merge or conflict resolution, inspect whether dependency
    inputs changed during the merge. Treat package manifests, lockfiles,
    workspace manifests, or toolchain version files as dependency inputs.
@@ -98,7 +108,18 @@ GitHub's remote update button, or any GitHub update API. Never push.
    dependency refresh, or completing conflict resolution. Prefer commands in
    `AGENTS.md`, README files, package scripts, or other repository guidance. If
    no local verification applies, say so explicitly.
-10. Report the result without pushing.
+10. Finish according to the resolved mode:
+    - In `pull-request` mode, run
+      `scripts/update-context.sh push <pr-number> <base-ref> <pr-head>` with the
+      fields recorded in step 3. This pushes `HEAD` to the branch's configured
+      upstream after validating the pull request identity, target, and head,
+      then revalidates that context immediately after the push. A post-push
+      context change means the remote branch moved but the pull request update
+      is indeterminate. On failure, report the helper's context change or exact
+      failed `git push` command and output, then stop without claiming the pull
+      request was updated.
+    - In `local-only` mode, leave the branch unpushed and report the optional
+      command `git push origin HEAD`.
 
 ## Conflict Rules
 
@@ -119,11 +140,15 @@ Always include:
 
 - Current branch.
 - Base ref fetched and merged.
+- Whether the base came from an open pull request, an explicit argument, or
+  `origin/HEAD`.
 - Whether a dirty-work auto-commit was created.
 - Whether a merge commit was created or the branch was already up to date.
 - Whether dependency refresh was skipped, run, or blocked because no documented
   install/bootstrap command was available.
 - Conflicts resolved or the human-owned blocker that stopped the workflow.
 - Documented verification commands and results, when run.
-- A clear note that the branch remains local-only.
-- The optional push command: `git push origin HEAD`.
+- In the open-PR path, the pull request URL and whether its configured remote
+  branch was updated; a failed push is a failed update.
+- In the no-PR path, a clear note that the branch remains local-only and the
+  optional push command `git push origin HEAD`.
