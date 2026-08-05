@@ -45,9 +45,9 @@ normalize_origin_ref() {
 }
 
 validate_pull_request_context() {
-  local row="$1" branch="$2" expected_number="$3" expected_base expected_head="$5"
+  local row="$1" branch="$2" expected_number="$3" expected_base="$4" expected_head="$5"
   local pr_number pr_url pr_base pr_head actual_base
-  expected_base="$(normalize_origin_ref "$4")"
+  expected_base="$(normalize_origin_ref "$expected_base")"
   [ -n "$row" ] || fail "no open pull request exists for branch $branch; the no-PR path remains local-only"
   IFS=$'\t' read -r pr_number pr_url pr_base pr_head <<< "$row"
   actual_base="$(normalize_origin_ref "$pr_base")"
