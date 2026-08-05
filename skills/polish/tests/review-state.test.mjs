@@ -102,16 +102,28 @@ function processResult(child) {
 async function waitForLock(temporaryRoot) {
   const directory = join(temporaryRoot, 'patinaproject', 'polish-reviews');
   for (let attempt = 0; attempt < 1_000; attempt += 1) {
+    let lockName;
     try {
-      const lockName = readdirSync(directory).find((name) =>
+      lockName = readdirSync(directory).find((name) =>
         name.endsWith('.lock')
       );
-      if (lockName) {
-        assert.match(readFileSync(join(directory, lockName), 'utf8'), /^\d+\n$/);
-        return;
+    } catch (error) {
+      if (!(error && typeof error === 'object' && error.code === 'ENOENT')) {
+        throw error;
       }
-    } catch {
-      // The writer has not created the private directory yet.
+    }
+    if (lockName) {
+      let contents;
+      try {
+        contents = readFileSync(join(directory, lockName), 'utf8');
+      } catch (error) {
+        if (!(error && typeof error === 'object' && error.code === 'ENOENT')) {
+          throw error;
+        }
+        continue;
+      }
+      assert.match(contents, /^\d+\n$/);
+      return;
     }
     await new Promise((resolve) => setTimeout(resolve, 1));
   }
