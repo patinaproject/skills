@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.24.0](https://github.com/patinaproject/skills/compare/v2.23.1...v2.24.0) (2026-08-05)
+
+
+### Features
+
+* [#324](https://github.com/patinaproject/skills/issues/324) update open pull request branches ([#326](https://github.com/patinaproject/skills/issues/326)) ([257b8dc](https://github.com/patinaproject/skills/commit/257b8dc65cb5ca9e72c62003dc2d49e8f3cbb520))
+
+
+### Bug Fixes
+
+* [#320](https://github.com/patinaproject/skills/issues/320) remove review handoff bookkeeping ([#321](https://github.com/patinaproject/skills/issues/321)) ([81d0316](https://github.com/patinaproject/skills/commit/81d0316df2cdbd8a103abc7d133fc81299cc9095))
+
 ## [2.23.1](https://github.com/patinaproject/skills/compare/v2.23.0...v2.23.1) (2026-07-28)
 
 
