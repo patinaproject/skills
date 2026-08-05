@@ -79,8 +79,10 @@ same concern remains outstanding. Revalidate locations on every later run.
 
 The helper follows the temporary-file approach used by mattpocock/skills. Node's
 operating-system temp resolver supplies the platform location. Beneath it, the
-helper creates `patinaproject/polish-reviews` and derives a deterministic SHA-256
-filename from repository, source-branch, and target-branch identity.
+helper creates a private, user-scoped `patinaproject-<user>/polish-reviews`
+directory and derives a deterministic SHA-256 filename from repository,
+source-branch, and target-branch identity. Every state-directory component is
+owner-checked and opened without following symbolic links.
 
 `PATINAPROJECT_POLISH_TMP_DIR` replaces the temp root for isolated automated
 tests. Normal runs use the operating-system location.
@@ -92,5 +94,6 @@ coverage or narrows that scope.
 
 Completed records are written to a same-directory temporary file,
 synchronized, and atomically renamed. On supported platforms, the directory is
-mode `0700` and records are mode `0600`. Losing the directory causes a full
-review on the next run.
+mode `0700` and records are mode `0600`. Identity-scoped lock files serialize
+record transitions so a provisional write cannot restore stale authoritative
+state. Losing the directory causes a full review on the next run.

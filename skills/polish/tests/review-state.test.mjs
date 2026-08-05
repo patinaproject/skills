@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import {
   mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   statSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -41,11 +42,11 @@ function createRepository() {
   git(root, 'config', 'user.name', 'patinaproject Tests');
   writeFileSync(join(root, 'README.md'), 'base\n');
   git(root, 'add', 'README.md');
-  git(root, 'commit', '-m', 'chore: base');
+  git(root, 'commit', '-m', 'chore: #323 base');
   git(root, 'switch', '-c', '323-incremental-polish');
   writeFileSync(join(root, 'README.md'), 'base\nchange\n');
   git(root, 'add', 'README.md');
-  git(root, 'commit', '-m', 'feat: change');
+  git(root, 'commit', '-m', 'feat: #323 change');
 
   return { root, temporaryRoot };
 }
@@ -72,7 +73,48 @@ function reviewCommandResult(cwd, temporaryRoot, ...args) {
   });
 }
 
-function commitChange(root, content, message = 'fix: change') {
+function reviewCommandProcess(cwd, temporaryRoot, ...args) {
+  return spawn(process.execPath, [commandPath, ...args], {
+    cwd,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
+    },
+  });
+}
+
+function processResult(child) {
+  return new Promise((resolve, reject) => {
+    let stderr = '';
+    let stdout = '';
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk;
+    });
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk;
+    });
+    child.on('error', reject);
+    child.on('close', (status) => resolve({ status, stderr, stdout }));
+  });
+}
+
+async function waitForLock(temporaryRoot) {
+  const directory = join(temporaryRoot, 'patinaproject', 'polish-reviews');
+  for (let attempt = 0; attempt < 1_000; attempt += 1) {
+    try {
+      if (readdirSync(directory).some((name) => name.endsWith('.lock'))) {
+        return;
+      }
+    } catch {
+      // The writer has not created the private directory yet.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  }
+  assert.fail('Timed out waiting for the review-state lock.');
+}
+
+function commitChange(root, content, message = 'fix: #323 change') {
   writeFileSync(join(root, 'README.md'), content);
   git(root, 'add', 'README.md');
   git(root, 'commit', '-m', message);
@@ -312,7 +354,7 @@ try {
       'passed'
     );
     git(rewritten.root, 'reset', '--hard', 'main');
-    commitChange(rewritten.root, 'base\nrewritten\n', 'feat: rewritten');
+    commitChange(rewritten.root, 'base\nrewritten\n', 'feat: #323 rewritten');
     assert.equal(
       JSON.parse(
         reviewCommand(
@@ -457,6 +499,94 @@ try {
       'sourceBranch',
       'targetBranch',
     ]);
+
+    const traversed = createRepository();
+    const outside = mkdtempSync(join(tmpdir(), 'patinaproject-polish-outside-'));
+    fixtures.push(outside);
+    symlinkSync(outside, join(traversed.temporaryRoot, 'patinaproject'));
+    const traversalResult = reviewCommandResult(
+      traversed.root,
+      traversed.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      git(traversed.root, 'rev-parse', 'HEAD'),
+      '--outcome',
+      'passed'
+    );
+    assert.equal(traversalResult.status, 1);
+    assert.match(traversalResult.stderr, /not a private directory/);
+    assert.deepEqual(readdirSync(outside), []);
+  }
+
+  {
+    const concurrent = createRepository();
+    const head = git(concurrent.root, 'rev-parse', 'HEAD');
+    const largeFindings = findingsFile(
+      Array.from({ length: 50_000 }, (_, index) => ({
+        ...standardsFinding,
+        id: `ST${index}`,
+      }))
+    );
+    const provisional = reviewCommandProcess(
+      concurrent.root,
+      concurrent.temporaryRoot,
+      'provisional',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--findings',
+      largeFindings
+    );
+    const provisionalResult = processResult(provisional);
+    await waitForLock(concurrent.temporaryRoot);
+    const completed = reviewCommandProcess(
+      concurrent.root,
+      concurrent.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+    const [provisionalOutcome, completedOutcome] = await Promise.all([
+      provisionalResult,
+      processResult(completed),
+    ]);
+    assert.equal(provisionalOutcome.status, 0, provisionalOutcome.stderr);
+    assert.equal(completedOutcome.status, 0, completedOutcome.stderr);
+    assert.equal(
+      JSON.parse(
+        reviewCommand(
+          concurrent.root,
+          concurrent.temporaryRoot,
+          'scope',
+          '--target',
+          'main'
+        )
+      ).mode,
+      'skip'
+    );
+
+    const { directory, names } = recordFiles(concurrent.temporaryRoot);
+    const staleLock = join(directory, `${names[0]}.lock`);
+    writeFileSync(staleLock, '99999999\n', { mode: 0o600 });
+    const staleResult = reviewCommandResult(
+      concurrent.root,
+      concurrent.temporaryRoot,
+      'provisional',
+      '--target',
+      'main',
+      '--candidate',
+      head
+    );
+    assert.equal(staleResult.status, 1);
+    assert.match(staleResult.stderr, /Review state lock is stale/);
+    assert.equal(readFileSync(staleLock, 'utf8'), '99999999\n');
   }
 
   {

@@ -3,9 +3,11 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
-  chmodSync,
   closeSync,
+  constants,
   existsSync,
+  fchmodSync,
+  fstatSync,
   fsyncSync,
   lstatSync,
   mkdirSync,
@@ -16,8 +18,8 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { tmpdir, userInfo } from 'node:os';
+import { isAbsolute, join, resolve } from 'node:path';
 
 const schemaVersion = 1;
 const axes = new Set(['architecture', 'spec', 'standards']);
@@ -78,11 +80,82 @@ function currentIdentity(targetBranch) {
   };
 }
 
-function reviewDirectory() {
-  const temporaryRoot = process.env.PATINAPROJECT_POLISH_TMP_DIR
+function temporaryRoot() {
+  return process.env.PATINAPROJECT_POLISH_TMP_DIR
     ? resolve(process.env.PATINAPROJECT_POLISH_TMP_DIR)
-    : tmpdir();
-  return join(temporaryRoot, 'patinaproject', 'polish-reviews');
+    : realpathSync(tmpdir());
+}
+
+function reviewRoot() {
+  const privateRootName = process.env.PATINAPROJECT_POLISH_TMP_DIR
+    ? 'patinaproject'
+    : `patinaproject-${
+        typeof process.getuid === 'function'
+          ? process.getuid()
+          : createHash('sha256').update(userInfo().username).digest('hex')
+      }`;
+  return join(temporaryRoot(), privateRootName);
+}
+
+function reviewDirectory() {
+  return join(reviewRoot(), 'polish-reviews');
+}
+
+function assertPrivateDirectory(path) {
+  let descriptor;
+  try {
+    descriptor = openSync(
+      path,
+      constants.O_RDONLY |
+        (constants.O_DIRECTORY ?? 0) |
+        (constants.O_NOFOLLOW ?? 0)
+    );
+    const state = fstatSync(descriptor);
+    if (!state.isDirectory()) {
+      throw new Error(`Review state path is not a private directory: ${path}`);
+    }
+    if (
+      typeof process.getuid === 'function' &&
+      state.uid !== process.getuid()
+    ) {
+      throw new Error(`Review state directory has a foreign owner: ${path}`);
+    }
+    if (process.platform !== 'win32') {
+      fchmodSync(descriptor, 0o700);
+    }
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Review state ')
+    ) {
+      throw error;
+    }
+    throw new Error(`Review state path is not a private directory: ${path}`);
+  } finally {
+    if (descriptor !== undefined) {
+      closeSync(descriptor);
+    }
+  }
+}
+
+function ensurePrivateDirectory(path) {
+  try {
+    mkdirSync(path, { mode: 0o700 });
+  } catch (error) {
+    if (!(error && typeof error === 'object' && error.code === 'EEXIST')) {
+      throw error;
+    }
+  }
+  assertPrivateDirectory(path);
+}
+
+function prepareReviewDirectory() {
+  if (process.env.PATINAPROJECT_POLISH_TMP_DIR) {
+    assertPrivateDirectory(temporaryRoot());
+  }
+  ensurePrivateDirectory(reviewRoot());
+  ensurePrivateDirectory(reviewDirectory());
+  return reviewDirectory();
 }
 
 function recordPath(identity) {
@@ -177,11 +250,11 @@ function loadRecord(identity) {
   const directory = reviewDirectory();
 
   try {
+    if (existsSync(reviewRoot())) {
+      assertPrivateDirectory(reviewRoot());
+    }
     if (existsSync(directory)) {
-      const directoryState = lstatSync(directory);
-      if (!directoryState.isDirectory() || directoryState.isSymbolicLink()) {
-        return { status: 'unavailable' };
-      }
+      assertPrivateDirectory(directory);
     }
     if (!existsSync(path)) {
       return { status: 'missing' };
@@ -202,30 +275,123 @@ function loadRecord(identity) {
 
 function writeRecord(identity, record) {
   const path = recordPath(identity);
-  const directory = dirname(path);
-  mkdirSync(directory, { mode: 0o700, recursive: true });
-  if (process.platform !== 'win32') {
-    chmodSync(directory, 0o700);
-  }
+  const directory = prepareReviewDirectory();
 
   const temporaryPath = join(directory, `.${randomUUID()}.tmp`);
   let descriptor;
 
   try {
     descriptor = openSync(temporaryPath, 'wx', 0o600);
+    if (process.platform !== 'win32') {
+      fchmodSync(descriptor, 0o600);
+    }
     writeFileSync(descriptor, `${JSON.stringify(record, null, 2)}\n`);
     fsyncSync(descriptor);
     closeSync(descriptor);
     descriptor = undefined;
     renameSync(temporaryPath, path);
-    if (process.platform !== 'win32') {
-      chmodSync(path, 0o600);
-    }
   } finally {
     if (descriptor !== undefined) {
       closeSync(descriptor);
     }
     rmSync(temporaryPath, { force: true });
+  }
+}
+
+function wait(milliseconds) {
+  Atomics.wait(
+    new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT)),
+    0,
+    0,
+    milliseconds
+  );
+}
+
+function lockIsStale(path) {
+  const state = lstatSync(path);
+  if (!state.isFile() || state.isSymbolicLink()) {
+    throw new Error(`Review state lock is not a regular file: ${path}`);
+  }
+  if (
+    typeof process.getuid === 'function' &&
+    state.uid !== process.getuid()
+  ) {
+    throw new Error(`Review state lock has a foreign owner: ${path}`);
+  }
+  const owner = Number.parseInt(readFileSync(path, 'utf8'), 10);
+  if (!Number.isInteger(owner) || owner <= 0) {
+    throw new Error(`Review state lock is corrupt: ${path}`);
+  }
+  try {
+    process.kill(owner, 0);
+    return false;
+  } catch (error) {
+    if (error && typeof error === 'object' && error.code === 'ESRCH') {
+      return true;
+    }
+    return false;
+  }
+}
+
+function acquireRecordLock(identity) {
+  prepareReviewDirectory();
+  const path = `${recordPath(identity)}.lock`;
+
+  for (let attempt = 0; attempt < 400; attempt += 1) {
+    try {
+      const descriptor = openSync(
+        path,
+        constants.O_WRONLY |
+          constants.O_CREAT |
+          constants.O_EXCL |
+          (constants.O_NOFOLLOW ?? 0),
+        0o600
+      );
+      writeFileSync(descriptor, `${process.pid}\n`);
+      fsyncSync(descriptor);
+      return { descriptor, path };
+    } catch (error) {
+      if (!(error && typeof error === 'object' && error.code === 'EEXIST')) {
+        throw error;
+      }
+      if (lockIsStale(path)) {
+        throw new Error(
+          `Review state lock is stale; discard the disposable state root before retrying: ${path}`
+        );
+      }
+      wait(25);
+    }
+  }
+
+  throw new Error(`Timed out waiting for review state lock: ${path}`);
+}
+
+function releaseRecordLock(lock) {
+  const descriptorState = fstatSync(lock.descriptor);
+  closeSync(lock.descriptor);
+  try {
+    const pathState = lstatSync(lock.path);
+    if (
+      pathState.isFile() &&
+      !pathState.isSymbolicLink() &&
+      pathState.dev === descriptorState.dev &&
+      pathState.ino === descriptorState.ino
+    ) {
+      rmSync(lock.path);
+    }
+  } catch (error) {
+    if (!(error && typeof error === 'object' && error.code === 'ENOENT')) {
+      throw error;
+    }
+  }
+}
+
+function withRecordLock(identity, transition) {
+  const lock = acquireRecordLock(identity);
+  try {
+    return transition();
+  } finally {
+    releaseRecordLock(lock);
   }
 }
 
@@ -371,33 +537,37 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
   }
 
   const identity = currentIdentity(targetBranch);
-  const record = {
-    ...identity,
-    authoritative: {
-      findings,
-      outcome,
-      reviewedHead: head,
-    },
-    provisional: null,
-    schemaVersion,
-  };
-  writeRecord(identity, record);
-  return record;
+  return withRecordLock(identity, () => {
+    const record = {
+      ...identity,
+      authoritative: {
+        findings,
+        outcome,
+        reviewedHead: head,
+      },
+      provisional: null,
+      schemaVersion,
+    };
+    writeRecord(identity, record);
+    return record;
+  });
 }
 
 function saveProvisional(targetBranch, candidateHead, findings) {
   resolveTarget(targetBranch);
   const identity = currentIdentity(targetBranch);
-  const loaded = loadRecord(identity);
-  const record = {
-    ...identity,
-    authoritative:
-      loaded.status === 'valid' ? loaded.record.authoritative : null,
-    provisional: { candidateHead, findings },
-    schemaVersion,
-  };
-  writeRecord(identity, record);
-  return record;
+  return withRecordLock(identity, () => {
+    const loaded = loadRecord(identity);
+    const record = {
+      ...identity,
+      authoritative:
+        loaded.status === 'valid' ? loaded.record.authoritative : null,
+      provisional: { candidateHead, findings },
+      schemaVersion,
+    };
+    writeRecord(identity, record);
+    return record;
+  });
 }
 
 function main() {
