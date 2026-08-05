@@ -112,6 +112,11 @@ the selected change. Keep this pass report-only. Carry every accepted finding
 into Step 5 so architecture, Standards, and Spec findings share one completed
 outcome and one fix loop.
 
+The pass is complete when every changed module and interface in the selected
+delta has been assessed against those criteria, every outstanding architecture
+finding has been revalidated, and the report names every accepted finding or
+explicitly reports none.
+
 In `recheck` mode, revalidate named architecture findings without inventing an
 empty-delta architecture audit.
 
