@@ -103,7 +103,11 @@ async function waitForLock(temporaryRoot) {
   const directory = join(temporaryRoot, 'patinaproject', 'polish-reviews');
   for (let attempt = 0; attempt < 1_000; attempt += 1) {
     try {
-      if (readdirSync(directory).some((name) => name.endsWith('.lock'))) {
+      const lockName = readdirSync(directory).find((name) =>
+        name.endsWith('.lock')
+      );
+      if (lockName) {
+        assert.match(readFileSync(join(directory, lockName), 'utf8'), /^\d+\n$/);
         return;
       }
     } catch {

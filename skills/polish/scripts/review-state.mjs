@@ -9,6 +9,7 @@ import {
   fchmodSync,
   fstatSync,
   fsyncSync,
+  linkSync,
   lstatSync,
   mkdirSync,
   openSync,
@@ -334,36 +335,45 @@ function lockIsStale(path) {
 }
 
 function acquireRecordLock(identity) {
-  prepareReviewDirectory();
+  const directory = prepareReviewDirectory();
   const path = `${recordPath(identity)}.lock`;
+  const temporaryPath = join(directory, `.${randomUUID()}.lock.tmp`);
+  let descriptor;
 
-  for (let attempt = 0; attempt < 400; attempt += 1) {
-    try {
-      const descriptor = openSync(
-        path,
-        constants.O_WRONLY |
-          constants.O_CREAT |
-          constants.O_EXCL |
-          (constants.O_NOFOLLOW ?? 0),
-        0o600
-      );
-      writeFileSync(descriptor, `${process.pid}\n`);
-      fsyncSync(descriptor);
-      return { descriptor, path };
-    } catch (error) {
-      if (!(error && typeof error === 'object' && error.code === 'EEXIST')) {
-        throw error;
-      }
-      if (lockIsStale(path)) {
-        throw new Error(
-          `Review state lock is stale; discard the disposable state root before retrying: ${path}`
-        );
-      }
-      wait(25);
+  try {
+    descriptor = openSync(temporaryPath, 'wx', 0o600);
+    if (process.platform !== 'win32') {
+      fchmodSync(descriptor, 0o600);
     }
-  }
+    writeFileSync(descriptor, `${process.pid}\n`);
+    fsyncSync(descriptor);
 
-  throw new Error(`Timed out waiting for review state lock: ${path}`);
+    for (let attempt = 0; attempt < 400; attempt += 1) {
+      try {
+        linkSync(temporaryPath, path);
+        rmSync(temporaryPath);
+        return { descriptor, path };
+      } catch (error) {
+        if (!(error && typeof error === 'object' && error.code === 'EEXIST')) {
+          throw error;
+        }
+        if (lockIsStale(path)) {
+          throw new Error(
+            `Review state lock is stale; discard the disposable state root before retrying: ${path}`
+          );
+        }
+        wait(25);
+      }
+    }
+
+    throw new Error(`Timed out waiting for review state lock: ${path}`);
+  } catch (error) {
+    if (descriptor !== undefined) {
+      closeSync(descriptor);
+    }
+    rmSync(temporaryPath, { force: true });
+    throw error;
+  }
 }
 
 function releaseRecordLock(lock) {
