@@ -160,11 +160,10 @@ the skill contract.
 
 ### update-branch
 
-Keeping a work branch current should be a local git operation unless an
-operator chooses to publish it. `update-branch` fetches the selected base
-branch, defaults to `origin/HEAD`, guards dirty work, merges with
-`git merge --no-ff`, and reports the local-only result plus the push command to
-run later.
+`update-branch` fetches and merges with pure Git, using an open pull request's
+target branch ahead of an explicit or default base. After dependency refresh
+and verification, an open-PR update is pushed to its configured remote branch;
+a branch without an open PR remains local until the operator publishes it.
 
 See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 
