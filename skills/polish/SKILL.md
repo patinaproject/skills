@@ -75,8 +75,8 @@ success.
 
 Read [`review-record.md`](review-record.md) in full before using the bundled
 state command. Resolve the target branch from `origin/HEAD`, then run `scope`
-from a clean committed worktree. Keep the returned base and head fixed for this
-iteration.
+from a clean committed worktree, passing the resolved bare branch name rather
+than the full ref. Keep the returned base and head fixed for this iteration.
 
 | Mode | Review subject |
 | --- | --- |

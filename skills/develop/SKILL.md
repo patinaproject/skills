@@ -188,10 +188,7 @@ scope, and treat any issue as best-effort association, not a separate path.
    Standards and Spec stages. It records every completed outcome, fixes and
    commits agent-ready findings, and repeats incrementally until the current
    head passes with no findings. Invoking `develop` approves this review loop;
-   a `ready-for-human` finding stops the run as `human-blocked`. Track stable
-   outstanding finding IDs across iterations. After three consecutive
-   completed iterations with no reduction in that set and no new evidence that
-   changes the route, stop as `human-blocked` and report the repeated IDs.
+   a `ready-for-human` finding stops the run as `human-blocked`.
 8. Run `ready-pr` for commit, push, PR creation or update, visible check
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
    `ready-pr` only after `polish` records a passing current head with no
