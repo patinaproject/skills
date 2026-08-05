@@ -112,8 +112,10 @@ with that actionable error when installation cannot complete.
     - In `pull-request` mode, run
       `scripts/update-context.sh push <pr-number> <base-ref> <pr-head>` with the
       fields recorded in step 3. This pushes `HEAD` to the branch's configured
-      upstream only when the open pull request still has the same identity,
-      target, and head. On failure, report the helper's context change or exact
+      upstream after validating the pull request identity, target, and head,
+      then revalidates that context immediately after the push. A post-push
+      context change means the remote branch moved but the pull request update
+      is indeterminate. On failure, report the helper's context change or exact
       failed `git push` command and output, then stop without claiming the pull
       request was updated.
     - In `local-only` mode, leave the branch unpushed and report the optional

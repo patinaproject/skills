@@ -61,6 +61,18 @@ case "${GH_SCENARIO:?GH_SCENARIO must be set}" in
   changed-head)
     printf '324\thttps://github.com/example/project/pull/324\trelease/1.x\tfeature-renamed\n'
     ;;
+  post-push-retarget)
+    call_count=0
+    if [ -f "${GH_CALL_LOG:?GH_CALL_LOG must be set}" ]; then
+      call_count="$(wc -l < "$GH_CALL_LOG" | tr -d '[:space:]')"
+    fi
+    printf 'call\n' >> "$GH_CALL_LOG"
+    if [ "$call_count" -eq 0 ]; then
+      printf '324\thttps://github.com/example/project/pull/324\trelease/1.x\tfeature\n'
+    else
+      printf '324\thttps://github.com/example/project/pull/324\tmain\tfeature\n'
+    fi
+    ;;
   multiple-prs)
     printf '324\thttps://github.com/example/project/pull/324\trelease/1.x\tfeature\n'
     printf '325\thttps://github.com/example/project/pull/325\tmain\tfeature\n'
@@ -121,6 +133,13 @@ else
   assert_equal "$pr_url" "https://github.com/example/project/pull/324" "open PR URL should be reported"
   assert_equal "$head_ref" "feature" "open PR head should be reported"
 
+  if multiple_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=multiple-prs \
+    "$HELPER" resolve 2>&1)"; then
+    fail "multiple-PR context unexpectedly selected a base"
+  elif ! grep -Fq "found 2 open pull requests" <<< "$multiple_output"; then
+    fail "multiple-PR refusal was not actionable: $multiple_output"
+  fi
+
   git -C "$clone" fetch -q origin release/1.x
   git -C "$clone" merge -q --no-ff "$base_ref" -m "merge release target"
   git -C "$clone" merge-base --is-ancestor "$RELEASE_SHA" HEAD ||
@@ -161,6 +180,20 @@ else
     changed-head \
     "head changed from feature to feature-renamed" \
     "changed PR head"
+
+  post_push_log="$TMP_ROOT/gh-post-push.log"
+  if post_push_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=post-push-retarget GH_CALL_LOG="$post_push_log" \
+    "$HELPER" push "$pr_number" "$base_ref" "$head_ref" 2>&1)"; then
+    fail "post-push PR context change unexpectedly reported success"
+  elif ! grep -Fq "succeeded, but pull request context changed" <<< "$post_push_output"; then
+    fail "post-push PR context change was not reported as indeterminate: $post_push_output"
+  elif grep -Fq "Updated pull request" <<< "$post_push_output"; then
+    fail "post-push PR context change incorrectly claimed the pull request was updated"
+  fi
+  remote_sha="$(git --git-dir="$TMP_ROOT/pr-target/origin.git" rev-parse refs/heads/feature)"
+  local_sha="$(git -C "$clone" rev-parse HEAD)"
+  assert_equal "$remote_sha" "$local_sha" "post-push context change should still report that the remote branch moved"
 
   build_sandbox no-pr
   clone="$SANDBOX_CLONE"

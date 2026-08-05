@@ -44,6 +44,27 @@ normalize_origin_ref() {
   esac
 }
 
+validate_pull_request_context() {
+  local row="$1" branch="$2" expected_number="$3" expected_base expected_head="$5"
+  local pr_number pr_url pr_base pr_head actual_base
+  expected_base="$(normalize_origin_ref "$4")"
+  [ -n "$row" ] || fail "no open pull request exists for branch $branch; the no-PR path remains local-only"
+  IFS=$'\t' read -r pr_number pr_url pr_base pr_head <<< "$row"
+  actual_base="$(normalize_origin_ref "$pr_base")"
+
+  if [ "$pr_number" != "$expected_number" ]; then
+    fail "pull request changed from #$expected_number to #$pr_number; rerun update-branch against current context"
+  fi
+  if [ "$actual_base" != "$expected_base" ]; then
+    fail "pull request #$pr_number target changed from ${expected_base#origin/} to ${actual_base#origin/}; rerun update-branch against current context"
+  fi
+  if [ "$pr_head" != "$expected_head" ]; then
+    fail "pull request #$pr_number head changed from $expected_head to $pr_head; rerun update-branch against current context"
+  fi
+
+  printf '%s\n' "$pr_url"
+}
+
 resolve_context() {
   [ "$#" -le 1 ] || fail "resolve accepts at most one optional base ref"
 
@@ -74,24 +95,12 @@ resolve_context() {
 push_pull_request() {
   [ "$#" -eq 3 ] || fail "push requires the resolved PR number, base ref, and head ref"
 
-  local expected_number="$1" expected_base expected_head="$3"
-  local branch row pr_number pr_url pr_base pr_head actual_base remote merge_ref remote_branch output
-  expected_base="$(normalize_origin_ref "$2")"
+  local expected_number="$1" expected_base="$2" expected_head="$3"
+  local branch row post_push_url remote merge_ref remote_branch output
   branch="$(current_branch)"
   row="$(open_pull_request "$branch")"
-  [ -n "$row" ] || fail "no open pull request exists for branch $branch; the no-PR path remains local-only"
-  IFS=$'\t' read -r pr_number pr_url pr_base pr_head <<< "$row"
-  actual_base="$(normalize_origin_ref "$pr_base")"
-
-  if [ "$pr_number" != "$expected_number" ]; then
-    fail "pull request changed from #$expected_number to #$pr_number; rerun update-branch against current context"
-  fi
-  if [ "$actual_base" != "$expected_base" ]; then
-    fail "pull request #$pr_number target changed from ${expected_base#origin/} to ${actual_base#origin/}; rerun update-branch against current context"
-  fi
-  if [ "$pr_head" != "$expected_head" ]; then
-    fail "pull request #$pr_number head changed from $expected_head to $pr_head; rerun update-branch against current context"
-  fi
+  validate_pull_request_context \
+    "$row" "$branch" "$expected_number" "$expected_base" "$expected_head" >/dev/null
 
   if ! remote="$(git config --get "branch.$branch.remote")" || [ -z "$remote" ]; then
     fail "branch $branch has no configured push remote"
@@ -108,8 +117,8 @@ push_pull_request() {
       ;;
   esac
 
-  if [ "$remote_branch" != "$pr_head" ]; then
-    fail "configured upstream $remote/$remote_branch does not match pull request #$pr_number head $pr_head"
+  if [ "$remote_branch" != "$expected_head" ]; then
+    fail "configured upstream $remote/$remote_branch does not match pull request #$expected_number head $expected_head"
   fi
 
   if ! output="$(git push "$remote" "HEAD:$remote_branch" 2>&1)"; then
@@ -118,7 +127,12 @@ push_pull_request() {
     exit 1
   fi
   [ -n "$output" ] && printf '%s\n' "$output"
-  printf 'Updated pull request #%s at %s\n' "$pr_number" "$pr_url"
+  row="$(open_pull_request "$branch")"
+  if ! post_push_url="$(validate_pull_request_context \
+    "$row" "$branch" "$expected_number" "$expected_base" "$expected_head")"; then
+    fail "git push $remote HEAD:$remote_branch succeeded, but pull request context changed; the remote branch moved and the pull request update is indeterminate"
+  fi
+  printf 'Updated pull request #%s at %s\n' "$expected_number" "$post_push_url"
 }
 
 require_conflict_skill() {
