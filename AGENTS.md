@@ -16,7 +16,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/polish/`: bounded pre-PR architecture gate skill
+- `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill

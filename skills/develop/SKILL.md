@@ -62,12 +62,12 @@ environment:
 
 - `working-on-issue`: resolve the issue from the scope or current branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue.
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
-- `polish`: bounded pre-PR architecture gate.
+- `polish`: incremental pre-publication architecture, Standards, and Spec review.
 - `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
 
-`working-on-issue` reaches `new-branch`; `polish` reaches `implement` and
-`diagnosing-bugs`, and deepens against the `codebase-design` vocabulary;
-`implement` reaches `tdd`. Confirm those are installed too.
+`working-on-issue` reaches `new-branch`; `polish` reaches `code-review`,
+`implement`, and `diagnosing-bugs`, and deepens against the `codebase-design`
+vocabulary; `implement` reaches `tdd`. Confirm those are installed too.
 
 If any are missing, halt before building. Report the missing skill names and
 install guidance:
@@ -78,6 +78,7 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@impl
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
 ```
 
 The `implement`, `tdd`, `diagnosing-bugs`, `writing-great-skills`, and
@@ -146,8 +147,9 @@ scope, and treat any issue as best-effort association, not a separate path.
   instructions, or both.
 - Repository-documented verification has run and results are recorded.
 - Relevant tests are added or updated when the change has executable behavior.
-- `polish` ran its bounded architecture gate and applied or dispositioned every
-  accepted deepening.
+- `polish` reviewed the current committed head, applied or dispositioned every
+  accepted deepening and finding, and recorded a passing outcome with no
+  findings.
 - GitHub PR review comments and hosted review comments surfaced by `ready-pr`
   are fixed or dispositioned.
 - After `ready-pr`, all currently visible required and optional PR checks pass
@@ -178,19 +180,22 @@ scope, and treat any issue as best-effort association, not a separate path.
 5. Apply triggered conditional routes.
 6. Build the scope with the build/TDD portion of `implement` — instructions
    authoritative over any issue body — then run repository-documented
-   verification. The pull request owns review, so skip `implement`'s standalone
-   `code-review` tail.
-7. Run `polish`, forwarding the run's scope — the resolved issue reference and
-   any instructions — to ready the branch. Because `working-on-issue` is
-   idempotent, `polish`'s first-step alignment re-confirms the same branch and
-   issue at no cost. It runs one architecture pass and a second only when the
-   first accepted a deepening, routing candidates through its Finding Router.
-   Invoking `develop` is sufficient approval for this gate; dispatch it without
-   asking for another confirmation. A `ready-for-human` candidate stops the run
-   as `human-blocked`.
+   verification. `polish` owns review, so skip `implement`'s standalone
+   `code-review` tail here.
+7. Run `polish`, forwarding the resolved issue and instructions. Its
+   idempotent alignment re-confirms the branch, then it reviews the selected
+   committed delta through bounded architecture, verification, and fresh
+   Standards and Spec stages. It records every completed outcome, fixes and
+   commits agent-ready findings, and repeats incrementally until the current
+   head passes with no findings. Invoking `develop` approves this review loop;
+   a `ready-for-human` finding stops the run as `human-blocked`. Track stable
+   outstanding finding IDs across iterations. After three consecutive
+   completed iterations with no reduction in that set and no new evidence that
+   changes the route, stop as `human-blocked` and report the repeated IDs.
 8. Run `ready-pr` for commit, push, PR creation or update, visible check
    observation, PR feedback loops, and ready-to-merge reporting. Invoke
-   `ready-pr` only after `polish` completes its bounded architecture gate.
+   `ready-pr` only after `polish` records a passing current head with no
+   findings.
    **When step 3 resolved no issue**, consult the
    repository guidance read in step 1: if it requires an issue reference on commits or
    PRs, stop before `ready-pr` — that
