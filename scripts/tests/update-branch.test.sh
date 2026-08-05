@@ -22,15 +22,16 @@ assert_equal() {
 
 assert_context_change_blocks_push() {
   local scenario="$1" expected_message="$2" description="$3"
-  local before after output
-  before="$(git --git-dir="$TMP_ROOT/pr-target/origin.git" rev-parse refs/heads/feature)"
+  local origin before after output
+  origin="$(git -C "$clone" remote get-url origin)"
+  before="$(git --git-dir="$origin" rev-parse refs/heads/feature)"
   if output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO="$scenario" \
     "$HELPER" push "$pr_number" "$base_ref" "$head_ref" 2>&1)"; then
     fail "$description scenario unexpectedly succeeded"
   elif ! grep -Fq "$expected_message" <<< "$output"; then
     fail "$description error was not actionable: $output"
   fi
-  after="$(git --git-dir="$TMP_ROOT/pr-target/origin.git" rev-parse refs/heads/feature)"
+  after="$(git --git-dir="$origin" rev-parse refs/heads/feature)"
   assert_equal "$after" "$before" "$description should block the remote update"
 }
 

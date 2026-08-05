@@ -63,11 +63,8 @@ resolve_context() {
   if [ -n "$explicit_base" ]; then
     base_ref="$(normalize_origin_ref "$explicit_base")"
   else
-    if ! default_ref="$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>&1)"; then
-      echo "FAIL: refs/remotes/origin/HEAD is missing; run git remote set-head origin -a" >&2
-      [ -n "$default_ref" ] && printf '%s\n' "$default_ref" >&2
-      exit 1
-    fi
+    default_ref="$(git symbolic-ref --quiet refs/remotes/origin/HEAD)" ||
+      fail "refs/remotes/origin/HEAD is missing; run git remote set-head origin -a"
     base_ref="$(normalize_origin_ref "$default_ref")"
   fi
 
