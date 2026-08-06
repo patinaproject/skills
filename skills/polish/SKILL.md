@@ -1,14 +1,14 @@
 ---
 name: polish
-description: "Ready a completed branch for publication with a bounded architecture gate. Use when finishing issue work before a PR, when readying any branch for review on its own, or when a controller skill needs the pre-PR architecture gate."
+description: "Ready a completed branch with incremental architecture, Standards, and Spec review. Use when finishing issue work before publication, readying a branch on its own, or when a controller needs the local review loop."
 ---
 
 # Polish Branch
 
 ## Quick Start
 
-Invoke on the branch you want to ready for publication, with an **optional
-scope** — an issue reference, free-form instructions, or both:
+Invoke on the committed branch you want to review, with an optional scope: an
+issue reference, free-form instructions, or both.
 
 ```text
 /polish
@@ -17,142 +17,178 @@ scope** — an issue reference, free-form instructions, or both:
 /polish <issue-reference> focus on the parser
 ```
 
-**Polish** the current branch into a deeper architectural shape before its pull
-request opens. Run one architecture pass. Run a second only when the first
-accepted and applied a deepening, then stop regardless. The pull request owns
-the review loop.
+`polish` owns the complete local review loop. For each committed delta it runs:
 
-This skill assumes the branch's build is already complete and committed; it
-deepens the built work; it does not build the issue from scratch. It commits
-the changes its passes produce. It does not push or open a pull request —
-`ready-pr` owns publishing.
+1. delta-bounded architecture review;
+2. repository verification; and
+3. fresh, report-only Standards and Spec review.
+
+A completed review advances disposable local coverage even when it requests
+changes. `polish` fixes agent-ready findings, verifies and commits the fixes,
+then reviews only that new committed delta. It returns successfully only when
+the current head passes with no findings.
+
+This skill does not push or open a pull request. `develop` sequences successful
+`polish` before `ready-pr`; directly invoking `ready-pr` remains independent of
+this review state.
 
 ## Scope Contract
 
-The parameter is an **optional scope** — a free-form string that may be an issue
-reference, instructions, or both. It tells `polish` which issue to align to and
-where its architecture passes should focus; it never adds build work.
+The optional scope selects the issue and weights review attention. It never adds
+build work.
 
-- **Scope is authoritative for focus.** Free-form instructions weight each pass
-  toward the modules they name, still deepening only what the branch's existing
-  diff touches.
-- **Issue association is best-effort.** `working-on-issue` resolves the
-  issue from a reference in the scope, else the current branch, and aligns the
-  branch, assignment, and started state. When it resolves **no issue**, warn and
-  continue.
-- **Divergence is surfaced, not silently absorbed.** When the branch's built
-  work materially diverges from the resolved issue body, name it in the final
-  report. Leave the issue body to the caller; this skill never edits it.
-
-`polish` deepens an already-built branch, so it omits `develop`'s build-only
-judgments — acceptance-criteria actionability gating and build-vs-issue
-construction precedence. It needs the issue *resolved*, not interpreted for
-construction.
+- Free-form instructions weight each stage toward the named modules while
+  findings stay limited to code caused or exposed by the selected delta.
+- `working-on-issue` resolves the issue from the scope or current branch and
+  aligns the branch best-effort. A missing issue skips the Spec axis while
+  architecture and Standards review continue.
+- Material divergence from the issue body belongs in the final report. This
+  skill leaves issue editing to its caller.
 
 ## Required Child Skills
 
-- `working-on-issue`: resolve the issue (from the scope or the current branch) and land on its issue-linked branch, best-effort; returns cleanly when there is no issue.
-- `implement`: apply accepted deepenings through its build/TDD portion.
-- `diagnosing-bugs`: unclear root cause, missing reproduction, flaky behavior, or performance regressions.
-- `codebase-design`: the deep-module vocabulary and principles each pass
-  deepens against (reference, not invoked).
+- `working-on-issue`: resolve the issue and align its branch, best-effort.
+- `code-review`: supply the separate Standards and Spec rubrics through fresh
+  report-only subagents.
+- `implement`: apply accepted deepenings and clear findings through its
+  build/TDD portion.
+- `diagnosing-bugs`: investigate unclear causes, missing reproductions, flaky
+  behavior, or performance regressions.
+- `codebase-design`: supply the architecture vocabulary and principles.
 
-`working-on-issue` reaches `new-branch`; confirm it is installed too.
-
-If any are missing, halt before running and report the missing skill names and
-install guidance:
+`working-on-issue` reaches `new-branch`; `implement` reaches `tdd`. Confirm all
+seven skills are installed before the run. If one is missing, stop and report
+the missing name with the install guidance:
 
 ```sh
 npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --skill implement tdd code-review diagnosing-bugs codebase-design -y
 ```
 
-## Step 0 — Align to the scope
+## Step 0 — Align
 
-Before the first pass, run `working-on-issue` to resolve and align: it resolves
-the issue from a reference in the scope, else the current branch, then lands on
-the issue-linked branch and marks it started — all best-effort and idempotent.
-Re-running it while already aligned changes nothing, so a controller such as
-`develop` that already resolved the scope forwards it here as a cheap
-re-confirmation of the same branch and issue. When it resolves **no issue**,
-warn and continue.
+Run `working-on-issue` with the supplied scope. Carry its resolved issue into
+the Spec stage. Re-confirming an already aligned issue branch is an idempotent
+success.
 
-Then the first architecture pass begins.
+## Step 1 — Select the Review Scope
 
-## Bounded architecture passes
+Read [`review-record.md`](review-record.md) in full before using the bundled
+state command. Resolve the target branch from `origin/HEAD`, then run `scope`
+from a clean committed worktree, passing the resolved bare branch name rather
+than the full ref. Keep the returned base and head fixed for this iteration.
 
-Surface architectural friction in the branch's changes and apply the deepenings
-that clearly earn their place.
+| Mode | Review subject |
+| --- | --- |
+| `full` | Branch merge-base through committed `HEAD` |
+| `incremental` | Exact `reviewedHead..HEAD` delta |
+| `recheck` | Outstanding authoritative and provisional findings at the same head |
+| `skip` | Current head already passed with no findings |
 
-Work in the **deep-module vocabulary** and its principles — **module**,
+Missing, corrupt, unavailable, foreign, or non-ancestral state produces `full`.
+Provisional findings never narrow the selected delta. Both authoritative and
+provisional findings are advisory inputs to revalidate at their current
+locations.
+
+In `skip` mode, report the visible no-op and stop without rewriting the passing
+record.
+
+## Step 2 — Architecture Review
+
+Every non-empty `full` or `incremental` delta receives architecture review.
+Review the exact returned range and read unchanged neighboring modules,
+interfaces, contracts, and callers when context requires it. Findings remain
+attributable to architecture caused or exposed by the selected delta. Revalidate
+outstanding architecture findings in the same pass.
+
+Use the **deep-module vocabulary** from `codebase-design`: **module**,
 **interface**, **depth** (**deep**/**shallow**), **seam**, **adapter**,
-**leverage**, **locality**, and the **deletion test** — from the vendored
-`codebase-design` skill; use those terms exactly rather than drifting into
-"component," "service," "API," or "boundary." Read the domain glossary
-(`CONTEXT.md`, if any) and the ADRs in `docs/adr/` for the area you are touching
-first, so deepenings use the project's names for seams and do not re-litigate
-recorded decisions.
+**leverage**, **locality**, and the **deletion test**. Read `CONTEXT.md` and the
+relevant ADRs before proposing a deepening.
 
-**Explore, branch-scoped.** Use the Agent tool with `subagent_type=Explore` to
-walk the branch's changes plus the unchanged neighbours they interface with —
-read past the diff hunks. Note where you feel friction:
+Report an architecture finding only when the proposed deepening passes the
+deletion test, increases depth, improves locality or the test surface, and fits
+the selected change. Keep this pass report-only. Carry every accepted finding
+into Step 5 so architecture, Standards, and Spec findings share one completed
+outcome and one fix loop.
 
-- Understanding one concept means bouncing between many small modules.
-- A module is **shallow** — its interface is nearly as complex as its
-  implementation.
-- Pure functions were extracted for testability, but the real bugs hide in how
-  they are called (no **locality**).
-- Tightly-coupled modules leak across their seams.
-- Part of the change is untested or hard to test through its current interface.
+The pass is complete when every changed module and interface in the selected
+delta has been assessed against those criteria, every outstanding architecture
+finding has been revalidated, and the report names every accepted finding or
+explicitly reports none.
 
-Apply the **deletion test** to anything you suspect is shallow: would deleting
-the module concentrate complexity across its callers, or just move it?
-"Concentrates" is the signal to deepen.
+In `recheck` mode, revalidate named architecture findings without inventing an
+empty-delta architecture audit.
 
-**Accept conservatively.** Accept a deepening only when it passes the
-deletion test, increases **depth**, improves **locality** or the test surface,
-and folds into this branch without sprawling into unrelated code. Reject
-speculative generality, pass-throughs that only move complexity, and anything
-that complicates the interface instead of hiding complexity behind it. **Default
-to reject when uncertain**. Route each accepted deepening through the build/TDD
-portion of `implement`; the pull request owns review, so skip `implement`'s
-standalone `code-review` tail.
+## Step 3 — Pin and Verify the Candidate
 
-- Run repository-documented verification after each pass that applies
-  deepenings.
+After architecture review, require a clean committed worktree and capture
+`HEAD` as the candidate endpoint. Run repository-documented verification
+against that candidate. Keep the Step 1 base and this endpoint fixed through
+the remaining review stages.
 
-The sequence is bounded:
+A failed or interrupted verification leaves authoritative state unchanged.
+Save useful located findings as provisional state, then fix locally or report
+the blocker.
 
-1. Run the first pass.
-2. If it accepts zero deepenings, stop.
-3. If it accepts and applies at least one deepening, run exactly one second
-   pass, apply its accepted deepenings, verify, and stop. There is no third pass.
+## Step 4 — Standards and Spec Review
+
+Run the two `code-review` axes as fresh parallel subagents. Their prompts carry:
+
+- the exact Step 1 base and Step 3 candidate endpoint;
+- `git diff <base>..<candidate>` for `full` and `incremental` modes;
+- unchanged neighbors as read-only context;
+- the resolved issue or an explicit no-spec instruction;
+- every authoritative and provisional finding to revalidate; and
+- the `code-review` Standards rubric, smell baseline, and Spec rubric.
+
+The reviewers report only: they do not edit, stage, commit, or fix their own
+findings. In `recheck` mode, revalidate the named finding set despite the empty
+diff. Keep the two axis reports separate.
+
+Documented Standards violations and missing, partial, or incorrect Spec
+requirements are blocking. Fowler smells remain judgment calls. Benign scope
+notes are non-blocking unless they require a product or scope decision.
+
+If either reviewer fails, times out, or stops early, the iteration is incomplete.
+Save useful located findings as provisional data and retain the prior
+authoritative record.
+
+## Step 5 — Record, Route, and Repeat
+
+Confirm `HEAD` still equals the Step 3 candidate after both reviewers finish.
+Combine the architecture, Standards, and Spec reports. Build the minimal
+finding array defined by the review-record reference: one stable ID, axis,
+current location, and concise summary per outstanding blocking finding. Store
+no source excerpts or reviewer transcript.
+
+- No blocking findings: record `passed` at the candidate.
+- Blocking findings: record `changes_requested` at the candidate before routing
+  them.
+- Any incomplete stage or moving head: preserve authoritative state and save
+  only useful provisional findings.
+
+Route completed findings through the Finding Router. Fix architecture,
+Standards, and Spec findings only after the completed outcome is recorded. Use
+`implement` or `diagnosing-bugs`, verify and commit the fixes, then restart at
+Step 1. The next iteration reviews only that fix delta while rechecking the
+outstanding concerns. A human-owned finding records `changes_requested` and
+stops with a concrete blocker.
 
 ## Finding Router
 
-Classify each architecture candidate into exactly one outcome:
+Classify every architecture, Standards, and Spec finding into one outcome:
 
-| Outcome | Use When | Next Action |
-|---|---|---|
-| `ready-for-agent` | The deepening is clearly earned or its evidence can be gathered locally | Route a clear change to `implement`; route an unclear root cause, missing reproduction, flaky behavior, or performance regression to `diagnosing-bugs` |
-| `ready-for-human` | The candidate needs judgment, external access, manual testing, design input, missing information, changed scope, product decisions, permissions, conflicting direction, or valid work outside the branch | Stop and report the blocker with evidence |
-| `wontfix` | The candidate is stale, incorrect, conflicts with repository rules, or is intentionally rejected | Explain the disposition in the report; add a concise code comment only when a future maintainer would otherwise repeat the concern |
-
-Insufficient information maps to `ready-for-human`. A `ready-for-human` candidate
-stops the sequence; report it as a human-owned blocker.
+| Outcome | Use when | Next action |
+| --- | --- | --- |
+| `ready-for-agent` | The change is clear or evidence can be gathered locally | Route implementation to `implement`; route investigation to `diagnosing-bugs` |
+| `ready-for-human` | It needs judgment, external access, manual testing, design input, changed scope, permissions, or conflicting direction | Stop with the evidence and needed decision |
+| `wontfix` | It is stale, incorrect, non-blocking, or conflicts with repository rules | Explain the disposition; retain no outstanding blocking finding |
 
 ## Final Report
 
-Write for the caller, leading with whether the branch is polished:
-
-- Resolved issue reference, or that Step 0 found no issue.
-- Passes run and deepenings applied; explicitly say when the first pass accepted
-  zero and skipped the second.
-- Verification result, collapsed to one line when everything passed.
-- Human-owned blockers, if any.
-- `wontfix` explanations, if any.
-- Scope divergence from the resolved issue body, if any.
-- Residual risks or test gaps, only when concrete and relevant.
+Lead with the final review outcome. Include the resolved issue, reviewed base
+and endpoint, stages completed, outstanding and provisional findings, whether
+`reviewedHead` advanced, architecture passes and deepenings, verification
+failures or blockers, and any scope divergence. Keep successful verification
+to one line.

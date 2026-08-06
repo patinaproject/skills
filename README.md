@@ -120,9 +120,10 @@ for the skill contract.
 
 ### polish
 
-`polish` runs one architecture pass before publication, and a second only when
-the first accepted and applied a deepening. It stops after that bounded gate;
-the pull request owns the review loop.
+`polish` reviews each committed delta for architecture and Standards/Spec,
+records disposable local coverage, and fixes, verifies, commits, and rereviews
+incrementally until the current head passes. CodeRabbit can then supply an
+independent GitHub second opinion.
 
 See [./skills/polish/](./skills/polish/) for the skill contract.
 
@@ -215,7 +216,7 @@ README and skill contract.
 | [edit-issue](./skills/edit-issue/) | Safely update issues through the tracker adapter |
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
-| [polish](./skills/polish/) | Ready a branch with a bounded pre-PR architecture gate |
+| [polish](./skills/polish/) | Run incremental local architecture and code review |
 | [ready-pr](./skills/ready-pr/) | Publish completed branch work and prove its PR ready to merge |
 | [merge-pr](./skills/merge-pr/) | Enable repository-managed auto-merge for a PR |
 | [finish-pr](./skills/finish-pr/) | Deprecated compatibility alias for ready-pr |
