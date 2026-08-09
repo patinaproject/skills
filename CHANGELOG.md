@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.25.0](https://github.com/patinaproject/skills/compare/v2.24.0...v2.25.0) (2026-08-06)
+
+
+### Features
+
+* [#323](https://github.com/patinaproject/skills/issues/323) add incremental polish review ([#325](https://github.com/patinaproject/skills/issues/325)) ([931c048](https://github.com/patinaproject/skills/commit/931c0484a51471b911e1b6f8a2ff6cbb05b52476))
+
 ## [2.24.0](https://github.com/patinaproject/skills/compare/v2.23.1...v2.24.0) (2026-08-05)
 
 
