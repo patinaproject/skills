@@ -260,9 +260,9 @@ tell the human what to do next.
     all check buckets, unresolved review threads, top-level PR comments, review
     bodies, review decision, and current PR head. After any watch timeout,
     immediately snapshot all check states and perform the same full PR state
-    resync before choosing the next action. Treat a failed, canceled,
-    skipped-problematic, or otherwise non-pass required check as a triage item
-    before starting another watch window.
+    resync before choosing the next action. Treat a failed, canceled, skipped,
+    problematic, or otherwise non-pass required check as a triage item before
+    starting another watch window.
 
     Define no progress as no meaningful change in check buckets, check start or
     completion timestamps, PR head SHA, or feedback inventory between
@@ -316,7 +316,8 @@ tell the human what to do next.
     and flip the draft to ready for review the moment it holds. This is the one
     canonical draft-to-ready flip.
 
-    When the predicate holds:
+    Take the predicate's immediate pre-transition snapshot. When that snapshot
+    remains stable and the predicate holds:
 
     ```sh
     gh pr ready
