@@ -5,8 +5,8 @@ request's transition to ready for human review.
 
 Flip an agent-owned draft only when all three conditions hold:
 
-1. The repository-required local review passed on the exact current committed
-   head.
+1. The exact current committed head equals the latest published pull-request
+   head, and the repository-required local review passed on that commit.
 2. Every required GitHub check passed on the latest published head, as reported
    by `gh pr checks --required`.
 3. Zero unresolved agent-authored GraphQL review threads remain.
