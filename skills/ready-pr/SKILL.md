@@ -25,21 +25,9 @@ check is triaged and reported. A failing check is evidence to triage, not a
 halt. It never merges the PR or enables auto-merge.
 
 Agent-authored PRs open as drafts while the agent loop runs, so draft means
-"agent loop still churning, not yet for humans." The skill flips a draft when
-the **repository-controlled readiness predicate** holds:
-
-- the repository-required local review passed on the current committed head;
-- every required GitHub check passed on the latest published head; and
-- no unresolved agent-authored review thread remains.
-
-A human-authored thread never gates the flip; getting the PR in front of humans
-is what the flip is for. An optional review service's status, availability,
-completion, conclusion, or latest-head coverage never enters the predicate.
-Feedback that service posted remains ordinary agent-authored feedback and
-blocks while its conversation is unresolved.
-
-The flip is one-way. Leave a human's work-in-progress draft alone unless the
-operator asks the agent to take it over.
+"agent loop still churning, not yet for humans." Apply the
+[repository-controlled readiness predicate](references/readiness-predicate.md)
+for the one-way draft-to-ready transition and its human-ownership boundary.
 
 End on a strict final ready-to-merge gate. The gate enumerates every
 uncommitted path and requires a provable per-path disposition — in-scope paths
@@ -57,12 +45,8 @@ human line.
    ambiguous.
 3. Inspect uncommitted changes and stage only relevant paths.
 4. Run the repository's documented verification commands.
-5. Commit using the repository's required commit format, then run the
-   repository-required local review against that exact committed head. Apply
-   and commit branch-local findings, then repeat verification and local review
-   until the current committed head passes. When a repository defines no
-   separate local-review procedure, its documented verification supplies the
-   local readiness evidence.
+5. Commit using the repository's required format, then complete the
+   authoritative workflow's pre-publish evidence loop.
 6. Push the branch when there is work to publish.
 7. Create or update the PR using the repository template. Open agent-authored
    work as a draft by default.
@@ -73,8 +57,9 @@ human line.
    persists or has returned. Watch required checks in fail-fast bounded
    observation windows, snapshot optional checks for feedback, re-query PR
    feedback after checks and after every watch exit or timeout, fix branch-local
-   issues, push, and repeat. A required check the agent cannot fix gets a
-   concrete disposition and continues to reporting, not a halt.
+   issues, pass the pre-publish evidence loop, push, and repeat. A required
+   check the agent cannot fix gets a concrete disposition and continues to
+   reporting, not a halt.
 9. Flip the draft to ready for review the moment the repository-controlled
    readiness predicate holds. The flip is one-way, and the PR transition does
    not write issue state.
@@ -98,8 +83,9 @@ human line.
 - Do not enable auto-merge.
 - Do not create follow-up issues from PR feedback.
 - Do not wait indefinitely for new human review comments.
-- Observe optional checks for feedback, but use required checks for readiness
-  and bounded watching.
+- Apply the
+  [canonical readiness predicate](references/readiness-predicate.md) when
+  classifying required and optional automation.
 - Stop after the documented no-progress threshold instead of watching
   indefinitely.
 - Do not stop solely because a check failed, was canceled, or is out of scope;

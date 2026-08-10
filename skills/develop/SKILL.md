@@ -152,9 +152,9 @@ scope, and treat any issue as best-effort association, not a separate path.
   findings.
 - GitHub PR review comments and hosted review comments surfaced by `ready-pr`
   are fixed or dispositioned.
-- After `ready-pr`, all currently visible required PR checks pass for
-  `goal-met`. Optional check state does not gate the outcome; feedback it
-  posted remains subject to the ordinary review-conversation gates.
+- After `ready-pr`, its
+  [canonical readiness predicate](../ready-pr/references/readiness-predicate.md)
+  and final ready-to-merge gate are satisfied for `goal-met`.
 - Required PR check failures outside branch scope have a concrete disposition
   in a `human-blocked` final report; do not report `goal-met` while a required
   PR check is still failing.

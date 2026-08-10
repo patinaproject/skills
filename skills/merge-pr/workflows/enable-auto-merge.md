@@ -49,9 +49,10 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
      head from satisfying readiness gates.
 
    Pending checks or outstanding required approvals alone do not require
-   branch changes; repository-managed auto-merge may wait for them. Optional
-   review-service status alone never requires remediation, though unresolved
-   feedback that service posted does. When
+   branch changes; repository-managed auto-merge may wait for them. Apply
+   `ready-pr`'s
+   [canonical readiness predicate](../../ready-pr/references/readiness-predicate.md)
+   when deciding whether optional automation requires remediation. When
    remediation is needed, pass the current PR and caller scope to `ready-pr`
    and wait for its terminal result. A `ready-pr` human blocker becomes this
    workflow's `human-blocked` result.

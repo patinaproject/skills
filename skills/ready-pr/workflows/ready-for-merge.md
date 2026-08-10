@@ -70,15 +70,19 @@ tell the human what to do next.
    in `AGENTS.md`, README files, or package scripts. Do not invent expensive or
    unrelated checks when guidance is absent.
 
-4. Commit staged changes using the format read from repository guidance. Do not
-   hard-code one tracker's reference syntax in this shared skill. Then run the
-   repository-required local review against that exact committed head. Apply
-   and commit branch-local findings, then repeat verification and local review
-   until the current committed head passes. When the repository defines no
-   separate local-review procedure, step 3 supplies the local readiness
-   evidence.
+4. Commit staged changes using the format read from repository guidance when
+   any remain. Do not hard-code one tracker's reference syntax in this shared
+   skill. Then run the repository-required local review against the exact
+   current committed head. Apply and commit branch-local findings, then repeat
+   verification and local review until the current committed head passes. When
+   the repository defines no separate local-review procedure, step 3 supplies
+   the local readiness evidence.
 
 5. Push only when there are commits not present on the remote branch.
+   Steps 3–5 are the **pre-publish evidence loop**. Every branch-local commit
+   created later in this workflow returns to step 3, repeats step 4 on the new
+   committed head, and reaches step 5 only after that exact head passes. No
+   later step pushes a new head directly.
 
 6. Create or update the PR:
 
@@ -139,8 +143,9 @@ tell the human what to do next.
    If the merge reports `Already up to date.`, leave the branch unchanged and
    continue. If the merge applies cleanly and changes the branch, keep the merge
    result in the working tree, run documented verification, commit the merge
-   with the repository's normal issue-tagged format, push, and restart the
-   readiness loop on the new head. If verification fails on this clean merge,
+   with the repository's normal issue-tagged format, then return to the
+   pre-publish evidence loop before restarting the readiness loop on the new
+   head. If verification fails on this clean merge,
    run `git merge --abort` and stop under the verification stop condition. If
    two consecutive base merges keep changing the branch without reaching a
    stable PR head in the same ready-pr run, stop for operator feedback instead
@@ -151,7 +156,8 @@ tell the human what to do next.
    generators, and documented verification over ad hoc reasoning. Preserve both
    sides when that is clearly correct. After resolving, run documented
    verification, commit the resolution with the repository's normal issue-tagged
-   format, push, and restart the readiness loop on the new head. Use
+   format, then return to the pre-publish evidence loop before restarting the
+   readiness loop on the new head. Use
    [triage.md](triage.md) as the source of truth for conflict classification;
    this workflow owns the git sequence and readiness-loop restart.
 
@@ -186,8 +192,9 @@ tell the human what to do next.
 
 10. Triage every currently available feedback item with
     [triage.md](triage.md). A `fix-now` finding interrupts pending checks:
-    patch, verify, commit, push, and restart the readiness loop on the new head
-    before waiting on check runs that the fix will make stale. For `explain`,
+    patch, verify, commit, return to the pre-publish evidence loop, and restart
+    the readiness loop on the new head before waiting on check runs that the
+    fix will make stale. For `explain`,
     `stale`, and `defer`, reply or report with concrete evidence; handle
     `explain`, `stale`, and `defer` before checks unless the evidence itself
     depends on check results. Stop only when feedback returns `needs-human`.
@@ -264,8 +271,9 @@ tell the human what to do next.
 13. Triage every non-pass, canceled, or otherwise problematic required check with
     [triage.md](triage.md), using the full PR state snapshot rather than
     tunneling into only the first failed check. Fix branch-local check causes,
-    push follow-up commits when appropriate, and restart the readiness loop on
-    the new head. Continue for `explain`, `stale`, and `defer` outcomes with
+    return follow-up commits to the pre-publish evidence loop, and restart the
+    readiness loop on the new head. Continue for `explain`, `stale`, and
+    `defer` outcomes with
     concrete evidence. Do not halt solely because a check failed, was canceled,
     is flaky, is infrastructure-owned, lacks agent permissions, depends on
     missing secrets, or is outside the PR scope; record that disposition and
@@ -302,25 +310,10 @@ tell the human what to do next.
     predicate, but it blocks the final ready-to-merge gate. Report it to the
     operator and leave the conversation untouched.
 
-16. Flip the draft to ready for review the moment the
-    **repository-controlled readiness predicate** holds. This is the one
+16. Apply the
+    [repository-controlled readiness predicate](../references/readiness-predicate.md)
+    and flip the draft to ready for review the moment it holds. This is the one
     canonical draft-to-ready flip.
-
-    The **readiness predicate** is the whole gate; all three conditions must
-    hold:
-
-    - the repository-required local review passed on the exact current
-      committed head;
-    - every required GitHub check on the latest published head passes, as
-      reported by `gh pr checks --required`; and
-    - **zero** unresolved agent-authored GraphQL review threads remain.
-
-    Human-authored threads sit outside this predicate: a person who commented
-    on the draft is already engaged, and flipping formally puts the work in
-    front of them. An optional review service's status, availability,
-    completion, conclusion, or latest-head coverage also sits outside the
-    predicate. Feedback it posted remains an ordinary agent-authored
-    conversation and blocks while unresolved.
 
     When the predicate holds:
 
@@ -332,13 +325,10 @@ tell the human what to do next.
     write issue state from this workflow; integration automation owns issue
     transitions tied to the pull request lifecycle.
 
-    The flip is **one-way**: never convert a ready PR back to draft. The
-    predicate decides after the operator-ownership boundary is satisfied. An
-    agent-owned draft is a legitimate flip target whether this run, an earlier
-    run, or other tooling opened it. A human work-in-progress draft becomes
-    eligible only when the operator asks the agent to take it over. A genuine
-    major rework is re-drafted manually by the author, after which this same
-    predicate applies again.
+    An agent-owned draft is a legitimate flip target whether this run, an
+    earlier run, or other tooling opened it. A genuine major rework is
+    re-drafted manually by the author, after which the same predicate applies
+    again.
 
     Ready-for-review is distinct from ready-to-merge: the predicate can hold
     while optional automation is pending, failed, or absent.

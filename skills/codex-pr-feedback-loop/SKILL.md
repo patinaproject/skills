@@ -41,14 +41,7 @@ The durable boundaries at this skill level:
 - A human report that a previously handled bug persists or has returned
   restarts the repository's human-bug-report loop even when the PR head is
   unchanged. Follow that contract before more fix work, or report a blocker.
-- At loop exit, run the completion step: flip the draft when the
-  repository-required local review passed on the current committed head,
-  required GitHub checks passed on the latest published head, and no unresolved
-  agent-authored review thread remains. A human-authored thread and optional
-  review-service status sit outside that predicate. Feedback posted by an
-  optional service remains ordinary agent-authored feedback. The flip is
-  one-way and covers any agent-owned draft that satisfies the predicate,
-  including one a prior `ready-pr` run opened. Never take over a human's
-  work-in-progress draft without operator direction, re-draft a ready PR, or
-  write issue state from the PR loop.
+- At loop exit, apply `ready-pr`'s
+  [canonical readiness predicate](../ready-pr/references/readiness-predicate.md)
+  and completion behavior. Never write issue state from the PR loop.
 - Do not merge the PR.

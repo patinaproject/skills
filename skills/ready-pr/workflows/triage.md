@@ -105,8 +105,9 @@ human-authored conversation remains untouched throughout.
 ## Check Failure Rules
 
 - Wait for required checks only after currently available feedback has been
-  handled. Snapshot optional checks for feedback, but their status never gates
-  draft-to-ready or ready-to-merge.
+  handled. Snapshot optional checks for feedback and apply the
+  [canonical readiness predicate](../references/readiness-predicate.md) to
+  their status.
 - Use a tool-enforced 10-minute timeout around `gh pr checks --required --watch
   --fail-fast` in 10-minute observation windows. GNU `timeout`, Homebrew
   `gtimeout`, the portable `perl` fallback below, or an equivalent host timeout
@@ -120,10 +121,8 @@ human-authored conversation remains untouched throughout.
 
 - Treat exit code 124 from the timeout tool as a watch timeout. Treat a
   non-zero `gh` exit before the timeout as a fail-fast watch exit.
-- Re-query optional checks after each required-check watch exit. Triage feedback
-  they posted through the ordinary conversation rules; their pending, failed,
-  canceled, skipped, or absent status is reportable evidence, not a readiness
-  blocker.
+- Re-query optional checks after each required-check watch exit. Triage their
+  posted feedback through the ordinary conversation rules.
 - Perform a full PR state resync after every watch exit or timeout: all check
   buckets, unresolved review threads, top-level PR comments, review bodies,
   review decision, and current PR head.
