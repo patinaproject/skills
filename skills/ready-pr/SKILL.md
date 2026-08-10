@@ -27,7 +27,7 @@ halt. It never merges the PR or enables auto-merge.
 Agent-authored PRs open as drafts while the agent loop runs, so draft means
 "agent loop still churning, not yet for humans." Apply the
 [repository-controlled readiness predicate](references/readiness-predicate.md)
-for the one-way draft-to-ready transition and its human-ownership boundary.
+for the draft-to-ready transition.
 
 End on a strict final ready-to-merge gate. The gate enumerates every
 uncommitted path and requires a provable per-path disposition — in-scope paths
@@ -60,9 +60,8 @@ human line.
    issues, pass the pre-publish evidence loop, push, and repeat. A required
    check the agent cannot fix gets a concrete disposition and continues to
    reporting, not a halt.
-9. Flip the draft to ready for review the moment the repository-controlled
-   readiness predicate holds. The flip is one-way, and the PR transition does
-   not write issue state.
+9. Apply the canonical predicate and perform its draft-to-ready transition.
+   The PR transition does not write issue state.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.
 

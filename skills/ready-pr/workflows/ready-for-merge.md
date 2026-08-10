@@ -107,9 +107,9 @@ tell the human what to do next.
    - Open agent-authored work as a **draft** by default
      (`gh pr create --draft`). A draft signals "agent loop still running, not
      yet for humans"; step 16 is the one place that flips it to ready.
-   - Leave an existing human work-in-progress draft alone unless the operator
-     asks the agent to take it over. Reuse an existing agent-owned PR's draft
-     state as-is rather than re-drafting it.
+   - Apply the
+     [canonical predicate's ownership rule](../references/readiness-predicate.md)
+     to an existing draft. Reuse an eligible PR's draft state as-is.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR
    head SHA, base branch, and GitHub mergeability state, then verifying local
@@ -306,9 +306,9 @@ tell the human what to do next.
     blockers until they are resolved, fixed, or evidence-classified as stale or
     non-blocking.
 
-    An unresolved human-authored thread stays outside the draft-to-ready
-    predicate, but it blocks the final ready-to-merge gate. Report it to the
-    operator and leave the conversation untouched.
+    Apply the
+    [canonical predicate's human-thread rule](../references/readiness-predicate.md)
+    before moving to the draft transition.
 
 16. Apply the
     [repository-controlled readiness predicate](../references/readiness-predicate.md)
@@ -325,13 +325,8 @@ tell the human what to do next.
     write issue state from this workflow; integration automation owns issue
     transitions tied to the pull request lifecycle.
 
-    An agent-owned draft is a legitimate flip target whether this run, an
-    earlier run, or other tooling opened it. A genuine major rework is
-    re-drafted manually by the author, after which the same predicate applies
-    again.
-
-    Ready-for-review is distinct from ready-to-merge: the predicate can hold
-    while optional automation is pending, failed, or absent.
+    Ready-for-review is distinct from ready-to-merge. Complete step 17
+    separately.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
