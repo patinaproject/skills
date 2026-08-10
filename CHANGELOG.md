@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.0](https://github.com/patinaproject/skills/compare/v2.25.0...v2.26.0) (2026-08-10)
+
+
+### Features
+
+* [#328](https://github.com/patinaproject/skills/issues/328) make PR readiness repository-controlled ([#329](https://github.com/patinaproject/skills/issues/329)) ([a5ca5ef](https://github.com/patinaproject/skills/commit/a5ca5ef45877718bb5f989c098c0278b04faea2f))
+
 ## [2.25.0](https://github.com/patinaproject/skills/compare/v2.24.0...v2.25.0) (2026-08-06)
 
 
