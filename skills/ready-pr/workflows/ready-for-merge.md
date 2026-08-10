@@ -70,10 +70,19 @@ tell the human what to do next.
    in `AGENTS.md`, README files, or package scripts. Do not invent expensive or
    unrelated checks when guidance is absent.
 
-4. Commit staged changes using the format read from repository guidance. Do not
-   hard-code one tracker's reference syntax in this shared skill.
+4. Commit staged changes using the format read from repository guidance when
+   any remain. Do not hard-code one tracker's reference syntax in this shared
+   skill. Then run the repository-required local review against the exact
+   current committed head. Apply and commit branch-local findings, then repeat
+   verification and local review until the current committed head passes. When
+   the repository defines no separate local-review procedure, step 3 supplies
+   the local readiness evidence.
 
 5. Push only when there are commits not present on the remote branch.
+   Steps 3–5 are the **pre-publish evidence loop**. Every branch-local commit
+   created later in this workflow returns to step 3, repeats step 4 on the new
+   committed head, and reaches step 5 only after that exact head passes. No
+   later step pushes a new head directly.
 
 6. Create or update the PR:
 
@@ -95,22 +104,12 @@ tell the human what to do next.
      outcome-oriented, and use command-based manual checks only when no
      realistic app or artifact review path exists; name the behavior or
      repository contract the command verifies.
-   - Open the PR as a **draft** by default (`gh pr create --draft`). A draft
-     signals "agent code-review loop still running, not yet for humans"; step 16
-     is the one place that flips it to ready.
-   - This convention presumes the repository runs its **code-review loop on
-     draft PRs** (full CI on drafts) — that is the setup the step 16 predicate
-     gates on.
-   - The exception is any PR that **runs no code-review loop on its draft**:
-     open it non-draft, because the step 16 predicate can never hold and a draft
-     would otherwise strand forever. This covers a repository with no code-review
-     automation at all, a repository whose code-review automation is gated to
-     skip drafts (until it is configured to run on drafts), and a per-PR skip the
-     repository defines (for example a `skip-code-review` label) and this PR
-     carries. Identify the code-review run as the repository's code-review
-     check — the run that posts review threads on the PR head; when no such run
-     will appear on the draft, there is no loop to gate on. Reuse an existing
-     PR's draft state as-is rather than re-drafting it.
+   - Open agent-authored work as a **draft** by default
+     (`gh pr create --draft`). A draft signals "agent loop still running, not
+     yet for humans"; step 16 is the one place that flips it to ready.
+   - Apply the
+     [canonical predicate's ownership rule](../references/readiness-predicate.md)
+     to an existing draft. Reuse an eligible PR's draft state as-is.
 
 7. Enter the readiness loop. Each loop pass starts by capturing the current PR
    head SHA, base branch, and GitHub mergeability state, then verifying local
@@ -144,8 +143,9 @@ tell the human what to do next.
    If the merge reports `Already up to date.`, leave the branch unchanged and
    continue. If the merge applies cleanly and changes the branch, keep the merge
    result in the working tree, run documented verification, commit the merge
-   with the repository's normal issue-tagged format, push, and restart the
-   readiness loop on the new head. If verification fails on this clean merge,
+   with the repository's normal issue-tagged format, then return to the
+   pre-publish evidence loop before restarting the readiness loop on the new
+   head. If verification fails on this clean merge,
    run `git merge --abort` and stop under the verification stop condition. If
    two consecutive base merges keep changing the branch without reaching a
    stable PR head in the same ready-pr run, stop for operator feedback instead
@@ -156,7 +156,8 @@ tell the human what to do next.
    generators, and documented verification over ad hoc reasoning. Preserve both
    sides when that is clearly correct. After resolving, run documented
    verification, commit the resolution with the repository's normal issue-tagged
-   format, push, and restart the readiness loop on the new head. Use
+   format, then return to the pre-publish evidence loop before restarting the
+   readiness loop on the new head. Use
    [triage.md](triage.md) as the source of truth for conflict classification;
    this workflow owns the git sequence and readiness-loop restart.
 
@@ -191,8 +192,9 @@ tell the human what to do next.
 
 10. Triage every currently available feedback item with
     [triage.md](triage.md). A `fix-now` finding interrupts pending checks:
-    patch, verify, commit, push, and restart the readiness loop on the new head
-    before waiting on check runs that the fix will make stale. For `explain`,
+    patch, verify, commit, return to the pre-publish evidence loop, and restart
+    the readiness loop on the new head before waiting on check runs that the
+    fix will make stale. For `explain`,
     `stale`, and `defer`, reply or report with concrete evidence; handle
     `explain`, `stale`, and `defer` before checks unless the evidence itself
     depends on check results. Stop only when feedback returns `needs-human`.
@@ -233,42 +235,45 @@ tell the human what to do next.
     Step 10's routing already sent the human-authored ones to the human-thread
     handoff; no strength of evidence pulls them back here.
 
-12. Watch all checks only through the fail-fast bounded-watch policy. Before
+12. Watch required checks only through the fail-fast bounded-watch policy.
+    Snapshot all checks so optional automation can still surface feedback. Before
     each watch window, confirm all currently available feedback and known
-    problematic check states have been triaged. Use 10-minute observation
-    windows and watch all checks with a tool-enforced 10-minute timeout. Use an
+    problematic required-check states have been triaged. Use 10-minute
+    observation windows and a tool-enforced 10-minute timeout. Use an
     equivalent host tool when needed; examples include GNU `timeout`, Homebrew
     `gtimeout`, and a portable `perl` fallback:
 
     ```sh
-    timeout 10m gh pr checks --watch --fail-fast
-    gtimeout 10m gh pr checks --watch --fail-fast
-    perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --watch --fail-fast
+    timeout 10m gh pr checks --required --watch --fail-fast
+    gtimeout 10m gh pr checks --required --watch --fail-fast
+    perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --required --watch --fail-fast
     ```
 
     Treat exit code 124 from the timeout tool as a watch timeout. Treat a
     non-zero `gh` exit before the timeout as a fail-fast watch exit.
 
-    Watch all checks, including optional ones; optional checks can produce review
-    comments or useful blocking evidence. After any watch command exit,
+    Optional checks can produce review comments, so snapshot them without
+    extending the watch window or treating their status as a readiness gate.
+    After any watch command exit,
     immediately snapshot all check states and perform a full PR state resync:
     all check buckets, unresolved review threads, top-level PR comments, review
     bodies, review decision, and current PR head. After any watch timeout,
     immediately snapshot all check states and perform the same full PR state
     resync before choosing the next action. Treat a failed, canceled,
-    skipped-problematic, or otherwise non-pass check as a triage item before
-    starting another watch window.
+    skipped-problematic, or otherwise non-pass required check as a triage item
+    before starting another watch window.
 
     Define no progress as no meaningful change in check buckets, check start or
     completion timestamps, PR head SHA, or feedback inventory between
     observation windows. Stop for operator input after two consecutive
     10-minute no-progress windows instead of waiting indefinitely.
 
-13. Triage every non-pass, canceled, or otherwise problematic check with
+13. Triage every non-pass, canceled, or otherwise problematic required check with
     [triage.md](triage.md), using the full PR state snapshot rather than
     tunneling into only the first failed check. Fix branch-local check causes,
-    push follow-up commits when appropriate, and restart the readiness loop on
-    the new head. Continue for `explain`, `stale`, and `defer` outcomes with
+    return follow-up commits to the pre-publish evidence loop, and restart the
+    readiness loop on the new head. Continue for `explain`, `stale`, and
+    `defer` outcomes with
     concrete evidence. Do not halt solely because a check failed, was canceled,
     is flaky, is infrastructure-owned, lacks agent permissions, depends on
     missing secrets, or is outside the PR scope; record that disposition and
@@ -301,32 +306,14 @@ tell the human what to do next.
     blockers until they are resolved, fixed, or evidence-classified as stale or
     non-blocking.
 
-    An unresolved human-authored thread is a blocker this workflow cannot
-    clear, whatever its state on the latest head.
+    Apply the
+    [canonical predicate's human-thread rule](../references/readiness-predicate.md)
+    before moving to the draft transition.
 
-16. Flip the draft to ready for review the moment the **review loop is clean**.
-    This is the one canonical draft-to-ready flip.
-
-    The **readiness predicate** is the whole gate; do not flip on self-judgment.
-    The code-review run is the repository's code-review check — the run that
-    posts review threads on the PR head. Both must hold:
-
-    - that code-review run on the latest PR head has **completed** and has
-      **actually reviewed**. Its check run for the current head SHA must have
-      status `completed`, and either it concluded `success` or `neutral`, or it
-      posted review threads that are now resolved. A queued or in-progress run
-      does not satisfy the predicate even if it has already posted threads. A
-      completed run that errored, timed out, or was cancelled without posting
-      threads never reviewed, so the loop is not clean: re-run it rather than
-      flip.
-    - **zero** unresolved agent-authored GraphQL review threads remain on the
-      latest head. Human-authored threads sit outside this predicate: a human
-      who commented on the draft is already engaged, and flipping is what puts
-      the work formally in front of them.
-
-    A PR that runs no code-review loop on its draft was opened non-draft in
-    step 6 and has no predicate to satisfy — never leave such a PR stranded as a
-    draft.
+16. Apply the
+    [repository-controlled readiness predicate](../references/readiness-predicate.md)
+    and flip the draft to ready for review the moment it holds. This is the one
+    canonical draft-to-ready flip.
 
     When the predicate holds:
 
@@ -338,21 +325,8 @@ tell the human what to do next.
     write issue state from this workflow; integration automation owns issue
     transitions tied to the pull request lifecycle.
 
-    The flip is **one-way**: never convert a ready PR back to draft. The
-    predicate, not which run opened the PR or which GitHub account authored it,
-    decides. Any draft whose latest head carries a clean code-review run is a
-    legitimate flip target, including one opened by an earlier run, by a human
-    who then handed the branch to an agent, or by other tooling. A human's
-    work-in-progress draft is excluded by the predicate itself rather than by a
-    separate check: private work in progress has no completed code-review run on
-    its head with every thread resolved. A genuine major rework is re-drafted
-    manually by the author, after which this same flip applies again once the
-    loop is clean.
-
-    Ready-for-review is distinct from ready-to-merge: the predicate can hold —
-    review loop clean — while other checks are still failing or dispositioned,
-    and the PR still flips to ready. Those checks gate ready-to-merge in
-    step 17, not this flip.
+    Ready-for-review is distinct from ready-to-merge. Complete step 17
+    separately.
 
     Keep the no-merge guardrail: stop when merge is the next action.
 
@@ -368,7 +342,7 @@ tell the human what to do next.
     git status --short
     git rev-parse HEAD
     gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
-    gh pr checks <pr-number-or-url>
+    gh pr checks <pr-number-or-url> --required
     ```
 
     Also enumerate review threads with paginated GraphQL for the PR immediately
@@ -432,7 +406,8 @@ tell the human what to do next.
     - local `HEAD` equals the PR `headRefOid`.
     - `mergeStateStatus` is `CLEAN`.
     - PR is not a draft.
-    - every current check has status `COMPLETED` and conclusion `SUCCESS`.
+    - every current required check has status `COMPLETED` and conclusion
+      `SUCCESS`.
     - no paginated GraphQL review thread has `isResolved: false`, whoever
       authored it. Agent-authored threads reach that state through this
       workflow; human-authored threads reach it when their author or the
@@ -505,7 +480,7 @@ tell the human what to do next.
     - local branch equals `headRefName`
     - local HEAD equals `headRefOid`
     - mergeStateStatus is CLEAN
-    - every current check is SUCCESS
+    - every current required check is SUCCESS
     - no unresolved review threads
     ```
 

@@ -24,21 +24,10 @@ runs the readiness loop until the PR is ready-to-merge or every problematic
 check is triaged and reported. A failing check is evidence to triage, not a
 halt. It never merges the PR or enables auto-merge.
 
-Agent-authored PRs open as drafts and stay drafts while the code-review loop
-runs, so draft means "agent loop still churning, not yet for humans." The skill
-flips a draft when the **review loop is clean**: the code-review run on the
-latest head has completed, has actually reviewed it, and no unresolved
-agent-authored review threads remain. A human's thread never gates the flip;
-getting the PR in front of humans is what the flip is for. That predicate is the
-whole gate, and it applies the same way whether this run opened the PR or
-inherited one that another run or a human opened.
-The flip is one-way. A human's work-in-progress draft does not satisfy the
-predicate, because no completed code-review run has reviewed its head. The
-convention presumes the repository runs code review on draft PRs; a PR that
-**runs no code-review loop on its draft** opens non-draft instead, because its
-predicate can never hold. That covers a repo with no code-review automation, a
-repo whose code review skips drafts, and a per-PR skip a repo defines (for
-example a `skip-code-review` label).
+Agent-authored PRs open as drafts while the agent loop runs, so draft means
+"agent loop still churning, not yet for humans." Apply the
+[repository-controlled readiness predicate](references/readiness-predicate.md)
+for the draft-to-ready transition.
 
 End on a strict final ready-to-merge gate. The gate enumerates every
 uncommitted path and requires a provable per-path disposition — in-scope paths
@@ -56,24 +45,23 @@ human line.
    ambiguous.
 3. Inspect uncommitted changes and stage only relevant paths.
 4. Run the repository's documented verification commands.
-5. Commit using the repository's required commit format.
+5. Commit using the repository's required format, then complete the
+   authoritative workflow's pre-publish evidence loop.
 6. Push the branch when there is work to publish.
-7. Create or update the PR using the repository template. Open it as a draft by
-   default. Open it non-draft only when the PR runs no code-review loop on its
-   draft (see the overview and `ready-for-merge.md` step 6).
+7. Create or update the PR using the repository template. Open agent-authored
+   work as a draft by default.
 8. Enter the readiness loop: detect merge conflicts, triage currently
    available PR feedback, resolve eligible conversations (the agent-authored
    threads), hand every human-authored one to the operator in the session, and
    restart reproduction when a human reports that a previously handled bug
-   persists or has returned. Watch all checks in fail-fast bounded observation
-   windows, triage every problematic check, re-query PR feedback after checks
-   and after every watch exit or timeout, fix branch-local issues, push, and
-   repeat. A check the agent cannot fix gets a concrete disposition and
-   continues to reporting, not a halt.
-9. Flip the draft to ready for review the moment the review loop is clean, with
-   every agent-authored thread resolved. The flip is one-way, and the readiness
-   predicate is its only precondition. The PR transition is the complete review
-   signal and does not write issue state.
+   persists or has returned. Watch required checks in fail-fast bounded
+   observation windows, snapshot optional checks for feedback, re-query PR
+   feedback after checks and after every watch exit or timeout, fix branch-local
+   issues, pass the pre-publish evidence loop, push, and repeat. A required
+   check the agent cannot fix gets a concrete disposition and continues to
+   reporting, not a halt.
+9. Apply the canonical predicate and perform its draft-to-ready transition.
+   The PR transition does not write issue state.
 10. Report ready-to-merge status or concrete non-ready check dispositions
     without merging.
 
@@ -94,7 +82,9 @@ human line.
 - Do not enable auto-merge.
 - Do not create follow-up issues from PR feedback.
 - Do not wait indefinitely for new human review comments.
-- Watch all checks, including optional ones; optional checks remain in scope.
+- Apply the
+  [canonical readiness predicate](references/readiness-predicate.md) when
+  classifying required and optional automation.
 - Stop after the documented no-progress threshold instead of watching
   indefinitely.
 - Do not stop solely because a check failed, was canceled, or is out of scope;

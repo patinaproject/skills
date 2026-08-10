@@ -104,21 +104,25 @@ human-authored conversation remains untouched throughout.
 
 ## Check Failure Rules
 
-- Wait for all checks only after currently available feedback has been handled.
-- Use a tool-enforced 10-minute timeout around `gh pr checks --watch
+- Wait for required checks only after currently available feedback has been
+  handled. Snapshot optional checks for feedback and apply the
+  [canonical readiness predicate](../references/readiness-predicate.md) to
+  their status.
+- Use a tool-enforced 10-minute timeout around `gh pr checks --required --watch
   --fail-fast` in 10-minute observation windows. GNU `timeout`, Homebrew
   `gtimeout`, the portable `perl` fallback below, or an equivalent host timeout
   are acceptable.
 
   ```sh
-  timeout 10m gh pr checks --watch --fail-fast
-  gtimeout 10m gh pr checks --watch --fail-fast
-  perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --watch --fail-fast
+  timeout 10m gh pr checks --required --watch --fail-fast
+  gtimeout 10m gh pr checks --required --watch --fail-fast
+  perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --required --watch --fail-fast
   ```
 
 - Treat exit code 124 from the timeout tool as a watch timeout. Treat a
   non-zero `gh` exit before the timeout as a fail-fast watch exit.
-- Keep optional checks in scope; do not switch to required-check-only watching.
+- Re-query optional checks after each required-check watch exit. Triage their
+  posted feedback through the ordinary conversation rules.
 - Perform a full PR state resync after every watch exit or timeout: all check
   buckets, unresolved review threads, top-level PR comments, review bodies,
   review decision, and current PR head.
@@ -126,7 +130,7 @@ human-authored conversation remains untouched throughout.
   no meaningful change in check buckets, check start or completion timestamps,
   PR head SHA, or feedback inventory between observation windows.
 - Triage every failed, canceled, skipped-problematic, or otherwise non-pass
-  check result before starting another watch window.
+  required check before starting another watch window.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
 - Do not classify a check as `needs-human` solely because it failed, was

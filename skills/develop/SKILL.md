@@ -38,7 +38,7 @@ opt-in: invoke `develop-with-workflow` directly when you want them.
 
 ## Terminal Goal
 
-Production-ready implementation, all visible PR checks passing, and all PR
+Production-ready implementation, all required PR checks passing, and all PR
 review comments addressed.
 
 Treat production-ready as an evidence-backed readiness case, not a guarantee of
@@ -48,7 +48,7 @@ or similar wording.
 ## Terminal States
 
 - `goal-met`: production-readiness evidence supports `goal-met`; all required
-  exit gates are satisfied and all visible required and optional PR checks pass.
+  exit gates are satisfied and all required PR checks pass.
 - `human-blocked`: progress requires human judgment, external access, product
   or design decisions, permissions, secrets, conflicting direction, or valid
   work outside the run's scope.
@@ -152,11 +152,12 @@ scope, and treat any issue as best-effort association, not a separate path.
   findings.
 - GitHub PR review comments and hosted review comments surfaced by `ready-pr`
   are fixed or dispositioned.
-- After `ready-pr`, all currently visible required and optional PR checks pass
-  for `goal-met`.
-- PR check failures outside branch scope have a concrete disposition in a
-  `human-blocked` final report; do not report `goal-met` while any visible PR
-  check is still failing.
+- After `ready-pr`, its
+  [canonical readiness predicate](../ready-pr/references/readiness-predicate.md)
+  and final ready-to-merge gate are satisfied for `goal-met`.
+- Required PR check failures outside branch scope have a concrete disposition
+  in a `human-blocked` final report; do not report `goal-met` while a required
+  PR check is still failing.
 - When an issue is resolved, either the PR is on its issue-linked branch, or the
   final report explicitly names the retained non-issue-linked branch and why the
   caller declared it immutable. Do not report `goal-met` on such a branch
