@@ -19,10 +19,10 @@ readiness without broadening into unrelated issue work, merging the pull
 request, or enabling auto-merge.
 
 The validation loop is the readiness loop below: inspect the current PR state,
-handle currently available feedback, observe all visible checks, triage every
-non-ready state, publish branch-local fixes when appropriate, and repeat on the
-new head. End only when the final ready-to-merge gates pass or a documented
-stop condition requires human input.
+handle currently available feedback, watch required checks, snapshot optional
+checks for posted feedback, publish branch-local fixes when appropriate, and
+repeat on the new head. End only when the final ready-to-merge gates pass or a
+documented stop condition requires human input.
 
 Progress reports should name the current checkpoint, evidence gathered, next
 action, and blocker status. Keep stop reports concrete enough for a human to
