@@ -11,6 +11,12 @@ Flip an agent-owned draft only when all three conditions hold:
    by `gh pr checks --required`.
 3. Zero unresolved agent-authored GraphQL review threads remain.
 
+Immediately before `gh pr ready`, recapture local `HEAD`, the pull request's
+`headRefOid`, required-check results, and paginated GraphQL review threads.
+Evaluate the three conditions from that snapshot. If any input changes during
+the capture or before the command runs, discard the snapshot and restart the
+predicate.
+
 An optional review service's status, availability, completion, conclusion, or
 latest-head coverage never enters the predicate. Feedback it posted remains an
 ordinary agent-authored conversation and blocks while unresolved.

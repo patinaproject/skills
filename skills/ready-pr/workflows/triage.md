@@ -105,9 +105,10 @@ human-authored conversation remains untouched throughout.
 ## Check Failure Rules
 
 - Wait for required checks only after currently available feedback has been
-  handled. Snapshot optional checks for feedback and apply the
-  [canonical readiness predicate](../references/readiness-predicate.md) to
-  their status.
+  handled. Snapshot optional checks solely for posted feedback; their status
+  stays outside the
+  [canonical readiness predicate](../references/readiness-predicate.md) and the
+  draft-to-ready gate.
 - Use a tool-enforced 10-minute timeout around `gh pr checks --required --watch
   --fail-fast` in 10-minute observation windows. GNU `timeout`, Homebrew
   `gtimeout`, the portable `perl` fallback below, or an equivalent host timeout
@@ -129,7 +130,7 @@ human-authored conversation remains untouched throughout.
 - Stop after two consecutive 10-minute no-progress windows. No progress means
   no meaningful change in check buckets, check start or completion timestamps,
   PR head SHA, or feedback inventory between observation windows.
-- Triage every failed, canceled, skipped-problematic, or otherwise non-pass
+- Triage every failed, canceled, skipped, problematic, or otherwise non-pass
   required check before starting another watch window.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
