@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.26.1](https://github.com/patinaproject/skills/compare/v2.26.0...v2.26.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* [#328](https://github.com/patinaproject/skills/issues/328) complete the PR readiness contract ([#331](https://github.com/patinaproject/skills/issues/331)) ([5095101](https://github.com/patinaproject/skills/commit/509510165c1a31745ba2fc542164d82e3c31682a))
+* [#328](https://github.com/patinaproject/skills/issues/328) complete the readiness contract ([5095101](https://github.com/patinaproject/skills/commit/509510165c1a31745ba2fc542164d82e3c31682a))
+* [#328](https://github.com/patinaproject/skills/issues/328) narrow readiness to required checks ([#333](https://github.com/patinaproject/skills/issues/333)) ([11f7d59](https://github.com/patinaproject/skills/commit/11f7d5938d333aa910242d1778587890cd7f43f0))
+
 ## [2.26.0](https://github.com/patinaproject/skills/compare/v2.25.0...v2.26.0) (2026-08-10)
 
 
