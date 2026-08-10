@@ -41,7 +41,7 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
 
    - the PR is a draft;
    - GitHub or a clean local base merge shows conflicts;
-   - a completed check is not successful;
+   - a completed required check is not successful;
    - actionable or unresolved review feedback remains;
    - local `HEAD` differs from the PR head because of unpublished commits, a
      stale checkout, or another branch-local condition;
@@ -49,7 +49,9 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
      head from satisfying readiness gates.
 
    Pending checks or outstanding required approvals alone do not require
-   branch changes; repository-managed auto-merge may wait for them. When
+   branch changes; repository-managed auto-merge may wait for them. Optional
+   review-service status alone never requires remediation, though unresolved
+   feedback that service posted does. When
    remediation is needed, pass the current PR and caller scope to `ready-pr`
    and wait for its terminal result. A `ready-pr` human blocker becomes this
    workflow's `human-blocked` result.

@@ -18,7 +18,8 @@ If readiness inspection finds branch-local remediation, invoke `ready-pr` with
 the current PR scope, then resume this workflow against the resulting latest PR
 head. `ready-pr` is the single source of truth for publication, checks, review
 feedback, conflict remediation, and draft-to-ready handling; do not reproduce
-that loop here.
+that loop here. Optional review-service status is not a remediation signal;
+unresolved feedback that the service posted is.
 
 Report only the observed outcome defined by the authoritative workflow and any
 human-owned blocker.
