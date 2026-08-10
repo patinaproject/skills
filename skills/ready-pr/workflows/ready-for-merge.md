@@ -1,9 +1,10 @@
 # Ready for Merge Workflow
 
-**Goal:** Carry completed branch-local work through publication, checks, and
-PR feedback until the pull request is ready to merge or every visible non-ready
-state has a concrete disposition. A failing check is evidence to triage and
-report, not a halt condition by itself.
+**Goal:** Carry completed branch-local work through publication, required
+checks, and PR feedback until the pull request is ready to merge or every
+required-check and feedback blocker has a concrete disposition. A failing
+required check or posted feedback is evidence to triage and report, not a halt
+condition by itself.
 
 ## Preconditions
 
