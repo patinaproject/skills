@@ -6,7 +6,8 @@ Accepted
 
 ## Context
 
-Grilling sessions (via the vendored `grilling` / `domain-modeling` skills) write
+Grilling sessions (via the vendored `grill-with-docs` / `domain-modeling`
+skills) write
 `CONTEXT.md` and ADR edits inline into whatever working tree they run in.
 Grilling is a planning activity, so running it away from the implementing
 branch — a separate chat, a different worktree, before any implementing branch
