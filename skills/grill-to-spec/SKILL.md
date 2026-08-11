@@ -33,12 +33,12 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@gril
 1. **Grill to settled.** Record `git status --porcelain` as the worktree
    baseline, then run `grilling`, keeping every documentation change it resolves
    in the session as material for step 2. Done when `grilling` reaches its own
-   bar: the frontier is empty and the user has confirmed shared understanding.
+   settled bar.
 
 2. **Draft a proposal per resolved doc change.** A glossary term the session
-   pinned down, and a decision that is hard to reverse, surprising without
-   context, and the result of a real trade-off, each become one proposal. Write
-   the text to the format `write-docs` names — `CONTEXT-FORMAT.md` for a
+   pinned down, and a decision that clears `write-docs`'s bar for recording an
+   ADR, each become one proposal. Write the text to the format `write-docs`
+   names — `CONTEXT-FORMAT.md` for a
    glossary entry, `ADR-FORMAT.md` for a decision — and follow the target
    repository's own ADR naming scheme when it documents one. Each proposal
    carries its destination path and the complete text that belongs there.
