@@ -25,6 +25,14 @@ implement the decision, creating that issue if none exists. The text then
 travels to the implementing branch with the issue instead of depending on this
 session's worktree surviving.
 
+**Apply the proposals already captured.** When the current branch is where
+these docs publish and the issue in play carries proposed doc changes, those
+proposals are the source: write each one's text to the path it names, adding it
+to the surrounding document in the right place — merged into the glossary in
+term order, or created as its own ADR file. Where a proposal and the settled
+understanding in this session disagree, the session is newer; write the
+sharpened version and say which proposal you departed from and why.
+
 **No grilling.** Do not run an interview loop, walk the design tree one question
 at a time, or invent edge cases to force precision — that work is out of scope
 here. If a fact can be checked in the codebase, check it instead of asking.

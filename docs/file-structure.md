@@ -21,6 +21,8 @@ layout.
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
+- `skills/grill-to-spec/`: grill-and-publish skill that sends doc changes to the
+  tracker as proposals instead of the worktree
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
@@ -66,6 +68,7 @@ Skills owned by this repository:
 | `polish` | `skills/polish/` | Incremental local architecture and code review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
+| `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and publish it as a spec carrying doc-change proposals |
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |

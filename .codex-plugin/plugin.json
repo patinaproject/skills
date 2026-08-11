@@ -17,6 +17,7 @@
     "./skills/polish",
     "./skills/update-branch",
     "./skills/install-skills",
+    "./skills/grill-to-spec",
     "./skills/write-docs",
     "./skills/write-changelog",
     "./skills/prompting-fable"

@@ -19,6 +19,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
+- `skills/grill-to-spec/`: grill-and-publish skill that sends doc changes to the
+  tracker as proposals instead of the worktree
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
@@ -240,6 +242,7 @@ This repo owns these skills at flat paths:
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
+| grill-to-spec | `skills/grill-to-spec/` |
 | write-docs | `skills/write-docs/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
