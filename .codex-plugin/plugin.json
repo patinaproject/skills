@@ -6,8 +6,6 @@
     "./skills/using-github",
     "./skills/new-branch",
     "./skills/working-on-issue",
-    "./skills/new-issue",
-    "./skills/edit-issue",
     "./skills/develop",
     "./skills/develop-with-workflow",
     "./skills/ready-pr",
@@ -17,7 +15,7 @@
     "./skills/polish",
     "./skills/update-branch",
     "./skills/install-skills",
-    "./skills/write-docs",
+    "./skills/grill-to-spec",
     "./skills/write-changelog",
     "./skills/prompting-fable"
   ]

@@ -7,6 +7,14 @@ technology direction, workflow contracts, or cross-package integration. Keep
 short-lived implementation plans and issue-specific notes in their existing
 issue or plan locations.
 
+## Lifecycle
+
+This directory holds only in-force decisions. A decision that is made but not
+yet implemented lives as exact proposed text on the GitHub issue that will
+implement it; its ADR file merges in the pull request that makes the decision
+true — the implementing PR, or a docs-only PR when the repository already
+reflects it. See [ADR-337](ADR-337-off-branch-doc-capture.md).
+
 ## Naming
 
 Name a new ADR after its originating GitHub issue:

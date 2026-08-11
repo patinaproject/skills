@@ -8,8 +8,8 @@ description: GitHub forge and pull-request operations in a patinaproject reposit
 Use GitHub as the source-code forge and, for public repositories, as the issue
 provider selected by
 [the issue-tracker adapter](../../docs/issue-tracker.md). Issue operations
-still belong to the tracker-agnostic skills (`new-issue`, `edit-issue`,
-`working-on-issue`, and `write-changelog`).
+still belong to the adapter, the `/to-spec` skill for filing, and the
+tracker-agnostic skills (`working-on-issue` and `write-changelog`).
 
 ## First checks
 
