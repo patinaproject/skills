@@ -116,15 +116,16 @@ do not edit the vendored payloads under `.agents/skills/**`.
 ## Working on skills
 
 When creating or editing any skill under `skills/`, first use the third-party
-`writing-great-skills` skill as a structure and progressive-disclosure review. It
-helps check trigger descriptions, concise `SKILL.md` shape, leading-word
-terminology, and when to split reference material out of the main skill file.
+`writing-for-agents` skill (the successor to `writing-great-skills`) as a
+structure and progressive-disclosure review. It helps check trigger
+descriptions, concise `SKILL.md` shape, leading-word terminology, and when to
+split reference material out of the main skill file.
 
-If `writing-great-skills` is not installed in the local agent environment, install
+If `writing-for-agents` is not installed in the local agent environment, install
 it with:
 
 ```bash
-npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-great-skills -y
+npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-for-agents -y
 ```
 
 ## Testing Guidelines
