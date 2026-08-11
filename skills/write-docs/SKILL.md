@@ -144,7 +144,8 @@ from it deliberately in two places:
 - **Capture has a target.** `domain-modeling` writes resolved terms into
   `CONTEXT.md` inline, wherever the session is running. This skill picks the
   target first, so an off-branch session sends the text to the tracker instead.
-- **Capture runs both directions.** Applying proposals already captured on an
-  issue has no counterpart upstream.
+- **Capture runs both directions.** This skill also reads back: on the
+  publishing branch it applies proposals already recorded on the issue, writing
+  them into the files they name. `domain-modeling` only ever writes out.
 
 </supporting-info>
