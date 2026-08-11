@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.27.0](https://github.com/patinaproject/skills/compare/v2.26.1...v2.27.0) (2026-08-11)
+
+
+### Features
+
+* [#339](https://github.com/patinaproject/skills/issues/339) update vendored skills and adopt writing-for-agents rename ([#340](https://github.com/patinaproject/skills/issues/340)) ([d0e3d91](https://github.com/patinaproject/skills/commit/d0e3d91f66c8722af797b65087718a43727e6b09))
+
+
+### Bug Fixes
+
+* [#328](https://github.com/patinaproject/skills/issues/328) revalidate readiness before transition ([#334](https://github.com/patinaproject/skills/issues/334)) ([c7f12e1](https://github.com/patinaproject/skills/commit/c7f12e13cf91c2a5dc5ad1363ee016bf9d612511))
+
 ## [2.26.1](https://github.com/patinaproject/skills/compare/v2.26.0...v2.26.1) (2026-08-10)
 
 
