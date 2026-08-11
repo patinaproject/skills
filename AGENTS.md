@@ -19,7 +19,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
-- `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
@@ -96,7 +95,9 @@ not exist yet — captures the exact proposed doc text (the complete ADR body an
 each glossary entry) on the GitHub issue that will implement the decision
 instead of editing the tree, creating that issue if none exists. The branch
 implementing such an issue applies the captured text verbatim in its pull
-request. This
+request. Take the capture rules and the `CONTEXT-FORMAT.md` and `ADR-FORMAT.md`
+formats from the vendored `domain-modeling` skill; this repository owns no
+documentation-capture skill. This
 supersedes the inline "update `CONTEXT.md` right there" capture instruction in
 the vendored `domain-modeling` payload; see
 [docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
@@ -111,9 +112,6 @@ the vendored `domain-modeling` payload; see
   refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
-  When a re-vendor changes `domain-modeling`'s `CONTEXT-FORMAT.md` or
-  `ADR-FORMAT.md`, copy the changed file over the bundled `write-docs` copy by
-  hand; `write-docs-format-sync.test.sh` fails until the two match again.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -171,11 +169,6 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-g
 - Run `bash scripts/tests/pull-request-workflow.test.sh` after changing `.github/workflows/pull-request.yml`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
-- Run `bash scripts/tests/write-docs-format-sync.test.sh` after changing the
-  `write-docs` bundled format files or the vendored `domain-modeling` originals;
-  it asserts byte-equality between the two copies (a machine-consumed mirror
-  contract, never their prose — see
-  [docs/adr/ADR-232-format-sync-mirror-contract.md](docs/adr/ADR-232-format-sync-mirror-contract.md))
 
 ## Pull request labels
 
@@ -244,7 +237,6 @@ This repo owns these skills at flat paths:
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
-| write-docs | `skills/write-docs/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
 

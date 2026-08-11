@@ -36,5 +36,6 @@ same pull request as the change that makes it true.
   superseded for off-branch sessions, the same way
   [`docs/adr/README.md`](README.md) supersedes its numbering scheme; the
   vendored payloads themselves stay unedited.
-- The repo-owned `write-docs` skill carries the generic form of this rule for
-  consuming repositories.
+- The rule travels with the caller rather than in a skill of its own; see
+  [ADR-347](ADR-347-retire-write-docs.md), which retired the repo-owned
+  `write-docs` skill that first carried it.
