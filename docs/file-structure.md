@@ -10,8 +10,6 @@ layout.
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
-- `skills/new-issue/`: tracker-agnostic issue filing skill
-- `skills/edit-issue/`: tracker-agnostic issue update skill
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/ready-pr/`: PR readiness and publication skill
@@ -21,8 +19,8 @@ layout.
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
-- `skills/grill-to-spec/`: grill-and-publish skill that sends doc changes to the
-  tracker as proposals instead of the worktree
+- `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
+  `/to-spec` as proposals instead of the worktree
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
@@ -57,8 +55,6 @@ Skills owned by this repository:
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
 | `working-on-issue` | `skills/working-on-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
-| `new-issue` | `skills/new-issue/` | Draft and publish issues through the tracker adapter |
-| `edit-issue` | `skills/edit-issue/` | Safely update issues through the tracker adapter |
 | `develop` | `skills/develop/` | Issue development orchestration |
 | `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
 | `ready-pr` | `skills/ready-pr/` | Publish and prove a PR ready to merge |
@@ -68,7 +64,7 @@ Skills owned by this repository:
 | `polish` | `skills/polish/` | Incremental local architecture and code review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
-| `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and publish it as a spec carrying doc-change proposals |
+| `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | `write-docs` | `skills/write-docs/` | Capture-only CONTEXT.md glossary and ADR documentation |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |

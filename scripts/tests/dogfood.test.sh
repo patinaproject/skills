@@ -18,8 +18,6 @@ SKILLS=(
   using-github
   new-branch
   working-on-issue
-  new-issue
-  edit-issue
   develop
   develop-with-workflow
   ready-pr

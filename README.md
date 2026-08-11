@@ -86,15 +86,13 @@ never edits the issue body, so every entrypoint aligns work identically.
 
 See [./skills/working-on-issue/](./skills/working-on-issue/) for the skill contract.
 
-### new-issue and edit-issue
+### Filing and editing issues
 
-Issue filing and updates should be provider-independent. `new-issue` drafts,
-checks duplicates, and publishes through the repository adapter; `edit-issue`
-applies verified field, lifecycle, label, and relationship changes through the
-same adapter.
-
-See [./skills/new-issue/](./skills/new-issue/) and
-[./skills/edit-issue/](./skills/edit-issue/) for their contracts.
+This repository owns no issue-filing or issue-editing skill. Operators publish a
+spec with the third-party `/to-spec`, and skills that need issue mechanics —
+claiming, labels, lifecycle, relationships, closure — follow
+[`docs/issue-tracker.md`](./docs/issue-tracker.md), the sole adapter that
+defines them for every provider.
 
 ### develop
 
@@ -173,9 +171,9 @@ See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 Grilling usually happens away from the branch that will implement the outcome —
 a separate chat, a scratch worktree, or before any branch exists. Writing the
 resulting ADR and glossary edits into that tree strands them there.
-`grill-to-spec` grills the design to settled and publishes it as a tracker spec
-whose doc changes ride along as file-ready proposals, so the worktree can be
-thrown away and `write-docs` can apply them on the implementing branch.
+`grill-to-spec` grills the design to settled and hands it to `/to-spec` with its
+doc changes as file-ready proposals, so the worktree can be thrown away and
+`write-docs` can apply them on the implementing branch.
 
 See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
 
@@ -223,8 +221,6 @@ README and skill contract.
 | [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
 | [working-on-issue](./skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
-| [new-issue](./skills/new-issue/) | Draft and publish issues through the tracker adapter |
-| [edit-issue](./skills/edit-issue/) | Safely update issues through the tracker adapter |
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Run incremental local architecture and code review |
@@ -234,7 +230,7 @@ README and skill contract.
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
-| [grill-to-spec](./skills/grill-to-spec/) | Grill a design and publish it as a spec carrying doc-change proposals |
+| [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
@@ -282,8 +278,6 @@ skills/
   using-github/
   new-branch/
   working-on-issue/
-  new-issue/
-  edit-issue/
   develop/
   develop-with-workflow/
   ready-pr/
