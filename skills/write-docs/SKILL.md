@@ -14,6 +14,17 @@ or a merged decision, and record it:
   [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
 - Offer ADRs sparingly using [ADR-FORMAT.md](./ADR-FORMAT.md).
 
+**Pick the capture target first.** Committed docs are read as in-force truth,
+so write into the working tree only when the current branch is where these docs
+will publish: the branch implementing the decision, or any branch when the
+repository already reflects it. From anywhere else — a planning or grilling
+session, a worktree on an unrelated branch, an implementing branch that does
+not exist yet — leave the tree untouched and post the exact proposed text (the
+complete ADR body and each glossary entry) to the tracker issue that will
+implement the decision, creating that issue if none exists. The text then
+travels to the implementing branch with the issue instead of depending on this
+session's worktree surviving.
+
 **No grilling.** Do not run an interview loop, walk the design tree one question
 at a time, or invent edge cases to force precision — that work is out of scope
 here. If a fact can be checked in the codebase, check it instead of asking.

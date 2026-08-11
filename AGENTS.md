@@ -81,6 +81,19 @@ skills (`domain-modeling`, `setup-matt-pocock-skills`): name every ADR after its
 originating GitHub issue (`ADR-N-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 
+### Durable context capture
+
+`CONTEXT.md` and `docs/adr/**` are in-force truth and change only on the branch
+that publishes them: the branch implementing the decision, or a docs-only branch
+when the repository already reflects it. A session anywhere else — grilling,
+planning, a worktree on an unrelated branch, an implementing branch that does
+not exist yet — captures the exact proposed doc text (the complete ADR body and
+each glossary entry) on the GitHub issue that will implement the decision
+instead of editing the tree, creating that issue if none exists. This
+supersedes the inline "update `CONTEXT.md` right there" capture instruction in
+the vendored `domain-modeling` payload; see
+[docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
+
 ## Build, Test, and Development Commands
 
 - `pnpm install` (alias `pnpm env:setup`): install dev tooling and initialize
