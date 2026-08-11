@@ -81,7 +81,7 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
 ```
 
-The `implement`, `tdd`, `diagnosing-bugs`, `writing-great-skills`, and
+The `implement`, `tdd`, `diagnosing-bugs`, `writing-for-agents`, and
 `prototype` install hints intentionally track their source catalog's default
 branch. Consumers who need a frozen install can add `#<git-ref>` to those
 sources.
@@ -92,7 +92,7 @@ Conditional routes are not blanket prerequisites. Check that the named skill is
 available only when the scope triggers that route; halt with the missing skill
 name and install guidance only for a triggered missing route.
 
-- Consult `writing-great-skills` when the scope changes an installable skill
+- Consult `writing-for-agents` when the scope changes an installable skill
   package surface: skill entry instructions, frontmatter or description,
   workflow contract text, examples, reference material, or bundled helper
   scripts. Apply its review before the build route builds the change.
@@ -104,7 +104,7 @@ name and install guidance only for a triggered missing route.
 Install guidance for these triggered routes:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@writing-great-skills -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@writing-for-agents -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@prototype -y
 ```
 
