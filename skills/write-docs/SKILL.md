@@ -57,8 +57,28 @@ Most repos have a single context:
 
 If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts and the
 map points to where each one lives (see [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md)).
+Each context keeps its own `CONTEXT.md` and its own `docs/adr/`, alongside a
+root `docs/adr/` for system-wide decisions:
+
+```text
+/
+├── CONTEXT-MAP.md
+├── docs/
+│   └── adr/                          ← system-wide decisions
+└── src/
+    ├── ordering/
+    │   ├── CONTEXT.md
+    │   └── docs/adr/                 ← context-specific decisions
+    └── billing/
+        ├── CONTEXT.md
+        └── docs/adr/
+```
+
 When multiple contexts exist, infer which one the current topic belongs to; if it
-is unclear, ask which context to write into.
+is unclear, ask which context to write into. A term always goes in that context's
+`CONTEXT.md`. A decision goes in that context's `docs/adr/` when it binds only
+that context, and in the root `docs/adr/` when it binds the system or crosses a
+context boundary.
 
 Create files lazily — only when you have something to write. If no `CONTEXT.md`
 exists, create one when the first term is captured. If no `docs/adr/` exists,
@@ -118,7 +138,13 @@ If any of the three is missing, skip the ADR. Use the
 The bundled [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md) and
 [ADR-FORMAT.md](./ADR-FORMAT.md) are copied verbatim from the `domain-modeling`
 skill in [`mattpocock/skills`](https://github.com/mattpocock/skills). This skill
-runs only the documentation-writing half — `domain-modeling`'s capture — without
-the `grilling` interview.
+runs `domain-modeling`'s capture without the `grilling` interview, and diverges
+from it deliberately in two places:
+
+- **Capture has a target.** `domain-modeling` writes resolved terms into
+  `CONTEXT.md` inline, wherever the session is running. This skill picks the
+  target first, so an off-branch session sends the text to the tracker instead.
+- **Capture runs both directions.** Applying proposals already captured on an
+  issue has no counterpart upstream.
 
 </supporting-info>
