@@ -16,8 +16,8 @@ or a merged decision, and record it:
 
 **Pick the capture target first.** Committed docs are read as in-force truth,
 so write into the working tree only when the current branch is where these docs
-will publish: the branch implementing the decision, or any branch when the
-repository already reflects it. From anywhere else — a planning or grilling
+will publish: the branch implementing the decision, or a docs-only branch when
+the repository already reflects it. From anywhere else — a planning or grilling
 session, a worktree on an unrelated branch, an implementing branch that does
 not exist yet — leave the tree untouched and post the exact proposed text (the
 complete ADR body and each glossary entry) to the tracker issue that will

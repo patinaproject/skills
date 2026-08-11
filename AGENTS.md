@@ -89,7 +89,9 @@ when the repository already reflects it. A session anywhere else — grilling,
 planning, a worktree on an unrelated branch, an implementing branch that does
 not exist yet — captures the exact proposed doc text (the complete ADR body and
 each glossary entry) on the GitHub issue that will implement the decision
-instead of editing the tree, creating that issue if none exists. This
+instead of editing the tree, creating that issue if none exists. The branch
+implementing such an issue applies the captured text verbatim in its pull
+request. This
 supersedes the inline "update `CONTEXT.md` right there" capture instruction in
 the vendored `domain-modeling` payload; see
 [docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
