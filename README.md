@@ -168,6 +168,17 @@ a branch without an open PR remains local until the operator publishes it.
 
 See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 
+### grill-to-spec
+
+Grilling usually happens away from the branch that will implement the outcome —
+a separate chat, a scratch worktree, or before any branch exists. Writing the
+resulting ADR and glossary edits into that tree strands them there.
+`grill-to-spec` grills the design to settled and publishes it as a tracker spec
+whose doc changes ride along as file-ready proposals, so the worktree can be
+thrown away and `write-docs` can apply them on the implementing branch.
+
+See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
+
 ### write-docs
 
 Settled designs decay when they live only in chat. `write-docs` captures an
@@ -223,6 +234,7 @@ README and skill contract.
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
+| [grill-to-spec](./skills/grill-to-spec/) | Grill a design and publish it as a spec carrying doc-change proposals |
 | [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
@@ -280,6 +292,7 @@ skills/
   codex-pr-feedback-loop/
   polish/
   update-branch/
+  grill-to-spec/
   write-docs/
   write-changelog/
   prompting-fable/
