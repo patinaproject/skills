@@ -8,8 +8,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
 - `skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
-- `skills/new-issue/`: tracker-agnostic issue filing skill
-- `skills/edit-issue/`: tracker-agnostic issue update skill
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/ready-pr/`: PR readiness and publication skill
@@ -19,6 +17,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/install-skills/`: project-local skills CLI installation skill
+- `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
+  `/to-spec` as proposals instead of the worktree
 - `skills/write-docs/`: capture-only CONTEXT.md/ADR documentation skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
@@ -48,6 +48,11 @@ issue or in normal docs when it is broadly useful beyond one issue.
 ### Issue tracker
 
 Tracker operations are defined in the sole adapter, `docs/issue-tracker.md`.
+Follow it directly for claiming, labels, lifecycle, relationships, and closure;
+this repository owns no issue-filing or issue-editing skill. Filing a spec is
+the operator's to run with the third-party `/to-spec`, so ask them to run it
+rather than filing on their behalf. `docs/issue-publishing.md` still governs
+issue body framing and `docs/triage-workflow.md` the ready bar.
 
 ### Working an issue
 
@@ -229,8 +234,6 @@ This repo owns these skills at flat paths:
 | using-github | `skills/using-github/` |
 | new-branch | `skills/new-branch/` |
 | working-on-issue | `skills/working-on-issue/` |
-| new-issue | `skills/new-issue/` |
-| edit-issue | `skills/edit-issue/` |
 | develop | `skills/develop/` |
 | develop-with-workflow | `skills/develop-with-workflow/` |
 | ready-pr | `skills/ready-pr/` |
@@ -240,6 +243,7 @@ This repo owns these skills at flat paths:
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
+| grill-to-spec | `skills/grill-to-spec/` |
 | write-docs | `skills/write-docs/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |

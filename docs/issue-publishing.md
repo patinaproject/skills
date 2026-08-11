@@ -5,6 +5,19 @@ issues. Provider mechanics live only in
 [the issue-tracker adapter](issue-tracker.md); ready-state transitions live in
 [the triage workflow](triage-workflow.md).
 
+## Who applies these rules
+
+This repository owns no filing skill. The operator files with the third-party
+`/to-spec`, and these rules bind that act: they are the reviewer's checklist
+before publishing and the agent's checklist when asked to prepare a draft for
+the operator to file.
+
+`/to-spec` writes a feature-spec body and labels the result `ready-for-agent`
+outright. Two reconciliations follow every run of it. Work that has not cleared
+[the ready bar](triage-workflow.md) takes the triage state instead, and routine
+work that is not feature-shaped takes the body framing below rather than a full
+spec template.
+
 ## Body framing
 
 Describe the problem, desired outcome, and context needed for triage. A proposal

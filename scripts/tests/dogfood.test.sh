@@ -18,8 +18,6 @@ SKILLS=(
   using-github
   new-branch
   working-on-issue
-  new-issue
-  edit-issue
   develop
   develop-with-workflow
   ready-pr
@@ -28,6 +26,7 @@ SKILLS=(
   codex-pr-feedback-loop
   polish
   update-branch
+  grill-to-spec
   write-docs
   write-changelog
   prompting-fable
