@@ -48,15 +48,15 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    drafted as a proposal, or named as a deliberate skip with its reason. A
    design that settled neither yields no proposals; carry on to the spec.
 
-3. **Hand the proposals to the operator.** Publishing is theirs to run: present
-   every proposal in the session under one `Proposed doc changes` heading, each
-   in its own fenced block labelled with its destination path, and tell them to
-   run `/to-spec` to publish the spec with those blocks inside it, carried over
-   unchanged — `write-docs` applies them verbatim later, so a reworded proposal
-   stops being file-ready. `/to-spec` synthesizes from this conversation, so the
-   grilling and the proposals are already in the context it reads. Done when
-   every proposal from step 2 is on screen in full and that instruction has been
-   given.
+3. **Confirm the worktree.** `git status --porcelain` matches the step 1
+   baseline, proving the grilling left nothing behind to commit.
 
-4. **Confirm the worktree.** `git status --porcelain` matches the step 1
-   baseline. Report that result and every proposal's destination path.
+4. **Hand off to the operator.** This is where the run ends: publishing is
+   theirs. Present every proposal under one `Proposed doc changes` heading, each
+   in its own fenced block labelled with its destination path, then close by
+   telling them to run `/to-spec` to publish the spec with those blocks inside
+   it, carried over unchanged — `write-docs` applies them verbatim later, so a
+   reworded proposal stops being file-ready. `/to-spec` synthesizes from this
+   conversation, so the grilling and the proposals are already in the context it
+   reads. Done when every proposal from step 2 is on screen in full and that
+   instruction is the last thing said.
