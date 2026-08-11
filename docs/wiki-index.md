@@ -11,7 +11,7 @@ yet live. Publishing them is tracked as part of issue [#58](https://github.com/p
 | `Install-Claude-Code` | Step-by-step Claude Code install: `npx skills@latest add patinaproject/skills` (interactive selection). |
 | `Install-Codex` | Step-by-step Codex install: `npx skills@latest add patinaproject/skills` (interactive selection; CLI auto-detects agent). |
 | `Skill-scaffold-repository-usage` | Full usage walkthrough for `scaffold-repository`: new-repo scaffold mode, realignment mode, what each baseline file does, and how to add optional surfaces. Source: `skills/scaffold-repository/SKILL.md` and `skills/scaffold-repository/README.md` (now in-repo). |
-| `Skill-using-github-usage` | Full usage walkthrough for `using-github`: entry point, issue filing, branch creation, PR preparation, and changelog writing. Source: `skills/using-github/SKILL.md` and `skills/using-github/README.md` (now in-repo). |
+| `Skill-using-github-usage` | Full usage walkthrough for `using-github`: entry point, pull-request preparation, review threads, checks, and releases. Issue filing is out of scope; it runs through `/to-spec` and the tracker adapter. Source: `skills/using-github/SKILL.md` and `skills/using-github/README.md` (now in-repo). |
 | `Skill-find-skills-usage` | Usage walkthrough for the `find-skills` third-party skill (from `vercel-labs/skills`): how to ask the agent to discover and install skills, what the skill resolves against (the vercel-labs registry), and how to install results. Install: `npx skills@latest add vercel-labs/skills@find-skills`. |
 | `Troubleshooting` | Common failure modes: skills CLI cloning errors, broken symlinks in the overlay, `core.symlinks` false on Windows/WSL, and how to reset the overlay. |
 
