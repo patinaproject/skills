@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-347](ADR-347-retire-write-docs.md). No bundled mirror
+remains: `write-docs` was retired and its copies deleted with it, so the sync
+test it sanctioned is gone too. The reasoning below still governs any future
+byte-equality mirror contract, which is why the record is kept.
 
 ## Context
 

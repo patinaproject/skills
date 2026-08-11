@@ -39,7 +39,8 @@ The vendored set was extended to keep it coherent: `domain-modeling`,
 Re-point each surviving mirror at its new vendored source; own the two files that
 no longer have one.
 
-- `write-docs`: `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` ← `domain-modeling`.
+- `write-docs`: `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` ← `domain-modeling`
+  (retired by [ADR-347](ADR-347-retire-write-docs.md); no mirror remains).
 - `improve-branch-architecture`: `DEEPENING.md` ← `codebase-design`;
   `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` ← `domain-modeling`.
 - `improve-branch-architecture`'s `LANGUAGE.md` and `INTERFACE-DESIGN.md` are

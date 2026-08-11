@@ -173,17 +173,9 @@ a separate chat, a scratch worktree, or before any branch exists. Writing the
 resulting ADR and glossary edits into that tree strands them there.
 `grill-to-spec` grills the design to settled and hands it to `/to-spec` with its
 doc changes as file-ready proposals, so the worktree can be thrown away and
-`write-docs` can apply them on the implementing branch.
+the implementing branch can apply them verbatim.
 
 See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
-
-### write-docs
-
-Settled designs decay when they live only in chat. `write-docs` captures an
-already-agreed understanding into CONTEXT.md glossary terms and, sparingly,
-ADRs — recording decisions and terminology without re-litigating them.
-
-See [./skills/write-docs/](./skills/write-docs/) for the skill contract.
 
 ### write-changelog
 
@@ -231,7 +223,6 @@ README and skill contract.
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
-| [write-docs](./skills/write-docs/) | Capture a settled design into CONTEXT.md terms and ADRs |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -287,7 +278,6 @@ skills/
   polish/
   update-branch/
   grill-to-spec/
-  write-docs/
   write-changelog/
   prompting-fable/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
