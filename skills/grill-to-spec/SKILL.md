@@ -1,16 +1,17 @@
 ---
 name: grill-to-spec
-description: Grill a design to settled, then publish it as a tracker spec whose ADR and glossary changes ride along as file-ready proposals. Use when grilling anywhere but the branch that will implement the outcome.
+description: Grill a design to settled, then hand it to `/to-spec` with its ADR and glossary changes as file-ready proposals. Use when grilling anywhere but the branch that will implement the outcome.
 ---
 
 # Grill To Spec
 
-Grill a design to **settled**, then hand the whole outcome to the tracker: the
-spec, and every documentation change the design resolved, as a **proposal** —
-complete file-ready text the implementing branch can apply verbatim.
+Grill a design to **settled**, then hand the whole outcome to `/to-spec` for
+publication: the spec, and every documentation change the design resolved, as a
+**proposal** — complete file-ready text the implementing branch can apply
+verbatim.
 
-Everything this skill produces lands in the tracker, so the worktree stays
-scratch and the decision survives it.
+Everything this skill produces goes to the tracker with the spec, so the
+worktree stays scratch and the decision survives it.
 
 ## Required Child Skills
 
@@ -18,13 +19,11 @@ scratch and the decision survives it.
 - `write-docs`: supplies the `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` rules each
   proposal is written to, and applies the proposals later on the implementing
   branch.
-- `new-issue`: publish the spec through the tracker adapter.
-- `edit-issue`: attach the spec to an issue that already exists.
 
 If one is missing, stop and report its name with install guidance:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill write-docs new-issue edit-issue -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill write-docs -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@grilling -y
 ```
 
@@ -47,13 +46,13 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@gril
    drafted as a proposal, or named as a deliberate skip with its reason. A
    design that settled neither yields no proposals; carry on to the spec.
 
-3. **Publish the spec.** File it with `new-issue`, or attach it with
-   `edit-issue` when the work already has an issue. The spec states the problem
-   and the solution from the user's perspective; the proposals ride inside it
-   under one `Proposed doc changes` heading, each in its own fenced block
-   labelled with its destination path. Done when the spec is live in the tracker
-   and every proposal from step 2 appears in it, character for character.
+3. **Hand the proposals to the operator.** Publishing is theirs to run: present
+   every proposal in the session under one `Proposed doc changes` heading, each
+   in its own fenced block labelled with its destination path, and tell them to
+   run `/to-spec` to publish the spec with those blocks inside it. `/to-spec`
+   synthesizes from this conversation, so the grilling and the proposals are
+   already in the context it reads. Done when every proposal from step 2 is on
+   screen in full and that instruction has been given.
 
 4. **Confirm the worktree.** `git status --porcelain` matches the step 1
-   baseline. Report the published spec's URL and every proposal's destination
-   path.
+   baseline. Report every proposal's destination path alongside it.
