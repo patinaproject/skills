@@ -154,8 +154,8 @@ assert_blocked() {
     'a bisect in progress in the holder'
   git -C "$root/held" bisect reset >/dev/null 2>&1
 
-  # A bisect deep enough to check out a midpoint detaches the holder, so no
-  # worktree record claims the branch.
+  # A bisect only detaches once the range holds an untested midpoint to check
+  # out, which these commits supply. Then no worktree record claims the branch.
   root="$(new_fixture)"
   for step in 1 2 3 4 5 6; do
     printf 'base\nfeature\n%s\n' "$step" > "$root/held/README.md"
@@ -164,7 +164,8 @@ assert_blocked() {
   first="$(git -C "$root/held" rev-list --max-parents=0 HEAD)"
   git -C "$root/held" bisect start >/dev/null 2>&1
   git -C "$root/held" bisect bad >/dev/null 2>&1
-  git -C "$root/held" bisect good "$first" >/dev/null 2>&1 || true
+  git -C "$root/held" bisect good "$first" >/dev/null 2>&1 ||
+    fail 'the deep bisect fixture could not start a bisect'
   if git -C "$root/held" symbolic-ref --quiet HEAD >/dev/null; then
     fail 'the deep bisect fixture did not detach the holder'
   fi
@@ -174,6 +175,18 @@ assert_blocked() {
     fail "a bisecting holder error was not actionable: $output"
   fi
   git -C "$root/held" bisect reset >/dev/null 2>&1
+
+  # git am borrows the rebase-apply state, and only git am --abort clears it.
+  root="$(new_fixture)"
+  git -C "$root/held" switch --quiet -c conflicting main
+  printf 'base\nconflict\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
+  git -C "$root/held" format-patch --quiet -1 -o "$root/patches" >/dev/null
+  git -C "$root/held" switch --quiet feature
+  git -C "$root/held" am "$root/patches"/*.patch >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held am --abort" \
+    'a patch application in progress in the holder'
+  git -C "$root/held" am --abort >/dev/null 2>&1 || true
 
   root="$(new_fixture)"
   git -C "$root/repo" worktree lock "$root/held" --reason 'pinned by the operator'

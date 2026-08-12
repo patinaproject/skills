@@ -50,8 +50,11 @@ uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, or
 bisect, and the holder must be unlocked and still on disk. A rebase or a bisect
 detaches the worktree running it, so no worktree record claims the branch and it
 reads as `free`; the helper reads those operations' own state to catch that and
-refuse. Its message names the blocker and the command that clears it. Report
-that message and stop; committing, stashing, finishing, aborting, unlocking, or
+refuse. A worktree whose directory was deleted mid-operation is past stranding:
+`git worktree prune` clears its metadata along with that state.
+
+Every message names the blocker and the command that clears it. Report that
+message and stop; committing, stashing, finishing, aborting, unlocking, or
 pruning is the operator's call.
 
 ## Step 2 — Move the Branch

@@ -34,7 +34,15 @@ require_branch() {
 }
 
 # The states a rebase leaves behind, named once for every reader of them.
-rebase_states='rebase-merge rebase-apply'
+rebase_states=(rebase-merge rebase-apply)
+
+# Reads the first line of a file, keeping a value written without a trailing
+# newline, which makes read report failure after it has already assigned.
+first_line() {
+  local line=''
+  read -r line < "$1" || true
+  printf '%s\n' "$line"
+}
 
 worktree_listing() {
   local listing
@@ -65,9 +73,19 @@ holder_record() {
 }
 
 fail_operation_elsewhere() {
-  local path="$1" branch="$2" marker="$3" operation command
-  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$marker" "$path")"
+  local path="$1" branch="$2" key="$3" operation command
+  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$key" "$path")"
   fail "worktree $path is in the middle of a $operation on $branch; finish it there or run: $command"
+}
+
+# "<state file>\t<guidance key>" for the operations that detach the worktree
+# running them. Each records the branch it will return to in its own state.
+detaching_states() {
+  local state
+  for state in "${rebase_states[@]}"; do
+    printf '%s/head-name\t%s\n' "$state" "$state"
+  done
+  printf 'BISECT_START\tBISECT_LOG\n'
 }
 
 # A worktree mid-rebase or mid-bisect sits on a detached HEAD, so no worktree
@@ -75,29 +93,24 @@ fail_operation_elsewhere() {
 # that branch instead. The current worktree is left to assert_worktree_quiet,
 # which reports its operations in the first person.
 assert_branch_free_of_operations() {
-  local branch="$1" current="$2" listing="$3" paths path git_dir state name
+  local branch="$1" current="$2" listing="$3" paths path resolved git_dir
+  local state key name
   paths="$(printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }')"
 
   while IFS= read -r path; do
+    # A worktree whose directory is gone strands no live work; its metadata
+    # goes with git worktree prune.
     [ -d "$path" ] || continue
-    [ "$(real_path "$path")" != "$current" ] || continue
+    resolved="$(cd "$path" 2>/dev/null && pwd -P)" || continue
+    [ "$resolved" != "$current" ] || continue
     git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" || continue
 
-    # Word splitting is the point: rebase_states names two directories.
-    # shellcheck disable=SC2086
-    for state in $rebase_states; do
-      [ -f "$git_dir/$state/head-name" ] || continue
-      read -r name < "$git_dir/$state/head-name" || continue
-      [ "$name" = "refs/heads/$branch" ] || continue
-      fail_operation_elsewhere "$path" "$branch" "$state"
-    done
-
-    if [ -f "$git_dir/BISECT_START" ]; then
-      read -r name < "$git_dir/BISECT_START" || name=''
-      if [ "$name" = "$branch" ] || [ "$name" = "refs/heads/$branch" ]; then
-        fail_operation_elsewhere "$path" "$branch" BISECT_LOG
-      fi
-    fi
+    while IFS=$'\t' read -r state key; do
+      [ -f "$git_dir/$state" ] || continue
+      name="$(first_line "$git_dir/$state")"
+      [ "$name" = "$branch" ] || [ "$name" = "refs/heads/$branch" ] || continue
+      fail_operation_elsewhere "$path" "$branch" "$key"
+    done <<< "$(detaching_states)"
   done <<< "$paths"
 }
 
@@ -112,13 +125,15 @@ worktree_git_dir() {
 # free of failure exits lets callers read it inside a command substitution.
 operation_marker() {
   local git_dir="$1" marker
-  # Word splitting is the point: rebase_states names two directories.
-  # shellcheck disable=SC2086
-  for marker in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG $rebase_states; do
-    if [ -e "$git_dir/$marker" ]; then
+  for marker in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG "${rebase_states[@]}"; do
+    [ -e "$git_dir/$marker" ] || continue
+    # git am borrows rebase-apply, and only git am --abort clears it.
+    if [ "$marker" = 'rebase-apply' ] && [ -e "$git_dir/rebase-apply/applying" ]; then
+      printf 'am\n'
+    else
       printf '%s\n' "$marker"
-      return
     fi
+    return
   done
 }
 
@@ -130,6 +145,7 @@ operation_guidance() {
     CHERRY_PICK_HEAD)          printf 'cherry-pick\tgit -C %s cherry-pick --abort\n' "$2" ;;
     REVERT_HEAD)               printf 'revert\tgit -C %s revert --abort\n' "$2" ;;
     BISECT_LOG)                printf 'bisect\tgit -C %s bisect reset\n' "$2" ;;
+    am)                        printf 'patch application\tgit -C %s am --abort\n' "$2" ;;
     rebase-merge|rebase-apply) printf 'rebase\tgit -C %s rebase --abort\n' "$2" ;;
     *)                         printf 'git operation (%s)\tgit -C %s status\n' "$1" "$2" ;;
   esac
