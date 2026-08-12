@@ -20,15 +20,10 @@ resolve_physical_path() {
   printf '%s\n' "$resolved"
 }
 
-real_path() {
-  resolve_physical_path "$1" || fail "path is not a readable directory: $1"
-}
-
 current_worktree() {
   local root
-  root="$(git rev-parse --show-toplevel 2>/dev/null)" ||
-    fail "move-branch-here requires a git worktree; run it from inside one"
-  real_path "$root"
+  root="$(git rev-parse --show-toplevel 2>/dev/null)" || return 1
+  resolve_physical_path "$root"
 }
 
 require_branch() {
@@ -41,23 +36,14 @@ require_branch() {
 # The states a rebase leaves behind, named once for every reader of them.
 rebase_states=(rebase-merge rebase-apply)
 
-# Reads the first line of a file. A value written without a trailing newline
-# makes read report failure after it has already assigned, so keep it rather
-# than trusting the exit status. A file that yields nothing is refused: for git
-# state that is a branch the scan cannot see, and a row it could not back.
+# Prints the first line of a file, or returns non-zero when it yields nothing.
+# A value written without a trailing newline makes read report failure after it
+# has already assigned, so the value decides rather than the exit status.
 first_line() {
   local line=''
-  read -r line < "$1" || true
-  [ -n "$line" ] ||
-    fail "git state file is empty or unreadable: $1; repair that worktree or clear the operation there"
+  read -r line < "$1" 2>/dev/null || true
+  [ -n "$line" ] || return 1
   printf '%s\n' "$line"
-}
-
-worktree_listing() {
-  local listing
-  listing="$(git worktree list --porcelain)" ||
-    fail "git worktree list --porcelain failed"
-  printf '%s\n' "$listing"
 }
 
 # Emits "<path>\t<locked>\t<prunable>\t<locked-reason>" for the worktree that
@@ -127,12 +113,13 @@ assert_branch_free_of_operations() {
     resolved="$(resolve_physical_path "$path")" ||
       fail_unchecked_worktree "$path"
     [ "$resolved" != "$current" ] || continue
-    git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" ||
+    git_dir="$(worktree_git_dir "$path")" ||
       fail_unchecked_worktree "$path"
 
     while IFS=$'\t' read -r state key; do
       [ -f "$git_dir/$state" ] || continue
-      name="$(first_line "$git_dir/$state")"
+      name="$(first_line "$git_dir/$state")" ||
+        fail "git state file is empty or unreadable: $git_dir/$state; repair that worktree or clear the operation there"
       [ "$name" = "$branch" ] || [ "$name" = "refs/heads/$branch" ] || continue
       fail_operation "worktree $path" "$key" "$path" "$branch"
     done <<< "$(detaching_states)"
@@ -140,10 +127,7 @@ assert_branch_free_of_operations() {
 }
 
 worktree_git_dir() {
-  local git_dir
-  git_dir="$(git -C "$1" rev-parse --absolute-git-dir)" ||
-    fail_unreadable_worktree "$1"
-  printf '%s\n' "$git_dir"
+  git -C "$1" rev-parse --absolute-git-dir 2>/dev/null
 }
 
 # Prints the marker file of an operation in progress, or nothing. Keeping this
@@ -178,7 +162,7 @@ operation_guidance() {
 
 assert_no_operation() {
   local worktree="$1" role="$2" git_dir marker
-  git_dir="$(worktree_git_dir "$worktree")"
+  git_dir="$(worktree_git_dir "$worktree")" || fail_unreadable_worktree "$role"
   marker="$(operation_marker "$git_dir")"
   [ -n "$marker" ] || return 0
   fail_operation "$role" "$marker" "$worktree"
@@ -195,8 +179,7 @@ $changes"
 
 untracked_count() {
   local files
-  files="$(git -C "$1" ls-files --others --exclude-standard)" ||
-    fail_unreadable_worktree "$1"
+  files="$(git -C "$1" ls-files --others --exclude-standard)" || return 1
   [ -n "$files" ] || { printf '0\n'; return; }
   printf '%s\n' "$files" | awk 'END { print NR + 0 }'
 }
@@ -225,9 +208,11 @@ resolve_branch() {
   local branch="$1" current branch_head listing record holder locked reason
   local prunable holder_head untracked
   require_branch "$branch"
-  current="$(current_worktree)"
+  current="$(current_worktree)" ||
+    fail "move-branch-here requires a git worktree; run it from inside one"
   branch_head="$(git rev-parse "refs/heads/$branch")"
-  listing="$(worktree_listing)"
+  listing="$(git worktree list --porcelain)" ||
+    fail "git worktree list --porcelain failed"
   record="$(holder_record "$branch" "$listing")"
 
   if [ -z "$record" ]; then
@@ -249,8 +234,9 @@ resolve_branch() {
     fail "worktree $holder holds $branch but its path is gone; run: git worktree prune"
   fi
 
-  holder="$(real_path "$holder")"
-  untracked="$(untracked_count "$holder")"
+  holder="$(resolve_physical_path "$holder")" ||
+    fail "worktree $holder is not a readable directory; run: git worktree prune"
+  untracked="$(untracked_count "$holder")" || fail_unreadable_worktree "$holder"
 
   if [ "$holder" = "$current" ]; then
     printf 'here\t%s\t%s\t%s\t%s\t%s\n' \
@@ -282,7 +268,8 @@ move_branch() {
     fail "branch $branch moved from $expected_head to $actual_head; rerun resolve against current context"
   fi
   if [ -n "$expected_holder" ]; then
-    expected_holder="$(real_path "$expected_holder")"
+    expected_holder="$(resolve_physical_path "$expected_holder")" ||
+      fail "path is not a readable directory: $expected_holder"
     [ "$mode" = "held" ] ||
       fail "branch $branch is no longer held by another worktree (now $mode); rerun resolve against current context"
     [ "$holder" = "$expected_holder" ] ||

@@ -57,6 +57,23 @@ resolve_field() {
   (cd "$root/repo" && "$HELPER" resolve "$branch") | cut -f "$index"
 }
 
+# A refusal that only reaches `resolve` is not a refusal: `move` re-resolves
+# through a command substitution, where an exit escapes only the substitution.
+assert_move_blocked() {
+  local root="$1" branch="$2" expected="$3" description="$4" head output
+  head="$(git -C "$root/repo" rev-parse "$branch")"
+  if output="$(cd "$root/repo" && "$HELPER" move "$branch" "$head" \
+    2>"$root/move-stderr")"; then
+    fail "$description: move unexpectedly succeeded: $output"
+  fi
+  assert_equal "$output" '' "$description: a refused move emits no row"
+  if ! grep -Fq "$expected" "$root/move-stderr"; then
+    fail "$description: move error was not actionable: $(cat "$root/move-stderr")"
+  fi
+  assert_equal "$(git -C "$root/repo" branch --show-current)" main \
+    "$description: a refused move leaves the current worktree alone"
+}
+
 assert_blocked() {
   local root="$1" branch="$2" expected="$3" description="$4" output
   if output="$(cd "$root/repo" && "$HELPER" resolve "$branch" 2>&1)"; then
@@ -270,6 +287,8 @@ assert_blocked() {
   elif ! grep -Fq 'is not a readable git worktree' <<< "$output"; then
     fail "an unreadable holder error was not actionable: $output"
   fi
+  assert_move_blocked "$root" feature 'is not a readable git worktree' \
+    'an unreadable holder'
 
   # A state file that yields nothing hides the branch it names just as well as
   # an unreadable worktree, so it is refused rather than read as absent.
@@ -286,6 +305,8 @@ assert_blocked() {
   if ! grep -Fq 'git state file is empty or unreadable' "$root/stderr"; then
     fail "an unreadable state file error was not actionable: $(cat "$root/stderr")"
   fi
+  assert_move_blocked "$root" feature 'git state file is empty or unreadable' \
+    'an unreadable state file'
 
   # An unreadable worktree hides whatever operation it is running, so a free
   # branch is refused rather than reported free on stdout.
@@ -302,6 +323,8 @@ assert_blocked() {
   if ! grep -Fq "git worktree remove --force $root/other" "$root/stderr"; then
     fail "an unreadable bystander error was not actionable: $(cat "$root/stderr")"
   fi
+  assert_move_blocked "$root" feature 'its operations could not be checked' \
+    'an unreadable bystander worktree'
 }
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
