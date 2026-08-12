@@ -160,8 +160,10 @@ use the adapter to:
 
 1. apply the provider's ready state — leave a GitHub issue open, or move a
    Linear issue to `Todo`;
-2. write `ready-for-agent` or `ready-for-human`, replacing the previous state
-   role and preserving the category role; and
+2. write the state label for the `ready-for-agent` or `ready-for-human` role,
+   replacing the previous state role and preserving the category role. Resolve
+   the live label name from the provider's inventory, since a role name and its
+   label string can differ; and
 3. set the planning fields together when the work belongs to a named effort —
    a GitHub milestone, or a Linear project and project milestone.
 
