@@ -47,12 +47,12 @@ fields are empty in `free` mode. Step 2 consumes those fields.
 The helper exits non-zero rather than moving a branch out from under work in
 progress. Both worktrees qualify: this one and the holder must each be free of
 uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, or
-bisect, and the holder must be unlocked and still on disk. A rebase detaches the
-worktree running it, so a branch being rebased elsewhere reads as `free` in the
-worktree list; the helper reads the rebase state to catch that and refuse. Its
-message names the blocker and the command that clears it. Report that message and stop;
-committing, stashing, finishing, aborting, unlocking, or pruning is the
-operator's call.
+bisect, and the holder must be unlocked and still on disk. A rebase or a bisect
+detaches the worktree running it, so no worktree record claims the branch and it
+reads as `free`; the helper reads those operations' own state to catch that and
+refuse. Its message names the blocker and the command that clears it. Report
+that message and stop; committing, stashing, finishing, aborting, unlocking, or
+pruning is the operator's call.
 
 ## Step 2 — Move the Branch
 

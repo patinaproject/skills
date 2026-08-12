@@ -716,8 +716,8 @@ function relocateRecords(from, branch) {
       }
       writeRecord(identity, {
         ...value,
-        // This session's provisional findings outlive the carry: they are
-        // advisory locations to revalidate, not coverage.
+        // A carry that brings no provisional data keeps this session's own
+        // findings: they are advisory locations to revalidate, not coverage.
         provisional:
           value.provisional ??
           (loaded.status === 'valid' ? loaded.record.provisional : null),

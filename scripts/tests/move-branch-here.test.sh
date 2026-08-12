@@ -154,6 +154,27 @@ assert_blocked() {
     'a bisect in progress in the holder'
   git -C "$root/held" bisect reset >/dev/null 2>&1
 
+  # A bisect deep enough to check out a midpoint detaches the holder, so no
+  # worktree record claims the branch.
+  root="$(new_fixture)"
+  for step in 1 2 3 4 5 6; do
+    printf 'base\nfeature\n%s\n' "$step" > "$root/held/README.md"
+    git -C "$root/held" commit --quiet -am "chore: #350 step $step"
+  done
+  first="$(git -C "$root/held" rev-list --max-parents=0 HEAD)"
+  git -C "$root/held" bisect start >/dev/null 2>&1
+  git -C "$root/held" bisect bad >/dev/null 2>&1
+  git -C "$root/held" bisect good "$first" >/dev/null 2>&1 || true
+  if git -C "$root/held" symbolic-ref --quiet HEAD >/dev/null; then
+    fail 'the deep bisect fixture did not detach the holder'
+  fi
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "a bisecting holder should not resolve: $output"
+  elif ! grep -Fq "git -C $root/held bisect reset" <<< "$output"; then
+    fail "a bisecting holder error was not actionable: $output"
+  fi
+  git -C "$root/held" bisect reset >/dev/null 2>&1
+
   root="$(new_fixture)"
   git -C "$root/repo" worktree lock "$root/held" --reason 'pinned by the operator'
   assert_blocked "$root" feature "git worktree unlock $root/held" 'a locked holder'

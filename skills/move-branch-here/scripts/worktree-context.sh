@@ -33,14 +33,22 @@ require_branch() {
     fail "local branch $branch does not exist; fetch or create it before moving it here"
 }
 
+# The states a rebase leaves behind, named once for every reader of them.
+rebase_states='rebase-merge rebase-apply'
+
+worktree_listing() {
+  local listing
+  listing="$(git worktree list --porcelain)" ||
+    fail "git worktree list --porcelain failed"
+  printf '%s\n' "$listing"
+}
+
 # Emits "<path>\t<locked>\t<prunable>\t<locked-reason>" for the worktree that
 # holds the branch, or nothing when no worktree holds it. Flags follow the
 # branch line inside a record, so each record is buffered until it ends. The
 # optional reason stays last because a tab IFS collapses empty middle fields.
 holder_record() {
-  local branch="$1" listing
-  listing="$(git worktree list --porcelain)" ||
-    fail "git worktree list --porcelain failed"
+  local branch="$1" listing="$2"
   printf '%s\n' "$listing" | awk -v ref="refs/heads/$branch" '
     function flush() {
       if (path != "" && head == ref) {
@@ -56,28 +64,41 @@ holder_record() {
   '
 }
 
-worktree_paths() {
-  local listing
-  listing="$(git worktree list --porcelain)" ||
-    fail "git worktree list --porcelain failed"
-  printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }'
+fail_operation_elsewhere() {
+  local path="$1" branch="$2" marker="$3" operation command
+  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$marker" "$path")"
+  fail "worktree $path is in the middle of a $operation on $branch; finish it there or run: $command"
 }
 
-# A worktree mid-rebase sits on a detached HEAD, so no record claims the branch
-# it will re-attach. The rebase state names it instead.
-assert_branch_not_rebasing() {
-  local branch="$1" path git_dir state name
+# A worktree mid-rebase or mid-bisect sits on a detached HEAD, so no worktree
+# record claims the branch it will return to. Each operation's own state names
+# that branch instead. The current worktree is left to assert_worktree_quiet,
+# which reports its operations in the first person.
+assert_branch_free_of_operations() {
+  local branch="$1" current="$2" listing="$3" paths path git_dir state name
+  paths="$(printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }')"
+
   while IFS= read -r path; do
     [ -d "$path" ] || continue
+    [ "$(real_path "$path")" != "$current" ] || continue
     git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" || continue
-    for state in rebase-merge rebase-apply; do
+
+    # Word splitting is the point: rebase_states names two directories.
+    # shellcheck disable=SC2086
+    for state in $rebase_states; do
       [ -f "$git_dir/$state/head-name" ] || continue
       read -r name < "$git_dir/$state/head-name" || continue
-      if [ "$name" = "refs/heads/$branch" ]; then
-        fail "worktree $path is rebasing $branch; finish it there or run: git -C $path rebase --abort"
-      fi
+      [ "$name" = "refs/heads/$branch" ] || continue
+      fail_operation_elsewhere "$path" "$branch" "$state"
     done
-  done <<< "$(worktree_paths)"
+
+    if [ -f "$git_dir/BISECT_START" ]; then
+      read -r name < "$git_dir/BISECT_START" || name=''
+      if [ "$name" = "$branch" ] || [ "$name" = "refs/heads/$branch" ]; then
+        fail_operation_elsewhere "$path" "$branch" BISECT_LOG
+      fi
+    fi
+  done <<< "$paths"
 }
 
 worktree_git_dir() {
@@ -91,7 +112,9 @@ worktree_git_dir() {
 # free of failure exits lets callers read it inside a command substitution.
 operation_marker() {
   local git_dir="$1" marker
-  for marker in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG rebase-merge rebase-apply; do
+  # Word splitting is the point: rebase_states names two directories.
+  # shellcheck disable=SC2086
+  for marker in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG $rebase_states; do
     if [ -e "$git_dir/$marker" ]; then
       printf '%s\n' "$marker"
       return
@@ -159,15 +182,16 @@ assert_holder_releasable() {
 resolve_branch() {
   [ "$#" -eq 1 ] || fail "resolve requires exactly one branch name"
 
-  local branch="$1" current branch_head record holder locked reason prunable
-  local holder_head untracked
+  local branch="$1" current branch_head listing record holder locked reason
+  local prunable holder_head untracked
   require_branch "$branch"
   current="$(current_worktree)"
   branch_head="$(git rev-parse "refs/heads/$branch")"
-  record="$(holder_record "$branch")"
+  listing="$(worktree_listing)"
+  record="$(holder_record "$branch" "$listing")"
 
   if [ -z "$record" ]; then
-    assert_branch_not_rebasing "$branch"
+    assert_branch_free_of_operations "$branch" "$current" "$listing"
     assert_worktree_quiet "$current" 'this worktree'
     printf 'free\t%s\t%s\t0\t\t\n' "$branch" "$branch_head"
     return
