@@ -155,13 +155,11 @@ assert_blocked() {
   git -C "$root/held" bisect reset >/dev/null 2>&1
 
   # A bisect detaches only when an untested revision sits strictly between its
-  # good and bad ends, which is the midpoint git checks out. These six commits
-  # supply that gap; then no worktree record claims the branch.
+  # good and bad ends, which is the midpoint git checks out. One commit past the
+  # fixture's two supplies that gap; then no worktree record claims the branch.
   root="$(new_fixture)"
-  for step in 1 2 3 4 5 6; do
-    printf 'base\nfeature\n%s\n' "$step" > "$root/held/README.md"
-    git -C "$root/held" commit --quiet -am "chore: #350 step $step"
-  done
+  printf 'base\nfeature\nmidpoint\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'chore: #350 bisect midpoint'
   first="$(git -C "$root/held" rev-list --max-parents=0 HEAD)"
   git -C "$root/held" bisect start >/dev/null 2>&1
   git -C "$root/held" bisect bad >/dev/null 2>&1
@@ -269,6 +267,18 @@ assert_blocked() {
     fail "an unreadable holder should not resolve: $output"
   elif ! grep -Fq 'is not a readable git worktree' <<< "$output"; then
     fail "an unreadable holder error was not actionable: $output"
+  fi
+
+  # An unreadable worktree hides whatever operation it is running, so a free
+  # branch is refused rather than reported free on stdout.
+  root="$(new_fixture)"
+  git -C "$root/repo" worktree remove "$root/held"
+  git -C "$root/repo" worktree add --quiet "$root/other" -b other-work
+  printf 'garbage\n' > "$root/other/.git"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "an unreadable bystander worktree should not resolve: $output"
+  elif ! grep -Fq "git worktree remove --force $root/other" <<< "$output"; then
+    fail "an unreadable bystander error was not actionable: $output"
   fi
 }
 

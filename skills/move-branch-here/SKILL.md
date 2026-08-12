@@ -52,10 +52,12 @@ rebase or a bisect detaches the worktree running it, so no worktree record
 claims the branch and it reads as `free`; the helper reads those operations' own
 state to catch that and refuse.
 
-Two worktrees fall outside that reach, and the move proceeds without them: one
-whose directory was deleted mid-operation, which strands no live work and whose
-metadata `git worktree prune` clears, and one the helper cannot read, which it
-names on stderr as unchecked. Relay that note when it appears.
+One case falls outside that reach: a worktree other than the holder whose
+directory was deleted mid-operation strands no live work, so the move proceeds
+and `git worktree prune` clears its metadata. Any other worktree the helper
+cannot read is refused, because an unreadable worktree hides whatever it is
+running. The holder itself is never skipped: a holder that is gone or unreadable
+stops the move on its own message.
 
 Every message names the blocker and the command that clears it. Report that
 message and stop; committing, stashing, finishing, aborting, unlocking, or

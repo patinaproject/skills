@@ -78,10 +78,10 @@ fail_operation_elsewhere() {
   fail "worktree $path is in the middle of a $operation on $branch; finish it there or run: $command"
 }
 
-# An unreadable worktree keeps its operations to itself, so say which one went
-# unchecked rather than dropping it silently.
-skipped_worktree() {
-  echo "NOTE: worktree $1 is unreadable; its operations were not checked" >&2
+# An unreadable worktree keeps its operations to itself. Refusing beats a row
+# that reads as free on stdout while the doubt goes only to stderr.
+fail_unreadable_worktree() {
+  fail "worktree $1 cannot be read, so its operations could not be checked; repair it or run: git worktree remove --force $1"
 }
 
 # "<state file>\t<guidance key>" for the operations that detach the worktree
@@ -107,15 +107,11 @@ assert_branch_free_of_operations() {
     # A worktree whose directory is gone strands no live work; its metadata
     # goes with git worktree prune.
     [ -d "$path" ] || continue
-    resolved="$(cd "$path" 2>/dev/null && pwd -P)" || {
-      skipped_worktree "$path"
-      continue
-    }
+    resolved="$(cd "$path" 2>/dev/null && pwd -P)" ||
+      fail_unreadable_worktree "$path"
     [ "$resolved" != "$current" ] || continue
-    git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" || {
-      skipped_worktree "$path"
-      continue
-    }
+    git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" ||
+      fail_unreadable_worktree "$path"
 
     while IFS=$'\t' read -r state key; do
       [ -f "$git_dir/$state" ] || continue
