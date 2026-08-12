@@ -38,8 +38,10 @@ require_branch() {
 # branch line inside a record, so each record is buffered until it ends. The
 # optional reason stays last because a tab IFS collapses empty middle fields.
 holder_record() {
-  local branch="$1"
-  git worktree list --porcelain | awk -v ref="refs/heads/$branch" '
+  local branch="$1" listing
+  listing="$(git worktree list --porcelain)" ||
+    fail "git worktree list --porcelain failed"
+  printf '%s\n' "$listing" | awk -v ref="refs/heads/$branch" '
     function flush() {
       if (path != "" && head == ref) {
         print path "\t" locked "\t" prunable "\t" reason
@@ -52,6 +54,30 @@ holder_record() {
     /^prunable/  { prunable = 1; next }
     END { flush() }
   '
+}
+
+worktree_paths() {
+  local listing
+  listing="$(git worktree list --porcelain)" ||
+    fail "git worktree list --porcelain failed"
+  printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }'
+}
+
+# A worktree mid-rebase sits on a detached HEAD, so no record claims the branch
+# it will re-attach. The rebase state names it instead.
+assert_branch_not_rebasing() {
+  local branch="$1" path git_dir state name
+  while IFS= read -r path; do
+    [ -d "$path" ] || continue
+    git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" || continue
+    for state in rebase-merge rebase-apply; do
+      [ -f "$git_dir/$state/head-name" ] || continue
+      read -r name < "$git_dir/$state/head-name" || continue
+      if [ "$name" = "refs/heads/$branch" ]; then
+        fail "worktree $path is rebasing $branch; finish it there or run: git -C $path rebase --abort"
+      fi
+    done
+  done <<< "$(worktree_paths)"
 }
 
 worktree_git_dir() {
@@ -112,10 +138,9 @@ untracked_count() {
   printf '%s\n' "$files" | awk 'END { print NR + 0 }'
 }
 
-assert_ready_to_receive() {
-  local worktree="$1"
-  assert_no_operation "$worktree" 'this worktree'
-  assert_no_tracked_changes "$worktree" 'this worktree'
+assert_worktree_quiet() {
+  assert_no_operation "$1" "$2"
+  assert_no_tracked_changes "$1" "$2"
 }
 
 assert_holder_releasable() {
@@ -123,13 +148,14 @@ assert_holder_releasable() {
   if [ "$locked" = "1" ]; then
     fail "worktree $holder is locked${reason:+ ($reason)}; run: git worktree unlock $holder"
   fi
-  assert_no_operation "$holder" "worktree $holder"
-  assert_no_tracked_changes "$holder" "worktree $holder"
+  assert_worktree_quiet "$holder" "worktree $holder"
 }
 
-# Emits "<mode>\t<branch>\t<branch-head>\t<holder-path>\t<holder-head>\t<holder-untracked>".
+# Emits
+# "<mode>\t<branch>\t<branch-head>\t<holder-untracked>\t<holder-path>\t<holder-head>".
 # Modes: here (already attached), free (no worktree holds it), held (another
-# worktree holds it).
+# worktree holds it). The holder fields stay last because they are empty in
+# free mode and a tab IFS collapses empty middle fields.
 resolve_branch() {
   [ "$#" -eq 1 ] || fail "resolve requires exactly one branch name"
 
@@ -141,8 +167,9 @@ resolve_branch() {
   record="$(holder_record "$branch")"
 
   if [ -z "$record" ]; then
-    assert_ready_to_receive "$current"
-    printf 'free\t%s\t%s\t\t\t0\n' "$branch" "$branch_head"
+    assert_branch_not_rebasing "$branch"
+    assert_worktree_quiet "$current" 'this worktree'
+    printf 'free\t%s\t%s\t0\t\t\n' "$branch" "$branch_head"
     return
   fi
 
@@ -163,16 +190,16 @@ resolve_branch() {
 
   if [ "$holder" = "$current" ]; then
     printf 'here\t%s\t%s\t%s\t%s\t%s\n' \
-      "$branch" "$branch_head" "$holder" "$branch_head" "$untracked"
+      "$branch" "$branch_head" "$untracked" "$holder" "$branch_head"
     return
   fi
 
   assert_holder_releasable "$holder" "$locked" "$reason"
-  assert_ready_to_receive "$current"
+  assert_worktree_quiet "$current" 'this worktree'
   holder_head="$(git -C "$holder" rev-parse HEAD)"
 
   printf 'held\t%s\t%s\t%s\t%s\t%s\n' \
-    "$branch" "$branch_head" "$holder" "$holder_head" "$untracked"
+    "$branch" "$branch_head" "$untracked" "$holder" "$holder_head"
 }
 
 # Detaches the holding worktree and attaches the branch here, restoring the
@@ -185,7 +212,7 @@ move_branch() {
   local row mode actual_head holder detached output restore
 
   row="$(resolve_branch "$branch")"
-  IFS=$'\t' read -r mode _ actual_head holder _ _ <<< "$row"
+  IFS=$'\t' read -r mode _ actual_head _ holder _ <<< "$row"
 
   if [ "$actual_head" != "$expected_head" ]; then
     fail "branch $branch moved from $expected_head to $actual_head; rerun resolve against current context"

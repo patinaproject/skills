@@ -34,9 +34,9 @@ run the bundled helper:
 <skill-directory>/scripts/worktree-context.sh resolve <branch>
 ```
 
-The tab-separated result carries `mode`, branch name, branch head, holder path,
-holder head, and the count of untracked files in the holder. Step 2 consumes
-those fields.
+The tab-separated result carries `mode`, branch name, branch head, the count of
+untracked files in the holder, holder path, and holder head. The two holder
+fields are empty in `free` mode. Step 2 consumes those fields.
 
 | Mode | Meaning | Next action |
 | --- | --- | --- |
@@ -47,8 +47,10 @@ those fields.
 The helper exits non-zero rather than moving a branch out from under work in
 progress. Both worktrees qualify: this one and the holder must each be free of
 uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, or
-bisect, and the holder must be unlocked and still on disk. Its message names the
-blocker and the command that clears it. Report that message and stop;
+bisect, and the holder must be unlocked and still on disk. A rebase detaches the
+worktree running it, so a branch being rebased elsewhere reads as `free` in the
+worktree list; the helper reads the rebase state to catch that and refuse. Its
+message names the blocker and the command that clears it. Report that message and stop;
 committing, stashing, finishing, aborting, unlocking, or pruning is the
 operator's call.
 
@@ -96,8 +98,9 @@ move itself still succeeded.
      --from <other-temporary-root> --branch <branch>
    ```
 
-   A root holding no review state at all exits non-zero. That is an absent
-   record rather than a failed move: report it as absent and finish.
+   An empty `relocated` list, or a root holding no review state at all (which
+   exits non-zero), means the branch has no record to carry. Both are an absent
+   record rather than a failed move: report absent and finish.
 
 3. A `missing` state with no `--from` root finishes on the report: this session
    sees no review state for the branch, and the `relocate` command above takes

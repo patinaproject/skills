@@ -867,6 +867,18 @@ try {
       }
     );
 
+    reviewCommand(
+      advancing.root,
+      advancing.temporaryRoot,
+      'provisional',
+      '--target',
+      'main',
+      '--candidate',
+      newerHead,
+      '--findings',
+      findingsFile([standardsFinding])
+    );
+
     // The reverse carry advances the older session to the newer reviewed head.
     assert.deepEqual(
       JSON.parse(
@@ -880,18 +892,19 @@ try {
       ).relocated,
       ['main']
     );
-    assert.equal(
-      JSON.parse(
-        reviewCommand(
-          advancing.root,
-          advancing.temporaryRoot,
-          'scope',
-          '--target',
-          'main'
-        )
-      ).mode,
-      'skip'
+    const carriedScope = JSON.parse(
+      reviewCommand(
+        advancing.root,
+        advancing.temporaryRoot,
+        'scope',
+        '--target',
+        'main'
+      )
     );
+    assert.equal(carriedScope.head, newerHead);
+    // The carry keeps this session's provisional findings to revalidate.
+    assert.deepEqual(carriedScope.provisionalFindings, [standardsFinding]);
+    assert.equal(carriedScope.mode, 'recheck');
   }
 
   console.info('OK: incremental polish review-state contract passed');

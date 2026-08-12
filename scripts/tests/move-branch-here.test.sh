@@ -63,7 +63,7 @@ assert_blocked() {
 
   assert_equal "$(resolve_field "$root" feature 1)" held 'a held branch resolves as held'
   assert_equal "$(resolve_field "$root" feature 3)" "$head" 'resolve reports the branch head'
-  assert_equal "$(resolve_field "$root" feature 4)" "$(cd "$root/held" && pwd -P)" \
+  assert_equal "$(resolve_field "$root" feature 5)" "$(cd "$root/held" && pwd -P)" \
     'resolve reports the holding worktree'
 
   result="$(cd "$root/repo" && "$HELPER" move feature "$head" "$root/held")"
@@ -85,6 +85,17 @@ assert_blocked() {
   git -C "$root/repo" worktree remove "$root/held"
   head="$(git -C "$root/repo" rev-parse feature)"
   assert_equal "$(resolve_field "$root" feature 1)" free 'an unheld branch resolves as free'
+
+  # Every field keeps its slot under a tab IFS, which collapses empty runs.
+  IFS=$'\t' read -r mode row_branch row_head row_untracked row_holder row_holder_head \
+    <<< "$(cd "$root/repo" && "$HELPER" resolve feature)"
+  assert_equal "$mode" free 'the free row keeps its mode'
+  assert_equal "$row_branch" feature 'the free row keeps its branch'
+  assert_equal "$row_head" "$head" 'the free row keeps its branch head'
+  assert_equal "$row_untracked" 0 'the free row keeps its untracked count in its own field'
+  assert_equal "$row_holder" '' 'the free row has no holder path'
+  assert_equal "$row_holder_head" '' 'the free row has no holder head'
+
   result="$(cd "$root/repo" && "$HELPER" move feature "$head")"
   assert_equal "$(cut -f1 <<< "$result")" attached 'move attaches a free branch'
   assert_equal "$(git -C "$root/repo" branch --show-current)" feature \
@@ -115,6 +126,20 @@ assert_blocked() {
   git -C "$root/held" cherry-pick conflicting >/dev/null 2>&1 || true
   assert_blocked "$root" feature "git -C $root/held cherry-pick --abort" \
     'a cherry-pick in progress in the holder'
+
+  root="$(new_fixture)"
+  git -C "$root/held" switch --quiet -c conflicting main
+  printf 'base\nconflict\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
+  git -C "$root/held" switch --quiet feature
+  git -C "$root/held" rebase conflicting >/dev/null 2>&1 || true
+  # A rebase detaches the holder, so no worktree record claims the branch.
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "a rebasing holder should not resolve: $output"
+  elif ! grep -Fq "git -C $root/held rebase --abort" <<< "$output"; then
+    fail "a rebasing holder error was not actionable: $output"
+  fi
+  git -C "$root/held" rebase --abort >/dev/null 2>&1 || true
 
   root="$(new_fixture)"
   git -C "$root/held" revert --no-edit HEAD~1 >/dev/null 2>&1 || true
@@ -163,7 +188,7 @@ assert_blocked() {
   printf 'local\n' > "$root/repo/collide.txt"
   printf 'scratch\n' > "$root/held/scratch.txt"
 
-  assert_equal "$(resolve_field "$root" feature 6)" 1 'resolve counts untracked files in the holder'
+  assert_equal "$(resolve_field "$root" feature 4)" 1 'resolve counts untracked files in the holder'
   if output="$(cd "$root/repo" && "$HELPER" move feature "$head" "$root/held" 2>&1)"; then
     fail "a colliding untracked file should block the attach: $output"
   elif ! grep -Fq "was restored to feature" <<< "$output"; then

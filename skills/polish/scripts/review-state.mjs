@@ -714,7 +714,14 @@ function relocateRecords(from, branch) {
         kept.push(value.targetBranch);
         return;
       }
-      writeRecord(identity, value);
+      writeRecord(identity, {
+        ...value,
+        // This session's provisional findings outlive the carry: they are
+        // advisory locations to revalidate, not coverage.
+        provisional:
+          value.provisional ??
+          (loaded.status === 'valid' ? loaded.record.provisional : null),
+      });
       relocated.push(value.targetBranch);
     });
   }
