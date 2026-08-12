@@ -38,6 +38,18 @@ new_fixture() {
   printf '%s\n' "$root"
 }
 
+# Leaves the holder on `feature` with a `conflicting` branch whose commit
+# touches the same line, so any replay of it stops on a conflict.
+new_conflicting_fixture() {
+  local root
+  root="$(new_fixture)"
+  git -C "$root/held" switch --quiet -c conflicting main
+  printf 'base\nconflict\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
+  git -C "$root/held" switch --quiet feature
+  printf '%s\n' "$root"
+}
+
 resolve_field() {
   local root="$1" branch="$2" index="$3"
   (cd "$root/repo" && "$HELPER" resolve "$branch") | cut -f "$index"
@@ -109,29 +121,17 @@ assert_blocked() {
   assert_blocked "$root" feature "git -C $root/held stash --include-untracked" \
     'uncommitted tracked changes in the holder'
 
-  root="$(new_fixture)"
-  git -C "$root/held" switch --quiet -c conflicting main
-  printf 'base\nconflict\n' > "$root/held/README.md"
-  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
-  git -C "$root/held" switch --quiet feature
+  root="$(new_conflicting_fixture)"
   git -C "$root/held" merge conflicting >/dev/null 2>&1 || true
   assert_blocked "$root" feature "git -C $root/held merge --abort" \
     'a merge in progress in the holder'
 
-  root="$(new_fixture)"
-  git -C "$root/held" switch --quiet -c conflicting main
-  printf 'base\nconflict\n' > "$root/held/README.md"
-  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
-  git -C "$root/held" switch --quiet feature
+  root="$(new_conflicting_fixture)"
   git -C "$root/held" cherry-pick conflicting >/dev/null 2>&1 || true
   assert_blocked "$root" feature "git -C $root/held cherry-pick --abort" \
     'a cherry-pick in progress in the holder'
 
-  root="$(new_fixture)"
-  git -C "$root/held" switch --quiet -c conflicting main
-  printf 'base\nconflict\n' > "$root/held/README.md"
-  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
-  git -C "$root/held" switch --quiet feature
+  root="$(new_conflicting_fixture)"
   git -C "$root/held" rebase conflicting >/dev/null 2>&1 || true
   # A rebase detaches the holder, so no worktree record claims the branch.
   if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
@@ -154,8 +154,9 @@ assert_blocked() {
     'a bisect in progress in the holder'
   git -C "$root/held" bisect reset >/dev/null 2>&1
 
-  # A bisect only detaches once the range holds an untested midpoint to check
-  # out, which these commits supply. Then no worktree record claims the branch.
+  # A bisect detaches only when an untested revision sits strictly between its
+  # good and bad ends, which is the midpoint git checks out. These six commits
+  # supply that gap; then no worktree record claims the branch.
   root="$(new_fixture)"
   for step in 1 2 3 4 5 6; do
     printf 'base\nfeature\n%s\n' "$step" > "$root/held/README.md"
@@ -177,12 +178,8 @@ assert_blocked() {
   git -C "$root/held" bisect reset >/dev/null 2>&1
 
   # git am borrows the rebase-apply state, and only git am --abort clears it.
-  root="$(new_fixture)"
-  git -C "$root/held" switch --quiet -c conflicting main
-  printf 'base\nconflict\n' > "$root/held/README.md"
-  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
-  git -C "$root/held" format-patch --quiet -1 -o "$root/patches" >/dev/null
-  git -C "$root/held" switch --quiet feature
+  root="$(new_conflicting_fixture)"
+  git -C "$root/held" format-patch --quiet -1 -o "$root/patches" conflicting >/dev/null
   git -C "$root/held" am "$root/patches"/*.patch >/dev/null 2>&1 || true
   assert_blocked "$root" feature "git -C $root/held am --abort" \
     'a patch application in progress in the holder'

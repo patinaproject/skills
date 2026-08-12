@@ -46,12 +46,16 @@ fields are empty in `free` mode. Step 2 consumes those fields.
 
 The helper exits non-zero rather than moving a branch out from under work in
 progress. Both worktrees qualify: this one and the holder must each be free of
-uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, or
-bisect, and the holder must be unlocked and still on disk. A rebase or a bisect
-detaches the worktree running it, so no worktree record claims the branch and it
-reads as `free`; the helper reads those operations' own state to catch that and
-refuse. A worktree whose directory was deleted mid-operation is past stranding:
-`git worktree prune` clears its metadata along with that state.
+uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, bisect,
+or patch application, and the holder must be unlocked and still on disk. A
+rebase or a bisect detaches the worktree running it, so no worktree record
+claims the branch and it reads as `free`; the helper reads those operations' own
+state to catch that and refuse.
+
+Two worktrees fall outside that reach, and the move proceeds without them: one
+whose directory was deleted mid-operation, which strands no live work and whose
+metadata `git worktree prune` clears, and one the helper cannot read, which it
+names on stderr as unchecked. Relay that note when it appears.
 
 Every message names the blocker and the command that clears it. Report that
 message and stop; committing, stashing, finishing, aborting, unlocking, or
