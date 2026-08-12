@@ -155,8 +155,8 @@ verbatim.
 ## When an issue becomes ready
 
 An issue is ready when an implementation brief can be written from it without a
-new decision and without missing evidence. Making an issue ready is a person's
-decision. Whenever they make it, use the adapter to:
+new decision and without missing evidence. Whenever a person makes that call,
+use the adapter to:
 
 1. apply the provider's ready state — leave a GitHub issue open, or move a
    Linear issue to `Todo`;
