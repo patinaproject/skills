@@ -45,10 +45,12 @@ those fields.
 | `held` | Another worktree holds the branch | Release and attach it in Step 2 |
 
 The helper exits non-zero rather than moving a branch out from under work in
-progress — uncommitted tracked changes, an operation in progress, a locked
-holder, or a holder path that no longer exists. Its message names the blocker
-and the command that clears it. Report that message and stop; committing,
-stashing, finishing, aborting, or unlocking is the operator's call.
+progress. Both worktrees qualify: this one and the holder must each be free of
+uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, or
+bisect, and the holder must be unlocked and still on disk. Its message names the
+blocker and the command that clears it. Report that message and stop;
+committing, stashing, finishing, aborting, unlocking, or pruning is the
+operator's call.
 
 ## Step 2 — Move the Branch
 
@@ -93,6 +95,9 @@ move itself still succeeded.
    node <polish-skill-directory>/scripts/review-state.mjs relocate \
      --from <other-temporary-root> --branch <branch>
    ```
+
+   A root holding no review state at all exits non-zero. That is an absent
+   record rather than a failed move: report it as absent and finish.
 
 3. A `missing` state with no `--from` root finishes on the report: this session
    sees no review state for the branch, and the `relocate` command above takes

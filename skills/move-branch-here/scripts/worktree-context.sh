@@ -67,14 +67,16 @@ operation_marker() {
   done
 }
 
-# Prints "<operation>\t<command that clears it>" for a marker file.
+# Prints "<operation>\t<command that clears it>" for a marker file. The final
+# case keeps an unrecognized marker honest instead of naming the wrong command.
 operation_guidance() {
   case "$1" in
-    MERGE_HEAD)       printf 'merge\tgit -C %s merge --abort\n' "$2" ;;
-    CHERRY_PICK_HEAD) printf 'cherry-pick\tgit -C %s cherry-pick --abort\n' "$2" ;;
-    REVERT_HEAD)      printf 'revert\tgit -C %s revert --abort\n' "$2" ;;
-    BISECT_LOG)       printf 'bisect\tgit -C %s bisect reset\n' "$2" ;;
-    *)                printf 'rebase\tgit -C %s rebase --abort\n' "$2" ;;
+    MERGE_HEAD)                printf 'merge\tgit -C %s merge --abort\n' "$2" ;;
+    CHERRY_PICK_HEAD)          printf 'cherry-pick\tgit -C %s cherry-pick --abort\n' "$2" ;;
+    REVERT_HEAD)               printf 'revert\tgit -C %s revert --abort\n' "$2" ;;
+    BISECT_LOG)                printf 'bisect\tgit -C %s bisect reset\n' "$2" ;;
+    rebase-merge|rebase-apply) printf 'rebase\tgit -C %s rebase --abort\n' "$2" ;;
+    *)                         printf 'git operation (%s)\tgit -C %s status\n' "$1" "$2" ;;
   esac
 }
 

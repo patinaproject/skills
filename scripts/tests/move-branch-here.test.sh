@@ -117,6 +117,19 @@ assert_blocked() {
     'a cherry-pick in progress in the holder'
 
   root="$(new_fixture)"
+  git -C "$root/held" revert --no-edit HEAD~1 >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held revert --abort" \
+    'a revert in progress in the holder'
+
+  root="$(new_fixture)"
+  git -C "$root/held" bisect start >/dev/null 2>&1
+  git -C "$root/held" bisect bad >/dev/null 2>&1
+  git -C "$root/held" bisect good main >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held bisect reset" \
+    'a bisect in progress in the holder'
+  git -C "$root/held" bisect reset >/dev/null 2>&1
+
+  root="$(new_fixture)"
   git -C "$root/repo" worktree lock "$root/held" --reason 'pinned by the operator'
   assert_blocked "$root" feature "git worktree unlock $root/held" 'a locked holder'
   git -C "$root/repo" worktree unlock "$root/held"
