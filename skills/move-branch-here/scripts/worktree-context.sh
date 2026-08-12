@@ -12,11 +12,16 @@ fail_with_output() {
   exit 1
 }
 
-real_path() {
+# Prints a path as git reports it, or returns non-zero so each caller can name
+# what an unreadable path means where it stands.
+resolve_physical_path() {
   local resolved
-  resolved="$(cd "$1" 2>/dev/null && pwd -P)" ||
-    fail "path is not a readable directory: $1"
+  resolved="$(cd "$1" 2>/dev/null && pwd -P)" || return 1
   printf '%s\n' "$resolved"
+}
+
+real_path() {
+  resolve_physical_path "$1" || fail "path is not a readable directory: $1"
 }
 
 current_worktree() {
@@ -37,9 +42,9 @@ require_branch() {
 rebase_states=(rebase-merge rebase-apply)
 
 # Reads the first line of a file. A value written without a trailing newline
-# makes read report failure after it has already assigned, so keep it; an empty
-# result means the file itself gave nothing, which for git state is a branch
-# this scan would otherwise miss.
+# makes read report failure after it has already assigned, so keep it rather
+# than trusting the exit status. A file that yields nothing is refused: for git
+# state that is a branch the scan cannot see, and a row it could not back.
 first_line() {
   local line=''
   read -r line < "$1" || true
@@ -119,7 +124,7 @@ assert_branch_free_of_operations() {
     # A worktree whose directory is gone strands no live work; its metadata
     # goes with git worktree prune.
     [ -d "$path" ] || continue
-    resolved="$(cd "$path" 2>/dev/null && pwd -P)" ||
+    resolved="$(resolve_physical_path "$path")" ||
       fail_unchecked_worktree "$path"
     [ "$resolved" != "$current" ] || continue
     git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" ||
