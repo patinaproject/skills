@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.28.0](https://github.com/patinaproject/skills/compare/v2.27.0...v2.28.0) (2026-08-12)
+
+
+### Features
+
+* [#337](https://github.com/patinaproject/skills/issues/337) route off-branch doc capture to the implementing issue ([#338](https://github.com/patinaproject/skills/issues/338)) ([b3dc5ec](https://github.com/patinaproject/skills/commit/b3dc5ec91e505c8619bed2f9b9ef8ffefa9475f2))
+* [#350](https://github.com/patinaproject/skills/issues/350) add move-branch-here skill ([#351](https://github.com/patinaproject/skills/issues/351)) ([5a4cf16](https://github.com/patinaproject/skills/commit/5a4cf1630d9c50283c7ad6d0ff5463c668171bcc))
+
 ## [2.27.0](https://github.com/patinaproject/skills/compare/v2.26.1...v2.27.0) (2026-08-11)
 
 
