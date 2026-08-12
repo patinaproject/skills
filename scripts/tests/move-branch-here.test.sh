@@ -77,7 +77,7 @@ assert_blocked() {
 
   assert_equal "$(resolve_field "$root" feature 1)" held 'a held branch resolves as held'
   assert_equal "$(resolve_field "$root" feature 3)" "$head" 'resolve reports the branch head'
-  assert_equal "$(resolve_field "$root" feature 5)" "$(cd "$root/held" && pwd -P)" \
+  assert_equal "$(resolve_field "$root" feature 5)" "$root/held" \
     'resolve reports the holding worktree'
 
   result="$(cd "$root/repo" && "$HELPER" move feature "$head" "$root/held")"
@@ -276,7 +276,9 @@ assert_blocked() {
   root="$(new_fixture)"
   git -C "$root/repo" worktree remove "$root/held"
   git -C "$root/repo" worktree add --quiet "$root/other" -b other-work
-  : > "$(git -C "$root/other" rev-parse --absolute-git-dir)/BISECT_START"
+  # A lone newline reads back as an empty first line, which hides the branch
+  # just as an empty file does.
+  printf '\n' > "$(git -C "$root/other" rev-parse --absolute-git-dir)/BISECT_START"
   if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>"$root/stderr")"; then
     fail "an unreadable state file should not resolve: $output"
   fi

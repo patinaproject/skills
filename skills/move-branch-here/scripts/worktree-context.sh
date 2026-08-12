@@ -42,9 +42,9 @@ rebase_states=(rebase-merge rebase-apply)
 # this scan would otherwise miss.
 first_line() {
   local line=''
-  if ! read -r line < "$1" && [ -z "$line" ]; then
+  read -r line < "$1" || true
+  [ -n "$line" ] ||
     fail "git state file is empty or unreadable: $1; repair that worktree or clear the operation there"
-  fi
   printf '%s\n' "$line"
 }
 
