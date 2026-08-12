@@ -275,10 +275,14 @@ assert_blocked() {
   git -C "$root/repo" worktree remove "$root/held"
   git -C "$root/repo" worktree add --quiet "$root/other" -b other-work
   printf 'garbage\n' > "$root/other/.git"
-  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>"$root/stderr")"; then
     fail "an unreadable bystander worktree should not resolve: $output"
-  elif ! grep -Fq "git worktree remove --force $root/other" <<< "$output"; then
-    fail "an unreadable bystander error was not actionable: $output"
+  fi
+  # The refusal has to reach the machine channel: a row on stdout would move the
+  # branch no matter what stderr said.
+  assert_equal "$output" '' 'a refused resolve emits no row'
+  if ! grep -Fq "git worktree remove --force $root/other" "$root/stderr"; then
+    fail "an unreadable bystander error was not actionable: $(cat "$root/stderr")"
   fi
 }
 
