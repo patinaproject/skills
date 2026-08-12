@@ -25,6 +25,40 @@ disagreement in favor of GitHub.
 The sync creates a comment thread whose replies publish to GitHub. Comments
 outside the synced thread remain private.
 
+## Triage roles
+
+The vendored `triage` skill uses seven stable roles. That set is the whole
+vocabulary; a repository works within it rather than adding a role of its own.
+Translate every role through this adapter rather than assuming it is a label or
+a lifecycle state.
+
+Roles sit on two independent axes. A triaged issue carries exactly one
+**category** role and exactly one **state** role. A transition replaces the
+state role and preserves the category role.
+
+| Role | Axis | Meaning | GitHub | Linear |
+| --- | --- | --- | --- | --- |
+| `bug` | category | Something is broken | label | label |
+| `enhancement` | category | New feature or improvement | label | label |
+| `needs-triage` | state | Maintainer evaluation is required | label, issue open | label, Triage |
+| `needs-info` | state | Waiting for information | label, issue open | label |
+| `ready-for-agent` | state | Ready for an implementation agent | label, issue open | label, `Todo` |
+| `ready-for-human` | state | Requires human implementation | label, issue open | label, `Todo` |
+| `wontfix` | state | Deliberately declined | label, issue closed | label, Canceled |
+
+`wontfix` is terminal: it accompanies closure rather than sitting on open work.
+`ready-for-agent` and `ready-for-human` are both written; each is applied
+directly rather than read from the other's absence.
+
+A status and a role are different axes. The status says where the issue sits;
+the role says what triage decided. An issue that stays in the triage state while
+carrying a role is normal: triage has finished and a person has not yet accepted
+it. A person owns every triage-facing status change.
+
+In vendored triage guidance, interpret "GitHub issue" as the canonical tracker
+issue and route example commands through this adapter. Pull requests remain
+forge objects.
+
 ## Public repositories: GitHub Issues
 
 Prefer connected GitHub tools in interactive sessions. Use `gh` when a
@@ -49,25 +83,11 @@ Use the current repository unless the caller explicitly names another public
 repository. Resolve issue numbers, node IDs, labels, milestones, assignees, and
 relationships before mutation. Follow pagination for exhaustive reads.
 
-### Public lifecycle and triage roles
+### Public lifecycle
 
-GitHub issues use open/closed state plus these repository labels:
-
-| State role | Meaning |
-| --- | --- |
-| `needs-triage` | Maintainer evaluation is required |
-| `needs-info` | Waiting for information |
-| `ready-for-agent` | Ready for an implementation agent |
-| `ready-for-human` | Requires human implementation |
-| `wontfix` | Deliberately closed without implementation |
-
-Roles sit on two independent axes. A triaged issue carries exactly one
-**category** role, `bug` or `enhancement`, and exactly one **state** role from
-the table above. A transition replaces the state role and preserves the category
-role; never stack a second role on either axis.
-
-New public issues receive `needs-triage` unless they are already ready. A ready
-issue stays open and carries `ready-for-agent` or `ready-for-human`. Close
+GitHub issues carry the roles above as repository labels, alongside open/closed
+state. New public issues receive `needs-triage` unless they are already ready. A
+ready issue stays open and carries `ready-for-agent` or `ready-for-human`. Close
 duplicates with the duplicate reason and native relationship when available;
 close deliberate non-work with `wontfix` and a rationale.
 
@@ -115,24 +135,11 @@ operation, use Linear's GraphQL API at `https://api.linear.app/graphql`.
 Personal API keys are passed directly in `Authorization`; OAuth tokens use
 `Authorization: Bearer <token>`. Never print or commit a credential.
 
-### Private lifecycle and triage roles
+### Private lifecycle
 
-- New work enters Triage.
-- `needs-triage` marks an issue awaiting evaluation; it stays in Triage.
-- `needs-info` marks an issue waiting on its reporter.
-- `ready-for-agent` and `ready-for-human` pair with `Todo`. Both are written
-  labels; neither is inferred from the absence of the other.
-- `wontfix` pairs with Canceled and the rationale recorded.
-- Duplicate work uses Duplicate plus `duplicateOf`.
-
-The category roles `bug` and `enhancement` are ordinary labels in both
-providers. They are independent of the state role and of the lifecycle state,
-so a transition never removes them.
-
-A status and a role are different axes. The status says where the issue sits;
-the role says what triage decided. An issue that stays in Triage while carrying
-a role is normal: triage has finished and a person has not yet accepted it. A
-person owns every triage-facing status change.
+New work enters Triage. The roles above carry their Linear states, and duplicate
+work uses Duplicate plus `duplicateOf`. Record a `wontfix` rationale on the
+issue.
 
 Start work by self-assigning only when unassigned, then moving the issue to
 `In Progress` when it is not already started or completed. Resolve work with
@@ -144,29 +151,6 @@ Linear Releases and release notes describe what shipped.
 
 The canonical private branch is the fetched issue's `gitBranchName`, used
 verbatim.
-
-## Vendored role translation
-
-The vendored `triage` skill uses the stable roles `bug`, `enhancement`,
-`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and
-`wontfix`. That set is the whole vocabulary; a repository adds no role of its
-own to it. Translate every role through this adapter instead of assuming it is
-a label or a lifecycle state.
-
-| Role | GitHub | Linear |
-| --- | --- | --- |
-| `bug`, `enhancement` | label | label |
-| `needs-triage` | label, issue open | label, Triage |
-| `needs-info` | label, issue open | label |
-| `ready-for-agent` | label, issue open | label, `Todo` |
-| `ready-for-human` | label, issue open | label, `Todo` |
-| `wontfix` | label, issue closed | label, Canceled |
-
-Duplicate work and blocking use the selected provider's native relationships.
-
-In vendored triage guidance, interpret "GitHub issue" as the canonical tracker
-issue and route example commands through this adapter. Pull requests remain
-forge objects.
 
 ## When an issue becomes ready
 
@@ -186,9 +170,9 @@ user-impacting fault. In every other case the priority stays unset until a
 person chooses it. Record priority in the provider's priority field where it has
 one, such as Linear's; never encode it as a label.
 
-Release attachment is not a readiness side effect; releases describe what
-shipped. A blocked issue may still become ready — record its dependency with
-the native blocked-by relationship.
+Releases describe what shipped, so the release pipeline owns them and readiness
+leaves them alone. A blocked issue may still become ready — record its
+dependency with the native blocked-by relationship.
 
 ## Tracker-agnostic operations
 
