@@ -105,13 +105,16 @@ function userScopedRootName() {
   }`;
 }
 
+// Isolated test runs name the private root plainly; normal runs scope it to the
+// user. Named once here so the carry's read path can look for either one.
+function privateRootName(
+  isolated = Boolean(process.env.PATINAPROJECT_POLISH_TMP_DIR)
+) {
+  return isolated ? 'patinaproject' : userScopedRootName();
+}
+
 function reviewRoot() {
-  return join(
-    temporaryRoot(),
-    process.env.PATINAPROJECT_POLISH_TMP_DIR
-      ? 'patinaproject'
-      : userScopedRootName()
-  );
+  return join(temporaryRoot(), privateRootName());
 }
 
 function reviewDirectory() {
@@ -615,8 +618,9 @@ function resolveSourceDirectory(from) {
   const candidates = [
     ...(basename(root) === 'polish-reviews' ? [root] : []),
     join(root, 'polish-reviews'),
-    join(root, userScopedRootName(), 'polish-reviews'),
-    join(root, 'patinaproject', 'polish-reviews'),
+    // The other session's root name is not ours to assume, so try both.
+    join(root, privateRootName(false), 'polish-reviews'),
+    join(root, privateRootName(true), 'polish-reviews'),
   ];
 
   for (const candidate of candidates) {
