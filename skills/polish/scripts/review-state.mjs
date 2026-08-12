@@ -13,6 +13,7 @@ import {
   lstatSync,
   mkdirSync,
   openSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   renameSync,
@@ -20,7 +21,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
-import { isAbsolute, join, resolve } from 'node:path';
+import { basename, isAbsolute, join, resolve } from 'node:path';
 
 const schemaVersion = 1;
 const axes = new Set(['architecture', 'spec', 'standards']);
@@ -58,7 +59,7 @@ function resolveTarget(targetBranch) {
   throw new Error(`Target branch does not resolve: ${targetBranch}`);
 }
 
-function currentIdentity(targetBranch) {
+function repositoryIdentity() {
   const root = git(['rev-parse', '--show-toplevel']);
   const commonDirectory = git(['rev-parse', '--git-common-dir']);
   const absoluteCommonDirectory = realpathSync(
@@ -66,17 +67,26 @@ function currentIdentity(targetBranch) {
       ? commonDirectory
       : resolve(root, commonDirectory)
   );
+
+  // Linked worktrees share one common directory, so this identity follows a
+  // branch between the worktrees of one repository.
+  return createHash('sha256').update(absoluteCommonDirectory).digest('hex');
+}
+
+function currentBranch() {
   const sourceBranch = git(['branch', '--show-current']);
 
   if (sourceBranch.length === 0) {
     throw new Error('Polish review state requires a named source branch.');
   }
 
+  return sourceBranch;
+}
+
+function currentIdentity(targetBranch) {
   return {
-    repository: createHash('sha256')
-      .update(absoluteCommonDirectory)
-      .digest('hex'),
-    sourceBranch,
+    repository: repositoryIdentity(),
+    sourceBranch: currentBranch(),
     targetBranch,
   };
 }
@@ -87,22 +97,28 @@ function temporaryRoot() {
     : realpathSync(tmpdir());
 }
 
+function userScopedRootName() {
+  return `patinaproject-${
+    typeof process.getuid === 'function'
+      ? process.getuid()
+      : createHash('sha256').update(userInfo().username).digest('hex')
+  }`;
+}
+
 function reviewRoot() {
-  const privateRootName = process.env.PATINAPROJECT_POLISH_TMP_DIR
-    ? 'patinaproject'
-    : `patinaproject-${
-        typeof process.getuid === 'function'
-          ? process.getuid()
-          : createHash('sha256').update(userInfo().username).digest('hex')
-      }`;
-  return join(temporaryRoot(), privateRootName);
+  return join(
+    temporaryRoot(),
+    process.env.PATINAPROJECT_POLISH_TMP_DIR
+      ? 'patinaproject'
+      : userScopedRootName()
+  );
 }
 
 function reviewDirectory() {
   return join(reviewRoot(), 'polish-reviews');
 }
 
-function assertPrivateDirectory(path) {
+function assertPrivateDirectory(path, { enforceMode = true } = {}) {
   let descriptor;
   try {
     descriptor = openSync(
@@ -121,7 +137,7 @@ function assertPrivateDirectory(path) {
     ) {
       throw new Error(`Review state directory has a foreign owner: ${path}`);
     }
-    if (process.platform !== 'win32') {
+    if (enforceMode && process.platform !== 'win32') {
       fchmodSync(descriptor, 0o700);
     }
   } catch (error) {
@@ -582,15 +598,115 @@ function saveProvisional(targetBranch, candidateHead, findings) {
   });
 }
 
+function resolveSourceDirectory(from) {
+  const root = resolve(from);
+  const candidates = [
+    ...(basename(root) === 'polish-reviews' ? [root] : []),
+    join(root, 'polish-reviews'),
+    join(root, userScopedRootName(), 'polish-reviews'),
+    join(root, 'patinaproject', 'polish-reviews'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      assertPrivateDirectory(candidate, { enforceMode: false });
+      return candidate;
+    }
+  }
+
+  throw new Error(`No polish review state directory beneath: ${root}`);
+}
+
+function readSourceRecord(path) {
+  const state = lstatSync(path);
+  if (!state.isFile() || state.isSymbolicLink()) {
+    return null;
+  }
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function relocateRecords(from, branch) {
+  const sourceDirectory = resolveSourceDirectory(from);
+  const destinationDirectory = reviewDirectory();
+  if (
+    existsSync(destinationDirectory) &&
+    realpathSync(destinationDirectory) === realpathSync(sourceDirectory)
+  ) {
+    throw new Error(
+      `Source review state is already this session's review state: ${sourceDirectory}`
+    );
+  }
+
+  const repository = repositoryIdentity();
+  const kept = [];
+  const relocated = [];
+
+  for (const name of readdirSync(sourceDirectory).sort()) {
+    if (!/^[a-f0-9]{64}\.json$/.test(name)) {
+      continue;
+    }
+    const value = readSourceRecord(join(sourceDirectory, name));
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      typeof value.targetBranch !== 'string'
+    ) {
+      continue;
+    }
+    const identity = {
+      repository,
+      sourceBranch: branch,
+      targetBranch: value.targetBranch,
+    };
+    // Identity equality keeps another repository's findings out of this one.
+    if (!isReviewRecord(value, identity)) {
+      continue;
+    }
+
+    withRecordLock(identity, () => {
+      if (loadRecord(identity).status === 'valid') {
+        kept.push(value.targetBranch);
+        return;
+      }
+      writeRecord(identity, value);
+      relocated.push(value.targetBranch);
+    });
+  }
+
+  return {
+    branch,
+    kept: kept.sort(),
+    relocated: relocated.sort(),
+    source: sourceDirectory,
+  };
+}
+
 function main() {
   const { command, options } = parseArguments(process.argv.slice(2));
-  const commands = new Set(['complete', 'provisional', 'scope']);
+  const commands = new Set(['complete', 'provisional', 'relocate', 'scope']);
   if (!command || !commands.has(command)) {
     throw new Error(`Unknown command: ${command ?? '(missing)'}`);
   }
 
-  const target = requiredOption(options, 'target');
   let result;
+
+  if (command === 'relocate') {
+    console.info(
+      JSON.stringify(
+        relocateRecords(
+          requiredOption(options, 'from'),
+          options.get('branch') || currentBranch()
+        )
+      )
+    );
+    return;
+  }
+
+  const target = requiredOption(options, 'target');
 
   if (command === 'scope') {
     result = selectScope(target);

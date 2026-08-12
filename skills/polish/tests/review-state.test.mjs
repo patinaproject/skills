@@ -650,6 +650,139 @@ try {
     assert.match(sensitiveResult.stderr, /valid finding array/);
   }
 
+  {
+    const carried = createRepository();
+    const reviewedHead = git(carried.root, 'rev-parse', 'HEAD');
+    reviewCommand(
+      carried.root,
+      carried.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      reviewedHead,
+      '--outcome',
+      'changes_requested',
+      '--findings',
+      findingsFile([standardsFinding])
+    );
+
+    const session = mkdtempSync(join(tmpdir(), 'patinaproject-polish-session-'));
+    fixtures.push(session);
+    assert.equal(
+      JSON.parse(
+        reviewCommand(carried.root, session, 'scope', '--target', 'main')
+      ).state,
+      'missing'
+    );
+
+    const relocated = JSON.parse(
+      reviewCommand(
+        carried.root,
+        session,
+        'relocate',
+        '--from',
+        carried.temporaryRoot
+      )
+    );
+    assert.deepEqual(relocated.relocated, ['main']);
+    assert.deepEqual(relocated.kept, []);
+    assert.equal(relocated.branch, '323-incremental-polish');
+
+    const head = commitChange(carried.root, 'base\nchange\nfix\n');
+    const scope = JSON.parse(
+      reviewCommand(carried.root, session, 'scope', '--target', 'main')
+    );
+    assert.deepEqual(scope, {
+      authoritativeFindings: [standardsFinding],
+      base: reviewedHead,
+      head,
+      mode: 'incremental',
+      provisionalFindings: [],
+      range: `${reviewedHead}..${head}`,
+      state: 'valid',
+    });
+    // The source root keeps its copy: relocation copies rather than empties.
+    assert.equal(recordFiles(carried.temporaryRoot).names.length, 1);
+
+    const keeping = JSON.parse(
+      reviewCommand(
+        carried.root,
+        session,
+        'relocate',
+        '--from',
+        carried.temporaryRoot
+      )
+    );
+    assert.deepEqual(keeping.kept, ['main']);
+    assert.deepEqual(keeping.relocated, []);
+
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          carried.root,
+          session,
+          'relocate',
+          '--from',
+          carried.temporaryRoot,
+          '--branch',
+          'another-branch'
+        )
+      ).relocated,
+      []
+    );
+
+    const foreign = createRepository();
+    const foreignHead = git(foreign.root, 'rev-parse', 'HEAD');
+    reviewCommand(
+      foreign.root,
+      foreign.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      foreignHead,
+      '--outcome',
+      'passed'
+    );
+    const isolated = mkdtempSync(
+      join(tmpdir(), 'patinaproject-polish-isolated-')
+    );
+    fixtures.push(isolated);
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          carried.root,
+          isolated,
+          'relocate',
+          '--from',
+          foreign.temporaryRoot
+        )
+      ).relocated,
+      []
+    );
+
+    const sameRoot = reviewCommandResult(
+      carried.root,
+      session,
+      'relocate',
+      '--from',
+      session
+    );
+    assert.equal(sameRoot.status, 1);
+    assert.match(sameRoot.stderr, /already this session's review state/);
+
+    const absent = reviewCommandResult(
+      carried.root,
+      session,
+      'relocate',
+      '--from',
+      join(session, 'absent')
+    );
+    assert.equal(absent.status, 1);
+    assert.match(absent.stderr, /No polish review state directory beneath/);
+  }
+
   console.info('OK: incremental polish review-state contract passed');
 } finally {
   findingsFileIndex = 0;

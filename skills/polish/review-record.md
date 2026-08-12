@@ -56,6 +56,27 @@ after the command completes. The helper exits `1` on invalid arguments or an
 operational error; no state transition is complete unless it exits `0` and
 prints the resulting JSON record.
 
+## Carry a branch's record between temporary roots
+
+Record identity spans the worktrees of one repository, so a branch keeps its
+coverage when it moves between them. A session that resolves a different
+temporary root — its own `TMPDIR` — sees no record at all. `relocate` copies
+this repository's records for one branch from that other root into this
+session's review directory:
+
+```sh
+node <polish-skill-directory>/scripts/review-state.mjs relocate \
+  --from <other-temporary-root> \
+  --branch <branch>
+```
+
+`--branch` defaults to the current branch. `--from` accepts the other session's
+temporary root or a `polish-reviews` directory directly. The result reports the
+resolved `source`, the target branches `relocated`, and the target branches
+`kept` because this session already holds a valid record for them. Records
+belonging to another repository or another source branch stay where they are,
+and the source root keeps its copy.
+
 ## Finding shape
 
 Finding files are JSON arrays. Keep the minimum needed to revalidate each

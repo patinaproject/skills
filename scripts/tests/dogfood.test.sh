@@ -26,6 +26,7 @@ SKILLS=(
   codex-pr-feedback-loop
   polish
   update-branch
+  move-branch-here
   grill-to-spec
   write-changelog
   prompting-fable
