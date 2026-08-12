@@ -61,12 +61,11 @@ GitHub issues use open/closed state plus these repository labels:
 | `ready-for-human` | Requires human implementation |
 | `wontfix` | Deliberately closed without implementation |
 
-New public issues receive `needs-triage` unless they already meet the ready bar.
-Shaping labels may stack. Remove `needs-triage` when triage begins; remove only
-the shaping label whose activity resolved. Ready work has exactly one of
-`ready-for-agent` or `ready-for-human`. Close duplicates with the duplicate
-reason and native relationship when available; close deliberate non-work with
-`wontfix` and a rationale.
+New public issues receive `needs-triage` unless they are already ready. An issue
+carries exactly one of these roles at a time; replace the old role rather than
+stacking a second one. Close duplicates with the duplicate reason and native
+relationship when available; close deliberate non-work with `wontfix` and a
+rationale.
 
 ### Public branch name
 
@@ -115,12 +114,17 @@ Personal API keys are passed directly in `Authorization`; OAuth tokens use
 ### Private lifecycle and triage roles
 
 - New work enters Triage.
-- `needs-triage` maps to the Triage inbox.
-- `needs-info` maps to Backlog plus the applicable shaping activity.
-- `ready-for-agent` maps to Todo without `ready-for-human`.
-- `ready-for-human` maps to Todo with `ready-for-human`.
-- `wontfix` maps to Canceled with the rationale recorded.
+- `needs-triage` marks an issue awaiting evaluation.
+- `needs-info` marks an issue waiting on its reporter.
+- `ready-for-agent` and `ready-for-human` are written labels; neither is
+  inferred from the absence of the other.
+- `wontfix` pairs with Canceled and the rationale recorded.
 - Duplicate work uses Duplicate plus `duplicateOf`.
+
+A status and a role are different axes. The status says where the issue sits;
+the role says what triage decided. An issue that stays in Triage while carrying
+a role is normal: triage has finished and a person has not yet accepted it. A
+person owns every triage-facing status change.
 
 Start work by self-assigning only when unassigned, then moving the issue to
 `In Progress` when it is not already started or completed. Resolve work with
@@ -132,6 +136,38 @@ Linear Releases and release notes describe what shipped.
 
 The canonical private branch is the fetched issue's `gitBranchName`, used
 verbatim.
+
+## Vendored role translation
+
+The vendored `triage` skill uses the stable roles `bug`, `enhancement`,
+`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and
+`wontfix`. That set is the whole vocabulary; a repository adds no role of its
+own to it. Translate every role through this adapter instead of assuming it is
+a label or a lifecycle state. Duplicate work and blocking use the selected
+provider's native relationships.
+
+In vendored triage guidance, interpret "GitHub issue" as the canonical tracker
+issue and route example commands through this adapter. Pull requests remain
+forge objects.
+
+## When an issue becomes ready
+
+An issue is ready when an implementation brief can be written from it without a
+new decision and without missing evidence. Readying is a person's decision.
+Whenever they make it, use the adapter to:
+
+1. apply the provider's ready state;
+2. write `ready-for-agent` or `ready-for-human`; and
+3. set a project and milestone together when the work belongs to a named
+   effort.
+
+Triage sets the highest priority only when the evidence shows a live,
+user-impacting fault. In every other case the priority stays unset until a
+person chooses it. Urgency is the priority field, never a label.
+
+Release attachment is not a readiness side effect; releases describe what
+shipped. A blocked issue may still become ready — record its dependency with
+the native blocked-by relationship.
 
 ## Tracker-agnostic operations
 

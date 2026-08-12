@@ -52,7 +52,7 @@ Follow it directly for claiming, labels, lifecycle, relationships, and closure;
 this repository owns no issue-filing or issue-editing skill. Filing a spec is
 the operator's to run with the third-party `/to-spec`, so ask them to run it
 rather than filing on their behalf. `docs/issue-publishing.md` still governs
-issue body framing and `docs/triage-workflow.md` the ready bar.
+issue body framing, and the adapter owns readiness and priority.
 
 ### Working an issue
 
@@ -71,7 +71,7 @@ proceeding silently.
 ### Triage labels
 
 Triage roles map through the tracker adapter and the repository's configured
-labels. See `docs/triage-workflow.md`.
+labels. See `docs/issue-tracker.md`.
 
 ### Domain docs
 

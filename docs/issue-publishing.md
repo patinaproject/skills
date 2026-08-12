@@ -1,9 +1,8 @@
 # Issue Publishing
 
 Canonical tracker-agnostic rules for filing and publishing patinaproject
-issues. Provider mechanics live only in
-[the issue-tracker adapter](issue-tracker.md); ready-state transitions live in
-[the triage workflow](triage-workflow.md).
+issues. Provider mechanics and ready-state transitions live only in
+[the issue-tracker adapter](issue-tracker.md).
 
 ## Who applies these rules
 
@@ -13,10 +12,10 @@ before publishing and the agent's checklist when asked to prepare a draft for
 the operator to file.
 
 `/to-spec` writes a feature-spec body and labels the result `ready-for-agent`
-outright. Two reconciliations follow every run of it. Work that has not cleared
-[the ready bar](triage-workflow.md) takes the triage state instead, and routine
-work that is not feature-shaped takes the body framing below rather than a full
-spec template.
+outright. Two reconciliations follow every run of it. Work that is not yet
+[ready](issue-tracker.md#when-an-issue-becomes-ready) takes the triage state
+instead, and routine work that is not feature-shaped takes the body framing
+below rather than a full spec template.
 
 ## Body framing
 
@@ -33,8 +32,8 @@ Acceptance criteria use Given / When / Then and describe observable behavior.
 - **Labels:** load the live inventory and never invent one.
 - **Assignee:** blank unless the filer is taking the work or assignment was
   explicitly confirmed.
-- **Lifecycle:** new work enters the adapter's triage state unless it already
-  meets the ready bar.
+- **Lifecycle:** new work enters the adapter's triage state unless it is
+  already [ready](issue-tracker.md#when-an-issue-becomes-ready).
 - **Planning:** set the adapter's planning fields only for a named delivery
   effort.
 - **Relationships:** use native parent, blocker, related, and duplicate fields
