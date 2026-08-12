@@ -104,7 +104,10 @@ detaching_states() {
 assert_branch_free_of_operations() {
   local branch="$1" current="$2" listing="$3" paths path resolved git_dir
   local state key name
-  paths="$(printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }')"
+  # Guarded like every other substitution here: a failure inside one is
+  # swallowed when move re-resolves through one of its own.
+  paths="$(printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }')" ||
+    fail "could not read the worktree list"
 
   while IFS= read -r path; do
     # A worktree whose directory is gone strands no live work; its metadata
@@ -213,7 +216,8 @@ resolve_branch() {
   branch_head="$(git rev-parse "refs/heads/$branch")"
   listing="$(git worktree list --porcelain)" ||
     fail "git worktree list --porcelain failed"
-  record="$(holder_record "$branch" "$listing")"
+  record="$(holder_record "$branch" "$listing")" ||
+    fail "could not read the worktree list"
 
   if [ -z "$record" ]; then
     assert_branch_free_of_operations "$branch" "$current" "$listing"
