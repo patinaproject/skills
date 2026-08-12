@@ -1,0 +1,338 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+HELPER="$REPO_ROOT/skills/move-branch-here/scripts/worktree-context.sh"
+TMP_ROOT="$(mktemp -d)"
+trap 'rm -rf "$TMP_ROOT"' EXIT
+
+FAIL_COUNT=0
+
+fail() {
+  echo "FAIL: $1" >&2
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+}
+
+assert_equal() {
+  local actual="$1" expected="$2" message="$3"
+  if [ "$actual" != "$expected" ]; then
+    fail "$message (expected '$expected', got '$actual')"
+  fi
+}
+
+# Creates a repository on main plus a linked worktree holding `feature`.
+new_fixture() {
+  local root
+  root="$(mktemp -d "$TMP_ROOT/fixture-XXXXXX")"
+  # The helper reports physical paths, and mktemp can hand back a symlinked one.
+  root="$(cd "$root" && pwd -P)"
+  mkdir -p "$root/repo"
+  git -c init.defaultBranch=main init --quiet "$root/repo"
+  git -C "$root/repo" config user.email tests@patinaproject.com
+  git -C "$root/repo" config user.name 'patinaproject Tests'
+  printf 'base\n' > "$root/repo/README.md"
+  git -C "$root/repo" add README.md
+  git -C "$root/repo" commit --quiet -m 'chore: #350 base'
+  git -C "$root/repo" branch feature
+  git -C "$root/repo" worktree add --quiet "$root/held" feature
+  printf 'base\nfeature\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'feat: #350 feature work'
+  printf '%s\n' "$root"
+}
+
+# Leaves the holder on `feature` with a `conflicting` branch whose commit
+# touches the same line, so any replay of it stops on a conflict.
+new_conflicting_fixture() {
+  local root
+  root="$(new_fixture)"
+  git -C "$root/held" switch --quiet -c conflicting main
+  printf 'base\nconflict\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
+  git -C "$root/held" switch --quiet feature
+  printf '%s\n' "$root"
+}
+
+resolve_field() {
+  local root="$1" branch="$2" index="$3"
+  (cd "$root/repo" && "$HELPER" resolve "$branch") | cut -f "$index"
+}
+
+# A refusal that only reaches `resolve` is not a refusal: `move` re-resolves
+# through a command substitution, where an exit escapes only the substitution.
+assert_move_blocked() {
+  local root="$1" branch="$2" expected="$3" description="$4" head output
+  head="$(git -C "$root/repo" rev-parse "$branch")"
+  if output="$(cd "$root/repo" && "$HELPER" move "$branch" "$head" \
+    2>"$root/move-stderr")"; then
+    fail "$description: move unexpectedly succeeded: $output"
+  fi
+  assert_equal "$output" '' "$description: a refused move emits no row"
+  if ! grep -Fq "$expected" "$root/move-stderr"; then
+    fail "$description: move error was not actionable: $(cat "$root/move-stderr")"
+  fi
+  assert_equal "$(git -C "$root/repo" branch --show-current)" main \
+    "$description: a refused move leaves the current worktree alone"
+}
+
+assert_blocked() {
+  local root="$1" branch="$2" expected="$3" description="$4" output
+  if output="$(cd "$root/repo" && "$HELPER" resolve "$branch" 2>&1)"; then
+    fail "$description unexpectedly resolved: $output"
+    return
+  fi
+  if ! grep -Fq "$expected" <<< "$output"; then
+    fail "$description error was not actionable: $output"
+  fi
+  assert_equal "$(git -C "$root/held" branch --show-current)" feature \
+    "$description should leave the holder attached"
+}
+
+# A held branch moves, and moving it again is a reported no-op.
+{
+  root="$(new_fixture)"
+  head="$(git -C "$root/held" rev-parse HEAD)"
+
+  assert_equal "$(resolve_field "$root" feature 1)" held 'a held branch resolves as held'
+  assert_equal "$(resolve_field "$root" feature 3)" "$head" 'resolve reports the branch head'
+  assert_equal "$(resolve_field "$root" feature 5)" "$root/held" \
+    'resolve reports the holding worktree'
+
+  result="$(cd "$root/repo" && "$HELPER" move feature "$head" "$root/held")"
+  assert_equal "$(cut -f1 <<< "$result")" moved 'move reports the release'
+  assert_equal "$(cut -f4 <<< "$result")" "$head" 'move reports the detached head'
+  assert_equal "$(git -C "$root/repo" branch --show-current)" feature \
+    'the branch is attached to the current worktree'
+  assert_equal "$(git -C "$root/held" rev-parse HEAD)" "$head" \
+    'the released worktree stays at the same commit'
+  if git -C "$root/held" symbolic-ref --quiet HEAD >/dev/null; then
+    fail 'the released worktree should be left on a detached HEAD'
+  fi
+  assert_equal "$(resolve_field "$root" feature 1)" here 'a moved branch resolves as here'
+}
+
+# An unheld branch attaches without a holder argument.
+{
+  root="$(new_fixture)"
+  git -C "$root/repo" worktree remove "$root/held"
+  head="$(git -C "$root/repo" rev-parse feature)"
+  assert_equal "$(resolve_field "$root" feature 1)" free 'an unheld branch resolves as free'
+
+  # Every field keeps its slot under a tab IFS, which collapses empty runs.
+  IFS=$'\t' read -r mode row_branch row_head row_untracked row_holder row_holder_head \
+    <<< "$(cd "$root/repo" && "$HELPER" resolve feature)"
+  assert_equal "$mode" free 'the free row keeps its mode'
+  assert_equal "$row_branch" feature 'the free row keeps its branch'
+  assert_equal "$row_head" "$head" 'the free row keeps its branch head'
+  assert_equal "$row_untracked" 0 'the free row keeps its untracked count in its own field'
+  assert_equal "$row_holder" '' 'the free row has no holder path'
+  assert_equal "$row_holder_head" '' 'the free row has no holder head'
+
+  result="$(cd "$root/repo" && "$HELPER" move feature "$head")"
+  assert_equal "$(cut -f1 <<< "$result")" attached 'move attaches a free branch'
+  assert_equal "$(git -C "$root/repo" branch --show-current)" feature \
+    'a free branch attaches to the current worktree'
+}
+
+# Work in progress in either worktree blocks the move.
+{
+  root="$(new_fixture)"
+  printf 'base\nfeature\nedited\n' > "$root/held/README.md"
+  assert_blocked "$root" feature "git -C $root/held stash --include-untracked" \
+    'uncommitted tracked changes in the holder'
+
+  root="$(new_conflicting_fixture)"
+  git -C "$root/held" merge conflicting >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held merge --abort" \
+    'a merge in progress in the holder'
+
+  root="$(new_conflicting_fixture)"
+  git -C "$root/held" cherry-pick conflicting >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held cherry-pick --abort" \
+    'a cherry-pick in progress in the holder'
+
+  root="$(new_conflicting_fixture)"
+  git -C "$root/held" rebase conflicting >/dev/null 2>&1 || true
+  # A rebase detaches the holder, so no worktree record claims the branch.
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "a rebasing holder should not resolve: $output"
+  elif ! grep -Fq "git -C $root/held rebase --abort" <<< "$output"; then
+    fail "a rebasing holder error was not actionable: $output"
+  fi
+  git -C "$root/held" rebase --abort >/dev/null 2>&1 || true
+
+  root="$(new_fixture)"
+  git -C "$root/held" revert --no-edit HEAD~1 >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held revert --abort" \
+    'a revert in progress in the holder'
+
+  root="$(new_fixture)"
+  git -C "$root/held" bisect start >/dev/null 2>&1
+  git -C "$root/held" bisect bad >/dev/null 2>&1
+  git -C "$root/held" bisect good main >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held bisect reset" \
+    'a bisect in progress in the holder'
+  git -C "$root/held" bisect reset >/dev/null 2>&1
+
+  # A bisect detaches only when an untested revision sits strictly between its
+  # good and bad ends, which is the midpoint git checks out. One commit past the
+  # fixture's two supplies that gap; then no worktree record claims the branch.
+  root="$(new_fixture)"
+  printf 'base\nfeature\nmidpoint\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'chore: #350 bisect midpoint'
+  first="$(git -C "$root/held" rev-list --max-parents=0 HEAD)"
+  git -C "$root/held" bisect start >/dev/null 2>&1
+  git -C "$root/held" bisect bad >/dev/null 2>&1
+  git -C "$root/held" bisect good "$first" >/dev/null 2>&1 ||
+    fail 'the deep bisect fixture could not start a bisect'
+  if git -C "$root/held" symbolic-ref --quiet HEAD >/dev/null; then
+    fail 'the deep bisect fixture did not detach the holder'
+  fi
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "a bisecting holder should not resolve: $output"
+  elif ! grep -Fq "git -C $root/held bisect reset" <<< "$output"; then
+    fail "a bisecting holder error was not actionable: $output"
+  fi
+  assert_move_blocked "$root" feature "git -C $root/held bisect reset" \
+    'a bisecting bystander'
+  git -C "$root/held" bisect reset >/dev/null 2>&1
+
+  # git am borrows the rebase-apply state, and only git am --abort clears it.
+  root="$(new_conflicting_fixture)"
+  git -C "$root/held" format-patch --quiet -1 -o "$root/patches" conflicting >/dev/null
+  git -C "$root/held" am "$root/patches"/*.patch >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held am --abort" \
+    'a patch application in progress in the holder'
+  git -C "$root/held" am --abort >/dev/null 2>&1 || true
+
+  root="$(new_fixture)"
+  git -C "$root/repo" worktree lock "$root/held" --reason 'pinned by the operator'
+  assert_blocked "$root" feature "git worktree unlock $root/held" 'a locked holder'
+  git -C "$root/repo" worktree unlock "$root/held"
+
+  root="$(new_fixture)"
+  printf 'base\nedited\n' > "$root/repo/README.md"
+  assert_blocked "$root" feature "git -C $root/repo stash --include-untracked" \
+    'uncommitted tracked changes in the current worktree'
+}
+
+# A stale worktree entry names the command that clears it.
+{
+  root="$(new_fixture)"
+  rm -rf "$root/held"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "a stale holder should not resolve: $output"
+  elif ! grep -Fq 'run: git worktree prune' <<< "$output"; then
+    fail "a stale holder error was not actionable: $output"
+  fi
+  git -C "$root/repo" worktree prune
+  assert_equal "$(resolve_field "$root" feature 1)" free 'a pruned holder frees the branch'
+}
+
+# A failed attach restores the holder.
+{
+  root="$(new_fixture)"
+  printf 'kept\n' > "$root/held/collide.txt"
+  git -C "$root/held" add collide.txt
+  git -C "$root/held" commit --quiet -m 'feat: #350 add a colliding file'
+  head="$(git -C "$root/held" rev-parse HEAD)"
+  printf 'local\n' > "$root/repo/collide.txt"
+  printf 'scratch\n' > "$root/held/scratch.txt"
+
+  assert_equal "$(resolve_field "$root" feature 4)" 1 'resolve counts untracked files in the holder'
+  if output="$(cd "$root/repo" && "$HELPER" move feature "$head" "$root/held" 2>&1)"; then
+    fail "a colliding untracked file should block the attach: $output"
+  elif ! grep -Fq "was restored to feature" <<< "$output"; then
+    fail "a failed attach did not report the restore: $output"
+  fi
+  assert_equal "$(git -C "$root/held" branch --show-current)" feature \
+    'a failed attach restores the holder'
+  assert_equal "$(git -C "$root/repo" branch --show-current)" main \
+    'a failed attach leaves the current worktree alone'
+  assert_equal "$(cat "$root/repo/collide.txt")" local \
+    'a failed attach preserves the untracked file'
+}
+
+# Invalid input and stale context are refused.
+{
+  root="$(new_fixture)"
+  if output="$(cd "$root/repo" && "$HELPER" resolve absent 2>&1)"; then
+    fail "an absent branch should not resolve: $output"
+  elif ! grep -Fq 'local branch absent does not exist' <<< "$output"; then
+    fail "an absent branch error was not actionable: $output"
+  fi
+
+  if output="$(cd "$root/repo" && "$HELPER" move feature 0000000 "$root/held" 2>&1)"; then
+    fail "a stale branch head should not move: $output"
+  elif ! grep -Fq 'rerun resolve against current context' <<< "$output"; then
+    fail "a stale branch head error was not actionable: $output"
+  fi
+
+  head="$(git -C "$root/held" rev-parse HEAD)"
+  if output="$(cd "$root/repo" && "$HELPER" move feature "$head" 2>&1)"; then
+    fail "a held branch should not move as free: $output"
+  elif ! grep -Fq 'rather than free' <<< "$output"; then
+    fail "a held-versus-free error was not actionable: $output"
+  fi
+  assert_equal "$(git -C "$root/held" branch --show-current)" feature \
+    'refused moves leave the holder attached'
+
+  if output="$(cd "$root/repo" && "$HELPER" 2>&1)"; then
+    fail "a missing subcommand should not succeed: $output"
+  elif ! grep -Fq 'usage: worktree-context.sh' <<< "$output"; then
+    fail "a missing subcommand error did not print usage: $output"
+  fi
+
+  root="$(new_fixture)"
+  printf 'garbage\n' > "$root/held/.git"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "an unreadable holder should not resolve: $output"
+  elif ! grep -Fq 'is not a readable git worktree' <<< "$output"; then
+    fail "an unreadable holder error was not actionable: $output"
+  fi
+  assert_move_blocked "$root" feature 'is not a readable git worktree' \
+    'an unreadable holder'
+
+  # A state file that yields nothing hides the branch it names just as well as
+  # an unreadable worktree, so it is refused rather than read as absent.
+  root="$(new_fixture)"
+  git -C "$root/repo" worktree remove "$root/held"
+  git -C "$root/repo" worktree add --quiet "$root/other" -b other-work
+  # A lone newline reads back as an empty first line, which hides the branch
+  # just as an empty file does.
+  printf '\n' > "$(git -C "$root/other" rev-parse --absolute-git-dir)/BISECT_START"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>"$root/stderr")"; then
+    fail "an unreadable state file should not resolve: $output"
+  fi
+  assert_equal "$output" '' 'a refused state read emits no row'
+  if ! grep -Fq 'git state file is empty or unreadable' "$root/stderr"; then
+    fail "an unreadable state file error was not actionable: $(cat "$root/stderr")"
+  fi
+  assert_move_blocked "$root" feature 'git state file is empty or unreadable' \
+    'an unreadable state file'
+
+  # An unreadable worktree hides whatever operation it is running, so a free
+  # branch is refused rather than reported free on stdout.
+  root="$(new_fixture)"
+  git -C "$root/repo" worktree remove "$root/held"
+  git -C "$root/repo" worktree add --quiet "$root/other" -b other-work
+  printf 'garbage\n' > "$root/other/.git"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>"$root/stderr")"; then
+    fail "an unreadable bystander worktree should not resolve: $output"
+  fi
+  # The refusal has to reach the machine channel: a row on stdout would move the
+  # branch no matter what stderr said.
+  assert_equal "$output" '' 'a refused resolve emits no row'
+  if ! grep -Fq "git worktree remove --force $root/other" "$root/stderr"; then
+    fail "an unreadable bystander error was not actionable: $(cat "$root/stderr")"
+  fi
+  assert_move_blocked "$root" feature 'its operations could not be checked' \
+    'an unreadable bystander worktree'
+}
+
+if [ "$FAIL_COUNT" -gt 0 ]; then
+  echo "" >&2
+  echo "FAIL: $FAIL_COUNT assertion(s) failed" >&2
+  exit 1
+fi
+
+echo "OK: move-branch-here worktree contract passed"

@@ -166,6 +166,17 @@ a branch without an open PR remains local until the operator publishes it.
 
 See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
 
+### move-branch-here
+
+Git refuses to check out a branch another worktree already holds, and the
+manual recovery strands work or drops review coverage. `move-branch-here`
+releases the branch from that worktree, attaches it to the current one,
+restores the holder when attaching fails, and carries the branch's `polish`
+review record into this session.
+
+See [./skills/move-branch-here/](./skills/move-branch-here/) for the skill
+contract.
+
 ### grill-to-spec
 
 Grilling usually happens away from the branch that will implement the outcome —
@@ -221,6 +232,7 @@ README and skill contract.
 | [finish-pr](./skills/finish-pr/) | Deprecated compatibility alias for ready-pr |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
+| [move-branch-here](./skills/move-branch-here/) | Take a branch from the worktree holding it, with its polish review state |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
@@ -277,6 +289,7 @@ skills/
   codex-pr-feedback-loop/
   polish/
   update-branch/
+  move-branch-here/
   grill-to-spec/
   write-changelog/
   prompting-fable/

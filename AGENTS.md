@@ -16,6 +16,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
+- `skills/move-branch-here/`: worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
@@ -164,6 +165,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   package scripts.
 - Run `bash scripts/tests/worktree-setup.test.sh` after changing
   `scripts/worktree-setup.sh`.
+- Run `bash scripts/tests/move-branch-here.test.sh` after changing
+  `skills/move-branch-here/scripts/worktree-context.sh`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
@@ -236,6 +239,7 @@ This repo owns these skills at flat paths:
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
+| move-branch-here | `skills/move-branch-here/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | write-changelog | `skills/write-changelog/` |

@@ -13,6 +13,7 @@ import {
   lstatSync,
   mkdirSync,
   openSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   renameSync,
@@ -20,7 +21,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
-import { isAbsolute, join, resolve } from 'node:path';
+import { basename, isAbsolute, join, resolve } from 'node:path';
 
 const schemaVersion = 1;
 const axes = new Set(['architecture', 'spec', 'standards']);
@@ -58,7 +59,7 @@ function resolveTarget(targetBranch) {
   throw new Error(`Target branch does not resolve: ${targetBranch}`);
 }
 
-function currentIdentity(targetBranch) {
+function repositoryIdentity() {
   const root = git(['rev-parse', '--show-toplevel']);
   const commonDirectory = git(['rev-parse', '--git-common-dir']);
   const absoluteCommonDirectory = realpathSync(
@@ -66,17 +67,26 @@ function currentIdentity(targetBranch) {
       ? commonDirectory
       : resolve(root, commonDirectory)
   );
+
+  // Linked worktrees share one common directory, so this identity follows a
+  // branch between the worktrees of one repository.
+  return createHash('sha256').update(absoluteCommonDirectory).digest('hex');
+}
+
+function currentBranch() {
   const sourceBranch = git(['branch', '--show-current']);
 
   if (sourceBranch.length === 0) {
     throw new Error('Polish review state requires a named source branch.');
   }
 
+  return sourceBranch;
+}
+
+function currentIdentity(targetBranch) {
   return {
-    repository: createHash('sha256')
-      .update(absoluteCommonDirectory)
-      .digest('hex'),
-    sourceBranch,
+    repository: repositoryIdentity(),
+    sourceBranch: currentBranch(),
     targetBranch,
   };
 }
@@ -87,22 +97,33 @@ function temporaryRoot() {
     : realpathSync(tmpdir());
 }
 
+function userScopedRootName() {
+  return `patinaproject-${
+    typeof process.getuid === 'function'
+      ? process.getuid()
+      : createHash('sha256').update(userInfo().username).digest('hex')
+  }`;
+}
+
+// Isolated test runs name the private root plainly. Named once here so the
+// carry's read path can look for it beside the user-scoped name.
+const isolatedRootName = 'patinaproject';
+
+function privateRootName() {
+  return process.env.PATINAPROJECT_POLISH_TMP_DIR
+    ? isolatedRootName
+    : userScopedRootName();
+}
+
 function reviewRoot() {
-  const privateRootName = process.env.PATINAPROJECT_POLISH_TMP_DIR
-    ? 'patinaproject'
-    : `patinaproject-${
-        typeof process.getuid === 'function'
-          ? process.getuid()
-          : createHash('sha256').update(userInfo().username).digest('hex')
-      }`;
-  return join(temporaryRoot(), privateRootName);
+  return join(temporaryRoot(), privateRootName());
 }
 
 function reviewDirectory() {
   return join(reviewRoot(), 'polish-reviews');
 }
 
-function assertPrivateDirectory(path) {
+function assertPrivateDirectory(path, { repairPermissions = true } = {}) {
   let descriptor;
   try {
     descriptor = openSync(
@@ -121,7 +142,7 @@ function assertPrivateDirectory(path) {
     ) {
       throw new Error(`Review state directory has a foreign owner: ${path}`);
     }
-    if (process.platform !== 'win32') {
+    if (repairPermissions && process.platform !== 'win32') {
       fchmodSync(descriptor, 0o700);
     }
   } catch (error) {
@@ -311,17 +332,29 @@ function wait(milliseconds) {
 }
 
 function lockIsStale(path) {
-  const state = lstatSync(path);
-  if (!state.isFile() || state.isSymbolicLink()) {
-    throw new Error(`Review state lock is not a regular file: ${path}`);
+  let contents;
+
+  try {
+    const state = lstatSync(path);
+    if (!state.isFile() || state.isSymbolicLink()) {
+      throw new Error(`Review state lock is not a regular file: ${path}`);
+    }
+    if (
+      typeof process.getuid === 'function' &&
+      state.uid !== process.getuid()
+    ) {
+      throw new Error(`Review state lock has a foreign owner: ${path}`);
+    }
+    contents = readFileSync(path, 'utf8');
+  } catch (error) {
+    // The holder released the lock mid-check, so the caller retries the link.
+    if (error && typeof error === 'object' && error.code === 'ENOENT') {
+      return false;
+    }
+    throw error;
   }
-  if (
-    typeof process.getuid === 'function' &&
-    state.uid !== process.getuid()
-  ) {
-    throw new Error(`Review state lock has a foreign owner: ${path}`);
-  }
-  const owner = Number.parseInt(readFileSync(path, 'utf8'), 10);
+
+  const owner = Number.parseInt(contents, 10);
   if (!Number.isInteger(owner) || owner <= 0) {
     throw new Error(`Review state lock is corrupt: ${path}`);
   }
@@ -582,15 +615,155 @@ function saveProvisional(targetBranch, candidateHead, findings) {
   });
 }
 
+function resolveSourceDirectory(from) {
+  const root = resolve(from);
+  const candidates = [
+    ...(basename(root) === 'polish-reviews' ? [root] : []),
+    join(root, 'polish-reviews'),
+    // The other session's root name is not ours to assume, so try both.
+    join(root, userScopedRootName(), 'polish-reviews'),
+    join(root, isolatedRootName, 'polish-reviews'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      assertPrivateDirectory(candidate, { repairPermissions: false });
+      return candidate;
+    }
+  }
+
+  throw new Error(`No polish review state directory beneath: ${root}`);
+}
+
+// The source root belongs to another session, which may still be writing it, so
+// a record that vanishes mid-scan is skipped rather than failing the carry.
+function readSourceRecord(path) {
+  try {
+    const state = lstatSync(path);
+    if (!state.isFile() || state.isSymbolicLink()) {
+      return null;
+    }
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function commitResolves(head) {
+  return (
+    typeof head === 'string' &&
+    tryGit(['rev-parse', '--verify', `${head}^{commit}`]).status === 0
+  );
+}
+
+// The carried record replaces this session's only when it reviewed strictly
+// further along the same history. This session keeps its record when the heads
+// are equal, when their histories diverged, and when the carried head does not
+// resolve here; an unresolvable local head has no coverage left to keep.
+function carriedAdvancesCoverage(local, carried) {
+  const carriedHead = carried.authoritative?.reviewedHead;
+  if (!commitResolves(carriedHead)) {
+    return false;
+  }
+  const localHead = local.authoritative?.reviewedHead;
+  if (!commitResolves(localHead)) {
+    return true;
+  }
+  return (
+    localHead !== carriedHead &&
+    tryGit(['merge-base', '--is-ancestor', localHead, carriedHead]).status === 0
+  );
+}
+
+function relocateRecords(from, branch) {
+  const sourceDirectory = resolveSourceDirectory(from);
+  const destinationDirectory = reviewDirectory();
+  if (
+    existsSync(destinationDirectory) &&
+    realpathSync(destinationDirectory) === realpathSync(sourceDirectory)
+  ) {
+    throw new Error(
+      `Source review state is already this session's review state: ${sourceDirectory}`
+    );
+  }
+
+  const repository = repositoryIdentity();
+  const kept = [];
+  const relocated = [];
+
+  for (const name of readdirSync(sourceDirectory).sort()) {
+    if (!/^[a-f0-9]{64}\.json$/.test(name)) {
+      continue;
+    }
+    const value = readSourceRecord(join(sourceDirectory, name));
+    if (
+      !value ||
+      typeof value !== 'object' ||
+      typeof value.targetBranch !== 'string'
+    ) {
+      continue;
+    }
+    const identity = {
+      repository,
+      sourceBranch: branch,
+      targetBranch: value.targetBranch,
+    };
+    // Identity equality keeps another repository's findings out of this one.
+    if (!isReviewRecord(value, identity)) {
+      continue;
+    }
+
+    withRecordLock(identity, () => {
+      const loaded = loadRecord(identity);
+      if (
+        loaded.status === 'valid' &&
+        !carriedAdvancesCoverage(loaded.record, value)
+      ) {
+        kept.push(value.targetBranch);
+        return;
+      }
+      writeRecord(identity, {
+        ...value,
+        // A carry that brings no provisional data keeps this session's own
+        // findings: they are advisory locations to revalidate, not coverage.
+        provisional:
+          value.provisional ??
+          (loaded.status === 'valid' ? loaded.record.provisional : null),
+      });
+      relocated.push(value.targetBranch);
+    });
+  }
+
+  return {
+    branch,
+    kept: kept.sort(),
+    relocated: relocated.sort(),
+    source: sourceDirectory,
+  };
+}
+
 function main() {
   const { command, options } = parseArguments(process.argv.slice(2));
-  const commands = new Set(['complete', 'provisional', 'scope']);
+  const commands = new Set(['complete', 'provisional', 'relocate', 'scope']);
   if (!command || !commands.has(command)) {
     throw new Error(`Unknown command: ${command ?? '(missing)'}`);
   }
 
-  const target = requiredOption(options, 'target');
   let result;
+
+  if (command === 'relocate') {
+    console.info(
+      JSON.stringify(
+        relocateRecords(
+          requiredOption(options, 'from'),
+          options.get('branch') || currentBranch()
+        )
+      )
+    );
+    return;
+  }
+
+  const target = requiredOption(options, 'target');
 
   if (command === 'scope') {
     result = selectScope(target);
