@@ -629,12 +629,14 @@ function resolveSourceDirectory(from) {
   throw new Error(`No polish review state directory beneath: ${root}`);
 }
 
+// The source root belongs to another session, which may still be writing it, so
+// a record that vanishes mid-scan is skipped rather than failing the carry.
 function readSourceRecord(path) {
-  const state = lstatSync(path);
-  if (!state.isFile() || state.isSymbolicLink()) {
-    return null;
-  }
   try {
+    const state = lstatSync(path);
+    if (!state.isFile() || state.isSymbolicLink()) {
+      return null;
+    }
     return JSON.parse(readFileSync(path, 'utf8'));
   } catch {
     return null;

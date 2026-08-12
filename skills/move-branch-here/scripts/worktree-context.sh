@@ -36,11 +36,15 @@ require_branch() {
 # The states a rebase leaves behind, named once for every reader of them.
 rebase_states=(rebase-merge rebase-apply)
 
-# Reads the first line of a file, keeping a value written without a trailing
-# newline, which makes read report failure after it has already assigned.
+# Reads the first line of a file. A value written without a trailing newline
+# makes read report failure after it has already assigned, so keep it; an empty
+# result means the file itself gave nothing, which for git state is a branch
+# this scan would otherwise miss.
 first_line() {
   local line=''
-  read -r line < "$1" || true
+  if ! read -r line < "$1" && [ -z "$line" ]; then
+    fail "git state file is empty or unreadable: $1; repair that worktree or clear the operation there"
+  fi
   printf '%s\n' "$line"
 }
 

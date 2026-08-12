@@ -24,6 +24,8 @@ assert_equal() {
 new_fixture() {
   local root
   root="$(mktemp -d "$TMP_ROOT/fixture-XXXXXX")"
+  # The helper reports physical paths, and mktemp can hand back a symlinked one.
+  root="$(cd "$root" && pwd -P)"
   mkdir -p "$root/repo"
   git -c init.defaultBranch=main init --quiet "$root/repo"
   git -C "$root/repo" config user.email tests@patinaproject.com
@@ -267,6 +269,20 @@ assert_blocked() {
     fail "an unreadable holder should not resolve: $output"
   elif ! grep -Fq 'is not a readable git worktree' <<< "$output"; then
     fail "an unreadable holder error was not actionable: $output"
+  fi
+
+  # A state file that yields nothing hides the branch it names just as well as
+  # an unreadable worktree, so it is refused rather than read as absent.
+  root="$(new_fixture)"
+  git -C "$root/repo" worktree remove "$root/held"
+  git -C "$root/repo" worktree add --quiet "$root/other" -b other-work
+  : > "$(git -C "$root/other" rev-parse --absolute-git-dir)/BISECT_START"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>"$root/stderr")"; then
+    fail "an unreadable state file should not resolve: $output"
+  fi
+  assert_equal "$output" '' 'a refused state read emits no row'
+  if ! grep -Fq 'git state file is empty or unreadable' "$root/stderr"; then
+    fail "an unreadable state file error was not actionable: $(cat "$root/stderr")"
   fi
 
   # An unreadable worktree hides whatever operation it is running, so a free

@@ -892,6 +892,52 @@ try {
       ).relocated,
       ['main']
     );
+    // Diverged history is kept: neither head covers the other.
+    const diverged = createRepository();
+    const shared = git(diverged.root, 'rev-parse', 'HEAD');
+    const localHead = commitChange(diverged.root, 'base\nchange\nlocal\n');
+    reviewCommand(
+      diverged.root,
+      diverged.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      localHead,
+      '--outcome',
+      'passed'
+    );
+    const divergedRoot = mkdtempSync(
+      join(tmpdir(), 'patinaproject-polish-diverged-')
+    );
+    fixtures.push(divergedRoot);
+    git(diverged.root, 'reset', '--hard', shared);
+    const otherHead = commitChange(diverged.root, 'base\nchange\nother\n');
+    reviewCommand(
+      diverged.root,
+      divergedRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      otherHead,
+      '--outcome',
+      'passed'
+    );
+    git(diverged.root, 'reset', '--hard', localHead);
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          diverged.root,
+          diverged.temporaryRoot,
+          'relocate',
+          '--from',
+          divergedRoot
+        )
+      ).kept,
+      ['main']
+    );
+
     const carriedScope = JSON.parse(
       reviewCommand(
         advancing.root,
