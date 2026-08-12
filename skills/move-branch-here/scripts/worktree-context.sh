@@ -6,6 +6,12 @@ fail() {
   exit 1
 }
 
+fail_with_output() {
+  echo "FAIL: $1" >&2
+  printf '%s\n' "$2" >&2
+  exit 1
+}
+
 real_path() {
   local resolved
   resolved="$(cd "$1" 2>/dev/null && pwd -P)" ||
@@ -91,14 +97,19 @@ assert_no_operation() {
 
 assert_no_tracked_changes() {
   local worktree="$1" role="$2" changes
-  changes="$(git -C "$worktree" status --porcelain --untracked-files=no)"
+  changes="$(git -C "$worktree" status --porcelain --untracked-files=no)" ||
+    fail "$role is not a readable git worktree"
   [ -n "$changes" ] || return 0
   fail "$role has uncommitted tracked changes; commit them there or run: git -C $worktree stash --include-untracked
 $changes"
 }
 
 untracked_count() {
-  git -C "$1" ls-files --others --exclude-standard | awk 'END { print NR + 0 }'
+  local files
+  files="$(git -C "$1" ls-files --others --exclude-standard)" ||
+    fail "$1 is not a readable git worktree"
+  [ -n "$files" ] || { printf '0\n'; return; }
+  printf '%s\n' "$files" | awk 'END { print NR + 0 }'
 }
 
 assert_ready_to_receive() {
@@ -191,27 +202,22 @@ move_branch() {
   fi
 
   if [ "$mode" = "held" ]; then
-    if ! output="$(git -C "$holder" checkout --detach 2>&1)"; then
-      echo "FAIL: git -C $holder checkout --detach failed" >&2
-      printf '%s\n' "$output" >&2
-      exit 1
-    fi
+    output="$(git -C "$holder" checkout --detach 2>&1)" ||
+      fail_with_output "git -C $holder checkout --detach failed" "$output"
     detached="$(git -C "$holder" rev-parse HEAD)"
   fi
 
   if ! output="$(git switch "$branch" 2>&1)"; then
-    if [ "$mode" = "held" ]; then
-      if restore="$(git -C "$holder" switch "$branch" 2>&1)"; then
-        echo "FAIL: git switch $branch failed; worktree $holder was restored to $branch" >&2
-      else
-        echo "FAIL: git switch $branch failed and worktree $holder could not be restored to $branch" >&2
-        printf '%s\n' "$restore" >&2
-      fi
-    else
-      echo "FAIL: git switch $branch failed" >&2
+    if [ "$mode" != "held" ]; then
+      fail_with_output "git switch $branch failed" "$output"
     fi
-    printf '%s\n' "$output" >&2
-    exit 1
+    restore="$(git -C "$holder" switch "$branch" 2>&1)" ||
+      fail_with_output \
+        "git switch $branch failed and worktree $holder could not be restored to $branch" \
+        "$restore
+$output"
+    fail_with_output \
+      "git switch $branch failed; worktree $holder was restored to $branch" "$output"
   fi
 
   [ "$(git branch --show-current)" = "$branch" ] ||

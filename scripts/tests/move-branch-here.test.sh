@@ -206,6 +206,14 @@ assert_blocked() {
   elif ! grep -Fq 'usage: worktree-context.sh' <<< "$output"; then
     fail "a missing subcommand error did not print usage: $output"
   fi
+
+  root="$(new_fixture)"
+  printf 'garbage\n' > "$root/held/.git"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "an unreadable holder should not resolve: $output"
+  elif ! grep -Fq 'is not a readable git worktree' <<< "$output"; then
+    fail "an unreadable holder error was not actionable: $output"
+  fi
 }
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

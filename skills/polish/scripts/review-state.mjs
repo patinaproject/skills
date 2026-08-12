@@ -118,7 +118,7 @@ function reviewDirectory() {
   return join(reviewRoot(), 'polish-reviews');
 }
 
-function assertPrivateDirectory(path, { repairMode = true } = {}) {
+function assertPrivateDirectory(path, { repairPermissions = true } = {}) {
   let descriptor;
   try {
     descriptor = openSync(
@@ -137,7 +137,7 @@ function assertPrivateDirectory(path, { repairMode = true } = {}) {
     ) {
       throw new Error(`Review state directory has a foreign owner: ${path}`);
     }
-    if (repairMode && process.platform !== 'win32') {
+    if (repairPermissions && process.platform !== 'win32') {
       fchmodSync(descriptor, 0o700);
     }
   } catch (error) {
@@ -621,7 +621,7 @@ function resolveSourceDirectory(from) {
 
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
-      assertPrivateDirectory(candidate, { repairMode: false });
+      assertPrivateDirectory(candidate, { repairPermissions: false });
       return candidate;
     }
   }
@@ -649,7 +649,9 @@ function commitResolves(head) {
 }
 
 // The carried record replaces this session's only when it reviewed strictly
-// further along the same history; equal or unknown heads keep what is here.
+// further along the same history. This session keeps its record when the heads
+// are equal, when their histories diverged, and when the carried head does not
+// resolve here; an unresolvable local head has no coverage left to keep.
 function carriedAdvancesCoverage(local, carried) {
   const carriedHead = carried.authoritative?.reviewedHead;
   if (!commitResolves(carriedHead)) {
