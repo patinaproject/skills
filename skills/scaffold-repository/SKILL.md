@@ -60,7 +60,7 @@ Behavior:
 - For each recommendation, show a **diff preview** and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; issue templates must match repository visibility.
-  2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/issue-publishing.md`, `docs/triage-workflow.md`, `.gitignore`.
+  2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`.
   3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
 
@@ -121,11 +121,9 @@ commitizen.config.json
 commitlint.config.js
 docs/file-structure.md
 docs/agents/issue-tracker.md        (symlink to ../issue-tracker.md)
-docs/agents/triage-labels.md        (symlink to ../triage-workflow.md)
 docs/issue-publishing.md
 docs/issue-tracker.md
 docs/release-flow.md
-docs/triage-workflow.md
 docs/wiki-index.md
 package.json
 pnpm-lock.yaml

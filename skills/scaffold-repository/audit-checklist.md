@@ -74,9 +74,7 @@ Classify stale PR templates when they encourage command transcripts, routine aut
 | `docs/file-structure.md` | yes | present |
 | `docs/issue-tracker.md` | yes | sole provider-specific adapter; selects GitHub for public repositories and Linear for private repositories |
 | `docs/agents/issue-tracker.md` | yes | relative compatibility symlink to `../issue-tracker.md`; contains no duplicate adapter content |
-| `docs/agents/triage-labels.md` | yes | relative compatibility symlink to `../triage-workflow.md`; contains no provider-specific label inventory |
 | `docs/issue-publishing.md` | yes | tracker-agnostic filing and publishing rules |
-| `docs/triage-workflow.md` | yes | tracker-agnostic shaping and ready-state rules |
 
 ## Area 4 – Claude Code configuration
 
@@ -163,7 +161,7 @@ For each gap, emit:
 Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
 
 1. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, visibility-selected issue intake)
-2. PNPM tooling, skills installation, and tracker connection (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/issue-publishing.md`, `docs/triage-workflow.md`, `.gitignore`)
+2. PNPM tooling, skills installation, and tracker connection (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`)
 3. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 4. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`)
 5. Deprecated workflow cleanup
