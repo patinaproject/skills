@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# move re-resolves through a command substitution, and without this a failure
+# inside one is swallowed rather than refusing the move. Structural, so a future
+# unguarded read cannot reintroduce that silently.
+shopt -s inherit_errexit
 
 fail() {
   echo "FAIL: $1" >&2
@@ -104,8 +108,6 @@ detaching_states() {
 assert_branch_free_of_operations() {
   local branch="$1" current="$2" listing="$3" paths path resolved git_dir
   local state key name
-  # Guarded like every other substitution here: a failure inside one is
-  # swallowed when move re-resolves through one of its own.
   paths="$(printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }')" ||
     fail "could not read the worktree list"
 

@@ -98,7 +98,13 @@ move itself still succeeded.
    ```
 
    A `valid` state carried with the branch. Report its `mode` and outstanding
-   findings, and finish.
+   findings, and finish. An `unavailable` or `corrupt` state leaves nothing
+   usable here, so treat it as `missing` and continue below.
+
+   The command also refuses a worktree holding uncommitted or untracked files,
+   which the move itself permits. Report the review state as unread and name
+   that `polish` needs a clean worktree to see it, then finish: the move
+   already succeeded.
 
 2. A `missing` state with a `--from` root copies the record in, then re-reads
    the scope above:
@@ -124,6 +130,6 @@ Always include:
 - The released worktree path and its detached HEAD, or the no-op that needed no
   release.
 - Untracked files left behind in the released worktree, when there are any.
-- The review state outcome: carried, relocated, absent, or unhandled because
-  `polish` is not installed.
+- The review state outcome: carried, relocated, absent, unread because the
+  worktree is not clean, or unhandled because `polish` is not installed.
 - The blocker that stopped the move, when one did.
