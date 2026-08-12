@@ -72,15 +72,23 @@ holder_record() {
   '
 }
 
-fail_operation_elsewhere() {
-  local path="$1" branch="$2" key="$3" operation command
-  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$key" "$path")"
-  fail "worktree $path is in the middle of a $operation on $branch; finish it there or run: $command"
+# Names the operation in the way of the move and the command that clears it.
+# The optional branch marks an operation that took the branch off the worktree
+# list with it. One wording for every blocker, so none of them can drift.
+fail_operation() {
+  local role="$1" key="$2" worktree="$3" branch="${4:-}" operation command
+  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$key" "$worktree")"
+  fail "$role is in the middle of a $operation${branch:+ on $branch}; finish it there or run: $command"
 }
 
-# An unreadable worktree keeps its operations to itself. Refusing beats a row
-# that reads as free on stdout while the doubt goes only to stderr.
 fail_unreadable_worktree() {
+  fail "$1 is not a readable git worktree"
+}
+
+# A worktree scanned for hidden operations keeps them to itself when it cannot
+# be read. Refusing beats a row that reads as free while the doubt goes to
+# stderr.
+fail_unchecked_worktree() {
   fail "worktree $1 cannot be read, so its operations could not be checked; repair it or run: git worktree remove --force $1"
 }
 
@@ -108,16 +116,16 @@ assert_branch_free_of_operations() {
     # goes with git worktree prune.
     [ -d "$path" ] || continue
     resolved="$(cd "$path" 2>/dev/null && pwd -P)" ||
-      fail_unreadable_worktree "$path"
+      fail_unchecked_worktree "$path"
     [ "$resolved" != "$current" ] || continue
     git_dir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" ||
-      fail_unreadable_worktree "$path"
+      fail_unchecked_worktree "$path"
 
     while IFS=$'\t' read -r state key; do
       [ -f "$git_dir/$state" ] || continue
       name="$(first_line "$git_dir/$state")"
       [ "$name" = "$branch" ] || [ "$name" = "refs/heads/$branch" ] || continue
-      fail_operation_elsewhere "$path" "$branch" "$key"
+      fail_operation "worktree $path" "$key" "$path" "$branch"
     done <<< "$(detaching_states)"
   done <<< "$paths"
 }
@@ -125,7 +133,7 @@ assert_branch_free_of_operations() {
 worktree_git_dir() {
   local git_dir
   git_dir="$(git -C "$1" rev-parse --absolute-git-dir)" ||
-    fail "$1 is not a readable git worktree"
+    fail_unreadable_worktree "$1"
   printf '%s\n' "$git_dir"
 }
 
@@ -160,18 +168,17 @@ operation_guidance() {
 }
 
 assert_no_operation() {
-  local worktree="$1" role="$2" git_dir marker operation command
+  local worktree="$1" role="$2" git_dir marker
   git_dir="$(worktree_git_dir "$worktree")"
   marker="$(operation_marker "$git_dir")"
   [ -n "$marker" ] || return 0
-  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$marker" "$worktree")"
-  fail "$role is in the middle of a $operation; finish it there or run: $command"
+  fail_operation "$role" "$marker" "$worktree"
 }
 
 assert_no_tracked_changes() {
   local worktree="$1" role="$2" changes
   changes="$(git -C "$worktree" status --porcelain --untracked-files=no)" ||
-    fail "$role is not a readable git worktree"
+    fail_unreadable_worktree "$role"
   [ -n "$changes" ] || return 0
   fail "$role has uncommitted tracked changes; commit them there or run: git -C $worktree stash --include-untracked
 $changes"
@@ -180,7 +187,7 @@ $changes"
 untracked_count() {
   local files
   files="$(git -C "$1" ls-files --others --exclude-standard)" ||
-    fail "$1 is not a readable git worktree"
+    fail_unreadable_worktree "$1"
   [ -n "$files" ] || { printf '0\n'; return; }
   printf '%s\n' "$files" | awk 'END { print NR + 0 }'
 }
