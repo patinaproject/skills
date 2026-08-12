@@ -192,6 +192,8 @@ assert_blocked() {
   elif ! grep -Fq "git -C $root/held bisect reset" <<< "$output"; then
     fail "a bisecting holder error was not actionable: $output"
   fi
+  assert_move_blocked "$root" feature "git -C $root/held bisect reset" \
+    'a bisecting bystander'
   git -C "$root/held" bisect reset >/dev/null 2>&1
 
   # git am borrows the rebase-apply state, and only git am --abort clears it.
