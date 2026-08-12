@@ -72,8 +72,10 @@ repository, and a session that resolves a different temporary root sees none of
 it — paying a full re-review of an already reviewed branch. Read
 [`polish/review-record.md`](../polish/review-record.md) for the record's
 identity and commands, resolving `<polish-skill-directory>` to the installed
-`polish` directory beside this skill. Report an uninstalled `polish` and finish:
-the move itself still succeeded.
+`polish` directory beside this skill. A missing
+`<polish-skill-directory>/scripts/review-state.mjs` means `polish` is not
+installed: report that the review state was left alone and finish, because the
+move itself still succeeded.
 
 1. Resolve the target branch from `origin/HEAD` and read what this session sees:
 

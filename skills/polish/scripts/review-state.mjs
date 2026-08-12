@@ -118,7 +118,7 @@ function reviewDirectory() {
   return join(reviewRoot(), 'polish-reviews');
 }
 
-function assertPrivateDirectory(path, { enforceMode = true } = {}) {
+function assertPrivateDirectory(path, { repairMode = true } = {}) {
   let descriptor;
   try {
     descriptor = openSync(
@@ -137,7 +137,7 @@ function assertPrivateDirectory(path, { enforceMode = true } = {}) {
     ) {
       throw new Error(`Review state directory has a foreign owner: ${path}`);
     }
-    if (enforceMode && process.platform !== 'win32') {
+    if (repairMode && process.platform !== 'win32') {
       fchmodSync(descriptor, 0o700);
     }
   } catch (error) {
@@ -327,17 +327,29 @@ function wait(milliseconds) {
 }
 
 function lockIsStale(path) {
-  const state = lstatSync(path);
-  if (!state.isFile() || state.isSymbolicLink()) {
-    throw new Error(`Review state lock is not a regular file: ${path}`);
+  let contents;
+
+  try {
+    const state = lstatSync(path);
+    if (!state.isFile() || state.isSymbolicLink()) {
+      throw new Error(`Review state lock is not a regular file: ${path}`);
+    }
+    if (
+      typeof process.getuid === 'function' &&
+      state.uid !== process.getuid()
+    ) {
+      throw new Error(`Review state lock has a foreign owner: ${path}`);
+    }
+    contents = readFileSync(path, 'utf8');
+  } catch (error) {
+    // The holder released the lock mid-check, so the caller retries the link.
+    if (error && typeof error === 'object' && error.code === 'ENOENT') {
+      return false;
+    }
+    throw error;
   }
-  if (
-    typeof process.getuid === 'function' &&
-    state.uid !== process.getuid()
-  ) {
-    throw new Error(`Review state lock has a foreign owner: ${path}`);
-  }
-  const owner = Number.parseInt(readFileSync(path, 'utf8'), 10);
+
+  const owner = Number.parseInt(contents, 10);
   if (!Number.isInteger(owner) || owner <= 0) {
     throw new Error(`Review state lock is corrupt: ${path}`);
   }
@@ -609,7 +621,7 @@ function resolveSourceDirectory(from) {
 
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
-      assertPrivateDirectory(candidate, { enforceMode: false });
+      assertPrivateDirectory(candidate, { repairMode: false });
       return candidate;
     }
   }
@@ -627,6 +639,30 @@ function readSourceRecord(path) {
   } catch {
     return null;
   }
+}
+
+function commitResolves(head) {
+  return (
+    typeof head === 'string' &&
+    tryGit(['rev-parse', '--verify', `${head}^{commit}`]).status === 0
+  );
+}
+
+// The carried record replaces this session's only when it reviewed strictly
+// further along the same history; equal or unknown heads keep what is here.
+function carriedAdvancesCoverage(local, carried) {
+  const carriedHead = carried.authoritative?.reviewedHead;
+  if (!commitResolves(carriedHead)) {
+    return false;
+  }
+  const localHead = local.authoritative?.reviewedHead;
+  if (!commitResolves(localHead)) {
+    return true;
+  }
+  return (
+    localHead !== carriedHead &&
+    tryGit(['merge-base', '--is-ancestor', localHead, carriedHead]).status === 0
+  );
 }
 
 function relocateRecords(from, branch) {
@@ -668,7 +704,11 @@ function relocateRecords(from, branch) {
     }
 
     withRecordLock(identity, () => {
-      if (loadRecord(identity).status === 'valid') {
+      const loaded = loadRecord(identity);
+      if (
+        loaded.status === 'valid' &&
+        !carriedAdvancesCoverage(loaded.record, value)
+      ) {
         kept.push(value.targetBranch);
         return;
       }

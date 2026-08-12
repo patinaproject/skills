@@ -95,7 +95,7 @@ assert_blocked() {
 {
   root="$(new_fixture)"
   printf 'base\nfeature\nedited\n' > "$root/held/README.md"
-  assert_blocked "$root" feature 'commit or stash them there first' \
+  assert_blocked "$root" feature "git -C $root/held stash --include-untracked" \
     'uncommitted tracked changes in the holder'
 
   root="$(new_fixture)"
@@ -104,24 +104,39 @@ assert_blocked() {
   git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
   git -C "$root/held" switch --quiet feature
   git -C "$root/held" merge conflicting >/dev/null 2>&1 || true
-  assert_blocked "$root" feature 'in the middle of MERGE_HEAD' \
+  assert_blocked "$root" feature "git -C $root/held merge --abort" \
     'a merge in progress in the holder'
 
   root="$(new_fixture)"
+  git -C "$root/held" switch --quiet -c conflicting main
+  printf 'base\nconflict\n' > "$root/held/README.md"
+  git -C "$root/held" commit --quiet -am 'fix: #350 conflicting work'
+  git -C "$root/held" switch --quiet feature
+  git -C "$root/held" cherry-pick conflicting >/dev/null 2>&1 || true
+  assert_blocked "$root" feature "git -C $root/held cherry-pick --abort" \
+    'a cherry-pick in progress in the holder'
+
+  root="$(new_fixture)"
   git -C "$root/repo" worktree lock "$root/held" --reason 'pinned by the operator'
-  assert_blocked "$root" feature 'git worktree unlock' 'a locked holder'
+  assert_blocked "$root" feature "git worktree unlock $root/held" 'a locked holder'
   git -C "$root/repo" worktree unlock "$root/held"
 
   root="$(new_fixture)"
   printf 'base\nedited\n' > "$root/repo/README.md"
-  assert_blocked "$root" feature 'commit or stash them before moving a branch here' \
+  assert_blocked "$root" feature "git -C $root/repo stash --include-untracked" \
     'uncommitted tracked changes in the current worktree'
 }
 
-# A stale worktree entry is pruned rather than reported as a holder.
+# A stale worktree entry names the command that clears it.
 {
   root="$(new_fixture)"
   rm -rf "$root/held"
+  if output="$(cd "$root/repo" && "$HELPER" resolve feature 2>&1)"; then
+    fail "a stale holder should not resolve: $output"
+  elif ! grep -Fq 'run: git worktree prune' <<< "$output"; then
+    fail "a stale holder error was not actionable: $output"
+  fi
+  git -C "$root/repo" worktree prune
   assert_equal "$(resolve_field "$root" feature 1)" free 'a pruned holder frees the branch'
 }
 

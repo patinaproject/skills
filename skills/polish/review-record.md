@@ -71,11 +71,15 @@ node <polish-skill-directory>/scripts/review-state.mjs relocate \
 ```
 
 `--branch` defaults to the current branch. `--from` accepts the other session's
-temporary root or a `polish-reviews` directory directly. The result reports the
-resolved `source`, the target branches `relocated`, and the target branches
-`kept` because this session already holds a valid record for them. Records
-belonging to another repository or another source branch stay where they are,
-and the source root keeps its copy.
+temporary root, the `patinaproject-<user>` private root beneath it, or a
+`polish-reviews` directory directly.
+
+The result reports the resolved `source`, the target branches `relocated`, and
+the target branches `kept`. A record is `kept` when this session already holds
+one whose reviewed head is the carried head or a descendant of it, so carrying
+never trades newer coverage for older. Records belonging to another repository
+or another source branch stay where they are, and the source root keeps its
+copy.
 
 ## Finding shape
 

@@ -603,6 +603,41 @@ try {
     assert.equal(staleResult.status, 1);
     assert.match(staleResult.stderr, /Review state lock is stale/);
     assert.equal(readFileSync(staleLock, 'utf8'), '99999999\n');
+
+    const releasing = createRepository();
+    const releasingHead = git(releasing.root, 'rev-parse', 'HEAD');
+    reviewCommand(
+      releasing.root,
+      releasing.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      releasingHead,
+      '--outcome',
+      'passed'
+    );
+    const releasingFiles = recordFiles(releasing.temporaryRoot);
+    const heldLock = join(
+      releasingFiles.directory,
+      `${releasingFiles.names[0]}.lock`
+    );
+    writeFileSync(heldLock, `${process.pid}\n`, { mode: 0o600 });
+    const waiting = processResult(
+      reviewCommandProcess(
+        releasing.root,
+        releasing.temporaryRoot,
+        'provisional',
+        '--target',
+        'main',
+        '--candidate',
+        releasingHead
+      )
+    );
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    rmSync(heldLock);
+    const waitingOutcome = await waiting;
+    assert.equal(waitingOutcome.status, 0, waitingOutcome.stderr);
   }
 
   {
@@ -781,6 +816,82 @@ try {
     );
     assert.equal(absent.status, 1);
     assert.match(absent.stderr, /No polish review state directory beneath/);
+  }
+
+  {
+    const advancing = createRepository();
+    const olderHead = git(advancing.root, 'rev-parse', 'HEAD');
+    reviewCommand(
+      advancing.root,
+      advancing.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      olderHead,
+      '--outcome',
+      'passed'
+    );
+
+    const newerHead = commitChange(advancing.root, 'base\nchange\nmore\n');
+    const local = mkdtempSync(join(tmpdir(), 'patinaproject-polish-local-'));
+    fixtures.push(local);
+    reviewCommand(
+      advancing.root,
+      local,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      newerHead,
+      '--outcome',
+      'passed'
+    );
+
+    // An older carried record never displaces coverage this session already has.
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          advancing.root,
+          local,
+          'relocate',
+          '--from',
+          advancing.temporaryRoot
+        )
+      ),
+      {
+        branch: '323-incremental-polish',
+        kept: ['main'],
+        relocated: [],
+        source: join(advancing.temporaryRoot, 'patinaproject', 'polish-reviews'),
+      }
+    );
+
+    // The reverse carry advances the older session to the newer reviewed head.
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          advancing.root,
+          advancing.temporaryRoot,
+          'relocate',
+          '--from',
+          local
+        )
+      ).relocated,
+      ['main']
+    );
+    assert.equal(
+      JSON.parse(
+        reviewCommand(
+          advancing.root,
+          advancing.temporaryRoot,
+          'scope',
+          '--target',
+          'main'
+        )
+      ).mode,
+      'skip'
+    );
   }
 
   console.info('OK: incremental polish review-state contract passed');

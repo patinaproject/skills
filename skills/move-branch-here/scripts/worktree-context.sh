@@ -48,21 +48,51 @@ holder_record() {
   '
 }
 
-operation_in_progress() {
-  local worktree="$1" git_dir marker
-  git_dir="$(git -C "$worktree" rev-parse --absolute-git-dir)" ||
-    fail "$worktree is not a readable git worktree"
+worktree_git_dir() {
+  local git_dir
+  git_dir="$(git -C "$1" rev-parse --absolute-git-dir)" ||
+    fail "$1 is not a readable git worktree"
+  printf '%s\n' "$git_dir"
+}
+
+# Prints the marker file of an operation in progress, or nothing. Keeping this
+# free of failure exits lets callers read it inside a command substitution.
+operation_marker() {
+  local git_dir="$1" marker
   for marker in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG rebase-merge rebase-apply; do
     if [ -e "$git_dir/$marker" ]; then
       printf '%s\n' "$marker"
-      return 0
+      return
     fi
   done
-  return 1
 }
 
-tracked_changes() {
-  git -C "$1" status --porcelain --untracked-files=no
+# Prints "<operation>\t<command that clears it>" for a marker file.
+operation_guidance() {
+  case "$1" in
+    MERGE_HEAD)       printf 'merge\tgit -C %s merge --abort\n' "$2" ;;
+    CHERRY_PICK_HEAD) printf 'cherry-pick\tgit -C %s cherry-pick --abort\n' "$2" ;;
+    REVERT_HEAD)      printf 'revert\tgit -C %s revert --abort\n' "$2" ;;
+    BISECT_LOG)       printf 'bisect\tgit -C %s bisect reset\n' "$2" ;;
+    *)                printf 'rebase\tgit -C %s rebase --abort\n' "$2" ;;
+  esac
+}
+
+assert_no_operation() {
+  local worktree="$1" role="$2" git_dir marker operation command
+  git_dir="$(worktree_git_dir "$worktree")"
+  marker="$(operation_marker "$git_dir")"
+  [ -n "$marker" ] || return 0
+  IFS=$'\t' read -r operation command <<< "$(operation_guidance "$marker" "$worktree")"
+  fail "$role is in the middle of a $operation; finish it there or run: $command"
+}
+
+assert_no_tracked_changes() {
+  local worktree="$1" role="$2" changes
+  changes="$(git -C "$worktree" status --porcelain --untracked-files=no)"
+  [ -n "$changes" ] || return 0
+  fail "$role has uncommitted tracked changes; commit them there or run: git -C $worktree stash --include-untracked
+$changes"
 }
 
 untracked_count() {
@@ -70,30 +100,18 @@ untracked_count() {
 }
 
 assert_ready_to_receive() {
-  local worktree="$1" marker changes
-  if marker="$(operation_in_progress "$worktree")"; then
-    fail "this worktree is in the middle of $marker; finish or abort it before moving a branch here"
-  fi
-  changes="$(tracked_changes "$worktree")"
-  if [ -n "$changes" ]; then
-    fail "this worktree has uncommitted tracked changes; commit or stash them before moving a branch here:
-$changes"
-  fi
+  local worktree="$1"
+  assert_no_operation "$worktree" 'this worktree'
+  assert_no_tracked_changes "$worktree" 'this worktree'
 }
 
 assert_holder_releasable() {
-  local holder="$1" locked="$2" reason="$3" marker changes
+  local holder="$1" locked="$2" reason="$3"
   if [ "$locked" = "1" ]; then
-    fail "worktree $holder is locked${reason:+ ($reason)}; run git worktree unlock $holder when releasing it is intended"
+    fail "worktree $holder is locked${reason:+ ($reason)}; run: git worktree unlock $holder"
   fi
-  if marker="$(operation_in_progress "$holder")"; then
-    fail "worktree $holder is in the middle of $marker; finish or abort it there before moving the branch here"
-  fi
-  changes="$(tracked_changes "$holder")"
-  if [ -n "$changes" ]; then
-    fail "worktree $holder has uncommitted tracked changes that would be stranded on a detached HEAD; commit or stash them there first:
-$changes"
-  fi
+  assert_no_operation "$holder" "worktree $holder"
+  assert_no_tracked_changes "$holder" "worktree $holder"
 }
 
 # Emits "<mode>\t<branch>\t<branch-head>\t<holder-path>\t<holder-head>\t<holder-untracked>".
@@ -102,47 +120,46 @@ $changes"
 resolve_branch() {
   [ "$#" -eq 1 ] || fail "resolve requires exactly one branch name"
 
-  local branch="$1" current branch_head record holder locked reason prunable pruned=0
+  local branch="$1" current branch_head record holder locked reason prunable
+  local holder_head untracked
   require_branch "$branch"
   current="$(current_worktree)"
   branch_head="$(git rev-parse "refs/heads/$branch")"
   record="$(holder_record "$branch")"
 
-  while :; do
-    if [ -z "$record" ]; then
-      assert_ready_to_receive "$current"
-      printf 'free\t%s\t%s\t\t\t0\n' "$branch" "$branch_head"
-      return
-    fi
+  if [ -z "$record" ]; then
+    assert_ready_to_receive "$current"
+    printf 'free\t%s\t%s\t\t\t0\n' "$branch" "$branch_head"
+    return
+  fi
 
-    IFS=$'\t' read -r holder locked prunable reason <<< "$record"
+  case "$record" in
+    *$'\n'*)
+      fail "more than one worktree records $branch; run: git worktree prune"
+      ;;
+  esac
 
-    if [ ! -d "$holder" ]; then
-      if [ "$prunable" = "1" ] && [ "$pruned" = "0" ]; then
-        git worktree prune
-        pruned=1
-        record="$(holder_record "$branch")"
-        continue
-      fi
-      fail "worktree $holder holds $branch but is unreadable; run git worktree prune or restore that path"
-    fi
+  IFS=$'\t' read -r holder locked prunable reason <<< "$record"
 
-    break
-  done
+  if [ "$prunable" = "1" ] || [ ! -d "$holder" ]; then
+    fail "worktree $holder holds $branch but its path is gone; run: git worktree prune"
+  fi
 
   holder="$(real_path "$holder")"
+  untracked="$(untracked_count "$holder")"
+
   if [ "$holder" = "$current" ]; then
     printf 'here\t%s\t%s\t%s\t%s\t%s\n' \
-      "$branch" "$branch_head" "$holder" "$branch_head" "$(untracked_count "$holder")"
+      "$branch" "$branch_head" "$holder" "$branch_head" "$untracked"
     return
   fi
 
   assert_holder_releasable "$holder" "$locked" "$reason"
   assert_ready_to_receive "$current"
+  holder_head="$(git -C "$holder" rev-parse HEAD)"
 
   printf 'held\t%s\t%s\t%s\t%s\t%s\n' \
-    "$branch" "$branch_head" "$holder" "$(git -C "$holder" rev-parse HEAD)" \
-    "$(untracked_count "$holder")"
+    "$branch" "$branch_head" "$holder" "$holder_head" "$untracked"
 }
 
 # Detaches the holding worktree and attaches the branch here, restoring the
@@ -152,10 +169,10 @@ move_branch() {
     fail "usage: worktree-context.sh move <branch> <branch-head> [holder-path]"
 
   local branch="$1" expected_head="$2" expected_holder="${3:-}"
-  local row mode actual_branch actual_head holder detached output restore
+  local row mode actual_head holder detached output restore
 
   row="$(resolve_branch "$branch")"
-  IFS=$'\t' read -r mode actual_branch actual_head holder _ _ <<< "$row"
+  IFS=$'\t' read -r mode _ actual_head holder _ _ <<< "$row"
 
   if [ "$actual_head" != "$expected_head" ]; then
     fail "branch $branch moved from $expected_head to $actual_head; rerun resolve against current context"
