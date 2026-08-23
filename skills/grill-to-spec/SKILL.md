@@ -48,6 +48,9 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    `CONTEXT.md`, and a decision to that context's `docs/adr/` when it binds only
    that context or the root `docs/adr/` when it binds the system.
 
+   When a later `grilling` round reopens a settled decision, re-draft that one
+   proposal. The newest draft for a destination path is its live text.
+
    Done when every term and decision the session settled is accounted for:
    drafted as a proposal, or named as a deliberate skip with its reason. A
    design that settled neither yields no proposals; carry on to the spec.
@@ -56,12 +59,15 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    baseline, proving the grilling left nothing behind to commit.
 
 4. **Hand off to the operator.** This is where the run ends: publishing is
-   theirs. Present every proposal under one `Proposed doc changes` heading, each
-   in its own fenced block labelled with its destination path, then close by
-   telling them to run `/to-spec` to publish the spec with those blocks inside
-   it, carried over unchanged — the implementing branch applies them verbatim
-   later, so a reworded proposal stops being file-ready. `/to-spec` synthesizes
-   from this
-   conversation, so the grilling and the proposals are already in the context it
-   reads. Done when every proposal from step 2 is on screen in full and that
-   instruction is the last thing said.
+   theirs. Index the live proposals under one `Proposed doc changes` heading:
+   one line each, giving the destination path and a one-sentence summary, plus
+   the count. The full text stays where step 2 drafted it. `/to-spec`
+   synthesizes from this conversation, so it reads each block there, and the
+   tracker issue it publishes is the canonical copy from then on. Print a block
+   in full when the operator asks to see one.
+
+   Close by telling them to run `/to-spec` to publish the spec with those blocks
+   inside it, carried over unchanged — the implementing branch applies them
+   verbatim later, so a reworded proposal stops being file-ready. Done when the
+   index accounts for every proposal from step 2 and that instruction is the
+   last thing said.
