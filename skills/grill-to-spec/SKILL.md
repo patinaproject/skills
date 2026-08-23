@@ -41,9 +41,9 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    an ADR, each become one proposal. Write the text to the format
    `domain-modeling` names — `CONTEXT-FORMAT.md` for a glossary entry,
    `ADR-FORMAT.md` for a decision — and follow the target repository's own ADR
-   naming scheme when it documents one. Each proposal is one fenced block
-   labelled with its destination path, carrying the complete text that belongs
-   there.
+   naming scheme when it documents one. Each proposal's draft is one fenced
+   block in the conversation, labelled with its destination path and carrying
+   the complete text that belongs there.
 
    In a repository with a `CONTEXT-MAP.md`, a term belongs to its context's
    `CONTEXT.md`, and a decision to that context's `docs/adr/` when it binds only
@@ -65,9 +65,9 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    line each, naming the term or decision, its destination path, and a
    one-sentence summary, plus the count. The full text stays where step 2
    drafted it: `/to-spec` synthesizes from this conversation, so it reads each
-   proposal's live draft there — the newest block drafted for that term or
-   decision — and the tracker issue it publishes is the canonical copy from then
-   on. Print a draft in full only when the operator asks to see one.
+   proposal's live draft there, and the tracker issue it publishes is the
+   canonical copy from then on. Print a draft in full only when the operator
+   asks to see one.
 
    Close by telling them to run `/to-spec` to publish the spec with those drafts
    inside it, carried over unchanged — the implementing branch applies them
