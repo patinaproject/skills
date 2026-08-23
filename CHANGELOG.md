@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.29.0](https://github.com/patinaproject/skills/compare/v2.28.0...v2.29.0) (2026-08-23)
+
+
+### Features
+
+* [#360](https://github.com/patinaproject/skills/issues/360) index grill-to-spec hand-off proposals ([#361](https://github.com/patinaproject/skills/issues/361)) ([f227106](https://github.com/patinaproject/skills/commit/f2271060db47cc77fdb3a8bdfe841611ee0d5504))
+
 ## [2.28.0](https://github.com/patinaproject/skills/compare/v2.27.0...v2.28.0) (2026-08-12)
 
 
