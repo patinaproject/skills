@@ -49,9 +49,9 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    `CONTEXT.md`, and a decision to that context's `docs/adr/` when it binds only
    that context or the root `docs/adr/` when it binds the system.
 
-   When grilling resumes after drafting and reopens a settled term or decision,
-   re-draft its one proposal. A proposal's newest draft is the live one, and the
-   drafts it superseded stay in the conversation as history.
+   When `grilling` resumes after drafting and reopens a settled term or
+   decision, re-draft its one proposal. A proposal's newest draft is the live
+   one, and the drafts it superseded stay in the conversation as history.
 
    Done when every term and decision the session settled is accounted for:
    drafted as a proposal, or named as a deliberate skip with its reason. A
