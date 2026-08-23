@@ -41,15 +41,16 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    an ADR, each become one proposal. Write the text to the format
    `domain-modeling` names — `CONTEXT-FORMAT.md` for a glossary entry,
    `ADR-FORMAT.md` for a decision — and follow the target repository's own ADR
-   naming scheme when it documents one. Each proposal carries its destination
-   path and the complete text that belongs there.
+   naming scheme when it documents one. Each proposal is one fenced block
+   labelled with its destination path, carrying the complete text that belongs
+   there.
 
    In a repository with a `CONTEXT-MAP.md`, a term belongs to its context's
    `CONTEXT.md`, and a decision to that context's `docs/adr/` when it binds only
    that context or the root `docs/adr/` when it binds the system.
 
    When a later `grilling` round reopens a settled term or decision, re-draft
-   its one proposal. A proposal's newest draft is its live text, and the drafts
+   its one proposal. A proposal's newest draft is the live one, and the drafts
    it superseded stay in the conversation as history.
 
    Done when every term and decision the session settled is accounted for:
@@ -60,16 +61,16 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    baseline, proving the grilling left nothing behind to commit.
 
 4. **Hand off to the operator.** This is where the run ends: publishing is
-   theirs. Index the live proposals under one `Proposed doc changes` heading:
-   one line each, giving the destination path and a one-sentence summary, plus
-   the count. The full text stays where step 2 drafted it. `/to-spec`
-   synthesizes from this conversation, so it reads each proposal's live draft
-   there, and the tracker issue it publishes is the canonical copy from then on.
-   Print a block in full only when the operator asks to see one.
+   theirs. Index the proposals under one `Proposed doc changes` heading: one
+   line each, naming the term or decision, its destination path, and a
+   one-sentence summary, plus the count. The full text stays where step 2
+   drafted it: `/to-spec` synthesizes from this conversation, so it reads each
+   proposal's live draft there — the newest block drafted for that term or
+   decision — and the tracker issue it publishes is the canonical copy from then
+   on. Print a draft in full only when the operator asks to see one.
 
-   Close by telling them to run `/to-spec` to publish the spec with each
-   proposal's live draft inside it, carried over unchanged — the implementing
-   branch applies them verbatim later, so a reworded proposal stops being
-   file-ready. Done when the index carries a path and a summary for every
-   proposal step 2 drafted, gives the count, and that instruction is the last
-   thing said.
+   Close by telling them to run `/to-spec` to publish the spec with those drafts
+   inside it, carried over unchanged — the implementing branch applies them
+   verbatim later, so a reworded proposal stops being file-ready. Done when the
+   index carries a name, a path, and a summary for every proposal step 2
+   drafted, gives the count, and that instruction is the last thing said.
