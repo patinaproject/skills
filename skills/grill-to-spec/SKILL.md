@@ -38,12 +38,12 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
 
 2. **Draft a proposal per resolved doc change.** A glossary term the session
    pinned down, and a decision that clears `domain-modeling`'s bar for recording
-   an ADR, each become one proposal. Write the text to the format
-   `domain-modeling` names — `CONTEXT-FORMAT.md` for a glossary entry,
-   `ADR-FORMAT.md` for a decision — and follow the target repository's own ADR
-   naming scheme when it documents one. Each proposal's draft is one fenced
-   block in the conversation, labelled with its destination path and carrying
-   the complete text that belongs there.
+   an ADR, each become one proposal, the unit the hand-off indexes. Write the
+   text to the format `domain-modeling` names — `CONTEXT-FORMAT.md` for a
+   glossary entry, `ADR-FORMAT.md` for a decision — and follow the target
+   repository's own ADR naming scheme when it documents one. That text is the
+   proposal's draft: one fenced block in the conversation, labelled with its
+   destination path and carrying the complete text that belongs there.
 
    In a repository with a `CONTEXT-MAP.md`, a term belongs to its context's
    `CONTEXT.md`, and a decision to that context's `docs/adr/` when it binds only
