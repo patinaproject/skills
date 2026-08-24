@@ -17,7 +17,6 @@
     // Vendored third-party skill payloads and the overlays that mirror them are
     // written against their own upstream markdownlint config and are overwritten
     // on every re-vendor, so they are never linted here.
-    "skills/**",
     ".agents/skills/**",
     ".claude/skills/**"
   ]

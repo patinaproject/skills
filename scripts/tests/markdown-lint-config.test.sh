@@ -4,17 +4,73 @@ set -euo pipefail
 # Behavioral guard for the markdown exclusion mechanism.
 #
 # `markdownlint-cli2` does not read `.markdownlintignore`. Exclusions live in
-# `.markdownlint-cli2.jsonc` (`ignores`), which is the only mechanism that also
-# covers the explicit file paths `lint-staged` hands the pre-commit hook.
+# `.markdownlint-cli2.jsonc` (`ignores`), the single list every markdown entry
+# point inherits — including the pre-commit hook, which needs its paths made
+# relative first because `ignores` does not match absolute ones.
 #
 # Per ADR-224 this asserts tool behavior and non-`.md` config only.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+TMP_DIRS=()
+cleanup() {
+  if [ "${#TMP_DIRS[@]}" -gt 0 ]; then
+    rm -rf "${TMP_DIRS[@]}"
+  fi
+}
+# One accumulator, one trap. A bash trap replaces rather than appends, so
+# registering a second one per temp directory would silently drop the first.
+trap cleanup EXIT
+
 fail() {
   echo "FAIL: $1" >&2
   exit 1
+}
+
+scratch_dir() {
+  local dir
+  # `set -e` is suppressed inside the command substitution this is called from,
+  # so a failing `mktemp` would otherwise return an empty, unregistered path.
+  dir="$(mktemp -d)" || fail "could not create a temporary directory"
+  TMP_DIRS+=("$dir")
+  printf '%s\n' "$dir"
+}
+
+# `Linting: N file(s)` is the only signal cli2 gives for which files it
+# *selected*, and selection is the mechanism under test — a clean file exits
+# zero whether or not it was excluded. Named once so the coupling has one home.
+NO_FILES_SELECTED_LINE="Linting: 0 file(s)"
+
+# A Setext H1 with no blank line after it, plus an unlabelled fenced block:
+# violates MD022, MD031 and MD040 under this repository's rule set. One home for
+# the shape, so a rule-set change does not have to be chased across fixtures.
+write_violating_md() {
+  printf 'Violating Heading\n=================\n```\nx\n```\n' > "$1"
+}
+
+# The committed vendored-skill overlay roots, in one place.
+OVERLAY_ROOTS=(.agents/skills .claude/skills)
+
+# `-print -quit` rather than `| head -n 1`: under `set -euo pipefail`, `head`
+# closing the pipe can kill `find` with SIGPIPE and abort the script with a
+# bare 141 once these trees grow past the pipe buffer.
+find_overlay_md() {
+  local root="$1" found
+  [ -d "$root" ] || return 1
+  found="$(find "$root" -name '*.md' -type f -print -quit)"
+  [ -n "$found" ] || return 1
+  printf '%s\n' "$found"
+}
+
+assert_ignored() {
+  local path="$1" description="$2" output
+  output="$(pnpm exec markdownlint-cli2 "$path" 2>&1)" || {
+    printf '%s\n' "$output" >&2
+    fail "linting an ignored path should succeed: $description"
+  }
+  printf '%s\n' "$output" | grep -q "$NO_FILES_SELECTED_LINE" ||
+    fail "ignores did not apply to $description: $output"
 }
 
 # The inert file must not come back: an exclusion added there is silently lost.
@@ -24,46 +80,89 @@ fi
 
 [ -f .markdownlint-cli2.jsonc ] || fail ".markdownlint-cli2.jsonc is missing"
 
+# Resolved once so the temp-directory cases below can run the same binary
+# without `pnpm exec`, which needs a package.json in the working directory and
+# would otherwise fail for a reason unrelated to what is being asserted.
+CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
+[ -x "$CLI2_BIN" ] || fail "markdownlint-cli2 is not installed at $CLI2_BIN"
+
 # A malformed config makes markdownlint-cli2 exit non-zero, so every run below
 # doubles as a parse check.
 
-# 1. An excluded path passed explicitly is skipped. `ignores` applies to
-#    relative paths only, which is why case 3 covers the absolute form
-#    lint-staged actually produces.
-explicit_output="$(pnpm exec markdownlint-cli2 "skills/scaffold-repository/SKILL.md" 2>&1)" || {
-  printf '%s\n' "$explicit_output" >&2
-  fail "linting an ignored path explicitly should succeed"
-}
-printf '%s\n' "$explicit_output" | grep -q "Linting: 0 file(s)" ||
-  fail "ignores did not apply to an explicitly passed path: $explicit_output"
+# 1. Every committed vendored-skill overlay is excluded when passed explicitly.
+#    The baseline tells repositories to commit these payloads, and they are
+#    third-party markdown written against their own upstream config, so without
+#    the exclusion the first vendoring run breaks lint:md, markdown CI, and
+#    pre-commit at once.
+#
+#    The sample must come from an overlay: this repo's own `skills/**` is
+#    deliberately linted, so a file from there would assert the opposite.
+EXCLUDED_SAMPLE=""
+for overlay_root in "${OVERLAY_ROOTS[@]}"; do
+  overlay_file="$(find_overlay_md "$overlay_root")" || continue
+  assert_ignored "$overlay_file" "committed overlay $overlay_root"
+  [ -n "$EXCLUDED_SAMPLE" ] || EXCLUDED_SAMPLE="$overlay_file"
+done
+[ -n "$EXCLUDED_SAMPLE" ] ||
+  fail "no vendored overlay markdown found to probe the exclusion with"
 
 # 2. Rule configuration from .markdownlint.jsonc still loads for linted files.
-probe_dir="$(mktemp -d)"
-trap 'rm -rf "$probe_dir"' EXIT
+probe_dir="$(scratch_dir)"
 probe="$probe_dir/probe.md"
-printf 'Bad Heading\n===========\n```\nx\n```\n' > "$probe"
+write_violating_md "$probe"
 
 if pnpm exec markdownlint-cli2 "$probe" >/dev/null 2>&1; then
   fail "a file with real violations should not lint clean"
 fi
 
-# 3. The pre-commit path, end to end, on the form lint-staged really produces.
+# 3. The other half of the contract: this repo's own authored skills are
+# first-party markdown written against this config, so they must be linted.
+first_party="$(find skills -name '*.md' -type f -print -quit)"
+if [ -n "$first_party" ]; then
+  first_party_output="$(pnpm exec markdownlint-cli2 "$first_party" 2>&1)" || {
+    printf '%s\n' "$first_party_output" >&2
+    fail "first-party skill markdown must lint clean: $first_party"
+  }
+  if printf '%s\n' "$first_party_output" | grep -q "$NO_FILES_SELECTED_LINE"; then
+    fail "first-party skill markdown must be linted, not excluded: $first_party"
+  fi
+fi
+
+# 4. The exclusion above is load-bearing, not vacuous: a payload written against
+#    another repository's config really does violate this one's rules.
+collision_dir="$(scratch_dir)"
+mkdir -p "$collision_dir/.claude/skills/vendored"
+cp .markdownlint.jsonc "$collision_dir/.markdownlint.jsonc"
+write_violating_md "$collision_dir/.claude/skills/vendored/SKILL.md"
+
+lint_collision_payload() {
+  (cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1)
+}
+
+if lint_collision_payload; then
+  fail "vendored payload should violate this repository's rules when not excluded"
+fi
+
+printf '{ "ignores": [".claude/skills/**"] }\n' > "$collision_dir/.markdownlint-cli2.jsonc"
+lint_collision_payload ||
+  fail "an ignores entry must exclude the same vendored payload"
+
+# 5. The pre-commit path, end to end, on the form lint-staged really produces.
 #    lint-staged hands its task absolute paths; markdownlint-cli2 applies
 #    `ignores` only to relative ones. So the config must convert them, and this
 #    runs the command it emits for an absolute excluded path and requires that
 #    nothing was linted. Passing the absolute path straight through selects the
-#    file, which is the pre-commit failure the shared exclusion list exists to
-#    prevent.
-staged_command="$(REPO_ROOT="$REPO_ROOT" node --input-type=module -e '
+#    file, which is the pre-commit failure the shared exclusion list prevents.
+staged_command="$(REPO_ROOT="$REPO_ROOT" EXCLUDED_SAMPLE="$EXCLUDED_SAMPLE" node --input-type=module -e '
 import assert from "node:assert/strict";
 import { pathToFileURL } from "node:url";
 const root = process.env.REPO_ROOT;
 const config = (await import(pathToFileURL(`${root}/.lintstagedrc.js`))).default;
 const entry = config["*.md"];
-const absolute = `${root}/skills/scaffold-repository/SKILL.md`;
-// lint-staged appends the (absolute) paths to a plain string command, and
-// uses a function command verbatim. Model both so a string config is tested
-// as lint-staged would actually invoke it, not as a bare command with no args.
+const absolute = `${root}/${process.env.EXCLUDED_SAMPLE}`;
+// lint-staged appends the (absolute) paths to a plain string command, and uses
+// a function command verbatim. Model both so a string config is tested as
+// lint-staged would actually invoke it, not as a bare command with no args.
 const commands = typeof entry === "function"
   ? [entry([absolute])].flat()
   : [entry].flat().map((command) => `${command} "${absolute}"`);
@@ -79,7 +178,7 @@ staged_output="$(eval "pnpm exec $staged_command" 2>&1)" || {
   printf '%s\n' "$staged_output" >&2
   fail "the lint-staged markdown command failed on an excluded path"
 }
-printf '%s\n' "$staged_output" | grep -q "Linting: 0 file(s)" ||
+printf '%s\n' "$staged_output" | grep -q "$NO_FILES_SELECTED_LINE" ||
   fail "the lint-staged command lints excluded paths: $staged_output"
 
 echo "OK: markdown lint exclusion contract passed"

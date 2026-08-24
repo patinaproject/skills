@@ -21,7 +21,7 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `.editorconfig` | yes | present; `root = true`; `end_of_line = lf` |
 | `.nvmrc` | yes | present |
 | `.markdownlint.jsonc` | yes | present; valid JSONC; carries rule configuration only |
-| `.markdownlint-cli2.jsonc` | yes | present; valid JSONC; carries an `ignores` array holding every markdown exclusion |
+| `.markdownlint-cli2.jsonc` | yes | present; valid JSONC; carries an `ignores` array holding every markdown exclusion, including the committed vendored-skill overlays (`.agents/skills/**` and `.claude/skills/**`). A repo that commits vendored skills without these entries fails `lint:md`, markdown CI, and `pre-commit` at once. A catalog repo's own `skills/**` must NOT be excluded: that markdown is first-party, written against this config, and excluding it only hides drift |
 | `.markdownlintignore` | no | absent; `markdownlint-cli2` does not read it, so any exclusion in it is inert. When present, classify as `stale` and recommend moving its entries into `.markdownlint-cli2.jsonc` → `ignores` |
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |
@@ -101,6 +101,7 @@ in a fresh worktree without an install step.
 | `scripts/clean.sh` | yes | present; removes only generated dependency and transient install files; never prunes committed overlay entries |
 | `package.json` | yes | includes `env:setup: pnpm install`, `skills:install: pnpm dlx skills@latest experimental_install --yes`, and `clean: bash scripts/clean.sh`; no `postinstall` skill-restore hook and no custom `scripts/install-skills.sh` |
 | `.gitignore` | yes | does not ignore `.agents/skills/**` or `.claude/skills/**`; ignores `node_modules/` and `.skills-install.lock*` |
+| Markdown lint exclusion | yes | `.markdownlint-cli2.jsonc` → `ignores` excludes the committed overlays, so vendored third-party markdown never reaches this repo's rules. Verify behaviorally rather than by reading the array: `pnpm exec markdownlint-cli2 <a vendored overlay file>` must report `Linting: 0 file(s)`. Passing an explicit path is the check that matters — it is the `lint-staged` path, and the one a negated glob would not have covered |
 | `pnpm skills:install` | yes | run after accepting `skills-lock.json` drift when one or more skills are locked; re-vendors the committed overlays via the upstream skills CLI (`skills experimental_install`), which must then be committed |
 | `npx --yes skills@latest list --json` | yes | verify vendored skills are present alongside any in-repo overlay symlinks |
 | Catalog-change convention | when catalog non-empty | when `skills-lock.json` locks any skill, the skill-catalog-change convention must travel with the repo: `install-skills` is locked (its `catalog-change.md` carries the reconciliation method, staleness audit, and catalog-delta PR format). When a populated lock omits `install-skills`, recommend adding it so catalog changes stay executed and described the same way |
@@ -135,15 +136,7 @@ Writes always go through the UI (or `gh api -X PATCH`). Deep-link: `https://gith
 | `squash_merge_commit_message` | `COMMIT_MESSAGES` |
 | `delete_branch_on_merge` | true |
 | `allow_update_branch` | true |
-| `allow_auto_merge` | true |
 | Release immutability (UI-only) | enabled |
-
-`merge-pr` requires auto-merge, so `allow_auto_merge: false` is normally drift.
-Before reporting it as such, apply the off-versus-unavailable test in `SKILL.md`
-→ "Auto-merge: off versus unavailable": `autoMergeAllowed` alone cannot tell a
-repository with the box unchecked from one whose plan does not offer the setting
-at all, and the second is an environment constraint to report rather than drift
-to fix.
 
 ## Area 8 – Commit / PR title hygiene
 

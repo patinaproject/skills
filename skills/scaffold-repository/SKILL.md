@@ -190,6 +190,20 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   converts each path with `path.relative(process.cwd(), file)` before handing
   it over. This is the same pre-commit gap that negated globs could not close;
   the mechanism changed, the trap did not.
+
+  `ignores` must exclude the committed vendored-skill overlays,
+  `.agents/skills/**` and `.claude/skills/**`. The baseline guarantees this
+  collision rather than merely permitting it: it tells repositories to commit
+  their vendored skills, and those payloads are third-party markdown written
+  against their own upstream config, so they fail this repository's rules on
+  contact and are overwritten on the next re-vendor. Emit the exclusion
+  pre-wired; reformatting the payloads is not an option.
+
+  Do not extend the exclusion to a catalog repo's own `skills/**`. That markdown
+  is first-party, written against this very config, and the collision argument
+  does not reach it — excluding it only gives up coverage, and hides any drift
+  behind the same silence. This repository lints its own first-party skill
+  files for that reason.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
@@ -204,7 +218,11 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   with no install step. Real skill directories live under `.agents/skills/<name>/`;
   `.claude/skills/<name>` entries are portable relative symlinks
   (`../../.agents/skills/<name>`) to the matching payloads. Repo-owned skills
-  stay isolated under `skills/<name>/`. `scripts/clean.sh` removes only generated
+  stay isolated under `skills/<name>/`. Because these payloads are committed,
+  the emitted `.markdownlint-cli2.jsonc` must already exclude them from markdown
+  lint (see **Markdown** above) — otherwise the first vendoring run breaks
+  `lint:md`, markdown CI, and the `pre-commit` hook at once.
+  `scripts/clean.sh` removes only generated
   dependency and transient install files (`node_modules`, `.skills-install.lock*`)
   and must never prune the committed overlay directories; `.gitignore` must not
   exclude `.agents/skills/**` or `.claude/skills/**`.
@@ -281,7 +299,6 @@ Every scaffold-managed repo should carry these merge settings:
 | `squash_merge_commit_message` | `COMMIT_MESSAGES` | Preserves commit-level context (useful for review and git blame) in the squash body. |
 | `delete_branch_on_merge` | true | Keeps the branch list tidy after each squash. |
 | `allow_update_branch` | true | Surfaces an "Update branch" button on stale PRs so reviewers can sync without leaving the UI. |
-| `allow_auto_merge` | true | `merge-pr` expresses merge intent through repository-managed auto-merge and refuses to merge any other way. With this off, `/merge-pr` dead-ends on a blocker only the operator can clear in the UI. |
 | Release immutability | enabled | Prevents published release assets and tags from being modified after the fact – critical for downstream consumers pinning to a tag. UI-only: not exposed via the standard REST `repos` endpoint. |
 
 ### Checking current settings
@@ -291,14 +308,14 @@ The skill picks the check path based on what the user has installed and whether 
 **Path 1 – `gh` CLI (preferred, covers public + private uniformly):**
 
 ```bash
-gh api "repos/<owner>/<repo>" --jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch, allow_auto_merge}'
+gh api "repos/<owner>/<repo>" --jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch}'
 ```
 
 **Path 2 – `curl` + public REST API (no auth, public repos only; requires `jq` for the field projection below – fall back to inspecting raw JSON if `jq` is absent):**
 
 ```bash
 curl -s "https://api.github.com/repos/<owner>/<repo>" \
-  | jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch, allow_auto_merge}'
+  | jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch}'
 ```
 
 Rate limit is 60 req/hr per IP unauthenticated – fine for a one-shot realignment check. If the response is a 404 on what should be a visible repo, the repo is private and this path cannot be used.
@@ -317,9 +334,6 @@ Writes always require auth. Rather than scripting tokens, the skill directs the 
    - **Allow rebase merging** → **unchecked**.
    - **Always suggest updating pull request branches** → **checked** (`allow_update_branch=true`).
    - **Automatically delete head branches** → **checked** (`delete_branch_on_merge=true`).
-   - **Allow auto-merge** → **checked** (`allow_auto_merge=true`). If the control
-     is absent, auto-merge is unavailable on this repository's plan rather than
-     merely off; record that and see the note below.
 2. Scroll to **Releases** (or open **[General → Releases](https://github.com/<owner>/<repo>/settings)** and scroll). Toggle **Enable release immutability** → **on**. This prevents published release assets and tags from being modified after the fact; it is verified by eye only – the setting is not exposed by the standard `repos` REST endpoint.
 3. Click **Save** under each changed control that has one; the checkboxes save inline.
 
@@ -333,42 +347,8 @@ gh api -X PATCH "repos/<owner>/<repo>" \
   -F squash_merge_commit_title=PR_TITLE \
   -F squash_merge_commit_message=COMMIT_MESSAGES \
   -F delete_branch_on_merge=true \
-  -F allow_update_branch=true \
-  -F allow_auto_merge=true
+  -F allow_update_branch=true
 ```
-
-#### Auto-merge: off versus unavailable
-
-This is the canonical statement of the distinction. `merge-pr` consumes it at
-the point of merge intent (its `workflows/enable-auto-merge.md`, step 3); the
-realignment audit consumes it here. Keep the rule in one place — the two
-branches need different human actions, and a copy that drifts sends the
-operator looking for a control that is not there.
-
-`autoMergeAllowed` alone cannot tell the two states apart: a repository with
-the box merely unchecked and a private repository on a free plan, where the
-setting does not exist, both report `false`. The rulesets endpoint is the
-discriminator, because only it is plan-gated:
-
-```bash
-gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){autoMergeAllowed}}'
-gh api "repos/<owner>/<repo>/rulesets"
-```
-
-- **Disabled but available** — `autoMergeAllowed: false` and rulesets responds
-  (`200`, an empty list included). This is drift: report it as a setting to
-  enable, through the realignment prompt below.
-- **Unavailable on this plan** — `autoMergeAllowed: false` and rulesets returns
-  `403 Upgrade`. Report it as an environment constraint, not drift: there is
-  nothing for the operator to click. Say plainly that `merge-pr` cannot complete
-  on that repository until the plan changes or the repository becomes public.
-
-Do not read branch protection as a second discriminator. A `404` there means
-the branch is simply unprotected, which is ordinary on a paid repository too, so
-requiring it alongside the `403` would leave an unprotected paid repository
-matching neither branch. It is useful only as context once the `403` has already
-settled the question — a plan with no rulesets and no protection is the case
-where auto-merge has nothing to wait for in the first place.
 
 ### Realignment-mode prompt format
 
@@ -383,7 +363,8 @@ Repository settings drift detected. Open:
   3. Default squash commit message: currently "Default to pull request title",
      should be "Pull request title and commit details".
   4. Automatically delete head branches: currently OFF, should be ON.
-  5. Allow auto-merge: currently OFF, should be ON (`merge-pr` requires it).
+  (Auto-merge is intentionally left unopinionated – neither recommended nor
+   flagged.)
 
 Proceed to apply via `gh api` (if available), or confirm after applying via UI?
 ```
