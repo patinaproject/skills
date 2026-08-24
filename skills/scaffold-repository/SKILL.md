@@ -177,12 +177,19 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 - **Markdown**: `markdownlint-cli2` with rule configuration in
   `.markdownlint.jsonc` and exclusions in `.markdownlint-cli2.jsonc`
   (`ignores`). Do not emit `.markdownlintignore`: `markdownlint-cli2` does
-  not read it, so an exclusion added there is silently inert. `ignores` is
-  the one mechanism that applies to both a glob run and the explicit file
-  paths `lint-staged` passes from `pre-commit`, so `lint:md`, the markdown
-  CI workflow, and `.lintstagedrc.js` all inherit one exclusion list
-  instead of repeating it. A negated glob (`"#node_modules"`) still works
-  on the command line for a one-off run.
+  not read it, so an exclusion added there is silently inert. `ignores`
+  applies to glob runs and to explicitly passed files alike, so `lint:md`,
+  the markdown CI workflow, and `.lintstagedrc.js` all inherit one exclusion
+  list instead of repeating it. A negated glob (`"#node_modules"`) still
+  works on the command line for a one-off run.
+
+  One sharp edge decides whether the `pre-commit` hook actually inherits the
+  list: `ignores` matches **relative** paths, and `lint-staged` passes
+  **absolute** ones. A plain `"*.md": "markdownlint-cli2"` therefore lints the
+  very files the list excludes. Emit a `.lintstagedrc.js` whose command
+  converts each path with `path.relative(process.cwd(), file)` before handing
+  it over. This is the same pre-commit gap that negated globs could not close;
+  the mechanism changed, the trap did not.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
