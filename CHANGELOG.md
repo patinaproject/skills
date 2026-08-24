@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.29.3](https://github.com/patinaproject/skills/compare/v2.29.2...v2.29.3) (2026-08-24)
+
+
+### Bug Fixes
+
+* [#356](https://github.com/patinaproject/skills/issues/356) pre-wire vendored skill markdown lint exclusion ([#368](https://github.com/patinaproject/skills/issues/368)) ([e7e6486](https://github.com/patinaproject/skills/commit/e7e6486f212fcf3f9652b723b9dde095d566cdc7))
+* [#358](https://github.com/patinaproject/skills/issues/358) assert core baseline presence in scaffold self-test ([#369](https://github.com/patinaproject/skills/issues/369)) ([c320417](https://github.com/patinaproject/skills/commit/c320417484b0f075daa004ce7f8735af490aa79f))
+
 ## [2.29.2](https://github.com/patinaproject/skills/compare/v2.29.1...v2.29.2) (2026-08-24)
 
 
