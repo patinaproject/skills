@@ -77,6 +77,10 @@ human line.
 - Do not resolve a review thread without an evidence-bearing reply, including
   code-fix dispositions; verify pattern-based feedback with a direct search or
   check before resolving when feasible.
+- Verify a clean base merge through the
+  [base-update recovery contract](references/base-update-recovery.md): one
+  bounded retry classifies a retryable failure from a reproducible one, and
+  only an exactly verified merged head is committed and pushed.
 - Do not rewrite branch history or force-push by default.
 - Do not use browser conflict resolution or merge the pull request itself.
 - Do not enable auto-merge.

@@ -14,6 +14,7 @@ bash scripts/tests/pr-workflow-boundary.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
 bash scripts/tests/update-branch.test.sh
+bash scripts/tests/base-update-recovery.test.sh
 bash scripts/tests/move-branch-here.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
