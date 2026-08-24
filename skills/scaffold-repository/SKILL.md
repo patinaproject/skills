@@ -176,10 +176,11 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   contact and are overwritten on the next re-vendor. Emit the exclusion
   pre-wired; reformatting the payloads is not an option.
 
-  A repo that owns a skill catalog may also exclude `skills/**`, but that is a
-  choice rather than a requirement. Those files are first-party markdown written
-  against this config and normally lint clean, so excluding them gives up
-  coverage the collision argument does not justify.
+  Do not extend the exclusion to a catalog repo's own `skills/**`. That markdown
+  is first-party, written against this very config, and the collision argument
+  does not reach it — excluding it only gives up coverage, and hides any drift
+  behind the same silence. This repository lints its own 34 skill files for that
+  reason.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`

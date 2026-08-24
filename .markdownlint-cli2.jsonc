@@ -18,12 +18,6 @@
     // written against their own upstream markdownlint config and are overwritten
     // on every re-vendor, so they are never linted here.
     ".agents/skills/**",
-    ".claude/skills/**",
-    // This repository's own authored skills. The collision argument above does
-    // not reach them — they are first-party markdown written against this very
-    // config, and they lint clean — so this entry is the optional catalog-repo
-    // exclusion `scaffold-repository` describes, kept deliberately rather than
-    // required. Dropping it would put 34 more files under `lint:md`.
-    "skills/**"
+    ".claude/skills/**"
   ]
 }
