@@ -527,10 +527,10 @@ try {
     const record = JSON.parse(readFileSync(join(directory, names[0]), 'utf8'));
     assert.deepEqual(Object.keys(record).sort(), [
       'authoritative',
+      'openScopedHead',
       'provisional',
       'repository',
       'schemaVersion',
-      'scoped',
       'sourceBranch',
       'targetBranch',
     ]);
@@ -1110,7 +1110,7 @@ try {
     writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
 
     // The degradation must hold across repeated scopes. Keying `earned` on the
-    // live `scoped` endpoint instead would let the `recheck` selection re-mint
+    // live open endpoint instead would let the `recheck` selection re-mint
     // its own proof, so the second call would launder the record back to
     // `skip` with no review in between.
     for (const attempt of [1, 2, 3]) {
@@ -1128,7 +1128,7 @@ try {
     // authoritative block.
     const intact = JSON.parse(readFileSync(recordPath, 'utf8'));
     intact.authoritative.scopedHead = intact.authoritative.reviewedHead;
-    intact.scoped = null;
+    intact.openScopedHead = null;
     writeFileSync(recordPath, `${JSON.stringify(intact, null, 2)}\n`);
     assert.equal(
       JSON.parse(

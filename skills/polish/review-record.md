@@ -136,7 +136,7 @@ record whose `scopedHead` does not match its `reviewedHead` degrades to
 exactly the run that would notice a bad record.
 
 That evidence is written by `complete` and by nothing else. Reading the live
-`scoped` endpoint instead would not hold: `scope` mints it on every reviewable
+`openScopedHead` instead would not hold: `scope` mints it on every reviewable
 selection, including the `recheck` a degraded record produces, so the next call
 would accept the endpoint it had just minted as proof and launder the record
 back to `skip` with no review in between. A degraded record stays degraded until

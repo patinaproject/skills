@@ -247,12 +247,16 @@ function isAuthoritativeReview(value) {
   );
 }
 
-// The commit `scope` last handed out. `complete` requires its candidate to
-// match this, so `reviewedHead` records a head a reviewer was actually given
-// rather than one the caller asserts about itself. Only the head is stored:
-// the selection's mode is what decides whether an endpoint is written at all,
-// and nothing reads it back.
-function isScopedEndpoint(value) {
+// The commit `scope` last handed out and has not yet consumed: the *open*
+// endpoint. `complete` requires its candidate to match this, so `reviewedHead`
+// records a head a reviewer was actually given rather than one the caller
+// asserts about itself.
+//
+// Distinct from `authoritative.scopedHead`, which is the endpoint a completed
+// outcome consumed. This one is live and re-minted by every reviewable `scope`;
+// that one is durable evidence written only by `complete`. Reading the live one
+// where the durable one belongs is what would let a record re-earn its own pass.
+function isOpenScopedHead(value) {
   return value === null || (typeof value === 'string' && value.length > 0);
 }
 
@@ -275,7 +279,7 @@ function isReviewRecord(value, identity) {
       'provisional',
       'repository',
       'schemaVersion',
-      'scoped',
+      'openScopedHead',
       'sourceBranch',
       'targetBranch',
     ]) &&
@@ -285,7 +289,7 @@ function isReviewRecord(value, identity) {
     value.targetBranch === identity.targetBranch &&
     isAuthoritativeReview(value.authoritative) &&
     isProvisionalReview(value.provisional) &&
-    isScopedEndpoint(value.scoped)
+    isOpenScopedHead(value.openScopedHead)
   );
 }
 
@@ -539,14 +543,14 @@ function selectScope(targetBranch) {
     // accepts only a candidate this call handed out.
     //
     // A `skip` selection hands out no delta and leaves the record untouched.
-    // Its scoped endpoint is the evidence that earned the pass, so clearing it
+    // Its open endpoint is the evidence that earned the pass, so clearing it
     // would make the next `scope` on an untouched passing head degrade to
     // `recheck` — turning the sticky record the design wants into a re-review
     // every other run.
     if (reviewableModes.has(selection.mode)) {
       writeRecord(
         identity,
-        buildRecord(identity, loaded, { scoped: head })
+        buildRecord(identity, loaded, { openScopedHead: head })
       );
     }
 
@@ -564,7 +568,7 @@ function buildRecord(identity, loaded, overrides) {
     authoritative: previous?.authoritative ?? null,
     provisional: previous?.provisional ?? null,
     schemaVersion,
-    scoped: previous?.scoped ?? null,
+    openScopedHead: previous?.openScopedHead ?? null,
     ...overrides,
   };
 }
@@ -613,7 +617,7 @@ function computeScope(loaded, head, mergeBase) {
     // rather than to a visible no-op.
     //
     // The evidence is `authoritative.scopedHead`, which only `complete` writes,
-    // and never the live `scoped` endpoint. `scope` mints `scoped` on every
+    // and never the live `openScopedHead`. `scope` mints that on every
     // reviewable selection including the `recheck` this branch produces, so
     // reading it here would let the degraded record re-earn its own pass on the
     // next call with no review in between.
@@ -663,16 +667,17 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
     // have reviewed the fix, and `reviewedHead` would name a head no reviewer
     // was ever given. Only an endpoint `scope` handed out can be completed.
     const loaded = loadRecord(identity);
-    const scoped = loaded.status === 'valid' ? loaded.record.scoped : null;
+    const openScopedHead =
+      loaded.status === 'valid' ? loaded.record.openScopedHead : null;
 
-    if (scoped === null) {
+    if (openScopedHead === null) {
       throw new Error(
         `No review scope is open for ${head}. Run \`scope\` and review the delta it returns before recording an outcome.`
       );
     }
-    if (scoped !== head) {
+    if (openScopedHead !== head) {
       throw new Error(
-        `Review scope is stale: \`scope\` handed out ${scoped}, but HEAD is now ${head}. Re-run \`scope\` and review the ${scoped}..${head} delta before recording an outcome.`
+        `Review scope is stale: \`scope\` handed out ${openScopedHead}, but HEAD is now ${head}. Re-run \`scope\` and review the ${openScopedHead}..${head} delta before recording an outcome.`
       );
     }
 
@@ -680,7 +685,7 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
       // `scopedHead` records which open endpoint this outcome consumed. It is
       // the durable evidence the outcome was earned, written here and nowhere
       // else.
-      authoritative: { findings, outcome, reviewedHead: head, scopedHead: scoped },
+      authoritative: { findings, outcome, reviewedHead: head, scopedHead: openScopedHead },
       provisional: null,
     });
     writeRecord(identity, record);
