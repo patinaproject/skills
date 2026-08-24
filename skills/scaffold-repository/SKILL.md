@@ -332,23 +332,28 @@ operator looking for a control that is not there.
 
 `autoMergeAllowed` alone cannot tell the two states apart: a repository with
 the box merely unchecked and a private repository on a free plan, where the
-setting does not exist, both report `false`. Corroborate with the two signals
-that do differ:
+setting does not exist, both report `false`. The rulesets endpoint is the
+discriminator, because only it is plan-gated:
 
 ```bash
 gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){autoMergeAllowed}}'
 gh api "repos/<owner>/<repo>/rulesets"
-gh api "repos/<owner>/<repo>/branches/<default-branch>/protection"
 ```
 
-- **Disabled but available** — `autoMergeAllowed: false` while rulesets and
-  branch protection respond normally. This is drift: report it as a setting to
+- **Disabled but available** — `autoMergeAllowed: false` and rulesets responds
+  (`200`, an empty list included). This is drift: report it as a setting to
   enable, through the realignment prompt below.
-- **Unavailable on this plan** — `autoMergeAllowed: false` with rulesets
-  returning `403 Upgrade` and branch protection returning `404`. Report it as an
-  environment constraint, not drift: there is nothing for the operator to click.
-  Say plainly that `merge-pr` cannot complete on that repository until the plan
-  changes or the repository becomes public.
+- **Unavailable on this plan** — `autoMergeAllowed: false` and rulesets returns
+  `403 Upgrade`. Report it as an environment constraint, not drift: there is
+  nothing for the operator to click. Say plainly that `merge-pr` cannot complete
+  on that repository until the plan changes or the repository becomes public.
+
+Do not read branch protection as a second discriminator. A `404` there means
+the branch is simply unprotected, which is ordinary on a paid repository too, so
+requiring it alongside the `403` would leave an unprotected paid repository
+matching neither branch. It is useful only as context once the `403` has already
+settled the question — a plan with no rulesets and no protection is the case
+where auto-merge has nothing to wait for in the first place.
 
 ### Realignment-mode prompt format
 

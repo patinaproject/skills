@@ -85,11 +85,11 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
    uses a merge queue, let that queue own the strategy and omit a strategy flag.
 
    Resolve whether repository auto-merge is available before expressing merge
-   intent. `autoMergeAllowed: false` covers two different situations, and they
-   need different human actions, so apply the off-versus-unavailable test the
+   intent. `autoMergeAllowed: false` covers two different situations that need
+   different human actions. Apply the off-versus-unavailable test the
    `scaffold-repository` skill states canonically (its `SKILL.md` →
-   "Auto-merge: off versus unavailable"): `autoMergeAllowed` corroborated by
-   whether rulesets return `403 Upgrade` and branch protection returns `404`.
+   "Auto-merge: off versus unavailable") rather than restating its signals here,
+   and act on which branch it selects:
 
    - **Disabled but available**: stop as `human-blocked` and ask the operator to
      enable **Allow auto-merge** in the repository's pull-request settings. This
