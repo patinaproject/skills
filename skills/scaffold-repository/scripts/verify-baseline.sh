@@ -81,6 +81,17 @@ while IFS= read -r line || [ -n "$line" ]; do
     marker="${entry#*[}"
     marker="${marker%]*}"
     entry="${entry%% [*}"
+
+    # A marker the grammar does not define is a manifest typo. Reject it rather
+    # than falling through: an unrecognised `[symlink->x]` would otherwise leave
+    # the target unstripped and silently compare against the wrong path.
+    case "$marker" in
+      public|'symlink -> '?*) ;;
+      *)
+        echo "verify-baseline: unrecognised marker [$marker] on: $entry" >&2
+        exit 2
+        ;;
+    esac
   fi
 
   if [ "$marker" = "public" ] && [ "$visibility" != "public" ]; then
