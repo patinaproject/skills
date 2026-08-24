@@ -27,7 +27,7 @@ Start with the whole-baseline presence check; the per-file rows below refine it.
 | `.editorconfig` | yes | present; `root = true`; `end_of_line = lf` |
 | `.nvmrc` | yes | present |
 | `.markdownlint.jsonc` | yes | present; valid JSONC; carries rule configuration only |
-| `.markdownlint-cli2.jsonc` | yes | present; valid JSONC; carries an `ignores` array holding every markdown exclusion, including the committed vendored-skill overlays (`.agents/skills/**`, `.claude/skills/**`, and `skills/**` when the repo owns a catalog). A repo that commits vendored skills without these entries fails `lint:md`, markdown CI, and `pre-commit` at once |
+| `.markdownlint-cli2.jsonc` | yes | present; valid JSONC; carries an `ignores` array holding every markdown exclusion, including the committed vendored-skill overlays (`.agents/skills/**` and `.claude/skills/**`). A repo that commits vendored skills without these entries fails `lint:md`, markdown CI, and `pre-commit` at once. Excluding a catalog repo's own `skills/**` is optional — that markdown is first-party and normally lints clean |
 | `.markdownlintignore` | no | absent; `markdownlint-cli2` does not read it, so any exclusion in it is inert. When present, classify as `stale` and recommend moving its entries into `.markdownlint-cli2.jsonc` → `ignores` |
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |

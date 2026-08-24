@@ -42,8 +42,8 @@ layout.
 - `docs/issue-tracker.md`: sole provider-specific tracker adapter
 - `package.json`, `commitizen.config.json`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
-- `.lintstagedrc.js`: lint-staged config that excludes vendored skill files
-  from root lint
+- `.lintstagedrc.js`: lint-staged config; markdown exclusions come from
+  `.markdownlint-cli2.jsonc`
 
 ## Flat skill layout
 
