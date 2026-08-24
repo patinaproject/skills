@@ -90,8 +90,8 @@ tell the human what to do next.
    - Read `.github/pull_request_template.md`.
    - Derive the PR title, including its semantic type, from the final branch diff
      against the PR base branch (`git diff <merge-base>...HEAD`) and the
-     repository's [commit and title guidance](../../../AGENTS.md).
-     When resuming an existing PR, treat its inherited title as a candidate:
+     repository's commit and title guidance in `AGENTS.md` at the repository
+     root. When resuming an existing PR, treat its inherited title as a candidate:
      re-derive the type and update a conflicting
      title even when it already passes syntactic validation.
    - Include the repository-required issue-closing line from the PR template.

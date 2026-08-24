@@ -140,6 +140,24 @@ structure and progressive-disclosure review. It helps check trigger
 descriptions, concise `SKILL.md` shape, leading-word terminology, and when to
 split reference material out of the main skill file.
 
+### Referring to shared repository docs
+
+A skill under `skills/<name>/` sits two levels below this repository's root, but
+three levels below a consumer repo's root once vendored into `.agents/skills/`
+or `.claude/skills/`. A relative link to a repo-root doc therefore resolves in
+exactly one of those layouts and is broken in the other — `../../AGENTS.md`
+becomes `.claude/AGENTS.md`, which does not exist.
+
+Name shared repository docs by their repo-root-relative path in prose
+(`` `docs/issue-tracker.md` ``, "`AGENTS.md` at the repository root") instead of
+linking them. The file lives in the consumer's repository, not alongside the
+skill, so a path is the honest reference and a link is a layout assumption.
+
+Relative links between sibling skills are fine and should stay links: skills
+remain siblings in both layouts, so `../../ready-pr/references/...` from
+`skills/merge-pr/workflows/` resolves either way. Links to files bundled inside
+the same skill (`./audit-checklist.md`) are likewise unaffected.
+
 If `writing-for-agents` is not installed in the local agent environment, install
 it with:
 

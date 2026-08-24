@@ -6,7 +6,7 @@ description: "Align issue state when starting or resuming issue-linked work: res
 # Working On Issue
 
 Resolve and align one issue before implementation. Read
-[`docs/issue-tracker.md`](../../docs/issue-tracker.md) for every tracker
+`docs/issue-tracker.md` at the repository root for every tracker
 operation; do not embed tracker commands here.
 
 If `docs/issue-tracker.md` is absent, stop before any tracker operation and

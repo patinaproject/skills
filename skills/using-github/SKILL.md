@@ -7,7 +7,7 @@ description: GitHub forge and pull-request operations in a patinaproject reposit
 
 Use GitHub as the source-code forge and, for public repositories, as the issue
 provider selected by
-[the issue-tracker adapter](../../docs/issue-tracker.md). Issue operations
+the issue-tracker adapter at `docs/issue-tracker.md`. Issue operations
 still belong to the adapter, the `/to-spec` skill for filing, and the
 tracker-agnostic skills (`working-on-issue` and `write-changelog`).
 
@@ -40,8 +40,9 @@ the provider.
   `gh` after reading the owning repository guidance.
 
 Pull request bodies use the repository template headings in order. Commits and
-PR titles follow [the repository guidance](../../AGENTS.md). Public PR and release text must not
-leak private repository URLs, credentials, or private path-shaped content.
+PR titles follow the repository guidance in `AGENTS.md` at the repository root.
+Public PR and release text must not leak private repository URLs, credentials,
+or private path-shaped content.
 
 Route issue creation, editing, labels, assignment, closure, search,
 relationships, branches, and state through the adapter even when it selects

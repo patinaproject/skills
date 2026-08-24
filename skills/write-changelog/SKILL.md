@@ -5,7 +5,7 @@ description: Render user-facing changelog or release-note copy from a project mi
 
 # Write Changelog
 
-Read [`docs/issue-tracker.md`](../../docs/issue-tracker.md) for remote
+Read `docs/issue-tracker.md` at the repository root for remote
 operations and repository brand-voice guidance before writing user-facing copy.
 
 If `docs/issue-tracker.md` is absent, stop before any tracker operation and
