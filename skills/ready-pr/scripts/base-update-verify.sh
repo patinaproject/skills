@@ -41,6 +41,12 @@ git rev-parse -q --verify MERGE_HEAD >/dev/null ||
   fail 'the base merge has unresolved conflicts; resolve them through the conflict path, not this contract'
 
 pre_head="$(git rev-parse HEAD)"
+staged_tree="$(git write-tree)"
+
+emit_aborted() {
+  printf 'outcome=%s attempts=%s merge-state=aborted head=%s\n' \
+    "$1" "$2" "$(git rev-parse HEAD)"
+}
 
 abort_merge() {
   git merge --abort ||
@@ -60,14 +66,14 @@ run_attempt() {
 commit_exactly_verified() {
   local outcome="$1" attempts="$2" head
 
-  # The committed tree must be the tree the passing run verified. A tracked
-  # difference between the working tree and the index means verification
-  # mutated the merge result after staging, so the head would be unverified.
-  if ! git diff --quiet; then
+  # The committed tree must be the staged merge tree the attempts verified. A
+  # tracked worktree difference or a changed index tree means a verification
+  # attempt mutated the merge result — staged or not — so the committed head
+  # would not be the exactly verified tree.
+  if ! git diff --quiet || [ "$(git write-tree)" != "$staged_tree" ]; then
     abort_merge
-    printf 'outcome=drifted attempts=%s merge-state=aborted head=%s\n' \
-      "$attempts" "$(git rev-parse HEAD)"
-    fail "verification mutated tracked files after the passing run, so the merged head is no longer exactly verified; merge aborted, branch unchanged at $pre_head"
+    emit_aborted drifted "$attempts"
+    fail "a verification attempt mutated the merge result, so the merged head is no longer exactly verified; merge aborted, branch unchanged at $pre_head"
   fi
 
   git commit -m "$message" >/dev/null ||
@@ -89,6 +95,5 @@ if run_attempt 2; then
 fi
 
 abort_merge
-printf 'outcome=reproducible attempts=2 merge-state=aborted head=%s\n' \
-  "$(git rev-parse HEAD)"
+emit_aborted reproducible 2
 fail "verification failed on both bounded attempts: ${verify_cmd[*]}; merge aborted, branch unchanged at $pre_head"

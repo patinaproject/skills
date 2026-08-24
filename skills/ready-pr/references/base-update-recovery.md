@@ -31,9 +31,10 @@ The helper enforces the contract mechanics:
    cannot be classified as retryable — the command is missing, the
    environment is broken — repeats and lands on the reproducible path.
 2. **Exactly verified head.** The helper commits the merge only when the
-   passing run's tree is identical in tracked content to the tree being
-   committed. When verification mutated tracked files after the passing run,
-   it aborts the merge instead of committing an unverified head.
+   staged merge tree the attempts verified is identical in tracked content to
+   the tree being committed. When a verification attempt mutated tracked
+   content — staged or unstaged — it aborts the merge instead of committing
+   an unverified head.
 3. **Reproducible failure aborts.** When both bounded attempts fail, the
    helper runs `git merge --abort`, leaving the branch unchanged at its
    pre-merge head.
@@ -44,10 +45,10 @@ Each run prints one machine-readable outcome line:
 
 | Outcome line | Exit | Meaning | Caller action |
 | --- | --- | --- | --- |
-| `outcome=verified attempts=1` | 0 | First attempt passed; the exactly verified merged head is committed. | Return to the pre-publish evidence loop, then restart the readiness loop on the new head. |
-| `outcome=recovered attempts=2` | 0 | The first failure was retryable; the bounded retry passed and the exactly verified merged head is committed. | Same as `verified`. |
-| `outcome=reproducible attempts=2 merge-state=aborted` | 1 | The failure repeated on the bounded retry; the merge is aborted and the branch is unchanged. | Stop under the verification stop condition. The report names the failing verification command and the final merge state: merge aborted, branch unchanged at its pre-merge head. |
-| `outcome=drifted merge-state=aborted` | 1 | A passing run mutated tracked files, so the merged head is no longer exactly verified; the merge is aborted. | Stop for operator input: the verification command is not commit-safe. |
+| `outcome=verified attempts=1 head=<sha>` | 0 | First attempt passed; the exactly verified merged head is committed. | Return to the pre-publish evidence loop, then restart the readiness loop on the new head. |
+| `outcome=recovered attempts=2 head=<sha>` | 0 | The first failure was retryable; the bounded retry passed and the exactly verified merged head is committed. | Same as `verified`. |
+| `outcome=reproducible attempts=2 merge-state=aborted head=<sha>` | 1 | The failure repeated on the bounded retry; the merge is aborted and the branch is unchanged. | Stop under the verification stop condition. The report names the failing verification command and the final merge state: merge aborted, branch unchanged at its pre-merge head. |
+| `outcome=drifted attempts=<n> merge-state=aborted head=<sha>` | 1 | A verification attempt mutated tracked content, so the merged head is no longer exactly verified; the merge is aborted. | Stop for operator input: the verification command is not commit-safe. |
 
 ## Consumers
 

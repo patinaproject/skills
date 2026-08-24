@@ -131,6 +131,23 @@ if [ -n "$(git -C "$dir" status --porcelain)" ]; then
   exit 1
 fi
 
+# --- unclassifiable failure: a verification command that cannot run at all
+# --- repeats and lands on the reproducible stop path ---
+dir="$WORKDIR/unclassifiable"
+fixture "$dir"
+pre_head="$(git -C "$dir" rev-parse HEAD)"
+status=0
+output="$(cd "$dir" && "$SCRIPT" --message 'chore: #0 update branch with main' -- "$WORKDIR/does-not-exist.sh" 2>&1)" || status="$?"
+if [ "$status" -eq 0 ]; then
+  echo 'FAIL: unclassifiable path: script succeeded with a missing verification command' >&2
+  exit 1
+fi
+assert_contains "$output" 'outcome=reproducible attempts=2 merge-state=aborted' 'unclassifiable path'
+if [ "$(git -C "$dir" rev-parse HEAD)" != "$pre_head" ]; then
+  echo 'FAIL: unclassifiable path: branch head changed despite unrunnable verification' >&2
+  exit 1
+fi
+
 # --- exactly-verified-head guard: a passing run that mutates tracked files
 # --- must not be committed ---
 dir="$WORKDIR/drifted"
@@ -147,6 +164,25 @@ fi
 assert_contains "$output" 'outcome=drifted' 'drift guard'
 if [ "$(git -C "$dir" rev-parse HEAD)" != "$pre_head" ]; then
   echo 'FAIL: drift guard: branch head changed despite drift' >&2
+  exit 1
+fi
+
+# --- exactly-verified-head guard: a passing run that mutates AND stages a
+# --- tracked file must not be committed either ---
+dir="$WORKDIR/drifted-staged"
+fixture "$dir"
+pre_head="$(git -C "$dir" rev-parse HEAD)"
+verifier="$WORKDIR/drifted-staged-verify.sh"
+write_verifier "$verifier" 'echo mutated >>base.txt; git add base.txt; exit 0'
+status=0
+output="$(cd "$dir" && "$SCRIPT" --message 'chore: #0 update branch with main' -- "$verifier" 2>&1)" || status="$?"
+if [ "$status" -eq 0 ]; then
+  echo 'FAIL: staged drift guard: script committed a head that differs from the verified staged merge tree' >&2
+  exit 1
+fi
+assert_contains "$output" 'outcome=drifted' 'staged drift guard'
+if [ "$(git -C "$dir" rev-parse HEAD)" != "$pre_head" ]; then
+  echo 'FAIL: staged drift guard: branch head changed despite staged drift' >&2
   exit 1
 fi
 
