@@ -23,9 +23,11 @@ import {
 import { tmpdir, userInfo } from 'node:os';
 import { basename, isAbsolute, join, resolve } from 'node:path';
 
-const schemaVersion = 1;
+const schemaVersion = 2;
 const axes = new Set(['architecture', 'spec', 'standards']);
 const outcomes = new Set(['changes_requested', 'passed']);
+// `skip` hands out no reviewable delta, so it mints no scope to complete.
+const reviewableModes = new Set(['full', 'incremental', 'recheck']);
 
 function git(args, cwd = process.cwd()) {
   return execFileSync('git', args, {
@@ -225,16 +227,40 @@ function isAuthoritativeReview(value) {
   if (value === null) {
     return true;
   }
-  if (!isExactObject(value, ['findings', 'outcome', 'reviewedHead'])) {
+  if (
+    !isExactObject(value, [
+      'findings',
+      'outcome',
+      'reviewedHead',
+      'scopedHead',
+    ])
+  ) {
     return false;
   }
   return (
     typeof value.reviewedHead === 'string' &&
+    // Trusted as written, not verified: nothing here can tell a `scopedHead`
+    // that `complete` produced from one a hand-edited or carried record simply
+    // states. The `earned` gate reads it as self-consistency, not proof.
+    typeof value.scopedHead === 'string' &&
     outcomes.has(value.outcome) &&
     isFindingArray(value.findings) &&
     ((value.outcome === 'passed' && value.findings.length === 0) ||
       (value.outcome === 'changes_requested' && value.findings.length > 0))
   );
+}
+
+// The commit `scope` last handed out and has not yet consumed: the *open*
+// endpoint. `complete` requires its candidate to match this, so `reviewedHead`
+// records a head a reviewer was actually given rather than one the caller
+// asserts about itself.
+//
+// Distinct from `authoritative.scopedHead`, which is the endpoint a completed
+// outcome consumed. This one is live and re-minted by every reviewable `scope`;
+// that one is durable evidence written only by `complete`. Reading the live one
+// where the durable one belongs is what would let a record re-earn its own pass.
+function isOpenScopedHead(value) {
+  return value === null || (typeof value === 'string' && value.length > 0);
 }
 
 function isProvisionalReview(value) {
@@ -256,6 +282,7 @@ function isReviewRecord(value, identity) {
       'provisional',
       'repository',
       'schemaVersion',
+      'openScopedHead',
       'sourceBranch',
       'targetBranch',
     ]) &&
@@ -264,7 +291,8 @@ function isReviewRecord(value, identity) {
     value.sourceBranch === identity.sourceBranch &&
     value.targetBranch === identity.targetBranch &&
     isAuthoritativeReview(value.authoritative) &&
-    isProvisionalReview(value.provisional)
+    isProvisionalReview(value.provisional) &&
+    isOpenScopedHead(value.openScopedHead)
   );
 }
 
@@ -509,7 +537,46 @@ function selectScope(targetBranch) {
   const target = resolveTarget(targetBranch);
   const head = git(['rev-parse', 'HEAD']);
   const mergeBase = git(['merge-base', target, head]);
-  const loaded = loadRecord(identity);
+
+  return withRecordLock(identity, () => {
+    const loaded = loadRecord(identity);
+    const selection = computeScope(loaded, head, mergeBase);
+
+    // Recording the endpoint is what makes a later outcome earnable: `complete`
+    // accepts only a candidate this call handed out.
+    //
+    // A `skip` selection hands out no delta and leaves the record untouched.
+    // Its open endpoint is the evidence that earned the pass, so clearing it
+    // would make the next `scope` on an untouched passing head degrade to
+    // `recheck` — turning the sticky record the design wants into a re-review
+    // every other run.
+    if (reviewableModes.has(selection.mode)) {
+      writeRecord(
+        identity,
+        buildRecord(identity, loaded, { openScopedHead: head })
+      );
+    }
+
+    return selection;
+  });
+}
+
+// One shape for every write path, so a field added to the record cannot be
+// dropped by whichever path forgets it.
+function buildRecord(identity, loaded, overrides) {
+  const previous = loaded.status === 'valid' ? loaded.record : null;
+
+  return {
+    ...identity,
+    authoritative: previous?.authoritative ?? null,
+    provisional: previous?.provisional ?? null,
+    schemaVersion,
+    openScopedHead: previous?.openScopedHead ?? null,
+    ...overrides,
+  };
+}
+
+function computeScope(loaded, head, mergeBase) {
   const fallback = {
     authoritativeFindings: [],
     base: mergeBase,
@@ -547,10 +614,23 @@ function selectScope(targetBranch) {
   } else {
     const hasFindings =
       authoritative.findings.length > 0 || provisionalFindings.length > 0;
+    // A pass only suppresses the next run when the record carries the endpoint
+    // that earned it. Without that evidence the run that would notice a bad
+    // record is exactly the run a `skip` would cancel, so degrade to `recheck`
+    // rather than to a visible no-op.
+    //
+    // The evidence is `authoritative.scopedHead`, which only `complete` writes,
+    // and never the live `openScopedHead`. `scope` mints that on every
+    // reviewable selection including the `recheck` this branch produces, so
+    // reading it here would let the degraded record re-earn its own pass on the
+    // next call with no review in between.
+    const earned = authoritative.scopedHead === authoritative.reviewedHead;
     authoritativeFindings = authoritative.findings;
     base = head;
     mode =
-      authoritative.outcome === 'passed' && !hasFindings ? 'skip' : 'recheck';
+      authoritative.outcome === 'passed' && !hasFindings && earned
+        ? 'skip'
+        : 'recheck';
     range = null;
   }
 
@@ -569,6 +649,7 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
   assertCommittedWorktree();
   resolveTarget(targetBranch);
   const head = git(['rev-parse', 'HEAD']);
+  // Catches a head that moved during review.
   if (candidateHead !== head) {
     throw new Error(
       `Review endpoint changed: candidate ${candidateHead} does not equal HEAD ${head}.`
@@ -583,16 +664,38 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
 
   const identity = currentIdentity(targetBranch);
   return withRecordLock(identity, () => {
-    const record = {
-      ...identity,
-      authoritative: {
-        findings,
-        outcome,
-        reviewedHead: head,
-      },
+    // Catches the easier and likelier failure the endpoint guard cannot: a head
+    // that moved *before* the record was written. Fixing a finding, committing,
+    // and recording the outcome at the new head skips the iteration that would
+    // have reviewed the fix, and `reviewedHead` would name a head no reviewer
+    // was ever given. Only an endpoint `scope` handed out can be completed.
+    const loaded = loadRecord(identity);
+    const openScopedHead =
+      loaded.status === 'valid' ? loaded.record.openScopedHead : null;
+
+    if (openScopedHead === null) {
+      throw new Error(
+        `No review scope is open for ${head}. Run \`scope\` and review the delta it returns before recording an outcome.`
+      );
+    }
+    if (openScopedHead !== head) {
+      throw new Error(
+        `Review scope is stale: \`scope\` handed out ${openScopedHead}, but HEAD is now ${head}. Re-run \`scope\` and review the ${openScopedHead}..${head} delta before recording an outcome.`
+      );
+    }
+
+    const record = buildRecord(identity, loaded, {
+      // `scopedHead` records which open endpoint this outcome consumed. It is
+      // the durable evidence the outcome was earned, written here and nowhere
+      // else.
+      authoritative: { findings, outcome, reviewedHead: head, scopedHead: openScopedHead },
+      // One `complete` consumes one `scope`. Carrying the endpoint forward
+      // would leave it open at this head, so a second `complete` could rewrite
+      // the outcome — a pass into `changes_requested`, say — with no review
+      // between. Nothing legitimate needs it: the next iteration re-scopes.
+      openScopedHead: null,
       provisional: null,
-      schemaVersion,
-    };
+    });
     writeRecord(identity, record);
     return record;
   });
@@ -603,13 +706,9 @@ function saveProvisional(targetBranch, candidateHead, findings) {
   const identity = currentIdentity(targetBranch);
   return withRecordLock(identity, () => {
     const loaded = loadRecord(identity);
-    const record = {
-      ...identity,
-      authoritative:
-        loaded.status === 'valid' ? loaded.record.authoritative : null,
+    const record = buildRecord(identity, loaded, {
       provisional: { candidateHead, findings },
-      schemaVersion,
-    };
+    });
     writeRecord(identity, record);
     return record;
   });
