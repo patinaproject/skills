@@ -146,6 +146,14 @@ a real `complete` re-earns it, and a `skip` selection writes nothing, so an
 earned pass stays sticky however many times `scope` runs against the same
 untouched head.
 
+The guard covers a caller asserting about its own run, which is the failure this
+record shape exists to prevent. It is not tamper-proof, and should not be read
+as more than it is: the stored evidence is a self-consistency check, not a
+minted token, so a record hand-edited on disk — or carried in by `relocate` from
+another root — whose `scopedHead` already equals its `reviewedHead` is trusted
+as written. Nothing verifies that a `complete` ever produced it. Treat a carried
+record as coverage claimed by another session, not as proof a review ran.
+
 Completed records are written to a same-directory temporary file,
 synchronized, and atomically renamed. On supported platforms, the directory is
 mode `0700` and records are mode `0600`. Identity-scoped lock files serialize

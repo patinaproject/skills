@@ -239,6 +239,9 @@ function isAuthoritativeReview(value) {
   }
   return (
     typeof value.reviewedHead === 'string' &&
+    // Trusted as written, not verified: nothing here can tell a `scopedHead`
+    // that `complete` produced from one a hand-edited or carried record simply
+    // states. The `earned` gate reads it as self-consistency, not proof.
     typeof value.scopedHead === 'string' &&
     outcomes.has(value.outcome) &&
     isFindingArray(value.findings) &&
