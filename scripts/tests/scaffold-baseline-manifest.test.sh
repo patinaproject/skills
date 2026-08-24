@@ -24,7 +24,9 @@ fail() {
 [ -f "$MANIFEST" ] || fail "$MANIFEST is missing"
 
 # The manifest is the single source the skill documents and the verifier reads.
-manifest_paths="$(grep -vE '^\s*(#|$)' "$MANIFEST" | sed 's/ \[.*//')"
+# Strips a trailing CR the way `verify-baseline.sh` does, so this independent
+# oracle stays equivalent to it rather than diverging on a CRLF checkout.
+manifest_paths="$(grep -vE '^\s*(#|$)' "$MANIFEST" | sed 's/\r$//; s/ \[.*//')"
 [ -n "$manifest_paths" ] || fail "manifest declares no paths"
 
 # 1. This repository is the live baseline reference, so it must satisfy its own
@@ -93,5 +95,25 @@ rm -f "$work/inverted/docs/agents/issue-tracker.md"
 ln -s ../issue-tracker.md "$work/inverted/docs/agents/issue-tracker.md"
 bash "$VERIFIER" --public "$work/inverted" >/dev/null 2>&1 &&
   fail "the previous symlink direction should be reported as a gap"
+
+# 6. A marker outside the documented grammar is a manifest typo, and must be
+#    rejected rather than silently checked against an unstripped target.
+seed_repo "$work/badmarker"
+bad_manifest="$work/bad-core-baseline.txt"
+{
+  echo "README.md"
+  echo "docs/issue-tracker.md [symlink->agents/issue-tracker.md]"
+} > "$bad_manifest"
+bad_skill="$work/bad-skill/scripts"
+mkdir -p "$bad_skill"
+cp "$VERIFIER" "$bad_skill/verify-baseline.sh"
+cp "$bad_manifest" "$work/bad-skill/core-baseline.txt"
+
+output="$(bash "$bad_skill/verify-baseline.sh" --public "$work/badmarker" 2>&1)" && {
+  printf '%s\n' "$output" >&2
+  fail "a marker outside the grammar should be rejected"
+}
+printf '%s\n' "$output" | grep -q "unrecognised marker" ||
+  fail "the failure must name the unrecognised marker: $output"
 
 echo "OK: scaffold core baseline manifest contract passed"

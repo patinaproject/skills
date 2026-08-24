@@ -154,21 +154,32 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
 - **Markdown**: `markdownlint-cli2` with rule configuration in
   `.markdownlint.jsonc` and exclusions in `.markdownlint-cli2.jsonc`
   (`ignores`). Do not emit `.markdownlintignore`: `markdownlint-cli2` does
-  not read it, so an exclusion added there is silently inert. `ignores` is
-  the one mechanism that applies to both a glob run and the explicit file
-  paths `lint-staged` passes from `pre-commit`, so `lint:md`, the markdown
-  CI workflow, and `.lintstagedrc.js` all inherit one exclusion list
-  instead of repeating it. A negated glob (`"#node_modules"`) still works
-  on the command line for a one-off run.
+  not read it, so an exclusion added there is silently inert. `ignores`
+  applies to glob runs and to explicitly passed files alike, so `lint:md`,
+  the markdown CI workflow, and `.lintstagedrc.js` all inherit one exclusion
+  list instead of repeating it. A negated glob (`"#node_modules"`) still
+  works on the command line for a one-off run.
 
-  `ignores` must exclude the committed vendored-skill overlays
-  (`.agents/skills/**` and `.claude/skills/**`, plus `skills/**` in a repo that
-  owns a skill catalog). The baseline guarantees this collision rather than
-  merely permitting it: it tells repositories to commit their vendored skills,
-  and those payloads are third-party markdown written against their own
-  upstream config, so they fail this repository's rules on contact and are
-  overwritten on the next re-vendor. Emit the exclusion pre-wired; reformatting
-  the payloads is not an option.
+  One sharp edge decides whether the `pre-commit` hook actually inherits the
+  list: `ignores` matches **relative** paths, and `lint-staged` passes
+  **absolute** ones. A plain `"*.md": "markdownlint-cli2"` therefore lints the
+  very files the list excludes. Emit a `.lintstagedrc.js` whose command
+  converts each path with `path.relative(process.cwd(), file)` before handing
+  it over. This is the same pre-commit gap that negated globs could not close;
+  the mechanism changed, the trap did not.
+
+  `ignores` must exclude the committed vendored-skill overlays,
+  `.agents/skills/**` and `.claude/skills/**`. The baseline guarantees this
+  collision rather than merely permitting it: it tells repositories to commit
+  their vendored skills, and those payloads are third-party markdown written
+  against their own upstream config, so they fail this repository's rules on
+  contact and are overwritten on the next re-vendor. Emit the exclusion
+  pre-wired; reformatting the payloads is not an option.
+
+  A repo that owns a skill catalog may also exclude `skills/**`, but that is a
+  choice rather than a requirement. Those files are first-party markdown written
+  against this config and normally lint clean, so excluding them gives up
+  coverage the collision argument does not justify.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
@@ -405,7 +416,7 @@ Bundled with this skill:
 - [`core-baseline.txt`](./core-baseline.txt) – canonical core baseline manifest.
 
 At the root of the repository being scaffolded, not alongside this skill, so
-they are named by path rather than linked:
+they are named by path:
 
 - `AGENTS.md` – repo workflow contract.
 - `docs/file-structure.md` – layout reference.
