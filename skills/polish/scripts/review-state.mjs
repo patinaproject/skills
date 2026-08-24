@@ -227,11 +227,19 @@ function isAuthoritativeReview(value) {
   if (value === null) {
     return true;
   }
-  if (!isExactObject(value, ['findings', 'outcome', 'reviewedHead'])) {
+  if (
+    !isExactObject(value, [
+      'findings',
+      'outcome',
+      'reviewedHead',
+      'scopedHead',
+    ])
+  ) {
     return false;
   }
   return (
     typeof value.reviewedHead === 'string' &&
+    typeof value.scopedHead === 'string' &&
     outcomes.has(value.outcome) &&
     isFindingArray(value.findings) &&
     ((value.outcome === 'passed' && value.findings.length === 0) ||
@@ -599,11 +607,17 @@ function computeScope(loaded, head, mergeBase) {
   } else {
     const hasFindings =
       authoritative.findings.length > 0 || provisionalFindings.length > 0;
-    // A pass only suppresses the next run when the record still carries the
-    // endpoint that earned it. Without that evidence the run that would notice
-    // a bad record is exactly the run a `skip` would cancel, so degrade to
-    // `recheck` rather than to a visible no-op.
-    const earned = loaded.record.scoped === authoritative.reviewedHead;
+    // A pass only suppresses the next run when the record carries the endpoint
+    // that earned it. Without that evidence the run that would notice a bad
+    // record is exactly the run a `skip` would cancel, so degrade to `recheck`
+    // rather than to a visible no-op.
+    //
+    // The evidence is `authoritative.scopedHead`, which only `complete` writes,
+    // and never the live `scoped` endpoint. `scope` mints `scoped` on every
+    // reviewable selection including the `recheck` this branch produces, so
+    // reading it here would let the degraded record re-earn its own pass on the
+    // next call with no review in between.
+    const earned = authoritative.scopedHead === authoritative.reviewedHead;
     authoritativeFindings = authoritative.findings;
     base = head;
     mode =
@@ -663,7 +677,10 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
     }
 
     const record = buildRecord(identity, loaded, {
-      authoritative: { findings, outcome, reviewedHead: head },
+      // `scopedHead` records which open endpoint this outcome consumed. It is
+      // the durable evidence the outcome was earned, written here and nowhere
+      // else.
+      authoritative: { findings, outcome, reviewedHead: head, scopedHead: scoped },
       provisional: null,
     });
     writeRecord(identity, record);

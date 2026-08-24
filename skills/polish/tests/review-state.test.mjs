@@ -211,6 +211,8 @@ try {
       findings: [standardsFinding],
       outcome: 'changes_requested',
       reviewedHead,
+      // Written by `complete` alone: the endpoint this outcome consumed.
+      scopedHead: reviewedHead,
     });
 
     const head = commitChange(root, 'base\nchange\nfix\n');
@@ -1100,15 +1102,40 @@ try {
     const { directory, names } = recordFiles(sticky.temporaryRoot);
     const recordPath = join(directory, names[0]);
     const record = JSON.parse(readFileSync(recordPath, 'utf8'));
-    assert.equal(record.scoped, record.authoritative.reviewedHead);
+    assert.equal(record.authoritative.scopedHead, record.authoritative.reviewedHead);
 
-    record.scoped = null;
+    // Tamper with the evidence the pass was earned, the way a corrupt or
+    // hand-edited record would.
+    record.authoritative.scopedHead = '0'.repeat(40);
     writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
 
-    const degraded = JSON.parse(
-      reviewCommand(sticky.root, sticky.temporaryRoot, 'scope', '--target', 'main')
+    // The degradation must hold across repeated scopes. Keying `earned` on the
+    // live `scoped` endpoint instead would let the `recheck` selection re-mint
+    // its own proof, so the second call would launder the record back to
+    // `skip` with no review in between.
+    for (const attempt of [1, 2, 3]) {
+      assert.equal(
+        JSON.parse(
+          reviewCommand(sticky.root, sticky.temporaryRoot, 'scope', '--target', 'main')
+        ).mode,
+        'recheck',
+        `a degraded passing record must stay degraded (scope call ${attempt})`
+      );
+    }
+
+    // Clearing the live endpoint alone does not degrade a genuinely earned
+    // pass: `scope` reopens it, and the evidence lives in the record's own
+    // authoritative block.
+    const intact = JSON.parse(readFileSync(recordPath, 'utf8'));
+    intact.authoritative.scopedHead = intact.authoritative.reviewedHead;
+    intact.scoped = null;
+    writeFileSync(recordPath, `${JSON.stringify(intact, null, 2)}\n`);
+    assert.equal(
+      JSON.parse(
+        reviewCommand(sticky.root, sticky.temporaryRoot, 'scope', '--target', 'main')
+      ).mode,
+      'skip'
     );
-    assert.equal(degraded.mode, 'recheck');
   }
 
   {

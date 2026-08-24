@@ -129,12 +129,20 @@ current work. Missing, corrupt, inaccessible, foreign, or non-ancestral state
 selects a full merge-base-to-`HEAD` review. Provisional state never advances
 coverage or narrows that scope.
 
-`skip` mode requires the record to still carry the endpoint that earned its
-pass. A passing record whose scoped endpoint does not match its `reviewedHead`
-degrades to `recheck` rather than to a visible no-op, because the run a `skip`
-cancels is exactly the run that would notice a bad record. A `skip` selection
-writes nothing, so an earned pass stays sticky however many times `scope` runs
-against the same untouched head.
+`skip` mode requires the record to carry the evidence its pass was earned:
+`authoritative.scopedHead`, the open endpoint `complete` consumed. A passing
+record whose `scopedHead` does not match its `reviewedHead` degrades to
+`recheck` rather than to a visible no-op, because the run a `skip` cancels is
+exactly the run that would notice a bad record.
+
+That evidence is written by `complete` and by nothing else. Reading the live
+`scoped` endpoint instead would not hold: `scope` mints it on every reviewable
+selection, including the `recheck` a degraded record produces, so the next call
+would accept the endpoint it had just minted as proof and launder the record
+back to `skip` with no review in between. A degraded record stays degraded until
+a real `complete` re-earns it, and a `skip` selection writes nothing, so an
+earned pass stays sticky however many times `scope` runs against the same
+untouched head.
 
 Completed records are written to a same-directory temporary file,
 synchronized, and atomically renamed. On supported platforms, the directory is
