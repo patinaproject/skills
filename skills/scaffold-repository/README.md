@@ -110,8 +110,8 @@ pnpm commitlint        # one-off commit-message validation
 
 This public repository uses `type: #N short description`; private repositories
 scaffolded from it use `type: PAT-N short description`. See
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full rule; choose the commit type
-by product impact, not by file extension.
+`CONTRIBUTING.md` at the repository root for the full rule; choose the commit
+type by product impact, not by file extension.
 
 | Change | Type |
 |--------|------|
