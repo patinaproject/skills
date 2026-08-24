@@ -530,31 +530,44 @@ function selectScope(targetBranch) {
   const mergeBase = git(['merge-base', target, head]);
 
   return withRecordLock(identity, () => {
-    const selection = computeScope(identity, head, mergeBase);
-    persistScopedEndpoint(identity, head, selection.mode);
+    const loaded = loadRecord(identity);
+    const selection = computeScope(loaded, head, mergeBase);
+
+    // Recording the endpoint is what makes a later outcome earnable: `complete`
+    // accepts only a candidate this call handed out.
+    //
+    // A `skip` selection hands out no delta and leaves the record untouched.
+    // Its scoped endpoint is the evidence that earned the pass, so clearing it
+    // would make the next `scope` on an untouched passing head degrade to
+    // `recheck` — turning the sticky record the design wants into a re-review
+    // every other run.
+    if (reviewableModes.has(selection.mode)) {
+      writeRecord(
+        identity,
+        buildRecord(identity, loaded, { scoped: { head, mode: selection.mode } })
+      );
+    }
+
     return selection;
   });
 }
 
-// Recording the endpoint is what makes a later `passed` earnable: `complete`
-// accepts only a candidate this call handed out. A `skip` selection hands out
-// no delta, so it clears any stale endpoint instead of minting one.
-function persistScopedEndpoint(identity, head, mode) {
-  const loaded = loadRecord(identity);
-  const scoped = reviewableModes.has(mode) ? { head, mode } : null;
+// One shape for every write path, so a field added to the record cannot be
+// dropped by whichever path forgets it.
+function buildRecord(identity, loaded, overrides) {
   const previous = loaded.status === 'valid' ? loaded.record : null;
 
-  writeRecord(identity, {
+  return {
     ...identity,
     authoritative: previous?.authoritative ?? null,
     provisional: previous?.provisional ?? null,
     schemaVersion,
-    scoped,
-  });
+    scoped: previous?.scoped ?? null,
+    ...overrides,
+  };
 }
 
-function computeScope(identity, head, mergeBase) {
-  const loaded = loadRecord(identity);
+function computeScope(loaded, head, mergeBase) {
   const fallback = {
     authoritativeFindings: [],
     base: mergeBase,
@@ -655,17 +668,10 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
       );
     }
 
-    const record = {
-      ...identity,
-      authoritative: {
-        findings,
-        outcome,
-        reviewedHead: head,
-      },
+    const record = buildRecord(identity, loaded, {
+      authoritative: { findings, outcome, reviewedHead: head },
       provisional: null,
-      schemaVersion,
-      scoped,
-    };
+    });
     writeRecord(identity, record);
     return record;
   });
@@ -676,14 +682,9 @@ function saveProvisional(targetBranch, candidateHead, findings) {
   const identity = currentIdentity(targetBranch);
   return withRecordLock(identity, () => {
     const loaded = loadRecord(identity);
-    const record = {
-      ...identity,
-      authoritative:
-        loaded.status === 'valid' ? loaded.record.authoritative : null,
+    const record = buildRecord(identity, loaded, {
       provisional: { candidateHead, findings },
-      schemaVersion,
-      scoped: loaded.status === 'valid' ? loaded.record.scoped : null,
-    };
+    });
     writeRecord(identity, record);
     return record;
   });

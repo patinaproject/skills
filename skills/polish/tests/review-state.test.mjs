@@ -1042,6 +1042,22 @@ try {
       ).mode,
       'skip'
     );
+
+    // An earned pass stays sticky across repeated scopes. A `skip` selection
+    // must leave the record alone: clearing its endpoint would make the very
+    // next scope on the same untouched head degrade to `recheck`.
+    assert.equal(
+      JSON.parse(
+        reviewCommand(skipped.root, skipped.temporaryRoot, 'scope', '--target', 'main')
+      ).mode,
+      'skip'
+    );
+    assert.equal(
+      JSON.parse(
+        reviewCommand(skipped.root, skipped.temporaryRoot, 'scope', '--target', 'main')
+      ).mode,
+      'skip'
+    );
   }
 
   {

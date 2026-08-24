@@ -132,7 +132,9 @@ coverage or narrows that scope.
 `skip` mode requires the record to still carry the endpoint that earned its
 pass. A passing record whose scoped endpoint does not match its `reviewedHead`
 degrades to `recheck` rather than to a visible no-op, because the run a `skip`
-cancels is exactly the run that would notice a bad record.
+cancels is exactly the run that would notice a bad record. A `skip` selection
+writes nothing, so an earned pass stays sticky however many times `scope` runs
+against the same untouched head.
 
 Completed records are written to a same-directory temporary file,
 synchronized, and atomically renamed. On supported platforms, the directory is
