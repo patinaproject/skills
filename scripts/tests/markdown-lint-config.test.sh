@@ -38,7 +38,7 @@ fail() {
 # `Linting: N file(s)` is the only signal cli2 gives for which files it
 # *selected*, and selection is the mechanism under test — a clean file exits
 # zero whether or not it was excluded. Named once so the coupling has one home.
-LINTED_NOTHING="Linting: 0 file(s)"
+NO_FILES_SELECTED_LINE="Linting: 0 file(s)"
 
 assert_ignored() {
   local path="$1" description="$2" output
@@ -46,7 +46,7 @@ assert_ignored() {
     printf '%s\n' "$output" >&2
     fail "linting an ignored path should succeed: $description"
   }
-  printf '%s\n' "$output" | grep -q "$LINTED_NOTHING" ||
+  printf '%s\n' "$output" | grep -q "$NO_FILES_SELECTED_LINE" ||
     fail "ignores did not apply to $description: $output"
 }
 
@@ -100,12 +100,16 @@ cp .markdownlint.jsonc "$collision_dir/.markdownlint.jsonc"
 printf 'Vendored Heading\n================\n```\nx\n```\n' \
   > "$collision_dir/.claude/skills/vendored/SKILL.md"
 
-if (cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1); then
+lint_collision_payload() {
+  (cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1)
+}
+
+if lint_collision_payload; then
   fail "vendored payload should violate this repository's rules when not excluded"
 fi
 
 printf '{ "ignores": [".claude/skills/**"] }\n' > "$collision_dir/.markdownlint-cli2.jsonc"
-(cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1) ||
+lint_collision_payload ||
   fail "an ignores entry must exclude the same vendored payload"
 
 # 5. The pre-commit path, end to end, on the form lint-staged really produces.
@@ -139,7 +143,7 @@ staged_output="$(eval "pnpm exec $staged_command" 2>&1)" || {
   printf '%s\n' "$staged_output" >&2
   fail "the lint-staged markdown command failed on an excluded path"
 }
-printf '%s\n' "$staged_output" | grep -q "$LINTED_NOTHING" ||
+printf '%s\n' "$staged_output" | grep -q "$NO_FILES_SELECTED_LINE" ||
   fail "the lint-staged command lints excluded paths: $staged_output"
 
 echo "OK: markdown lint exclusion contract passed"
