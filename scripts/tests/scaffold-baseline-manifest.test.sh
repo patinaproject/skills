@@ -98,7 +98,6 @@ rm -f "$work/inverted/docs/agents/issue-tracker.md"
 ln -s ../issue-tracker.md "$work/inverted/docs/agents/issue-tracker.md"
 bash "$VERIFIER" --public "$work/inverted" >/dev/null 2>&1 &&
   fail "the previous symlink direction should be reported as a gap"
-
 # 6. A marker outside the documented grammar is a manifest typo, and must be
 #    rejected rather than silently checked against an unstripped target.
 seed_repo "$work/badmarker"

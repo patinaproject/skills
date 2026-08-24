@@ -41,6 +41,19 @@ longer equals `HEAD`. A passing record has no findings; a changes-requested
 record has at least one. Completion clears provisional data because the full
 selected scope and every carried concern were revalidated.
 
+`complete` also requires an open scope at that head, and consumes it: one
+`complete` per `scope`, so a recorded outcome cannot be rewritten at the same
+head without a fresh review. `scope` records the
+endpoint it hands out, and `complete` rejects a candidate that endpoint does
+not name, so `reviewedHead` records a head a reviewer was actually given rather
+than one the caller asserts about itself. The `HEAD` guard above catches an
+endpoint that moved *during* review; this catches the easier and likelier
+failure it cannot — an endpoint that moved *before* the record was written.
+Fixing a finding, committing, and recording the outcome at the new head is that
+failure: it skips the iteration that would have reviewed the fix. The fix is to
+re-run `scope` and review the delta it returns, which is what `SKILL.md` Step 5
+already requires; the guard makes skipping it fail loudly instead of silently.
+
 When a stage errors, times out, is interrupted, or observes a moving head, keep
 the authoritative record and save only useful findings from the attempt:
 
@@ -117,6 +130,29 @@ The record is valid only when its schema, identity, and Git ancestry match the
 current work. Missing, corrupt, inaccessible, foreign, or non-ancestral state
 selects a full merge-base-to-`HEAD` review. Provisional state never advances
 coverage or narrows that scope.
+
+`skip` mode requires the record to carry the evidence its pass was earned:
+`authoritative.scopedHead`, the open endpoint `complete` consumed. A passing
+record whose `scopedHead` does not match its `reviewedHead` degrades to
+`recheck` rather than to a visible no-op, because the run a `skip` cancels is
+exactly the run that would notice a bad record.
+
+That evidence is written by `complete` and by nothing else. Reading the live
+`openScopedHead` instead would not hold: `scope` mints it on every reviewable
+selection, including the `recheck` a degraded record produces, so the next call
+would accept the endpoint it had just minted as proof and launder the record
+back to `skip` with no review in between. A degraded record stays degraded until
+a real `complete` re-earns it, and a `skip` selection writes nothing, so an
+earned pass stays sticky however many times `scope` runs against the same
+untouched head.
+
+The guard covers a caller asserting about its own run, which is the failure this
+record shape exists to prevent. It is not tamper-proof, and should not be read
+as more than it is: the stored evidence is a self-consistency check, not a
+minted token, so a record hand-edited on disk — or carried in by `relocate` from
+another root — whose `scopedHead` already equals its `reviewedHead` is trusted
+as written. Nothing verifies that a `complete` ever produced it. Treat a carried
+record as coverage claimed by another session, not as proof a review ran.
 
 Completed records are written to a same-directory temporary file,
 synchronized, and atomically renamed. On supported platforms, the directory is

@@ -28,5 +28,10 @@ delegated remediation.
 Report only the observed outcome defined by the authoritative workflow and any
 human-owned blocker.
 
+This skill requires repository-managed auto-merge, which the
+`scaffold-repository` baseline turns on. When it is off, the workflow stops and
+asks the operator to enable it; when the repository's plan does not offer it at
+all, the workflow says so rather than reporting a setting to fix.
+
 Never force-merge, use administrator bypass, disable protections, merge with
 local git, or claim an open PR merged.

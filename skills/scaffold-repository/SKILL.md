@@ -179,8 +179,8 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   Do not extend the exclusion to a catalog repo's own `skills/**`. That markdown
   is first-party, written against this very config, and the collision argument
   does not reach it — excluding it only gives up coverage, and hides any drift
-  behind the same silence. This repository lints its own 34 skill files for that
-  reason.
+  behind the same silence. This repository lints its own first-party skill
+  files for that reason.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
