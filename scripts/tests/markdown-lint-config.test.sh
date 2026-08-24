@@ -25,7 +25,9 @@ trap cleanup EXIT
 
 scratch_dir() {
   local dir
-  dir="$(mktemp -d)"
+  # `set -e` is suppressed inside the command substitution this is called from,
+  # so a failing `mktemp` would otherwise return an empty, unregistered path.
+  dir="$(mktemp -d)" || fail "could not create a temporary directory"
   TMP_DIRS+=("$dir")
   printf '%s\n' "$dir"
 }
@@ -45,6 +47,20 @@ NO_FILES_SELECTED_LINE="Linting: 0 file(s)"
 # the shape, so a rule-set change does not have to be chased across fixtures.
 write_violating_md() {
   printf 'Violating Heading\n=================\n```\nx\n```\n' > "$1"
+}
+
+# The committed vendored-skill overlay roots, in one place.
+OVERLAY_ROOTS=(.agents/skills .claude/skills)
+
+# `-print -quit` rather than `| head -n 1`: under `set -euo pipefail`, `head`
+# closing the pipe can kill `find` with SIGPIPE and abort the script with a
+# bare 141 once these trees grow past the pipe buffer.
+find_overlay_md() {
+  local root="$1" found
+  [ -d "$root" ] || return 1
+  found="$(find "$root" -name '*.md' -type f -print -quit)"
+  [ -n "$found" ] || return 1
+  printf '%s\n' "$found"
 }
 
 assert_ignored() {
@@ -73,20 +89,22 @@ CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
 # A malformed config makes markdownlint-cli2 exit non-zero, so every run below
 # doubles as a parse check.
 
-# A real excluded file to probe with. It must come from a vendored overlay: this
-# repo's own `skills/**` is deliberately linted, so a file from there would
-# assert the opposite of the intended contract.
+# 1. Every committed vendored-skill overlay is excluded when passed explicitly.
+#    The baseline tells repositories to commit these payloads, and they are
+#    third-party markdown written against their own upstream config, so without
+#    the exclusion the first vendoring run breaks lint:md, markdown CI, and
+#    pre-commit at once.
+#
+#    The sample must come from an overlay: this repo's own `skills/**` is
+#    deliberately linted, so a file from there would assert the opposite.
 EXCLUDED_SAMPLE=""
-for probe_root in .agents/skills .claude/skills; do
-  [ -d "$probe_root" ] || continue
-  EXCLUDED_SAMPLE="$(find "$probe_root" -name '*.md' -type f -print -quit)"
-  [ -n "$EXCLUDED_SAMPLE" ] && break
+for overlay_root in "${OVERLAY_ROOTS[@]}"; do
+  overlay_file="$(find_overlay_md "$overlay_root")" || continue
+  assert_ignored "$overlay_file" "committed overlay $overlay_root"
+  [ -n "$EXCLUDED_SAMPLE" ] || EXCLUDED_SAMPLE="$overlay_file"
 done
 [ -n "$EXCLUDED_SAMPLE" ] ||
   fail "no vendored overlay markdown found to probe the exclusion with"
-
-# 1. An excluded path passed explicitly is skipped.
-assert_ignored "$EXCLUDED_SAMPLE" "an explicitly passed path"
 
 # 2. Rule configuration from .markdownlint.jsonc still loads for linted files.
 probe_dir="$(scratch_dir)"
@@ -97,21 +115,7 @@ if pnpm exec markdownlint-cli2 "$probe" >/dev/null 2>&1; then
   fail "a file with real violations should not lint clean"
 fi
 
-# 3. Every committed vendored-skill overlay root is excluded. The baseline tells
-#    repositories to commit these payloads, and they are third-party markdown
-#    written against their own upstream config, so without the exclusion the
-#    first vendoring run breaks lint:md, markdown CI, and pre-commit at once.
-for overlay_root in .agents/skills .claude/skills; do
-  [ -d "$overlay_root" ] || continue
-  # `-print -quit` rather than `| head -n 1`: under `set -euo pipefail`, `head`
-  # closing the pipe can kill `find` with SIGPIPE and abort the script with a
-  # bare 141 once these trees grow past the pipe buffer.
-  overlay_file="$(find "$overlay_root" -name '*.md' -type f -print -quit)"
-  [ -n "$overlay_file" ] || continue
-  assert_ignored "$overlay_file" "committed overlay $overlay_root"
-done
-
-# The other half of the contract: this repo's own authored skills are
+# 3. The other half of the contract: this repo's own authored skills are
 # first-party markdown written against this config, so they must be linted.
 first_party="$(find skills -name '*.md' -type f -print -quit)"
 if [ -n "$first_party" ]; then
