@@ -73,8 +73,20 @@ CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
 # A malformed config makes markdownlint-cli2 exit non-zero, so every run below
 # doubles as a parse check.
 
+# A real excluded file to probe with. It must come from a vendored overlay: this
+# repo's own `skills/**` is deliberately linted, so a file from there would
+# assert the opposite of the intended contract.
+EXCLUDED_SAMPLE=""
+for probe_root in .agents/skills .claude/skills; do
+  [ -d "$probe_root" ] || continue
+  EXCLUDED_SAMPLE="$(find "$probe_root" -name '*.md' -type f -print -quit)"
+  [ -n "$EXCLUDED_SAMPLE" ] && break
+done
+[ -n "$EXCLUDED_SAMPLE" ] ||
+  fail "no vendored overlay markdown found to probe the exclusion with"
+
 # 1. An excluded path passed explicitly is skipped.
-assert_ignored "skills/scaffold-repository/SKILL.md" "an explicitly passed path"
+assert_ignored "$EXCLUDED_SAMPLE" "an explicitly passed path"
 
 # 2. Rule configuration from .markdownlint.jsonc still loads for linted files.
 probe_dir="$(scratch_dir)"
@@ -98,6 +110,19 @@ for overlay_root in .agents/skills .claude/skills; do
   [ -n "$overlay_file" ] || continue
   assert_ignored "$overlay_file" "committed overlay $overlay_root"
 done
+
+# The other half of the contract: this repo's own authored skills are
+# first-party markdown written against this config, so they must be linted.
+first_party="$(find skills -name '*.md' -type f -print -quit)"
+if [ -n "$first_party" ]; then
+  first_party_output="$(pnpm exec markdownlint-cli2 "$first_party" 2>&1)" || {
+    printf '%s\n' "$first_party_output" >&2
+    fail "first-party skill markdown must lint clean: $first_party"
+  }
+  if printf '%s\n' "$first_party_output" | grep -q "$NO_FILES_SELECTED_LINE"; then
+    fail "first-party skill markdown must be linted, not excluded: $first_party"
+  fi
+fi
 
 # 4. The exclusion above is load-bearing, not vacuous: a payload written against
 #    another repository's config really does violate this one's rules.
@@ -124,13 +149,13 @@ lint_collision_payload ||
 #    runs the command it emits for an absolute excluded path and requires that
 #    nothing was linted. Passing the absolute path straight through selects the
 #    file, which is the pre-commit failure the shared exclusion list prevents.
-staged_command="$(REPO_ROOT="$REPO_ROOT" node --input-type=module -e '
+staged_command="$(REPO_ROOT="$REPO_ROOT" EXCLUDED_SAMPLE="$EXCLUDED_SAMPLE" node --input-type=module -e '
 import assert from "node:assert/strict";
 import { pathToFileURL } from "node:url";
 const root = process.env.REPO_ROOT;
 const config = (await import(pathToFileURL(`${root}/.lintstagedrc.js`))).default;
 const entry = config["*.md"];
-const absolute = `${root}/skills/scaffold-repository/SKILL.md`;
+const absolute = `${root}/${process.env.EXCLUDED_SAMPLE}`;
 // lint-staged appends the (absolute) paths to a plain string command, and uses
 // a function command verbatim. Model both so a string config is tested as
 // lint-staged would actually invoke it, not as a bare command with no args.
