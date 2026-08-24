@@ -1100,7 +1100,7 @@ try {
     const { directory, names } = recordFiles(sticky.temporaryRoot);
     const recordPath = join(directory, names[0]);
     const record = JSON.parse(readFileSync(recordPath, 'utf8'));
-    assert.equal(record.scoped.head, record.authoritative.reviewedHead);
+    assert.equal(record.scoped, record.authoritative.reviewedHead);
 
     record.scoped = null;
     writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);

@@ -239,19 +239,13 @@ function isAuthoritativeReview(value) {
   );
 }
 
-// The endpoint `scope` last handed out. `complete` requires its candidate to
+// The commit `scope` last handed out. `complete` requires its candidate to
 // match this, so `reviewedHead` records a head a reviewer was actually given
-// rather than one the caller asserts about itself.
+// rather than one the caller asserts about itself. Only the head is stored:
+// the selection's mode is what decides whether an endpoint is written at all,
+// and nothing reads it back.
 function isScopedEndpoint(value) {
-  if (value === null) {
-    return true;
-  }
-  return (
-    isExactObject(value, ['head', 'mode']) &&
-    typeof value.head === 'string' &&
-    value.head.length > 0 &&
-    reviewableModes.has(value.mode)
-  );
+  return value === null || (typeof value === 'string' && value.length > 0);
 }
 
 function isProvisionalReview(value) {
@@ -544,7 +538,7 @@ function selectScope(targetBranch) {
     if (reviewableModes.has(selection.mode)) {
       writeRecord(
         identity,
-        buildRecord(identity, loaded, { scoped: { head, mode: selection.mode } })
+        buildRecord(identity, loaded, { scoped: head })
       );
     }
 
@@ -609,7 +603,7 @@ function computeScope(loaded, head, mergeBase) {
     // endpoint that earned it. Without that evidence the run that would notice
     // a bad record is exactly the run a `skip` would cancel, so degrade to
     // `recheck` rather than to a visible no-op.
-    const earned = loaded.record.scoped?.head === authoritative.reviewedHead;
+    const earned = loaded.record.scoped === authoritative.reviewedHead;
     authoritativeFindings = authoritative.findings;
     base = head;
     mode =
@@ -657,14 +651,14 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
     const loaded = loadRecord(identity);
     const scoped = loaded.status === 'valid' ? loaded.record.scoped : null;
 
-    if (scoped === null || scoped === undefined) {
+    if (scoped === null) {
       throw new Error(
         `No review scope is open for ${head}. Run \`scope\` and review the delta it returns before recording an outcome.`
       );
     }
-    if (scoped.head !== head) {
+    if (scoped !== head) {
       throw new Error(
-        `Review scope is stale: \`scope\` handed out ${scoped.head}, but HEAD is now ${head}. Re-run \`scope\` and review the ${scoped.head}..${head} delta before recording an outcome.`
+        `Review scope is stale: \`scope\` handed out ${scoped}, but HEAD is now ${head}. Re-run \`scope\` and review the ${scoped}..${head} delta before recording an outcome.`
       );
     }
 
