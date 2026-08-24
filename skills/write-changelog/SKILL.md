@@ -8,6 +8,13 @@ description: Render user-facing changelog or release-note copy from a project mi
 Read [`docs/issue-tracker.md`](../../docs/issue-tracker.md) for remote
 operations and repository brand-voice guidance before writing user-facing copy.
 
+If `docs/issue-tracker.md` is absent, stop before any tracker operation and
+report the missing path plus the skill that provides it: `scaffold-repository`
+emits it as part of the core baseline. Do not fall back to invented tracker
+commands or to a local-markdown tracker — this skill delegates its whole
+tracker vocabulary to the adapter, so proceeding without it silently guesses
+the provider.
+
 ## Choose the source
 
 - **Planning milestone:** resolve one provider milestone, then list its issues.

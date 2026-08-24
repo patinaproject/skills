@@ -11,6 +11,13 @@ provider selected by
 still belong to the adapter, the `/to-spec` skill for filing, and the
 tracker-agnostic skills (`working-on-issue` and `write-changelog`).
 
+If `docs/issue-tracker.md` is absent, stop before any tracker operation and
+report the missing path plus the skill that provides it: `scaffold-repository`
+emits it as part of the core baseline. Do not fall back to invented tracker
+commands or to a local-markdown tracker — this skill delegates its whole
+tracker vocabulary to the adapter, so proceeding without it silently guesses
+the provider.
+
 ## First checks
 
 - Read root repository guidance and the docs governing the changed forge

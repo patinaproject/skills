@@ -5,7 +5,10 @@ Prepare the local issue-linked branch without mixing work or triggering CI.
 ## Steps
 
 1. Read `docs/issue-tracker.md` and fetch the explicit current ticket with
-   relationships included.
+   relationships included. When that file is absent, stop and report the
+   missing path plus the skill that provides it (`scaffold-repository` emits it
+   as part of the core baseline). This workflow has no tracker vocabulary of
+   its own, so there is nothing to fall back to.
 2. Refuse a missing ticket or a completed ticket unless the user explicitly
    allows completed-issue work.
 3. Inspect native blockers. Refuse when any blocker is non-completed unless the

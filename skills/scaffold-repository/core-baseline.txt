@@ -1,0 +1,56 @@
+# Core baseline manifest for scaffold-repository.
+#
+# The single machine-readable list of files every scaffolded repository must
+# carry. `scripts/verify-baseline.sh` reads this file, so the self-test and the
+# documented baseline can never drift apart.
+#
+# One repository-relative path per line. Blank lines and `#` comments are
+# ignored. A trailing marker narrows the requirement:
+#
+#   [public]              emitted only for public repositories
+#   [symlink -> TARGET]   must be a symlink whose link text is TARGET
+#
+# Marketplace maintenance verifiers (dogfood, marketplace, scaffold-cleanup,
+# workflow-cleanup) are deliberately absent: a generic consumer repo does not
+# receive them.
+
+.claude/settings.json
+.codex/config.toml
+.codex/environments/environment.toml
+.editorconfig
+.github/CODEOWNERS
+.github/actionlint.yaml
+.github/ISSUE_TEMPLATE/config.yml
+.github/pull_request_template.md
+.github/workflows/actions.yml
+.github/workflows/markdown.yml
+.github/workflows/pull-request.yml
+.gitattributes
+.gitignore
+.husky/commit-msg
+.husky/pre-commit
+.lintstagedrc.js
+.markdownlint-cli2.jsonc
+.markdownlint.jsonc
+.mcp.json
+.nvmrc
+AGENTS.md
+CHANGELOG.md
+CLAUDE.md
+CONTRIBUTING.md
+LICENSE
+README.md
+SECURITY.md [public]
+commitizen.config.json
+commitlint.config.js
+docs/agents/issue-tracker.md [symlink -> ../issue-tracker.md]
+docs/file-structure.md
+docs/issue-publishing.md
+docs/issue-tracker.md
+docs/release-flow.md
+docs/wiki-index.md
+package.json
+pnpm-lock.yaml
+scripts/clean.sh
+scripts/worktree-setup.sh
+skills-lock.json
