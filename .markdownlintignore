@@ -1,7 +1,0 @@
-node_modules/
-pnpm-lock.yaml
-dist/
-build/
-skills/
-.agents/skills/
-.claude/skills/

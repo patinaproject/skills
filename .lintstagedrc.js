@@ -1,16 +1,8 @@
-// Lint-staged configuration
-// Filters out vendored skill files and canonical skill overlay files (from
-// external sources) so each source can use its own markdownlint config without
-// conflicting with ours.
+// Lint-staged configuration.
+//
+// Exclusions are not repeated here: `.markdownlint-cli2.jsonc` (`ignores`)
+// applies to the explicit file paths lint-staged passes, just as it does to a
+// glob run, so vendored skill payloads are filtered by the same single source.
 export default {
-  "*.md": (files) => {
-    const filtered = files.filter(
-      (f) =>
-        !f.includes("/skills/") &&
-        !f.includes("/.agents/skills/") &&
-        !f.includes("/.claude/skills/")
-    );
-    if (filtered.length === 0) return [];
-    return [`markdownlint-cli2 ${filtered.join(" ")}`];
-  },
+  "*.md": "markdownlint-cli2",
 };
