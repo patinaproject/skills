@@ -142,12 +142,16 @@ tell the human what to do next.
    or the "Automatically merge & resolve" button.
 
    If the merge reports `Already up to date.`, leave the branch unchanged and
-   continue. If the merge applies cleanly and changes the branch, keep the merge
-   result in the working tree, run documented verification, commit the merge
-   with the repository's normal issue-tagged format, then return to the
-   pre-publish evidence loop before restarting the readiness loop on the new
-   head. If verification fails on this clean merge,
-   run `git merge --abort` and stop under the verification stop condition. If
+   continue. If the merge applies cleanly and changes the branch, keep the
+   merge result in the working tree and verify-and-commit it through the
+   [base-update recovery contract](../references/base-update-recovery.md):
+   run its bundled `scripts/base-update-verify.sh` with the repository's
+   documented verification command and normal issue-tagged commit message. A
+   `verified` or `recovered` outcome has committed the exactly verified
+   merged head; return to the pre-publish evidence loop before restarting the
+   readiness loop on the new head. A `reproducible` or `drifted` outcome has
+   already aborted the merge; stop under the verification stop condition and
+   report the failing verification command and the final merge state. If
    two consecutive base merges keep changing the branch without reaching a
    stable PR head in the same ready-pr run, stop for operator feedback instead
    of pushing indefinitely.
@@ -498,6 +502,10 @@ tell the human what to do next.
 - An uncommitted path cannot be provably attributed to a different issue or
   branch, and committing it in-scope needs judgment the workflow does not have.
 - Local verification fails for a reason that is not branch-local or in scope.
+- A clean base merge's verification failure is reproducible or drifted under
+  the [base-update recovery contract](../references/base-update-recovery.md)'s
+  bounded retry; the report names the failing verification and the final
+  merge state.
 - Merge conflict resolution requires product judgment, secrets, permissions,
   destructive git operations, unrelated scope, or unverifiable semantic choices.
 - Feedback triage returns `needs-human`.
