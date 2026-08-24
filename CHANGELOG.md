@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.29.4](https://github.com/patinaproject/skills/compare/v2.29.3...v2.29.4) (2026-08-24)
+
+
+### Bug Fixes
+
+* [#354](https://github.com/patinaproject/skills/issues/354) make docs/agents the canonical tracker adapter ([#373](https://github.com/patinaproject/skills/issues/373)) ([259836f](https://github.com/patinaproject/skills/commit/259836f6c4da77ec2632296fa1802400da12c19b))
+* [#359](https://github.com/patinaproject/skills/issues/359) name shared repo docs by path instead of linking ([#370](https://github.com/patinaproject/skills/issues/370)) ([e656f2f](https://github.com/patinaproject/skills/commit/e656f2fa277b17f495c7702297335083f0cb77d2))
+
 ## [2.29.3](https://github.com/patinaproject/skills/compare/v2.29.2...v2.29.3) (2026-08-24)
 
 
