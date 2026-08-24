@@ -86,6 +86,8 @@ than the full ref. Keep the returned base and head fixed for this iteration.
 | `skip` | Current head already passed with no findings |
 
 Missing, corrupt, unavailable, foreign, or non-ancestral state produces `full`.
+A passing record that no longer carries the endpoint which earned it produces
+`recheck` rather than `skip`.
 Provisional findings never narrow the selected delta. Both authoritative and
 provisional findings are advisory inputs to revalidate at their current
 locations.
@@ -171,7 +173,10 @@ no source excerpts or reviewer transcript.
 Route completed findings through the Finding Router. Fix architecture,
 Standards, and Spec findings only after the completed outcome is recorded. Use
 `implement` or `diagnosing-bugs`, verify and commit the fixes, then restart at
-Step 1. The next iteration reviews only that fix delta while rechecking the
+Step 1. Restarting is not discretionary and no fix is too small to re-review:
+`complete` accepts only an endpoint `scope` handed out, so recording an outcome
+at a head reached by a later commit fails rather than silently skipping the
+iteration that would have reviewed it. The next iteration reviews only that fix delta while rechecking the
 outstanding concerns. A human-owned finding records `changes_requested` and
 stops with a concrete blocker.
 

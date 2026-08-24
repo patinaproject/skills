@@ -73,6 +73,13 @@ function reviewCommandResult(cwd, temporaryRoot, ...args) {
   });
 }
 
+// `complete` accepts only an endpoint `scope` handed out, which is the whole
+// point of the guard, so every completing test opens a scope the way the
+// workflow does.
+function openScope(cwd, temporaryRoot, target = 'main') {
+  return JSON.parse(reviewCommand(cwd, temporaryRoot, 'scope', '--target', target));
+}
+
 function reviewCommandProcess(cwd, temporaryRoot, ...args) {
   return spawn(process.execPath, [commandPath, ...args], {
     cwd,
@@ -184,6 +191,7 @@ try {
     const reviewedHead = git(root, 'rev-parse', 'HEAD');
     const findingPath = findingsFile([standardsFinding]);
 
+    openScope(root, temporaryRoot);
     const record = JSON.parse(
       reviewCommand(
         root,
@@ -223,6 +231,7 @@ try {
   {
     const passing = createRepository();
     const passingHead = git(passing.root, 'rev-parse', 'HEAD');
+    openScope(passing.root, passing.temporaryRoot);
     reviewCommand(
       passing.root,
       passing.temporaryRoot,
@@ -249,6 +258,7 @@ try {
 
     const blocked = createRepository();
     const blockedHead = git(blocked.root, 'rev-parse', 'HEAD');
+    openScope(blocked.root, blocked.temporaryRoot);
     reviewCommand(
       blocked.root,
       blocked.temporaryRoot,
@@ -278,6 +288,7 @@ try {
   {
     const corrupt = createRepository();
     const corruptHead = git(corrupt.root, 'rev-parse', 'HEAD');
+    openScope(corrupt.root, corrupt.temporaryRoot);
     reviewCommand(
       corrupt.root,
       corrupt.temporaryRoot,
@@ -307,6 +318,7 @@ try {
 
     const incompatible = createRepository();
     const incompatibleHead = git(incompatible.root, 'rev-parse', 'HEAD');
+    openScope(incompatible.root, incompatible.temporaryRoot);
     reviewCommand(
       incompatible.root,
       incompatible.temporaryRoot,
@@ -358,6 +370,7 @@ try {
 
     const rewritten = createRepository();
     const oldHead = git(rewritten.root, 'rev-parse', 'HEAD');
+    openScope(rewritten.root, rewritten.temporaryRoot);
     reviewCommand(
       rewritten.root,
       rewritten.temporaryRoot,
@@ -388,6 +401,7 @@ try {
   {
     const isolated = createRepository();
     const head = git(isolated.root, 'rev-parse', 'HEAD');
+    openScope(isolated.root, isolated.temporaryRoot);
     reviewCommand(
       isolated.root,
       isolated.temporaryRoot,
@@ -430,6 +444,7 @@ try {
   {
     const moving = createRepository();
     const reviewedHead = git(moving.root, 'rev-parse', 'HEAD');
+    openScope(moving.root, moving.temporaryRoot);
     reviewCommand(
       moving.root,
       moving.temporaryRoot,
@@ -489,6 +504,7 @@ try {
   {
     const secure = createRepository();
     const head = git(secure.root, 'rev-parse', 'HEAD');
+    openScope(secure.root, secure.temporaryRoot);
     reviewCommand(
       secure.root,
       secure.temporaryRoot,
@@ -512,6 +528,7 @@ try {
       'provisional',
       'repository',
       'schemaVersion',
+      'scoped',
       'sourceBranch',
       'targetBranch',
     ]);
@@ -539,6 +556,7 @@ try {
   {
     const concurrent = createRepository();
     const head = git(concurrent.root, 'rev-parse', 'HEAD');
+    openScope(concurrent.root, concurrent.temporaryRoot);
     const largeFindings = findingsFile(
       Array.from({ length: 50_000 }, (_, index) => ({
         ...standardsFinding,
@@ -606,6 +624,7 @@ try {
 
     const releasing = createRepository();
     const releasingHead = git(releasing.root, 'rev-parse', 'HEAD');
+    openScope(releasing.root, releasing.temporaryRoot);
     reviewCommand(
       releasing.root,
       releasing.temporaryRoot,
@@ -688,6 +707,7 @@ try {
   {
     const carried = createRepository();
     const reviewedHead = git(carried.root, 'rev-parse', 'HEAD');
+    openScope(carried.root, carried.temporaryRoot);
     reviewCommand(
       carried.root,
       carried.temporaryRoot,
@@ -769,6 +789,7 @@ try {
 
     const foreign = createRepository();
     const foreignHead = git(foreign.root, 'rev-parse', 'HEAD');
+    openScope(foreign.root, foreign.temporaryRoot);
     reviewCommand(
       foreign.root,
       foreign.temporaryRoot,
@@ -821,6 +842,7 @@ try {
   {
     const advancing = createRepository();
     const olderHead = git(advancing.root, 'rev-parse', 'HEAD');
+    openScope(advancing.root, advancing.temporaryRoot);
     reviewCommand(
       advancing.root,
       advancing.temporaryRoot,
@@ -836,6 +858,7 @@ try {
     const newerHead = commitChange(advancing.root, 'base\nchange\nmore\n');
     const local = mkdtempSync(join(tmpdir(), 'patinaproject-polish-local-'));
     fixtures.push(local);
+    openScope(advancing.root, local);
     reviewCommand(
       advancing.root,
       local,
@@ -896,6 +919,7 @@ try {
     const diverged = createRepository();
     const shared = git(diverged.root, 'rev-parse', 'HEAD');
     const localHead = commitChange(diverged.root, 'base\nchange\nlocal\n');
+    openScope(diverged.root, diverged.temporaryRoot);
     reviewCommand(
       diverged.root,
       diverged.temporaryRoot,
@@ -913,6 +937,7 @@ try {
     fixtures.push(divergedRoot);
     git(diverged.root, 'reset', '--hard', shared);
     const otherHead = commitChange(diverged.root, 'base\nchange\nother\n');
+    openScope(diverged.root, divergedRoot);
     reviewCommand(
       diverged.root,
       divergedRoot,
@@ -951,6 +976,154 @@ try {
     // The carry keeps this session's provisional findings to revalidate.
     assert.deepEqual(carriedScope.provisionalFindings, [standardsFinding]);
     assert.equal(carriedScope.mode, 'recheck');
+  }
+
+  {
+    // The reported failure: fix a finding, commit, and record `passed` at the
+    // new head without restarting the review loop. `reviewedHead` would name a
+    // head no reviewer was ever given, and two downstream gates consume it as
+    // proof.
+    const skipped = createRepository();
+    const firstHead = git(skipped.root, 'rev-parse', 'HEAD');
+    openScope(skipped.root, skipped.temporaryRoot);
+    reviewCommand(
+      skipped.root,
+      skipped.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      firstHead,
+      '--outcome',
+      'changes_requested',
+      '--findings',
+      findingsFile([standardsFinding])
+    );
+
+    const fixedHead = commitChange(skipped.root, 'base\nchange\nfix\n');
+    const unearned = reviewCommandResult(
+      skipped.root,
+      skipped.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      fixedHead,
+      '--outcome',
+      'passed'
+    );
+    assert.equal(unearned.status, 1);
+    assert.match(unearned.stderr, /Review scope is stale/);
+    assert.match(unearned.stderr, new RegExp(firstHead));
+    assert.match(unearned.stderr, new RegExp(fixedHead));
+
+    // The authoritative record is untouched by the rejected write.
+    const afterRejection = JSON.parse(
+      reviewCommand(skipped.root, skipped.temporaryRoot, 'scope', '--target', 'main')
+    );
+    assert.equal(afterRejection.mode, 'incremental');
+    assert.deepEqual(afterRejection.authoritativeFindings, [standardsFinding]);
+
+    // Restarting the loop is what earns the pass. `scope` above reopened it.
+    reviewCommand(
+      skipped.root,
+      skipped.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      fixedHead,
+      '--outcome',
+      'passed'
+    );
+    assert.equal(
+      JSON.parse(
+        reviewCommand(skipped.root, skipped.temporaryRoot, 'scope', '--target', 'main')
+      ).mode,
+      'skip'
+    );
+  }
+
+  {
+    // Completing with no scope open at all is the same unearned record.
+    const unscoped = createRepository();
+    const head = git(unscoped.root, 'rev-parse', 'HEAD');
+    const result = reviewCommandResult(
+      unscoped.root,
+      unscoped.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /No review scope is open/);
+  }
+
+  {
+    // A passing record that lost the endpoint which earned it degrades to
+    // `recheck`, not to a `skip` that would cancel the run able to notice it.
+    const sticky = createRepository();
+    const head = git(sticky.root, 'rev-parse', 'HEAD');
+    openScope(sticky.root, sticky.temporaryRoot);
+    reviewCommand(
+      sticky.root,
+      sticky.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+
+    const { directory, names } = recordFiles(sticky.temporaryRoot);
+    const recordPath = join(directory, names[0]);
+    const record = JSON.parse(readFileSync(recordPath, 'utf8'));
+    assert.equal(record.scoped.head, record.authoritative.reviewedHead);
+
+    record.scoped = null;
+    writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
+
+    const degraded = JSON.parse(
+      reviewCommand(sticky.root, sticky.temporaryRoot, 'scope', '--target', 'main')
+    );
+    assert.equal(degraded.mode, 'recheck');
+  }
+
+  {
+    // A provisional write must not close the open scope: the stage that saved
+    // it can still complete once it finishes.
+    const interrupted = createRepository();
+    const head = git(interrupted.root, 'rev-parse', 'HEAD');
+    openScope(interrupted.root, interrupted.temporaryRoot);
+    reviewCommand(
+      interrupted.root,
+      interrupted.temporaryRoot,
+      'provisional',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--findings',
+      findingsFile([standardsFinding])
+    );
+    const completed = reviewCommandResult(
+      interrupted.root,
+      interrupted.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+    assert.equal(completed.status, 0, completed.stderr);
   }
 
   console.info('OK: incremental polish review-state contract passed');

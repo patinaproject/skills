@@ -41,6 +41,17 @@ longer equals `HEAD`. A passing record has no findings; a changes-requested
 record has at least one. Completion clears provisional data because the full
 selected scope and every carried concern were revalidated.
 
+`complete` also requires an open scope at that head. `scope` records the
+endpoint it hands out, and `complete` rejects a candidate that endpoint does
+not name, so `reviewedHead` records a head a reviewer was actually given rather
+than one the caller asserts about itself. The `HEAD` guard above catches an
+endpoint that moved *during* review; this catches the easier and likelier
+failure it cannot — an endpoint that moved *before* the record was written.
+Fixing a finding, committing, and recording the outcome at the new head is that
+failure: it skips the iteration that would have reviewed the fix. The fix is to
+re-run `scope` and review the delta it returns, which is what `SKILL.md` Step 5
+already requires; the guard makes skipping it fail loudly instead of silently.
+
 When a stage errors, times out, is interrupted, or observes a moving head, keep
 the authoritative record and save only useful findings from the attempt:
 
@@ -117,6 +128,11 @@ The record is valid only when its schema, identity, and Git ancestry match the
 current work. Missing, corrupt, inaccessible, foreign, or non-ancestral state
 selects a full merge-base-to-`HEAD` review. Provisional state never advances
 coverage or narrows that scope.
+
+`skip` mode requires the record to still carry the endpoint that earned its
+pass. A passing record whose scoped endpoint does not match its `reviewedHead`
+degrades to `recheck` rather than to a visible no-op, because the run a `skip`
+cancels is exactly the run that would notice a bad record.
 
 Completed records are written to a same-directory temporary file,
 synchronized, and atomically renamed. On supported platforms, the directory is
