@@ -396,7 +396,7 @@ Bundled with this skill:
 - [`core-baseline.txt`](./core-baseline.txt) – canonical core baseline manifest.
 
 At the root of the repository being scaffolded, not alongside this skill, so
-they are named by path rather than linked:
+they are named by path:
 
 - `AGENTS.md` – repo workflow contract.
 - `docs/file-structure.md` – layout reference.
