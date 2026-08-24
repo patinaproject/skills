@@ -183,6 +183,15 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   CI workflow, and `.lintstagedrc.js` all inherit one exclusion list
   instead of repeating it. A negated glob (`"#node_modules"`) still works
   on the command line for a one-off run.
+
+  `ignores` must exclude the committed vendored-skill overlays
+  (`.agents/skills/**` and `.claude/skills/**`, plus `skills/**` in a repo that
+  owns a skill catalog). The baseline guarantees this collision rather than
+  merely permitting it: it tells repositories to commit their vendored skills,
+  and those payloads are third-party markdown written against their own
+  upstream config, so they fail this repository's rules on contact and are
+  overwritten on the next re-vendor. Emit the exclusion pre-wired; reformatting
+  the payloads is not an option.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
@@ -197,7 +206,11 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   with no install step. Real skill directories live under `.agents/skills/<name>/`;
   `.claude/skills/<name>` entries are portable relative symlinks
   (`../../.agents/skills/<name>`) to the matching payloads. Repo-owned skills
-  stay isolated under `skills/<name>/`. `scripts/clean.sh` removes only generated
+  stay isolated under `skills/<name>/`. Because these payloads are committed,
+  the emitted `.markdownlint-cli2.jsonc` must already exclude them from markdown
+  lint (see **Markdown** above) — otherwise the first vendoring run breaks
+  `lint:md`, markdown CI, and the `pre-commit` hook at once.
+  `scripts/clean.sh` removes only generated
   dependency and transient install files (`node_modules`, `.skills-install.lock*`)
   and must never prune the committed overlay directories; `.gitignore` must not
   exclude `.agents/skills/**` or `.claude/skills/**`.

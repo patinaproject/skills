@@ -24,6 +24,12 @@ fi
 
 [ -f .markdownlint-cli2.jsonc ] || fail ".markdownlint-cli2.jsonc is missing"
 
+# Resolved once so the temp-directory cases below can run the same binary
+# without `pnpm exec`, which needs a package.json in the working directory and
+# would otherwise fail for a reason unrelated to what is being asserted.
+CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
+[ -x "$CLI2_BIN" ] || fail "markdownlint-cli2 is not installed at $CLI2_BIN"
+
 # A malformed config makes markdownlint-cli2 exit non-zero, so every run below
 # doubles as a parse check.
 
@@ -45,7 +51,40 @@ if pnpm exec markdownlint-cli2 "$probe" >/dev/null 2>&1; then
   fail "a file with real violations should not lint clean"
 fi
 
-# 3. The pre-commit hook routes markdown through markdownlint-cli2, so it
+# 3. Every committed vendored-skill overlay root is excluded. The baseline tells
+#    repositories to commit these payloads, and they are third-party markdown
+#    written against their own upstream config, so without the exclusion the
+#    first vendoring run breaks lint:md, markdown CI, and pre-commit at once.
+for overlay_root in skills .agents/skills .claude/skills; do
+  [ -d "$overlay_root" ] || continue
+  overlay_file="$(find "$overlay_root" -name '*.md' -type f | head -n 1)"
+  [ -n "$overlay_file" ] || continue
+  overlay_output="$(pnpm exec markdownlint-cli2 "$overlay_file" 2>&1)" || {
+    printf '%s\n' "$overlay_output" >&2
+    fail "committed overlay $overlay_root is not excluded from markdown lint"
+  }
+  printf '%s\n' "$overlay_output" | grep -q "Linting: 0 file(s)" ||
+    fail "committed overlay $overlay_root is not excluded: $overlay_output"
+done
+
+# 4. The exclusion above is load-bearing, not vacuous: a payload written against
+#    another repository's config really does violate this one's rules.
+collision_dir="$(mktemp -d)"
+trap 'rm -rf "$probe_dir" "$collision_dir"' EXIT
+mkdir -p "$collision_dir/.claude/skills/vendored"
+cp .markdownlint.jsonc "$collision_dir/.markdownlint.jsonc"
+printf 'Vendored Heading\n================\n```\nx\n```\n' \
+  > "$collision_dir/.claude/skills/vendored/SKILL.md"
+
+if (cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1); then
+  fail "vendored payload should violate this repository's rules when not excluded"
+fi
+
+printf '{ "ignores": [".claude/skills/**"] }\n' > "$collision_dir/.markdownlint-cli2.jsonc"
+(cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1) ||
+  fail "an ignores entry must exclude the same vendored payload"
+
+# 5. The pre-commit hook routes markdown through markdownlint-cli2, so it
 #    inherits the same ignores instead of re-implementing an exclusion filter.
 REPO_ROOT="$REPO_ROOT" node --input-type=module -e '
 import assert from "node:assert/strict";
