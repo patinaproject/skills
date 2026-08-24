@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.29.1](https://github.com/patinaproject/skills/compare/v2.29.0...v2.29.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* [#355](https://github.com/patinaproject/skills/issues/355) replace inert markdownlintignore with cli2 ignores ([#367](https://github.com/patinaproject/skills/issues/367)) ([8b49c9c](https://github.com/patinaproject/skills/commit/8b49c9cf5c540acc08f4cd67cb76acf175d761f5))
+* [#364](https://github.com/patinaproject/skills/issues/364) recover from retryable base-update verification failures ([#365](https://github.com/patinaproject/skills/issues/365)) ([9370ead](https://github.com/patinaproject/skills/commit/9370ead38e3c9a2a13fe9bea7d0232fd69cebd97))
+
 ## [2.29.0](https://github.com/patinaproject/skills/compare/v2.28.0...v2.29.0) (2026-08-23)
 
 
