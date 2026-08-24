@@ -20,8 +20,9 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 | `.gitattributes` | yes | present; contains `* text=auto eol=lf` |
 | `.editorconfig` | yes | present; `root = true`; `end_of_line = lf` |
 | `.nvmrc` | yes | present |
-| `.markdownlint.jsonc` | yes | present; valid JSONC |
-| `.markdownlintignore` | yes | present; excludes `node_modules/`, `pnpm-lock.yaml` |
+| `.markdownlint.jsonc` | yes | present; valid JSONC; carries rule configuration only |
+| `.markdownlint-cli2.jsonc` | yes | present; valid JSONC; carries an `ignores` array holding every markdown exclusion |
+| `.markdownlintignore` | no | absent; `markdownlint-cli2` does not read it, so any exclusion in it is inert. When present, classify as `stale` and recommend moving its entries into `.markdownlint-cli2.jsonc` → `ignores` |
 | `commitlint.config.js` | yes | present; extends `@commitlint/config-conventional`; has `ticket-required` rule |
 | `commitizen.config.json` | yes | present; remains JSON because `cz-customizable` loads it through CommonJS `require()` |
 | `.husky/commit-msg` | yes | present; runs `pnpm exec commitlint --edit "$1"` |
@@ -161,7 +162,7 @@ For each gap, emit:
 Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
 
 1. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, visibility-selected issue intake)
-2. PNPM tooling, skills installation, and tracker connection (`package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`)
+2. PNPM tooling, skills installation, and tracker connection (`package.json`, `.markdownlint.jsonc`, `.markdownlint-cli2.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`)
 3. Agent + repo docs (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`)
 4. Workflows (`actions.yml`, `markdown.yml`, `pull-request.yml`)
 5. Deprecated workflow cleanup

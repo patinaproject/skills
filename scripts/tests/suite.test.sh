@@ -7,6 +7,7 @@ pnpm exec commitlint --version >/dev/null
 bash scripts/tests/issue-reference-contract.test.sh
 node scripts/tests/history-rewrite.test.mjs
 node skills/polish/tests/review-state.test.mjs
+bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/pr-readiness-flip.test.sh

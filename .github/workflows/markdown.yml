@@ -20,10 +20,7 @@ jobs:
         # DavidAnson/markdownlint-cli2-action@v18.0.0
         uses: DavidAnson/markdownlint-cli2-action@eb5ca3ab411449c66620fe7f1b3c9e10547144b0
         with:
+          # Exclusions live in `.markdownlint-cli2.jsonc` (`ignores`), the
+          # single list every markdown entry point inherits.
           globs: |
             **/*.md
-            #node_modules
-            #CHANGELOG.md
-            #skills/**
-            #.agents/skills/**
-            #.claude/skills/**

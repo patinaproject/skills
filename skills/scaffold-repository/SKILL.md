@@ -60,7 +60,7 @@ Behavior:
 - For each recommendation, show a **diff preview** and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
 - Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
   1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; issue templates must match repository visibility.
-  2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`.
+  2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `.markdownlint-cli2.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`.
   3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
   4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
 
@@ -106,8 +106,8 @@ themselves this marketplace repository.
 .husky/commit-msg
 .husky/pre-commit
 .lintstagedrc.js
+.markdownlint-cli2.jsonc
 .markdownlint.jsonc
-.markdownlintignore
 .nvmrc
 .mcp.json
 AGENTS.md
@@ -174,7 +174,22 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   prefix. Body structure is owned by the tracker-agnostic skill creating the
   issue. Public repositories enable GitHub issue intake. Private repositories
   disable blank GitHub issues and redirect intake to Linear.
-- **Markdown**: `markdownlint-cli2` with `.markdownlint.jsonc` + `.markdownlintignore`. `lint-staged` runs it from `pre-commit`. The lint script uses a glob that excludes `node_modules/`.
+- **Markdown**: `markdownlint-cli2` with rule configuration in
+  `.markdownlint.jsonc` and exclusions in `.markdownlint-cli2.jsonc`
+  (`ignores`). Do not emit `.markdownlintignore`: `markdownlint-cli2` does
+  not read it, so an exclusion added there is silently inert. `ignores`
+  applies to glob runs and to explicitly passed files alike, so `lint:md`,
+  the markdown CI workflow, and `.lintstagedrc.js` all inherit one exclusion
+  list instead of repeating it. A negated glob (`"#node_modules"`) still
+  works on the command line for a one-off run.
+
+  One sharp edge decides whether the `pre-commit` hook actually inherits the
+  list: `ignores` matches **relative** paths, and `lint-staged` passes
+  **absolute** ones. A plain `"*.md": "markdownlint-cli2"` therefore lints the
+  very files the list excludes. Emit a `.lintstagedrc.js` whose command
+  converts each path with `path.relative(process.cwd(), file)` before handing
+  it over. This is the same pre-commit gap that negated globs could not close;
+  the mechanism changed, the trap did not.
 - **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
   content of documentation files. Tests validate code behavior and
   machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
@@ -381,7 +396,7 @@ not a settings toggle:
 Never run step 6 from an ordinary realignment pass. It requires an explicit
 rewrite plan and reviewed mapping.
 
-Run `pnpm exec markdownlint-cli2 --fix "**/*.md" "#node_modules"` to auto-fix common markdown violations before committing.
+Run `pnpm exec markdownlint-cli2 --fix "**/*.md"` to auto-fix common markdown violations before committing; `.markdownlint-cli2.jsonc` supplies the exclusions.
 
 ## Related documents
 

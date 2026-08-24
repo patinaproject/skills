@@ -58,6 +58,7 @@ assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
 assert_absent_path ".github/ISSUE_TEMPLATE/bug_report.md"
 assert_absent_path ".github/ISSUE_TEMPLATE/feature_request.md"
 assert_absent_path "scripts/install-skills.sh"
+assert_absent_path ".markdownlintignore"
 
 # This protects the live patinaproject/skills reference repo. Some files below
 # are marketplace-internal verification files, while the skill installation
@@ -82,8 +83,8 @@ for live_reference_path in \
   .husky/commit-msg \
   .husky/pre-commit \
   .lintstagedrc.js \
+  .markdownlint-cli2.jsonc \
   .markdownlint.jsonc \
-  .markdownlintignore \
   .nvmrc \
   AGENTS.md \
   CHANGELOG.md \
