@@ -23,6 +23,11 @@ cleanup() {
 # registering a second one per temp directory would silently drop the first.
 trap cleanup EXIT
 
+fail() {
+  echo "FAIL: $1" >&2
+  exit 1
+}
+
 scratch_dir() {
   local dir
   # `set -e` is suppressed inside the command substitution this is called from,
@@ -30,11 +35,6 @@ scratch_dir() {
   dir="$(mktemp -d)" || fail "could not create a temporary directory"
   TMP_DIRS+=("$dir")
   printf '%s\n' "$dir"
-}
-
-fail() {
-  echo "FAIL: $1" >&2
-  exit 1
 }
 
 # `Linting: N file(s)` is the only signal cli2 gives for which files it
