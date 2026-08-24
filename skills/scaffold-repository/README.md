@@ -85,7 +85,7 @@ Or install the full `patinaproject-skills` plugin via your host's marketplace:
 - Claude Code: `/plugin marketplace add patinaproject/skills` then `/plugin install patinaproject-skills@patinaproject-skills`
 - Codex: `/marketplace add patinaproject/skills` then `/install patinaproject-skills`
 
-See the [root README](../../README.md) for the full install guide.
+See `README.md` at the repository root for the full install guide.
 
 ## First use
 
@@ -110,8 +110,8 @@ pnpm commitlint        # one-off commit-message validation
 
 This public repository uses `type: #N short description`; private repositories
 scaffolded from it use `type: PAT-N short description`. See
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full rule; choose the commit type
-by product impact, not by file extension.
+`CONTRIBUTING.md` at the repository root for the full rule; choose the commit
+type by product impact, not by file extension.
 
 | Change | Type |
 |--------|------|
@@ -124,11 +124,11 @@ Edits to `skills/**/SKILL.md` and adjacent skill workflow contracts are product/
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](../../CONTRIBUTING.md) and [`AGENTS.md`](../../AGENTS.md). The release flow lives in [`docs/release-flow.md`](../../docs/release-flow.md).
+See `CONTRIBUTING.md` and `AGENTS.md` at the repository root. The release flow lives in `docs/release-flow.md`.
 
 ## Related
 
 - [`SKILL.md`](./SKILL.md) – skill contract, modes, placeholders, emitted tree.
 - [`audit-checklist.md`](./audit-checklist.md) – realignment checklist.
-- [`docs/file-structure.md`](../../docs/file-structure.md) – layout reference.
+- `docs/file-structure.md` – layout reference.
 - [`patinaproject/skills`](https://github.com/patinaproject/skills) – marketplace distributing Patina Project plugins.

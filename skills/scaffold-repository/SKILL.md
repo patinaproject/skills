@@ -136,8 +136,8 @@ later, but the scaffold does not auto-enable retired workflow dependencies.
   operator chores. GitHub Checks are the source of truth for routine automated
   verification; PR bodies should not repeat successful lint, test, type-check,
   hook, package, or similar command results. See
-  [ADR-257](../../docs/adr/ADR-257-slim-baseline-pr-template.md) for the
-  single-baseline decision.
+  `docs/adr/ADR-257-slim-baseline-pr-template.md` for the single-baseline
+  decision.
 - **Issue titles and bodies**: titles are plain-language, no commit-style
   prefix. Body structure is owned by the tracker-agnostic skill creating the
   issue. Public repositories enable GitHub issue intake. Private repositories
@@ -402,6 +402,13 @@ Run `pnpm exec markdownlint-cli2 --fix "**/*.md"` to auto-fix common markdown vi
 
 ## Related documents
 
+Bundled with this skill:
+
 - [`audit-checklist.md`](./audit-checklist.md) – canonical realignment checklist.
-- [`../../AGENTS.md`](../../AGENTS.md) – repo workflow contract.
-- [`../../docs/file-structure.md`](../../docs/file-structure.md) – layout reference.
+- [`core-baseline.txt`](./core-baseline.txt) – canonical core baseline manifest.
+
+At the root of the repository being scaffolded, not alongside this skill, so
+they are named by path:
+
+- `AGENTS.md` – repo workflow contract.
+- `docs/file-structure.md` – layout reference.
