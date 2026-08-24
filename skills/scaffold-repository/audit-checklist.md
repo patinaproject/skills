@@ -134,6 +134,7 @@ Writes always go through the UI (or `gh api -X PATCH`). Deep-link: `https://gith
 | `squash_merge_commit_message` | `COMMIT_MESSAGES` |
 | `delete_branch_on_merge` | true |
 | `allow_update_branch` | true |
+| `allow_auto_merge` | true — `merge-pr` requires it. Before reporting drift, confirm it is off rather than unavailable: `gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){autoMergeAllowed}}'`. Unavailable (a private repo on a free plan) is an environment constraint to report, not a setting to fix |
 | Release immutability (UI-only) | enabled |
 
 ## Area 8 – Commit / PR title hygiene

@@ -84,9 +84,29 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
    stop as `human-blocked` and ask the operator to choose. When the base branch
    uses a merge queue, let that queue own the strategy and omit a strategy flag.
 
-   Refuse when repository auto-merge is disabled or unavailable. Enabling a
-   setting, changing a ruleset, or weakening branch protection is outside this
-   workflow.
+   Resolve whether repository auto-merge is available before expressing merge
+   intent, and report the two cases differently — they need different human
+   actions:
+
+   ```sh
+   gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){autoMergeAllowed}}'
+   ```
+
+   - **Disabled but available** (`autoMergeAllowed: false` on a plan that offers
+     it): stop as `human-blocked` and ask the operator to enable **Allow
+     auto-merge** in the repository's pull-request settings. This is a one-time
+     setting the scaffold baseline expects to be on.
+   - **Unavailable on this plan** (a private repository on a free GitHub plan,
+     where rulesets return `403 Upgrade` and branch protection returns `404`):
+     stop as `human-blocked` and name that explicitly. Do not report it as a
+     setting the operator forgot to turn on — there is nothing for them to click.
+     Say that the repository must become public or move to a paid plan before
+     this workflow can complete, and that the pull request is otherwise ready.
+
+   Either way, refuse. Enabling a setting, changing a ruleset, weakening branch
+   protection, or falling back to a direct merge is outside this workflow: the
+   skill expresses merge intent and lets repository policy govern integration,
+   and a direct merge would make it something else.
 
 4. Immediately before expressing merge intent, refresh the PR and local head.
    Require the PR to remain open, non-draft, on the same head branch, and at the
