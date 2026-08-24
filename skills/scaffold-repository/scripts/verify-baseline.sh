@@ -22,7 +22,16 @@ while [ "$#" -gt 0 ]; do
     --public) visibility="public" ;;
     --private) visibility="private" ;;
     -h|--help)
-      sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+      cat <<'USAGE'
+Assert that a repository carries the core baseline scaffold-repository emits.
+
+Usage:
+  bash verify-baseline.sh [--public|--private] [repo-root]
+
+Reads core-baseline.txt next to this script and checks the target repository
+against it. Visibility defaults to public; repo-root defaults to the current
+git repository. Exits non-zero listing every gap.
+USAGE
       exit 0
       ;;
     -*)
