@@ -322,17 +322,33 @@ gh api -X PATCH "repos/<owner>/<repo>" \
   -F allow_auto_merge=true
 ```
 
-Auto-merge is not always available to enable. A private repository on a free
-GitHub plan reports `autoMergeAllowed: false` with no way to change it, and has
-no rulesets or branch protection either. Confirm before reporting drift:
+#### Auto-merge: off versus unavailable
+
+This is the canonical statement of the distinction. `merge-pr` consumes it at
+the point of merge intent (its `workflows/enable-auto-merge.md`, step 3); the
+realignment audit consumes it here. Keep the rule in one place — the two
+branches need different human actions, and a copy that drifts sends the
+operator looking for a control that is not there.
+
+`autoMergeAllowed` alone cannot tell the two states apart: a repository with
+the box merely unchecked and a private repository on a free plan, where the
+setting does not exist, both report `false`. Corroborate with the two signals
+that do differ:
 
 ```bash
 gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){autoMergeAllowed}}'
+gh api "repos/<owner>/<repo>/rulesets"
+gh api "repos/<owner>/<repo>/branches/<default-branch>/protection"
 ```
 
-When it is unavailable, report it as an environment constraint rather than a
-setting to fix, and say so plainly: `merge-pr` cannot complete on that
-repository until the plan changes or the repository becomes public.
+- **Disabled but available** — `autoMergeAllowed: false` while rulesets and
+  branch protection respond normally. This is drift: report it as a setting to
+  enable, through the realignment prompt below.
+- **Unavailable on this plan** — `autoMergeAllowed: false` with rulesets
+  returning `403 Upgrade` and branch protection returning `404`. Report it as an
+  environment constraint, not drift: there is nothing for the operator to click.
+  Say plainly that `merge-pr` cannot complete on that repository until the plan
+  changes or the repository becomes public.
 
 ### Realignment-mode prompt format
 
