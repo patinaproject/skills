@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.29.2](https://github.com/patinaproject/skills/compare/v2.29.1...v2.29.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* [#357](https://github.com/patinaproject/skills/issues/357) require auto-merge in the baseline and name its absence ([#372](https://github.com/patinaproject/skills/issues/372)) ([5bba923](https://github.com/patinaproject/skills/commit/5bba9233870ac3a60544b6e9fecddd8d20cda6ed))
+* [#363](https://github.com/patinaproject/skills/issues/363) require an earned scope before recording a review ([#371](https://github.com/patinaproject/skills/issues/371)) ([7e4b01a](https://github.com/patinaproject/skills/commit/7e4b01ac989f731608e55411a0637104228bf036))
+
 ## [2.29.1](https://github.com/patinaproject/skills/compare/v2.29.0...v2.29.1) (2026-08-24)
 
 
