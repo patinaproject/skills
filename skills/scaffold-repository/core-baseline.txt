@@ -15,6 +15,15 @@
 # `docs/issue-tracker.md` is the compatibility symlink. The pair must always
 # resolve to one file - two real copies drift.
 #
+# Which side is real rests entirely on the `[symlink -> ...]` marker below: the
+# plain entry is checked with `-e`, which follows symlinks, so the marker is the
+# only thing pinning the direction. Move the marker and you move the layout.
+#
+# This manifest is not the complete `docs/agents/` layout. `triage-labels.md` is
+# required only when the `triage` skill is vendored, and the marker grammar has
+# no conditional for that, so it is declared in `audit-checklist.md` (Area 3)
+# and verified by the audit rather than here.
+#
 # Marketplace maintenance verifiers (dogfood, marketplace, scaffold-cleanup,
 # workflow-cleanup) are deliberately absent: a generic consumer repo does not
 # receive them.

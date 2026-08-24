@@ -90,7 +90,7 @@ expects to and nothing silently breaks. The target repository records this as
 | `docs/file-structure.md` | yes | present |
 | `docs/agents/issue-tracker.md` | yes | the real adapter file, and the sole provider-specific one; selects GitHub for public repositories and Linear for private repositories. Carries `## Pull requests as a triage surface` (the flag `triage` reads), `## When a skill says "publish to the issue tracker"`, `## When a skill says "fetch the relevant ticket"`, and `## Wayfinding operations` (absent, `wayfinder` silently falls back to a local-markdown tracker) |
 | `docs/issue-tracker.md` | yes | relative compatibility symlink to `agents/issue-tracker.md`; contains no duplicate adapter content. The pair must resolve to one file — a second real copy is `divergent`, not a passing check |
-| `docs/agents/domain.md` | yes | domain notes; written by `setup-matt-pocock-skills` and read by its skill family |
+| `docs/agents/domain.md` | yes | the domain *config* file `setup-matt-pocock-skills` writes and its skill family reads — a pointer that tells agents when domain docs are warranted, not domain content. Requiring it does not conflict with `AGENTS.md` keeping the docs themselves optional and lazily created |
 | `docs/agents/triage-labels.md` | when `triage` is vendored | maps the canonical triage roles to this repository's label strings. May point at the adapter's Triage roles table rather than restating it |
 | `docs/issue-publishing.md` | yes | tracker-agnostic filing and publishing rules |
 

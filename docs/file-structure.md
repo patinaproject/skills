@@ -47,7 +47,7 @@ layout.
   `agents/issue-tracker.md`, so either path resolves to one adapter
 - `package.json`, `commitizen.config.json`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
-- `.lintstagedrc.js`: lint-staged config; exclusions come from
+- `.lintstagedrc.js`: lint-staged config; markdown exclusions come from
   `.markdownlint-cli2.jsonc`
 
 ## Flat skill layout
