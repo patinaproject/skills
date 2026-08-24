@@ -4,17 +4,50 @@ set -euo pipefail
 # Behavioral guard for the markdown exclusion mechanism.
 #
 # `markdownlint-cli2` does not read `.markdownlintignore`. Exclusions live in
-# `.markdownlint-cli2.jsonc` (`ignores`), which is the only mechanism that also
-# covers the explicit file paths `lint-staged` hands the pre-commit hook.
+# `.markdownlint-cli2.jsonc` (`ignores`), the single list every markdown entry
+# point inherits — including the pre-commit hook, which needs its paths made
+# relative first because `ignores` does not match absolute ones.
 #
 # Per ADR-224 this asserts tool behavior and non-`.md` config only.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
+TMP_DIRS=()
+cleanup() {
+  if [ "${#TMP_DIRS[@]}" -gt 0 ]; then
+    rm -rf "${TMP_DIRS[@]}"
+  fi
+}
+# One accumulator, one trap. A bash trap replaces rather than appends, so
+# registering a second one per temp directory would silently drop the first.
+trap cleanup EXIT
+
+scratch_dir() {
+  local dir
+  dir="$(mktemp -d)"
+  TMP_DIRS+=("$dir")
+  printf '%s\n' "$dir"
+}
+
 fail() {
   echo "FAIL: $1" >&2
   exit 1
+}
+
+# `Linting: N file(s)` is the only signal cli2 gives for which files it
+# *selected*, and selection is the mechanism under test — a clean file exits
+# zero whether or not it was excluded. Named once so the coupling has one home.
+LINTED_NOTHING="Linting: 0 file(s)"
+
+assert_ignored() {
+  local path="$1" description="$2" output
+  output="$(pnpm exec markdownlint-cli2 "$path" 2>&1)" || {
+    printf '%s\n' "$output" >&2
+    fail "linting an ignored path should succeed: $description"
+  }
+  printf '%s\n' "$output" | grep -q "$LINTED_NOTHING" ||
+    fail "ignores did not apply to $description: $output"
 }
 
 # The inert file must not come back: an exclusion added there is silently lost.
@@ -33,17 +66,11 @@ CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
 # A malformed config makes markdownlint-cli2 exit non-zero, so every run below
 # doubles as a parse check.
 
-# 1. An excluded path passed explicitly - the lint-staged path - is skipped.
-explicit_output="$(pnpm exec markdownlint-cli2 "skills/scaffold-repository/SKILL.md" 2>&1)" || {
-  printf '%s\n' "$explicit_output" >&2
-  fail "linting an ignored path explicitly should succeed"
-}
-printf '%s\n' "$explicit_output" | grep -q "Linting: 0 file(s)" ||
-  fail "ignores did not apply to an explicitly passed path: $explicit_output"
+# 1. An excluded path passed explicitly is skipped.
+assert_ignored "skills/scaffold-repository/SKILL.md" "an explicitly passed path"
 
 # 2. Rule configuration from .markdownlint.jsonc still loads for linted files.
-probe_dir="$(mktemp -d)"
-trap 'rm -rf "$probe_dir"' EXIT
+probe_dir="$(scratch_dir)"
 probe="$probe_dir/probe.md"
 printf 'Bad Heading\n===========\n```\nx\n```\n' > "$probe"
 
@@ -55,25 +82,19 @@ fi
 #    repositories to commit these payloads, and they are third-party markdown
 #    written against their own upstream config, so without the exclusion the
 #    first vendoring run breaks lint:md, markdown CI, and pre-commit at once.
-for overlay_root in skills .agents/skills .claude/skills; do
+for overlay_root in .agents/skills .claude/skills; do
   [ -d "$overlay_root" ] || continue
   # `-print -quit` rather than `| head -n 1`: under `set -euo pipefail`, `head`
   # closing the pipe can kill `find` with SIGPIPE and abort the script with a
   # bare 141 once these trees grow past the pipe buffer.
   overlay_file="$(find "$overlay_root" -name '*.md' -type f -print -quit)"
   [ -n "$overlay_file" ] || continue
-  overlay_output="$(pnpm exec markdownlint-cli2 "$overlay_file" 2>&1)" || {
-    printf '%s\n' "$overlay_output" >&2
-    fail "committed overlay $overlay_root is not excluded from markdown lint"
-  }
-  printf '%s\n' "$overlay_output" | grep -q "Linting: 0 file(s)" ||
-    fail "committed overlay $overlay_root is not excluded: $overlay_output"
+  assert_ignored "$overlay_file" "committed overlay $overlay_root"
 done
 
 # 4. The exclusion above is load-bearing, not vacuous: a payload written against
 #    another repository's config really does violate this one's rules.
-collision_dir="$(mktemp -d)"
-trap 'rm -rf "$probe_dir" "$collision_dir"' EXIT
+collision_dir="$(scratch_dir)"
 mkdir -p "$collision_dir/.claude/skills/vendored"
 cp .markdownlint.jsonc "$collision_dir/.markdownlint.jsonc"
 printf 'Vendored Heading\n================\n```\nx\n```\n' \
@@ -87,20 +108,38 @@ printf '{ "ignores": [".claude/skills/**"] }\n' > "$collision_dir/.markdownlint-
 (cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1) ||
   fail "an ignores entry must exclude the same vendored payload"
 
-# 5. The pre-commit hook routes markdown through markdownlint-cli2, so it
-#    inherits the same ignores instead of re-implementing an exclusion filter.
-REPO_ROOT="$REPO_ROOT" node --input-type=module -e '
+# 5. The pre-commit path, end to end, on the form lint-staged really produces.
+#    lint-staged hands its task absolute paths; markdownlint-cli2 applies
+#    `ignores` only to relative ones. So the config must convert them, and this
+#    runs the command it emits for an absolute excluded path and requires that
+#    nothing was linted. Passing the absolute path straight through selects the
+#    file, which is the pre-commit failure the shared exclusion list prevents.
+staged_command="$(REPO_ROOT="$REPO_ROOT" node --input-type=module -e '
 import assert from "node:assert/strict";
 import { pathToFileURL } from "node:url";
-const config = (await import(pathToFileURL(`${process.env.REPO_ROOT}/.lintstagedrc.js`))).default;
+const root = process.env.REPO_ROOT;
+const config = (await import(pathToFileURL(`${root}/.lintstagedrc.js`))).default;
 const entry = config["*.md"];
+const absolute = `${root}/skills/scaffold-repository/SKILL.md`;
+// lint-staged appends the (absolute) paths to a plain string command, and uses
+// a function command verbatim. Model both so a string config is tested as
+// lint-staged would actually invoke it, not as a bare command with no args.
 const commands = typeof entry === "function"
-  ? [entry(["README.md"])].flat()
-  : [entry].flat();
+  ? [entry([absolute])].flat()
+  : [entry].flat().map((command) => `${command} "${absolute}"`);
+assert.equal(commands.length, 1, "expected one *.md command, got: " + JSON.stringify(commands));
 assert.ok(
-  commands.length > 0 && commands.every((c) => String(c).includes("markdownlint-cli2")),
-  "lint-staged must run markdownlint-cli2 for *.md, got: " + JSON.stringify(commands)
+  String(commands[0]).includes("markdownlint-cli2"),
+  "lint-staged must run markdownlint-cli2 for *.md, got: " + commands[0]
 );
-' || fail "lint-staged markdown command does not route through markdownlint-cli2"
+process.stdout.write(String(commands[0]));
+')" || fail "could not resolve the lint-staged markdown command"
+
+staged_output="$(eval "pnpm exec $staged_command" 2>&1)" || {
+  printf '%s\n' "$staged_output" >&2
+  fail "the lint-staged markdown command failed on an excluded path"
+}
+printf '%s\n' "$staged_output" | grep -q "$LINTED_NOTHING" ||
+  fail "the lint-staged command lints excluded paths: $staged_output"
 
 echo "OK: markdown lint exclusion contract passed"
