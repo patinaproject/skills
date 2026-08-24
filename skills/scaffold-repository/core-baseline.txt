@@ -10,6 +10,11 @@
 #   [public]              emitted only for public repositories
 #   [symlink -> TARGET]   must be a symlink whose link text is TARGET
 #
+# The tracker adapter is one file with two names. `docs/agents/` holds the real
+# file, matching the upstream mattpocock skill family that writes and reads it;
+# `docs/issue-tracker.md` is the compatibility symlink. The pair must always
+# resolve to one file - two real copies drift.
+#
 # Marketplace maintenance verifiers (dogfood, marketplace, scaffold-cleanup,
 # workflow-cleanup) are deliberately absent: a generic consumer repo does not
 # receive them.
@@ -43,10 +48,11 @@ README.md
 SECURITY.md [public]
 commitizen.config.json
 commitlint.config.js
-docs/agents/issue-tracker.md [symlink -> ../issue-tracker.md]
+docs/agents/domain.md
+docs/agents/issue-tracker.md
 docs/file-structure.md
 docs/issue-publishing.md
-docs/issue-tracker.md
+docs/issue-tracker.md [symlink -> agents/issue-tracker.md]
 docs/release-flow.md
 docs/wiki-index.md
 package.json

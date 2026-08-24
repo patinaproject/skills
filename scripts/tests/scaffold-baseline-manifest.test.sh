@@ -42,8 +42,9 @@ seed_repo() {
     : > "$root/$entry"
   done <<< "$manifest_paths"
   # The one entry the manifest requires to be a symlink rather than a file.
-  rm -f "$root/docs/agents/issue-tracker.md"
-  ln -s ../issue-tracker.md "$root/docs/agents/issue-tracker.md"
+  # `docs/agents/` holds the real adapter; `docs/issue-tracker.md` points at it.
+  rm -f "$root/docs/issue-tracker.md"
+  ln -s agents/issue-tracker.md "$root/docs/issue-tracker.md"
 }
 
 # 2. A complete emit passes.
@@ -74,13 +75,23 @@ bash "$VERIFIER" --private "$work/private" >/dev/null 2>&1 ||
 # 5. The adapter compatibility entry must be a symlink to the real file, not a
 #    second copy of it.
 seed_repo "$work/copied"
-rm -f "$work/copied/docs/agents/issue-tracker.md"
-: > "$work/copied/docs/agents/issue-tracker.md"
+rm -f "$work/copied/docs/issue-tracker.md"
+: > "$work/copied/docs/issue-tracker.md"
 output="$(bash "$VERIFIER" --public "$work/copied" 2>&1)" && {
   printf '%s\n' "$output" >&2
   fail "a duplicated adapter file should fail the symlink requirement"
 }
-printf '%s\n' "$output" | grep -q "docs/agents/issue-tracker.md" ||
+printf '%s\n' "$output" | grep -q "docs/issue-tracker.md" ||
   fail "the failure must name the divergent symlink: $output"
+
+# The pair must resolve to one file: a symlink pointing the old way is a gap,
+# not an acceptable alternative direction.
+seed_repo "$work/inverted"
+rm -f "$work/inverted/docs/issue-tracker.md"
+: > "$work/inverted/docs/issue-tracker.md"
+rm -f "$work/inverted/docs/agents/issue-tracker.md"
+ln -s ../issue-tracker.md "$work/inverted/docs/agents/issue-tracker.md"
+bash "$VERIFIER" --public "$work/inverted" >/dev/null 2>&1 &&
+  fail "the previous symlink direction should be reported as a gap"
 
 echo "OK: scaffold core baseline manifest contract passed"

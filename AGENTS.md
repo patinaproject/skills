@@ -47,7 +47,9 @@ issue or in normal docs when it is broadly useful beyond one issue.
 
 ### Issue tracker
 
-Tracker operations are defined in the sole adapter, `docs/issue-tracker.md`.
+Tracker operations are defined in the sole adapter. The real file is
+`docs/agents/issue-tracker.md`; `docs/issue-tracker.md` is a compatibility
+symlink to it, so either path reaches the same adapter.
 Follow it directly for claiming, labels, lifecycle, relationships, and closure;
 this repository owns no issue-filing or issue-editing skill. Filing a spec is
 the operator's to run with the third-party `/to-spec`, so ask them to run it

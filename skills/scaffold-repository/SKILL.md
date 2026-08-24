@@ -96,9 +96,18 @@ workflow-cleanup verifier scripts unless they are themselves this marketplace
 repository. The manifest already omits them.
 
 Two manifest entries are conditional. `SECURITY.md` carries `[public]` and is
-emitted for public repositories only. `docs/agents/issue-tracker.md` carries
-`[symlink -> ../issue-tracker.md]` and must be that relative symlink, not a
+emitted for public repositories only. `docs/issue-tracker.md` carries
+`[symlink -> agents/issue-tracker.md]` and must be that relative symlink, not a
 second copy of the adapter.
+
+`docs/agents/` is the canonical location for agent configuration. The real
+tracker adapter lives at `docs/agents/issue-tracker.md`, which is where
+`mattpocock/skills`' `setup-matt-pocock-skills` writes and its skill family
+reads; `docs/issue-tracker.md` is the compatibility symlink. Emitting it the
+other way round means a repository vendoring both sources gets whichever layout
+ran second. The adapter must carry the sections those consumers look up by
+name — see the Area 3 rows in
+[`audit-checklist.md`](./audit-checklist.md).
 
 The live reference repo also carries marketplace-internal tooling — the test
 harness, verify scripts, generated agent overlays, and the code-review, verify,
