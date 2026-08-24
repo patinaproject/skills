@@ -686,6 +686,11 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
       // the durable evidence the outcome was earned, written here and nowhere
       // else.
       authoritative: { findings, outcome, reviewedHead: head, scopedHead: openScopedHead },
+      // One `complete` consumes one `scope`. Carrying the endpoint forward
+      // would leave it open at this head, so a second `complete` could rewrite
+      // the outcome — a pass into `changes_requested`, say — with no review
+      // between. Nothing legitimate needs it: the next iteration re-scopes.
+      openScopedHead: null,
       provisional: null,
     });
     writeRecord(identity, record);

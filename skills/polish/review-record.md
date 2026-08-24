@@ -41,7 +41,9 @@ longer equals `HEAD`. A passing record has no findings; a changes-requested
 record has at least one. Completion clears provisional data because the full
 selected scope and every carried concern were revalidated.
 
-`complete` also requires an open scope at that head. `scope` records the
+`complete` also requires an open scope at that head, and consumes it: one
+`complete` per `scope`, so a recorded outcome cannot be rewritten at the same
+head without a fresh review. `scope` records the
 endpoint it hands out, and `complete` rejects a candidate that endpoint does
 not name, so `reviewedHead` records a head a reviewer was actually given rather
 than one the caller asserts about itself. The `HEAD` guard above catches an

@@ -1014,9 +1014,10 @@ try {
       '--outcome',
       'passed'
     );
+    // The preceding `complete` consumed the scope it was given, so there is no
+    // open endpoint at all to record against.
     assert.equal(unearned.status, 1);
-    assert.match(unearned.stderr, /Review scope is stale/);
-    assert.match(unearned.stderr, new RegExp(firstHead));
+    assert.match(unearned.stderr, /No review scope is open/);
     assert.match(unearned.stderr, new RegExp(fixedHead));
 
     // The authoritative record is untouched by the rejected write.
@@ -1060,6 +1061,66 @@ try {
       ).mode,
       'skip'
     );
+  }
+
+  {
+    // The other half of the guard: an endpoint that went stale because HEAD
+    // advanced after `scope` handed it out.
+    const stale = createRepository();
+    const scopedHead = git(stale.root, 'rev-parse', 'HEAD');
+    openScope(stale.root, stale.temporaryRoot);
+    const movedHead = commitChange(stale.root, 'base\nchange\nmoved\n');
+
+    const rejected = reviewCommandResult(
+      stale.root,
+      stale.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      movedHead,
+      '--outcome',
+      'passed'
+    );
+    assert.equal(rejected.status, 1);
+    assert.match(rejected.stderr, /Review scope is stale/);
+    assert.match(rejected.stderr, new RegExp(scopedHead));
+    assert.match(rejected.stderr, new RegExp(movedHead));
+  }
+
+  {
+    // A completed outcome consumes its scope, so a second `complete` at the
+    // same head cannot rewrite it without a fresh review.
+    const consumed = createRepository();
+    const head = git(consumed.root, 'rev-parse', 'HEAD');
+    openScope(consumed.root, consumed.temporaryRoot);
+    reviewCommand(
+      consumed.root,
+      consumed.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+
+    const rewrite = reviewCommandResult(
+      consumed.root,
+      consumed.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'changes_requested',
+      '--findings',
+      findingsFile([standardsFinding])
+    );
+    assert.equal(rewrite.status, 1);
+    assert.match(rewrite.stderr, /No review scope is open/);
   }
 
   {
