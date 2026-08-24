@@ -84,53 +84,21 @@ The skill collects the following inputs. Author name, author email, and the secu
 
 ## Core baseline
 
-Emitted for every target repo. Use the live repository root as the content
-reference, but filter out `patinaproject/skills` marketplace maintenance
-verifiers: consumer repos should not receive dogfood, marketplace,
-scaffold-cleanup, or workflow-cleanup verifier scripts unless they are
-themselves this marketplace repository.
+[`core-baseline.txt`](./core-baseline.txt) is the canonical list of files
+emitted for every target repo — one machine-readable manifest rather than a
+prose list, so the documented baseline and the verification self-test cannot
+drift apart. Read it before emitting, and use the live repository root as the
+content reference.
 
-```text
-.claude/settings.json
-.codex/config.toml
-.editorconfig
-.github/CODEOWNERS
-.github/actionlint.yaml
-.github/ISSUE_TEMPLATE/config.yml
-.github/pull_request_template.md
-.github/workflows/actions.yml
-.github/workflows/markdown.yml
-.github/workflows/pull-request.yml
-.gitattributes
-.gitignore
-.husky/commit-msg
-.husky/pre-commit
-.lintstagedrc.js
-.markdownlint-cli2.jsonc
-.markdownlint.jsonc
-.nvmrc
-.mcp.json
-AGENTS.md
-CHANGELOG.md
-CLAUDE.md
-CONTRIBUTING.md
-LICENSE
-README.md
-SECURITY.md                 (public repos only)
-commitizen.config.json
-commitlint.config.js
-docs/file-structure.md
-docs/agents/issue-tracker.md        (symlink to ../issue-tracker.md)
-docs/issue-publishing.md
-docs/issue-tracker.md
-docs/release-flow.md
-docs/wiki-index.md
-package.json
-pnpm-lock.yaml
-scripts/clean.sh
-scripts/worktree-setup.sh
-skills-lock.json
-```
+Filter out `patinaproject/skills` marketplace maintenance verifiers: consumer
+repos should not receive dogfood, marketplace, scaffold-cleanup, or
+workflow-cleanup verifier scripts unless they are themselves this marketplace
+repository. The manifest already omits them.
+
+Two manifest entries are conditional. `SECURITY.md` carries `[public]` and is
+emitted for public repositories only. `docs/agents/issue-tracker.md` carries
+`[symlink -> ../issue-tracker.md]` and must be that relative symlink, not a
+second copy of the adapter.
 
 The live reference repo also carries marketplace-internal tooling — the test
 harness, verify scripts, generated agent overlays, and the code-review, verify,
@@ -365,15 +333,31 @@ The `autorelease: pending` and `autorelease: tagged` labels are owned by Release
 
 ## Verification self-test
 
-After a scaffold or realignment run on this repo, all of the following must succeed:
+After a scaffold or realignment run, all of the following must succeed. Start
+with the baseline presence check: the tooling checks below all pass on a repo
+that received none of the declared files, so running them alone proves only
+that commit and markdown linting work, never that the baseline arrived.
 
 ```bash
+bash <skill-dir>/scripts/verify-baseline.sh --public   # or --private
 pnpm install
 pnpm exec commitlint --help
 pnpm lint:md
 echo "feat: bad" | pnpm exec commitlint   # exits non-zero
 echo "feat: #1 ok" | pnpm exec commitlint # public repo; exits zero
 ```
+
+`<skill-dir>` is wherever this skill is installed — `skills/scaffold-repository`
+in this repository, or `.agents/skills/scaffold-repository` (or the
+`.claude/skills/` symlink to it) in a repo that vendored it. The script finds
+`core-baseline.txt` relative to itself and checks the target repository, so run
+it from the repository being scaffolded, or pass that repository's root as its
+final argument.
+
+It reports every gap and exits non-zero on the first partial emit, naming each
+missing path. Treat a reported gap as a failed scaffold run, not a warning: a
+missing `docs/issue-tracker.md` leaves `working-on-issue`, `new-branch`,
+`using-github`, and `write-changelog` with no tracker vocabulary at all.
 
 ## Making a repository public
 

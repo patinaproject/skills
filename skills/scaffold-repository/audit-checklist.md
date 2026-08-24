@@ -14,6 +14,12 @@ For every gap, produce a concrete recommendation and show a diff preview. Never 
 
 ## Area 1 – Core repo tooling
 
+Start with the whole-baseline presence check; the per-file rows below refine it.
+
+| Check | Required | How |
+|---|---|---|
+| Core baseline present | yes | `bash <skill-dir>/scripts/verify-baseline.sh --public\|--private <repo-root>` exits zero. It reads [`core-baseline.txt`](./core-baseline.txt), the canonical manifest, and names every gap. Classify each reported path as `missing`. Run this before the rows below: they all pass on a repo that received none of the declared files |
+
 | File | Required | Check |
 |---|---|---|
 | `.gitignore` | yes | present; contains `node_modules/` and `.skills-install.lock*`; must NOT ignore `.agents/skills/**` or `.claude/skills/**`, because vendored skills are committed |
