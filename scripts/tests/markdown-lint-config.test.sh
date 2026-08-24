@@ -40,6 +40,13 @@ fail() {
 # zero whether or not it was excluded. Named once so the coupling has one home.
 NO_FILES_SELECTED_LINE="Linting: 0 file(s)"
 
+# A Setext H1 with no blank line after it, plus an unlabelled fenced block:
+# violates MD022, MD031 and MD040 under this repository's rule set. One home for
+# the shape, so a rule-set change does not have to be chased across fixtures.
+write_violating_md() {
+  printf 'Violating Heading\n=================\n```\nx\n```\n' > "$1"
+}
+
 assert_ignored() {
   local path="$1" description="$2" output
   output="$(pnpm exec markdownlint-cli2 "$path" 2>&1)" || {
@@ -72,7 +79,7 @@ assert_ignored "skills/scaffold-repository/SKILL.md" "an explicitly passed path"
 # 2. Rule configuration from .markdownlint.jsonc still loads for linted files.
 probe_dir="$(scratch_dir)"
 probe="$probe_dir/probe.md"
-printf 'Bad Heading\n===========\n```\nx\n```\n' > "$probe"
+write_violating_md "$probe"
 
 if pnpm exec markdownlint-cli2 "$probe" >/dev/null 2>&1; then
   fail "a file with real violations should not lint clean"
@@ -97,8 +104,7 @@ done
 collision_dir="$(scratch_dir)"
 mkdir -p "$collision_dir/.claude/skills/vendored"
 cp .markdownlint.jsonc "$collision_dir/.markdownlint.jsonc"
-printf 'Vendored Heading\n================\n```\nx\n```\n' \
-  > "$collision_dir/.claude/skills/vendored/SKILL.md"
+write_violating_md "$collision_dir/.claude/skills/vendored/SKILL.md"
 
 lint_collision_payload() {
   (cd "$collision_dir" && "$CLI2_BIN" ".claude/skills/vendored/SKILL.md" >/dev/null 2>&1)
