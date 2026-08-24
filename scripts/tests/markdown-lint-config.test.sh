@@ -47,17 +47,18 @@ fi
 
 # 3. The pre-commit hook routes markdown through markdownlint-cli2, so it
 #    inherits the same ignores instead of re-implementing an exclusion filter.
-node --input-type=module -e "
-import assert from 'node:assert/strict';
-const config = (await import('${REPO_ROOT}/.lintstagedrc.js')).default;
-const entry = config['*.md'];
-const commands = typeof entry === 'function'
-  ? [entry(['README.md'])].flat()
+REPO_ROOT="$REPO_ROOT" node --input-type=module -e '
+import assert from "node:assert/strict";
+import { pathToFileURL } from "node:url";
+const config = (await import(pathToFileURL(`${process.env.REPO_ROOT}/.lintstagedrc.js`))).default;
+const entry = config["*.md"];
+const commands = typeof entry === "function"
+  ? [entry(["README.md"])].flat()
   : [entry].flat();
 assert.ok(
-  commands.length > 0 && commands.every((c) => String(c).includes('markdownlint-cli2')),
-  'lint-staged must run markdownlint-cli2 for *.md, got: ' + JSON.stringify(commands)
+  commands.length > 0 && commands.every((c) => String(c).includes("markdownlint-cli2")),
+  "lint-staged must run markdownlint-cli2 for *.md, got: " + JSON.stringify(commands)
 );
-" || fail "lint-staged markdown command does not route through markdownlint-cli2"
+' || fail "lint-staged markdown command does not route through markdownlint-cli2"
 
 echo "OK: markdown lint exclusion contract passed"
