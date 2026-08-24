@@ -26,7 +26,10 @@ fail() {
 # The manifest is the single source the skill documents and the verifier reads.
 # Strips a trailing CR the way `verify-baseline.sh` does, so this independent
 # oracle stays equivalent to it rather than diverging on a CRLF checkout.
-manifest_paths="$(grep -vE '^\s*(#|$)' "$MANIFEST" | sed 's/\r$//; s/ \[.*//')"
+# Mirrors `verify-baseline.sh`: strip a trailing CR, then a marker only when it
+# is a bracketed token at end of line. Stripping from any ` [` would diverge
+# from the verifier on an entry whose bracket never closes.
+manifest_paths="$(grep -vE '^\s*(#|$)' "$MANIFEST" | sed 's/\r$//; s/ \[[^]]*\]$//')"
 [ -n "$manifest_paths" ] || fail "manifest declares no paths"
 
 # 1. This repository is the live baseline reference, so it must satisfy its own
