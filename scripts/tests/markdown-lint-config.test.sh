@@ -57,7 +57,10 @@ fi
 #    first vendoring run breaks lint:md, markdown CI, and pre-commit at once.
 for overlay_root in skills .agents/skills .claude/skills; do
   [ -d "$overlay_root" ] || continue
-  overlay_file="$(find "$overlay_root" -name '*.md' -type f | head -n 1)"
+  # `-print -quit` rather than `| head -n 1`: under `set -euo pipefail`, `head`
+  # closing the pipe can kill `find` with SIGPIPE and abort the script with a
+  # bare 141 once these trees grow past the pipe buffer.
+  overlay_file="$(find "$overlay_root" -name '*.md' -type f -print -quit)"
   [ -n "$overlay_file" ] || continue
   overlay_output="$(pnpm exec markdownlint-cli2 "$overlay_file" 2>&1)" || {
     printf '%s\n' "$overlay_output" >&2
