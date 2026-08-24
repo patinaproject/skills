@@ -39,7 +39,12 @@ layout.
 - `.mcp.json`: hosted Linear MCP registration for supported agent hosts
 - `skills-lock.json`: vercel-labs CLI install lockfile
 - `docs/`: contributor-facing docs for skill maintenance
-- `docs/issue-tracker.md`: sole provider-specific tracker adapter
+- `docs/agents/`: agent configuration, the canonical location the upstream
+  `mattpocock/skills` family writes and reads
+- `docs/agents/issue-tracker.md`: sole provider-specific tracker adapter, and
+  the real file
+- `docs/issue-tracker.md`: relative compatibility symlink to
+  `agents/issue-tracker.md`, so either path resolves to one adapter
 - `package.json`, `commitizen.config.json`, `commitlint.config.js`: repo tooling
 - `.husky/`: local git hooks
 - `.lintstagedrc.js`: lint-staged config; markdown exclusions come from

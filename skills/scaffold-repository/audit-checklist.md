@@ -70,6 +70,15 @@ Classify stale PR templates when they encourage command transcripts, routine aut
 
 ## Area 3 – Agent + repo docs
 
+`docs/agents/` is the canonical location for agent configuration, matching the
+upstream `mattpocock/skills` family that writes and reads it. `scaffold-repository`
+previously kept the real adapter at `docs/issue-tracker.md` and made
+`docs/agents/issue-tracker.md` the symlink, which meant a repository vendoring
+both skill sources ended up with whichever layout ran second. The direction is
+now the other way, so `setup-matt-pocock-skills` writes the real file where it
+expects to and nothing silently breaks. The target repository records this as
+`docs/adr/ADR-354-agents-canonical-tracker-adapter.md`.
+
 | File | Required | Check |
 |---|---|---|
 | `AGENTS.md` | yes | present; covers project structure, commands, conventions, commits, PRs; "Commit type selection" section leads with the product-surface glob list and one-sentence path-first rule BEFORE the type table, contains a rationalization table, a red-flags STOP block, and at least one WRONG → RIGHT pair. Verify with a parity grep across agent-facing surfaces. |
@@ -79,8 +88,10 @@ Classify stale PR templates when they encourage command transcripts, routine aut
 | `SECURITY.md` | public only | public repo → present; private → absent |
 | `README.md` | yes | present; includes repo name, description, and conventions summary |
 | `docs/file-structure.md` | yes | present |
-| `docs/issue-tracker.md` | yes | sole provider-specific adapter; selects GitHub for public repositories and Linear for private repositories |
-| `docs/agents/issue-tracker.md` | yes | relative compatibility symlink to `../issue-tracker.md`; contains no duplicate adapter content |
+| `docs/agents/issue-tracker.md` | yes | the real adapter file, and the sole provider-specific one; selects GitHub for public repositories and Linear for private repositories. Carries `## Pull requests as a triage surface` (the flag `triage` reads), `## When a skill says "publish to the issue tracker"`, `## When a skill says "fetch the relevant ticket"`, and `## Wayfinding operations` (absent, `wayfinder` silently falls back to a local-markdown tracker) |
+| `docs/issue-tracker.md` | yes | relative compatibility symlink to `agents/issue-tracker.md`; contains no duplicate adapter content. The pair must resolve to one file — a second real copy is `divergent`, not a passing check |
+| `docs/agents/domain.md` | yes | the domain *config* file `setup-matt-pocock-skills` writes and its skill family reads — a pointer that tells agents when domain docs are warranted, not domain content. Requiring it does not conflict with `AGENTS.md` keeping the docs themselves optional and lazily created |
+| `docs/agents/triage-labels.md` | when `triage` is vendored | maps the canonical triage roles to this repository's label strings. May point at the adapter's Triage roles table rather than restating it |
 | `docs/issue-publishing.md` | yes | tracker-agnostic filing and publishing rules |
 
 ## Area 4 – Claude Code configuration
