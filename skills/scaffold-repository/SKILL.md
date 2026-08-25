@@ -110,8 +110,8 @@ name — see the Area 3 rows in
 [`audit-checklist.md`](./audit-checklist.md).
 
 The live reference repo also carries marketplace-internal tooling — the test
-harness, verify scripts, generated agent overlays, and the code-review, verify,
-and marketplace release workflows. These are reference-implementation only:
+harness, verify scripts, generated agent overlays, and the verify and
+marketplace release workflows. These are reference-implementation only:
 omit them from a generic consumer repo unless it opts into the same marketplace
 maintenance role, and adapt the emitted consumer workflows to the files the
 repo actually receives.
