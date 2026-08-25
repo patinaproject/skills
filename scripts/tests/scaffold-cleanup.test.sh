@@ -72,7 +72,6 @@ for live_reference_path in \
   .github/actionlint.yaml \
   .github/pull_request_template.md \
   .github/workflows/actions.yml \
-  .github/workflows/code-review.yml \
   .github/workflows/code.yml \
   .github/workflows/markdown.yml \
   .github/workflows/pull-request.yml \

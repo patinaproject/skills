@@ -81,11 +81,6 @@ assert_match '^  issue_comment:' .github/workflows/code.yml
 assert_match '^  pull_request_review_comment:' .github/workflows/code.yml
 assert_match '^  pull_request_review:' .github/workflows/code.yml
 
-# Hosted review resolves its specification from the canonical GitHub issue.
-assert_match 'Fetch GitHub issue spec' .github/workflows/code-review.yml
-assert_match 'repos/\$GITHUB_REPOSITORY/issues/\$issue_number' .github/workflows/code-review.yml
-assert_match 'read `.issue-spec.md`' .github/workflows/code-review.yml
-
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
   echo "FAIL: $FAIL_COUNT workflow cleanup assertion(s) failed" >&2
