@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.29.5](https://github.com/patinaproject/skills/compare/v2.29.4...v2.29.5) (2026-08-25)
+
+
+### Bug Fixes
+
+* [#379](https://github.com/patinaproject/skills/issues/379) distinguish required-check set from superseded check history ([#380](https://github.com/patinaproject/skills/issues/380)) ([b4619e0](https://github.com/patinaproject/skills/commit/b4619e05e066a30af6aa58e5ff0b12374f05f007))
+
 ## [2.29.4](https://github.com/patinaproject/skills/compare/v2.29.3...v2.29.4) (2026-08-24)
 
 
