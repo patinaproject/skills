@@ -274,6 +274,9 @@ Keep visible and specific:
 - Failed checks, skipped checks, unresolved risks, or human action still needed.
 - The exact command and blocker for any verification that did not run or did not
   pass.
+- The scope of every passing-checks statement — local verification, the required
+  PR contexts, or all visible check runs — plus any check history and non-`CLEAN`
+  merge state `ready-pr` reported.
 - Runtime-required token or budget reporting, but place token or budget
   reporting after the result so it does not dominate the message.
 

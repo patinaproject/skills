@@ -88,7 +88,14 @@ human line.
 - Do not wait indefinitely for new human review comments.
 - Apply the
   [canonical readiness predicate](references/readiness-predicate.md) when
-  classifying required and optional automation.
+  classifying required and optional automation. Its **required-check set** is
+  the CLI-selected contexts on the latest head; a head's optional and
+  superseded runs are check history, reported as history rather than counted
+  as a current required result.
+- Name the scope of every passing-checks statement — the required contexts, or
+  all visible check runs.
+- Report a merge state other than `CLEAN` with the exact values GitHub
+  returned, and say so when GitHub exposes no reason for it.
 - Stop after the documented no-progress threshold instead of watching
   indefinitely.
 - Do not stop solely because a check failed, was canceled, or is out of scope;
