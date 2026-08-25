@@ -241,7 +241,9 @@ tell the human what to do next.
     handoff; no strength of evidence pulls them back here.
 
 12. Watch required checks only through the fail-fast bounded-watch policy.
-    Snapshot all checks so optional automation can still surface feedback. Before
+    Snapshot all checks so optional automation can still surface feedback, and
+    so optional and superseded runs on the head are available to step 18's
+    reporting rules. Before
     each watch window, confirm all currently available feedback and known
     problematic required-check states have been triaged. Use 10-minute
     observation windows and a tool-enforced 10-minute timeout. Use an
@@ -264,16 +266,16 @@ tell the human what to do next.
     all check buckets, unresolved review threads, top-level PR comments, review
     bodies, review decision, and current PR head. After any watch timeout,
     immediately snapshot all check states and perform the same full PR state
-    resync before choosing the next action. Treat a failed, canceled, skipped,
-    problematic, or otherwise non-pass required check as a triage item before
-    starting another watch window.
+    resync before choosing the next action. Treat a non-pass check in the
+    required-check set as a triage item before starting another watch window,
+    and the head's optional and superseded runs as check history.
 
     Define no progress as no meaningful change in check buckets, check start or
     completion timestamps, PR head SHA, or feedback inventory between
     observation windows. Stop for operator input after two consecutive
     10-minute no-progress windows instead of waiting indefinitely.
 
-13. Triage every non-pass, canceled, or otherwise problematic required check with
+13. Triage every non-pass check in the required-check set with
     [triage.md](triage.md), using the full PR state snapshot rather than
     tunneling into only the first failed check. Fix branch-local check causes,
     return follow-up commits to the pre-publish evidence loop, and restart the
@@ -410,10 +412,13 @@ tell the human what to do next.
       unattributed path fails this gate.
     - local branch equals the PR `headRefName`.
     - local `HEAD` equals the PR `headRefOid`.
-    - `mergeStateStatus` is `CLEAN`.
+    - `mergeStateStatus` is `CLEAN`. This gate is independent of the checks:
+      a fully passing required-check set never satisfies it.
     - PR is not a draft.
-    - every current required check has status `COMPLETED` and conclusion
-      `SUCCESS`.
+    - every check in the
+      [required-check set](../references/readiness-predicate.md#required-check-set)
+      passed on the current head. Optional and superseded runs on that head are
+      check history for step 18 to report, and leave this gate unchanged.
     - no paginated GraphQL review thread has `isResolved: false`, whoever
       authored it. Agent-authored threads reach that state through this
       workflow; human-authored threads reach it when their author or the
@@ -458,6 +463,16 @@ tell the human what to do next.
       resolution as a defect to correct rather than a completed disposition.
     - Every unresolved human-authored thread the operator still owns.
     - Human blockers, if any.
+    - The scope of any passing-checks statement: the required contexts, or all
+      visible check runs on the head. Those are different claims, so name the
+      one being made.
+    - Optional and superseded runs on the reported head, named as check
+      history beside the required-context result, so a passing required line
+      reads as what it is.
+    - For a merge state other than `CLEAN`, the exact values GitHub returned:
+      `mergeStateStatus`, `mergeable`, and `reviewDecision`. Where those values
+      carry no reason, say GitHub exposed none, and keep approval and
+      branch-protection policy out of the report until GitHub names one.
 
     Compress ready-to-merge evidence into one human line when every final gate
     passes. Do not write gate inventories such as clean worktree, head SHA
@@ -474,6 +489,20 @@ tell the human what to do next.
     and pushed `2635d83`.
 
     Verified: routine checks passed. No human action needed before merge.
+    ```
+
+    Good final output when the head carries superseded history and GitHub
+    reports no reason for a non-clean merge state:
+
+    ```md
+    PR #197 is not ready to merge.
+
+    The required contexts pass on `2635d83`. The head also carries a canceled
+    `Test Gate` run superseded by the current successful one — history from a
+    concurrency cancellation, not a current failure.
+
+    GitHub reports `mergeStateStatus: BLOCKED` with `mergeable: MERGEABLE` and
+    `reviewDecision: null`, and exposes no reason for the block.
     ```
 
     Avoid final output shaped like a readiness checklist:

@@ -41,7 +41,10 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
 
    - the PR is a draft;
    - GitHub or a clean local base merge shows conflicts;
-   - a completed required check is not successful;
+   - a completed check in the
+     [required-check set](../../ready-pr/references/readiness-predicate.md#required-check-set)
+     is not successful — an optional or superseded run on the head is check
+     history and needs no remediation;
    - actionable or unresolved review feedback remains;
    - local `HEAD` differs from the PR head because of unpublished commits, a
      stale checkout, or another branch-local condition;

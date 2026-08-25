@@ -130,8 +130,14 @@ human-authored conversation remains untouched throughout.
 - Stop after two consecutive 10-minute no-progress windows. No progress means
   no meaningful change in check buckets, check start or completion timestamps,
   PR head SHA, or feedback inventory between observation windows.
-- Triage every failed, canceled, skipped, problematic, or otherwise non-pass
-  required check before starting another watch window.
+- Take the required-check set from the
+  [canonical readiness predicate](../references/readiness-predicate.md), and
+  triage every non-pass check in it before starting another watch window.
+- Read a canceled or non-pass run outside that set as check history: an
+  optional run, or a run superseded by a later run of the same context on the
+  same head. Report the history under
+  [ready-for-merge.md](ready-for-merge.md)'s reporting rules and leave the
+  required-check evaluation on the current contexts.
 - Inspect logs before classifying.
 - Fix branch-local failures in normal follow-up commits.
 - Do not classify a check as `needs-human` solely because it failed, was
