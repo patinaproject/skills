@@ -24,10 +24,14 @@ SKILLS=(
   merge-pr
   finish-pr
   codex-pr-feedback-loop
+  orchestrate
   polish
   update-branch
   move-branch-here
   grill-to-spec
+  grill-system-design
+  review-system-design
+  resolve-qa-feedback
   write-changelog
   prompting-fable
 )

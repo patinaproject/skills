@@ -14,12 +14,16 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
+- `skills/orchestrate/`: existing Codex task orchestration and monitoring skill
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
+- `skills/grill-system-design/`: focused system design grilling skill
+- `skills/review-system-design/`: contract dependency review skill
+- `skills/resolve-qa-feedback/`: evidence-backed QA feedback resolution skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
@@ -264,11 +268,15 @@ This repo owns these skills at flat paths:
 | merge-pr | `skills/merge-pr/` |
 | finish-pr (deprecated alias) | `skills/finish-pr/` |
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
+| orchestrate | `skills/orchestrate/` |
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
 | move-branch-here | `skills/move-branch-here/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
+| grill-system-design | `skills/grill-system-design/` |
+| review-system-design | `skills/review-system-design/` |
+| resolve-qa-feedback | `skills/resolve-qa-feedback/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
 

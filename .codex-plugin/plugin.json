@@ -12,11 +12,15 @@
     "./skills/merge-pr",
     "./skills/finish-pr",
     "./skills/codex-pr-feedback-loop",
+    "./skills/orchestrate",
     "./skills/polish",
     "./skills/update-branch",
     "./skills/move-branch-here",
     "./skills/install-skills",
     "./skills/grill-to-spec",
+    "./skills/grill-system-design",
+    "./skills/review-system-design",
+    "./skills/resolve-qa-feedback",
     "./skills/write-changelog",
     "./skills/prompting-fable"
   ]

@@ -16,12 +16,16 @@ layout.
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
+- `skills/orchestrate/`: existing Codex task orchestration and monitoring skill
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
+- `skills/grill-system-design/`: focused system design grilling skill
+- `skills/review-system-design/`: contract dependency review skill
+- `skills/resolve-qa-feedback/`: evidence-backed QA feedback resolution skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
@@ -66,11 +70,15 @@ Skills owned by this repository:
 | `merge-pr` | `skills/merge-pr/` | Enable repository-managed auto-merge |
 | `finish-pr` | `skills/finish-pr/` | Deprecated compatibility alias for `ready-pr` |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
+| `orchestrate` | `skills/orchestrate/` | Existing Codex task orchestration and monitoring |
 | `polish` | `skills/polish/` | Incremental local architecture and code review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `move-branch-here` | `skills/move-branch-here/` | Worktree branch handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
+| `review-system-design` | `skills/review-system-design/` | Contract dependency review |
+| `resolve-qa-feedback` | `skills/resolve-qa-feedback/` | Evidence-backed QA feedback resolution |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |
 

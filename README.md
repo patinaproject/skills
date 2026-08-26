@@ -4,9 +4,10 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging, Codex
-PR feedback polling, settled-design documentation capture, release changelog
-ceremonies, and local branch updating. They are available across Claude Code,
-Codex, and any agent runtime that reads `AGENTS.md`.
+task orchestration, QA feedback resolution, system design review, focused
+system design grilling, settled-design documentation capture, release
+changelog ceremonies, and local branch updating. They are available across
+Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
@@ -157,6 +158,14 @@ actionable work remains.
 See [./skills/codex-pr-feedback-loop/](./skills/codex-pr-feedback-loop/) for
 the skill contract.
 
+### orchestrate
+
+Long-running Codex work needs a control task that can distinguish progress from
+a real blocker. `orchestrate` inspects existing tasks, takes one safe action per
+unchanged blocker, and starts a thread heartbeat for continued monitoring.
+
+See [./skills/orchestrate/](./skills/orchestrate/) for the skill contract.
+
 ### update-branch
 
 `update-branch` fetches and merges with pure Git, using an open pull request's
@@ -187,6 +196,33 @@ doc changes as file-ready proposals, so the worktree can be thrown away and
 the implementing branch can apply them verbatim.
 
 See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
+
+### grill-system-design
+
+System design grilling should focus on choices that deserve durable context.
+`grill-system-design` routes that interview through `grill-to-spec` and limits
+questions to hard-to-reverse, surprising trade-offs.
+
+See [./skills/grill-system-design/](./skills/grill-system-design/) for the skill
+contract.
+
+### review-system-design
+
+System design review needs an implementation-focused map of the contracts that
+changed. `review-system-design` presents those contracts in dependency-ordered
+rounds for a human reviewer.
+
+See [./skills/review-system-design/](./skills/review-system-design/) for the
+skill contract.
+
+### resolve-qa-feedback
+
+QA feedback needs reproduction evidence and a fixed-build retest before a fix
+claim. `resolve-qa-feedback` carries that loop from the red baseline through
+inspected visual evidence.
+
+See [./skills/resolve-qa-feedback/](./skills/resolve-qa-feedback/) for the skill
+contract.
 
 ### write-changelog
 
@@ -231,10 +267,14 @@ README and skill contract.
 | [merge-pr](./skills/merge-pr/) | Enable repository-managed auto-merge for a PR |
 | [finish-pr](./skills/finish-pr/) | Deprecated compatibility alias for ready-pr |
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
+| [orchestrate](./skills/orchestrate/) | Keep existing Codex tasks moving and monitor them with a thread heartbeat |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [move-branch-here](./skills/move-branch-here/) | Take a branch from the worktree holding it, with its polish review state |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
+| [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
+| [resolve-qa-feedback](./skills/resolve-qa-feedback/) | Reproduce, fix, retest, and visibly prove a QA report is resolved |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -287,10 +327,14 @@ skills/
   merge-pr/
   finish-pr/
   codex-pr-feedback-loop/
+  orchestrate/
   polish/
   update-branch/
   move-branch-here/
   grill-to-spec/
+  grill-system-design/
+  review-system-design/
+  resolve-qa-feedback/
   write-changelog/
   prompting-fable/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
