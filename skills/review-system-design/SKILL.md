@@ -1,6 +1,6 @@
 ---
 name: review-system-design
-description: Presents a diff or spec's hard-to-reverse system contracts to a human reviewer in dependency-ordered rounds. Use when asked to review or explain system design, architecture, or contracts.
+description: Presents a diff or spec's hard-to-reverse system contracts to a human reviewer in dependency-ordered rounds. Use when asked for a system design review of a diff, specification, or both.
 ---
 
 Present the system design of a **scope** — a diff, a spec, or both — to a human reviewer, one batch at a time. A **contract** is the agreement crossing one seam, stated as a before/after pair. Write each state in design-by-contract terms — what the client must supply, what the supplier guarantees, what holds invariant — so both parties of the seam are named. A contract whose two states match is an **invariant** the scope stands on.

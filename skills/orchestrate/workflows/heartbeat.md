@@ -67,6 +67,7 @@ Keep all actions inside the existing task scope and authority. Apply these guard
 - do not change the scope;
 - do not authorize destructive work;
 - do not move or hand off a task;
+- do not merge a pull request or enable auto-merge;
 - do not reply to or resolve a human-authored review thread.
 
 Notify the operator only for an operator-required condition. Also notify when one automatic nudge did not restore progress. Include the exact task title, evidence, action taken, and remaining operator need. Do not repeat an unchanged notification. If no operator action is needed, report a brief quiet status.

@@ -91,7 +91,8 @@ restart a retry loop that the target task already exhausted.
 
 Keep the message inside the task's existing authority. The control task does
 not create a task, issue, branch, or pull request. It does not grant an approval
-or answer an ambiguous question.
+or answer an ambiguous question. It does not merge a pull request or enable
+auto-merge.
 
 For human-authored review feedback, direct the task to fix verified code when
 the repository permits it. Keep the human conversation for the operator.
