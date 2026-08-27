@@ -73,6 +73,9 @@ Use `prototype` only when the user asks for a throwaway prototype or needs to
 compare possible behavior or UI. Delete the prototype or move its useful parts
 into the real implementation before `polish`, unless the user asked to keep it.
 
+Before using either skill, confirm that it is installed. If it is missing, stop,
+name it, and give a project-local install command for its current source.
+
 ## Workflow
 
 1. Read `AGENTS.md`, `CLAUDE.md`, and any files they require.
@@ -87,7 +90,11 @@ into the real implementation before `polish`, unless the user asked to keep it.
    instructions when they differ from the issue body. Skip `implement`'s final
    standalone code review because `polish` performs that review.
 7. Run the verification commands documented by the repository. Add or update
-   tests when the change affects executable behavior.
+   tests when the change affects executable behavior. After merging the target
+   branch, follow `update-branch`'s
+   [verification rules](../update-branch/SKILL.md#workflow). A proven problem
+   that already exists on the target branch does not stop `develop`. Keep the
+   target commit, command, failure, and proof for the final report.
 8. Run `polish` against the current commit. Pass it the issue and the
    written instructions. Fix accepted findings, commit the fixes, and run
    `polish` again. Continue until it passes with no findings or asks for a
@@ -98,52 +105,32 @@ into the real implementation before `polish`, unless the user asked to keep it.
 10. Run `ready-pr`. Let it commit and push the branch, create or update the
     pull request, handle available feedback, and check the current pull request
     state.
-11. Fix problems caused by this branch when local checks, pull request checks, or
-    review feedback. Verify and review each new commit, push it, and repeat
-    until the pull request is ready to merge or the next step needs a person.
-
-## Verification after a target-branch merge
-
-Run the repository checks that cover the pull request changes, resolved merge
-conflicts, and dependency changes. A failure in one of those checks blocks the
-update.
-
-A separate full-repository check may find a problem that already exists on the
-target branch. Continue only when the checks for this pull request pass and the
-full-repository failure is proven to belong to the target branch.
-
-Record:
-
-- the fetched target commit
-- the command
-- the failing rule or test
-- the comparison or rerun on the target branch that proves the problem already
-  fails there
-
-Stop when the evidence is unclear, the branch changed a failing input, the
-merge caused the failure, or repository rules require the full-repository
-command for this change.
+11. When local checks or pull request checks fail, fix problems caused by this
+    branch. Do the same when review feedback identifies one. Verify and review
+    each new commit, push it, and repeat until the pull request is ready to
+    merge or the next step needs a person.
 
 ## When the work is done
 
-Report `goal-met` only when all of these statements are true:
+Report that the pull request is ready to merge only when all of these statements
+are true:
 
-- The implementation covers the written instructions and any applicable issue
+- The implementation covers the written instructions and any relevant issue
   requirements.
 - Repository verification completed.
 - Tests cover changed behavior where useful.
-- `polish` passed on the current committed head with no findings.
+- `polish` passed on the current commit with no findings.
 - Pull request feedback has an answer or a fix.
-- Every required pull request check passes on the current head.
+- Every required pull request check passes on the latest commit.
 - `ready-pr` reports that the pull request is ready to merge.
 - No unresolved decision or access problem remains.
 
 A proven target-branch failure from an extra full-repository command does not
-block `goal-met`. Include its recorded proof in the final report.
+block the pull request. Include its recorded proof in the final report.
 
-Report `human-blocked` when the next step needs a product or design decision,
-credentials, permissions, external access, conflicting instructions, or valid
-work outside this request.
+Report that the work is blocked when the next step needs a product or design
+decision, credentials, permissions, external access, conflicting instructions,
+or valid work outside this request.
 
 When the issue has a required branch, finish on that branch. Use a different
 branch only when the user explicitly requires it. Name the branch and the reason
@@ -151,7 +138,7 @@ in the final report.
 
 ## Final report
 
-Lead with `goal-met` or `human-blocked`. Then tell the user:
+Lead with `Ready to merge` or `Blocked`. Then tell the user:
 
 - what changed
 - where the work lives
@@ -170,4 +157,6 @@ repeat GitHub status fields or list every successful check.
 
 During a long run, keep a short note with the request, issue, branch, current
 result, blocker, and next step. Use that note to resume without repeating
-completed work.
+completed work. If an extra full-repository command found a proven target-branch
+problem, also keep the target commit, command, failure, and proof. Apply
+`update-branch`'s verification rules again before reusing that proof.
