@@ -20,7 +20,8 @@ treat the diff as the record of what changed and flag any unplanned agreement.
 Review production code only. Tests, documentation, and workspace fixtures may
 provide evidence, but they are not separate design agreements.
 
-Present one ready group at a time under
+Present one group at a time after reviewing everything it depends on. Use the
+heading
 `## <change name>, round N of M`. Number agreements `A1`, `A2`, and so on across
 all rounds. For each agreement:
 
@@ -40,5 +41,5 @@ research.
 
 Finish after every agreement has been reviewed. Summarize concerns and agreed
 fixes, then apply only the changes the reviewer confirms. If the reviewer asks
-for a guide, write it at the requested path with one review pointer, the
-agreements in number order, and the selected visuals.
+for a guide, write it at the requested path with a link to the reviewed change,
+the agreements in number order, and the selected visuals.

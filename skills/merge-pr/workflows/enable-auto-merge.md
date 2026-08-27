@@ -1,28 +1,12 @@
-# Enable Auto-Merge Workflow
+# Enable auto-merge
 
-**Goal:** Express merge intent for the current pull request through GitHub's
-repository-managed auto-merge path, then distinguish a queued request from a
-completed merge without bypassing readiness policy.
-
-## Preconditions
-
-Use this workflow only when the caller explicitly asks to merge, auto-merge,
-queue, land, or integrate a pull request. Stay in the current working
-directory's default `gh` repository.
-
-Confirm `ready-pr` is installed before starting. If it is missing, stop with
-this install guidance:
-
-```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill ready-pr -y
-```
+Use these instructions only after the user explicitly asks to merge, queue,
+land, integrate, or enable auto-merge for a pull request. Work in the current
+directory's default `gh` repository. Confirm that `ready-pr` is installed.
 
 ## Steps
 
-1. Read repository guidance and resolve the current branch's pull request.
-   Capture its URL, state, draft state, head branch and SHA, base branch,
-   mergeability, merge-state status, review decision, checks, auto-merge
-   request, and merged timestamp:
+1. Read repository instructions and resolve the current branch's pull request:
 
    ```sh
    gh pr view --json url,number,state,isDraft,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,autoMergeRequest,mergedAt
@@ -30,115 +14,68 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
    git rev-parse HEAD
    ```
 
-   Stop as `human-blocked` when no PR resolves, the PR is closed without a
-   merge, or the local branch differs from the PR head branch. Record a local
-   `HEAD` mismatch for readiness remediation instead of stopping here. If
-   `mergedAt` is already present, report `merged` without issuing another merge
-   command.
+   Stop and ask the user when no pull request exists, it closed without merging,
+   or the local branch differs from its head branch. A local commit mismatch
+   should go through `ready-pr`. If `mergedAt` is present, report that it already
+   merged and do not run another merge command.
+2. Run `ready-pr` when the pull request is a draft, has conflicts, has a failed
+   required check, has unresolved actionable feedback, has unpublished local
+   commits, or has local files that prevent a reliable ready result.
 
-2. Decide whether the PR needs readiness remediation. Invoke `ready-pr` when
-   any of these conditions is visible:
+   Pending checks and missing approvals do not require branch changes because
+   auto-merge can wait for them. Optional or replaced check runs are history.
 
-   - the PR is a draft;
-   - GitHub or a clean local base merge shows conflicts;
-   - a completed check in the
-     [required-check set](../../ready-pr/references/readiness-predicate.md#required-check-set)
-     is not successful — an optional or superseded run on the head is check
-     history and needs no remediation;
-   - actionable or unresolved review feedback remains;
-   - local `HEAD` differs from the PR head because of unpublished commits, a
-     stale checkout, or another branch-local condition;
-   - a dirty worktree or another branch-local condition prevents the latest
-     head from satisfying readiness gates.
+   Before calling `ready-pr`, record the local commit, pull request commit, and
+   reasons. After it returns, repeat step 1. If the commits and reasons are
+   unchanged, stop with the specific remaining problem instead of calling it
+   again. A new pull request commit may get one new readiness pass.
 
-   Pending checks or outstanding required approvals alone do not require
-   branch changes; repository-managed auto-merge may wait for them. Apply
-   `ready-pr`'s
-   [canonical readiness predicate](../../ready-pr/references/readiness-predicate.md)
-   when deciding whether optional automation requires remediation. When
-   remediation is needed, pass the current PR and caller scope to `ready-pr`
-   and wait for its terminal result. A `ready-pr` human blocker becomes this
-   workflow's `human-blocked` result.
+   If a clean target branch merge fails verification, use the exact result from
+   [the clean merge instructions](../../ready-pr/references/base-update-recovery.md).
+   Continue after `verified` or `recovered`. Stop and report the failed command
+   after `reproducible` or `drifted`.
+3. Choose the repository's merge method. Prefer the method named in repository
+   instructions. Otherwise inspect repository settings and use the only enabled
+   method among merge commit, squash, and rebase. Ask the user when several are
+   enabled and no instruction chooses one. Omit the method flag when a required
+   merge queue chooses the method.
 
-   When delegated remediation meets a clean base merge whose verification
-   fails, `ready-pr` applies its
-   [base-update recovery contract](../../ready-pr/references/base-update-recovery.md);
-   this workflow consumes that contract's outcome instead of defining its
-   own. A `recovered` outcome publishes a new, exactly verified PR head:
-   refresh state per the next paragraph and continue this auto-merge workflow
-   on that head. A `reproducible` outcome is a `human-blocked` stop carrying
-   the contract's report — the failing verification command and the final
-   merge state.
+   Confirm that GitHub auto-merge is available. When GitHub reports that the
+   repository setting is off, ask the user to enable **Allow auto-merge** in
+   pull request settings. When GitHub reports that the plan does not support
+   auto-merge, say that the repository must become public or use a plan that
+   supports it. Do not guess which case applies from one Boolean field; use the
+   GitHub response and repository plan information.
 
-   Before delegating, record the local SHA, PR head SHA, and remediation reasons
-   in memory. After `ready-pr` returns, repeat step 1 and make every later
-   decision from the refreshed local and PR state. If the same SHA pair and
-   remediation reasons remain, stop as `human-blocked` with `ready-pr`'s
-   concrete non-ready disposition instead of delegating again. This no-progress
-   rule also applies when `ready-pr` reports `not ready-to-merge` without a
-   separately named human blocker. A new head may re-enter readiness once for
-   newly visible branch-local remediation; never delegate twice for unchanged
-   evidence.
-
-3. Resolve the repository-supported merge mode without inventing policy.
-   Prefer an explicit mode in repository guidance. Otherwise inspect repository
-   settings and use the sole enabled mode among merge commit, squash, and
-   rebase. When more than one mode is enabled and guidance does not choose one,
-   stop as `human-blocked` and ask the operator to choose. When the base branch
-   uses a merge queue, let that queue own the strategy and omit a strategy flag.
-
-   Resolve whether repository auto-merge is available before expressing merge
-   intent. `autoMergeAllowed: false` covers two different situations that need
-   different human actions. Apply the off-versus-unavailable test the
-   `scaffold-repository` skill states canonically (its `SKILL.md` →
-   "Auto-merge: off versus unavailable") rather than restating its signals here,
-   and act on which branch it selects:
-
-   - **Disabled but available**: stop as `human-blocked` and ask the operator to
-     enable **Allow auto-merge** in the repository's pull-request settings. This
-     is a one-time setting the scaffold baseline expects to be on.
-   - **Unavailable on this plan**: stop as `human-blocked` and name that
-     explicitly. Do not report it as a setting the operator forgot to turn on —
-     there is nothing for them to click. Say the repository must become public
-     or move to a paid plan before this workflow can complete, and that the
-     pull request is otherwise ready.
-
-   Either way, refuse. Enabling a setting, changing a ruleset, weakening branch
-   protection, or falling back to a direct merge is outside this workflow: the
-   skill expresses merge intent and lets repository policy govern integration,
-   and a direct merge would make it something else.
-
-4. Immediately before expressing merge intent, refresh the PR and local head.
-   Require the PR to remain open, non-draft, on the same head branch, and at the
-   same head SHA. Use that SHA as the optimistic concurrency guard:
+   Do not change repository settings, rulesets, or branch protection. Do not
+   fall back to a direct merge.
+4. Refresh the pull request and local commit immediately before the command.
+   Require an open, non-draft pull request with the same branch and commit. Then
+   run:
 
    ```sh
    gh pr merge <pr-number-or-url> --auto --match-head-commit <head-sha> <repository-mode-flag>
    ```
 
-   Use exactly one of `--merge`, `--squash`, or `--rebase` for a repository
-   without a merge queue. Omit `<repository-mode-flag>` for a required merge
-   queue. Never pass `--admin`, delete branches as part of this operation, or
-   fall back to a direct or local merge.
+   Use exactly one of `--merge`, `--squash`, or `--rebase` when there is no
+   merge queue. Omit the flag for a required queue. Never pass `--admin`, delete
+   the branch in this command, or merge with local Git.
+5. Fetch GitHub state again after the command. Read `state`, `mergedAt`,
+   `headRefOid`, and `autoMergeRequest`; query `mergeQueueEntry` with GraphQL
+   when needed. Do not trust the command's exit code or prose alone.
 
-5. Re-fetch GitHub state after the command. Use `gh pr view` for `state`,
-   `mergedAt`, `headRefOid`, and `autoMergeRequest`; query GraphQL when needed
-   to inspect `mergeQueueEntry`. Do not infer success from the command's exit
-   code or prose output alone.
+   - Report `merged` only when GitHub returns a merge time or merged state.
+   - Report `queued` only when the pull request remains open and GitHub returns
+     a current auto-merge request or queue entry.
+   - Otherwise report `blocked` because the requested state was not proven.
 
-   - Report `merged` only when GitHub returns a non-null `mergedAt` or merged
-     state for the captured PR.
-   - Report `queued` only when the PR remains open and GitHub returns a current
-     `autoMergeRequest` or `mergeQueueEntry` for it.
-   - Otherwise report `human-blocked`: the requested state was not proven.
+   If another actor changes the pull request commit before the result is read,
+   report both commits and stop. Do not enable auto-merge on the replacement
+   commit until it has been reviewed.
 
-   If another actor changes the PR head before the outcome is observed, stop as
-   `human-blocked` and report both SHAs. Never enable auto-merge again against
-   an unreviewed replacement head.
+## Final report
 
-## Final Report
-
-Lead with `merged`, `queued`, or `human-blocked`, link the pull request, and
-name the merge method or merge queue. For `queued`, state only the currently
-visible requirements still governing completion. For `human-blocked`, give the
-specific blocker and next human action. Do not claim a queued or open PR merged.
+Lead with `Merged`, `Queued`, or `Blocked`. Link the pull request and name the
+merge method or queue. For a queued pull request, name only the visible checks
+or approvals still required. For a blocked result, state the exact problem and
+user action. Never report an open or queued pull request as merged.
