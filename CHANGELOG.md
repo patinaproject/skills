@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.30.0](https://github.com/patinaproject/skills/compare/v2.29.5...v2.30.0) (2026-08-27)
+
+
+### Features
+
+* [#382](https://github.com/patinaproject/skills/issues/382) add four workflow skills ([#383](https://github.com/patinaproject/skills/issues/383)) ([b27b5e6](https://github.com/patinaproject/skills/commit/b27b5e61b19ee7ba0c1000c7d82f339b7d736310))
+* [#382](https://github.com/patinaproject/skills/issues/382) add orchestrate skill ([#385](https://github.com/patinaproject/skills/issues/385)) ([a9cc2e9](https://github.com/patinaproject/skills/commit/a9cc2e949ff0f9dd2d8dc41027b20e88d272bb06))
+
 ## [2.29.5](https://github.com/patinaproject/skills/compare/v2.29.4...v2.29.5) (2026-08-25)
 
 
