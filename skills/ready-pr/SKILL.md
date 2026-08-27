@@ -78,9 +78,9 @@ human line.
   code-fix dispositions; verify pattern-based feedback with a direct search or
   check before resolving when feasible.
 - Verify a clean base merge through the
-  [base-update recovery contract](references/base-update-recovery.md): one
-  bounded retry classifies a retryable failure from a reproducible one, and
-  only an exactly verified merged head is committed and pushed.
+  [target-merge verification contract](../update-branch/references/verification.md):
+  scoped verification gates the merge, while a proved target-owned,
+  non-required broad failure is recorded and continues to current-head checks.
 - Do not rewrite branch history or force-push by default.
 - Do not use browser conflict resolution or merge the pull request itself.
 - Do not enable auto-merge.
@@ -92,6 +92,9 @@ human line.
   the CLI-selected contexts on the latest head; a head's optional and
   superseded runs are check history, reported as history rather than counted
   as a current required result.
+- Snapshot the required-check set against the exact published head with
+  `scripts/current-head-required-checks.sh`; only its `required-checks-passed`
+  outcome satisfies the check gate.
 - Name the scope of every passing-checks statement — the required contexts, or
   all visible check runs.
 - Report a merge state other than `CLEAN` with the exact values GitHub

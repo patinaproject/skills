@@ -190,6 +190,12 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   package scripts.
 - Run `bash scripts/tests/worktree-setup.test.sh` after changing
   `scripts/worktree-setup.sh`.
+- Run `bash scripts/tests/update-branch.test.sh` after changing
+  `skills/update-branch/scripts/update-context.sh` or
+  `skills/update-branch/scripts/update-verify.sh`.
+- Run `bash scripts/tests/develop-verification-contract.test.sh` after changing
+  target-merge verification outcomes, develop's verification routing, or
+  `skills/ready-pr/scripts/current-head-required-checks.sh`.
 - Run `bash scripts/tests/move-branch-here.test.sh` after changing
   `skills/move-branch-here/scripts/worktree-context.sh`.
 - Run `bash scripts/tests/base-update-recovery.test.sh` after changing

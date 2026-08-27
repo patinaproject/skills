@@ -64,6 +64,8 @@ environment:
 - `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
 - `polish`: incremental pre-publication architecture, Standards, and Spec review.
 - `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
+- `update-branch`: target-merge verification vocabulary and exact-tree helper
+  consumed by `ready-pr`.
 
 `working-on-issue` reaches `new-branch`; `polish` reaches `code-review`,
 `implement`, and `diagnosing-bugs`, and reviews against the `codebase-design`
@@ -73,7 +75,7 @@ If any are missing, halt before building. Report the missing skill names and
 install guidance:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish ready-pr -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish ready-pr update-branch -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
@@ -158,6 +160,11 @@ scope, and treat any issue as best-effort association, not a separate path.
 - Required PR check failures outside branch scope have a concrete disposition
   in a `human-blocked` final report; do not report `goal-met` while a required
   PR check is still failing.
+- A target-owned, non-required local verification failure under the
+  [target-merge verification contract](../update-branch/references/verification.md)
+  is a continuing disposition, not `human-blocked`. It becomes blocking only
+  when valid work outside the issue scope is necessary to satisfy a required
+  exit gate.
 - When an issue is resolved, either the PR is on its issue-linked branch, or the
   final report explicitly names the retained non-issue-linked branch and why the
   caller declared it immutable. Do not report `goal-met` on such a branch
@@ -181,8 +188,11 @@ scope, and treat any issue as best-effort association, not a separate path.
 5. Apply triggered conditional routes.
 6. Build the scope with the build/TDD portion of `implement` — instructions
    authoritative over any issue body — then run repository-documented
-   verification. `polish` owns review, so skip `implement`'s standalone
-   `code-review` tail here.
+   proportional verification. When a target merge adds a broad local failure,
+   apply the
+   [target-merge verification contract](../update-branch/references/verification.md)
+   and carry a proved target-owned outcome forward as a disposition. `polish`
+   owns review, so skip `implement`'s standalone `code-review` tail here.
 7. Run `polish`, forwarding the resolved issue and instructions. Its
    idempotent alignment re-confirms the branch, then it reviews the selected
    committed delta through delta-bounded architecture, verification, and fresh
@@ -222,6 +232,8 @@ documented `human-blocked` stop.
 from `working-on-issue`, the actionability judgment, the build, `polish`,
 or `ready-pr` — stops the pipeline in the `human-blocked` terminal state. There
 is no `needs-info` state; insufficient information maps to `ready-for-human`.
+A proved target-owned, non-required local failure does not enter this route;
+continue until current-head required checks and the other exit gates are known.
 
 ## Final Report
 
@@ -258,6 +270,8 @@ Include:
 - Production-readiness case.
 - Verification commands and results, summarized at the highest useful level.
   Collapse routine verification into one concise line when everything passed.
+- Any target-owned local failure: name the broad command, failing contract,
+  exact target SHA, ownership evidence, and current-head required-check result.
 - Relevant tests added or updated.
 - Child skill halt reasons, only when a halt changes what the human should do
   next.

@@ -60,15 +60,15 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills -
    and wait for its terminal result. A `ready-pr` human blocker becomes this
    workflow's `human-blocked` result.
 
-   When delegated remediation meets a clean base merge whose verification
-   fails, `ready-pr` applies its
-   [base-update recovery contract](../../ready-pr/references/base-update-recovery.md);
-   this workflow consumes that contract's outcome instead of defining its
-   own. A `recovered` outcome publishes a new, exactly verified PR head:
-   refresh state per the next paragraph and continue this auto-merge workflow
-   on that head. A `reproducible` outcome is a `human-blocked` stop carrying
-   the contract's report — the failing verification command and the final
-   merge state.
+   When delegated remediation meets a target merge whose verification fails,
+   `ready-pr` applies the
+   [target-merge verification contract](../../update-branch/references/verification.md);
+   this workflow consumes that contract's outcome instead of defining its own.
+   A `verified` or `target-owned` outcome publishes a new scoped-verified PR
+   head: refresh state per the next paragraph and continue this auto-merge
+   workflow on that head. A blocking outcome becomes `human-blocked` only when
+   satisfying a required exit gate needs valid work outside the issue scope or
+   another human-owned input; carry the concrete reason and final merge state.
 
    Before delegating, record the local SHA, PR head SHA, and remediation reasons
    in memory. After `ready-pr` returns, repeat step 1 and make every later

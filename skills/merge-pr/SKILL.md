@@ -21,9 +21,9 @@ feedback, conflict remediation, base-update verification recovery, and
 draft-to-ready handling; do not reproduce that loop here. Use `ready-pr`'s
 [canonical readiness predicate](../ready-pr/references/readiness-predicate.md)
 to distinguish readiness state from unresolved feedback, and its
-[base-update recovery contract](../ready-pr/references/base-update-recovery.md)
-as the shared behavior when a clean base merge's verification fails during
-delegated remediation.
+[target-merge verification contract](../update-branch/references/verification.md)
+as the shared behavior when local verification fails during delegated
+remediation.
 
 Report only the observed outcome defined by the authoritative workflow and any
 human-owned blocker.

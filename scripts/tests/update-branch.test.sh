@@ -3,6 +3,7 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 HELPER="$REPO_ROOT/skills/update-branch/scripts/update-context.sh"
+VERIFY_HELPER="$REPO_ROOT/skills/update-branch/scripts/update-verify.sh"
 GIT_ID=(-c user.email=test@example.com -c user.name=test)
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
@@ -33,6 +34,15 @@ assert_context_change_blocks_push() {
   fi
   after="$(git --git-dir="$origin" rev-parse refs/heads/feature)"
   assert_equal "$after" "$before" "$description should block the remote update"
+}
+
+assert_merge_aborted() {
+  local dir="$1" pre_head="$2" description="$3"
+  if git -C "$dir" rev-parse -q --verify MERGE_HEAD >/dev/null; then
+    fail "$description should abort the merge"
+  fi
+  assert_equal "$(git -C "$dir" rev-parse HEAD)" "$pre_head" \
+    "$description should restore the pre-merge head"
 }
 
 FAKE_BIN="$TMP_ROOT/bin"
@@ -94,7 +104,11 @@ build_sandbox() {
   mkdir -p "$base"
   git init -q --bare "$origin"
   git init -q -b main "$seed"
-  git -C "$seed" "${GIT_ID[@]}" commit -q --allow-empty -m common
+  printf 'target violation\n' >"$seed/failing-source.txt"
+  printf 'rule input\n' >"$seed/lint-rule.txt"
+  printf '#!/usr/bin/env bash\nexit 1\n' >"$seed/lint-runner.sh"
+  git -C "$seed" add failing-source.txt lint-rule.txt lint-runner.sh
+  git -C "$seed" "${GIT_ID[@]}" commit -q -m common
   git -C "$seed" remote add origin "$origin"
   git -C "$seed" push -q -u origin main
 
@@ -113,6 +127,9 @@ build_sandbox() {
   git -C "$clone" config user.email test@example.com
   git -C "$clone" config user.name test
   git -C "$clone" switch -q -c feature HEAD~1
+  printf 'feature behavior\n' >"$clone/feature.txt"
+  git -C "$clone" add feature.txt
+  git -C "$clone" commit -q -m feature
   git -C "$clone" push -q -u origin feature
   SANDBOX_CLONE="$clone"
 }
@@ -232,6 +249,121 @@ else
   elif ! grep -Fq "mattpocock/skills@resolving-merge-conflicts" <<< "$missing_conflict"; then
     fail "missing conflict skill error did not include installation guidance: $missing_conflict"
   fi
+
+  scoped_pass="$TMP_ROOT/scoped-pass.sh"
+  cat >"$scoped_pass" <<'VERIFY'
+#!/usr/bin/env bash
+set -euo pipefail
+test "$(cat feature.txt)" = 'feature behavior'
+VERIFY
+  chmod +x "$scoped_pass"
+
+  scoped_blocked="$TMP_ROOT/scoped-blocked.sh"
+  cat >"$scoped_blocked" <<'VERIFY'
+#!/usr/bin/env bash
+exit 19
+VERIFY
+  chmod +x "$scoped_blocked"
+
+  broad_failure="$TMP_ROOT/broad-failure.sh"
+  cat >"$broad_failure" <<'VERIFY'
+#!/usr/bin/env bash
+grep -Fq 'target violation' failing-source.txt
+exit 23
+VERIFY
+  chmod +x "$broad_failure"
+
+  build_sandbox target-owned-verification
+  clone="$SANDBOX_CLONE"
+  git -C "$clone" fetch -q origin release/1.x
+  git -C "$clone" merge -q --no-commit --no-ff origin/release/1.x
+  if ! verification_output="$(cd "$clone" && "$VERIFY_HELPER" \
+    --message 'chore: #324 merge release target' \
+    --target origin/release/1.x \
+    --scoped "$scoped_pass" \
+    --broad "$broad_failure" \
+    --evidence failing-source.txt \
+    --evidence lint-rule.txt \
+    --evidence lint-runner.sh 2>&1)"; then
+    fail "target-owned broad failure blocked the verified merge: $verification_output"
+  elif ! grep -Fq 'outcome=target-owned' <<< "$verification_output"; then
+    fail "target-owned outcome was not recorded: $verification_output"
+  fi
+  if [ "$(git -C "$clone" rev-list --parents -n1 HEAD | wc -w | tr -d '[:space:]')" != '3' ]; then
+    fail 'target-owned broad failure did not create a merge commit'
+  fi
+  context="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=open-pr "$HELPER" resolve)"
+  IFS=$'\t' read -r _ _ base_ref pr_number _ head_ref <<< "$context"
+  if ! (cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=open-pr \
+    "$HELPER" push "$pr_number" "$base_ref" "$head_ref") >/dev/null; then
+    fail 'target-owned broad failure prevented the verified merge from being pushed'
+  fi
+  assert_equal \
+    "$(git --git-dir="$TMP_ROOT/target-owned-verification/origin.git" rev-parse refs/heads/feature)" \
+    "$(git -C "$clone" rev-parse HEAD)" \
+    'target-owned scenario should push the verified merge'
+
+  build_sandbox branch-caused-verification
+  clone="$SANDBOX_CLONE"
+  printf 'branch interaction\n' >>"$clone/failing-source.txt"
+  git -C "$clone" add failing-source.txt
+  git -C "$clone" commit -q -m 'change failing input'
+  git -C "$clone" push -q
+  pre_head="$(git -C "$clone" rev-parse HEAD)"
+  git -C "$clone" fetch -q origin release/1.x
+  git -C "$clone" merge -q --no-commit --no-ff origin/release/1.x
+  if branch_output="$(cd "$clone" && "$VERIFY_HELPER" \
+    --message 'chore: #324 merge release target' \
+    --target origin/release/1.x \
+    --scoped "$scoped_pass" \
+    --broad "$broad_failure" \
+    --evidence failing-source.txt \
+    --evidence lint-rule.txt \
+    --evidence lint-runner.sh 2>&1)"; then
+    fail 'branch-caused broad failure unexpectedly committed the merge'
+  elif ! grep -Fq 'reason=branch-caused' <<< "$branch_output"; then
+    fail "branch-caused failure was not identified: $branch_output"
+  fi
+  assert_merge_aborted "$clone" "$pre_head" 'branch-caused broad failure'
+
+  build_sandbox scoped-verification-blocked
+  clone="$SANDBOX_CLONE"
+  pre_head="$(git -C "$clone" rev-parse HEAD)"
+  git -C "$clone" fetch -q origin release/1.x
+  git -C "$clone" merge -q --no-commit --no-ff origin/release/1.x
+  if scoped_output="$(cd "$clone" && "$VERIFY_HELPER" \
+    --message 'chore: #324 merge release target' \
+    --target origin/release/1.x \
+    --scoped "$scoped_blocked" \
+    --broad "$broad_failure" \
+    --evidence failing-source.txt \
+    --evidence lint-rule.txt \
+    --evidence lint-runner.sh 2>&1)"; then
+    fail 'unavailable scoped verification unexpectedly committed the merge'
+  elif ! grep -Fq 'reason=scoped-verification-failed' <<< "$scoped_output"; then
+    fail "scoped verification blocker was not identified: $scoped_output"
+  fi
+  assert_merge_aborted "$clone" "$pre_head" 'unavailable scoped verification'
+
+  build_sandbox mandatory-broad-verification
+  clone="$SANDBOX_CLONE"
+  pre_head="$(git -C "$clone" rev-parse HEAD)"
+  git -C "$clone" fetch -q origin release/1.x
+  git -C "$clone" merge -q --no-commit --no-ff origin/release/1.x
+  if mandatory_output="$(cd "$clone" && "$VERIFY_HELPER" \
+    --message 'chore: #324 merge release target' \
+    --target origin/release/1.x \
+    --broad-required \
+    --scoped "$scoped_pass" \
+    --broad "$broad_failure" \
+    --evidence failing-source.txt \
+    --evidence lint-rule.txt \
+    --evidence lint-runner.sh 2>&1)"; then
+    fail 'mandatory broad failure unexpectedly committed the merge'
+  elif ! grep -Fq 'reason=required-broad-verification-failed' <<< "$mandatory_output"; then
+    fail "mandatory broad failure was not identified: $mandatory_output"
+  fi
+  assert_merge_aborted "$clone" "$pre_head" 'mandatory broad failure'
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

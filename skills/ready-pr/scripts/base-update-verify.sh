@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Mechanics for the base-update recovery contract
-# (../references/base-update-recovery.md): verify a clean, uncommitted base
-# merge with one bounded retry, commit only an exactly verified merged head,
-# and abort the merge on a reproducible failure.
+# Compatibility mechanics for one scoped base-update verification command
+# (../references/base-update-recovery.md). New target merges use the shared
+# target-merge verification contract and update-branch's update-verify.sh.
 
 usage() {
   echo 'usage: base-update-verify.sh --message <commit-message> -- <verification-command> [args...]' >&2

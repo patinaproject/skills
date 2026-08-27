@@ -1,9 +1,9 @@
-# Base-Update Recovery Contract
+# Legacy Base-Update Recovery Helper
 
-This reference is the single source of truth for verifying a clean,
-uncommitted base merge before it is committed. `ready-pr` owns the contract
-and applies it directly; `merge-pr` consumes it through delegated `ready-pr`
-remediation.
+This reference documents the compatibility helper for callers that supply one
+scoped verification command. New target merges use the
+[target-merge verification contract](../../update-branch/references/verification.md),
+which distinguishes scoped verification from target-owned broad failures.
 
 ## Scope
 
@@ -52,13 +52,6 @@ Each run prints one machine-readable outcome line:
 
 ## Consumers
 
-- `ready-pr` applies the contract in its mergeability gate
-  ([ready-for-merge.md](../workflows/ready-for-merge.md) step 8). Exit 0
-  continues the readiness loop; exit 1 is a stop with the outcome line's
-  report.
-- `merge-pr` never runs the helper directly. Delegated `ready-pr`
-  remediation applies it; a `recovered` head changes the PR head SHA, so
-  `merge-pr`'s post-delegation state refresh sees progress and continues
-  toward repository-managed auto-merge. A `reproducible` stop becomes
-  `merge-pr`'s `human-blocked` report, carrying the same failing
-  verification and final merge state.
+Legacy callers may continue to use this helper for a single scoped command.
+It does not classify a broad failure as target-owned; use the target-merge
+contract for that workflow.
