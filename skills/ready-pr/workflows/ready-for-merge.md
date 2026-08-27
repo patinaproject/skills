@@ -142,16 +142,16 @@ tell the human what to do next.
    or the "Automatically merge & resolve" button.
 
    If the merge reports `Already up to date.`, leave the branch unchanged and
-   continue. If the merge changes the branch, apply the
-   [target-merge verification contract](../../update-branch/references/verification.md).
-   Run `update-branch`'s bundled `scripts/update-verify.sh` on the resolved,
-   staged merge with the fetched base ref, scoped verification, and the normal
-   issue-tagged commit message. Pass any additional broad command and complete
-   unchanged-input ownership evidence separately. A `verified` or
-   `target-owned` outcome has committed the exact scoped-verified merge; return
-   to the pre-publish evidence loop before restarting readiness on the new
-   head. A blocking outcome has already aborted the merge; report its reason
-   and final state. If
+   continue. If the merge applies cleanly and changes the branch, keep the
+   merge result in the working tree and verify-and-commit it through the
+   [base-update recovery contract](../references/base-update-recovery.md):
+   run its bundled `scripts/base-update-verify.sh` with the repository's
+   documented verification command and normal issue-tagged commit message. A
+   `verified` or `recovered` outcome has committed the exactly verified
+   merged head; return to the pre-publish evidence loop before restarting the
+   readiness loop on the new head. A `reproducible` or `drifted` outcome has
+   already aborted the merge; stop under the verification stop condition and
+   report the failing verification command and the final merge state. If
    two consecutive base merges keep changing the branch without reaching a
    stable PR head in the same ready-pr run, stop for operator feedback instead
    of pushing indefinitely.
@@ -350,9 +350,7 @@ tell the human what to do next.
     git status --short
     git rev-parse HEAD
     gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
-    <update-branch-directory>/scripts/current-head-required-checks.sh \
-      --pr <pr-number> \
-      --head <headRefOid>
+    gh pr checks <pr-number-or-url> --required
     ```
 
     Also enumerate review threads with paginated GraphQL for the PR immediately
@@ -532,10 +530,11 @@ tell the human what to do next.
 - Change staging would include unrelated or ambiguous files.
 - An uncommitted path cannot be provably attributed to a different issue or
   branch, and committing it in-scope needs judgment the workflow does not have.
-- Scoped verification fails or cannot complete. A broad local failure stops
-  only when it is branch-caused, unclassified, or explicitly mandatory under
-  the
-  [target-merge verification contract](../../update-branch/references/verification.md).
+- Local verification fails for a reason that is not branch-local or in scope.
+- A clean base merge's verification failure is reproducible or drifted under
+  the [base-update recovery contract](../references/base-update-recovery.md)'s
+  bounded retry; the report names the failing verification and the final
+  merge state.
 - Merge conflict resolution requires product judgment, secrets, permissions,
   destructive git operations, unrelated scope, or unverifiable semantic choices.
 - Feedback triage returns `needs-human`.

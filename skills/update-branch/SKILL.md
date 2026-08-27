@@ -22,10 +22,9 @@ falls back to `origin/HEAD`.
 Use pure `git` for fetch, merge, and push. Use `gh` only to read pull request
 context; the bundled `scripts/update-context.sh` makes target selection and the
 configured-remote push deterministic. The open-PR path pushes only after the
-merge, dependency refresh, and scoped verification succeed. Apply the
-[target-merge verification contract](references/verification.md) to additional
-broad failures. The no-PR path remains local-only. GitHub's remote update
-button and update-branch APIs are outside this workflow.
+merge, dependency refresh, and applicable verification are complete. The
+no-PR path remains local-only. GitHub's remote update button and update-branch
+APIs are outside this workflow.
 
 ## Required Conflict Skill
 
@@ -82,8 +81,8 @@ with that actionable error when installation cannot complete.
      secrets; or any commit-message requirement, such as a required issue tag,
      that cannot be satisfied from local guidance.
 6. Merge with an explicit merge commit:
-   - Run `git merge --no-commit --no-ff <base-ref>` so verification covers the
-     staged merge before `scripts/update-verify.sh` creates the merge commit.
+   - Run `git merge --no-commit --no-ff <base-ref>` so verification finishes
+     before the merge commit is created.
    - If Git reports `Already up to date`, report that no merge commit was
      needed.
 7. When the merge conflicts, run the conflict-skill availability check, then
@@ -106,18 +105,32 @@ with that actionable error when installation cannot complete.
      them only when they are a direct result of the documented install command,
      are in scope for the branch update, and follow the same reporting and
      commit-message rules as other auto-committed dirty work.
-9. Apply the
-   [target-merge verification contract](references/verification.md) after
-   auto-committing dirty work, completing dependency refresh, or resolving
-   conflicts. Select scoped verification from `AGENTS.md`, README files,
-   package scripts, or other repository guidance. Run additional broad
-   repository-health commands separately. When a broad command fails, prove
-   target ownership or treat it as blocking; a nonzero status alone does not
-   classify the failure. Use the bundled `scripts/update-verify.sh` for the
-   unchanged-input evidence path so the exact verified merge is committed or a
-   blocking merge is aborted. If no local verification applies, say so
-   explicitly.
-10. Finish according to the resolved mode:
+9. Run **applicable verification** after auto-committing dirty work, completing
+   dependency refresh, or completing conflict resolution. Applicable
+   verification is the repository-documented, proportional verification for
+   the pull request delta, resolved conflicts, and dependency effects that can
+   change branch behavior. Prefer commands in `AGENTS.md`, README files,
+   package scripts, or other repository guidance. If no local verification
+   applies, say so explicitly.
+   - Treat an additional broad repository-health command as mandatory only
+     when repository guidance explicitly requires it for this change.
+   - When applicable verification fails or cannot complete, abort an
+     in-progress merge and stop.
+   - When applicable verification passes but an additional broad command
+     fails, classify the failure as **target-owned** only when the failing
+     source and the rule, configuration, or other input that explains the
+     failure are unchanged from the fetched target, or when the failure
+     reproduces on that target. Record the command, failing contract, and
+     ownership evidence, then continue. Leave the unrelated target defect for
+     its own scope. On a resumed run, reuse this disposition only when the
+     fetched target and ownership evidence are unchanged.
+   - Treat every unproven target-owned failure as blocking. Abort an
+     in-progress merge and stop when the branch changed a failing input, the
+     merge created the failure through interaction, or repository guidance
+     makes the broad command mandatory.
+10. When a merge remains in progress after verification, create the merge
+    commit under the repository's commit convention. Use normal commit hooks.
+11. Finish according to the resolved mode:
     - In `pull-request` mode, run
       `scripts/update-context.sh push <pr-number> <base-ref> <pr-head>` with the
       fields recorded in step 3. This pushes `HEAD` to the branch's configured
@@ -126,11 +139,7 @@ with that actionable error when installation cannot complete.
       context change means the remote branch moved but the pull request update
       is indeterminate. On failure, report the helper's context change or exact
       failed `git push` command and output, then stop without claiming the pull
-      request was updated. After a successful push, capture `HEAD` and run
-      `scripts/current-head-required-checks.sh --pr <pr-number> --head <head>`.
-      Record its exact-head outcome. A non-pass result leaves the successfully
-      updated pull request non-ready and routes through readiness triage; it
-      does not undo or misreport the push.
+      request was updated.
     - In `local-only` mode, leave the branch unpushed and report the optional
       command `git push origin HEAD`.
 
@@ -146,9 +155,6 @@ with that actionable error when installation cannot complete.
   its pre-merge state.
 - Do not rebase, force-push, or rewrite history.
 - Do not sweep unrelated dirty files into the merge.
-- Preserve normal commit and push hooks. Do not use a skip flag or other
-  verification bypass.
-- Leave a target-owned defect unchanged on the issue branch.
 
 ## Final Report
 
@@ -164,8 +170,8 @@ Always include:
   install/bootstrap command was available.
 - Conflicts resolved or the human-owned blocker that stopped the workflow.
 - Documented verification commands and results, when run.
-- For a target-owned failure, the broad command, failing contract, exact target
-  SHA, ownership evidence, and required-check outcome on the pushed head.
+- For a target-owned broad failure, the command, failing contract, and
+  ownership evidence that allowed the update to continue.
 - In the open-PR path, the pull request URL and whether its configured remote
   branch was updated; a failed push is a failed update.
 - In the no-PR path, a clear note that the branch remains local-only and the

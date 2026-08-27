@@ -162,11 +162,10 @@ human-authored conversation remains untouched throughout.
 - Classify branch-local, in-scope, verifiable conflicts as `fix-now`.
 - Preserve both sides of a conflict when that is clearly correct.
 - Commit clean base merges and conflict resolutions with the repository's normal
-  issue-tagged commit format, push, and restart the readiness loop. Target-merge
-  verification routes through the
-  [shared verification contract](../../update-branch/references/verification.md),
-  not through feedback classification. A proved target-owned, non-required
-  broad failure is recorded and continues to current-head checks.
+  issue-tagged commit format, push, and restart the readiness loop. A clean
+  base merge's verification failure routes through the
+  [base-update recovery contract](../references/base-update-recovery.md), not
+  through feedback classification.
 - Classify conflicts as `needs-human` when resolution requires product judgment,
   secrets, permissions, destructive git operations, unrelated scope, or
   unverifiable semantic choices.
