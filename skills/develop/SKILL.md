@@ -61,6 +61,7 @@ Confirm these skills are installed before implementation:
 - `code-review`
 - `codebase-design`
 - `diagnosing-bugs`
+- `update-branch`
 - `ready-pr`
 
 Stop and name any missing skill. Give a project-local install command for its
