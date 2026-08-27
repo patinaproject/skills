@@ -19,7 +19,9 @@ not change an existing repository until the user approves the change.
 Run the complete file check first:
 
 ```bash
-bash <skill-dir>/scripts/verify-baseline.sh --public|--private <repo-root>
+bash <skill-dir>/scripts/verify-baseline.sh --public <repo-root>
+# For a private repository:
+bash <skill-dir>/scripts/verify-baseline.sh --private <repo-root>
 ```
 
 The script reads [`core-baseline.txt`](./core-baseline.txt) and reports every

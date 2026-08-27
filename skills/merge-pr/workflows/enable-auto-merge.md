@@ -19,8 +19,9 @@ directory's default `gh` repository. Confirm that `ready-pr` is installed.
    should go through `ready-pr`. If `mergedAt` is present, report that it already
    merged and do not run another merge command.
 2. Run `ready-pr` when the pull request is a draft, has conflicts, has a failed
-   required check, has unresolved actionable feedback, has unpublished local
-   commits, or has local files that prevent a reliable ready result.
+   required check, has actionable feedback or any unresolved review thread, has
+   unpublished local commits, or has local files that prevent a reliable ready
+   result.
 
    Pending checks and missing approvals do not require branch changes because
    auto-merge can wait for them. Optional or replaced check runs are history.

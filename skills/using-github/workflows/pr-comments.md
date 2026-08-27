@@ -13,9 +13,10 @@ repo_json="$(gh repo view --json nameWithOwner --jq '{nameWithOwner}')"
 owner="$(printf '%s\n' "$repo_json" | jq -r '.nameWithOwner | split("/")[0]')"
 repo="$(printf '%s\n' "$repo_json" | jq -r '.nameWithOwner | split("/")[1]')"
 
-pr_json="$(gh pr view "$pr" \
+pr_json="$(gh pr view \
   --json number,headRefName,headRefOid,url \
   --jq '{number, headRefName, headRefOid, url}')"
+pr="$(printf '%s\n' "$pr_json" | jq -r '.number')"
 head_sha="$(printf '%s\n' "$pr_json" | jq -r '.headRefOid')"
 ```
 

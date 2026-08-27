@@ -52,7 +52,7 @@ repository check here should report no differences.
 ```bash
 pnpm install
 pnpm lint:md
-pnpm exec commitlint --help
+echo "feat: #1 verify commitlint" | pnpm exec commitlint
 ```
 
 Public repository commits use `type: #N short description`. Private repository
