@@ -24,6 +24,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/resolve-qa-feedback/`: evidence-backed QA feedback resolution skill
+- `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
@@ -277,6 +278,7 @@ This repo owns these skills at flat paths:
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
 | resolve-qa-feedback | `skills/resolve-qa-feedback/` |
+| orchestrate | `skills/orchestrate/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
 

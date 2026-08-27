@@ -32,6 +32,7 @@ SKILLS=(
   grill-system-design
   review-system-design
   resolve-qa-feedback
+  orchestrate
   write-changelog
   prompting-fable
 )
