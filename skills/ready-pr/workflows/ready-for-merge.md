@@ -145,8 +145,9 @@ tell the human what to do next.
    continue. If the merge applies cleanly and changes the branch, keep the
    merge result in the working tree and verify-and-commit it through the
    [base-update recovery contract](../references/base-update-recovery.md):
-   run its bundled `scripts/base-update-verify.sh` with the repository's
-   documented verification command and normal issue-tagged commit message. A
+   select applicable verification under that contract, then run its bundled
+   `scripts/base-update-verify.sh` with that command and the normal issue-tagged
+   commit message. A
    `verified` or `recovered` outcome has committed the exactly verified
    merged head; return to the pre-publish evidence loop before restarting the
    readiness loop on the new head. A `reproducible` or `drifted` outcome has

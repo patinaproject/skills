@@ -66,7 +66,8 @@ with that actionable error when installation cannot complete.
      `origin/HEAD` when no base was supplied.
 4. Fetch the remote head name for the selected base from `origin`, stripping
    the leading `origin/` first. For example, fetch `main` for `origin/main` and
-   `release/1.x` for `origin/release/1.x`.
+   `release/1.x` for `origin/release/1.x`. Record `git rev-parse <base-ref>` as
+   the immutable fetched target SHA.
 5. Inspect local dirty state before merging:
    - Run `git status --short`.
    - Review staged, unstaged, and untracked diffs.
@@ -120,10 +121,11 @@ with that actionable error when installation cannot complete.
      fails, classify the failure as **target-owned** only when the failing
      source and the rule, configuration, or other input that explains the
      failure are unchanged from the fetched target, or when the failure
-     reproduces on that target. Record the command, failing contract, and
-     ownership evidence, then continue. Leave the unrelated target defect for
-     its own scope. On a resumed run, reuse this disposition only when the
-     fetched target and ownership evidence are unchanged.
+     reproduces on that target. Record the fetched target SHA, command, failing
+     contract, and ownership evidence, then continue. Leave the unrelated
+     target defect for its own scope. On a resumed run, reuse this disposition
+     only when the target SHA, command, failing contract, and ownership evidence
+     are unchanged.
    - Treat every unproven target-owned failure as blocking. Abort an
      in-progress merge and stop when the branch changed a failing input, the
      merge created the failure through interaction, or repository guidance
@@ -161,7 +163,7 @@ with that actionable error when installation cannot complete.
 Always include:
 
 - Current branch.
-- Base ref fetched and merged.
+- Base ref and immutable target SHA fetched and merged.
 - Whether the base came from an open pull request, an explicit argument, or
   `origin/HEAD`.
 - Whether a dirty-work auto-commit was created.
@@ -170,8 +172,8 @@ Always include:
   install/bootstrap command was available.
 - Conflicts resolved or the human-owned blocker that stopped the workflow.
 - Documented verification commands and results, when run.
-- For a target-owned broad failure, the command, failing contract, and
-  ownership evidence that allowed the update to continue.
+- For a target-owned broad failure, the target SHA, command, failing contract,
+  and ownership evidence that allowed the update to continue.
 - In the open-PR path, the pull request URL and whether its configured remote
   branch was updated; a failed push is a failed update.
 - In the no-PR path, a clear note that the branch remains local-only and the

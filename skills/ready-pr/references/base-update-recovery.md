@@ -13,8 +13,10 @@ the conflict path in [triage.md](../workflows/triage.md).
 
 ## Contract
 
-Run the repository's documented verification through the bundled helper,
-passing the repository's normal issue-tagged commit message:
+Select **applicable verification** under `update-branch`'s
+[verification contract](../../update-branch/SKILL.md#workflow). Pass only that
+verification through the bundled helper with the repository's normal
+issue-tagged commit message:
 
 ```sh
 <skill-directory>/scripts/base-update-verify.sh \
@@ -22,7 +24,13 @@ passing the repository's normal issue-tagged commit message:
   -- <documented verification command>
 ```
 
-The helper enforces the contract mechanics:
+An additional broad repository-health command stays outside the helper unless
+repository guidance makes it mandatory for this change. When an optional broad
+command fails, classify and record it under the same verification contract
+before invoking the helper. A proven target-owned failure continues; every
+other failure aborts the uncommitted merge.
+
+The helper enforces the applicable-verification mechanics:
 
 1. **Bounded retry.** Verification runs at most twice: one attempt, then one
    identical re-run when the first attempt fails. Classification is
@@ -35,9 +43,9 @@ The helper enforces the contract mechanics:
    the tree being committed. When a verification attempt mutated tracked
    content — staged or unstaged — it aborts the merge instead of committing
    an unverified head.
-3. **Reproducible failure aborts.** When both bounded attempts fail, the
-   helper runs `git merge --abort`, leaving the branch unchanged at its
-   pre-merge head.
+3. **Reproducible applicable failure aborts.** When both bounded attempts
+   fail, the helper runs `git merge --abort`, leaving the branch unchanged at
+   its pre-merge head.
 
 ## Outcomes
 
@@ -47,7 +55,7 @@ Each run prints one machine-readable outcome line:
 | --- | --- | --- | --- |
 | `outcome=verified attempts=1 head=<sha>` | 0 | First attempt passed; the exactly verified merged head is committed. | Return to the pre-publish evidence loop, then restart the readiness loop on the new head. |
 | `outcome=recovered attempts=2 head=<sha>` | 0 | The first failure was retryable; the bounded retry passed and the exactly verified merged head is committed. | Same as `verified`. |
-| `outcome=reproducible attempts=2 merge-state=aborted head=<sha>` | 1 | The failure repeated on the bounded retry; the merge is aborted and the branch is unchanged. | Stop under the verification stop condition. The report names the failing verification command and the final merge state: merge aborted, branch unchanged at its pre-merge head. |
+| `outcome=reproducible attempts=2 merge-state=aborted head=<sha>` | 1 | Applicable verification repeated its failure; the merge is aborted and the branch is unchanged. | Stop under the verification stop condition. The report names the failing verification command and the final merge state: merge aborted, branch unchanged at its pre-merge head. |
 | `outcome=drifted attempts=<n> merge-state=aborted head=<sha>` | 1 | A verification attempt mutated tracked content, so the merged head is no longer exactly verified; the merge is aborted. | Stop for operator input: the verification command is not commit-safe. |
 
 ## Consumers
@@ -60,5 +68,5 @@ Each run prints one machine-readable outcome line:
   remediation applies it; a `recovered` head changes the PR head SHA, so
   `merge-pr`'s post-delegation state refresh sees progress and continues
   toward repository-managed auto-merge. A `reproducible` stop becomes
-  `merge-pr`'s `human-blocked` report, carrying the same failing
+  `merge-pr`'s `human-blocked` report, carrying the same failing applicable
   verification and final merge state.
