@@ -22,6 +22,7 @@ layout.
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
+- `skills/design-by-contract/`: consequential system contract design overlay
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/resolve-qa-feedback/`: evidence-backed QA feedback resolution skill
@@ -74,6 +75,7 @@ Skills owned by this repository:
 | `move-branch-here` | `skills/move-branch-here/` | Worktree branch handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
 | `resolve-qa-feedback` | `skills/resolve-qa-feedback/` | Evidence-backed QA feedback resolution |

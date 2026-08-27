@@ -20,6 +20,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
+- `skills/design-by-contract/`: consequential system contract design overlay
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/resolve-qa-feedback/`: evidence-backed QA feedback resolution skill
@@ -272,6 +273,7 @@ This repo owns these skills at flat paths:
 | move-branch-here | `skills/move-branch-here/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
+| design-by-contract | `skills/design-by-contract/` |
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
 | resolve-qa-feedback | `skills/resolve-qa-feedback/` |

@@ -17,6 +17,7 @@
     "./skills/move-branch-here",
     "./skills/install-skills",
     "./skills/grill-to-spec",
+    "./skills/design-by-contract",
     "./skills/grill-system-design",
     "./skills/review-system-design",
     "./skills/resolve-qa-feedback",
