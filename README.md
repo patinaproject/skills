@@ -5,9 +5,10 @@ installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging,
 contract-based system design, QA feedback resolution, system design review,
-focused system design grilling, settled-design documentation capture, release
-changelog ceremonies, and local branch updating. They are available across
-Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
+focused system design grilling, Codex chat coordination, settled-design
+documentation capture, release changelog ceremonies, and local branch updating.
+They are available across Claude Code, Codex, and any agent runtime that reads
+`AGENTS.md`.
 
 ## Quickstart
 
@@ -226,6 +227,16 @@ inspected visual evidence.
 See [./skills/resolve-qa-feedback/](./skills/resolve-qa-feedback/) for the skill
 contract.
 
+### orchestrate
+
+Multiple user-visible Codex chats can stop even when safe work remains.
+`orchestrate` inventories those chats, resumes safe idle work, routes current
+check failures and merge conflicts back to their owning chats, and reports the
+dependencies that need an operator. It can also maintain one five-minute
+heartbeat for recurring orchestration.
+
+See [./skills/orchestrate/](./skills/orchestrate/) for the skill contract.
+
 ### write-changelog
 
 Milestone and Release summaries should come from the canonical tracker rather
@@ -277,6 +288,7 @@ README and skill contract.
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [resolve-qa-feedback](./skills/resolve-qa-feedback/) | Reproduce, fix, retest, and visibly prove a QA report is resolved |
+| [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -337,6 +349,7 @@ skills/
   grill-system-design/
   review-system-design/
   resolve-qa-feedback/
+  orchestrate/
   write-changelog/
   prompting-fable/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
