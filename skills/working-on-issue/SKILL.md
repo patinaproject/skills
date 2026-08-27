@@ -16,8 +16,9 @@ commands or to a local-markdown tracker — this skill delegates its whole
 tracker vocabulary to the adapter, so proceeding without it silently guesses
 the provider.
 
-This skill is best-effort and idempotent. Branch setup, assignment, and state
-are independent actions: record a failed action and continue with the others.
+This skill is best-effort and idempotent. Chat renaming, branch setup,
+assignment, and state are independent actions: record a failed action and
+continue with the others.
 
 ## Resolve one issue
 
@@ -36,6 +37,19 @@ identifier, URL, title, assignee, state, blockers, and adapter-provided branch
 name.
 
 ## Align
+
+### Chat title
+
+When the host exposes a current-chat rename capability, set the title to
+`<Issue ID> <Title sentence case>` using the adapter's canonical identifier and
+the fetched issue title. Convert natural-language words to sentence case while
+preserving technical names, acronyms, identifiers, and code terms exactly. Use
+one space between the identifier and title, and no other issue data.
+
+Treat an unavailable rename capability as a supported no-op. Record a failed
+rename but continue every other alignment action. Repeated runs set the same
+title without additional state. A `no-issue` result returns before this action,
+leaving the current chat title unchanged.
 
 ### Branch
 
@@ -67,7 +81,7 @@ Return:
 
 - the identifier, URL, and title, or `no-issue`;
 - the ending branch and whether `new-branch` ran;
-- assignment or state failures that need human action; and
+- rename, assignment, or state failures that need human action; and
 - every intentional or accidental non-issue-linked branch deviation.
 
 Never edit the issue body or judge whether its scope is actionable.
