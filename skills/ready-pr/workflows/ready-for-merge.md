@@ -160,10 +160,14 @@ tell the human what to do next.
    If the merge conflicts, resolve conflicts only when the correct result is
    branch-local, in scope, and verifiable. Prefer repository behavior, tests,
    generators, and documented verification over ad hoc reasoning. Preserve both
-   sides when that is clearly correct. After resolving, run documented
-   verification, commit the resolution with the repository's normal issue-tagged
-   format, then return to the pre-publish evidence loop before restarting the
-   readiness loop on the new head. Use
+   sides when that is clearly correct. After resolving, select and run applicable
+   verification under `update-branch`'s
+   [verification contract](../../update-branch/SKILL.md#workflow). Apply its
+   target-owned disposition to an additional broad repository-health failure.
+   A failure caused by conflict resolution or merge interaction is blocking.
+   When verification is complete, commit the resolution with the repository's
+   normal issue-tagged format, then return to the pre-publish evidence loop
+   before restarting the readiness loop on the new head. Use
    [triage.md](triage.md) as the source of truth for conflict classification;
    this workflow owns the git sequence and readiness-loop restart.
 
@@ -531,7 +535,10 @@ tell the human what to do next.
 - Change staging would include unrelated or ambiguous files.
 - An uncommitted path cannot be provably attributed to a different issue or
   branch, and committing it in-scope needs judgment the workflow does not have.
-- Local verification fails for a reason that is not branch-local or in scope.
+- Applicable or repository-mandatory verification fails or cannot complete; the
+  branch changed a failing input; the merge or conflict resolution created the
+  failure through interaction; or target ownership of an additional broad
+  failure is unproven.
 - A clean base merge's verification failure is reproducible or drifted under
   the [base-update recovery contract](../references/base-update-recovery.md)'s
   bounded retry; the report names the failing verification and the final
