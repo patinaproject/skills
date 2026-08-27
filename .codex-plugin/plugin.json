@@ -12,7 +12,6 @@
     "./skills/merge-pr",
     "./skills/finish-pr",
     "./skills/codex-pr-feedback-loop",
-    "./skills/orchestrate",
     "./skills/polish",
     "./skills/update-branch",
     "./skills/move-branch-here",

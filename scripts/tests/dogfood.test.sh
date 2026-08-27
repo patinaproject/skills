@@ -24,7 +24,6 @@ SKILLS=(
   merge-pr
   finish-pr
   codex-pr-feedback-loop
-  orchestrate
   polish
   update-branch
   move-branch-here

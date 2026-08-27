@@ -16,7 +16,6 @@ layout.
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/orchestrate/`: existing Codex task orchestration and monitoring skill
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
@@ -70,7 +69,6 @@ Skills owned by this repository:
 | `merge-pr` | `skills/merge-pr/` | Enable repository-managed auto-merge |
 | `finish-pr` | `skills/finish-pr/` | Deprecated compatibility alias for `ready-pr` |
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
-| `orchestrate` | `skills/orchestrate/` | Existing Codex task orchestration and monitoring |
 | `polish` | `skills/polish/` | Incremental local architecture and code review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
 | `move-branch-here` | `skills/move-branch-here/` | Worktree branch handover workflow |

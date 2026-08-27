@@ -14,7 +14,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/merge-pr/`: repository-managed auto-merge skill
 - `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
 - `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/orchestrate/`: existing Codex task orchestration and monitoring skill
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
@@ -268,7 +267,6 @@ This repo owns these skills at flat paths:
 | merge-pr | `skills/merge-pr/` |
 | finish-pr (deprecated alias) | `skills/finish-pr/` |
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
-| orchestrate | `skills/orchestrate/` |
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
 | move-branch-here | `skills/move-branch-here/` |
