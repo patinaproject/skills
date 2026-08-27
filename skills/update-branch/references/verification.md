@@ -43,6 +43,7 @@ is resolved, staged, and uncommitted:
   --target <fetched-target-ref> \
   --scoped <proportional-verification-command> \
   --broad <additional-broad-command> \
+  --contract '<failing contract>' \
   --evidence <failing-source> \
   --evidence <relevant-rule-or-config>
 ```
@@ -54,9 +55,12 @@ applies.
 
 The helper verifies that its target is the in-progress merge target, runs
 scoped verification first, checks that named evidence paths are unchanged in
-the staged merge, and commits only the exact tracked tree that was verified. A
-blocking outcome aborts the merge. A `target-owned` outcome records the failed
-broad command and ownership evidence before committing.
+the staged merge, and commits only an exact tracked tree that was verified. If
+normal commit hooks change that tree, it reruns scoped and broad verification
+on the committed head before allowing publication. A blocking pre-commit
+outcome aborts the merge; a blocking post-commit outcome leaves the commit
+local. A `target-owned` outcome records the failing contract, broad command,
+and ownership evidence.
 
 When ownership is proved by reproducing on the target instead, preserve the
 same contract manually: record the exact target SHA and reproduction command,

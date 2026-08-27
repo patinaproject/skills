@@ -350,7 +350,7 @@ tell the human what to do next.
     git status --short
     git rev-parse HEAD
     gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
-    <ready-pr-directory>/scripts/current-head-required-checks.sh \
+    <update-branch-directory>/scripts/current-head-required-checks.sh \
       --pr <pr-number> \
       --head <headRefOid>
     ```

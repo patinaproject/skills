@@ -125,7 +125,11 @@ with that actionable error when installation cannot complete.
       context change means the remote branch moved but the pull request update
       is indeterminate. On failure, report the helper's context change or exact
       failed `git push` command and output, then stop without claiming the pull
-      request was updated.
+      request was updated. After a successful push, capture `HEAD` and run
+      `scripts/current-head-required-checks.sh --pr <pr-number> --head <head>`.
+      Record its exact-head outcome. A non-pass result leaves the successfully
+      updated pull request non-ready and routes through readiness triage; it
+      does not undo or misreport the push.
     - In `local-only` mode, leave the branch unpushed and report the optional
       command `git push origin HEAD`.
 

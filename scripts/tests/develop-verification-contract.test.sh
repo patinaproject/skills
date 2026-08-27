@@ -8,7 +8,7 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 UPDATE_VERIFY="$REPO_ROOT/skills/update-branch/scripts/update-verify.sh"
-REQUIRED_CHECKS="$REPO_ROOT/skills/ready-pr/scripts/current-head-required-checks.sh"
+REQUIRED_CHECKS="$REPO_ROOT/skills/update-branch/scripts/current-head-required-checks.sh"
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
@@ -32,6 +32,8 @@ git -C "$repo" switch -q feature
 git -C "$repo" merge -q --no-commit --no-ff main
 
 scoped="$WORKDIR/scoped.sh"
+# Write the command substitution into the fixture rather than expanding it.
+# shellcheck disable=SC2016
 printf '#!/usr/bin/env bash\ntest "$(cat feature.txt)" = "verified feature"\n' >"$scoped"
 chmod +x "$scoped"
 broad="$WORKDIR/broad.sh"
@@ -43,6 +45,7 @@ if ! update_output="$(cd "$repo" && "$UPDATE_VERIFY" \
   --target main \
   --scoped "$scoped" \
   --broad "$broad" \
+  --contract 'target-owned lint contract' \
   --evidence failing-source.txt \
   --evidence lint-rule.txt 2>&1)"; then
   echo "FAIL: develop classified a target-owned non-required failure as blocking: $update_output" >&2

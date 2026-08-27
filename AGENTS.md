@@ -192,14 +192,12 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/update-branch.test.sh` after changing
   `skills/update-branch/scripts/update-context.sh` or
-  `skills/update-branch/scripts/update-verify.sh`.
+  a helper under `skills/update-branch/scripts/`.
 - Run `bash scripts/tests/develop-verification-contract.test.sh` after changing
   target-merge verification outcomes, develop's verification routing, or
-  `skills/ready-pr/scripts/current-head-required-checks.sh`.
+  `skills/update-branch/scripts/current-head-required-checks.sh`.
 - Run `bash scripts/tests/move-branch-here.test.sh` after changing
   `skills/move-branch-here/scripts/worktree-context.sh`.
-- Run `bash scripts/tests/base-update-recovery.test.sh` after changing
-  `skills/ready-pr/scripts/base-update-verify.sh`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing

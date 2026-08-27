@@ -21,14 +21,15 @@ Capture the check condition with the bundled helper so the result is tied to
 the exact published head:
 
 ```sh
-<ready-pr-directory>/scripts/current-head-required-checks.sh \
+<update-branch-directory>/scripts/current-head-required-checks.sh \
   --pr <pull-request-number> \
   --head <published-head-sha>
 ```
 
-Only `outcome=required-checks-passed` satisfies condition 2. A non-pass outcome
-keeps the pull request non-ready even when a target-owned local failure was
-already dispositioned.
+Only `outcome=required-checks-passed` satisfies condition 2. The helper is
+bundled with the sibling `update-branch` skill. A non-pass outcome keeps the
+pull request non-ready even when a target-owned local failure was already
+dispositioned.
 
 An optional review service's status, availability, completion, conclusion, or
 latest-head coverage never enters the predicate. Feedback it posted remains an

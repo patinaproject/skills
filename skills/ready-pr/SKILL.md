@@ -93,8 +93,8 @@ human line.
   superseded runs are check history, reported as history rather than counted
   as a current required result.
 - Snapshot the required-check set against the exact published head with
-  `scripts/current-head-required-checks.sh`; only its `required-checks-passed`
-  outcome satisfies the check gate.
+  `update-branch`'s bundled `scripts/current-head-required-checks.sh`; only its
+  `required-checks-passed` outcome satisfies the check gate.
 - Name the scope of every passing-checks statement — the required contexts, or
   all visible check runs.
 - Report a merge state other than `CLEAN` with the exact values GitHub

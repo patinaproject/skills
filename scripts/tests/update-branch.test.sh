@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 HELPER="$REPO_ROOT/skills/update-branch/scripts/update-context.sh"
 VERIFY_HELPER="$REPO_ROOT/skills/update-branch/scripts/update-verify.sh"
+REQUIRED_CHECKS="$REPO_ROOT/skills/update-branch/scripts/current-head-required-checks.sh"
 GIT_ID=(-c user.email=test@example.com -c user.name=test)
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
@@ -50,6 +51,17 @@ mkdir -p "$FAKE_BIN"
 cat > "$FAKE_BIN/gh" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
+
+if [ "${GH_SCENARIO:?GH_SCENARIO must be set}" = required-check-failed ]; then
+  if [ "${1:-}" = pr ] && [ "${2:-}" = view ]; then
+    printf '%s\n' "${EXPECTED_HEAD:?EXPECTED_HEAD must be set}"
+    exit 0
+  fi
+  if [ "${1:-}" = pr ] && [ "${2:-}" = checks ]; then
+    printf 'Test Gate\tfail\n'
+    exit 1
+  fi
+fi
 
 if [ "${1:-}" != "pr" ] || [ "${2:-}" != "list" ]; then
   echo "unexpected gh command: $*" >&2
@@ -282,6 +294,7 @@ VERIFY
     --target origin/release/1.x \
     --scoped "$scoped_pass" \
     --broad "$broad_failure" \
+    --contract 'house lint rejects target-owned source' \
     --evidence failing-source.txt \
     --evidence lint-rule.txt \
     --evidence lint-runner.sh 2>&1)"; then
@@ -302,6 +315,41 @@ VERIFY
     "$(git --git-dir="$TMP_ROOT/target-owned-verification/origin.git" rev-parse refs/heads/feature)" \
     "$(git -C "$clone" rev-parse HEAD)" \
     'target-owned scenario should push the verified merge'
+  pushed_head="$(git -C "$clone" rev-parse HEAD)"
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-check-failed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'failed required check on the pushed merge unexpectedly passed readiness'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "pushed-head required-check failure was not recorded: $check_output"
+  fi
+
+  build_sandbox hook-mutated-verification
+  clone="$SANDBOX_CLONE"
+  cat >"$clone/.git/hooks/pre-commit" <<'HOOK'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'hook output\n' >hook-output.txt
+git add hook-output.txt
+HOOK
+  chmod +x "$clone/.git/hooks/pre-commit"
+  git -C "$clone" fetch -q origin release/1.x
+  git -C "$clone" merge -q --no-commit --no-ff origin/release/1.x
+  if ! hook_output="$(cd "$clone" && "$VERIFY_HELPER" \
+    --message 'chore: #324 merge release target' \
+    --target origin/release/1.x \
+    --scoped "$scoped_pass" \
+    --broad "$broad_failure" \
+    --contract 'house lint rejects target-owned source' \
+    --evidence failing-source.txt \
+    --evidence lint-rule.txt \
+    --evidence lint-runner.sh 2>&1)"; then
+    fail "commit-hook tree change was not reverified: $hook_output"
+  elif ! grep -Fq 'post-commit-reverified=true' <<< "$hook_output"; then
+    fail "commit-hook re-verification was not recorded: $hook_output"
+  elif [ "$(git -C "$clone" show HEAD:hook-output.txt)" != 'hook output' ]; then
+    fail 'commit-hook output was not present in the reverified merge commit'
+  fi
 
   build_sandbox branch-caused-verification
   clone="$SANDBOX_CLONE"
@@ -317,6 +365,7 @@ VERIFY
     --target origin/release/1.x \
     --scoped "$scoped_pass" \
     --broad "$broad_failure" \
+    --contract 'house lint rejects target-owned source' \
     --evidence failing-source.txt \
     --evidence lint-rule.txt \
     --evidence lint-runner.sh 2>&1)"; then
@@ -336,6 +385,7 @@ VERIFY
     --target origin/release/1.x \
     --scoped "$scoped_blocked" \
     --broad "$broad_failure" \
+    --contract 'house lint rejects target-owned source' \
     --evidence failing-source.txt \
     --evidence lint-rule.txt \
     --evidence lint-runner.sh 2>&1)"; then
@@ -356,6 +406,7 @@ VERIFY
     --broad-required \
     --scoped "$scoped_pass" \
     --broad "$broad_failure" \
+    --contract 'house lint rejects target-owned source' \
     --evidence failing-source.txt \
     --evidence lint-rule.txt \
     --evidence lint-runner.sh 2>&1)"; then

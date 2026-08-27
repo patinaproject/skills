@@ -46,8 +46,8 @@ published_head="$(read_pr_head)" ||
 [ "$published_head" = "$expected_head" ] ||
   fail "pull request #$pr_number head is $published_head, not expected current head $expected_head"
 
-status=0
-gh pr checks "$pr_number" --required || status="$?"
+check_status=0
+gh pr checks "$pr_number" --required || check_status="$?"
 
 refreshed_head="$(read_pr_head)" ||
   fail "gh pr view $pr_number failed while rechecking the published head"
@@ -57,10 +57,10 @@ if [ "$refreshed_head" != "$expected_head" ]; then
   exit 1
 fi
 
-if [ "$status" -ne 0 ]; then
+if [ "$check_status" -ne 0 ]; then
   printf 'outcome=required-checks-non-pass status=%s head=%s\n' \
-    "$status" "$expected_head"
-  exit "$status"
+    "$check_status" "$expected_head"
+  exit "$check_status"
 fi
 
 printf 'outcome=required-checks-passed head=%s\n' "$expected_head"
