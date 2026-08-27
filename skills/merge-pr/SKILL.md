@@ -19,7 +19,7 @@ the pull request is ready. Its
 define how to handle verification failures after merging the target branch.
 
 Report whether auto-merge was enabled, the pull request merged, or a person
-must act. If the repository has auto-merge turned off, ask the operator to
+must act. If the repository has auto-merge turned off, ask the user to
 enable it. If the GitHub plan does not support auto-merge, say so.
 
 Never force a merge, bypass protections, disable checks, merge with local Git,

@@ -195,30 +195,10 @@ pnpm exec markdownlint-cli2 --fix "**/*.md"
 
 ## Changing a private repository to public
 
-Changing visibility also changes where issues are filed. Treat it as a
-migration and get a reviewed plan before changing history.
-
-1. List current issue references, open work, pull requests, tags, releases,
-   forks, branch protection, and self-referencing action commits.
-2. Configure one-way GitHub-to-Linear issue intake. Record that later field
-   updates synchronize both ways and that the Linear copies must not be edited
-   or closed.
-3. Create the required GitHub issue labels with descriptions.
-4. Re-file open repository work on GitHub with links back to the Linear issues,
-   then close the original Linear issues with links to GitHub.
-5. Review a complete map from every old reference to its new public GitHub
-   object or replacement text.
-6. Merge or close every pull request, list GitHub-managed fixed references,
-   create and restore-test a mirror backup, then perform only the approved
-   history changes across repository branches and tags.
-7. Change commit, pull request, issue, ADR, contributor, agent, and tracker
-   instructions to the public format. Update merged pull request text
-   separately.
-8. Restore branch protection, update self-referencing action commits, verify
-   releases and the next release calculation, and notify fork owners.
-
-Never perform step 6 during a normal existing-repository update. It requires a
-separate reviewed migration plan.
+When the user asks to make a private repository public, read
+[the visibility migration instructions](./public-repository-migration.md).
+Changing issue tracking or Git history is separate from a normal repository
+update and requires its own reviewed plan.
 
 ## Final report
 

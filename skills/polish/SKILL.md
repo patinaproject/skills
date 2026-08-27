@@ -72,17 +72,15 @@ for its current source.
    `full` or `incremental` range. Read unchanged callers and neighboring code
    when needed. Recheck any earlier design findings.
 
-   Use the terms and tests from `codebase-design`, including module, interface,
-   depth, seam, adapter, locality, and deletion test. Read relevant
-   `CONTEXT.md` and ADR files first. Report a design change only when it passes
-   the deletion test, makes the module deeper, improves locality or testing,
-   and belongs with the reviewed change. Do not edit code during this review.
-   In `recheck`, review only the named findings.
+   Follow the complete review rules in `codebase-design`. Read relevant
+   `CONTEXT.md` and ADR files first. Report only design improvements that belong
+   with the reviewed change and satisfy those rules. Do not edit code during
+   this review. In `recheck`, review only the named findings.
 4. Require a clean committed worktree and record `HEAD`. Run the repository's
    documented verification against that exact commit. If verification fails or
    stops early, keep the last completed review result unchanged. Save useful
-   located findings as incomplete-review notes, then fix the problem or report
-   what prevents progress.
+   findings from the unfinished review, then fix the problem or report what
+   prevents progress.
 5. Run the Standards and Spec reviews from `code-review` as fresh parallel
    subagents. Give both reviewers the fixed base and commit, the exact diff for
    `full` or `incremental`, any needed unchanged context, the issue or a clear
@@ -93,7 +91,7 @@ for its current source.
    A documented standards violation or a missing, partial, or incorrect issue
    requirement blocks the pass. Code smells require judgment. If a reviewer
    fails, times out, or stops early, keep the last completed result and save any
-   useful finding as an incomplete-review note.
+   useful finding from the unfinished review.
 6. Confirm that `HEAD` still matches the commit from step 4. Combine the design,
    Standards, and Spec results. Store only one stable ID, review type, current
    location, and short summary for each blocking finding.
@@ -101,14 +99,17 @@ for its current source.
    - With no blocking findings, record `passed` for the current commit.
    - With blocking findings, record `changes_requested` before fixing them.
    - If a review did not finish or `HEAD` changed, preserve the last completed
-     result and save only useful incomplete-review notes.
+     result and save only useful findings from that unfinished review.
 7. Decide what to do with every completed finding:
 
-   | Result | When to use it | Action |
-   | --- | --- | --- |
-   | `ready-for-agent` | The fix is clear or local evidence can answer the question | Use `implement` for changes or `diagnosing-bugs` for investigation |
-   | `ready-for-human` | It needs judgment, access, manual testing, design input, permission, changed requirements, or conflicting instructions | Stop with the evidence and the decision needed |
-   | `wontfix` | It is outdated, incorrect, non-blocking, or conflicts with repository rules | Explain why and remove it from the blocking list |
+   - Fix clear local problems with `implement`. Use `diagnosing-bugs` when local
+     investigation can answer the question.
+   - Ask the user when the finding needs judgment, access, manual testing,
+     design input, permission, changed requirements, or conflicting
+     instructions.
+   - Dismiss a finding when it is outdated, incorrect, non-blocking, or
+     conflicts with repository rules. Explain why and remove it from the
+     blocking list.
 
    Verify and commit every agent fix, then restart at step 2. Review even small
    fix commits. Finish only when the current commit itself has a passing record

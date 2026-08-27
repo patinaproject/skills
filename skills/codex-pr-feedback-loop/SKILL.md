@@ -20,7 +20,7 @@ Follow these rules:
 - Use a task automation so later runs retain this conversation's context.
 - Reply to and resolve a review thread only when a bot or GitHub App started
   it. Fix code requested by a human reviewer, but leave their thread open for
-  the reviewer or operator to answer and resolve.
+  the reviewer or user to answer and resolve.
 - If a human says a previously fixed bug remains or returned, reproduce that
   report again before changing more code.
 - Before stopping, apply `ready-pr`'s
