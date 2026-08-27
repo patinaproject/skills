@@ -28,6 +28,10 @@ SKILLS=(
   update-branch
   move-branch-here
   grill-to-spec
+  design-by-contract
+  grill-system-design
+  review-system-design
+  resolve-qa-feedback
   write-changelog
   prompting-fable
 )

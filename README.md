@@ -3,10 +3,11 @@
 Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
-polishing, isolated local branch-diff review, PR readiness and merging, Codex
-PR feedback polling, settled-design documentation capture, release changelog
-ceremonies, and local branch updating. They are available across Claude Code,
-Codex, and any agent runtime that reads `AGENTS.md`.
+polishing, isolated local branch-diff review, PR readiness and merging,
+contract-based system design, QA feedback resolution, system design review,
+focused system design grilling, settled-design documentation capture, release
+changelog ceremonies, and local branch updating. They are available across
+Claude Code, Codex, and any agent runtime that reads `AGENTS.md`.
 
 ## Quickstart
 
@@ -188,6 +189,43 @@ the implementing branch can apply them verbatim.
 
 See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
 
+### design-by-contract
+
+`design-by-contract` selects consequential client-supplier contracts and states
+what each contract requires, ensures, and maintains. It compares changes and
+alternatives through precise clauses, with tables or Mermaid diagrams when a
+visual explanation materially improves clarity.
+
+See [./skills/design-by-contract/](./skills/design-by-contract/) for the skill
+contract.
+
+### grill-system-design
+
+System design grilling should focus on choices that deserve durable context.
+`grill-system-design` routes that interview through `grill-to-spec` and limits
+questions to hard-to-reverse, surprising trade-offs.
+
+See [./skills/grill-system-design/](./skills/grill-system-design/) for the skill
+contract.
+
+### review-system-design
+
+System design review needs an implementation-focused map of the contracts that
+changed. `review-system-design` presents those contracts in dependency-ordered
+rounds for a human reviewer.
+
+See [./skills/review-system-design/](./skills/review-system-design/) for the
+skill contract.
+
+### resolve-qa-feedback
+
+QA feedback needs reproduction evidence and a fixed-build retest before a fix
+claim. `resolve-qa-feedback` carries that loop from the red baseline through
+inspected visual evidence.
+
+See [./skills/resolve-qa-feedback/](./skills/resolve-qa-feedback/) for the skill
+contract.
+
 ### write-changelog
 
 Milestone and Release summaries should come from the canonical tracker rather
@@ -235,6 +273,10 @@ README and skill contract.
 | [move-branch-here](./skills/move-branch-here/) | Take a branch from the worktree holding it, with its polish review state |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
+| [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
+| [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
+| [resolve-qa-feedback](./skills/resolve-qa-feedback/) | Reproduce, fix, retest, and visibly prove a QA report is resolved |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -291,6 +333,10 @@ skills/
   update-branch/
   move-branch-here/
   grill-to-spec/
+  design-by-contract/
+  grill-system-design/
+  review-system-design/
+  resolve-qa-feedback/
   write-changelog/
   prompting-fable/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
