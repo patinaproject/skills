@@ -82,7 +82,8 @@ with that actionable error when installation cannot complete.
      secrets; or any commit-message requirement, such as a required issue tag,
      that cannot be satisfied from local guidance.
 6. Merge with an explicit merge commit:
-   - Run `git merge --no-ff <base-ref>`.
+   - Run `git merge --no-commit --no-ff <base-ref>` so verification covers the
+     staged merge before `scripts/update-verify.sh` creates the merge commit.
    - If Git reports `Already up to date`, report that no merge commit was
      needed.
 7. When the merge conflicts, run the conflict-skill availability check, then
