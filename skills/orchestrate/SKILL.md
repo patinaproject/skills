@@ -1,113 +1,100 @@
 ---
 name: orchestrate
-description: Coordinate user-visible Codex chats when work must keep moving. Resume idle chats, automatically repair failing checks and merge-conflicted pull requests, and report chats that require operator attention. Exclude background sessions.
+description: Keep user-visible Codex tasks moving. Resume idle tasks, ask them to repair current pull request conflicts or failed checks, and report tasks that need the user. Ignore background workers.
 ---
 
-# Orchestrate
+# Orchestrate Codex tasks
 
-Keep every user-visible Codex chat moving as far as its current authority permits. Work as the coordinator; leave implementation inside each chat.
+Coordinate user-visible Codex tasks. Leave implementation inside each task.
+Ignore subagents, command sessions, automations, test processes, and other
+background workers except when their state explains a user-visible task.
 
-## Chat boundary
+## Check every task
 
-The inventory contains only user-visible Codex chats from the Codex task list.
+1. List every incomplete user-visible Codex task.
+2. Read each task's recent result and current run state.
+3. Check every open pull request owned by a task for conflicts and current
+   required checks.
+4. Put each task in one state:
+   - `Active`: a command, check, or agent turn is running.
+   - `Ready for more work`: nothing is running and the next safe step is clear
+     and already authorized.
+   - `User needed`: progress needs a decision, approval, credential,
+     clarification, or action outside the task's authority.
+5. Account for every incomplete user-visible task.
 
-Background implementation is outside this skill's inventory. This includes subagents, CLI `exec` sessions, automation runs, approval guardians, shell processes, test runners, and other worker sessions. Do not instruct, classify, or report these sessions. Read their state only when it explains the status of a user-visible chat.
+Time alone does not make a task idle. Inspect its current state.
 
-## Sweep
+## Resume tasks that can continue
 
-1. List every incomplete user-visible Codex chat.
-2. Read each chat's recent status and current run state.
-3. Inspect the current mergeability of each open pull request owned by a chat.
-4. Classify each chat:
-   - **Active:** A command, check, or agent turn is running.
-   - **Idle and actionable:** No work is running, and the next action is clear, safe, and within the task's existing scope and authority. A current failing check or pull request with merge conflicts is actionable.
-   - **Operator required:** No safe work remains without an operator decision, approval, credential, clarification, or external action.
-5. Account for every incomplete user-visible chat before proceeding.
+Send one instruction to each task that is ready for more work. State the next
+action, keep it within the task's existing request and permissions, define a
+visible completion condition, and tell the task to continue through later safe
+steps. Do not repeat an unchanged instruction already sent to that task.
 
-Elapsed time alone does not prove that a chat is idle. Inspect its current state.
+When one part needs the user but other work can continue independently, tell
+the task to finish that other work first.
 
-## Advance actionable chats
+## Pull request conflicts
 
-Send one instruction to each idle and actionable chat. The instruction must:
+For an idle task whose pull request has conflicts, instruct it to:
 
-- State the next concrete action.
-- Preserve the chat's existing scope and authority.
-- Define an observable completion criterion.
-- Tell the chat to continue through subsequent safe steps.
-- Tell the chat to stop only at completion or a genuine operator dependency.
+1. merge the pull request's current target branch using the repository's branch
+   update and conflict resolution instructions
+2. resolve every conflict covered by the pull request and repository rules
+3. run the checks required for the conflict changes
+4. push the branch
+5. confirm that the pull request no longer reports conflicts
 
-Do not repeat an unchanged instruction that the chat already received.
+The task is done when the updated branch is pushed, the pull request has no
+conflicts, and its required checks pass. Ask the user only when repository rules
+require it, a conflict exposes incompatible requirements, access is missing, or
+safe attempts cannot resolve the conflict.
 
-When one branch needs the operator but independent work remains, instruct the chat to complete the independent work first. Escalate only after the chat has exhausted safe progress.
+## Failed checks
 
-## Merge-conflicted pull requests
+For an idle task with a failed check on its latest pull request commit, instruct
+it to:
 
-Treat a merge conflict as routine branch maintenance. When the owning chat is idle, immediately instruct it to:
+1. read the current logs and reproduce the failure locally when the repository
+   provides a reliable command
+2. decide whether the branch caused it, it already exists on the target branch,
+   infrastructure failed temporarily, or an external service failed
+3. fix every cause introduced by the branch using the repository's diagnosis,
+   implementation, and test instructions
+4. run the smallest regression check first, then the required checks for the
+   changed code
+5. commit and push the fix to the existing branch
+6. repeat until the latest pull request commit passes every required check
 
-1. Update its branch from the pull request's current target branch with the repository's canonical branch-update and merge-conflict workflows.
-2. Resolve every conflict within the pull request's accepted scope and repository policy.
-3. Run the verification required for the changed conflict resolutions.
-4. Push the updated branch.
-5. Confirm that the pull request no longer reports merge conflicts.
+Retry temporary infrastructure failures a limited number of times. When the
+same failure exists on the target branch, follow the repository's branch update
+rules and record the comparison. Ask the user only when progress needs a new
+decision or permission, unavailable credentials, destructive recovery,
+incompatible requirements, a human review response, or an external service
+that still fails after reasonable retries.
 
-The observable completion criterion is a pushed branch whose pull request reports no merge conflicts and whose required verification passes.
+## Report tasks that need the user
 
-Escalate only when repository policy requires a halt, the conflict exposes incompatible accepted requirements, required access is unavailable, or safe conflict-resolution attempts fail.
+After resuming tasks that can continue, report every task that needs the user.
+Use each task's exact title. Link it with the app's task link when available.
+Link the issue, review, check, or other source of the problem when available.
 
-## Failing checks
-
-Treat a failing check on the chat's current pull-request head as actionable work. Ignore superseded failures from older heads. When the owning chat is idle, immediately instruct it to:
-
-1. Inspect the failing check's current logs and reproduce the failure locally when the repository provides a stable local seam.
-2. Classify the cause as branch-local, base-owned, transient infrastructure, or an external dependency.
-3. Fix every branch-local cause within the chat's accepted scope. Use the repository's existing diagnosis, development, and test workflows when they apply.
-4. Run the narrow regression first, then the required verification for the changed code.
-5. Commit and push the repair to the existing branch without expanding scope or creating a new pull request.
-6. Recheck the current pull-request head and continue until its required checks pass.
-
-For a transient infrastructure failure, use bounded safe retries and scoped recovery before escalating. For a base-owned failure, update from the current target branch when repository policy permits, verify the merged result, and push it. The observable completion criterion is a current pull-request head with the repaired check and all required checks passing.
-
-Escalate only when the failure needs an operator decision, new authority, unavailable credentials, destructive recovery, an incompatible accepted requirement, a human-owned review action, or an external service that still fails after bounded safe recovery. Report the exact check, current-head evidence, attempted recovery, and one operator action.
-
-## Operator boundary
-
-Operator attention is required when progress depends on:
-
-- A material product, design, or scope decision.
-- New authority or an approval the chat does not already have.
-- Credentials or access that the chat cannot obtain safely.
-- A destructive or difficult-to-recover action.
-- Conflicting accepted requirements.
-- A human-owned review response or resolution.
-- A blocker that remains after the chat exhausts its safe recovery paths.
-
-Do not make these decisions for the operator.
-
-## Report
-
-After advancing actionable chats, report every user-visible chat that currently requires operator attention.
-
-Use the chat's exact title. When the current client supports Codex deep links and the inventory provides the chat ID, render that title as `[Exact chat title](codex://threads/<thread-id>)`. Otherwise, render the exact title as plain text. Link the relevant issue, requested change, review, check, or other source when available.
-
-| Chat | Blocker | Work completed | Operator action required |
+| Task | Why it stopped | Work completed | User action |
 | --- | --- | --- | --- |
-| [Exact chat title](codex://threads/<thread-id>) | Concrete reason progress stopped | Furthest safe state reached | One specific decision or action |
+| Exact task title | Specific reason | Furthest safe result | One decision or action |
 
-Include unchanged operator dependencies until they are resolved. If none require attention, report that briefly.
+Keep reporting the same unresolved user actions on later runs. If none remain,
+say so briefly. You may also list tasks resumed during this run and the
+instruction sent to each.
 
-Optionally summarize newly resumed chats separately:
+## Recurring checks
 
-| Chat | Instruction sent |
-| --- | --- |
-| [Exact chat title](codex://threads/<thread-id>) | Concrete next action and completion criterion |
+When the user asks for recurring monitoring:
 
-## Recurring orchestration
+1. Run one complete check immediately.
+2. Resume every idle task that can continue.
+3. Report tasks that need the user.
+4. Create or update one five-minute heartbeat that repeats these instructions.
 
-When recurring monitoring is requested:
-
-1. Complete one full sweep immediately.
-2. Advance every presently actionable idle chat.
-3. Report current operator dependencies from user-visible chats.
-4. Create or update one five-minute heartbeat that repeats this skill's sweep.
-
-Keep one monitor for this purpose. Update it instead of creating a duplicate.
+Update the existing monitor instead of creating a duplicate.

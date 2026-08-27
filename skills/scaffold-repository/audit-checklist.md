@@ -177,7 +177,9 @@ For each gap, emit:
   Action? (accept / skip / defer)
 ```
 
-Group recommendations into ordered batches and offer them in this sequence (matching `SKILL.md` → Realignment mode; each batch must cover every listed file):
+Group recommendations into ordered batches and offer them in this sequence
+(matching `SKILL.md` under "Existing repository"; each batch must cover every
+listed file):
 
 1. Commit / PR conventions (`commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`, visibility-selected issue intake)
 2. PNPM tooling, skills installation, and tracker connection (`package.json`, `.markdownlint.jsonc`, `.markdownlint-cli2.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`)

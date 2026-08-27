@@ -1,49 +1,42 @@
 ---
 name: write-changelog
-description: Render user-facing changelog or release-note copy from a project milestone or shipped Release. Use when the user asks for milestone notes, release notes, or a changelog derived from tracked issues.
+description: Write user-facing changelog or release note text from a milestone or published release. Use when the user asks for milestone notes, release notes, or a changelog based on tracked issues.
 ---
 
-# Write Changelog
+# Write a changelog
 
-Read `docs/issue-tracker.md` at the repository root for remote
-operations and repository brand-voice guidance before writing user-facing copy.
+Read `docs/issue-tracker.md` at the repository root before fetching issues or
+writing user-facing text. It contains the tracker commands and the project's
+writing style. If it is missing, stop and say that `scaffold-repository`
+provides it.
 
-If `docs/issue-tracker.md` is absent, stop before any tracker operation and
-report the missing path plus the skill that provides it: `scaffold-repository`
-emits it as part of the core baseline. Do not fall back to invented tracker
-commands or to a local-markdown tracker — this skill delegates its whole
-tracker vocabulary to the adapter, so proceeding without it silently guesses
-the provider.
+Choose one source:
 
-## Choose the source
+- For planned work, use one milestone and its issues.
+- For shipped work, use one published release and resolve its `#N` or `PAT-N`
+  issue references according to `docs/issue-tracker.md`.
 
-- **Planning milestone:** resolve one provider milestone, then list its issues.
-  This answers what a delivery phase contains.
-- **Shipped Release:** fetch one provider Release and resolve its `#N` or
-  `PAT-N` issue references according to the adapter, then create or update the
-  corresponding release notes. This answers what actually shipped.
+A milestone shows what is planned. It does not prove that work shipped. Do not
+reconstruct a release from GitHub event history. Release Please continues to
+maintain the commit-based `CHANGELOG.md`; this skill writes issue-based
+milestone summaries and release notes.
 
-Do not use milestones as proof of shipping. Do not reconstruct shipped content
-by walking forge event timelines. Release Please continues to own the
-commit-level `CHANGELOG.md`; this skill owns issue-level milestone and Release
-summaries.
+## Steps
 
-## Workflow
+1. Resolve exactly one requested milestone or release. Stop if the request
+   matches more than one.
+2. Fetch every attached issue, following all result pages. Read enough of each
+   issue to understand the user impact.
+3. Remove internal work unless it changes the user experience or the user asks
+   for engineering notes.
+4. Group the remaining entries under `New`, `Improved`, `Fixed`, and
+   `Breaking`. Omit empty sections.
+5. Rewrite each entry as a short user outcome. Remove internal paths, private
+   context, and unnecessary implementation detail.
+6. Return milestone notes as Markdown for review. For a published release,
+   show the draft first and save it through the tracker instructions only when
+   the user authorized publication.
+7. Report the source, total issue count, omitted internal issue count, and the
+   release note link when one exists.
 
-1. Resolve the requested project milestone or Release. Refuse an ambiguous
-   target.
-2. Fetch all attached issues, following pagination, and include the issue
-   descriptions needed to understand user impact.
-3. Exclude internal-only work unless it materially changes the user experience
-   or the user asks for an engineering changelog.
-4. Group kept entries under `New`, `Improved`, `Fixed`, and `Breaking`; omit
-   empty groups.
-5. Rewrite entries as concise user outcomes. Avoid issue titles that expose
-   implementation details, internal paths, or private context.
-6. For a project milestone, return Markdown for review. For a Release, present
-   the draft and, when publishing is authorized, save it as tracker release
-   notes through the adapter.
-7. Report the source identifier, issue count, omitted internal count, and the
-   created or updated release-note link when one exists.
-
-Never claim an item shipped merely because its issue is completed.
+Never say an item shipped only because its issue is complete.

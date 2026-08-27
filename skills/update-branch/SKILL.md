@@ -1,180 +1,132 @@
 ---
 name: update-branch
-description: Update the current work branch with pure Git, using an open pull request's target and pushing its updated head, or falling back to an explicit/default base locally. Use when the user invokes `/update-branch`, says "update branch", or asks to merge the base or default branch into this branch.
+description: Merge the current pull request's target branch into the current work branch with Git and push the result. Without a pull request, merge an explicit or default target locally. Use when the user says update branch or asks to merge the base or default branch.
 ---
 
-# Update Branch
+# Update a branch
 
-## Quick Start
-
-Invoke from a local work branch:
+Run from a local work branch.
 
 ```text
 /update-branch
 /update-branch release/1.x
 ```
 
-First resolve whether the current branch has one open pull request. Its target
-branch is the base, including when an optional base argument was supplied. With
-no open pull request, an optional argument selects the base and no argument
-falls back to `origin/HEAD`.
+When the current branch has one open pull request, always use that pull
+request's target branch, even if the user supplied another target. Without an
+open pull request, use the supplied target or fall back to `origin/HEAD`.
 
-Use pure `git` for fetch, merge, and push. Use `gh` only to read pull request
-context; the bundled `scripts/update-context.sh` makes target selection and the
-configured-remote push deterministic. The open-PR path pushes only after the
-merge, dependency refresh, and applicable verification are complete. The
-no-PR path remains local-only. GitHub's remote update button and update-branch
-APIs are outside this workflow.
+Use `git` for fetch, merge, and push. Use `gh` only to read pull request data.
+The bundled `scripts/update-context.sh` selects the target and verifies the
+pull request again before and after pushing. A branch without a pull request
+stays local.
 
-## Required Conflict Skill
+## Requirements
 
-`resolving-merge-conflicts` owns every merge-conflict resolution. Load and
-follow it whenever `git merge` conflicts. Before touching a conflicted hunk,
-run `scripts/update-context.sh require-conflict-skill`; if it reports the skill
-missing, follow its installation guidance and load the installed skill, or stop
-with that actionable error when installation cannot complete.
-
-## Input Contract
-
-1. Accept no argument or one optional base ref.
-2. Refuse detached HEAD.
-3. Refuse a missing `origin` remote.
-4. Require `gh` to resolve open pull requests. Treat a failed query as a hard
-   error rather than assuming there is no pull request.
-5. When the no-PR path has no base argument, refuse missing `origin/HEAD`; do
-   not hardcode `main`, `master`, or another default branch. The helper tells
-   the operator to run `git remote set-head origin -a` when it is missing.
-6. Refuse to update the repository default branch unless the user explicitly
-   supplies a base and confirms they intend to mutate that branch.
+- Accept zero or one target argument.
+- Stop on a detached HEAD or missing `origin` remote.
+- Require `gh` for the pull request lookup. A failed lookup is an error, not
+  proof that no pull request exists.
+- Without a pull request or explicit target, require `origin/HEAD`. If it is
+  missing, tell the user to run `git remote set-head origin -a`.
+- Never assume the default branch is named `main` or `master`.
+- Do not update the repository's default branch unless the user supplied a
+  target and explicitly confirmed the default branch should change.
+- Use `resolving-merge-conflicts` for every merge conflict. Before editing a
+  conflict, run `scripts/update-context.sh require-conflict-skill`. Install the
+  skill or stop when the helper says it is missing.
 
 ## Workflow
 
-1. Read repository guidance for commit messages, verification, and protected
-   branches.
-2. Record the current branch with `git branch --show-current`. Compare it to
-   the repository default branch before fetch or merge. If they match, stop
-   unless the user supplied a base and explicitly confirmed they intend to
-   update the default branch.
-3. From the installed skill directory, run
-   `scripts/update-context.sh resolve [base-ref]` and record every returned
-   field: mode, current branch, normalized base ref, pull request number and
-   URL, and pull request head. The helper requires zero or one open pull request
-   for the current branch:
-   - `pull-request` mode uses that pull request's target, taking precedence over
-     the optional argument and `origin/HEAD`.
-   - `local-only` mode preserves the optional explicit base, or resolves
-     `origin/HEAD` when no base was supplied.
-4. Fetch the remote head name for the selected base from `origin`, stripping
-   the leading `origin/` first. For example, fetch `main` for `origin/main` and
-   `release/1.x` for `origin/release/1.x`. Record `git rev-parse <base-ref>` as
-   the immutable fetched target SHA.
-5. Inspect local dirty state before merging:
-   - Run `git status --short`.
-   - Review staged, unstaged, and untracked diffs.
-   - Auto-commit only when the entire dirty set is cohesive, branch-local,
-     free of secrets, and can be summarized under the local commit convention.
-     The initial update request authorizes this safe dirty-work auto-commit
-     without asking for another confirmation. Before committing, state the
-     exact files and commit message that will be used so the auto-commit is
-     not silent.
-   - Stop for unrelated or ambiguous changes, such as a mixed app, config, and
-     generated-file dirty set; generated output with unclear source; possible
-     secrets; or any commit-message requirement, such as a required issue tag,
-     that cannot be satisfied from local guidance.
-6. Merge with an explicit merge commit:
-   - Run `git merge --no-commit --no-ff <base-ref>` so verification finishes
-     before the merge commit is created.
-   - If Git reports `Already up to date`, report that no merge commit was
-     needed.
-7. When the merge conflicts, run the conflict-skill availability check, then
-   invoke and follow `resolving-merge-conflicts` as the underlying workflow.
-   Keep ownership of *when* to engage versus stop: first screen the conflicts
-   and hand it only hunks that are branch-local, in scope for this update, and
-   mechanically verifiable. Escalate a hunk that needs product judgment, and
-   stop (see Conflict Rules) for unrelated scope, permissions, secrets,
-   generated-file uncertainty, or unverifiable semantics.
-8. After a successful merge or conflict resolution, inspect whether dependency
-   inputs changed during the merge. Treat package manifests, lockfiles,
-   workspace manifests, or toolchain version files as dependency inputs.
-   - When dependency inputs changed, run the repository's documented
-     install/bootstrap command before verification. Prefer commands in
-     `AGENTS.md`, README files, package scripts, or other repository guidance.
-   - If dependency inputs changed and no install/bootstrap command is
-     documented, stop and report that dependencies may need refresh before
-     verification can run.
-   - Do not silently commit lockfile or generated dependency changes. Include
-     them only when they are a direct result of the documented install command,
-     are in scope for the branch update, and follow the same reporting and
-     commit-message rules as other auto-committed dirty work.
-9. Run **applicable verification** after auto-committing dirty work, completing
-   dependency refresh, or completing conflict resolution. Applicable
-   verification is the repository-documented, proportional verification for
-   the pull request delta, resolved conflicts, and dependency effects that can
-   change branch behavior. Prefer commands in `AGENTS.md`, README files,
-   package scripts, or other repository guidance. If no local verification
-   applies, say so explicitly.
-   - Treat an additional broad repository-health command as mandatory only
-     when repository guidance explicitly requires it for this change.
-   - When applicable verification fails or cannot complete, abort an
-     in-progress merge and stop.
-   - When applicable verification passes but an additional broad command
-     fails, classify the failure as **target-owned** only when the failing
-     source and the rule, configuration, or other input that explains the
-     failure are unchanged from the fetched target, or when the failure
-     reproduces on that target. Record the fetched target SHA, command, failing
-     contract, and ownership evidence, then continue. Leave the unrelated
-     target defect for its own scope. On a resumed run, reuse this disposition
-     only when the target SHA, command, failing contract, and ownership evidence
-     are unchanged.
-   - Treat every unproven target-owned failure as blocking. Abort an
-     in-progress merge and stop when the branch changed a failing input, the
-     merge created the failure through interaction, or repository guidance
-     makes the broad command mandatory.
-10. When a merge remains in progress after verification, create the merge
-    commit under the repository's commit convention. Use normal commit hooks.
-11. Finish according to the resolved mode:
-    - In `pull-request` mode, run
-      `scripts/update-context.sh push <pr-number> <base-ref> <pr-head>` with the
-      fields recorded in step 3. This pushes `HEAD` to the branch's configured
-      upstream after validating the pull request identity, target, and head,
-      then revalidates that context immediately after the push. A post-push
-      context change means the remote branch moved but the pull request update
-      is indeterminate. On failure, report the helper's context change or exact
-      failed `git push` command and output, then stop without claiming the pull
-      request was updated.
-    - In `local-only` mode, leave the branch unpushed and report the optional
-      command `git push origin HEAD`.
+1. Read repository instructions for commits, checks, and protected branches.
+2. Record `git branch --show-current` and compare it with the repository default
+   branch. Stop on the default branch unless the user explicitly authorized it.
+3. From this skill's installed directory, run:
 
-## Conflict Rules
+   ```sh
+   scripts/update-context.sh resolve [target]
+   ```
 
-- Keep the merge in progress only while `resolving-merge-conflicts` works the
-  clear branch-local conflicts.
-- `update-branch`'s stop rules **override** `resolving-merge-conflicts`' "always
-  resolve; never `--abort`" directive. When a conflict needs product judgment or
-  falls outside this update's scope, `git merge --abort` and stop rather than
-  resolving it.
-- Use `git merge --abort` before stopping when the branch should be restored to
-  its pre-merge state.
-- Do not rebase, force-push, or rewrite history.
-- Do not sweep unrelated dirty files into the merge.
+   Record the returned mode, current branch, normalized target, pull request
+   number and URL, and pull request head. `pull-request` mode uses the pull
+   request target. `local-only` mode uses the explicit target or `origin/HEAD`.
+4. Strip a leading `origin/` from the selected target and fetch that branch from
+   `origin`. Record `git rev-parse <target>` as the exact target commit.
+5. Run `git status --short` and inspect staged, unstaged, and untracked files.
+   Commit existing work automatically only when every changed file belongs to
+   one clear change, contains no likely secret, and can use the repository's
+   required commit format. Before committing, tell the user the exact files and
+   commit message. Stop for mixed or unclear changes, generated files with an
+   unknown source, possible secrets, or a required issue reference that cannot
+   be determined.
+6. Start the merge without committing it:
 
-## Final Report
+   ```sh
+   git merge --no-commit --no-ff <target>
+   ```
 
-Always include:
+   If Git says `Already up to date`, no merge commit is needed.
+7. If conflicts occur, run the required skill check and use
+   `resolving-merge-conflicts` for conflicts whose correct result belongs to
+   this change and can be verified. Abort the merge and ask the user when a
+   conflict needs a product decision, unrelated work, unavailable access,
+   secret handling, generated-file knowledge, or a guess about behavior.
+8. Check whether the merge changed package manifests, lockfiles, workspace
+   files, or toolchain versions. If so, run the install or setup command from
+   repository instructions before verification. Stop if no command is
+   documented. Include generated dependency changes only when that documented
+   command produced them and they belong to this branch update.
+9. Run the repository's documented checks that cover the changed code, resolved
+   conflicts, and affected dependencies. If no local check applies, state that.
 
-- Current branch.
-- Base ref and immutable target SHA fetched and merged.
-- Whether the base came from an open pull request, an explicit argument, or
-  `origin/HEAD`.
-- Whether a dirty-work auto-commit was created.
-- Whether a merge commit was created or the branch was already up to date.
-- Whether dependency refresh was skipped, run, or blocked because no documented
-  install/bootstrap command was available.
-- Conflicts resolved or the human-owned blocker that stopped the workflow.
-- Documented verification commands and results, when run.
-- For a target-owned broad failure, the target SHA, command, failing contract,
-  and ownership evidence that allowed the update to continue.
-- In the open-PR path, the pull request URL and whether its configured remote
-  branch was updated; a failed push is a failed update.
-- In the no-PR path, a clear note that the branch remains local-only and the
-  optional push command `git push origin HEAD`.
+   A separate full-repository check is required only when repository
+   instructions require it for this change. If a required or relevant check
+   fails, abort the merge and stop.
+
+   When the relevant checks pass but an extra full-repository check fails, you
+   may continue only after proving that the same problem already exists on the
+   fetched target commit. Prove that by showing either:
+
+   - the failing source and the rule, configuration, or input that causes the
+     failure are unchanged from the target commit
+   - the same failure occurs when the command runs on the target commit
+
+   Record the target commit, command, failing check, and comparison. Do not
+   continue when the branch changed an input involved in the failure, the merge
+   caused the failure through interaction, or repository instructions require
+   the full-repository command. On a later run, reuse the comparison only when
+   the target commit, command, failing check, and comparison are unchanged.
+10. If the merge is still open after verification, create the merge commit with
+    the repository's normal commit format and hooks.
+11. Finish based on the mode:
+
+    - In `pull-request` mode, run:
+
+      ```sh
+      scripts/update-context.sh push <pr-number> <target> <pr-head>
+      ```
+
+      The helper verifies the pull request, pushes to the configured upstream,
+      and verifies it again. If the pull request changes during the push, say
+      that the remote branch moved but the pull request result is uncertain.
+      On any failure, report the helper message or failed `git push` output and
+      do not claim the pull request was updated.
+    - In `local-only` mode, do not push. Report the optional command
+      `git push origin HEAD`.
+
+## Merge safety
+
+Keep a merge open only while resolving clear conflicts covered by this branch
+update. Run `git merge --abort` before stopping so the branch returns to its
+pre-merge state. Do not rebase, force-push, rewrite history, or include unrelated
+files.
+
+## Final report
+
+Report the current branch, selected target, exact target commit, and how the
+target was chosen. State whether existing work was committed, a merge commit
+was created, dependencies were refreshed, conflicts were resolved, checks
+passed, and the remote branch was pushed. For an extra full-repository failure
+that did not stop the update, include the target commit, command, failed check,
+and comparison. For local-only work, say that the branch remains unpushed and
+include `git push origin HEAD`.

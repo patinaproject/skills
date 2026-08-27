@@ -1,46 +1,44 @@
 ---
 name: review-system-design
-description: Presents a diff or spec's hard-to-reverse system contracts to a human reviewer in dependency-ordered rounds. Use when asked for a system design review of a diff, specification, or both.
+description: Present important design contracts from a diff or specification to a human reviewer in dependency order. Use when the user asks for a system design review.
 ---
 
-/design-by-contract
+# Review system design
 
-Present the system design of a **scope** — a diff, a spec, or both — to a human
-reviewer, one batch at a time.
+Use `design-by-contract` to describe each important agreement in the changed
+production code. The input may be a diff, a specification, or both.
 
-Write reviewer-facing prose in ASD-STE100 Simplified Technical English, inside
-a **closed vocabulary**: the ubiquitous language of `CONTEXT.md`,
-`codebase-design` terms used exactly, and code identifiers as code spans. When
-the vocabulary lacks a term, flag a glossary proposal through `domain-modeling`.
-Write complete clauses: every verb keeps its object, and every definite noun
-has an antecedent.
+Write in ASD-STE100 Simplified Technical English. Use terms already defined in
+`CONTEXT.md`, exact `codebase-design` terms, and code identifiers. When a needed
+term is missing, ask `domain-modeling` to propose a glossary entry. Write full
+sentences with clear subjects and objects.
 
-Map the selected contracts as a **contract dependency tree**: every contract
-branches into the contracts that depend on it. A spec's contract table names
-the contracts; a diff is the truth for what changed. When both exist, reconcile
-them and flag any contract found only in the diff as unplanned.
+Build a dependency tree of the design contracts. Review a contract before any
+contract that depends on it. When a specification and diff disagree, treat the
+diff as the record of what changed and flag any unplanned contract.
 
-The **review surface is implementation only**: production source. Exclude test
-suites, documentation, and workspace fixtures. Treat a spec row that names one
-of those surfaces as a sign-off device; review its knobs at their owning
-contract.
+Review production code only. Tests, documentation, and workspace fixtures may
+provide evidence, but they are not separate design contracts.
 
-Work the tree in **rounds**. The **frontier** is every contract whose upstream
-contracts are already reviewed. A round starts with
-`## <scope name> — round N of M`, then presents the whole frontier through
-`design-by-contract`, including only the visuals it selects. Prefix contracts
-with handles `C1`, `C2`, … across rounds. For each contract, state why it
-changed in one or two sentences and link its spec or ADR once.
+Present one ready group at a time under
+`## <change name>, round N of M`. Number contracts `C1`, `C2`, and so on across
+all rounds. For each contract:
 
-Then wait for the reviewer's reply. One reply advances the batch: challenged
-contracts become logged concerns, each with its agreed fix when one emerges;
-the rest are accepted. Keep the scope frozen while the review runs. A proposed
-fix is a log entry until the review ends.
+- use `design-by-contract`
+- explain why it changed in one or two sentences
+- link its specification or ADR once
+- add a visual only when it makes the design easier to understand
 
-Finding facts is your job, never the reviewer's. Use a sub-agent when the diff,
-spec, or a call site must establish a fact; the reviewer supplies only verdicts.
+Wait for the reviewer's reply after each group. Record challenged contracts and
+their agreed fixes. Treat the rest as accepted. Keep the reviewed change fixed
+until the review ends. A proposed fix remains a note until the reviewer finishes
+all rounds.
 
-Finish after every contract in the tree is visited. Summarize concerns and
-their agreed fixes, then apply the amendments the reviewer confirms. When the
-reviewer requests a guide, write it where they say: one review pointer, the
-contracts in handle order, and the selected visuals.
+Find supporting facts yourself. Use a subagent when the diff, specification, or
+callers require separate investigation. Ask the reviewer for decisions, not
+research.
+
+Finish after every contract has been reviewed. Summarize concerns and agreed
+fixes, then apply only the changes the reviewer confirms. If the reviewer asks
+for a guide, write it at the requested path with one review pointer, the
+contracts in number order, and the selected visuals.

@@ -1,320 +1,150 @@
 ---
 name: scaffold-repository
-description: Scaffold a new repository to the Patina Project baseline, or realign or audit an existing repository against that baseline (commit + PR rules, husky + commitlint, PNPM tooling, agent docs). Use when the user says "scaffold this repo", "realign with the baseline", "audit our repo conventions", or "set up commitlint and husky".
+description: Set up a new repository with the Patina Project standard files, or compare and update an existing repository. Use when the user asks to scaffold a repository, audit its conventions, align it with Patina Project, or configure commitlint and Husky.
 ---
 
-# scaffold-repository
+# Set up a repository
 
-There is no committed template bundle. The live
-[`patinaproject/skills`](https://github.com/patinaproject/skills) repository
-root is the canonical **baseline** reference. When a scaffold or realignment
-needs file content, compare against the current maintained root files and
-manifests instead of reading copied baseline files from this skill directory.
+Use the current root of
+[`patinaproject/skills`](https://github.com/patinaproject/skills) as the source
+for file contents. This skill does not contain copied templates. Read
+[`core-baseline.txt`](./core-baseline.txt) for the required file list and
+[`audit-checklist.md`](./audit-checklist.md) for every required check.
 
-## Obtaining the baseline
-
-When running outside `patinaproject/skills`, fetch baseline files from GitHub
-before writing them into the target repo. Prefer the GitHub CLI when available:
+When running outside `patinaproject/skills`, fetch a single source file with:
 
 ```sh
 gh api repos/patinaproject/skills/contents/<path> --jq .content | base64 -d
 ```
 
-For multi-file comparisons, create a shallow temporary clone instead:
+For many files, use a shallow temporary clone:
 
 ```sh
-git clone --depth 1 https://github.com/patinaproject/skills.git /tmp/patinaproject-skills-baseline
+git clone --depth 1 https://github.com/patinaproject/skills.git /tmp/patinaproject-skills-reference
 ```
 
-If neither network access nor a local baseline checkout is available, stop and
-ask the user for a baseline source. Do not invent file contents from memory.
+If neither the network nor a local checkout is available, ask the user for a
+copy of the reference repository. Do not recreate files from memory.
 
-## Modes
+## Choose the type of work
 
-The skill detects which mode to run based on target-repo state.
+Use new-repository setup when the target is a Git repository and has none of
+the Patina files, such as `AGENTS.md`, `commitlint.config.js`, or the standard
+scripts in `package.json`.
 
-### New-repo mode
+Use existing-repository update when any of those files already exist.
 
-Preconditions:
+### New repository
 
-- Target is a git repository (may be empty or just initialized).
-- No prior Patina baseline files (for example `AGENTS.md`, `commitlint.config.js`, or a `package.json` with the baseline scripts).
+1. Read `core-baseline.txt` and copy every required file from the current
+   Patina repository.
+2. Fill in repository-specific values from the inputs below.
+3. Omit marketplace-only test and maintenance files. The manifest already
+   excludes them.
+4. Run `pnpm install` to create `pnpm-lock.yaml` and configure Husky.
+5. Stage the created files but leave them uncommitted so the user owns the
+   first commit.
 
-Behavior:
+### Existing repository
 
-- Emit the full [core baseline](#core-baseline) tree from the live repository baseline, filtering out marketplace-internal verification and dogfood tooling.
-- Run `pnpm install` to generate `pnpm-lock.yaml` and wire Husky.
-- Leave all emitted files staged but uncommitted so the user owns the first commit.
+1. Read `audit-checklist.md` in full and run every applicable check.
+2. Use the difference names and definitions from `audit-checklist.md` so the
+   report matches its required output.
+3. For each difference, explain the recommended change and show a unified diff
+   against the current Patina file.
+4. Ask the user to accept, skip, or defer each recommendation before changing
+   an existing file. There is no non-interactive overwrite mode.
+5. Present changes in the order specified by `audit-checklist.md`: commit and
+   pull request rules, package and skill tools, repository documentation,
+   GitHub workflows, then removal of retired setup.
+6. If an accepted change modifies a non-empty `skills-lock.json`, run
+   `pnpm skills:install`, confirm that the project-local skills appear in
+   `npx --yes skills@latest list --json`, and include the refreshed
+   `.agents/skills/` directories and `.claude/skills/` links.
 
-### Realignment mode
+The `patinaproject/skills` repository itself may use this mode. Do not skip it
+because it is the source repository.
 
-Preconditions:
+## Repository inputs
 
-- Target is a git repository with existing content (one or more baseline files present).
+Read the repository owner and name from `origin` when possible. Read author name
+and email from `git config user.name` and `git config user.email`. Use the email
+as the public security contact. Stop if the configured name or email is missing.
 
-Behavior:
+Resolve the author's GitHub handle with `gh api user --jq .login`. If that
+fails, ask `Author GitHub handle for the package author URL?` without a default.
 
-- Walk [`audit-checklist.md`](./audit-checklist.md) against the target repo.
-- Classify each baseline item as `missing`, `stale`, or `divergent`.
-- For each gap, produce a concrete recommendation on how to realign with the current baseline.
-- For each recommendation, show a **diff preview** and ask the user to accept, skip, or defer. **Never overwrite existing files without explicit confirmation.** There are no flags or escape hatches; realignment is always interactive.
-- Group recommendations into ordered batches that can be applied independently. Each batch below must cover its listed files. `patinaproject/skills` is a normal realignment target – the skill must not self-exclude when run against it.
-  1. Commit / PR conventions: `commitlint.config.js`, `.husky/*`, `.github/pull_request_template.md`; issue templates must match repository visibility.
-  2. PNPM tooling, skills installation, and tracker connection: `package.json`, `.markdownlint.jsonc`, `.markdownlint-cli2.jsonc`, `pnpm-lock.yaml`, `skills-lock.json`, `scripts/clean.sh`, `scripts/worktree-setup.sh`, `.claude/settings.json`, `.codex/config.toml`, `.codex/environments/environment.toml`, `.mcp.json`, `docs/issue-tracker.md`, `docs/agents/issue-tracker.md`, `docs/issue-publishing.md`, `.gitignore`.
-  3. Agent + repo docs: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/release-flow.md`.
-  4. Workflows: `.github/workflows/actions.yml`, `.github/workflows/markdown.yml`, `.github/workflows/pull-request.yml`.
+Ask for any value that cannot be determined:
 
-Batch 2 always covers skills installation (see [Conventions encoded](#conventions-encoded) → committed vendored skills and skill refresh for the mechanics). After accepted changes to `skills-lock.json` that leave one or more skills locked, run `pnpm skills:install`, verify `npx --yes skills@latest list --json` includes the project-local skills, and commit the refreshed overlays.
+| Value | Default |
+| --- | --- |
+| Repository owner | Owner from `origin` |
+| Repository name | Name from `origin` |
+| One-line description | None |
+| Visibility | `public` |
+| Code owner | `@<owner>` |
+| Security contact | Configured Git email |
+| Author name | Configured Git name |
+| Author email | Configured Git email |
+| Author GitHub handle | Current authenticated GitHub user |
 
-## Prompts
+Write the author name, email, and `https://github.com/<author-handle>` into the
+`package.json` author field. Repository URLs continue to use the repository
+owner and name.
 
-The skill collects the following inputs. Author name, author email, and the security contact are derived from `git config user.name` and `git config user.email`; halt with a blocker if those are unset. Author handle is resolved with `gh api user --jq .login`; when unavailable, prompt `Author GitHub handle (for author URL)?` with no default.
+## Required file behavior
 
-| Prompt | Default | Notes |
-|---|---|---|
-| `<owner>` | from `git remote get-url origin` | GitHub org or user |
-| `<repo>` | from `git remote get-url origin` | repository name |
-| `<repo-description>` | – | one-line description |
-| `<visibility>` | public | public \| private |
-| `<codeowner>` | `@<owner>` | written into `.github/CODEOWNERS` |
-| `<security-contact>` | from `git config user.email` | public repos only; written into `SECURITY.md` |
-| `<author-name>` | from `git config user.name` | written into every `author` block |
-| `<author-email>` | from `git config user.email` | written into every `author` block |
-| `<author-handle>` | from `gh api user --jq .login` | prompted if unavailable; written into `author.url` |
+`core-baseline.txt` is the file list used by
+`scripts/verify-baseline.sh`. Use it instead of copying a second list into this
+skill.
 
-## Core baseline
+Two entries require special handling:
 
-[`core-baseline.txt`](./core-baseline.txt) is the canonical list of files
-emitted for every target repo — one machine-readable manifest rather than a
-prose list, so the documented baseline and the verification self-test cannot
-drift apart. Read it before emitting, and use the live repository root as the
-content reference.
+- Create `SECURITY.md` only for public repositories.
+- Keep the real tracker instructions at `docs/agents/issue-tracker.md`. Create
+  `docs/issue-tracker.md` as the relative link `agents/issue-tracker.md`.
 
-Filter out `patinaproject/skills` marketplace maintenance verifiers: consumer
-repos should not receive dogfood, marketplace, scaffold-cleanup, or
-workflow-cleanup verifier scripts unless they are themselves this marketplace
-repository. The manifest already omits them.
+Do not copy marketplace maintenance tests, generated skill links, or release
+workflows into an ordinary repository. Adapt copied workflows to the files the
+target repository actually receives.
 
-Two manifest entries are conditional. `SECURITY.md` carries `[public]` and is
-emitted for public repositories only. `docs/issue-tracker.md` carries
-`[symlink -> agents/issue-tracker.md]` and must be that relative symlink, not a
-second copy of the adapter.
+The default `.claude/settings.json` has an empty `enabledPlugins` object. It
+still registers `bash scripts/worktree-setup.sh` as its `SessionStart` startup
+hook. The Codex environment runs the same script from its `[setup]` block.
+Projects may enable plugins later.
 
-`docs/agents/` is the canonical location for agent configuration. The real
-tracker adapter lives at `docs/agents/issue-tracker.md`, which is where
-`mattpocock/skills`' `setup-matt-pocock-skills` writes and its skill family
-reads; `docs/issue-tracker.md` is the compatibility symlink. Emitting it the
-other way round means a repository vendoring both sources gets whichever layout
-ran second. The adapter must carry the sections those consumers look up by
-name — see the Area 3 rows in
-[`audit-checklist.md`](./audit-checklist.md).
+Use the exact current files and the checks in `audit-checklist.md` for commit
+format, pull request format, Markdown linting, package scripts, committed local
+skills, agent instructions, issue tracking, releases, action pinning, labels,
+and workflow permissions. Do not restate those changing details from memory.
 
-The live reference repo also carries marketplace-internal tooling — the test
-harness, verify scripts, generated agent overlays, and the verify and
-marketplace release workflows. These are reference-implementation only:
-omit them from a generic consumer repo unless it opts into the same marketplace
-maintenance role, and adapt the emitted consumer workflows to the files the
-repo actually receives.
+## GitHub merge settings
 
-## Plugin enablement
-
-```jsonc
-{
-  "enabledPlugins": {}
-}
-```
-
-The emitted `.claude/settings.json` enables no host plugins by default, but it
-does register the shared worktree setup as a `SessionStart` (`startup`) hook
-that runs `bash scripts/worktree-setup.sh`. Projects may opt into host plugins
-later, but the scaffold does not auto-enable retired workflow dependencies.
-
-## Conventions encoded
-
-- **Commits**: Conventional Commits with no scope and a 72-character maximum.
-  Public repositories require `#N`; private repositories require `PAT-N`.
-  Commitlint plus Husky enforce the selected form.
-- **PR titles**: same format, so squash commits reuse them verbatim.
-- **PR body**: a slim baseline shared by docs and code repos alike — required
-  closing keywords for normal PRs, additional linked-issue relationships
-  (`Related to`, `Blocks`, `Partially satisfies`), and a free-prose
-  `What changed` summary written for a reader who has not seen the work (no
-  `Context:` line or `- <change> - <why>` contract). `Testing steps` is not a
-  standing section; add it ad hoc only when a produced artifact needs human
-  inspection, and use optional `Do before merging` for work-specific pre-merge
-  operator chores. GitHub Checks are the source of truth for routine automated
-  verification; PR bodies should not repeat successful lint, test, type-check,
-  hook, package, or similar command results. See
-  `docs/adr/ADR-257-slim-baseline-pr-template.md` for the single-baseline
-  decision.
-- **Issue titles and bodies**: titles are plain-language, no commit-style
-  prefix. Body structure is owned by the tracker-agnostic skill creating the
-  issue. Public repositories enable GitHub issue intake. Private repositories
-  disable blank GitHub issues and redirect intake to Linear.
-- **Markdown**: `markdownlint-cli2` with rule configuration in
-  `.markdownlint.jsonc` and exclusions in `.markdownlint-cli2.jsonc`
-  (`ignores`). Do not emit `.markdownlintignore`: `markdownlint-cli2` does
-  not read it, so an exclusion added there is silently inert. `ignores`
-  applies to glob runs and to explicitly passed files alike, so `lint:md`,
-  the markdown CI workflow, and `.lintstagedrc.js` all inherit one exclusion
-  list instead of repeating it. A negated glob (`"#node_modules"`) still
-  works on the command line for a one-off run.
-
-  One sharp edge decides whether the `pre-commit` hook actually inherits the
-  list: `ignores` matches **relative** paths, and `lint-staged` passes
-  **absolute** ones. A plain `"*.md": "markdownlint-cli2"` therefore lints the
-  very files the list excludes. Emit a `.lintstagedrc.js` whose command
-  converts each path with `path.relative(process.cwd(), file)` before handing
-  it over. This is the same pre-commit gap that negated globs could not close;
-  the mechanism changed, the trap did not.
-
-  `ignores` must exclude the committed vendored-skill overlays,
-  `.agents/skills/**` and `.claude/skills/**`. The baseline guarantees this
-  collision rather than merely permitting it: it tells repositories to commit
-  their vendored skills, and those payloads are third-party markdown written
-  against their own upstream config, so they fail this repository's rules on
-  contact and are overwritten on the next re-vendor. Emit the exclusion
-  pre-wired; reformatting the payloads is not an option.
-
-  Do not extend the exclusion to a catalog repo's own `skills/**`. That markdown
-  is first-party, written against this very config, and the collision argument
-  does not reach it — excluding it only gives up coverage, and hides any drift
-  behind the same silence. This repository lints its own first-party skill
-  files for that reason.
-- **Testing rule**: `AGENTS.md` states that tests must not assert on the prose
-  content of documentation files. Tests validate code behavior and
-  machine-consumed contracts only (shell/JS behavior, JSON/YAML config, `.md`
-  *frontmatter* schema, symlink resolution, required-file existence); a doc's
-  prose body stays freely editable. Markdown linting is unaffected — linting is
-  not testing. The scaffold propagates the written rule only; it does not emit a
-  test harness to consumer repos.
-- **PNPM**: `"type": "module"`, `"packageManager": "pnpm@10.33.2"` pin, `engines.node >=24`, `prepare: "husky"`, `env:setup: "pnpm install"`, `clean: "bash scripts/clean.sh"`, `skills:install: "pnpm dlx skills@latest experimental_install --yes"`, and `lint:md` script. There is no `postinstall` skill-restore hook: vendored skills are committed, so `pnpm install` does not re-vendor them.
-- **Commitizen config**: `commitizen.config.json` stays JSON because `cz-customizable` loads it through CommonJS `require()`; do not convert it to ESM JavaScript.
-- **Committed vendored skills**: scaffolded repositories commit their vendored
-  project-local skills, so they load immediately in a fresh clone or worktree
-  with no install step. Real skill directories live under `.agents/skills/<name>/`;
-  `.claude/skills/<name>` entries are portable relative symlinks
-  (`../../.agents/skills/<name>`) to the matching payloads. Repo-owned skills
-  stay isolated under `skills/<name>/`. Because these payloads are committed,
-  the emitted `.markdownlint-cli2.jsonc` must already exclude them from markdown
-  lint (see **Markdown** above) — otherwise the first vendoring run breaks
-  `lint:md`, markdown CI, and the `pre-commit` hook at once.
-  `scripts/clean.sh` removes only generated
-  dependency and transient install files (`node_modules`, `.skills-install.lock*`)
-  and must never prune the committed overlay directories; `.gitignore` must not
-  exclude `.agents/skills/**` or `.claude/skills/**`.
-- **Skill refresh (`skills:install`)**: re-vendoring uses the upstream skills
-  CLI, not a custom script. `skills:install` runs
-  `pnpm dlx skills@latest experimental_install --yes`, which reads
-  `skills-lock.json` and restores each locked skill from its source's default
-  branch into `.agents/skills/`, with `.claude/skills/` relative symlinks to the
-  matching payloads. It is a manual maintenance command, not a `pnpm install`
-  hook: an empty or absent lockfile is a no-op; a populated lockfile pulls the
-  latest upstream content. Realignment must add missing `env:setup`,
-  `skills:install`, and `clean` package scripts and remove any retired
-  auto-restore `postinstall` hook, retired skill-restore package scripts, or
-  custom `scripts/install-skills.sh`.
-- **Skill catalog changes**: every change to a repo's vendored catalog
-  (`skills-lock.json` add, remove, rename, or refresh) follows one shared method
-  and PR shape — the ordered reconciliation method, the staleness audit that
-  surfaces a skill renamed or deleted upstream instead of leaving it silently
-  stale, and the Added / Removed / Refreshed / Unchanged catalog-delta PR
-  description. The `install-skills` skill owns this convention in its
-  `catalog-change.md`; a repo inherits it just-in-time by vendoring
-  `install-skills`, which carries that file. Realignment confirms the convention
-  travels with the repo (see [`audit-checklist.md`](./audit-checklist.md) →
-  Area 5).
-- **Shared worktree setup (`scripts/worktree-setup.sh`)**: scaffolded
-  repositories ship a single idempotent setup script wired into both agent
-  surfaces — the Claude Code `SessionStart` (`startup`) hook in
-  `.claude/settings.json` and the Codex `[setup]` block in
-  `.codex/environments/environment.toml` — so every new worktree is prepared the
-  same way. The script fast-forwards the worktree onto the target repository's
-  default branch and runs `pnpm env:setup`:
-
-  ```bash
-  if git fetch --prune origin <default-branch>; then
-    if git merge-base --is-ancestor HEAD origin/<default-branch>; then
-      git merge --ff-only origin/<default-branch> ||
-        echo "worktree-setup: warning: fast-forward failed; skipping branch sync" >&2
-    fi
-  else
-    echo "worktree-setup: warning: could not fetch origin/<default-branch>; skipping branch sync" >&2
-  fi
-  pnpm env:setup
-  ```
-
-  The branch sync is best-effort: because it runs as a `SessionStart` hook, a
-  network or remote failure must warn rather than abort under `set -euo
-  pipefail`, so the essential `pnpm env:setup` step still runs offline. Resolve
-  `<default-branch>` at scaffold time from the target repository (for example
-  `git symbolic-ref --short refs/remotes/origin/HEAD` or
-  `gh repo view --json defaultBranchRef`); never hardcode `main`.
-- **Line endings**: `.gitattributes` with `* text=auto eol=lf`.
-- **PR title hygiene**: `.github/workflows/pull-request.yml` validates that
-  every PR title is ASCII-only, follows conventional commits without scopes,
-  starts with the visibility-selected issue reference, keeps breaking-change
-  markers consistent (`!` in title ⇔ `BREAKING CHANGE:` footer), and contains
-  the selected provider's closing reference in the body.
-- **Markdown CI**: `.github/workflows/markdown.yml` runs `DavidAnson/markdownlint-cli2-action` on every PR as a backstop to the husky `pre-commit` hook (which can be bypassed with `--no-verify`).
-- **Workflow linting**: `.github/workflows/actions.yml` runs `actionlint` on PRs that touch `.github/workflows/**` or `.github/actionlint.yaml`. Catches malformed refs, invalid expressions, permission mistakes, and (alongside our SHA-pin convention) supply-chain drift.
-- **GitHub Actions pinning**: every `uses:` in emitted workflows references a full 40-char commit SHA with a `# <action>@<version>` comment above it, rather than a mutable tag. Documented in `AGENTS.md`.
-- **Labels**: issue labels resolve through `docs/issue-tracker.md`; pull-request
-  labels use `gh label list` and the repository's live descriptions.
-- **Author identity**: `package.json` carries a human author record: name and email from `git config`, plus `https://github.com/<author-handle>` from `gh api user --jq .login` or the required author-handle prompt. Repository-level URLs (`homepage`, `repository`) continue to use `<owner>/<repo>`.
-
-## GitHub repository settings
-
-Every scaffold-managed repo should carry these merge settings:
-
-| Setting | Value | Reason |
-|---|---|---|
-| `allow_squash_merge` | true | Release flow assumes squash; lint-pr enforces a PR title ready to become the squash commit. |
-| `allow_merge_commit` | false | Merge commits break linear history and release-please commit parsing. |
-| `allow_rebase_merge` | false | Rebase-merge drops the PR-title context that release-please reads. |
-| `squash_merge_commit_title` | `PR_TITLE` | Carries the lint-pr-validated title straight through to `main`. |
-| `squash_merge_commit_message` | `COMMIT_MESSAGES` | Preserves commit-level context (useful for review and git blame) in the squash body. |
-| `delete_branch_on_merge` | true | Keeps the branch list tidy after each squash. |
-| `allow_update_branch` | true | Surfaces an "Update branch" button on stale PRs so reviewers can sync without leaving the UI. |
-| Release immutability | enabled | Prevents published release assets and tags from being modified after the fact – critical for downstream consumers pinning to a tag. UI-only: not exposed via the standard REST `repos` endpoint. |
-
-### Checking current settings
-
-The skill picks the check path based on what the user has installed and whether the repo is public. Never apply changes without explicit user confirmation.
-
-**Path 1 – `gh` CLI (preferred, covers public + private uniformly):**
+Check current settings with `gh` when available:
 
 ```bash
 gh api "repos/<owner>/<repo>" --jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch}'
 ```
 
-**Path 2 – `curl` + public REST API (no auth, public repos only; requires `jq` for the field projection below – fall back to inspecting raw JSON if `jq` is absent):**
+For a public repository without `gh`, use the public API with `curl`. If the
+repository is private and authenticated tools are unavailable, show the user
+the expected values and ask them to inspect GitHub settings.
 
-```bash
-curl -s "https://api.github.com/repos/<owner>/<repo>" \
-  | jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, squash_merge_commit_title, squash_merge_commit_message, delete_branch_on_merge, allow_update_branch}'
-```
+Expected values:
 
-Rate limit is 60 req/hr per IP unauthenticated – fine for a one-shot realignment check. If the response is a 404 on what should be a visible repo, the repo is private and this path cannot be used.
+| Setting | Value |
+| --- | --- |
+| Squash merges | On |
+| Merge commits | Off |
+| Rebase merges | Off |
+| Squash title | `PR_TITLE` |
+| Squash message | `COMMIT_MESSAGES` |
+| Delete branch after merge | On |
+| Suggest branch updates | On |
+| Release immutability | On |
 
-**Path 3 – no CLI available, or private repo without auth:** skip the check and proceed straight to the UI walkthrough below; list expected values next to the checkboxes the user should see.
-
-Skill picks the first path that will succeed: `gh` if installed → `curl` if the repo is public → UI-only if neither.
-
-### Applying: UI walkthrough
-
-Writes always require auth. Rather than scripting tokens, the skill directs the user through the GitHub UI. Deep-links and precise click-paths:
-
-1. Open **[Pull Requests settings](https://github.com/<owner>/<repo>/settings#pull-requests-heading)** (`https://github.com/<owner>/<repo>/settings#pull-requests-heading`). On that page, adjust:
-   - **Allow merge commits** → **unchecked** (currently `allow_merge_commit` should read `false`).
-   - **Allow squash merging** → **checked**. Default commit message → **"Pull request title and commit details"** (maps to `squash_merge_commit_title=PR_TITLE`, `squash_merge_commit_message=COMMIT_MESSAGES`).
-   - **Allow rebase merging** → **unchecked**.
-   - **Always suggest updating pull request branches** → **checked** (`allow_update_branch=true`).
-   - **Automatically delete head branches** → **checked** (`delete_branch_on_merge=true`).
-2. Scroll to **Releases** (or open **[General → Releases](https://github.com/<owner>/<repo>/settings)** and scroll). Toggle **Enable release immutability** → **on**. This prevents published release assets and tags from being modified after the fact; it is verified by eye only – the setting is not exposed by the standard `repos` REST endpoint.
-3. Click **Save** under each changed control that has one; the checkboxes save inline.
-
-Faster for `gh`-equipped users – the equivalent single PATCH:
+Report how settings were checked and every difference. Ask for confirmation
+before changing settings. With confirmation, update supported values with:
 
 ```bash
 gh api -X PATCH "repos/<owner>/<repo>" \
@@ -327,97 +157,72 @@ gh api -X PATCH "repos/<owner>/<repo>" \
   -F allow_update_branch=true
 ```
 
-### Realignment-mode prompt format
+Release immutability must be enabled in GitHub under Settings, General,
+Releases. The normal repository API does not expose that setting.
 
-When the check shows drift, present a numbered list to the user with current → target and a deep-link, one setting per row:
+Also apply the repository settings checks in `audit-checklist.md`, including
+workflow write permission, tag signing rules for release tags, and the reserved
+`autorelease: pending` label. Never add or remove Release Please labels as part
+of ordinary issue or pull request work.
 
-```text
-Repository settings drift detected. Open:
-  https://github.com/<owner>/<repo>/settings#pull-requests-heading
+## Verify the result
 
-  1. Allow merge commits: currently ON, should be OFF.
-  2. Allow rebase merging: currently ON, should be OFF.
-  3. Default squash commit message: currently "Default to pull request title",
-     should be "Pull request title and commit details".
-  4. Automatically delete head branches: currently OFF, should be ON.
-  (Auto-merge is intentionally left unopinionated – neither recommended nor
-   flagged.)
-
-Proceed to apply via `gh api` (if available), or confirm after applying via UI?
-```
-
-In realignment mode, report which check path was used (`gh`, `curl`, or `skipped`) and the full list of diverging fields. Never modify settings without explicit user confirmation. When the `package.json` author URL points to the repository owner instead of the resolved author handle, report the author block as divergent and offer the normal interactive rewrite.
-
-### Reserved labels
-
-The `autorelease: pending` and `autorelease: tagged` labels are owned by Release Please. In realignment mode, verify that `autorelease: pending` exists with color `ededed` (the release-please default) and a non-empty description explaining the reservation; if either is missing or divergent, recommend a `gh label edit` fix. Never instruct agents to apply or remove these labels manually.
-
-## Verification self-test
-
-After a scaffold or realignment run, all of the following must succeed. Start
-with the baseline presence check: the tooling checks below all pass on a repo
-that received none of the declared files, so running them alone proves only
-that commit and markdown linting work, never that the baseline arrived.
+Run the presence check first. Other tools may pass even when none of the
+required files were copied.
 
 ```bash
-bash <skill-dir>/scripts/verify-baseline.sh --public   # or --private
+bash <skill-directory>/scripts/verify-baseline.sh --public
+# Use --private for a private repository.
 pnpm install
 pnpm exec commitlint --help
 pnpm lint:md
-echo "feat: bad" | pnpm exec commitlint   # exits non-zero
-echo "feat: #1 ok" | pnpm exec commitlint # public repo; exits zero
+echo "feat: bad" | pnpm exec commitlint
+echo "feat: #1 ok" | pnpm exec commitlint
 ```
 
-`<skill-dir>` is wherever this skill is installed — `skills/scaffold-repository`
-in this repository, or `.agents/skills/scaffold-repository` (or the
-`.claude/skills/` symlink to it) in a repo that vendored it. The script finds
-`core-baseline.txt` relative to itself and checks the target repository, so run
-it from the repository being scaffolded, or pass that repository's root as its
-final argument.
+The bad commit message must fail. The public example with `#1` must pass. Use
+the repository's private issue format for a private repository.
 
-It reports every gap and exits non-zero on the first partial emit, naming each
-missing path. Treat a reported gap as a failed scaffold run, not a warning: a
-missing `docs/issue-tracker.md` leaves `working-on-issue`, `new-branch`,
-`using-github`, and `write-changelog` with no tracker vocabulary at all.
+Resolve `<skill-directory>` to this skill's installed directory. Run the
+verification script from the target repository or pass the target repository
+root as its final argument. Treat every missing path as a failed setup.
 
-## Making a repository public
+Before committing Markdown changes, run:
 
-Changing visibility changes the source of issue truth. Treat it as a migration,
-not a settings toggle:
+```bash
+pnpm exec markdownlint-cli2 --fix "**/*.md"
+```
 
-1. Inventory current references, open work, pull requests, tags, releases,
-   forks, branch protection, and self-referential SHA pins.
-2. Configure one-way GitHub-to-Linear issue intake before advertising GitHub
-   intake. Record that native updates remain bidirectional and that operators
-   must not edit or close the Linear mirrors.
-3. Create the five canonical triage labels on GitHub with non-empty
-   descriptions.
-4. Re-file open repository-scoped Linear work on GitHub with back-links, then
-   close the Linear originals with pointers.
-5. Build and review a complete historical-reference mapping. Every reference
-   must resolve to a public GitHub object or explicit replacement text.
-6. Land or close every pull request, inventory forge-managed immutable refs,
-   create and restore-test a mirror backup, then run any approved history
-   rewrite across repository-owned branches and tags.
-7. Switch commit, PR, issue-template, ADR, agent, contributor, and adapter
-   conventions to the public form. Update merged PR metadata separately.
-8. Restore branch protection, re-pin self-references, verify Releases and the
-   next release computation, and notify fork holders.
+## Changing a private repository to public
 
-Never run step 6 from an ordinary realignment pass. It requires an explicit
-rewrite plan and reviewed mapping.
+Changing visibility also changes where issues are filed. Treat it as a
+migration and get a reviewed plan before changing history.
 
-Run `pnpm exec markdownlint-cli2 --fix "**/*.md"` to auto-fix common markdown violations before committing; `.markdownlint-cli2.jsonc` supplies the exclusions.
+1. List current issue references, open work, pull requests, tags, releases,
+   forks, branch protection, and self-referencing action commits.
+2. Configure one-way GitHub-to-Linear issue intake. Record that later field
+   updates synchronize both ways and that the Linear copies must not be edited
+   or closed.
+3. Create the required GitHub issue labels with descriptions.
+4. Re-file open repository work on GitHub with links back to the Linear issues,
+   then close the original Linear issues with links to GitHub.
+5. Review a complete map from every old reference to its new public GitHub
+   object or replacement text.
+6. Merge or close every pull request, list GitHub-managed fixed references,
+   create and restore-test a mirror backup, then perform only the approved
+   history changes across repository branches and tags.
+7. Change commit, pull request, issue, ADR, contributor, agent, and tracker
+   instructions to the public format. Update merged pull request text
+   separately.
+8. Restore branch protection, update self-referencing action commits, verify
+   releases and the next release calculation, and notify fork owners.
 
-## Related documents
+Never perform step 6 during a normal existing-repository update. It requires a
+separate reviewed migration plan.
 
-Bundled with this skill:
+## Final report
 
-- [`audit-checklist.md`](./audit-checklist.md) – canonical realignment checklist.
-- [`core-baseline.txt`](./core-baseline.txt) – canonical core baseline manifest.
-
-At the root of the repository being scaffolded, not alongside this skill, so
-they are named by path:
-
-- `AGENTS.md` – repo workflow contract.
-- `docs/file-structure.md` – layout reference.
+For a new repository, list the staged files and any values the user still must
+provide. For an existing repository, list accepted, skipped, and deferred
+changes by batch. Include failed checks, GitHub settings differences, and the
+exact user action needed for anything unfinished.

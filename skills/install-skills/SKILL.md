@@ -1,44 +1,39 @@
 ---
 name: install-skills
-description: Install agent skills project-locally with the skills CLI. Use when adding or refreshing locked skills in `skills-lock.json`, or when a user names a skill source to install into the current repository.
+description: Install or refresh project-local agent skills recorded in skills-lock.json. Use when the user names a skill source to add to the repository or asks to update its locked skills.
 ---
 
-# install-skills
+# Install project skills
 
-Install skills project-locally so the repository, not the operator's global
-environment, owns the shared workflow catalog. Use this skill to change that
-catalog — add, remove, or refresh the entries recorded in `skills-lock.json`.
+Project-local skills belong to the repository. The lockfile records their
+sources, and the committed `.agents/skills/` and `.claude/skills/` entries make
+them available in a fresh checkout.
 
-Vendored skills are committed, so they load without an install step. When the
-goal is only to re-vendor the committed overlays from an unchanged lockfile, run
-the repository's manual maintenance command instead:
+If `skills-lock.json` has not changed and the user only wants to restore the
+committed skill directories, run:
 
 ```bash
 pnpm skills:install
 ```
 
-Any change to the catalog — add, remove, rename, or refresh — is a **catalog
-change**. Execute and describe every one by the shared
-[catalog change convention](./catalog-change.md): the ordered reconciliation
-method, the **staleness audit** that catches a skill renamed or deleted
-upstream, the **catalog-delta** PR description, and the verification gate. Follow
-it whenever this skill's steps below change `skills-lock.json`.
+When adding, removing, renaming, or refreshing a lockfile entry, read
+[the skill list change instructions](./catalog-change.md). They define the
+order of work, the check for skills renamed or removed upstream, the pull
+request summary, and required verification.
 
-## Preflight
+## Before installing
 
-1. Read repository guidance first: `AGENTS.md`, `CLAUDE.md` if present, and
-   any docs governing agent skills or shared tooling.
-2. Inspect the current catalog if present:
+1. Read `AGENTS.md`, `CLAUDE.md`, and any repository instructions for agent
+   skills or shared tools.
+2. Inspect the current installed list. Prefer a repository script such as
+   `pnpm skills:list`. Otherwise run:
 
    ```bash
    test -f skills-lock.json && npm_config_ignore_scripts=true npx --yes skills@latest list --json
    ```
 
-   If the repository exposes a wrapper such as `pnpm skills:list`, use that
-   instead of the raw CLI list command.
-
-3. Resolve the requested source and skill names. If the source contents or
-   requested skill names are ambiguous, list before installing:
+3. Resolve the requested source and skill names. If either is unclear, list the
+   source before installing:
 
    ```bash
    npm_config_ignore_scripts=true npx --yes skills@latest add <source> --list
@@ -46,50 +41,37 @@ it whenever this skill's steps below change `skills-lock.json`.
 
 ## Install
 
-Run installs from the repository root. Do not use `--global`.
+Run installs from the repository root. Never use `--global`.
 
-Canonical single-source install:
-
-```bash
-npm_config_ignore_scripts=true npx --yes skills@latest add <source> --skill <skill-name> --agent '*' --yes
-```
-
-For multiple skills from the same source, repeat `--skill` values as separate
-arguments after one flag:
+Install one or more named skills from one source:
 
 ```bash
 npm_config_ignore_scripts=true npx --yes skills@latest add <source> --skill <skill-a> <skill-b> --agent '*' --yes
 ```
 
-For all skills from a source, prefer an explicit all-agent install:
+Install every skill from a source only when the user asks for all of them:
 
 ```bash
 npm_config_ignore_scripts=true npx --yes skills@latest add <source> --skill '*' --agent '*' --yes
 ```
 
-GitHub lock entries record a `source` and `skillPath`. The upstream skills CLI
-(`skills experimental_install`) restores them by cloning each source's default
-branch, so the lock does not pin an immutable `ref`; re-running picks up the
-latest upstream commit on that branch. Locked GitHub sources must be publicly
-readable because restore clones from the public GitHub source.
+GitHub lock entries contain `source` and `skillPath`. The restore command clones
+the source's default branch, so another run may install newer upstream content.
+The source must be publicly readable. Use a source with a git ref when the user
+requires a fixed version.
 
-To re-vendor the committed overlays from the lockfile, run:
+After changing the lockfile, restore every locked skill:
 
 ```bash
 pnpm skills:install
 ```
 
-This runs `pnpm dlx skills@latest experimental_install --yes`, which reads
-`skills-lock.json`, restores each locked skill into `.agents/skills/`, and
-maintains the relative `.claude/skills/` symlinks. Commit the refreshed
-overlays afterward.
+This command reads `skills-lock.json`, writes real skill directories under
+`.agents/skills/`, and maintains matching relative links under
+`.claude/skills/`.
 
-## Patina Sources
-
-For Patina Project marketplace skills, use `patinaproject/skills` as the source
-and install only the requested skills unless the user explicitly asks for all.
-
-Active Patina scaffold defaults are:
+For Patina Project skills, use `patinaproject/skills` and install only the
+requested names. Common repository defaults are:
 
 - `scaffold-repository`
 - `using-github`
@@ -104,13 +86,13 @@ Active Patina scaffold defaults are:
 
 ## Verify
 
-After installing, prove what changed:
+Run:
 
 ```bash
 npm_config_ignore_scripts=true npx --yes skills@latest list --json
 git status --short
 ```
 
-Report the installed skills, the source used, and the changed lockfile or agent
-overlay paths. Stop before committing unless the user asked you to finish the
-branch.
+Follow every additional check in `catalog-change.md`. Report the installed
+skills, their source, and the changed lockfile or skill directories. Stop before
+committing unless the user asked to finish the branch.
