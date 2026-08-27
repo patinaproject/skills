@@ -52,16 +52,228 @@ cat > "$FAKE_BIN/gh" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "${GH_SCENARIO:?GH_SCENARIO must be set}" = required-check-failed ]; then
+case "${GH_SCENARIO:?GH_SCENARIO must be set}" in
+required-check-failed | required-check-passed | required-check-state-changed | required-check-delayed | required-status-app-delayed | required-status-app-context-passed | required-status-app-context-wrong-source | required-status-app-context-ambiguous | required-status-app-context-ambiguous-failed | required-status-any-latest-passed | required-status-pass-check-fail | required-status-fail-check-pass | required-workflow-delayed | required-workflow-same-job-passed | required-workflow-duplicate-job-failed | required-workflow-partial-rerun-failed | required-workflow-superseded-passed | required-workflow-queued-rerun | required-workflow-cancelled-unstarted-superseded | required-workflow-cancelled-unstarted-latest | required-workflow-startup-failure-latest | required-workflow-version-delayed | required-workflow-ref-moved | required-config-changed | no-config-zero-runs | no-config-optional-only)
   if [ "${1:-}" = pr ] && [ "${2:-}" = view ]; then
-    printf '%s\n' "${EXPECTED_HEAD:?EXPECTED_HEAD must be set}"
+    printf '%s\tmain\tPR_node\n' "${EXPECTED_HEAD:?EXPECTED_HEAD must be set}"
+    exit 0
+  fi
+  if [ "${1:-}" = repo ] && [ "${2:-}" = view ]; then
+    printf 'example/project\n'
+    exit 0
+  fi
+  if [ "${1:-}" = api ] && [ "${2:-}" = graphql ]; then
+    if [[ "$*" == *statusCheckRollup* ]]; then
+      if [[ "$*" != *databaseId* ]]; then
+        echo 'status rollup query omitted the stable CheckRun identifier' >&2
+        exit 2
+      fi
+      if [[ "$*" != *runAttempt* ]]; then
+        echo 'status rollup query omitted the workflow execution attempt' >&2
+        exit 2
+      fi
+      case "$GH_SCENARIO" in
+        required-check-failed)
+          printf 'check\tTest Gate\t77\tFAILURE\t00000000000000000100\t\t\t\n'
+          ;;
+        required-check-passed)
+          printf 'check\tTest Gate\t77\tSUCCESS\t00000000000000000100\t\t\t\n'
+          ;;
+        required-check-state-changed)
+          if [ -s "${GH_CHECK_LOG:?GH_CHECK_LOG must be set}" ]; then
+            printf 'check\tTest Gate\t77\tPENDING\t00000000000000000100\t\t\t\n'
+          else
+            printf 'check\tTest Gate\t77\tSUCCESS\t00000000000000000100\t\t\t\n'
+          fi
+          printf 'call\n' >> "$GH_CHECK_LOG"
+          ;;
+        required-status-app-delayed)
+          printf 'check\tShared Gate\t11\tSUCCESS\t00000000000000000100\t\t\t\n'
+          ;;
+        required-status-app-context-passed)
+          printf 'status\tShared Gate\tany\tSUCCESS\t2026-08-27T00:00:00Z\t\t\t\n'
+          ;;
+        required-status-app-context-wrong-source)
+          # GitHub reports the wrong-source StatusContext as not required, so
+          # select(.isRequired) omits it from the helper's observation rows.
+          ;;
+        required-status-app-context-ambiguous)
+          printf 'status\tShared Gate\tany\tSUCCESS\t2026-08-27T00:00:00Z\t\t\t\n'
+          ;;
+        required-status-app-context-ambiguous-failed)
+          printf 'check\tShared Gate\t11\tSUCCESS\t00000000000000000100\t\t\t\n'
+          printf 'check\tShared Gate\t22\tSUCCESS\t00000000000000000101\t\t\t\n'
+          printf 'status\tShared Gate\tany\tFAILURE\t2026-08-27T00:00:00Z\t\t\t\n'
+          ;;
+        required-status-any-latest-passed)
+          printf 'check\tShared Gate\t11\tFAILURE\t00000000000000000100\t\t\t\n'
+          printf 'check\tShared Gate\t22\tSUCCESS\t00000000000000000101\t\t\t\n'
+          ;;
+        required-status-pass-check-fail)
+          printf 'status\tShared Gate\tany\tSUCCESS\t2026-08-27T00:00:00Z\t\t\t\n'
+          printf 'check\tShared Gate\t22\tFAILURE\t00000000000000000101\t\t\t\n'
+          ;;
+        required-status-fail-check-pass)
+          printf 'check\tShared Gate\t22\tSUCCESS\t00000000000000000100\t\t\t\n'
+          printf 'status\tShared Gate\tany\tFAILURE\t2026-08-27T00:01:00Z\t\t\t\n'
+          ;;
+        required-workflow-delayed)
+          printf 'check\tA job 1\t77\tSUCCESS\t00000000000000000100\texample/workflows-a\t.github/workflows/a.yml\thttps://github.com/example/workflows-a/blob/SHA_A/.github/workflows/a.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tA job 2\t77\tSUCCESS\t00000000000000000101\texample/workflows-a\t.github/workflows/a.yml\thttps://github.com/example/workflows-a/blob/SHA_A/.github/workflows/a.yml\t00000000000000000100:0000000001\n'
+          ;;
+        required-workflow-same-job-passed)
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000100\texample/workflows-a\t.github/workflows/a.yml\thttps://github.com/example/workflows-a/blob/SHA_A/.github/workflows/a.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000101\texample/workflows-b\t.github/workflows/b.yml\thttps://github.com/example/workflows-b/blob/SHA_B/.github/workflows/b.yml\t00000000000000000101:0000000001\n'
+          ;;
+        required-workflow-duplicate-job-failed)
+          printf 'check\tGate\t77\tFAILURE\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          ;;
+        required-workflow-partial-rerun-failed)
+          printf 'check\tA\t77\tFAILURE\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\tFAILURE\n'
+          printf 'check\tB\t77\tFAILURE\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\tFAILURE\n'
+          printf 'check\tA\t77\tSUCCESS\t00000000000000000102\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000002\tFAILURE\n'
+          ;;
+        required-workflow-superseded-passed)
+          printf 'check\tGate\t77\tFAILURE\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_OLD/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000101:0000000001\n'
+          ;;
+        required-workflow-queued-rerun)
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tQUEUED\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000002\n'
+          ;;
+        required-workflow-cancelled-unstarted-superseded)
+          # The older run finishes cancellation after the newer run starts;
+          # creation order, not lifecycle timestamps, identifies the rerun.
+          printf 'check\tGate\t77\tCANCELLED\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000002\n'
+          ;;
+        required-workflow-cancelled-unstarted-latest)
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tCANCELLED\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000002\n'
+          ;;
+        required-workflow-startup-failure-latest)
+          printf 'check\tGate\t77\tSUCCESS\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          printf 'check\tGate\t77\tSTARTUP_FAILURE\t00000000000000000101\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_NEW/.github/workflows/shared.yml\t00000000000000000100:0000000002\n'
+          ;;
+        required-workflow-version-delayed)
+          printf 'check\tA job 1\t77\tSUCCESS\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_V1/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          ;;
+        required-workflow-ref-moved)
+          printf 'check\tA job 1\t77\tSUCCESS\t00000000000000000100\texample/workflows\t.github/workflows/shared.yml\thttps://github.com/example/workflows/blob/SHA_OLD/.github/workflows/shared.yml\t00000000000000000100:0000000001\n'
+          ;;
+      esac
+    fi
+    exit 0
+  fi
+  if [ "${1:-}" = api ]; then
+    if [ "${2:-}" = repositories/101 ]; then
+      printf 'example/workflows-a\tmain\n'
+      exit 0
+    elif [ "${2:-}" = repositories/102 ]; then
+      printf 'example/workflows-b\tmain\n'
+      exit 0
+    elif [ "${2:-}" = repositories/103 ]; then
+      printf 'example/workflows\tmain\n'
+      exit 0
+    elif [ "${2:-}" = repos/example/workflows-a/commits/main ]; then
+      printf 'SHA_A\n'
+      exit 0
+    elif [ "${2:-}" = repos/example/workflows-b/commits/main ]; then
+      printf 'SHA_B\n'
+      exit 0
+    elif [ "${2:-}" = repos/example/workflows/commits/v1 ]; then
+      printf 'SHA_V1\n'
+      exit 0
+    elif [ "${2:-}" = repos/example/workflows/commits/v2 ]; then
+      printf 'SHA_V2\n'
+      exit 0
+    elif [ "${2:-}" = repos/example/workflows/commits/main ]; then
+      if [ "$GH_SCENARIO" = required-workflow-ref-moved ]; then
+        if [ -s "${GH_WORKFLOW_REF_LOG:?GH_WORKFLOW_REF_LOG must be set}" ]; then
+          printf 'SHA_NEW\n'
+        else
+          printf 'SHA_OLD\n'
+        fi
+        printf 'call\n' >> "$GH_WORKFLOW_REF_LOG"
+      else
+        printf 'SHA_NEW\n'
+      fi
+      exit 0
+    fi
+    case "$GH_SCENARIO" in
+      required-check-failed | required-check-passed | required-check-state-changed | required-check-delayed)
+        printf 'status\tTest Gate\t77\n'
+        ;;
+      required-status-app-delayed)
+        printf 'status\tShared Gate\t11\n'
+        printf 'status\tShared Gate\t22\n'
+        ;;
+      required-status-app-context-passed | required-status-app-context-wrong-source)
+        printf 'status\tShared Gate\t22\n'
+        ;;
+      required-status-app-context-ambiguous | required-status-app-context-ambiguous-failed)
+        printf 'status\tShared Gate\t11\n'
+        printf 'status\tShared Gate\t22\n'
+        ;;
+      required-status-any-latest-passed | required-status-pass-check-fail | required-status-fail-check-pass)
+        printf 'status\tShared Gate\tany\n'
+        ;;
+      required-workflow-delayed | required-workflow-same-job-passed)
+        printf 'workflow\t101\t.github/workflows/a.yml\tmain\n'
+        printf 'workflow\t102\t.github/workflows/b.yml\tmain\n'
+        ;;
+      required-workflow-version-delayed)
+        printf 'workflow\t103\t.github/workflows/shared.yml\tv1\n'
+        printf 'workflow\t103\t.github/workflows/shared.yml\tv2\n'
+        ;;
+      required-workflow-superseded-passed | required-workflow-duplicate-job-failed | required-workflow-partial-rerun-failed)
+        printf 'workflow\t103\t.github/workflows/shared.yml\tmain\n'
+        ;;
+      required-workflow-queued-rerun)
+        printf 'workflow\t103\t.github/workflows/shared.yml\tmain\n'
+        ;;
+      required-workflow-cancelled-unstarted-superseded | required-workflow-cancelled-unstarted-latest | required-workflow-startup-failure-latest)
+        printf 'workflow\t103\t.github/workflows/shared.yml\tmain\n'
+        ;;
+      required-workflow-ref-moved)
+        printf 'workflow\t103\t.github/workflows/shared.yml\tmain\n'
+        ;;
+      required-config-changed)
+        if [ -s "${GH_CALL_LOG:?GH_CALL_LOG must be set}" ]; then
+          printf 'status\tLate Gate\t77\n'
+        fi
+        printf 'call\n' >> "$GH_CALL_LOG"
+        ;;
+      no-config-zero-runs | no-config-optional-only) ;;
+    esac
     exit 0
   fi
   if [ "${1:-}" = pr ] && [ "${2:-}" = checks ]; then
-    printf 'Test Gate\tfail\n'
+    case "$GH_SCENARIO" in
+      required-check-failed) printf 'Test Gate\tfail\n'; exit 0 ;;
+      required-check-passed) printf 'Test Gate\tpass\n'; exit 0 ;;
+      required-check-state-changed)
+        if [ -s "${GH_CHECK_LOG:?GH_CHECK_LOG must be set}" ]; then
+          printf 'Test Gate\tpending\n'
+        else
+          printf 'Test Gate\tpass\n'
+        fi
+        printf 'call\n' >> "$GH_CHECK_LOG"
+        exit 0
+        ;;
+      required-check-delayed) printf "no required checks reported on the 'feature' branch\n" >&2 ;;
+      required-workflow-delayed | required-workflow-same-job-passed | required-workflow-duplicate-job-failed | required-workflow-partial-rerun-failed | required-workflow-superseded-passed | required-workflow-queued-rerun | required-workflow-cancelled-unstarted-superseded | required-workflow-cancelled-unstarted-latest | required-workflow-startup-failure-latest | required-workflow-version-delayed | required-workflow-ref-moved)
+        printf 'A job 1\tpass\n'
+        printf 'A job 2\tpass\n'
+        exit 0
+        ;;
+      *) echo "unexpected checks query without configured requirements" >&2; exit 2 ;;
+    esac
     exit 1
   fi
-fi
+  ;;
+esac
 
 if [ "${1:-}" != "pr" ] || [ "${2:-}" != "list" ]; then
   echo "unexpected gh command: $*" >&2
@@ -322,6 +534,174 @@ VERIFY
     fail 'failed required check on the pushed merge unexpectedly passed readiness'
   elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
     fail "pushed-head required-check failure was not recorded: $check_output"
+  fi
+  if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-check-passed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail "passing configured required check did not satisfy readiness: $check_output"
+  elif ! grep -Fq 'outcome=required-checks-passed configured=1' <<< "$check_output"; then
+    fail "passing configured required check was not recorded: $check_output"
+  fi
+  for empty_scenario in no-config-zero-runs no-config-optional-only; do
+    if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+      GH_SCENARIO="$empty_scenario" EXPECTED_HEAD="$pushed_head" \
+      "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+      fail "$empty_scenario did not satisfy an empty required-check set: $check_output"
+    elif ! grep -Fq 'outcome=required-checks-passed configured=0' <<< "$check_output"; then
+      fail "$empty_scenario did not record an empty passing outcome: $check_output"
+    fi
+  done
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-check-delayed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'configured required check that had not registered unexpectedly passed readiness'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "delayed required check was not recorded as non-pass: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-status-app-delayed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'one app masked a second delayed app-qualified status requirement'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "delayed app-qualified status check was not recorded as non-pass: $check_output"
+  fi
+  if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-status-app-context-passed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail "qualifying app-owned StatusContext did not satisfy readiness: $check_output"
+  elif ! grep -Fq 'outcome=required-checks-passed configured=1' <<< "$check_output"; then
+    fail "qualifying app-owned StatusContext was not recorded: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-status-app-context-wrong-source EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'wrong-source StatusContext unexpectedly satisfied an app-qualified requirement'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "wrong-source StatusContext omission was not recorded as non-pass: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-status-app-context-ambiguous EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'one source-less StatusContext satisfied two app-qualified requirements'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "ambiguous app-owned StatusContext was not recorded as non-pass: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-status-app-context-ambiguous-failed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'passing app checks masked an ambiguous required StatusContext failure'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "ambiguous required StatusContext failure was not recorded: $check_output"
+  fi
+  if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-status-any-latest-passed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail "newer passing app did not satisfy any-source status requirement: $check_output"
+  elif ! grep -Fq 'outcome=required-checks-passed configured=1' <<< "$check_output"; then
+    fail "any-source latest passing result was not recorded: $check_output"
+  fi
+  for mixed_scenario in required-status-pass-check-fail required-status-fail-check-pass; do
+    if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+      GH_SCENARIO="$mixed_scenario" EXPECTED_HEAD="$pushed_head" \
+      "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+      fail "$mixed_scenario let one observation type mask the other"
+    elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+      fail "$mixed_scenario was not recorded as non-pass: $check_output"
+    fi
+  done
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-delayed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'multiple jobs from one workflow masked a second delayed required workflow'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "delayed required workflow was not recorded as non-pass: $check_output"
+  fi
+  if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-same-job-passed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail "two passing required workflows with the same job name were not accepted: $check_output"
+  elif ! grep -Fq 'outcome=required-checks-passed configured=2' <<< "$check_output"; then
+    fail "same-job required workflows did not record a passing outcome: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-duplicate-job-failed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'passing duplicate-name job hid a failure in the same required workflow execution'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "duplicate-name workflow job failure was not recorded: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-partial-rerun-failed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'partial rerun hid a failed job omitted from the latest workflow attempt'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "partial-rerun workflow failure was not recorded: $check_output"
+  fi
+  if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-superseded-passed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail "superseded workflow revision blocked the configured passing revision: $check_output"
+  elif ! grep -Fq 'outcome=required-checks-passed configured=1' <<< "$check_output"; then
+    fail "configured passing workflow revision was not recorded: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-queued-rerun EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'queued rerun without startedAt was hidden by an older passing run'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "queued required-workflow rerun was not recorded as non-pass: $check_output"
+  fi
+  if ! check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-cancelled-unstarted-superseded EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail "completed unstarted cancellation hid a newer passing run: $check_output"
+  elif ! grep -Fq 'outcome=required-checks-passed configured=1' <<< "$check_output"; then
+    fail "newer pass after unstarted cancellation was not recorded: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-cancelled-unstarted-latest EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'newer completed unstarted cancellation was hidden by an older passing run'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "newer unstarted cancellation was not recorded as non-pass: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-startup-failure-latest EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'newer completed startup failure was hidden by an older passing run'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "newer startup failure was not recorded as non-pass: $check_output"
+  fi
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-version-delayed EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'one workflow revision masked a second delayed required revision'
+  elif ! grep -Fq 'outcome=required-checks-non-pass' <<< "$check_output"; then
+    fail "delayed required workflow revision was not recorded as non-pass: $check_output"
+  fi
+  workflow_ref_log="$TMP_ROOT/required-workflow-ref-calls.log"
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-workflow-ref-moved GH_WORKFLOW_REF_LOG="$workflow_ref_log" \
+    EXPECTED_HEAD="$pushed_head" "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'moving required-workflow ref did not invalidate the snapshot'
+  elif ! grep -Fq 'reason=required-workflow-resolution-changed' <<< "$check_output"; then
+    fail "moving required-workflow ref was not identified: $check_output"
+  fi
+  config_log="$TMP_ROOT/required-config-calls.log"
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-config-changed GH_CALL_LOG="$config_log" EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'required-check configuration changed during capture but the snapshot passed'
+  elif ! grep -Fq 'reason=required-check-configuration-changed' <<< "$check_output"; then
+    fail "required-check configuration change was not identified: $check_output"
+  fi
+  check_log="$TMP_ROOT/required-check-calls.log"
+  if check_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" \
+    GH_SCENARIO=required-check-state-changed GH_CHECK_LOG="$check_log" EXPECTED_HEAD="$pushed_head" \
+    "$REQUIRED_CHECKS" --pr 324 --head "$pushed_head" 2>&1)"; then
+    fail 'required check changed from pass to pending during capture but the snapshot passed'
+  elif ! grep -Fq 'reason=required-check-observations-changed' <<< "$check_output"; then
+    fail "required-check observation change was not identified: $check_output"
   fi
 
   build_sandbox hook-mutated-verification

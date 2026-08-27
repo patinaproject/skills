@@ -48,7 +48,18 @@ The transition is one-way. Never convert a ready pull request back to draft.
 The required-check set is the contexts `gh pr checks --required` selects on the
 latest published head. GitHub counts `success`, `skipped`, and `neutral` as
 passing conclusions for a required context, so a required context passes on any
-of the three.
+of the three. An empty configured required-check set passes vacuously. The
+bundled helper derives that empty set from the target branch's active rulesets
+and classic branch protection, not from the current head's check-rollup prose.
+If a required context is configured but has not registered on the head yet,
+the set remains non-passing. App-qualified status requirements preserve and
+match their integration identity, so one app cannot satisfy another app's
+requirement for the same context. Required workflow rules are matched by source
+repository, workflow-file path, and resolved ref or pinned SHA, so multiple
+jobs or one file revision cannot mask a different required workflow. The
+helper also rechecks the configured set, resolves floating workflow refs again,
+and recaptures observed check results before returning; any change makes the
+snapshot stale.
 
 The Checks API returns every run on that head, which is a wider list than the
 CLI selects. Two kinds of run appear there and stay outside the set:

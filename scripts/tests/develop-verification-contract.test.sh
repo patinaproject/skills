@@ -63,10 +63,18 @@ cat >"$fake_bin/gh" <<'GH'
 #!/usr/bin/env bash
 set -euo pipefail
 if [ "${1:-}" = pr ] && [ "${2:-}" = view ]; then
-  printf '%s\n' "${EXPECTED_HEAD:?EXPECTED_HEAD must be set}"
+  printf '%s\tmain\tPR_node\n' "${EXPECTED_HEAD:?EXPECTED_HEAD must be set}"
+elif [ "${1:-}" = repo ] && [ "${2:-}" = view ]; then
+  printf 'example/project\n'
+elif [ "${1:-}" = api ] && [ "${2:-}" = graphql ]; then
+  if [[ "$*" == *statusCheckRollup* ]]; then
+    printf 'check\tTest Gate\t77\tFAILURE\t2026-08-27T00:00:00Z\t\t\t\n'
+  fi
+elif [ "${1:-}" = api ]; then
+  printf 'status\tTest Gate\t77\n'
 elif [ "${1:-}" = pr ] && [ "${2:-}" = checks ]; then
   printf 'Test Gate\tfail\n'
-  exit 1
+  exit 0
 else
   echo "unexpected gh command: $*" >&2
   exit 2
