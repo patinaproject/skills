@@ -53,6 +53,18 @@ assert.deepEqual(
   }
 );
 
+assert.deepEqual(
+  decideOrchestrationAction({
+    parentState: 'interrupted',
+    delegatedWorkState: 'inactive',
+    nextActionState: 'unblocked',
+  }),
+  {
+    action: 'leave-unchanged',
+    reason: 'no-unblocked-next-action',
+  }
+);
+
 const policyScript = fileURLToPath(
   new URL('../scripts/orchestration-policy.mjs', import.meta.url)
 );

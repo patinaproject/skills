@@ -1,8 +1,6 @@
 import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const resumableParentStates = new Set(['idle', 'interrupted']);
-
 export function decideOrchestrationAction({
   parentState,
   delegatedWorkState,
@@ -29,10 +27,7 @@ export function decideOrchestrationAction({
     };
   }
 
-  if (
-    resumableParentStates.has(parentState) &&
-    nextActionState === 'unblocked'
-  ) {
+  if (parentState === 'idle' && nextActionState === 'unblocked') {
     return {
       action: 'send-instruction',
       reason: 'idle-and-actionable',
