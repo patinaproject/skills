@@ -1,84 +1,55 @@
-# Thread Automation Workflow
+# Automate pull request feedback
 
-**Goal:** After the first successful PR push, create a Codex app thread
-automation that polls the current PR, fixes blocking review feedback and
-low-risk cleanup comments worth handling, pushes updates, replies with evidence
-on agent-authored threads, hands human-authored ones to the operator, and —
-when no actionable review work remains — runs the completion step that flips
-the draft to ready before stopping.
+Create this Codex task automation after the branch has been pushed and its pull
+request exists. The automation checks for new feedback, fixes clear problems,
+pushes verified changes, and marks an agent-created draft ready when its checks
+pass.
 
-## Preconditions
-
-- A PR exists for the current branch.
-- The branch has been pushed successfully.
-- `gh` is authenticated for the current repository.
-- The Codex app automation tool is available, or the user can create the
-  automation manually from the app's Automations menu.
-
-Before creating the automation, resolve and report:
+Before creating it, require an authenticated `gh` session and run:
 
 ```sh
 gh repo view --json nameWithOwner --jq .nameWithOwner
 gh pr view --json number,headRefName,headRefOid,url
 ```
 
-If no PR exists for the current branch, finish the PR workflow first.
+If no pull request exists, finish the normal pull request workflow first.
 
-## Canonical Settings
+## Settings
 
 - Name: `PR feedback loop`
-- Kind: thread/heartbeat automation
-- Destination: current thread
-- Polling interval: user-selected minutes; default to 10 minutes when the user
-  gives no preference
-- Schedule: `FREQ=MINUTELY;INTERVAL=<polling-minutes>`
+- Kind: heartbeat automation
+- Destination: current task
+- Interval: the user's positive whole number of minutes, or 10 minutes when
+  they have no preference
 - Status: `ACTIVE`
-- Stop condition: defined by the final paragraph of the automation prompt below
 
-## Create The Automation
-
-When `codex_app.automation_update` is available, create a heartbeat/thread
-automation using the canonical settings above and the prompt below.
-
-Before creating the automation, ask the user for a polling interval when they
-have not already provided one. Use a positive whole number of minutes. If they
-do not care, use 10 minutes.
-
-Use this prompt exactly except for small repository-specific additions that make
-the current PR easier to resolve:
+Ask for the interval before creating the automation. Use the prompt below. Add
+repository details only when they help identify the current pull request.
 
 ```text
-Poll the current branch's GitHub PR for new unresolved review feedback. Use the current working directory's default gh repository. Resolve the fields listed in Preconditions with gh before acting.
+Check the current branch's GitHub pull request for new unresolved review feedback. Use the current working directory's default gh repository. Resolve the repository, pull request, branch, latest commit, and URL before changing anything.
 
-Enumerate pull request review threads with paginated GraphQL. Do not rely on REST review comments alone. Retain each thread ID, resolution state, outdated state, path, line context, comment URL, numeric review comment database ID, author, body, and comment commit OID. Also retain each thread's authorship from the opening comment's `author.__typename`: `Bot` is agent-authored (a GitHub App's comments resolve to `Bot` too, so that is one case rather than two), anything else is human-authored, and an unclear author counts as human-authored. Authorship is fixed when the thread opens and later replies never change it.
+List every review thread with paginated GraphQL. Keep the thread ID, resolution and outdated state, file and line details, comment URL, numeric review comment database ID, author, body, and comment commit. Read the opening comment's author type. Bot means a bot or GitHub App started the thread. Treat every other or unclear author as human. Later replies do not change who started the thread.
 
-Classify each unresolved item as actionable/blocking, requirement-changing, scope-changing, low-severity, informational, duplicate, stale, already handled, or not applicable. Low-severity comments are not automatic skips, but only auto-fix objective low-severity classes: typos; broken links; stale names, paths, commands, schedules, or field lists; factual drift from a named canonical source; and duplicated machine-checkable settings or field summaries where the fix is to point at that canonical source. Treat subjective clarity, tone, wording, organization, naming preference, broad redundancy, or style comments as report-only unless the user explicitly asks this thread to handle them.
+For every unresolved item, decide whether to fix it, ask the user, explain it, mark it outdated, or leave it because it repeats an item already handled. Fix clear bugs and objective small corrections such as typos, broken links, stale names or commands, facts that differ from a named source, and repeated machine-checkable settings that should link to their source. Report subjective comments about tone, wording, organization, or naming unless the user asked this task to handle them.
 
-Automatically fix actionable/blocking feedback and objective low-severity cleanup that preserves accepted requirements, accepted scope, implementation strategy, test strategy, dependency-security conclusions, CI/workflow contracts, and product behavior.
+Ask the user before changing requirements, requested behavior, implementation or test strategy, dependency security decisions, or CI behavior. Also stop for missing secrets or permissions, policy restrictions, and conflicts that cannot be resolved safely.
 
-Stop and report human input is required if feedback changes requirements, accepted scope, implementation strategy, test strategy, dependency-security conclusions, CI/workflow contracts, or product behavior. Also stop for secrets, permission blockers, policy blockers, or merge conflicts that cannot be resolved cleanly.
+Before editing, inspect the latest pull request commit and current file. Make the smallest fix that addresses the cause. Follow AGENTS.md, CLAUDE.md, and every document they require. Run the smallest documented check that covers the change. Do not use skip variables, broad bypass settings, --no-verify, or hidden exceptions. Report a blocked check instead of claiming it passed.
 
-For each actionable/blocking item, inspect the latest head and current file context before editing. Implement the smallest correct root-cause fix. Follow the repository's documented guidance — `AGENTS.md`/`CLAUDE.md` and the docs they import — and its commit and test conventions. Prefer offensive fixes over defensive workarounds.
+Commit verified changes with the repository's format. Run the repository's required local review on that exact commit. Fix and commit clear findings, then repeat checks and review until the current commit passes. Push only after that pass.
 
-After edits, run the narrowest local verification command that covers the changed behavior. Do not use hidden skip env vars, broad bypass knobs, or --no-verify. If local verification is blocked, report the exact blocker instead of claiming success.
+For a thread started by a bot, post a reply with the fix commit, check result, and explanation, then resolve it with GraphQL after confirming the fix is on the latest pull request commit. Fix code requested in a human-started thread, but do not reply, resolve, dismiss, or request another review. Report that thread to the user instead.
 
-When fixes are verified, commit focused changes with this repo's commit rules. Run the repository-required local review against that exact committed head, apply and commit branch-local findings, and repeat verification and local review until the current committed head passes. When the repository defines no separate local-review procedure, the documented verification supplies the local readiness evidence. Push the PR branch only after that pass. Reply to each handled agent-authored review thread using the REST threaded replies endpoint with evidence: fix commit SHA, verification command, and how the latest head addresses the comment. Resolve eligible review threads, the agent-authored ones, through GraphQL only after latest-head verification succeeds.
+If a human says a previously fixed bug remains or returned, reproduce the latest report before making another fix, even when the pull request commit is unchanged. Finish with a new failing-then-passing reproduction or report what prevents it. Leave the human-started thread unchanged.
 
-Fix human-authored threads the same way, but leave the conversation alone: no reply, no resolve, no dismissal, and no re-requested review, however strong the evidence. Report them to the operator in the session.
+Before stopping, apply the draft readiness checks in ../../ready-pr/references/readiness-predicate.md. When they pass, run gh pr ready. Do not change issue status.
 
-A human report that a previously handled bug persists or has returned is not a duplicate, stale comment, or ordinary actionable item. Restart the repository's human-bug-report loop even when the PR head SHA has not changed. Re-read the latest report, then read and follow the repository contract in full. Completion is a fresh red-then-green loop or a reported blocker. Leave the human-authored conversation untouched.
-
-Before stopping, run the completion step from `ready-pr`'s canonical readiness predicate in `../../ready-pr/references/readiness-predicate.md`. When it holds, flip the agent-owned draft with `gh pr ready`. The PR transition does not write issue state; integration automation owns issue lifecycle changes.
-
-Stop this automation when no unresolved actionable/blocking review feedback remains and every low-severity item is either handled as objective cleanup or explicitly classified as stale, duplicate, already handled, informational, subjective/report-only, or requiring a human decision, and the completion step above has run. A human-authored thread counts as handled once its code fix is on the latest head and it is reported in the session; a renewed bug report also requires a completed red-then-green loop or a reported blocker. Waiting for the operator to answer it is not this automation's job. Report the PR URL, latest head SHA, handled thread URLs, verification evidence, whether the PR was flipped to ready, every unresolved human-authored thread, and any remaining non-blocking items with the reason they were left open.
+Stop the automation when no clear review work remains, every small item is fixed or explained, and the draft readiness check has run. A human-started thread is complete for this automation after its code fix is on the latest commit and it has been reported to the user. Report the pull request URL, latest commit, handled thread URLs, useful check results, whether the draft became ready, every unresolved human-started thread, and any remaining item with the reason it was left open.
 ```
 
-## Manual Fallback
-
-If the automation tool is unavailable, tell the user to create a Codex app
-thread automation from the Automations menu using the canonical settings and
-the exact prompt above. Include the selected polling interval, or 10 minutes
-when the user gives no preference.
-
-Do not create a standalone project automation as a fallback unless the user
-explicitly asks for independent runs instead of preserving this chat's context.
+Create a heartbeat automation attached to the current task when the Codex app
+automation tool is available. If it is unavailable, tell the user to create the
+same task automation from the app's Automations menu with the selected interval
+and prompt. Create a separate project automation only when the user explicitly
+asks for independent runs without this conversation's context.

@@ -141,7 +141,8 @@ assert_blocked() {
     'uncommitted tracked changes in the holder'
 
   root="$(new_conflicting_fixture)"
-  git -C "$root/held" merge conflicting >/dev/null 2>&1 || true
+  # Override merge.ff=only because this case needs Git to write MERGE_HEAD.
+  git -C "$root/held" merge --no-ff conflicting >/dev/null 2>&1 || true
   assert_blocked "$root" feature "git -C $root/held merge --abort" \
     'a merge in progress in the holder'
 

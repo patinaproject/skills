@@ -1,55 +1,40 @@
-# Repository-Controlled Readiness Predicate
+# When to mark a draft ready
 
-This reference is the single source of truth for an agent-authored draft pull
-request's transition to ready for human review.
+Mark an agent-created draft pull request ready for human review only when all
+three checks pass:
 
-Flip an agent-owned draft only when all three conditions hold:
+1. Local `HEAD` equals the latest pull request commit, and the repository's
+   required local review passed on that commit.
+2. Every required GitHub check passes on that commit.
+3. No unresolved GraphQL review thread started by a bot or GitHub App remains.
 
-1. The exact current committed head equals the latest published pull-request
-   head, and the repository-required local review passed on that commit.
-2. Every check in the **required-check set** below passed on the latest
-   published head.
-3. Zero unresolved agent-authored GraphQL review threads remain.
+Immediately before `gh pr ready`, fetch local `HEAD`, the pull request
+`headRefOid`, required checks, and every paginated GraphQL review thread. If any
+value changes before the command runs, discard the result and check again.
 
-Immediately before `gh pr ready`, recapture local `HEAD`, the pull request's
-`headRefOid`, required-check results, and paginated GraphQL review threads.
-Evaluate the three conditions from that snapshot. If any input changes during
-the capture or before the command runs, discard the snapshot and restart the
-predicate.
+Optional review services are not part of this decision. Their comments still
+need the same fix or explanation as other bot feedback.
 
-An optional review service's status, availability, completion, conclusion, or
-latest-head coverage never enters the predicate. Feedback it posted remains an
-ordinary agent-authored conversation and blocks while unresolved.
+Human-started threads do not prevent moving an agent-created draft into human
+review, but every one must be resolved by its author or the user before the pull
+request is ready to merge. Leave a draft created by a person unchanged unless
+the user asks the agent to take it over.
 
-Human-authored threads sit outside this predicate because the transition puts
-the work formally in front of people. They still block the separate
-ready-to-merge gate until their author or the operator resolves them. Leave a
-human's work-in-progress draft alone unless the operator asks the agent to take
-it over.
+Never move a ready pull request back to draft.
 
-The transition is one-way. Never convert a ready pull request back to draft.
+## Required checks
 
-## Required-check set
+Use the contexts returned by `gh pr checks --required` on the latest pull
+request commit. GitHub treats `success`, `skipped`, and `neutral` as passing for
+a required context.
 
-The required-check set is the contexts `gh pr checks --required` selects on the
-latest published head. GitHub counts `success`, `skipped`, and `neutral` as
-passing conclusions for a required context, so a required context passes on any
-of the three.
+The Checks API may also return:
 
-The Checks API returns every run on that head, which is a wider list than the
-CLI selects. Two kinds of run appear there and stay outside the set:
+- optional runs that branch protection does not require
+- older runs replaced by a later run of the same context on the same commit
 
-- **Optional runs**, which the branch protection does not require.
-- **Superseded runs**, where a later run of the same context on the same head
-  replaced an earlier one. Concurrency cancellation is the common source: the
-  earlier run is retained as `cancelled` while the current run of that context
-  succeeds.
+Those runs are history. Report them when useful, but do not count them as a
+current required failure.
 
-Both are check **history**. Read them as history rather than as a current
-required result, and keep the required-check evaluation on the CLI-selected
-contexts. History is still reported, under the reporting rules in
-[workflows/ready-for-merge.md](../workflows/ready-for-merge.md).
-
-Passing this set is the check condition alone. GitHub decides mergeability
-separately through `mergeStateStatus`, so a fully passing required-check set
-never stands in for a `CLEAN` merge state.
+Required checks do not prove that the branch merges cleanly. Check
+`mergeStateStatus` separately.

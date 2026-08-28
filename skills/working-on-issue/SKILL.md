@@ -1,87 +1,67 @@
 ---
 name: working-on-issue
-description: "Align issue state when starting or resuming issue-linked work: resolve the ticket, use its tracker-provided branch, self-assign when unassigned, and mark it started. Use as the shared begin/resume step for one issue."
+description: Prepare an issue for development by finding it, switching to its branch, assigning it when unassigned, and marking it started. Use whenever issue-linked work begins or resumes.
 ---
 
-# Working On Issue
+# Working on an issue
 
-Resolve and align one issue before implementation. Read
-`docs/issue-tracker.md` at the repository root for every tracker
-operation; do not embed tracker commands here.
+Read `docs/issue-tracker.md` at the repository root before any issue operation.
+It defines the tracker and its commands. If the file is missing, stop and say
+that `scaffold-repository` provides it.
 
-If `docs/issue-tracker.md` is absent, stop before any tracker operation and
-report the missing path plus the skill that provides it: `scaffold-repository`
-emits it as part of the core baseline. Do not fall back to invented tracker
-commands or to a local-markdown tracker — this skill delegates its whole
-tracker vocabulary to the adapter, so proceeding without it silently guesses
-the provider.
+Run every time issue-linked work begins or resumes. Repeating the same actions
+is safe. Renaming the task, changing branches, assigning the issue, and changing
+its status are separate actions. If one fails, record the failure and continue
+with the others.
 
-This skill is best-effort and idempotent. Chat renaming, branch setup,
-assignment, and state are independent actions: record a failed action and
-continue with the others.
+## Find one issue
 
-## Resolve one issue
+Look for an issue in this order:
 
-Resolve in this order:
+1. the one explicit issue reference in the user's current request
+2. an issue reference in the current branch name, interpreted by
+   `docs/issue-tracker.md`
+3. no issue
 
-1. an explicit current issue reference supplied by the caller;
-2. a current issue reference in the branch name, interpreted through the
-   adapter's reference vocabulary; or
-3. no issue.
+Reject a request with more than one explicit issue reference. When no issue is
+found, return `no-issue`. The calling skill decides whether it can continue.
 
-Reject multiple explicit references. When no issue resolves, report `no-issue`
-and return; the caller decides whether issue association is required.
+Fetch the issue and its relationships using `docs/issue-tracker.md`. Record the
+ID, URL, title, assignee, status, blockers, and issue branch name.
 
-Fetch the resolved ticket and relationships through the adapter. Record its
-identifier, URL, title, assignee, state, blockers, and adapter-provided branch
-name.
+## Prepare the issue
 
-## Align
+### Rename the Codex task
 
-### Chat title
+When the app can rename the current task, set its title to
+`<Issue ID> <Title sentence case>`. Keep acronyms, identifiers, technical names,
+and code terms unchanged. A missing rename tool is fine. Record other rename
+failures and continue.
 
-When the host exposes a current-chat rename capability, set the title to
-`<Issue ID> <Title sentence case>` using the adapter's canonical identifier and
-the fetched issue title. Convert natural-language words to sentence case while
-preserving technical names, acronyms, identifiers, and code terms exactly. Use
-one space between the identifier and title, and no other issue data.
+### Switch branches
 
-Treat an unavailable rename capability as a supported no-op. Record a failed
-rename but continue every other alignment action. Repeated runs set the same
-title without additional state. A `no-issue` result returns before this action,
-leaving the current chat title unchanged.
+Compare the current branch with the issue branch.
 
-### Branch
+- If they match, stay on the current branch.
+- If they differ, run `new-branch` with the issue.
+- Keep a different branch only when the user explicitly says the current branch
+  must not change. Report the branch and the reason.
 
-Compare the current branch with the adapter-provided branch name.
+Finish on the issue branch unless the user required the exception above.
 
-- If they match, stay on it.
-- Otherwise invoke `new-branch` with the resolved issue.
-- Keep a different branch only when the caller explicitly declared the current
-  branch immutable. Report that deviation and its reason.
+### Assign the issue
 
-End on the adapter-provided branch unless an explicit immutable-branch override
-applies.
+If the issue has no assignee, claim it using `docs/issue-tracker.md`. Leave an
+existing assignee unchanged. Record a failed assignment and continue.
 
-### Assignment
+### Mark it started
 
-When the issue has no assignee, use the adapter's claim operation. When it is
-already assigned, do nothing. Record a failed assignment but do not halt.
-
-### Started state
-
-When the issue is not started or completed, use the adapter's start-work
-operation. Do not create or target a review state; the pull request's own
-draft/ready state represents review and integration automation owns later issue
-transitions.
+If the issue is neither started nor complete, mark it started using
+`docs/issue-tracker.md`. Do not move it to a review status. The pull request's
+draft and ready states show review progress.
 
 ## Report
 
-Return:
-
-- the identifier, URL, and title, or `no-issue`;
-- the ending branch and whether `new-branch` ran;
-- rename, assignment, or state failures that need human action; and
-- every intentional or accidental non-issue-linked branch deviation.
-
-Never edit the issue body or judge whether its scope is actionable.
+Return the issue ID, URL, title, ending branch, and whether `new-branch` ran.
+Include only rename, assignment, status, or branch failures that need attention.
+Never edit the issue body or decide whether its requested work is clear enough.
