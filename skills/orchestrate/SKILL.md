@@ -1,36 +1,62 @@
 ---
 name: orchestrate
-description: Keep user-visible Codex tasks moving. Resume idle tasks, ask them to repair current pull request conflicts or failed checks, and report tasks that need the user. Ignore background workers.
+description: Keep user-visible Codex tasks moving. Resume safe idle tasks, ask them to repair current pull request conflicts or failed checks, and report tasks that need the user. Check attached delegated work before sending a message.
 ---
 
 # Orchestrate Codex tasks
 
 Coordinate user-visible Codex tasks. Leave implementation inside each task.
-Ignore subagents, command sessions, automations, test processes, and other
-background workers except when their state explains a user-visible task.
+Background workers are outside the task inventory. Inspect attached delegated
+work only to decide whether messaging its parent task is safe.
 
 ## Check every task
 
 1. List every incomplete user-visible Codex task.
-2. Read each task's recent result and current run state.
+2. Read each task's recent result and current run state. Separately inspect its
+   attached delegated work with the available session-state tools.
 3. Check every open pull request owned by a task for conflicts and current
    required checks.
-4. Put each task in one state:
-   - `Active`: a command, check, or agent turn is running.
-   - `Ready for more work`: nothing is running and the next safe step is clear
-     and already authorized.
-   - `User needed`: progress needs a decision, approval, credential,
-     clarification, or action outside the task's authority.
+4. Record these policy inputs for each task:
+   - `parentState`: `active`, `idle`, `interrupted`, or the observed state.
+   - `delegatedWorkState`: `active`, `inactive`, or `unknown`. Use `inactive`
+     only when the session-state tools explicitly verify that no attached
+     delegated work is running. Absence from the user-visible task inventory is
+     not verification.
+   - `nextActionState`: `unblocked`, `operator-required`, or `none`. A current
+     failed check or pull request conflict is `unblocked` when its repair is
+     already authorized.
 5. Account for every incomplete user-visible task.
 
-Time alone does not make a task idle. Inspect its current state.
+Time alone and a top-level `idle` or `interrupted` state do not prove that a
+task is safe to resume.
+
+## Decide whether to send a message
+
+Keep discovery separate from the decision. Change to this skill's directory,
+then pass each task's three recorded inputs as JSON to the bundled policy:
+
+```sh
+node scripts/orchestration-policy.mjs '{"parentState":"idle","delegatedWorkState":"inactive","nextActionState":"unblocked"}'
+```
+
+Use the returned action exactly:
+
+- `send-instruction` permits one message through **Resume tasks that can
+  continue**.
+- `report-operator` adds the task to the user report without messaging it.
+- `leave-unchanged` sends no message. Report an `unknown` delegated-work state
+  as unverifiable. Active work needs no report unless it also needs the user.
+
+If the policy helper cannot run, leave the task unchanged and report the
+failure. No other observation authorizes a message.
 
 ## Resume tasks that can continue
 
-Send one instruction to each task that is ready for more work. State the next
-action, keep it within the task's existing request and permissions, define a
-visible completion condition, and tell the task to continue through later safe
-steps. Do not repeat an unchanged instruction already sent to that task.
+Send one instruction only to a task whose policy action is `send-instruction`.
+State the next action, keep it within the task's existing request and
+permissions, define a visible completion condition, and tell the task to
+continue through later safe steps. Do not repeat an unchanged instruction
+already sent to that task.
 
 When one part needs the user but other work can continue independently, tell
 the task to finish that other work first.
