@@ -55,5 +55,5 @@ Apply the consuming repository's rules when it maps pull request feedback into
 its issue tracker.
 
 The operator owns `/fix` invocation, reviewer contact, replies to human-authored
-conversations, and review-state changes. Report the handoff without taking
-those actions.
+conversations, and changes to a human review's state. Report the handoff without
+taking those actions.

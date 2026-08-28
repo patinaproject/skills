@@ -108,7 +108,6 @@ When a condition fails, report `not ready to merge` and explain what remains.
 When all conditions pass, summarize the evidence in one sentence instead of
 listing every condition.
 
-The operator owns follow-up issues, `/fix` invocation, reviewer contact, replies
-to human-started conversations, and review-state changes. Return control instead
-of taking those actions or waiting indefinitely for new comments. Add agent
-attribution only when the repository requires it.
+After reporting the reporter-fidelity handoff, return control instead of waiting
+indefinitely for new comments. Add agent attribution only when the repository
+requires it.
