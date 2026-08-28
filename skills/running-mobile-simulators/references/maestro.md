@@ -50,8 +50,9 @@ Use the recorded `device_id` in the first device tool call. Confirm that the
 Viewer connects to that device before starting the flow. Keep the same Viewer
 and device connection throughout the run.
 
-This step is complete when the operator has the Viewer URL, the available
-browser has opened it, and the Viewer shows the recorded device before the run.
+This step is complete when the operator has the Viewer URL and the Viewer shows
+the recorded device before the run. When the host has an embedded browser, that
+browser must also show the Viewer before the run.
 
 ## Cleanup
 

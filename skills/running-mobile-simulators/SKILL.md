@@ -51,10 +51,11 @@ automation, recovery, or cleanup:
 If the task uses Maestro as a launcher or controller, also read
 [Maestro](references/maestro.md) before starting it.
 
-Use the caller's requested launcher. Otherwise, use the platform launcher for
-the named device. After an owned launch, add the exact device identifier,
-launcher command, and launcher PID to the session record. If the launcher
-exits, record that it is not persistent.
+For an attached device, skip launch and continue with its platform identity and
+readiness checks. For an owned device, use the caller's requested launcher or
+the platform launcher for the named device. After launch, add the exact device
+identifier, launcher command, and launcher PID to the session record. If the
+launcher exits, record that it is not persistent.
 
 This step is complete when the selected device passes its platform identity and
 readiness checks under the exact recorded serial or UDID.
