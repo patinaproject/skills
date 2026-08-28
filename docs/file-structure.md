@@ -26,6 +26,7 @@ layout.
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/fix/`: diagnosis-first correction and fixed-build evidence skill
+- `skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
@@ -80,6 +81,7 @@ Skills owned by this repository:
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
 | `fix` | `skills/fix/` | Diagnosis-first correction and fixed-build evidence |
+| `running-mobile-simulators` | `skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `orchestrate` | `skills/orchestrate/` | User-visible Codex chat coordination |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |

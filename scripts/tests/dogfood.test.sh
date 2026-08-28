@@ -32,6 +32,7 @@ SKILLS=(
   grill-system-design
   review-system-design
   fix
+  running-mobile-simulators
   orchestrate
   write-changelog
   prompting-fable

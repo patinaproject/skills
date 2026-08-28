@@ -21,6 +21,7 @@
     "./skills/grill-system-design",
     "./skills/review-system-design",
     "./skills/fix",
+    "./skills/running-mobile-simulators",
     "./skills/orchestrate",
     "./skills/write-changelog",
     "./skills/prompting-fable"
