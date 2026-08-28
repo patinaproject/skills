@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.33.0](https://github.com/patinaproject/skills/compare/v2.32.0...v2.33.0) (2026-08-28)
+
+
+### Features
+
+* [#392](https://github.com/patinaproject/skills/issues/392) add explicit fix workflow ([#394](https://github.com/patinaproject/skills/issues/394)) ([4aa3c5a](https://github.com/patinaproject/skills/commit/4aa3c5a3d0f9c68e7aa5b40c6a834dc765a6dda6))
+* [#399](https://github.com/patinaproject/skills/issues/399) add running mobile simulators ([#400](https://github.com/patinaproject/skills/issues/400)) ([cca5ab4](https://github.com/patinaproject/skills/commit/cca5ab45d7d669b579f093ab01f3792b7de04f1c))
+
 ## [2.32.0](https://github.com/patinaproject/skills/compare/v2.31.0...v2.32.0) (2026-08-28)
 
 
