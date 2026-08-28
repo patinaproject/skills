@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.31.0](https://github.com/patinaproject/skills/compare/v2.30.0...v2.31.0) (2026-08-28)
+
+
+### Features
+
+* [#386](https://github.com/patinaproject/skills/issues/386) rename issue-linked chats ([#387](https://github.com/patinaproject/skills/issues/387)) ([79f0b1b](https://github.com/patinaproject/skills/commit/79f0b1b5314eedf84fc203fded7834a2b387bef8))
+
+
+### Bug Fixes
+
+* [#389](https://github.com/patinaproject/skills/issues/389) continue past unchanged target branch failures ([#390](https://github.com/patinaproject/skills/issues/390)) ([331d62c](https://github.com/patinaproject/skills/commit/331d62c14ae33da47a00250cc1dba6e8e263526c))
+
 ## [2.30.0](https://github.com/patinaproject/skills/compare/v2.29.5...v2.30.0) (2026-08-27)
 
 
