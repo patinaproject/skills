@@ -34,9 +34,12 @@ judgment. Link the agreement's specification or ADR once.
 The reviewer sees an explanation, not the contract form. Do not repeat
 **Client**, **Supplier**, **Requires**, **Ensures**, **Maintains**, or
 **Violation behavior** fields, and do not turn those fields into an unlabeled
-checklist. Include only facts that matter to the decision. Add a visual only
-when it makes a relationship easier to understand than the prose. End each
-group with a short request for concerns or approval.
+checklist. Include only facts that matter to the decision. Use a visual
+explainer when it makes a relationship easier to understand than prose alone:
+a table for repeated mappings or comparisons, a sequence or state diagram for
+interactions over time, or a dependency diagram for ordering. Keep the prose so
+the visual supports the explanation instead of replacing it. End each group
+with a short request for concerns or approval.
 
 Wait for the reviewer's reply after each group. Record challenged agreements
 under their plain-language titles and record each agreed fix. Treat the rest as
