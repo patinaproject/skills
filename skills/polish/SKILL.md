@@ -44,6 +44,11 @@ build work.
   architecture and Standards review continue.
 - Material divergence from the issue body belongs in the final report. This
   skill leaves issue editing to its caller.
+- When a caller supplies behavioral observation context, carry its requested-
+  change link, expected and actual behavior, reporter-perceived surface,
+  gathered and unavailable evidence, and known test-to-symptom mismatches into
+  both review axes. Missing context remains an ordinary absence and does not
+  make this portable review require a simulator, device, or deployed build.
 
 ## Required Child Skills
 
@@ -147,6 +152,25 @@ Run the two `code-review` axes as fresh parallel subagents. Their prompts carry:
 The reviewers report only: they do not edit, stage, commit, or fix their own
 findings. In `recheck` mode, revalidate the named finding set despite the empty
 diff. Keep the two axis reports separate.
+
+For a reported behavioral defect, both reviewers compare the regression
+evidence's observable assertion with the behavior the reporter perceived. The
+test must be capable of going red for that reported property. Reject proxy-only
+evidence, including:
+
+- eventual state or a fixed delay for a timing report;
+- request shape or counts for an ordering report;
+- internal calls for a public-interaction report;
+- element presence for a visibility or layout report; and
+- indirect requests or counts for directly reported data behavior.
+
+Prefer direct timing and sequence observations, the public interaction surface,
+visual evidence or measured geometry, and direct data results as appropriate.
+A proxy may supplement direct evidence, but passing automation or a convenient
+assertion never substitutes for the reported property. Record unavailable
+reporter-fidelity evidence as a limitation for fixed-build verification; it is
+a `polish` finding only when the implementation, regression seam, or supplied
+spec requires that evidence here.
 
 Documented Standards violations and missing, partial, or incorrect Spec
 requirements are blocking. Fowler smells remain judgment calls. Benign scope

@@ -25,7 +25,7 @@ layout.
 - `skills/design-by-contract/`: consequential system contract design overlay
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
-- `skills/resolve-qa-feedback/`: evidence-backed QA feedback resolution skill
+- `skills/fix/`: diagnosis-first correction and fixed-build evidence skill
 - `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
@@ -79,7 +79,7 @@ Skills owned by this repository:
 | `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
-| `resolve-qa-feedback` | `skills/resolve-qa-feedback/` | Evidence-backed QA feedback resolution |
+| `fix` | `skills/fix/` | Diagnosis-first correction and fixed-build evidence |
 | `orchestrate` | `skills/orchestrate/` | User-visible Codex chat coordination |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |

@@ -4,7 +4,7 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging,
-contract-based system design, QA feedback resolution, system design review,
+contract-based system design, diagnosis-first correction, system design review,
 focused system design grilling, Codex chat coordination, settled-design
 documentation capture, release changelog ceremonies, and local branch updating.
 They are available across Claude Code, Codex, and any agent runtime that reads
@@ -218,14 +218,14 @@ rounds for a human reviewer.
 See [./skills/review-system-design/](./skills/review-system-design/) for the
 skill contract.
 
-### resolve-qa-feedback
+### fix
 
-QA feedback needs reproduction evidence and a fixed-build retest before a fix
-claim. `resolve-qa-feedback` carries that loop from the red baseline through
-inspected visual evidence.
+One reported behavior needs a red diagnosis and a same-repro fixed-build retest
+before a fix claim. Operator-invoked `fix` carries that evidence case through
+implementation, shared review and publication, then verifies the deployed
+current pull-request head at the reporter's perceived surface.
 
-See [./skills/resolve-qa-feedback/](./skills/resolve-qa-feedback/) for the skill
-contract.
+See [./skills/fix/](./skills/fix/) for the skill contract.
 
 ### orchestrate
 
@@ -287,7 +287,7 @@ README and skill contract.
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [resolve-qa-feedback](./skills/resolve-qa-feedback/) | Reproduce, fix, retest, and visibly prove a QA report is resolved |
+| [fix](./skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
@@ -348,7 +348,7 @@ skills/
   design-by-contract/
   grill-system-design/
   review-system-design/
-  resolve-qa-feedback/
+  fix/
   orchestrate/
   write-changelog/
   prompting-fable/

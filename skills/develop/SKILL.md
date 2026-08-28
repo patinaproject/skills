@@ -1,6 +1,7 @@
 ---
 name: develop
-description: "Drive one scope — an issue reference, free-form instructions, or both — to an evidence-backed production-ready PR outcome on its branch. Use when the user invokes `/develop`, or asks to develop one issue or one set of instructions end to end."
+description: Drive one scope to an evidence-backed production-ready PR outcome on its branch.
+disable-model-invocation: true
 ---
 
 # Develop
@@ -35,6 +36,10 @@ guardrails, and never merges a pull request.
 `develop` builds with plain `implement`; it never triggers multi-agent
 workflow fan-out on its own. Parallel slice builds are a separate, deliberate
 opt-in: invoke `develop-with-workflow` directly when you want them.
+
+`develop` runs only when the operator invokes it. It stays portable: diagnosis
+and behavioral observations are useful when available, but neither local
+devices nor deployed-build evidence becomes a required stage or exit gate.
 
 ## Terminal Goal
 
@@ -166,6 +171,22 @@ scope, and treat any issue as best-effort association, not a separate path.
 - Residual risks and test gaps are reported only when they are concrete,
   relevant to the scope, and useful for a human decision.
 
+## Observation Context
+
+Carry available behavioral observations into `polish` and `ready-pr`:
+
+- the operator scope and most direct requested-change link;
+- expected and actual behavior;
+- the reporter-perceived surface, such as timing, ordering, interaction,
+  layout, visibility, data, or another directly observed property;
+- gathered evidence and the target or head it covers;
+- unavailable evidence; and
+- known mismatches between tests or checks and the reported symptom.
+
+Gather diagnosis when it helps implementation, but keep it optional. Missing
+observation context is an ordinary absence: it adds no stage, blocker, or exit
+gate to this workflow.
+
 ## Workflow
 
 1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
@@ -183,15 +204,17 @@ scope, and treat any issue as best-effort association, not a separate path.
    authoritative over any issue body — then run repository-documented
    verification. `polish` owns review, so skip `implement`'s standalone
    `code-review` tail here.
-7. Run `polish`, forwarding the resolved issue and instructions. Its
+7. Run `polish`, forwarding the resolved issue, instructions, and every
+   available observation-context field. Its
    idempotent alignment re-confirms the branch, then it reviews the selected
    committed delta through delta-bounded architecture, verification, and fresh
    Standards and Spec stages. It records every completed outcome, fixes and
    commits agent-ready findings, and repeats incrementally until the current
    head passes with no findings. Invoking `develop` approves this review loop;
    a `ready-for-human` finding stops the run as `human-blocked`.
-8. Run `ready-pr` for commit, push, PR creation or update, visible check
-   observation, PR feedback loops, and ready-to-merge reporting. Invoke
+8. Run `ready-pr`, forwarding the same observation context, for commit, push,
+   PR creation or update, visible check observation, PR feedback loops, and
+   ready-to-merge reporting. Invoke
    `ready-pr` only after `polish` records a passing current head with no
    findings.
    **When step 3 resolved no issue**, consult the

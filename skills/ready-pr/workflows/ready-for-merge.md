@@ -444,6 +444,12 @@ tell the human what to do next.
     Include:
 
     - PR URL.
+    - Reporter-fidelity QA as `verified` or `pending`, separately from PR
+      readiness, with the most direct available requested-change link. Mark it
+      verified only when direct evidence covers the reporter-perceived behavior
+      on the identified current target or head. Otherwise name the unavailable,
+      stale, mismatched, or still-needed evidence as pending. Passing checks do
+      not change that status.
     - Latest head SHA only when it helps identify a pushed fix or conflict
       resolution.
     - Meaningful changes since the previous report, especially conflict

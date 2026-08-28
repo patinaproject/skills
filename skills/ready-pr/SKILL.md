@@ -24,6 +24,11 @@ runs the readiness loop until the PR is ready-to-merge or every problematic
 check is triaged and reported. A failing check is evidence to triage, not a
 halt. It never merges the PR or enables auto-merge.
 
+Carry any supplied behavioral observation context through the loop: the
+operator scope, requested-change link, expected and actual behavior,
+reporter-perceived surface, gathered and unavailable evidence, and known
+test-to-symptom mismatches. Missing context is an ordinary absence.
+
 Agent-authored PRs open as drafts while the agent loop runs, so draft means
 "agent loop still churning, not yet for humans." Apply the
 [repository-controlled readiness predicate](references/readiness-predicate.md)
@@ -63,7 +68,8 @@ human line.
 9. Apply the canonical predicate and perform its draft-to-ready transition.
    The PR transition does not write issue state.
 10. Report ready-to-merge status or concrete non-ready check dispositions
-    without merging.
+    without merging. Report reporter-fidelity QA separately as `verified` or
+    `pending`, with the most direct requested-change link available.
 
 ## Guardrails
 
@@ -104,3 +110,17 @@ human line.
 - Do not add AI or agent attribution unless the repository requires it.
 - Stop for non-check blockers involving secrets, permissions, product
   decisions, or ambiguous scope.
+- Reporter-fidelity QA is `verified` only when direct evidence covers the
+  reporter-perceived behavior on the identified current target or head.
+  Passing CI, request shape, counts, eventual state, fixed delays, internal
+  calls, or element presence cannot verify a different reported property.
+- Reporter-fidelity QA stays `pending` when direct evidence is missing, stale,
+  unavailable, tied to another head, or known to mismatch the symptom. This
+  status does not enter the readiness predicate or change draft behavior.
+- Prefer the most specific link that identifies the requested change: the
+  report or review thread before its containing review, pull request, or issue.
+  Apply the consuming repository's reference rules when it maps pull-request
+  feedback into its issue tracker.
+- The evidence handoff is informational. Do not invoke `/fix`, notify or
+  request a reviewer, reply to a human-authored conversation, or change review
+  state on the operator's behalf.
