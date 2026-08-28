@@ -17,6 +17,11 @@ Before a device state change, resolve the workspace's real path and inventory:
 - active emulator, Simulator, Maestro, MCP, and Viewer processes; and
 - active leases or other repository-specific device coordination.
 
+Read [Device leases](references/device-leases.md) before selecting or starting
+a device. On a host that can run more than one workspace, an exclusive device
+lease is mandatory. Inventory is read-only; do not launch a device, install or
+start an app, run automation, or change device state until the lease is held.
+
 This skill manages virtual devices only. Stop if the requested target is a
 physical device or a cloud device.
 
@@ -33,9 +38,12 @@ app build. For an attached device, record its exact serial or UDID now. For a
 new owned Android emulator, record the AVD name and add its serial immediately
 after launch. Record an owned iOS simulator's UDID before launch.
 
-When workspaces share a host, acquire a device lease or serialize device
-creation and app runs. Include the workspace's real path in the lease. Hold the
-lease until cleanup.
+Acquire the lease atomically under the device's canonical identity. The lease
+must include the workspace's real path and a unique session ID. An attached
+device still requires a lease even though its lifecycle remains externally
+owned. Hold the lease through app execution, automation, evidence, recovery,
+and cleanup. If another session holds it, select a different device or stop;
+never wait while mutating the contested device.
 
 This step is complete when the session record names one device and ownership
 mode, and any required lease is held.
@@ -96,7 +104,7 @@ sequence and report the failed check.
 
 Follow the platform and Maestro cleanup instructions that apply to the session.
 Stop only the processes and device recorded as owned by the current session.
-Release the lease after those resources exit.
+Release the lease by its unique session ID after those resources exit.
 
 Preserve attached devices, shared ADB, unrelated simulators, and other
 workspaces' processes.

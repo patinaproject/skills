@@ -16,6 +16,12 @@ maestro start-device \
   --device-os <reported-os>
 ```
 
+On a shared host, use `start-device` only when the inventory maps the requested
+model and OS to one canonical AVD name or Simulator UDID that the session has
+already leased. If Maestro cannot reveal that identity before startup, use the
+platform launcher with a pre-leased device instead. Do not let `start-device`
+discover or reuse a device after mutation has begun.
+
 Reserve `--force-create` for explicit device maintenance because it can replace
 a canonical device. After startup, follow the platform reference to resolve
 the exact serial or UDID and prove readiness.
