@@ -1,3 +1,4 @@
+import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const resumableParentStates = new Set(['idle', 'interrupted']);
@@ -47,7 +48,11 @@ export function decideOrchestrationAction({
   };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+const isDirectInvocation =
+  process.argv[1] !== undefined &&
+  realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectInvocation) {
   const input = JSON.parse(process.argv[2] ?? '{}');
   process.stdout.write(`${JSON.stringify(decideOrchestrationAction(input))}\n`);
 }

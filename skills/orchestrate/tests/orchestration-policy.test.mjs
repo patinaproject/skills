@@ -73,4 +73,27 @@ assert.deepEqual(JSON.parse(commandOutput), {
   reason: 'delegated-work-unknown',
 });
 
+const overlayPolicyScript = fileURLToPath(
+  new URL(
+    '../../../.agents/skills/orchestrate/scripts/orchestration-policy.mjs',
+    import.meta.url
+  )
+);
+const overlayCommandOutput = execFileSync(
+  process.execPath,
+  [
+    overlayPolicyScript,
+    JSON.stringify({
+      parentState: 'idle',
+      delegatedWorkState: 'inactive',
+      nextActionState: 'unblocked',
+    }),
+  ],
+  { encoding: 'utf8' }
+);
+assert.deepEqual(JSON.parse(overlayCommandOutput), {
+  action: 'send-instruction',
+  reason: 'idle-and-actionable',
+});
+
 console.log('OK: orchestration policy assertions passed');
