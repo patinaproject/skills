@@ -50,16 +50,10 @@ Read repository guidance for a human-bug-report contract. Follow it when one
 exists. Otherwise use the report's expected behavior, actual behavior, steps,
 and environment as the portable contract.
 
-Build one observation context and carry it through every stage:
-
-- operator scope and most direct requested-change link;
-- expected and actual behavior;
-- reporter-perceived surface: visual, timing, ordering, interaction, layout,
-  visibility, data, or another directly perceived property;
-- exact reproduction and required environment;
-- gathered red or green evidence and the head or target it covers;
-- unavailable evidence; and
-- known mismatches between tests or checks and the reported symptom.
+Build the complete context defined by the
+[`ready-pr` reporter-fidelity reference](../ready-pr/references/reporter-fidelity.md)
+and carry it unchanged through every stage. For `/fix`, the exact reproduction,
+required environment, and red result are mandatory rather than optional.
 
 Do not store workflow state in the worktree or an operating-system temporary
 directory. The structured red checkpoint and later evidence live in the chat.
@@ -102,7 +96,10 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
 4. **Implement the correction.** Use the build/TDD portion of `implement`.
    Test at a stable public seam when one exists, and make its assertion observe
    the reported property rather than a proxy. Keep the observation context
-   current as evidence or mismatches emerge.
+   current as evidence or mismatches emerge. This step is complete when the
+   accepted scope is implemented, every relevant stable seam is locally green,
+   and any behavior without a stable automated seam is recorded as unavailable
+   evidence for the deployed-head retest.
 
 5. **Run the shared quality loop.** Pass the complete observation context to
    `polish`. Fix and re-review every agent-ready finding until `polish` passes

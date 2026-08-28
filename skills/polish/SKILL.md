@@ -44,11 +44,9 @@ build work.
   architecture and Standards review continue.
 - Material divergence from the issue body belongs in the final report. This
   skill leaves issue editing to its caller.
-- When a caller supplies behavioral observation context, carry its requested-
-  change link, expected and actual behavior, reporter-perceived surface,
-  gathered and unavailable evidence, and known test-to-symptom mismatches into
-  both review axes. Missing context remains an ordinary absence and does not
-  make this portable review require a simulator, device, or deployed build.
+- Pass any caller-supplied behavioral observation context unchanged into both
+  review axes. Missing context remains an ordinary absence and does not make
+  this portable review require a simulator, device, or deployed build.
 
 ## Required Child Skills
 

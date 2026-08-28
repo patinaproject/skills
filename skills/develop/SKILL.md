@@ -173,15 +173,9 @@ scope, and treat any issue as best-effort association, not a separate path.
 
 ## Observation Context
 
-Carry available behavioral observations into `polish` and `ready-pr`:
-
-- the operator scope and most direct requested-change link;
-- expected and actual behavior;
-- the reporter-perceived surface, such as timing, ordering, interaction,
-  layout, visibility, data, or another directly observed property;
-- gathered evidence and the target or head it covers;
-- unavailable evidence; and
-- known mismatches between tests or checks and the reported symptom.
+Use the observation context defined by the
+[`ready-pr` reporter-fidelity reference](../ready-pr/references/reporter-fidelity.md).
+Carry every available field unchanged into `polish` and `ready-pr`.
 
 Gather diagnosis when it helps implementation, but keep it optional. Missing
 observation context is an ordinary absence: it adds no stage, blocker, or exit
