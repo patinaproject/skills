@@ -17,106 +17,53 @@ Before a device state change, resolve the workspace's real path and inventory:
 - active emulator, Simulator, Maestro, MCP, and Viewer processes; and
 - active leases or other repository-specific device coordination.
 
+This skill manages virtual devices only. Stop if the requested target is a
+physical device or a cloud device.
+
 Choose one ownership mode:
 
-- **Attached device.** Use an existing device by its exact identifier. Its owner
-  retains lifecycle responsibility.
-- **Owned device.** Start one device for this session. Record its exact
-  identifier, launcher command, and launcher PID. If the launcher exits, record
-  that it is not persistent.
+- **Attached device.** Select an existing device by its exact identifier. Its
+  owner retains lifecycle responsibility.
+- **Owned device.** Select one named device that this session will start. The
+  session owns its launcher, recovery, and cleanup.
 
-Record the workspace, platform, ownership mode, device identifier, launcher,
-owned processes, and app build identity in one session record. For a new owned
-device, record the intended named device before launch. Resolve and add its
-exact serial or UDID before the next device operation.
+Start one session record before launch. Record the workspace, platform,
+ownership mode, selected device, launcher intent, owned processes, and required
+app build. For an attached device, record its exact serial or UDID now. For a
+new owned Android emulator, record the AVD name and add its serial immediately
+after launch. Record an owned iOS simulator's UDID before launch.
 
 When workspaces share a host, acquire a device lease or serialize device
-creation and app runs. Include the workspace's real path in the lease.
+creation and app runs. Include the workspace's real path in the lease. Hold the
+lease until cleanup.
 
-This step is complete when the session record identifies one device and its
-ownership boundary.
+This step is complete when the session record names one device and ownership
+mode, and any required lease is held.
 
-## Start or attach to one device
+## Prepare the exact device
 
-Use the requested launcher. Otherwise, use the platform launcher for a named
-existing device:
+Read the reference for the selected platform before launch, readiness checks,
+automation, recovery, or cleanup:
 
-```bash
-emulator -list-avds
-emulator -avd <avd-name>
+- [Android Emulator](references/android.md)
+- [iOS Simulator](references/ios.md)
 
-xcrun simctl list devices available -j
-xcrun simctl boot <udid>
-```
+If the task uses Maestro as a launcher or controller, also read
+[Maestro](references/maestro.md) before starting it.
 
-Maestro can optionally create a standard local device:
+Use the caller's requested launcher. Otherwise, use the platform launcher for
+the named device. After an owned launch, add the exact device identifier,
+launcher command, and launcher PID to the session record. If the launcher
+exits, record that it is not persistent.
 
-```bash
-maestro list-devices --platform <android-or-ios>
-maestro start-device \
-  --platform <android-or-ios> \
-  --device-model <reported-model> \
-  --device-os <reported-os>
-```
+This step is complete when the selected device passes its platform identity and
+readiness checks under the exact recorded serial or UDID.
 
-Use models and operating-system versions reported by the current host. Reserve
-Maestro's `--force-create` option for explicit device maintenance because it
-can replace a canonical device.
+## Bind automation and evidence
 
-For ordinary startup, let the Android Emulator select an available console and
-ADB port pair. Add explicit port allocation only when parallel device creation
-requires it. Identify each iOS simulator by UDID, not by a console port.
-
-## Prove identity and readiness
-
-For Android, verify the selected serial and AVD:
-
-```bash
-adb devices -l
-adb -s <serial> emu avd name
-adb -s <serial> get-state
-adb -s <serial> shell getprop sys.boot_completed
-```
-
-Android is ready when the selected serial reports the intended AVD,
-`get-state` returns `device`, and `sys.boot_completed` returns `1`.
-
-For iOS, verify the selected UDID:
-
-```bash
-xcrun simctl list devices booted -j
-xcrun simctl bootstatus <udid> -b
-```
-
-iOS is ready when the selected UDID is booted and `bootstatus` exits
-successfully.
-
-Complete this step only when the ready device matches the session record.
-
-## Bind every operation
-
-Use the recorded identifier for every targeted device command. Scope Android
-mutations with `adb -s <serial>`. Pass the recorded UDID to every targeted
-`xcrun simctl` command.
-
-Select the device explicitly for Maestro CLI flows:
-
-```bash
-maestro --device <serial-or-udid> test <flow-or-directory>
-```
-
-For Maestro MCP, call `list_devices` first and verify the recorded identifier.
-Pass that identifier as `device_id` to every device tool call.
-
-When the session starts Maestro MCP directly, bind file operations to the
-workspace:
-
-```bash
-maestro mcp --working-dir "$(git rev-parse --show-toplevel)"
-```
-
-Let Maestro select a free Viewer port by omitting `--viewer-port`. Connect the
-Viewer to the recorded device through the first device tool call.
+Use the recorded identifier for every targeted device and automation command.
+The platform reference defines the exact command binding. The Maestro reference
+defines its CLI, MCP, file, and Viewer binding.
 
 Before evidence capture, prove that the selected device runs the app build from
 the required workspace or deployment target. Record the device identifier and
@@ -133,22 +80,25 @@ Use this bounded order:
 2. Restart the app once if the failure remains.
 3. Restart the device once only when the session owns it.
 
-After each recovery action, repeat the identity and readiness checks. Also
-recheck the app build after an app or device restart.
+After each recovery action, repeat the platform identity and readiness checks.
+Also recheck the app build after an app or device restart.
 
 If an attached device needs a lifecycle restart, stop and report that its owner
 must recover it. If owned-device recovery fails, stop and report the exact
 failure.
 
+Recovery is complete when the same recorded device is ready, the required app
+build is running, and automation reconnects. Otherwise, stop after the bounded
+sequence and report the failed check.
+
 ## Release owned resources
 
+Follow the platform and Maestro cleanup instructions that apply to the session.
 Stop only the processes and device recorded as owned by the current session.
-Release its lease after those resources exit. Preserve attached devices, shared
-ADB, unrelated simulators, and other workspaces' processes.
+Release the lease after those resources exit.
 
-For an owned Android emulator, target shutdown with its exact serial. For an
-owned iOS simulator, target shutdown with its exact UDID. Use the recorded PIDs
-for owned launchers, Maestro servers, and Viewers.
+Preserve attached devices, shared ADB, unrelated simulators, and other
+workspaces' processes.
 
 Cleanup is complete when every owned resource has exited and every attached or
 unrelated resource remains available.
