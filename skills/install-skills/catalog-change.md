@@ -1,59 +1,39 @@
-# Catalog change convention
+# Update the installed skill list
 
-A **catalog change** is any edit to a repository's vendored skill catalog — the
-entries recorded in `skills-lock.json` and the committed `.agents/skills/` /
-`.claude/skills/` overlays. Adding, removing, renaming, or refreshing a skill is
-a catalog change. Execute and describe every one the same way so a reviewer can
-see at a glance what entered, left, and changed, and so a skill that vanished
-upstream cannot drift stale unnoticed.
+Follow these instructions whenever `skills-lock.json` adds, removes, renames,
+or refreshes a skill. The committed `.agents/skills/` directories and
+`.claude/skills/` links must match the lockfile.
 
-Locked GitHub sources are ref-less: a refresh re-clones each source's default
-branch rather than a pinned commit. That keeps the catalog current, but it also
-means a skill renamed or deleted upstream leaves its `skillPath` pointing at
-nothing and is **silently skipped** on refresh. The reconciliation method below
-ends every refresh with a **staleness audit** so that silent skip becomes a
-surfaced finding.
+GitHub lock entries follow the source's default branch. A skill renamed or
+removed upstream may disappear during refresh while its old lock entry remains.
+The steps below check every locked path so that failure is visible.
 
-## Reconciliation method
+## Steps
 
-Run these steps in order. The refresh and the staleness audit are a pair —
-never refresh without auditing after.
-
-1. **Discover upstream.** For each source in `skills-lock.json`, list the skills
-   its default branch currently offers, so additions and disappearances are
-   visible before you touch the lock:
+1. List the skills currently offered by every source in `skills-lock.json`:
 
    ```bash
    npm_config_ignore_scripts=true npx --yes skills@latest add <source> --list
    ```
 
-2. **Add new skills.** Install any newly requested skill from its source with
-   the `skills add` command this skill documents
-   (`npx --yes skills@latest add <source> --skill <name> …`), which updates
-   `skills-lock.json`.
-
-3. **Remove or migrate renamed or deleted skills.** When an upstream skill was
-   renamed or removed, drop its stale lock entry. If it was renamed, add the
-   successor in the same change, and update every authored reference (skill
-   bodies, `AGENTS.md`, docs) that named the old skill to name the successor.
-   Leave no authored file pointing at a skill that no longer exists.
-
-4. **Refresh all.** Re-vendor every locked skill from its source default branch,
-   then commit the refreshed overlays:
+2. Add each requested skill with the install command from `SKILL.md`.
+3. Remove lock entries for skills that no longer exist. When a skill was
+   renamed, add its replacement in the same change. Search authored skills,
+   `AGENTS.md`, and repository documentation for the old name and update every
+   active reference.
+4. Restore every locked skill from its source:
 
    ```bash
    pnpm skills:install
    ```
 
-5. **Run the staleness audit** (below). Resolve every finding before opening the
-   PR.
+5. Check every locked path with the command below. Resolve every `MISSING`
+   result before opening a pull request.
 
-## Staleness audit
+## Check locked paths
 
-Confirm every locked `skillPath` still exists on its source's default branch. A
-GitHub source (`sourceType: "github"`) resolves through the Contents API; a
-`404` means the skill was renamed or deleted upstream and would be silently
-skipped on the next refresh:
+For GitHub sources, verify that each `skillPath` exists on the source's default
+branch:
 
 ```bash
 jq -r '.skills | to_entries[]
@@ -61,58 +41,44 @@ jq -r '.skills | to_entries[]
   | "\(.key)\t\(.value.source)\t\(.value.skillPath)"' skills-lock.json |
 while IFS=$'\t' read -r name source skill_path; do
   if gh api "repos/${source}/contents/${skill_path}" --jq .path >/dev/null 2>&1; then
-    echo "ok    ${name}"
+    echo "ok      ${name}"
   else
-    echo "STALE ${name} — ${source}/${skill_path} not found on default branch"
+    echo "MISSING ${name}: ${source}/${skill_path}"
   fi
 done
 ```
 
-The `select` keeps the Contents-API check to GitHub sources; audit any other
-`sourceType` against its own source of truth. Every entry must report `ok`. For
-each `STALE` entry, migrate to the successor (discover its new name and path with
-step 1's `--list`) or remove the entry, then re-run the audit until it is clean.
+Check any other `sourceType` with that source's own listing command. Every
+entry must print `ok`. For each missing path, use the source listing from step 1
+to find a replacement or remove the lock entry, then run the check again.
 
-## Catalog-delta PR description
+## Pull request summary
 
-Describe the change in the PR body's `What changed` section as a **catalog
-delta** — a four-part breakdown with numbers derived from the `skills-lock.json`
-diff (`git diff -- skills-lock.json`), plus net counts and a staleness-audit
-confirmation:
+In the pull request's `What changed` section, summarize the lockfile change with
+counts taken from `git diff -- skills-lock.json`:
 
 ```md
-## What changed
+The installed skill list changed from N to M skills.
 
-Catalog delta (skills-lock.json: N → M skills):
+- Added: `<skill>` from `<source>`
+- Removed: `<skill>`; use `<replacement>` instead
+- Refreshed: `<skill>` from its source's default branch
+- Unchanged: `<skill>`
 
-- **Added:** `<skill>` (`<source>`), …
-- **Removed:** `<skill>` — use `<successor>` instead / retired upstream, …
-- **Refreshed:** `<skill>`, … (re-vendored from source default branch)
-- **Unchanged:** `<skill>`, …
-
-Staleness audit: all M locked skillPaths resolve on their source default
-branches.
+Every locked skill path exists on its source's default branch.
 ```
 
-Itemize the delta as above; the surrounding `What changed` narrative stays plain
-prose per the repository's PR guidance — this list is a catalog diff a reader
-scans, not a reintroduced `- <change> - <why>` contract. Omit an empty section
-rather than writing "none". Every `Removed` entry states its replacement
-(`use <successor> instead`) or that it was retired upstream, so a reader knows
-where the capability went.
+Omit empty lines from the list. For every removed skill, name its replacement
+or say that upstream retired it.
 
 ## Verification
 
-Before marking the catalog change ready:
+Before the change is ready:
 
-- `npm_config_ignore_scripts=true npx --yes skills@latest list --json` lists the
-  expected skills — the catalog is green.
-- The repository's install-state check passes (for example `pnpm test`, which
-  includes the committed-skill lifecycle check).
-- Overlay and symlink integrity holds: `.agents/skills/<name>/` payloads and the
-  matching `.claude/skills/<name>` relative symlinks are present and resolve for
-  every locked skill.
-- No authored file references a removed skill. After a removal or rename, search
-  the tree (for example `rg '<old-skill-name>'`) and confirm only intended
-  history-style mentions remain.
-- The staleness audit above reports `ok` for every entry.
+- `npm_config_ignore_scripts=true npx --yes skills@latest list --json` shows the
+  expected skills.
+- The repository's install-state test passes.
+- Every `.agents/skills/<name>/` directory and matching
+  `.claude/skills/<name>` relative link exists and resolves.
+- No active authored file names a removed skill.
+- The locked-path check prints `ok` for every entry.

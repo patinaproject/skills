@@ -1,175 +1,112 @@
-# Check and Feedback Triage
+# Handle pull request checks and feedback
 
-Use this shared state machine for merge conflicts, failed PR checks, inline
-review threads, top-level PR comments, and review bodies.
+Use these rules for conflicts, failed checks, inline threads, top-level
+comments, and review bodies.
 
-| State | Meaning | Action |
+| Decision | Use when | Action |
 | --- | --- | --- |
-| `fix-now` | Branch-local, actionable, in scope | Patch, verify, commit, push, and re-check |
-| `explain` | Valid to answer without code, or a reportable check disposition | Reply or report with concise evidence |
-| `stale` | No longer applies to latest head | Reply or report with current-head evidence |
-| `defer` | Valid but outside this PR | Explain the scope decision; do not create an issue |
-| `needs-human` | Non-check work requires judgment, permissions, secrets, or conflicting direction | Stop and ask |
+| Fix now | The branch caused a clear problem covered by this pull request | Fix, verify, commit, push, and check again |
+| Explain | The item is valid but needs no code change | Reply or report with current evidence |
+| No longer applies | The latest commit removed the problem | Reply or report with current evidence |
+| Outside this pull request | The item is valid but belongs to different work | Explain why it is not part of this pull request; do not create an issue |
+| Ask the user | Progress needs judgment, permission, a secret, or conflicting instructions | Stop with the evidence and exact question |
 
-For merge conflicts, apply the Merge Conflict Rules below when choosing and
-executing the state action.
+## Who started the conversation
 
-## Thread Authorship
+Read the opening comment's `author.__typename` from GraphQL. `Bot` means a bot
+or GitHub App started it. `User` means a person started it. Treat an unclear
+author as a person. Later replies do not change who started the conversation.
 
-Authorship decides who may speak in a review conversation and who may close it.
-It never decides whether the feedback is valid: triage and fix both kinds the
-same way.
+Fix valid feedback from either kind of thread.
 
-Every review conversation (an inline thread, a top-level PR comment, or a
-review body) is **agent-authored** when the comment that opened it comes from a
-bot or a GitHub App, and **human-authored** otherwise. Read `author.__typename`
-of that opening comment from the GraphQL inventory: `Bot` is agent-authored and
-`User` is human-authored. That switch is exhaustive for review authors, because
-a GitHub App's comments also resolve to `Bot`; "bot or GitHub App" is one case,
-not two. An agent and its operator can share one GitHub account, so an unclear
-author is human-authored.
+- In a bot-started conversation, post a reply with evidence, then resolve it
+  when the rules below allow.
+- In a human-started conversation, leave all replies, resolution, dismissal,
+  and new review requests to its author or the user. Report the thread in the
+  Codex task.
 
-Authorship is fixed when the conversation opens and later replies never change
-it. A human replying on a bot's thread leaves it agent-authored, and a bot
-replying on a human's thread leaves it human-authored.
+## Repeated human bug report
 
-- **Agent-authored conversations are the eligible ones.** Reply with evidence,
-  then resolve them under the rules below.
-- **A human-authored conversation belongs to its author.** Fix what the comment
-  asks for, then report it to the operator in the session.
-  The operator replies, resolves, dismisses, and re-requests review; the agent
-  does none of those on a human's conversation, even when the fix is verified.
+When a person says a previously fixed bug remains or returned, reproduce the
+new report before making another fix, even when the pull request commit did not
+change. Re-read any changed expected or actual behavior and follow the
+repository's bug-report instructions. Finish with a new failing-then-passing
+reproduction or report what prevents it. Leave the human-started conversation
+unchanged.
 
-### Renewed human bug report
+## Evidence to keep
 
-A human report that a previously handled bug persists or has returned is
-not a duplicate, stale comment, or ordinary `fix-now` item. Restart the
-repository's human-bug-report loop even when the PR head SHA has not changed.
+- latest pull request commit
+- check or comment name and URL
+- file and line for inline feedback
+- merge state, target branch, and local merge result for conflicts
+- fix commit for code changes
+- current facts for an explanation, outdated item, or excluded item
+- GraphQL `isResolved` after resolving a thread
 
-Before more fix work:
+## Review feedback
 
-1. Re-read the latest report and update the repro when its expected or actual
-   behavior changed.
-2. Read and follow the repository's human-bug-report contract in full.
+- Paginate GraphQL review threads. REST review comments do not show complete
+  thread state.
+- A reply does not resolve a thread. Check `isResolved`.
+- Compare the comment's path, line, and commit with the latest pull request
+  commit before acting.
+- Handle currently available feedback before waiting for checks. A clear code
+  fix makes pending checks obsolete, so fix, verify, commit, and restart on the
+  new commit.
+- Ask the user before changing requirements, acceptance criteria, requested
+  behavior, or the work included in the pull request.
+- Apply the repeated human bug rule before other feedback handling.
+- Before resolving a bot-started thread, post a reply with evidence. For a code
+  fix, say what changed and include the useful commit or check result.
+- When feedback names a repeated pattern, search for other matches and explain
+  every remaining match before resolving the thread.
+- After `resolveReviewThread`, verify `isResolved: true`. If permission is
+  missing, leave the evidence reply and report the open thread.
+- Keep handled top-level comments and review bodies in memory during the run so
+  later passes do not post duplicate replies.
 
-Completion is a fresh red-then-green loop or a reported blocker. The
-human-authored conversation remains untouched throughout.
+## Failed checks
 
-## Required Evidence
+Use the required contexts defined in
+[the draft readiness checks](../references/readiness-predicate.md#required-checks).
+Inspect logs before deciding what failed.
 
-- Latest PR head SHA used for the decision.
-- Check name, thread URL, comment URL, or review URL.
-- Mergeability state, base branch, and local merge result for merge conflicts.
-- File and line context when feedback is inline.
-- Fix commit SHA for `fix-now`.
-- Concrete current-state evidence for `explain`, `stale`, and `defer`.
-- Verified GraphQL resolution state when resolving inline threads.
+Wait in ten-minute windows with a tool-enforced timeout:
 
-## Review Feedback Rules
+```sh
+timeout 10m gh pr checks --required --watch --fail-fast
+gtimeout 10m gh pr checks --required --watch --fail-fast
+perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --required --watch --fail-fast
+```
 
-- Paginate GraphQL review threads; REST review comments alone are not enough.
-- Replies do not equal resolution. Check `isResolved`.
-- Verify line context against the latest head before replying or resolving.
-- Handle currently available feedback before watching checks. A `fix-now`
-  feedback item restarts the readiness loop on the new head even when checks are
-  pending; treat `fix-now` as pending-check-interrupting feedback.
-- Reply to or record `explain`, `stale`, and `defer` dispositions before checks
-  when the evidence does not depend on check results.
-- Route requirement, acceptance-criteria, scope, or user-visible behavior
-  changes through the repository's planning owner before implementation.
-- Classify authorship before replying or resolving. Reply on agent-authored
-  conversations; report every human-authored one in the session instead.
-- Apply the renewed-human-report rule before generic feedback triage. A report
-  that a handled bug persists restarts the bug-fix loop even on the same head.
-- Every resolved review thread must carry an evidence-bearing reply before
-  `resolveReviewThread`, including code-fix dispositions. Silent resolution is
-  not allowed for any disposition.
-- For a code-fix disposition, the reply must name what changed, the commit or
-  verification result when useful, and whether the fix covers only the
-  commented line or the broader pattern.
-- For pattern-based feedback that names a construct, helper, or anti-pattern
-  (for example, feedback that `definedOrThrow` is unacceptable), run a direct
-  semantic or pattern check before resolving when feasible: a repo search, an
-  AST query, or a lint rule. Account for every remaining match in the reply,
-  and do not resolve while unexplained matches remain.
-- Resolve agent-authored inline threads only after both the disposition
-  evidence (fix, explanation, stale evidence, or deferral evidence) is present
-  on latest head and an evidence-bearing reply for that disposition is posted.
-- Verify `isResolved: true` after calling `resolveReviewThread`; unresolved
-  agent-authored threads remain blockers unless permission-blocked and
-  explicitly reported. An unresolved human-authored thread is a blocker its
-  operator clears, reported in the session rather than acted on.
-- Track handled top-level comments and review bodies in memory during the run so
-  loop passes do not post duplicate replies.
+Exit 124 means the timeout ended the watch. Any earlier nonzero `gh` exit means
+a check failed. After every exit, refresh all checks, the pull request commit,
+unresolved review threads, comments, review bodies, and review decision.
 
-## Check Failure Rules
+Optional checks may post useful comments, but their status does not block the
+pull request. Older replaced runs are history. Fix every failure caused by the
+branch. Explain temporary infrastructure, an external outage, missing secrets,
+missing permission, or unrelated failures with evidence. A failed check alone
+does not require stopping. Stop only when its investigation finds a separate
+problem that needs the user.
 
-- Wait for required checks only after currently available feedback has been
-  handled. Snapshot optional checks solely for posted feedback; their status
-  stays outside the
-  [canonical readiness predicate](../references/readiness-predicate.md) and the
-  draft-to-ready gate.
-- Use a tool-enforced 10-minute timeout around `gh pr checks --required --watch
-  --fail-fast` in 10-minute observation windows. GNU `timeout`, Homebrew
-  `gtimeout`, the portable `perl` fallback below, or an equivalent host timeout
-  are acceptable.
+Stop waiting after two consecutive ten-minute windows with no change in check
+states, timestamps, pull request commit, or feedback.
 
-  ```sh
-  timeout 10m gh pr checks --required --watch --fail-fast
-  gtimeout 10m gh pr checks --required --watch --fail-fast
-  perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --required --watch --fail-fast
-  ```
+## Merge conflicts
 
-- Treat exit code 124 from the timeout tool as a watch timeout. Treat a
-  non-zero `gh` exit before the timeout as a fail-fast watch exit.
-- Re-query optional checks after each required-check watch exit. Triage their
-  posted feedback through the ordinary conversation rules.
-- Perform a full PR state resync after every watch exit or timeout: all check
-  buckets, unresolved review threads, top-level PR comments, review bodies,
-  review decision, and current PR head.
-- Stop after two consecutive 10-minute no-progress windows. No progress means
-  no meaningful change in check buckets, check start or completion timestamps,
-  PR head SHA, or feedback inventory between observation windows.
-- Take the required-check set from the
-  [canonical readiness predicate](../references/readiness-predicate.md), and
-  triage every non-pass check in it before starting another watch window.
-- Read a canceled or non-pass run outside that set as check history: an
-  optional run, or a run superseded by a later run of the same context on the
-  same head. Report the history under
-  [ready-for-merge.md](ready-for-merge.md)'s reporting rules and leave the
-  required-check evaluation on the current contexts.
-- Inspect logs before classifying.
-- Fix branch-local failures in normal follow-up commits.
-- Do not classify a check as `needs-human` solely because it failed, was
-  canceled, needs missing secrets, hit a permission failure, depends on an
-  external outage, is flaky infrastructure, or is outside the PR's scope. Use
-  `explain`, `stale`, or `defer` with evidence and continue to final reporting.
-- Classify flaky, infrastructure-owned, external-outage, missing-secret, and
-  permission-limited check failures as `explain` when evidence shows they are
-  not branch-local.
-- Only stop when check investigation reveals a separate non-check blocker, such
-  as a required product decision, ambiguous branch scope, or conflicting human
-  direction.
-- Re-query the full feedback surface after checks finish, fail fast, or time out
-  so CI-authored review comments are triaged before final readiness reporting.
-
-## Merge Conflict Rules
-
-- Capture `headRefOid`, `baseRefName`, `mergeable`, and `mergeStateStatus` with
-  `gh pr view` at the start of each readiness-loop pass.
-- Fetch the PR base branch and test the merge locally; local git results govern
-  when GitHub mergeability is stale or unknown.
-- Classify branch-local, in-scope, verifiable conflicts as `fix-now`.
-- Preserve both sides of a conflict when that is clearly correct.
-- Commit clean base merges and conflict resolutions with the repository's normal
-  issue-tagged commit format, push, and restart the readiness loop. A clean
-  base merge's verification failure routes through the
-  [base-update recovery contract](../references/base-update-recovery.md), not
-  through feedback classification.
-- Classify conflicts as `needs-human` when resolution requires product judgment,
-  secrets, permissions, destructive git operations, unrelated scope, or
-  unverifiable semantic choices.
-- Run `git merge --abort` before stopping when an uncommitted or conflicted
-  merge is still in the working tree.
-- Do not rebase or force-push by default. Do not use browser conflict
-  resolution or merge the pull request itself.
+- At the start of each pass, read `headRefOid`, `baseRefName`, `mergeable`, and
+  `mergeStateStatus`, then test the merge locally.
+- Fix a conflict when the correct result belongs to this pull request and can
+  be checked locally.
+- Keep both sides when that is clearly correct.
+- After a clean target branch merge, follow
+  [the clean merge instructions](../references/base-update-recovery.md).
+- After resolving a conflict, run the relevant checks, commit, push, and restart
+  pull request checks on the new commit.
+- Ask the user when a conflict needs a product decision, secret, permission,
+  destructive Git operation, unrelated work, or a guess about behavior.
+- Run `git merge --abort` before stopping with an open merge.
+- Do not rebase, force-push, use browser conflict tools, or merge the pull
+  request itself.

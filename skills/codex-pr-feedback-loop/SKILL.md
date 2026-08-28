@@ -1,47 +1,29 @@
 ---
 name: codex-pr-feedback-loop
-description: Loops a Codex app worktree on an existing PR's review feedback. Use when a Codex app chat should keep iterating on a pull request after its first successful push.
+description: Keep a Codex app task working through feedback on an existing pull request. Use after the task has pushed the pull request once and should continue handling new automated review feedback.
 ---
 
-# PR Feedback Loop
+# Pull request feedback loop
 
-## Quick Start
+First use the repository's normal development process to implement, review,
+commit, push, and create or update the pull request. After the first successful
+push, read [the task automation instructions](workflows/thread-automation.md)
+and create the automation for the current Codex task.
 
-1. Develop, verify, commit, push, and create or update the PR with the normal
-   issue pipeline (`working-on-issue` → build → `polish` → `ready-pr`).
-2. After the first successful PR push, follow
-   [workflows/thread-automation.md](workflows/thread-automation.md) to start the
-   Codex app thread automation that runs the loop for this chat.
+The automation belongs to this task and worktree. It is not a GitHub webhook or
+CI job. The linked instructions define its name, schedule, prompt, fallback,
+and stop condition.
 
-Suggested user prompt:
+Follow these rules:
 
-```text
-Use $codex-pr-feedback-loop for <issue-reference>.
-```
-
-## Automation Contract
-
-The loop runs as a Codex app thread automation attached to the current
-chat/worktree — not a GitHub webhook or CI workflow.
-
-[workflows/thread-automation.md](workflows/thread-automation.md) holds the
-canonical runtime rules: create/fallback procedure, automation name, schedule,
-scope, stop condition, the exact polling prompt, and guardrails. Read it before
-creating the automation.
-
-The durable boundaries at this skill level:
-
-- Stay in the current working directory's default `gh` repository.
-- Preserve this chat's context with a thread automation.
-- Reply on, resolve, dismiss, and re-request review only on **agent-authored**
-  threads, those whose first comment comes from a bot or GitHub App. A
-  **human-authored** thread belongs to its author: fix the code it asks for,
-  report it in the session, and leave the conversation for the operator to
-  answer and close.
-- A human report that a previously handled bug persists or has returned
-  restarts the repository's human-bug-report loop even when the PR head is
-  unchanged. Follow that contract before more fix work, or report a blocker.
-- At loop exit, apply `ready-pr`'s
-  [canonical readiness predicate](../ready-pr/references/readiness-predicate.md)
-  and completion behavior. Never write issue state from the PR loop.
-- Do not merge the PR.
+- Work only in the current directory's default GitHub repository.
+- Use a task automation so later runs retain this conversation's context.
+- Reply to and resolve a review thread only when a bot or GitHub App started
+  it. Fix code requested by a human reviewer, but leave their thread open for
+  the reviewer or user to answer and resolve.
+- If a human says a previously fixed bug remains or returned, reproduce that
+  report again before changing more code.
+- Before stopping, apply `ready-pr`'s
+  [readiness checks](../ready-pr/references/readiness-predicate.md).
+- Leave issue status unchanged.
+- Do not merge the pull request.

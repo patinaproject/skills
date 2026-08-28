@@ -1,354 +1,176 @@
 ---
 name: develop
-description: Drive one scope to an evidence-backed production-ready PR outcome on its branch.
+description: Build one issue or instruction set through implementation, local review, and a ready-to-merge pull request.
 disable-model-invocation: true
 ---
 
 # Develop
 
-## Quick Start
+`develop` takes one request from implementation through a ready-to-merge pull
+request. The request can contain an issue reference, written instructions, or
+both.
 
-Invoke with a **scope** — an issue reference, free-form instructions, or both:
+It runs four skills in order:
+
+1. `working-on-issue` finds the issue, switches to its branch, assigns it, and
+   marks it started.
+2. `implement` changes the code and adds tests.
+3. `polish` reviews the committed changes and fixes problems before
+   publication.
+4. `ready-pr` commits any remaining work, pushes the branch, updates the pull
+   request, handles review feedback, and checks whether it is ready to merge.
+
+`develop` never merges the pull request. It also uses the regular
+`implement` flow. Use `develop-with-workflow` when the user asks for parallel
+implementation.
+
+Run `develop` only when the operator invokes it. Keep it portable: use diagnosis
+and behavioral observations when helpful, but do not require local devices or
+deployed-build evidence.
+
+## Input
+
+Examples:
 
 ```text
 /develop <issue-reference>
-/develop "add null-checks to the login handler"
-/develop <issue-reference> focus only on the validation path
+/develop "add null checks to the login handler"
+/develop <issue-reference> change only the validation path
 ```
 
-This skill is a thin, goal-directed **controller**. It drives one scope to a
-ready-for-review PR through a predictable pipeline of named, reusable skills:
+Written instructions control what to build. When they differ from the linked
+issue, follow the written instructions. Use the issue for its branch name,
+required commit reference, and pull request link.
 
-```text
-working-on-issue → build (implement) → polish → ready-pr
-   (align)              (build the scope)      (make ready)     (publish)
-```
+Ask the user when the request is too vague to implement without making a
+product or design decision. A formal list of acceptance criteria is optional.
+Clear written instructions are enough.
 
-The **scope** is what to build, and it is authoritative for the run. Any
-associated issue is a *separate, best-effort* concern used for the branch,
-repository-required commit reference, and PR association — resolved from a reference in the scope
-or from the current branch by `working-on-issue`. When instructions and an
-issue body disagree, the instructions win.
+When `working-on-issue` finds no issue, warn the user and continue with the
+implementation and local review. Before committing or opening a pull request,
+read the repository rules. Stop if they require an issue reference.
 
-It coordinates those skills, preserves their contracts and repository
-guardrails, and never merges a pull request.
+When the finished work differs from the issue body, keep the required closing
+reference in the pull request. Tell the user about the difference and ask
+before editing the issue.
 
-`develop` builds with plain `implement`; it never triggers multi-agent
-workflow fan-out on its own. Parallel slice builds are a separate, deliberate
-opt-in: invoke `develop-with-workflow` directly when you want them.
+## Required skills
 
-`develop` runs only when the operator invokes it. It stays portable: diagnosis
-and behavioral observations are useful when available, but neither local
-devices nor deployed-build evidence becomes a required stage or exit gate.
+Confirm these skills are installed before implementation:
 
-## Terminal Goal
+- `working-on-issue`
+- `new-branch`
+- `implement`
+- `tdd`
+- `polish`
+- `code-review`
+- `codebase-design`
+- `diagnosing-bugs`
+- `update-branch`
+- `ready-pr`
 
-Production-ready implementation, all required PR checks passing, and all PR
-review comments addressed.
+Stop and name any missing skill. Give a project-local install command for its
+current source.
 
-Treat production-ready as an evidence-backed readiness case, not a guarantee of
-zero risk. Do not make unsupported certainty claims such as absolute certainty
-or similar wording.
+Use `writing-for-agents` when the request changes a skill, its instructions,
+frontmatter, examples, references, or bundled scripts.
 
-## Terminal States
+Use `prototype` only when the user asks for a throwaway prototype or needs to
+compare possible behavior or UI. Delete the prototype or move its useful parts
+into the real implementation before `polish`, unless the user asked to keep it.
 
-- `goal-met`: production-readiness evidence supports `goal-met`; all required
-  exit gates are satisfied and all required PR checks pass.
-- `human-blocked`: progress requires human judgment, external access, product
-  or design decisions, permissions, secrets, conflicting direction, or valid
-  work outside the run's scope.
+Before using either skill, confirm that it is installed. If it is missing, stop,
+name it, and give a project-local install command for its current source.
 
-Do not report `goal-met` while unresolved human-owned blockers remain.
+## Behavioral observations
 
-## Required Child Skills
-
-Before building, confirm these installed skills are available in the agent
-environment:
-
-- `working-on-issue`: resolve the issue from the scope or current branch, land on its adapter-provided branch, and mark it started; best-effort, returns cleanly when there is no issue.
-- `implement`: build the change from acceptance criteria — reaches `tdd` at agreed seams.
-- `polish`: incremental pre-publication architecture, Standards, and Spec review.
-- `ready-pr`: commit, push, PR creation or update, checks, PR feedback loops, and ready-to-merge reporting.
-
-`working-on-issue` reaches `new-branch`; `polish` reaches `code-review`,
-`implement`, and `diagnosing-bugs`, and reviews against the `codebase-design`
-vocabulary; `implement` reaches `tdd`. Confirm those are installed too.
-
-If any are missing, halt before building. Report the missing skill names and
-install guidance:
-
-```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch polish ready-pr -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@implement -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@tdd -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@diagnosing-bugs -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@codebase-design -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@code-review -y
-```
-
-The `implement`, `tdd`, `diagnosing-bugs`, `writing-for-agents`, and
-`prototype` install hints intentionally track their source catalog's default
-branch. Consumers who need a frozen install can add `#<git-ref>` to those
-sources.
-
-## Conditional Routes
-
-Conditional routes are not blanket prerequisites. Check that the named skill is
-available only when the scope triggers that route; halt with the missing skill
-name and install guidance only for a triggered missing route.
-
-- Consult `writing-for-agents` when the scope changes an installable skill
-  package surface: skill entry instructions, frontmatter or description,
-  workflow contract text, examples, reference material, or bundled helper
-  scripts. Apply its review before the build route builds the change.
-- Use `prototype` only when the scope explicitly asks for throwaway exploration,
-  state-model sanity checks, UI direction exploration, or equivalent prototype
-  work. Delete or absorb prototype output before `polish` unless the scope
-  explicitly asks to commit prototype artifacts.
-
-Install guidance for these triggered routes:
-
-```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@writing-for-agents -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills@prototype -y
-```
-
-Do not add normal `/develop` routes for upstream planning, triage,
-architecture review, handoff, or conversation-mode skills unless the scope
-explicitly asks for them.
-
-## Scope Contract
-
-The parameter is a **scope** — a free-form string that may be an issue reference,
-instructions, or both. There are no modes: treat the parameter uniformly as
-scope, and treat any issue as best-effort association, not a separate path.
-
-- **Scope is authoritative.** Build to the scope. When it references or associates
-  an issue and the instructions diverge from the issue body, the instructions
-  win; the issue body is context, not a competing spec.
-- **Issue association is best-effort.** `working-on-issue` resolves the
-  issue from a reference in the scope, else the current branch, and aligns the
-  branch, assignment, and started state. When it resolves no issue, **warn and
-  continue** — do not halt. In a repository that requires issue-tagged commits
-  (as this one does), a no-issue run still builds and polishes but stops before
-  the PR (see the Workflow's finish step); where no such rule applies, it
-  finishes normally.
-- **Actionability judgment, relaxed for instructions.** Treat the scope as prior
-  approval for implementation only when it is actionable. Pause for a human when
-  the scope — issue or instructions — is genuinely ambiguous, conflicts with
-  repository rules, requires a product or design decision, or depends on external
-  access. Explicit instructions are strong approval: do not demand a formal
-  acceptance-criteria structure for them; pause only when the scope is too vague
-  to build without inventing scope.
-- **Divergence is surfaced, not silently absorbed.** When the built scope
-  materially diverges from the resolved issue body, keep the repository-required
-  closing reference and
-  **offer** in the final report to update the issue body to match. Never edit the
-  issue body without the human's go-ahead, and never block on it.
-
-## Required Exit Gates
-
-- The run's scope is covered — the issue's acceptance criteria, the
-  instructions, or both.
-- Repository-documented verification has run and results are recorded.
-- Relevant tests are added or updated when the change has executable behavior.
-- `polish` reviewed the current committed head, applied or dispositioned every
-  accepted deepening and finding, and recorded a passing outcome with no
-  findings.
-- GitHub PR review comments and hosted review comments surfaced by `ready-pr`
-  are fixed or dispositioned.
-- After `ready-pr`, its
-  [canonical readiness predicate](../ready-pr/references/readiness-predicate.md)
-  and final ready-to-merge gate are satisfied for `goal-met`.
-- Required PR check failures outside branch scope have a concrete disposition
-  in a `human-blocked` final report; do not report `goal-met` while a required
-  PR check is still failing.
-- When an issue is resolved, either the PR is on its issue-linked branch, or the
-  final report explicitly names the retained non-issue-linked branch and why the
-  caller declared it immutable. Do not report `goal-met` on such a branch
-  without that explicit, reasoned callout. A no-issue run that finished on the
-  current branch per the no-issue path has no issue-linked branch to require.
-- Residual risks and test gaps are reported only when they are concrete,
-  relevant to the scope, and useful for a human decision.
-
-## Observation Context
-
-Use the observation context defined by the
+Use the context fields in the
 [`ready-pr` reporter-fidelity reference](../ready-pr/references/reporter-fidelity.md).
-Carry every available field unchanged into `polish` and `ready-pr`.
-
-Gather diagnosis when it helps implementation, but keep it optional. Missing
-observation context is an ordinary absence: it adds no stage, blocker, or exit
-gate to this workflow.
+Pass every available field unchanged to `polish` and `ready-pr`. Gather a
+diagnosis when it helps implementation. Missing observation context adds no
+step, blocker, or completion requirement to `develop`.
 
 ## Workflow
 
-1. Read `AGENTS.md` and `CLAUDE.md` if present, plus any docs they import.
-2. Confirm the required child skills are available. Issue resolution belongs to
-   `working-on-issue` (see Scope Contract); the controller does not
-   re-resolve it here.
-3. Run `working-on-issue` to align: it resolves the issue from the scope
-   or the current branch and aligns the branch, assignment, and started state,
-   all best-effort. If it resolves **no issue**, warn that commits and a PR
-   cannot be issue-tagged, then continue on the current branch (see step 8).
-4. Judge actionability against the Scope Contract. Pause for a human when the
-   scope is not actionable; do not invent scope.
-5. Apply triggered conditional routes.
-6. Build the scope with the build/TDD portion of `implement` — instructions
-   authoritative over any issue body — then run repository-documented
-   verification. `polish` owns review, so skip `implement`'s standalone
-   `code-review` tail here.
-7. Run `polish`, forwarding the resolved issue, instructions, and every
-   available observation-context field. Its
-   idempotent alignment re-confirms the branch, then it reviews the selected
-   committed delta through delta-bounded architecture, verification, and fresh
-   Standards and Spec stages. It records every completed outcome, fixes and
-   commits agent-ready findings, and repeats incrementally until the current
-   head passes with no findings. Invoking `develop` approves this review loop;
-   a `ready-for-human` finding stops the run as `human-blocked`.
-8. Run `ready-pr`, forwarding the same observation context, for commit, push,
-   PR creation or update, visible check observation, PR feedback loops, and
-   ready-to-merge reporting. Invoke
-   `ready-pr` only after `polish` records a passing current head with no
-   findings.
-   **When step 3 resolved no issue**, consult the
-   repository guidance read in step 1: if it requires an issue reference on commits or
-   PRs, stop before `ready-pr` — that
-   convention cannot be satisfied without an issue — and report `human-blocked`
-   (finishing needs an issue): the built-and-polished branch, and that a human
-   must supply or create an issue to finish, rather than committing. If the
-   repository imposes no such requirement, finish normally with a conventional
-   commit. When an issue is present and the built scope
-   diverged from its body, include the reconciliation offer (Scope Contract) in
-   the final report.
-9. Loop until the terminal goal is met or a human-owned blocker prevents further
-   progress.
+1. Read `AGENTS.md`, `CLAUDE.md`, and any files they require.
+2. Confirm the required skills are installed.
+3. Run `working-on-issue` with the full request. Keep its issue, branch, and
+   status results for the final report.
+4. Confirm that the request is clear enough to implement. Stop when work needs
+   a product decision, design decision, credentials, permissions, external
+   access, or instructions that resolve a conflict.
+5. Run `writing-for-agents` or `prototype` when the request needs them.
+6. Use the build and test steps from `implement`. Follow the written
+   instructions when they differ from the issue body. Skip `implement`'s final
+   standalone code review because `polish` performs that review.
+7. Run the verification commands documented by the repository. Add or update
+   tests when the change affects executable behavior. After merging the target
+   branch, follow `update-branch`'s
+   [verification rules](../update-branch/SKILL.md#workflow). A proven problem
+   that already exists on the target branch does not stop `develop`. Keep the
+   target commit, command, failure, and proof for the final report.
+8. Run `polish` against the current commit. Pass it the issue, written
+   instructions, and available behavioral observations. Fix accepted findings,
+   commit the fixes, and run `polish` again. Continue until it passes with no
+   findings or asks for a human decision.
+9. If the repository requires an issue reference and step 3 found no issue,
+   stop before `ready-pr`. Report the completed local work and ask the user for
+   an issue.
+10. Run `ready-pr` with the same behavioral observations. Let it commit and
+    push the branch, create or update the pull request, handle available
+    feedback, and check the current pull request state.
+11. When local checks or pull request checks fail, fix problems caused by this
+    branch. Do the same when review feedback identifies one. Verify and review
+    each new commit, push it, and repeat until the pull request is ready to
+    merge or the next step needs a person.
 
-During long-running or resumable execution, keep compact checkpoint state using
-the final-report vocabulary: the scope, the resolved issue reference and URL (if
-any), branch name, terminal state, meaningful changes, readiness, blockers, and
-next action. Resume from that state and continue until a terminal workflow state
-is reached: production-readiness evidence supports `goal-met` or there is a
-documented `human-blocked` stop.
+## When the work is done
 
-## Terminal-state routing
+Report that the pull request is ready to merge only when all of these statements
+are true:
 
-`polish` classifies architecture candidates through its Finding Router
-(`ready-for-agent` → `implement`/`diagnosing-bugs`; `ready-for-human` → stop;
-`wontfix` → explain). At the controller level, any `ready-for-human` blocker —
-from `working-on-issue`, the actionability judgment, the build, `polish`,
-or `ready-pr` — stops the pipeline in the `human-blocked` terminal state. There
-is no `needs-info` state; insufficient information maps to `ready-for-human`.
+- The implementation covers the written instructions and any relevant issue
+  requirements.
+- Repository verification completed.
+- Tests cover changed behavior where useful.
+- `polish` passed on the current commit with no findings.
+- Pull request feedback has an answer or a fix.
+- Every required pull request check passes on the latest commit.
+- `ready-pr` reports that the pull request is ready to merge.
+- No unresolved decision or access problem remains.
 
-## Final Report
+A proven target-branch failure from an extra full-repository command does not
+block the pull request. Include its recorded proof in the final report.
 
-### Reporting Guidance
+Report that the work is blocked when the next step needs a product or design
+decision, credentials, permissions, external access, conflicting instructions,
+or valid work outside this request.
 
-Progress updates, resumable checkpoints, and final handoffs should report what
-changed, whether the work is ready or blocked, and what the human should do
-next. Keep verification evidence internally for decisions. Report verification
-details when they failed, skipped, interrupted, changed readiness, explain a
-blocker, identify residual risk, or create a human next action.
+When the issue has a required branch, finish on that branch. Use a different
+branch only when the user explicitly requires it. Name the branch and the reason
+in the final report.
 
-Translate child-skill output into outcome, readiness, blocker, and next-action
-language. Progress updates name the current checkpoint and next action without
-repeating check lists.
+## Final report
 
-When the workflow stops, write for a human first, not as a process log. Lead with
-the outcome, and surface only details that change what the reader needs to
-understand or do.
+Lead with `Ready to merge` or `Blocked`. Then tell the user:
 
-Include:
+- what changed
+- where the work lives
+- what verification passed or failed
+- what `polish` changed
+- whether pull request feedback and checks are clear
+- what the user must do next
+- any specific remaining risk or test gap
 
-- What changed, in 1-3 meaningful bullets.
-- Where the work ended up: include the issue, PR, and branch links. Link them
-  when URLs are available; name them plainly when not.
-- Branch identity, called out only when it deviates: when the PR is on a
-  retained non-issue-linked branch, name that branch and why the caller declared
-  it immutable. When it is the normal issue-linked branch, a plain link is
-  enough — do not editorialize.
-- Issue-start update result only when it changed readiness, failed, skipped,
-  explains a blocker, or creates a human next action.
-- Issue self-assignment result only when it failed, changed readiness, or
-  created a human next action. Stay silent on successful assignment.
-- Terminal state: `goal-met` or `human-blocked`.
-- Production-readiness case.
-- Verification commands and results, summarized at the highest useful level.
-  Collapse routine verification into one concise line when everything passed.
-- Relevant tests added or updated.
-- Child skill halt reasons, only when a halt changes what the human should do
-  next.
-- `polish` result: iterations run, architecture findings fixed, and candidate
-  dispositions.
-- PR review and check feedback status.
-- Human-owned blockers, if any.
-- `wontfix` explanations, if any.
-- Residual risks or test gaps, only when they are concrete and relevant.
-- PR URL and readiness status, when `ready-pr` runs.
+Link the issue and pull request when links are available. Mention the branch
+only when it differs from the issue branch.
 
-Keep visible and specific:
+When all checks pass, summarize verification in one sentence. Include exact
+commands only for failures, skipped checks, or steps the user must run. Do not
+repeat GitHub status fields or list every successful check.
 
-- Failed checks, skipped checks, unresolved risks, or human action still needed.
-- The exact command and blocker for any verification that did not run or did not
-  pass.
-- The scope of every passing-checks statement — local verification, the required
-  PR contexts, or all visible check runs — plus any check history and non-`CLEAN`
-  merge state `ready-pr` reported.
-- Runtime-required token or budget reporting, but place token or budget
-  reporting after the result so it does not dominate the message.
-
-Remove or minimize:
-
-- Long lists of every command run when all passed.
-- Repeated statements that lint, typecheck, tests, hooks, and PR checks were
-  each verified.
-- Generic process narration such as "I inspected status, reviewed diffs, ran
-  checks."
-- Full PR check inventories when they are all green.
-- Mergeability, review, or unrelated dirty-file status unless it changes what
-  the human should do next.
-- `ready-pr` readiness gates such as clean worktree, head SHA equality, merge
-  state, check inventory, or review-thread count when they all passed; collapse
-  them into the verification line unless a failed gate changes the human next
-  action.
-
-### Good final output
-
-Example for one issue:
-
-```md
-Done: the issue is implemented on
-[PR 197](https://github.com/patinaproject/skills/pull/197) on its issue-linked
-branch.
-
-Changed:
-- `develop` final reports now lead with outcome and meaningful changes.
-- Routine verification is collapsed unless something failed, skipped, or needs
-  human attention.
-
-Verified: routine checks passed.
-
-Needs human attention: none before review.
-```
-
-### Bad final output
-
-Avoid final output shaped like a process transcript:
-
-```md
-Implemented the issue.
-
-Verification:
-- develop workflow test passed.
-- markdownlint passed.
-- type-check passed.
-- commit hook passed.
-- PR check Test Gate passed.
-- PR check code-review passed.
-- PR is MERGEABLE and CLEAN.
-
-Child skills invoked: working-on-issue, implement, polish, ready-pr.
-No unrelated dirty files except local config. Goal marked complete.
-```
-
-Use the bad shape only as an anti-example; do not mirror its structure.
+During a long run, keep a short note with the request, issue, branch, current
+result, blocker, and next step. Use that note to resume without repeating
+completed work. If an extra full-repository command found a proven target-branch
+problem, also keep the target commit, command, failure, and proof. Apply
+`update-branch`'s verification rules again before reusing that proof.

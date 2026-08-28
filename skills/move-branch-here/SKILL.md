@@ -1,135 +1,103 @@
 ---
 name: move-branch-here
-description: "Attach a branch another worktree holds to the current worktree, carrying its polish review state. Use when a checkout is refused because the branch is already used by another worktree, or when the user asks to move a branch here."
+description: Move a branch from another worktree in the same repository to the current worktree, and copy its polish review record when available. Use when Git refuses checkout because another worktree holds the branch or when the user asks to move it here.
 ---
 
-# Move Branch Here
+# Move a branch here
 
-## Quick Start
-
-Invoke from the worktree that should end up on the branch:
+Run this skill from the worktree that should receive the branch.
 
 ```text
 /move-branch-here 350-add-a-move-branch-here-skill
 /move-branch-here 350-add-a-move-branch-here-skill --from /tmp/other-session
 ```
 
-`--from` names the temporary root of the session that reviewed the branch
-elsewhere, and reaches only Step 3.
+`--from` names the temporary directory of the session that reviewed the branch.
+It is used only when copying the `polish` review record.
 
-The move releases the branch from the worktree holding it and attaches it here.
-The released worktree keeps its files on a detached HEAD at the same commit.
-Leave committing, pushing, and worktree removal to the operator.
+This skill moves branches only between worktrees of the same repository. If the
+branch is in another clone, tell the user it must be fetched instead and stop.
+The old worktree stays at the same commit on a detached HEAD. Leave commits,
+pushes, and worktree removal to the user.
 
-Scope is the worktrees of one repository, which `git worktree list` enumerates.
-A branch that lives in a separate clone is a fetch rather than a move: report
-that and stop.
+## Find the branch
 
-## Step 1 — Resolve the Holder
-
-Resolve `<skill-directory>` to the directory containing this `SKILL.md`, then
-run the bundled helper:
+Resolve `<skill-directory>` to this skill's installed directory, then run:
 
 ```sh
 <skill-directory>/scripts/worktree-context.sh resolve <branch>
 ```
 
-The tab-separated result carries `mode`, branch name, branch head, the count of
-untracked files in the holder, holder path, and holder head. The two holder
-fields are empty in `free` mode. Step 2 consumes those fields.
+The tab-separated output contains the mode, branch, branch commit, untracked
+file count, old worktree path, and old worktree commit.
 
-| Mode | Meaning | Next action |
+| Mode | Meaning | Next step |
 | --- | --- | --- |
-| `here` | This worktree already has the branch | Report the no-op and continue at Step 3 |
-| `free` | No worktree holds the branch | Attach it in Step 2 |
-| `held` | Another worktree holds the branch | Release and attach it in Step 2 |
+| `here` | The current worktree already has the branch | Report this and continue to the review record |
+| `free` | No worktree has the branch | Attach it here |
+| `held` | Another worktree has the branch | Release it there and attach it here |
 
-The helper exits non-zero rather than moving a branch out from under work in
-progress. Both worktrees qualify: this one and the holder must each be free of
-uncommitted tracked changes and of a merge, rebase, cherry-pick, revert, bisect,
-or patch application, and the holder must be unlocked and still on disk. A
-rebase or a bisect detaches the worktree running it, so no worktree record
-claims the branch and it reads as `free`; the helper reads those operations' own
-state to catch that and refuse.
+The helper refuses to move the branch when either worktree has uncommitted
+tracked changes or an active merge, rebase, cherry-pick, revert, bisect, or
+patch operation. It also refuses a missing, locked, or unreadable worktree.
+Report the helper's message and stop. The user decides whether to commit, stash,
+finish, abort, unlock, or prune.
 
-That state read reaches every worktree, and only in `free` mode — the mode whose
-whole claim is that nothing holds the branch. A worktree there whose directory
-was deleted mid-operation strands no live work, so the move proceeds and
-`git worktree prune` clears its metadata; one the helper cannot read is refused,
-because an unreadable worktree hides whatever it is running. The holder itself
-is never skipped in any mode: a holder that is gone or unreadable stops the move
-on its own message.
+In `free` mode the helper checks every listed worktree for an operation that may
+temporarily detach its branch. A deleted worktree directory can be pruned and
+does not stop the move unless its state cannot be read safely.
 
-Every message names the blocker and the command that clears it. Report that
-message and stop; committing, stashing, finishing, aborting, unlocking, or
-pruning is the operator's call.
+## Move the branch
 
-## Step 2 — Move the Branch
+Run:
 
 ```sh
-<skill-directory>/scripts/worktree-context.sh move <branch> <branch-head> [holder-path]
+<skill-directory>/scripts/worktree-context.sh move <branch> <branch-commit> [old-worktree-path]
 ```
 
-Pass the holder path in `held` mode and omit it in `free` mode. The helper
-revalidates the resolved context before touching either worktree, releases the
-holder, attaches the branch here, and restores the holder to the branch when
-attaching fails. A failed move leaves the branch where it started.
+Pass the old worktree path in `held` mode and omit it in `free` mode. The helper
+checks the earlier result again before changing either worktree. If attachment
+fails, it restores the branch to the old worktree.
 
-Untracked files stay in the released worktree. When the resolved count is above
-zero, name it in the final report so the operator knows work remains at that
-path.
+Untracked files stay in the old worktree. Record their count and path when the
+count is greater than zero.
 
-## Step 3 — Carry the polish Review State
+## Copy the polish review record
 
-A `polish` review record follows its branch between the worktrees of one
-repository, and a session that resolves a different temporary root sees none of
-it — paying a full re-review of an already reviewed branch. Read
-[`polish/review-record.md`](../polish/review-record.md) for the record's
-identity and commands, resolving `<polish-skill-directory>` to the installed
-`polish` directory beside this skill. A missing
-`<polish-skill-directory>/scripts/review-state.mjs` means `polish` is not
-installed: report that the review state was left alone and finish, because the
-move itself still succeeded.
+Read [`polish/review-record.md`](../polish/review-record.md). Resolve
+`<polish-skill-directory>` to the installed `polish` skill next to this one.
+If its `scripts/review-state.mjs` is missing, report that the branch moved but
+the review record was not handled.
 
-1. Resolve the target branch from `origin/HEAD` and read what this session sees:
+1. Resolve the target branch from `origin/HEAD`, then run:
 
    ```sh
    node <polish-skill-directory>/scripts/review-state.mjs scope --target <target-branch>
    ```
 
-   A `valid` state carried with the branch. Report its `mode` and outstanding
-   findings, and finish. An `unavailable` or `corrupt` state leaves nothing
-   usable here, so treat it as `missing` and continue below.
+   A `valid` result means the record already moved with the branch. Report its
+   mode and open findings. Treat `unavailable` or `corrupt` as `missing`.
 
-   The command also refuses a worktree holding uncommitted or untracked files,
-   which the move itself permits. Report the review state as unread and name
-   that `polish` needs a clean worktree to see it, then finish: the move
-   already succeeded.
+   If the command refuses because the current worktree has uncommitted or
+   untracked files, report that `polish` needs a clean worktree to read the
+   record. The branch move still succeeded.
 
-2. A `missing` state with a `--from` root copies the record in, then re-reads
-   the scope above:
+2. For `missing` with a `--from` directory, run:
 
    ```sh
    node <polish-skill-directory>/scripts/review-state.mjs relocate \
-     --from <other-temporary-root> --branch <branch>
+     --from <other-temporary-directory> --branch <branch>
    ```
 
-   An empty `relocated` list, or a root holding no review state at all (which
-   exits non-zero), means the branch has no record to carry. Both are an absent
-   record rather than a failed move: report absent and finish.
+   Read the record again with the `scope` command. An empty `relocated` list or
+   a source directory with no review data means there is no record to copy.
 
-3. A `missing` state with no `--from` root finishes on the report: this session
-   sees no review state for the branch, and the `relocate` command above takes
-   the other session's temporary root whenever the operator has it.
+3. For `missing` without `--from`, report that this session cannot find a
+   review record. Show the `relocate` command above when the user can provide
+   the other session's temporary directory.
 
-## Final Report
+## Final report
 
-Always include:
-
-- The branch, its head commit, and the worktree it now lives in.
-- The released worktree path and its detached HEAD, or the no-op that needed no
-  release.
-- Untracked files left behind in the released worktree, when there are any.
-- The review state outcome: carried, relocated, absent, unread because the
-  worktree is not clean, or unhandled because `polish` is not installed.
-- The blocker that stopped the move, when one did.
+Report the branch, branch commit, and current worktree. Include the old
+worktree and its detached commit when one was released, any untracked files
+left there, the review record result, and any error that stopped the move.

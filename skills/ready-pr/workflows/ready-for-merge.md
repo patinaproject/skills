@@ -1,557 +1,232 @@
-# Ready for Merge Workflow
+# Ready a pull request to merge
 
-**Goal:** Carry completed branch-local work through publication, required
-checks, and PR feedback until the pull request is ready to merge or every
-required-check and feedback blocker has a concrete disposition. A failing
-required check or posted feedback is evidence to triage and report, not a halt
-condition by itself.
+Use these instructions after implementation is complete or when the user asks
+to finish, publish, or open a pull request. Work in the current directory's
+default `gh` repository.
 
-## Preconditions
+Continue until the pull request is ready to merge or the next step needs the
+user. A failed check or review comment requires investigation, not an immediate
+stop. Fix problems introduced by this branch and report other causes with
+evidence.
 
-Use this workflow only after implementation is complete or the user explicitly
-asks to finish, publish, or open a ready PR. Stay in the current working
-directory's default `gh` repository.
+Do not merge the pull request or enable auto-merge.
 
-## Operating Contract
+## Updates to the user
 
-Treat this as one durable, resumable workflow. The objective is to carry
-completed branch-local work through PR publication, feedback, checks, and final
-readiness without broadening into unrelated issue work, merging the pull
-request, or enabling auto-merge.
+Say whether the pull request is ready, not ready, or waiting for a decision.
+During long work, report the current step, useful evidence, next action, and any
+blocker. When everything passes, summarize verification in one sentence. Show
+exact failed commands, skipped checks, or unresolved feedback only when they
+explain what remains.
 
-The validation loop is the readiness loop below: inspect the current PR state,
-handle currently available feedback, watch required checks, snapshot optional
-checks for posted feedback, publish branch-local fixes when appropriate, and
-repeat on the new head. End only when the final ready-to-merge gates pass or a
-documented stop condition requires human input.
+## Publish local work
 
-Progress reports should name the current checkpoint, evidence gathered, next
-action, and blocker status. Keep stop reports concrete enough for a human to
-decide the next move.
-
-## Reporting Guidance
-
-Progress reports and final handoffs should say whether the PR is ready to
-merge, not ready to merge, or waiting on a human decision. Keep the full command
-results, check snapshots, and gate evidence available for workflow decisions.
-Report user-visible details when work failed, skipped, interrupted, otherwise
-changes readiness, explains a blocker, identifies residual risk, or creates a
-human next action.
-
-Leave out exact verification commands, command inventories, pass counts, green
-check names, and gate inventories when everything passes. Progress reports
-should mention the current checkpoint and next action without repeated check
-lists. Show exact commands, failed check names, skipped verification,
-interrupted runs, or unresolved feedback only when they explain a blocker or
-tell the human what to do next.
-
-## Steps
-
-1. Resolve context:
-
-   - Current branch.
-   - Issue reference, from the existing PR association or issue-linked branch.
-   - Existing PR for the branch, if any.
-   - Repository visibility and default branch.
-
-   Ask before guessing when the issue is ambiguous.
-
-2. Inspect changes:
+1. Resolve the current branch, repository visibility, default branch, issue,
+   and existing pull request. Use the existing pull request or branch to find
+   the issue. Ask when more than one issue could apply.
+2. Inspect local files:
 
    ```sh
    git status --short
    git diff --stat
    ```
 
-   Stage exact relevant paths. Ask before including ambiguous or unrelated
-   files. If there are no local changes and a PR already exists, continue with
-   checks and feedback handling.
-
-3. Verify locally using documented repository guidance. Prefer commands listed
-   in `AGENTS.md`, README files, or package scripts. Do not invent expensive or
-   unrelated checks when guidance is absent.
-
-4. Commit staged changes using the format read from repository guidance when
-   any remain. Do not hard-code one tracker's reference syntax in this shared
-   skill. Then run the repository-required local review against the exact
-   current committed head. Apply and commit branch-local findings, then repeat
-   verification and local review until the current committed head passes. When
-   the repository defines no separate local-review procedure, step 3 supplies
-   the local readiness evidence.
-
-5. Push only when there are commits not present on the remote branch.
-   Steps 3–5 are the **pre-publish evidence loop**. Every branch-local commit
-   created later in this workflow returns to step 3, repeats step 4 on the new
-   committed head, and reaches step 5 only after that exact head passes. No
-   later step pushes a new head directly.
-
-6. Create or update the PR:
-
-   - Read `.github/pull_request_template.md`.
-   - Derive the PR title, including its semantic type, from the final branch diff
-     against the PR base branch (`git diff <merge-base>...HEAD`) and the
-     repository's commit and title guidance in `AGENTS.md` at the repository
-     root. When resuming an existing PR, treat its inherited title as a candidate:
-     re-derive the type and update a conflicting
-     title even when it already passes syntactic validation.
-   - Include the repository-required issue-closing line from the PR template.
-   - Write a reviewer-friendly PR body: summarize what changed and why in
-     `What changed` instead of narrating the implementation transcript.
-   - GitHub Checks are the source of truth for routine automated verification.
-     Do not copy command transcripts or successful lint, test, type-check,
-     hook, package, or similar command results into the PR body.
-   - Include `Testing steps` only when a human reviewer has meaningful behavior
-     or artifact verification to perform. Make each unchecked item
-     outcome-oriented, and use command-based manual checks only when no
-     realistic app or artifact review path exists; name the behavior or
-     repository contract the command verifies.
-   - Open agent-authored work as a **draft** by default
-     (`gh pr create --draft`). A draft signals "agent loop still running, not
-     yet for humans"; step 16 is the one place that flips it to ready.
-   - Apply the
-     [canonical predicate's ownership rule](../references/readiness-predicate.md)
-     to an existing draft. Reuse an eligible PR's draft state as-is.
-
-7. Enter the readiness loop. Each loop pass starts by capturing the current PR
-   head SHA, base branch, and GitHub mergeability state, then verifying local
-   `HEAD` matches the PR head:
-
-   ```sh
-   gh pr view --json headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
-   git rev-parse HEAD
-   ```
-
-   If another actor pushed a different PR head while this workflow is running,
-   stop for operator feedback before checking, resolving, replying, or
-   reporting.
-
-8. Resolve the mergeability gate before watching checks. The working tree must
-   be clean before the local base-merge attempt; stop for operator feedback if
-   a prior step left staged, unstaged, or conflicted changes. In the commands
-   below, `<base-branch>` is the `baseRefName` captured in step 7 and is fetched
-   from the working directory's default `gh` repository remote:
-
-   ```sh
-   git fetch origin <base-branch>
-   git merge --no-commit --no-ff origin/<base-branch>
-   ```
-
-   Use the `gh pr view` mergeability fields as the remote signal and the local
-   merge attempt as the source of truth when GitHub reports `UNKNOWN`, stale, or
-   conflicting state. Do not use browser automation, GitHub's web conflict UI,
-   or the "Automatically merge & resolve" button.
-
-   If the merge reports `Already up to date.`, leave the branch unchanged and
-   continue. If the merge applies cleanly and changes the branch, keep the
-   merge result in the working tree and verify-and-commit it through the
-   [base-update recovery contract](../references/base-update-recovery.md):
-   run its bundled `scripts/base-update-verify.sh` with the repository's
-   documented verification command and normal issue-tagged commit message. A
-   `verified` or `recovered` outcome has committed the exactly verified
-   merged head; return to the pre-publish evidence loop before restarting the
-   readiness loop on the new head. A `reproducible` or `drifted` outcome has
-   already aborted the merge; stop under the verification stop condition and
-   report the failing verification command and the final merge state. If
-   two consecutive base merges keep changing the branch without reaching a
-   stable PR head in the same ready-pr run, stop for operator feedback instead
-   of pushing indefinitely.
-
-   If the merge conflicts, resolve conflicts only when the correct result is
-   branch-local, in scope, and verifiable. Prefer repository behavior, tests,
-   generators, and documented verification over ad hoc reasoning. Preserve both
-   sides when that is clearly correct. After resolving, run documented
-   verification, commit the resolution with the repository's normal issue-tagged
-   format, then return to the pre-publish evidence loop before restarting the
-   readiness loop on the new head. Use
-   [triage.md](triage.md) as the source of truth for conflict classification;
-   this workflow owns the git sequence and readiness-loop restart.
-
-   Stop when conflicts require product judgment, secrets, permissions,
-   destructive git operations, unrelated scope, or unverifiable semantic
-   choices. Do not rebase or force-push by default. Do not merge the pull
-   request itself. Before any stop path that leaves an uncommitted or conflicted
-   merge in the working tree, run:
-
-   ```sh
-   git merge --abort
-   ```
-
-   Report the aborted merge state and the reason human input is required.
-
-9. Fetch the full PR feedback surface before watching checks:
-
-   - Unresolved inline review threads through paginated GraphQL.
-   - Top-level PR comments, including bot summaries with `Findings`,
-     severity counts, or line-keyed observations.
-   - Review bodies and latest review state.
-   - Review decision, when available.
-
-   Prefer inline threads when duplicate feedback exists. Maintain an in-memory
-   handled inventory for this run with comment or review identifiers, URLs,
-   authors, body hash or update time when available, classification, and
-   evidence status. Do not persist handled state in files.
-
-   Record each thread's authorship in that inventory, agent-authored or
-   human-authored per [triage.md](triage.md#thread-authorship), because it
-   decides which threads this workflow may reply to and resolve.
-
-10. Triage every currently available feedback item with
-    [triage.md](triage.md). A `fix-now` finding interrupts pending checks:
-    patch, verify, commit, return to the pre-publish evidence loop, and restart
-    the readiness loop on the new head before waiting on check runs that the
-    fix will make stale. For `explain`,
-    `stale`, and `defer`, reply or report with concrete evidence; handle
-    `explain`, `stale`, and `defer` before checks unless the evidence itself
-    depends on check results. Stop only when feedback returns `needs-human`.
-
-    Authorship changes where the disposition lands, not what it is. On an
-    agent-authored thread the disposition becomes a reply; on a human-authored
-    thread it is reported in the session and stays off the pull request. Fix the
-    code either way. Before generic triage, apply
-    [the renewed-human-report rule](triage.md#renewed-human-bug-report): a human
-    report that a handled bug persists restarts the repository's bug-fix loop
-    even on the same head and must be observed red again before more fix work.
-
-    When a top-level review comment contains findings, handle each finding
-    separately with a per-finding disposition: fixed in a named commit,
-    explained with evidence, stale, deferred as out of scope, or blocked for
-    human judgment. Severity labels such as `Minor` do not make findings
-    optional; unaddressed findings are blockers until they have a disposition
-    recorded in the PR or final report.
-
-11. Resolve eligible inline threads, the agent-authored ones, once the
-    disposition is valid and an evidence-bearing reply for that disposition is
-    present on the latest head.
-    Every resolved thread carries a reply first; never resolve a thread
-    silently. Explanation, stale, and deferral dispositions are eligible after
-    their evidence-bearing reply is present on the latest head. Code-fix
-    dispositions are eligible only after the fix is present on the latest head,
-    local verification passes, and an evidence-bearing reply is posted that
-    names what changed, the commit or verification result when useful, and
-    whether the fix covers only the commented line or the broader pattern. For
-    pattern-based feedback that names a construct, helper, or anti-pattern, run
-    a direct semantic or pattern check before resolving when feasible: a repo
-    search, an AST query, or a lint rule. Account for every remaining match in
-    the reply and do not resolve while unexplained matches remain. Use GraphQL
-    `resolveReviewThread`, then verify GraphQL `isResolved` after resolving. If
-    permissions do not allow resolution, leave the evidence-bearing reply and
-    report the unresolved state. Do not treat replies as resolution.
-
-    Step 10's routing already sent the human-authored ones to the human-thread
-    handoff; no strength of evidence pulls them back here.
-
-12. Watch required checks only through the fail-fast bounded-watch policy.
-    Snapshot all checks so optional automation can still surface feedback, and
-    so optional and superseded runs on the head are available to step 18's
-    reporting rules. Before
-    each watch window, confirm all currently available feedback and known
-    problematic required-check states have been triaged. Use 10-minute
-    observation windows and a tool-enforced 10-minute timeout. Use an
-    equivalent host tool when needed; examples include GNU `timeout`, Homebrew
-    `gtimeout`, and a portable `perl` fallback:
-
-    ```sh
-    timeout 10m gh pr checks --required --watch --fail-fast
-    gtimeout 10m gh pr checks --required --watch --fail-fast
-    perl -e 'my $seconds = shift; my $pid = fork; die "fork failed: $!" unless defined $pid; if ($pid == 0) { setpgrp(0, 0); exec @ARGV } $SIG{ALRM}=sub { kill q(TERM), -$pid; exit 124 }; alarm $seconds; waitpid($pid, 0); exit(($? & 127) ? 128 + ($? & 127) : ($? >> 8))' 600 gh pr checks --required --watch --fail-fast
-    ```
-
-    Treat exit code 124 from the timeout tool as a watch timeout. Treat a
-    non-zero `gh` exit before the timeout as a fail-fast watch exit.
-
-    Optional checks can produce review comments, so snapshot them without
-    extending the watch window or treating their status as a readiness gate.
-    After any watch command exit,
-    immediately snapshot all check states and perform a full PR state resync:
-    all check buckets, unresolved review threads, top-level PR comments, review
-    bodies, review decision, and current PR head. After any watch timeout,
-    immediately snapshot all check states and perform the same full PR state
-    resync before choosing the next action. Treat a non-pass check in the
-    required-check set as a triage item before starting another watch window,
-    and the head's optional and superseded runs as check history.
-
-    Define no progress as no meaningful change in check buckets, check start or
-    completion timestamps, PR head SHA, or feedback inventory between
-    observation windows. Stop for operator input after two consecutive
-    10-minute no-progress windows instead of waiting indefinitely.
-
-13. Triage every non-pass check in the required-check set with
-    [triage.md](triage.md), using the full PR state snapshot rather than
-    tunneling into only the first failed check. Fix branch-local check causes,
-    return follow-up commits to the pre-publish evidence loop, and restart the
-    readiness loop on the new head. Continue for `explain`, `stale`, and
-    `defer` outcomes with
-    concrete evidence. Do not halt solely because a check failed, was canceled,
-    is flaky, is infrastructure-owned, lacks agent permissions, depends on
-    missing secrets, or is outside the PR scope; record that disposition and
-    continue to the feedback and final reporting gates.
-
-14. Re-query the full PR feedback surface after checks finish, fail fast, or
-    time out because GitHub Actions or review automation may have posted new
-    comments or updated existing comments while checks were running. Compare
-    comment and review identifiers plus body hash or update time from the
-    in-memory handled inventory. Triage and handle any newly available,
-    changed, unresolved, or evidence-pending feedback before the final gate,
-    including deferred-until-checks dispositions whose evidence depended on
-    check results. Prior eligible resolutions stand unless the re-query shows
-    changed or newly unresolved thread state. Apply the same disposition rules
-    from steps 10 and 11, including immediate loop restart for `fix-now`
-    feedback and GraphQL verification for resolved inline threads.
-
-15. Final unresolved review-thread gate: immediately before declaring the PR
-    ready, re-query paginated GraphQL review threads for the latest PR head.
-    Distinguish unresolved actionable feedback from outdated or stale feedback
-    that is already fixed on the latest head. For stale fixed agent-authored
-    threads, post a
-    brief current-head evidence reply first, then resolve them with
-    `resolveReviewThread` when permissions allow, and verify `isResolved: true`
-    from GraphQL. If any agent-authored thread remains unresolved because it
-    still needs action, cannot be resolved automatically, lacks current-head
-    evidence, or needs human judgment, report it as a blocker instead of
-    reporting ready-to-merge. Restart the readiness loop after branch-local
-    fixes or newly pushed commits. Unresolved agent-authored threads are
-    blockers until they are resolved, fixed, or evidence-classified as stale or
-    non-blocking.
-
-    Apply the
-    [canonical predicate's human-thread rule](../references/readiness-predicate.md)
-    before moving to the draft transition.
-
-16. Apply the
-    [repository-controlled readiness predicate](../references/readiness-predicate.md)
-    and flip the draft to ready for review the moment it holds. This is the one
-    canonical draft-to-ready flip.
-
-    Take the predicate's immediate pre-transition snapshot. When that snapshot
-    remains stable and the predicate holds:
-
-    ```sh
-    gh pr ready
-    ```
-
-    The draft-to-ready transition is the entire review-phase signal. Do not
-    write issue state from this workflow; integration automation owns issue
-    transitions tied to the pull request lifecycle.
-
-    Ready-for-review is distinct from ready-to-merge. Complete step 17
-    separately.
-
-    Keep the no-merge guardrail: stop when merge is the next action.
-
-17. Mandatory final ready-to-merge check. Run this immediately before the final
-    response, after all feedback, check, draft, and branch-freshness handling is
-    complete. Re-capture the local checkout, PR identity, GitHub merge state,
-    current checks, and paginated GraphQL review threads; do not reuse earlier
-    readiness-loop evidence as the final answer.
-
-    ```sh
-    pwd
-    git branch --show-current
-    git status --short
-    git rev-parse HEAD
-    gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
-    gh pr checks <pr-number-or-url> --required
-    ```
-
-    Also enumerate review threads with paginated GraphQL for the PR immediately
-    before reporting. REST review comments are not sufficient, and replies do
-    not count as resolution. Use this self-contained query shape, preserving the
-    pagination and fields needed to identify unresolved actionable feedback and
-    each thread's authorship (`author.__typename`).
-    Replace `<pr-number-or-url>`, `<owner>`, `<repo>`, and `<pr-number>` with
-    the resolved PR identity from this workflow before running these commands:
-
-    ```sh
-    gh api graphql --paginate \
-      -F owner=<owner> -F repo=<repo> -F number=<pr-number> \
-      -f query='query($owner:String!,$repo:String!,$number:Int!,$endCursor:String){
-        repository(owner:$owner,name:$repo){
-          pullRequest(number:$number){
-            reviewThreads(first:100, after:$endCursor){
-              nodes{
-                id
-                isResolved
-                path
-                line
-                comments(first:100){
-                  nodes{id author{login __typename} body url createdAt path line originalLine diffHunk}
-                }
-              }
-              pageInfo{hasNextPage endCursor}
-            }
-          }
-        }
-      }'
-    ```
-
-    Classify the worktree before the gate. Enumerate every uncommitted path
-    from `git status --short` — tracked modifications and untracked (`??`) paths
-    alike — and give each path exactly one provable disposition:
-
-    - **in-scope**: the path is part of this PR's change. It must be committed
-      and pushed to the PR head before ready-to-merge. An in-scope path left
-      uncommitted means the PR is not finished — commit it (looping back through
-      verification and the readiness loop on the new head) or report
-      `not ready-to-merge`.
-    - **out-of-scope**: the path provably belongs to a different issue or
-      branch. Name that issue or branch as the attribution. A path is
-      out-of-scope only when the attribution is provable; "probably unrelated,"
-      "looks like leftover," or "belongs to the other batch" is not proof.
-
-    A path that is ambiguous, unattributed, or plausibly in-scope is treated as
-    in-scope: it forces `not ready-to-merge`, or a halt for the human when
-    committing it needs judgment the workflow does not have. Never fold an
-    unattributed path into "clean," and never self-classify an in-scope change
-    as belonging to a different PR to pass the gate.
-
-    The PR is `ready-to-merge` only when every final gate below is true:
-
-    - every uncommitted path has a provable disposition per the classification
-      above: in-scope paths are all committed to the PR head, every remaining
-      path is out-of-scope with a named issue or branch, and any ambiguous or
-      unattributed path fails this gate.
-    - local branch equals the PR `headRefName`.
-    - local `HEAD` equals the PR `headRefOid`.
-    - `mergeStateStatus` is `CLEAN`. This gate is independent of the checks:
-      a fully passing required-check set never satisfies it.
-    - PR is not a draft.
-    - every check in the
-      [required-check set](../references/readiness-predicate.md#required-check-set)
-      passed on the current head. Optional and superseded runs on that head are
-      check history for step 18 to report, and leave this gate unchanged.
-    - no paginated GraphQL review thread has `isResolved: false`, whoever
-      authored it. Agent-authored threads reach that state through this
-      workflow; human-authored threads reach it when their author or the
-      operator closes them, so an open one means the answer is
-      `not ready-to-merge` and it must be reported in the session.
-    - no human blocker or no-progress stop condition remains.
-
-    If every gate passes, report `ready-to-merge`. If any gate fails, report
-    `not ready-to-merge` and list the blocker in human-friendly language, with
-    just enough evidence to make the state clear. Do not dump the full command
-    output or every collected field unless the user asks for it. Check
-    dispositions, stale feedback explanations, and evidence-bearing replies may
-    explain why the workflow is blocked, but they do not permit ready-to-merge
-    wording when a gate is false. Do not describe a blocked outcome as
-    finished.
-
-18. Final report includes a short human handoff:
-
-    Write the final response as a short human handoff, not as a readiness audit.
-    The gate evidence from step 17 proves the state; it should not become the
-    shape of the message.
-
-    Include:
-
-    - PR URL.
-    - The reporter-fidelity verdict and requested-change link defined by the
-      [reporter-fidelity handoff](../references/reporter-fidelity.md), separately
-      from PR readiness.
-    - Latest head SHA only when it helps identify a pushed fix or conflict
-      resolution.
-    - Meaningful changes since the previous report, especially conflict
-      resolution or feedback fixes.
-    - Verification commands and results, summarized at the highest useful
-      level.
-    - When the worktree legitimately holds another branch's uncommitted work,
-      the out-of-scope paths and the issue or branch they belong to. Do not call
-      the worktree "clean" while such paths remain.
-    - Feedback handled, deferred, stale, explained, or blocked, including a
-      per-finding disposition for every top-level review finding and
-      per-failing-check dispositions when they change what the human should
-      know.
-    - For resolved review threads, report each as resolved after an
-      evidence-bearing reply. Distinguish threads resolved after an evidence
-      reply from any thread that was fixed silently, and flag a silent
-      resolution as a defect to correct rather than a completed disposition.
-    - Every unresolved human-authored thread the operator still owns.
-    - Human blockers, if any.
-    - The scope of any passing-checks statement: the required contexts, or all
-      visible check runs on the head. Those are different claims, so name the
-      one being made.
-    - Optional and superseded runs on the reported head, named as check
-      history beside the required-context result, so a passing required line
-      reads as what it is.
-    - For a merge state other than `CLEAN`, the exact values GitHub returned:
-      `mergeStateStatus`, `mergeable`, and `reviewDecision`. Where those values
-      carry no reason, say GitHub exposed none, and keep approval and
-      branch-protection policy out of the report until GitHub names one.
-
-    Compress ready-to-merge evidence into one human line when every final gate
-    passes. Do not write gate inventories such as clean worktree, head SHA
-    equality, merge state, all checks passed, and no unresolved review threads.
-    That evidence is required for the workflow decision, but it is routine proof
-    when everything passes.
-
-    Good final output:
-
-    ```md
-    Done: PR #197 is ready to merge.
-
-    Updated the branch with latest `main`, resolved the skill guidance conflict,
-    and pushed `2635d83`.
-
-    Verified: routine checks passed. No human action needed before merge.
-    ```
-
-    Good final output when the head carries superseded history and GitHub
-    reports no reason for a non-clean merge state:
-
-    ```md
-    PR #197 is not ready to merge.
-
-    The required contexts pass on `2635d83`. The head also carries a canceled
-    `Test Gate` run superseded by the current successful one — history from a
-    concurrency cancellation, not a current failure.
-
-    GitHub reports `mergeStateStatus: BLOCKED` with `mergeable: MERGEABLE` and
-    `reviewDecision: null`, and exposes no reason for the block.
-    ```
-
-    Avoid final output shaped like a readiness checklist:
-
-    ```md
-    PR #197 is ready-to-merge.
-
-    Final readiness:
-    - every uncommitted path has a provable disposition
-    - local branch equals `headRefName`
-    - local HEAD equals `headRefOid`
-    - mergeStateStatus is CLEAN
-    - every current required check is SUCCESS
-    - no unresolved review threads
-    ```
-
-    When any final gate fails, report `not ready-to-merge` and name the blocker
-    in human-friendly language. Include exact failed or skipped commands,
-    unresolved feedback, or check dispositions only when they explain what needs
-    attention.
-
-## Stop Conditions
-
-- Issue inference is ambiguous.
-- Change staging would include unrelated or ambiguous files.
-- An uncommitted path cannot be provably attributed to a different issue or
-  branch, and committing it in-scope needs judgment the workflow does not have.
-- Local verification fails for a reason that is not branch-local or in scope.
-- A clean base merge's verification failure is reproducible or drifted under
-  the [base-update recovery contract](../references/base-update-recovery.md)'s
-  bounded retry; the report names the failing verification and the final
-  merge state.
-- Merge conflict resolution requires product judgment, secrets, permissions,
-  destructive git operations, unrelated scope, or unverifiable semantic choices.
-- Feedback triage returns `needs-human`.
-- Check triage uncovers a non-check human blocker, such as a required product
-  decision or ambiguous branch scope. The failing check itself is not the halt
-  condition.
-- Two consecutive 10-minute no-progress check observation windows complete.
-- Review feedback changes requirements, acceptance criteria, or product scope.
-- Another actor pushes to the PR while the readiness loop is running.
-- Merge is the next action.
-
-## Non-Goals
-
-Do not merge the PR, enable auto-merge, rebase or force-push by default, use
-browser conflict resolution, create follow-up issues, persist handled feedback
-state, wait indefinitely for new human comments after the PR is ready, or add
-agent attribution by default.
+   Stage only files that belong to this work. Ask before including unclear or
+   unrelated files. If there are no local changes and a pull request exists,
+   continue with its current state.
+3. Run the repository's documented local checks. Prefer `AGENTS.md`, README
+   files, and package scripts. Do not invent expensive unrelated checks.
+4. Commit with the repository's format. Run any required local review on that
+   exact commit. Fix and commit clear findings, then repeat checks and review
+   until the current commit passes.
+5. Push only after the exact commit passes. Every later fix commit returns to
+   step 3 before another push.
+
+## Create or update the pull request
+
+1. Read `.github/pull_request_template.md`.
+2. Derive the title type from the complete branch diff against the pull request
+   target and the repository's title rules. Recheck an existing title instead
+   of assuming it is still correct.
+3. Include the required issue-closing line and keep the template headings in
+   order.
+4. Explain what changed and why. Do not copy successful command output into the
+   body. Add `Testing steps` only when a reviewer must inspect behavior or a
+   produced file.
+5. Open agent-created work as a draft. Leave a draft created by a person
+   unchanged unless the user asks the agent to take it over.
+
+## Check the current pull request commit
+
+At the start of every pass, capture current GitHub state and local `HEAD`:
+
+```sh
+gh pr view --json headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
+git rev-parse HEAD
+```
+
+If another actor pushed a different pull request commit, stop before replying,
+resolving, or reporting. Ask the user how to continue.
+
+## Merge the target branch locally
+
+Require a clean worktree, then fetch and test the current pull request target:
+
+```sh
+git fetch origin <base-branch>
+git merge --no-commit --no-ff origin/<base-branch>
+```
+
+Use the local Git result when GitHub reports an unknown or outdated merge state.
+Do not use browser conflict tools.
+
+- If Git reports `Already up to date.`, continue.
+- If the merge is clean and changes the branch, follow
+  [the clean merge instructions](../references/base-update-recovery.md). After
+  `verified` or `recovered`, rerun local checks and review, push, and start the
+  pull request checks again. After `reproducible` or `drifted`, report the
+  failed command and stopped merge.
+- If the merge conflicts, follow
+  [the conflict instructions](triage.md#merge-conflicts) and `update-branch`.
+  Resolve only changes covered by this pull request whose correct behavior can
+  be checked. Run checks for changed code, resolved conflicts, and affected
+  dependencies. An extra full-repository failure may be ignored only when
+  `update-branch` proves that the same problem exists on the exact target
+  commit. Commit, rerun local checks and review, push, and start again.
+
+Run `git merge --abort` before stopping with an open merge. Ask the user when a
+conflict needs a product decision, secret, permission, destructive Git change,
+unrelated work, or a guess about behavior. Do not rebase or force-push.
+
+Stop after two consecutive target merges change the branch without reaching a
+stable pull request commit during one run.
+
+## Handle feedback
+
+Before waiting for checks, read:
+
+- every paginated GraphQL inline thread
+- top-level comments, including bot summaries
+- review bodies and latest review state
+- current review decision
+
+Use [the comment instructions](../../using-github/workflows/pr-comments.md) for
+thread IDs, author type, replies, and resolution. Use
+[the feedback rules](triage.md) for decisions.
+
+Fix clear problems before waiting for checks. Verify, commit, return to the
+local checks and review, push, and restart on the new pull request commit.
+
+For an explanation, outdated item, or item outside this pull request, provide
+current evidence. A `Minor` label does not make feedback optional. Handle every
+finding separately.
+
+Fix valid code feedback from human-started threads but leave the conversation
+for the reviewer or user. If a person says a previously fixed bug remains or
+returned, reproduce the new report before changing more code.
+
+## Watch required checks
+
+Follow [the failed check instructions](triage.md#failed-checks). Watch required
+checks in ten-minute windows with a fail-fast command and tool-enforced timeout.
+After every exit or timeout, refresh:
+
+- required, optional, and replaced check runs
+- pull request commit and merge state
+- unresolved inline threads
+- top-level comments and review bodies
+- review decision
+
+Fix every failure introduced by the branch. Optional checks and replaced runs
+are history, but comments they posted still require attention. Stop after two
+unchanged ten-minute windows.
+
+After checks finish, fail, or time out, fetch all feedback again. Handle any new
+or changed item before reporting.
+
+## Mark an agent-created draft ready
+
+Immediately before changing draft state, follow
+[the draft readiness checks](../references/readiness-predicate.md). When they
+pass, run:
+
+```sh
+gh pr ready
+```
+
+Do not change issue status. Ready for human review and ready to merge are
+different results, so continue to the final check below.
+
+## Final ready check
+
+Fetch fresh state immediately before the final response:
+
+```sh
+pwd
+git branch --show-current
+git status --short
+git rev-parse HEAD
+gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
+gh pr checks <pr-number-or-url> --required
+```
+
+Use paginated GraphQL as described in
+[the comment instructions](../../using-github/workflows/pr-comments.md) to read
+every review thread. A REST comment list is not enough.
+
+Account for every path from `git status --short`:
+
+- A file for this pull request must be committed, checked, reviewed, and pushed.
+- A file for other work must name the exact issue or branch it belongs to.
+- An unclear file blocks a ready result. Ask the user when deciding whether to
+  commit it would change the request.
+
+The pull request is ready to merge only when:
+
+- every file for this pull request is committed and pushed
+- any remaining file belongs to a named different issue or branch
+- the local branch equals `headRefName`
+- local `HEAD` equals `headRefOid`
+- GitHub reports `mergeStateStatus: CLEAN`
+- the pull request is not a draft
+- every context from `gh pr checks --required` passes on the latest commit
+- every paginated GraphQL review thread has `isResolved: true`
+- no pending decision, permission, credential, or stopped check needs the user
+
+Optional and replaced check runs do not change the required-check result.
+Passing checks do not replace a clean merge state. Replies do not replace thread
+resolution.
+
+If every condition passes, report `ready to merge`. Otherwise report `not ready
+to merge` and name the remaining problem. Never describe a blocked pull request
+as finished.
+
+## Final report
+
+Lead with the pull request result and link. Mention meaningful fixes, useful
+verification, handled feedback, open human-started threads, and the one next
+action when needed. Include another branch's local files only when they remain
+in the worktree, with the issue or branch they belong to.
+
+Apply the
+[reporter-fidelity handoff](../references/reporter-fidelity.md). Report its
+`verified` or `pending` verdict and most direct requested-change link separately
+from pull request readiness. Passing checks do not change that verdict.
+
+When all conditions pass, do not list them one by one. One sentence stating
+that routine checks, review threads, and merge state are clear is enough.
+
+When GitHub reports a merge state other than `CLEAN`, include the exact
+`mergeStateStatus`, `mergeable`, and `reviewDecision` values. If GitHub gives no
+reason, say so instead of guessing.
+
+## Stop and ask the user
+
+Stop when the issue is unclear, local files cannot be assigned to this or named
+other work, a required check for changed code cannot pass, a target branch
+failure cannot be proven unchanged, a conflict needs judgment, feedback changes
+requirements, another actor changes the pull request commit, checks make no
+progress for two windows, or merging is the next action.
+
+Do not create follow-up issues, store handled-comment state in repository files,
+wait indefinitely for new comments, or add agent attribution unless required.
