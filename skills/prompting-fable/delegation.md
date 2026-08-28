@@ -1,42 +1,44 @@
-# Delegating to non-Claude models
+# Use a non-Claude model from Claude
 
-Wiring mechanics for [prompting-fable](SKILL.md)'s routing: how work leaves
-Claude for a cheaper model and comes back trustworthy. Examples use Theo's
-stack — gpt-5.6 behind the Codex CLI — substitute the CLI at hand.
+Use these instructions when a Fable task should run work through another
+model's command-line tool. Replace the example Codex command with the tool that
+is actually installed.
 
-## Shelling out
+## Run the command-line tool
 
-A model with no API surface in the session is still reachable through its
-CLI: say "shell out" — the agent already has Bash. Route each job through a
-purpose-built skill (implementation, review, computer use) that pins the
-exact commands; for work no skill covers (investigation, data analysis), run
-the CLI's non-interactive mode directly with a self-contained prompt (e.g.
-`codex exec -s read-only`).
+When the session has no direct model API, run the model's non-interactive CLI
+from Bash. Prefer a skill that already defines the job and exact command. For
+uncatalogued investigation or data work, give the CLI a self-contained prompt.
+For example:
 
-## Prompting the delegate
+```sh
+codex exec -s read-only '<complete request>'
+```
 
-- Write a plain, self-contained ask — not a Claude-style briefing. Other
-  models do what they're told and little else; guard rails like "do not edit
-  files" are mostly wasted tokens there.
-- Require the report to state explicitly when it found nothing and what it
-  inspected, so the parent doesn't rerun a clean result.
+Ask for a report that says what it inspected and says explicitly when it found
+nothing. This lets the calling Claude task trust a clean result without doing
+the same work again.
 
-## Inside workflows and subagents
+## Use from workflows and subagents
 
-The Workflow/Agent `model` parameter only takes Claude models, so wrap:
+Claude workflow and agent model settings accept only Claude models. To call a
+different model:
 
-- Spawn a thin Claude wrapper on the cheapest tier at low effort — in a
-  workflow, literally `agent(prompt, {model: 'sonnet', effort: 'low'})`;
-  the standalone Agent tool has no `effort` opt and inherits the session's —
-  whose prompt is: write a self-contained CLI prompt, run it via Bash,
-  return the report. Put `schema` on the wrapper to get structured output
-  back.
-- Label every wrapper with the real worker's prefix, e.g.
-  `{label: 'gpt-5.6:review-auth'}`. The workflow UI shows the wrapper's
-  Claude model, so the label is the only visible sign of who did the work.
-- Delegated runs can exceed Bash's 10-minute timeout: pass an explicit
-  timeout, or run in the background and poll for the report file.
-- Parallel delegated implementation agents need `isolation: 'worktree'` so
-  their edits don't collide in the shared checkout.
-- Workflow token budgets count Claude tokens only: delegated work is
-  invisible to `budget.spent()` — cheap, but also uncounted.
+1. Start a small Claude agent on the least expensive suitable tier. In a
+   workflow, for example:
+
+   ```js
+   agent(prompt, { model: 'sonnet', effort: 'low' })
+   ```
+
+2. Tell that agent to write a complete prompt, run the other model's CLI, and
+   return its report. Use a schema when the caller needs structured output.
+3. Label the agent with the actual worker, such as `gpt-5.6:review-auth`, because
+   the workflow UI otherwise shows only the Claude wrapper.
+4. Set an explicit timeout for work that may exceed ten minutes, or run it in
+   the background and poll for its report file.
+5. Give parallel implementation agents separate worktrees so their edits do not
+   collide.
+
+Workflow token counters include only Claude tokens. Track any CLI model usage
+separately.

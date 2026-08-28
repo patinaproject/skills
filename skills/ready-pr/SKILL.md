@@ -1,106 +1,105 @@
 ---
 name: ready-pr
-description: Ready completed branch work into a ready-to-merge pull request. Use when the caller wants to publish or ready a PR, or another skill needs the explicit PR-readiness workflow.
+description: Publish completed branch work and keep fixing current pull request problems until it is ready to merge or needs a person. Use when the user asks to create, publish, finish, or ready a pull request.
 ---
 
-# Ready PR
+# Ready a pull request
 
-## Quick Start
+Read [the complete ready-for-merge instructions](workflows/ready-for-merge.md)
+before starting. They define every command, timeout, retry, stop condition, and
+final check. When feedback appears, also read
+[the feedback instructions](workflows/triage.md).
 
-When local work is complete, follow
-[workflows/ready-for-merge.md](workflows/ready-for-merge.md) — the authoritative
-procedure for every step below.
+This skill verifies and commits local work, pushes the branch, creates or
+updates a draft pull request, handles available feedback, watches required
+checks, and repeats after each fix. It never merges the pull request or enables
+auto-merge.
 
-When review feedback appears, apply
-[workflows/triage.md](workflows/triage.md), especially its authorship and
-renewed-human-report routing, before taking a generic feedback disposition.
+A failed check does not stop the run by itself. Investigate it, fix any cause
+introduced by the branch, and report causes that require a person. Open work
+created by the agent as a draft while this process runs. Use the
+[draft readiness checks](references/readiness-predicate.md) before changing it
+to ready for human review.
 
-Example: on an adapter-provided issue branch, resolve its issue, verify the
-diff, commit with the repository's required issue-reference format, push, and
-open the PR as a draft.
+## Steps
 
-The skill verifies, commits, pushes, and creates or reuses a **draft** PR, then
-runs the readiness loop until the PR is ready-to-merge or every problematic
-check is triaged and reported. A failing check is evidence to triage, not a
-halt. It never merges the PR or enables auto-merge.
+1. Read repository instructions, commit rules, and the pull request template.
+2. Find the issue from the current branch or existing pull request. Ask when it
+   is unclear.
+3. Inspect every uncommitted path. Stage only files that belong to this work.
+4. Run the repository's documented local checks.
+5. Commit using the repository's required format. Run any required local review
+   on that exact commit. Fix findings, verify again, and push only after the new
+   commit passes.
+6. Create or update the pull request with the repository template. Open
+   agent-created work as a draft unless an existing eligible pull request is
+   already ready.
+7. Repeat the process in the linked instructions:
+   - check whether the target branch merges cleanly
+   - read all current review threads, comments, review bodies, and check results
+   - fix problems introduced by the branch
+   - reply to and resolve bot-created threads after posting evidence
+   - leave human-created threads for the reviewer or user to answer and resolve
+   - watch required checks in ten-minute windows and refresh all feedback after
+     every exit or timeout
+   - run local checks and review again before every new push
+8. Apply the draft readiness checks and run `gh pr ready` when they pass. Leave
+   issue status unchanged.
+9. Immediately before reporting, fetch fresh local status, pull request state,
+   required checks, and all paginated GraphQL review threads.
 
-Agent-authored PRs open as drafts while the agent loop runs, so draft means
-"agent loop still churning, not yet for humans." Apply the
-[repository-controlled readiness predicate](references/readiness-predicate.md)
-for the draft-to-ready transition.
+## Branch updates
 
-End on a strict final ready-to-merge gate. The gate enumerates every
-uncommitted path and requires a provable per-path disposition — in-scope paths
-must be committed, out-of-scope paths must name the issue or branch they belong
-to — so an ambiguous or plausibly-in-scope change can never pass as a "clean"
-worktree. If any gate fails, report the PR as not ready-to-merge, name the
-blocker in human-friendly language, and do not imply success or call it
-finished. If every gate passes, compress the ready-to-merge evidence into one
-human line.
+Test target branch merges with local Git. Do not use GitHub's browser conflict
+tools. For a clean merge that changes the branch, follow
+[the clean target update instructions](references/base-update-recovery.md).
+For conflicts, follow `update-branch` and the feedback instructions.
 
-## Workflow
+Run the repository checks that cover the changed code, conflict resolutions,
+and affected dependencies. A separate full-repository check may be ignored only
+when `update-branch` proves that the same problem already exists on the exact
+target commit and the repository does not require that check for this change.
 
-1. Read repository guidance, commit rules, and the PR template.
-2. Infer the issue from the current branch or existing PR metadata; ask if
-   ambiguous.
-3. Inspect uncommitted changes and stage only relevant paths.
-4. Run the repository's documented verification commands.
-5. Commit using the repository's required format, then complete the
-   authoritative workflow's pre-publish evidence loop.
-6. Push the branch when there is work to publish.
-7. Create or update the PR using the repository template. Open agent-authored
-   work as a draft by default.
-8. Enter the readiness loop: detect merge conflicts, triage currently
-   available PR feedback, resolve eligible conversations (the agent-authored
-   threads), hand every human-authored one to the operator in the session, and
-   restart reproduction when a human reports that a previously handled bug
-   persists or has returned. Watch required checks in fail-fast bounded
-   observation windows, snapshot optional checks for feedback, re-query PR
-   feedback after checks and after every watch exit or timeout, fix branch-local
-   issues, pass the pre-publish evidence loop, push, and repeat. A required
-   check the agent cannot fix gets a concrete disposition and continues to
-   reporting, not a halt.
-9. Apply the canonical predicate and perform its draft-to-ready transition.
-   The PR transition does not write issue state.
-10. Report ready-to-merge status or concrete non-ready check dispositions
-    without merging.
+Abort an uncommitted merge before stopping. Do not rebase or force-push by
+default.
 
-## Guardrails
+## Review threads
 
-- Reply on, resolve, dismiss, and re-request review only on agent-authored
-  threads. A human reviewer's thread is answered and closed by that human or
-  the operator; report it in the session and leave the conversation untouched.
-- Treat a human report that a previously handled bug persists or has returned
-  as a restarted bug-fix loop even when the PR head is unchanged. Follow the
-  repository's human-bug-report contract before more fix work, or report a
-  blocker.
-- Do not resolve a review thread without an evidence-bearing reply, including
-  code-fix dispositions; verify pattern-based feedback with a direct search or
-  check before resolving when feasible.
-- Verify a clean base merge through the
-  [base-update recovery contract](references/base-update-recovery.md): one
-  bounded retry classifies a retryable failure from a reproducible one, and
-  only an exactly verified merged head is committed and pushed.
-- Do not rewrite branch history or force-push by default.
-- Do not use browser conflict resolution or merge the pull request itself.
-- Do not enable auto-merge.
-- Do not create follow-up issues from PR feedback.
-- Do not wait indefinitely for new human review comments.
-- Apply the
-  [canonical readiness predicate](references/readiness-predicate.md) when
-  classifying required and optional automation. Its **required-check set** is
-  the CLI-selected contexts on the latest head; a head's optional and
-  superseded runs are check history, reported as history rather than counted
-  as a current required result.
-- Name the scope of every passing-checks statement — the required contexts, or
-  all visible check runs.
-- Report a merge state other than `CLEAN` with the exact values GitHub
-  returned, and say so when GitHub exposes no reason for it.
-- Stop after the documented no-progress threshold instead of watching
-  indefinitely.
-- Do not stop solely because a check failed, was canceled, or is out of scope;
-  triage it, fix branch-local causes when possible, and otherwise report the
-  check disposition.
-- Do not add AI or agent attribution unless the repository requires it.
-- Stop for non-check blockers involving secrets, permissions, product
-  decisions, or ambiguous scope.
+Fix valid feedback regardless of who wrote it. Reply to and resolve a thread
+only when a bot or GitHub App started it. A human-started thread belongs to its
+reviewer. Report it to the user and leave it open.
+
+Before resolving a bot-created thread, post a reply with current-commit
+evidence. For a code fix, include what changed and the useful commit or check
+result. Search for other matches when feedback names a repeated pattern. Verify
+GraphQL `isResolved: true` after resolution.
+
+If a human says a previously fixed bug remains or returned, reproduce the new
+report before changing more code, even when the pull request commit did not
+change.
+
+## Ready to merge
+
+Report `ready to merge` only when all of these are true in the final fresh
+check:
+
+- every file for this pull request is committed and pushed
+- any remaining uncommitted file is proven to belong to a named different
+  issue or branch
+- the current local branch and commit match the pull request branch and commit
+- GitHub reports `mergeStateStatus: CLEAN`
+- the pull request is not a draft
+- every context returned by `gh pr checks --required` passes on the latest
+  commit
+- every paginated GraphQL review thread is resolved
+- no decision, permission, credential, or stopped check still needs a person
+
+Optional checks and older replaced runs are history. They do not replace the
+required-check result. A reply does not count as resolving a review thread.
+
+When a condition fails, report `not ready to merge` and explain what remains.
+When all conditions pass, summarize the evidence in one sentence instead of
+listing every condition.
+
+Do not create follow-up issues from review feedback, wait indefinitely for new
+comments, or add agent attribution unless the repository requires it.

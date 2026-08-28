@@ -1,13 +1,13 @@
 ---
 name: new-branch
-description: Create or switch to the adapter-provided branch for an issue from the repository default branch. Use for branch-only setup or when working-on-issue needs to establish the issue-linked branch.
+description: Create or switch to the issue branch supplied by the repository's tracker instructions. Use for branch setup or when working-on-issue needs the issue branch.
 ---
 
-# New Branch
+# New branch
 
 Given one issue reference, follow
-[the issue-branch workflow](workflows/issue-branch.md) end to end.
+[the issue branch instructions](workflows/issue-branch.md) from start to finish.
 
-Use the branch name returned by the issue-tracker adapter verbatim. This skill
-does not install dependencies, push, commit, open a pull request, or implement
-the issue.
+Use the exact branch name returned by `docs/issue-tracker.md`. Stop after the
+branch is ready. Do not install dependencies, change code, commit, push, or open
+a pull request.

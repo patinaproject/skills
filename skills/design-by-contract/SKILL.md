@@ -1,22 +1,26 @@
 ---
 name: design-by-contract
-description: Analyzes and presents consequential system design as client-supplier contracts. Use when another skill or the operator requests design-by-contract analysis.
+description: Describe an important design decision as an agreement between a caller and the code it uses. Use when another skill or the user asks for design-by-contract analysis.
 ---
 
-Treat a design area as a contract only when all three are true:
+# Design by contract
 
-1. It is hard to reverse.
-2. It is surprising without context.
-3. It resolves a real trade-off.
+Use a contract only for a design decision that is hard to reverse, surprising
+without explanation, and based on a real trade-off.
 
-Name the client and supplier. State what the contract **requires**, **ensures**,
-and **maintains**. State violation behavior only when the design defines it.
-Never invent a missing clause; expose it to the calling workflow.
+Name the caller and the code that serves it. State:
 
-For changes or alternatives, compare both states with the same clauses. Use
-prose for one simple contract, a table for comparisons, and Mermaid for
-sequences, states, or dependencies when it materially improves clarity. Visuals
-support the clauses; they do not replace them.
+- what the caller must provide
+- what the code guarantees in return
+- what must remain true while they interact
+- what happens when either side breaks the agreement, if the design defines it
 
-This is a design overlay. The caller owns scope, ordering, interaction,
-verdicts, and completion. Do not prescribe implementation or tests.
+Do not invent missing rules. Point them out to the calling skill or user.
+
+When comparing designs, use the same statements for both. Use prose for one
+simple contract, a table for a comparison, and Mermaid only when a sequence,
+state change, or dependency is hard to explain in prose.
+
+The calling skill decides what to review, in what order, and when the work is
+done. This skill describes the design. It does not choose implementation or
+tests.

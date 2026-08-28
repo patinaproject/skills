@@ -1,61 +1,55 @@
 ---
 name: review-system-design
-description: Presents a diff or spec's hard-to-reverse system design to a human reviewer in plain-language, dependency-ordered rounds. Use when asked for a system design review of a diff, specification, or both.
+description: Present important design agreements from a diff or specification to a human reviewer in plain language and dependency order. Use when the user asks for a system design review.
 ---
 
-/design-by-contract
+# Review system design
 
-Present the system design of a **scope** — a diff, a spec, or both — to a human
-reviewer, one batch at a time.
+Use `design-by-contract` to select and analyze each important agreement in the
+changed production code. Keep its client-supplier clauses as an internal
+reasoning model. The input may be a diff, a specification, or both.
 
-Write reviewer-facing prose in ASD-STE100 Simplified Technical English, inside
-a **closed vocabulary**: the ubiquitous language of `CONTEXT.md`,
-`codebase-design` terms used exactly, and code identifiers as code spans. When
-the vocabulary lacks a term, flag a glossary proposal through `domain-modeling`.
-Write complete clauses: every verb keeps its object, and every definite noun
-has an antecedent.
+Use short, direct sentences with clear subjects and objects. Use terms already
+defined in `CONTEXT.md`, exact `codebase-design` terms, and code identifiers.
+When a needed term is missing, ask `domain-modeling` to propose a glossary
+entry.
 
-Use `design-by-contract` to select and analyze the consequential decisions. Keep
-its client-supplier clauses as an internal reasoning model. Map the selected
-contracts as a **contract dependency tree**: every contract branches into the
-contracts that depend on it. A spec's contract table names the contracts; a
-diff is the truth for what changed. When both exist, reconcile them and flag any
-contract found only in the diff as unplanned.
+Build a dependency tree of the design agreements. Review an agreement before
+any agreement that depends on it. When a specification and diff disagree,
+treat the diff as the record of what changed and flag any unplanned agreement.
 
-The **review surface is implementation only**: production source. Exclude test
-suites, documentation, and workspace fixtures. Treat a spec row that names one
-of those surfaces as a sign-off device; review its knobs at their owning
-contract.
+Review production code only. Tests, documentation, and workspace fixtures may
+provide evidence, but they are not separate design agreements.
 
-Work the tree in **rounds**. The **frontier** is every contract whose upstream
-contracts are already reviewed. A round starts with
-`## <scope name> — round N of M`, then presents the whole frontier. Prefix
-decisions with handles `C1`, `C2`, … across rounds. Present each decision under
-a plain-language title and explain it in a small number of connected
-paragraphs. In full sentences, name the relevant system parts and how they
+Present one group at a time after reviewing everything it depends on. Use the
+heading `## <change name>, round N of M`. Number agreements `A1`, `A2`, and so
+on across all rounds.
+
+Give each agreement a plain-language title followed by a small number of
+connected paragraphs. Name the relevant system parts and explain how they
 interact, what changed and why it matters, and the expectation or trade-off the
 reviewer must judge. Include defined failure behavior only when it helps that
-judgment. Link the relevant spec or ADR once.
+judgment. Link the agreement's specification or ADR once.
 
-The reviewer sees an explanation, not the contract form. Do not expose repeated
+The reviewer sees an explanation, not the contract form. Do not repeat
 **Client**, **Supplier**, **Requires**, **Ensures**, **Maintains**, or
 **Violation behavior** fields, and do not turn those fields into an unlabeled
-checklist. Include only facts that matter to the decision. Add a table,
-sequence, state, or dependency diagram only when it makes a relationship easier
-to understand than the prose. End each round with one short, plain-language
-request for concerns or approval.
+checklist. Include only facts that matter to the decision. Add a visual only
+when it makes a relationship easier to understand than the prose. End each
+group with a short request for concerns or approval.
 
-Then wait for the reviewer's reply. One reply advances the batch: challenged
-decisions become logged concerns under their plain-language titles, each with
-its agreed fix when one emerges; the rest are accepted. Keep each handle as a
-stable cross-round reference. Keep the scope frozen while the review runs. A
-proposed fix is a log entry until the review ends.
+Wait for the reviewer's reply after each group. Record challenged agreements
+under their plain-language titles and record each agreed fix. Treat the rest as
+accepted. Keep each agreement number as a stable reference. Keep the reviewed
+change fixed until the review ends. A proposed fix remains a note until the
+reviewer finishes all rounds.
 
-Finding facts is your job, never the reviewer's. Use a sub-agent when the diff,
-spec, or a call site must establish a fact; the reviewer supplies only verdicts.
+Find supporting facts yourself. Use a subagent when the diff, specification, or
+callers require separate investigation. Ask the reviewer for decisions, not
+research.
 
-Finish after every contract in the tree is visited. In the same plain-language
-style, summarize the accepted decisions, concerns, and agreed fixes, then apply
-the amendments the reviewer confirms. When the reviewer requests a guide, write
-it where they say: one review pointer, the decisions in handle order, and the
-selected visuals.
+Finish after every agreement has been reviewed. In the same plain style,
+summarize accepted agreements, concerns, and agreed fixes, then apply only the
+changes the reviewer confirms. If the reviewer asks for a guide, write it at
+the requested path with a link to the reviewed change, the agreements in number
+order, and the selected visuals.

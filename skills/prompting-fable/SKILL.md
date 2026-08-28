@@ -1,103 +1,83 @@
 ---
 name: prompting-fable
-description: Guidelines for prompting and configuring Claude Fable 5. Use when the user asks how to prompt Fable or get more out of it, picks a reasoning effort, writes a run-until-done goal prompt, chooses between a workflow, subagents, or session-orchestrated worktrees, or tunes a CLAUDE.md glossary or model-routing rules for Fable-driven work.
+description: Write prompts and choose settings for Claude Fable 5. Use when the user asks about Fable prompts, reasoning effort, long-running goals, worktrees, workflows, subagents, model selection, or Fable-related CLAUDE.md instructions.
 ---
 
 # Prompting Fable
 
-Check the work at hand against every section below, not only the one that
-prompted the lookup.
+Check the current task against every section below.
 
-## Prompt for distance, not difficulty
+## Ask for end-to-end completion
 
-Fable is not a better Opus, and Opus-era prompts underuse it. Its edge is
-**distance** — how far one prompt travels end to end (implement, test, verify,
-decompose to subagents) — not how hard a single step can be. Shape prompts for
-distance:
+Fable works best when one prompt states the final result and lets it complete
+the implementation, tests, verification, and useful delegation.
 
-- State the outcome, then enumerate the exact categories the answer must sort
-  into ("ready to merge / needs a rebase / trumped / scrap and rewrite"), so
-  the report comes back decision-shaped.
-- Grant orchestration explicitly: "use a workflow to break the work across
-  multiple reviewers."
-- Unsure how to structure the work? Ask the model to lay out the streams of
-  work before starting any of them — it pushes back well ("a single workflow
-  is the wrong tool for this umbrella"), and the answer aligns you both
-  before tokens are spent.
+- State the result first. Name the exact result categories the final report
+  must use, such as `ready to merge`, `needs a rebase`, or `rewrite needed`.
+- Give explicit permission to use workflows or subagents when you want them.
+- For broad work, ask Fable to propose the separate work areas before starting.
+  Review that breakdown before spending time on implementation.
 
-## Cap reasoning effort at high
+## Use high reasoning or lower
 
-Effort is per-step, not per-run: any effort can work for hours, and xhigh/max
-only think more per step. Most steps need no deep thought, so those tiers
-second-guess themselves in loops and return overdone diffs at a multiple of
-the cost. Even Ultracode runs its fleets on high. Stay in low–high; default
-high.
+Reasoning effort applies to each step, not the whole run. Start with `high` for
+hard work and use `low` or `medium` for routine steps. `xhigh` and `max` often
+spend more time reconsidering ordinary steps and can produce larger changes
+than the task needs.
 
-## Goals: run until the conditions pass
+## Define long-running goals with checks
 
-For a backlog-sized program of work, prompt a **goal** — keep going until the
-conditions pass — with three parts:
+For a backlog or other long program, include:
 
-- **Conditions**: a checkable done-state, e.g. every item in `to-do.md` done,
-  marked off and committed as the work lands.
-- **Permissions**: enumerate what it may do unasked — create worktrees,
-  branch, rebase, merge, close PRs. An unlisted permission is a stall waiting
-  to happen.
-- **Gates**: the checkpoints that stay non-negotiable — automated reviewers
-  must approve before any merge; production deploys stay human. The autonomy
-  is safe because the gates are, not because the model is.
+- the exact conditions that finish the work
+- the actions Fable may take without asking, such as creating worktrees,
+  branching, rebasing, merging, or closing pull requests
+- the reviews or approvals that still require a pause
 
-## Match orchestration to checkpoints
+An action not granted in the prompt may require user approval later. Make every
+completion condition observable, such as every item in `to-do.md` being checked
+off and committed.
 
-- **Workflow** for deterministic fan-out-and-verify: triage N items, judge
-  panels, multi-agent review passes. Don't pre-define reviewer subagent
-  archetypes; Fable invents the right ones per task.
-- **Session-orchestrated worktrees** for checkpoint-driven programs, where
-  each unit needs CI, human review, or a product call before the next step.
-  One giant workflow either barrels past the checkpoints or stalls at the
-  first one.
-- Inside a checkpointed program, drop back to workflows only where they are
-  strong: the multi-agent review pass before each merge.
+## Choose the coordination method
 
-## Route models by glossary, not price
+- Use a workflow when several independent tasks can run together and one final
+  check can verify the combined result.
+- Use separate worktree sessions when each task must pass CI, human review, or a
+  product decision before the next starts.
+- Within a worktree program, workflows still work well for independent review
+  passes before each merge.
 
-The highest-value CLAUDE.md addition is a **glossary**: the terms you judge
-work by, written down so the model applies your meanings instead of guessing.
-This skill ships one — [glossary.md](glossary.md) defines the judging axes
-(cost, intelligence, taste) and carries Theo's worked model scores. When
-setting up routing, copy it into the CLAUDE.md and re-score it for the models
-and subscriptions at hand, then route:
+Let Fable choose the reviewer roles for the specific task instead of defining a
+fixed set of reviewer personalities.
 
-- Bulk mechanical work — clear-spec implementation, log digging, giant PDFs,
-  migrations, computer use — goes to the cheapest model that clears the
-  intelligence bar, shelled out through its CLI.
-- Anything user-facing — UI, copy, API design — needs high taste.
-- Plan and implementation reviews need top intelligence; a cheaper model is
-  optionally one extra independent perspective.
+## Choose models by task needs
 
-Scores are defaults, not limits: give standing permission to rerun with a
-smarter model when a cheaper one's output misses the bar. Judge the output,
-not the price tag — escalating costs less than shipping mediocre work. Spend
-cheap tokens gathering information; never let cost pick the model for what
-ships.
+[glossary.md](glossary.md) defines cost, intelligence, and taste, with example
+model scores. Copy it into `CLAUDE.md` when the project needs repeatable model
+selection, then update the scores for the available models and subscriptions.
 
-When work actually leaves Claude — shell-outs, and the wrapper pattern that
-gets a non-Claude model into workflows and subagents — wire it per
+- Use the least expensive model that reliably handles clear implementation,
+  log searches, document reading, migrations, or computer use.
+- Use a model with strong taste for user-facing UI, writing, and API design.
+- Use the strongest reasoning model for plan and implementation reviews. A
+  cheaper model can add another independent opinion.
+
+Allow a task to retry with a stronger model when the first result is not good
+enough. When work runs outside Claude through a CLI or wrapper, follow
 [delegation.md](delegation.md).
 
-## Read time-to-fix as an architecture signal
+## Treat fix time as useful evidence
 
-Judge a spawned fix by how long it took, not only by its diff: a few minutes —
-simple, merge without guilt; a quarter hour — pay attention; an hour or more —
-the problem is architectural, don't blindly merge. A suspiciously fast fix
-that describes things the codebase doesn't have is the same signal inverted —
-interrogate it.
+A fix that takes a few minutes is usually straightforward. Review a fix that
+takes around fifteen minutes more carefully. An hour-long fix often points to a
+design problem. A suspiciously fast answer that describes code the repository
+does not contain also needs investigation.
 
-## Grow the harness from failures
+## Improve instructions after mistakes
 
-Get a CLAUDE.md section or skill roughly working in half an hour, then let
-failures write the rest: when the model misfires, ask it what it got wrong and
-what line would have prevented it, cut the suggestion in half, and append. Pin
-exact CLI commands in skills — the occasional wrong invocation costs more than
-the lines. And put the whole fire/don't-fire decision in a skill's
-description: the model sees nothing else until it fires.
+Start with short `CLAUDE.md` instructions or a small skill. When Fable makes a
+repeatable mistake, ask what instruction would have prevented it, shorten that
+answer, and add only the useful rule. Keep exact CLI commands when a mistaken
+invocation would be costly. Put the full use and do-not-use condition in a
+skill's description because that is the only text available before the skill
+loads.

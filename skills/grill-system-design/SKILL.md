@@ -1,8 +1,10 @@
 ---
 name: grill-system-design
-description: Guides system design grilling toward hard-to-reverse, surprising, real trade-offs, then hands the result to a specification. Use when system design decisions need a focused design interview.
+description: Question the user about important system design decisions, then prepare the decided design for a specification. Use when a design needs a focused interview before it can be specified.
 ---
 
-/design-by-contract
+# Grill system design
 
-/grill-to-spec
+1. Run `design-by-contract` to identify the important agreements in the design.
+2. Run `grill-to-spec` to question the user and prepare the decided result for
+   `/to-spec`.
