@@ -68,10 +68,14 @@ Before starting, confirm these skills are installed:
 - `polish` runs the shared local architecture, Standards, and Spec loop.
 - `ready-pr` publishes the branch and runs the shared PR readiness loop.
 
+For an evidence case that needs an Android emulator or iOS simulator, also
+confirm that `running-mobile-simulators` is installed. It owns device selection,
+readiness, binding, recovery, and cleanup.
+
 If any are missing, stop and report the missing names with install guidance:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish ready-pr -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish ready-pr running-mobile-simulators -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --skill diagnosing-bugs implement tdd -y
 ```
 
@@ -81,7 +85,10 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
    request, current head, reported environment, and required deployment path.
    Run in a local environment with every simulator, device, browser,
    credential, and deployment capability the evidence case needs. Missing
-   capability is a blocker.
+   capability is a blocker. When the evidence case needs an Android emulator or
+   iOS simulator, invoke `running-mobile-simulators` before any device state
+   change or mobile automation. Keep `fix` responsible for the evidence case
+   and the runtime skill responsible for device ownership and lifecycle.
 
 2. **Diagnose red.** Use `diagnosing-bugs` against the correct unfixed target
    and applicable environment. Follow the operator's exact steps and directly

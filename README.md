@@ -4,9 +4,10 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging,
-contract-based system design, diagnosis-first correction, system design review,
-focused system design grilling, Codex chat coordination, settled-design
-documentation capture, release changelog ceremonies, and local branch updating.
+contract-based system design, diagnosis-first correction, shared-host mobile
+simulator sessions, system design review, focused system design grilling, Codex
+chat coordination, settled-design documentation capture, release changelog
+ceremonies, and local branch updating.
 They are available across Claude Code, Codex, and any agent runtime that reads
 `AGENTS.md`.
 
@@ -227,6 +228,16 @@ current pull-request head at the reporter's perceived surface.
 
 See [./skills/fix/](./skills/fix/) for the skill contract.
 
+### running-mobile-simulators
+
+Concurrent workspaces can see the same Android emulators, iOS simulators, and
+automation processes. `running-mobile-simulators` binds one session to an exact
+device and limits readiness, recovery, evidence, and cleanup to that ownership
+boundary.
+
+See [./skills/running-mobile-simulators/](./skills/running-mobile-simulators/)
+for the skill contract.
+
 ### orchestrate
 
 Multiple user-visible Codex chats can stop even when safe work remains.
@@ -288,6 +299,7 @@ README and skill contract.
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [fix](./skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
+| [running-mobile-simulators](./skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
@@ -349,6 +361,7 @@ skills/
   grill-system-design/
   review-system-design/
   fix/
+  running-mobile-simulators/
   orchestrate/
   write-changelog/
   prompting-fable/

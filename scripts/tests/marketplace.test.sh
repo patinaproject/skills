@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-issue","./skills/develop","./skills/develop-with-workflow","./skills/ready-pr","./skills/merge-pr","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/polish","./skills/update-branch","./skills/move-branch-here","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/fix","./skills/orchestrate","./skills/write-changelog","./skills/prompting-fable"]'
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-issue","./skills/develop","./skills/develop-with-workflow","./skills/ready-pr","./skills/merge-pr","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/polish","./skills/update-branch","./skills/move-branch-here","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/fix","./skills/running-mobile-simulators","./skills/orchestrate","./skills/write-changelog","./skills/prompting-fable"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback'
 
 read_frontmatter_field() {
@@ -91,6 +91,8 @@ fi
 
 test "$(read_frontmatter_field skills/develop/SKILL.md disable-model-invocation)" = 'true'
 test "$(read_frontmatter_field skills/fix/SKILL.md disable-model-invocation)" = 'true'
+test -n "$(read_frontmatter_field skills/running-mobile-simulators/SKILL.md description)"
+test -z "$(read_frontmatter_field skills/running-mobile-simulators/SKILL.md disable-model-invocation)"
 
 unexpected_lock_entries="$(
   jq -r '
