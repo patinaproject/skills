@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.32.0](https://github.com/patinaproject/skills/compare/v2.31.0...v2.32.0) (2026-08-28)
+
+
+### Features
+
+* [#393](https://github.com/patinaproject/skills/issues/393) explain system design reviews in plain language ([#395](https://github.com/patinaproject/skills/issues/395)) ([1c7f2b8](https://github.com/patinaproject/skills/commit/1c7f2b8977c5e23420f594509ade276a9eaef80f))
+
+
+### Bug Fixes
+
+* [#391](https://github.com/patinaproject/skills/issues/391) prevent orchestration from interrupting delegated sessions ([#396](https://github.com/patinaproject/skills/issues/396)) ([27e82ec](https://github.com/patinaproject/skills/commit/27e82ec41c1334698997ac90cc7de2972fed904d))
+
 ## [2.31.0](https://github.com/patinaproject/skills/compare/v2.30.0...v2.31.0) (2026-08-28)
 
 
