@@ -6,8 +6,7 @@ description: Present important design agreements from a diff or specification to
 # Review system design
 
 Use `design-by-contract` to select and analyze each important agreement in the
-changed production code. Keep its client-supplier clauses as an internal
-reasoning model. The input may be a diff, a specification, or both.
+changed production code. The input may be a diff, a specification, or both.
 
 Use short, direct sentences with clear subjects and objects. Use terms already
 defined in `CONTEXT.md`, exact `codebase-design` terms, and code identifiers.
