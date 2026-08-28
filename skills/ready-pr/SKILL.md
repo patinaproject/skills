@@ -15,9 +15,10 @@ updates a draft pull request, handles available feedback, watches required
 checks, and repeats after each fix. It never merges the pull request or enables
 auto-merge.
 
-Carry any supplied context from the
-[reporter-fidelity reference](references/reporter-fidelity.md) unchanged through
-the run. Missing context does not change pull request readiness or draft state.
+Carry every supplied field from the
+[reporter-fidelity reference](references/reporter-fidelity.md#observation-context)
+unchanged through the run. Missing context does not change pull request
+readiness or draft state.
 
 A failed check does not stop the run by itself. Investigate it, fix any cause
 introduced by the branch, and report causes that require a person. Open work
@@ -107,7 +108,7 @@ When a condition fails, report `not ready to merge` and explain what remains.
 When all conditions pass, summarize the evidence in one sentence instead of
 listing every condition.
 
-Keep the reporter-fidelity handoff informational. Do not create follow-up
-issues from review feedback, invoke `/fix`, notify or request a reviewer, reply
-to a human-started conversation, wait indefinitely for new comments, or add
-agent attribution unless the repository requires it.
+The operator owns follow-up issues, `/fix` invocation, reviewer contact, replies
+to human-started conversations, and review-state changes. Return control instead
+of taking those actions or waiting indefinitely for new comments. Add agent
+attribution only when the repository requires it.

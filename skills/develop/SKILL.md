@@ -24,9 +24,9 @@ It runs four skills in order:
 `implement` flow. Use `develop-with-workflow` when the user asks for parallel
 implementation.
 
-Run `develop` only when the operator invokes it. Keep it portable: use diagnosis
-and behavioral observations when helpful, but do not require local devices or
-deployed-build evidence.
+Run `develop` only when the operator invokes it. It must work without a
+simulator, device, or deployed build. Use diagnosis and supplied behavioral
+observations when they help.
 
 ## Input
 
@@ -85,10 +85,10 @@ name it, and give a project-local install command for its current source.
 ## Behavioral observations
 
 Use the context fields in the
-[`ready-pr` reporter-fidelity reference](../ready-pr/references/reporter-fidelity.md).
-Pass every available field unchanged to `polish` and `ready-pr`. Gather a
-diagnosis when it helps implementation. Missing observation context adds no
-step, blocker, or completion requirement to `develop`.
+[reporter-fidelity observation fields](../ready-pr/references/reporter-fidelity.md#observation-context).
+Pass every available field unchanged to `polish` and `ready-pr`. Diagnose when
+it helps implementation. Continue without adding work when the caller supplies
+no observation context.
 
 ## Workflow
 

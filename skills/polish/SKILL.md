@@ -35,8 +35,8 @@ reviews. Report any meaningful difference between the finished work and the
 issue body. Do not edit the issue.
 
 Pass any behavioral observation context from the caller unchanged to both
-reviewers. Missing context is normal and does not require a simulator, device,
-or deployed build for this local review.
+reviewers. Continue normally when it is missing. This local review never
+requires a simulator, device, or deployed build.
 
 ## Required skills
 
@@ -97,20 +97,9 @@ for its current source.
    fails, times out, or stops early, keep the last completed result and save any
    useful finding from the unfinished review.
 
-   For a reported defect, both reviewers must compare the regression test's
-   observable assertion with the behavior the reporter perceived. The test must
-   be capable of failing for that property. Reject evidence that checks only:
-
-   - eventual state or a fixed delay for a timing report
-   - request shape or counts for an ordering report
-   - internal calls for a public-interaction report
-   - element presence for a visibility or layout report
-   - indirect requests or counts for directly reported data behavior
-
-   Prefer direct timing and sequence observations, the public interaction
-   surface, visual evidence or measured geometry, and direct data results as
-   appropriate. A proxy may supplement direct evidence but cannot replace it.
-   Record unavailable reporter-matched evidence for later fixed-build testing.
+   For a reported defect, both reviewers must apply the
+   [reporter-fidelity evidence rules](../ready-pr/references/reporter-fidelity.md#matching-evidence-to-the-report).
+   Record missing reporter-matched evidence for later fixed-build testing.
    Treat it as a `polish` finding only when the implementation, regression seam,
    or supplied requirements require that evidence here.
 6. Confirm that `HEAD` still matches the commit from step 4. Combine the design,
