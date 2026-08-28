@@ -1,43 +1,34 @@
-# Glossary — judging axes and worked model scores
+# Model selection terms
 
-The disclosed reference for [prompting-fable](SKILL.md)'s routing: the
-judging axes and a worked score table. The axes are durable; the scores go
-stale.
+Use these three terms when choosing a model. Update any scores for the models,
+subscriptions, and limits currently available.
 
-## Judging axes
+## Intelligence
 
-### Intelligence
+How difficult a problem the model can solve without supervision.
 
-How hard a problem a model can handle unsupervised.
+## Taste
 
-### Taste
+How consistently the model produces good user-facing UI, APIs, code, and
+writing.
 
-The quality of what ships to humans: UI/UX, code quality, API design, copy.
-Intelligence without taste solves any problem in code you don't want in your
-codebase — "writes TypeScript like a Python dev."
+## Cost
 
-### Cost
+How freely the team can run the model under its actual subscriptions and usage
+limits. This is not the public list price.
 
-How freely you can spend a model, scored against your own subscriptions and
-resets, not list price — a generous sub makes a frontier model effectively
-free.
+## Example scores from mid-2026
 
-## Worked example: Theo's scores, mid-2026
-
-Re-score for your own stack. Rankings 1–10, higher = better on every axis,
-so a high cost score means cheap to run.
+Scores run from 1 to 10. Higher is better, including cost, where a higher score
+means less expensive to run under the example subscriptions.
 
 | Model | Cost | Intelligence | Taste |
 | --- | --- | --- | --- |
-| gpt-5.6 (Codex CLI) | 9 | 8 | 5 |
+| gpt-5.6 with Codex CLI | 9 | 8 | 5 |
 | sonnet-5 | 5 | 5 | 7 |
 | opus-4.8 | 4 | 7 | 8 |
 | fable-5 | 2 | 9 | 9 |
 
-gpt-5.6's cost 9 is a generous Codex sub scored as what he actually pays, not
-list price. sonnet-5's token hunger often makes opus-4.8 cheaper in practice
-than the one-point gap suggests. Haiku is unscored: below the intelligence
-bar for real work — never route to it.
-
-Theo's threshold for "high taste": 7 or above on this scale. The routing and
-escalation rules that consume these scores live in [SKILL.md](SKILL.md).
+These are Theo's example scores, not permanent facts. Re-score before using
+them. In the example, user-facing work needs a taste score of at least 7. The
+selection and retry rules live in [SKILL.md](SKILL.md).

@@ -1,14 +1,24 @@
 ---
 name: polish
-description: "Ready a completed branch with incremental architecture, Standards, and Spec review. Use when finishing issue work before publication, readying a branch on its own, or when a controller needs the local review loop."
+description: Review a completed branch for design, repository standards, and issue requirements, then fix clear findings and repeat until the current commit passes. Use before publishing completed work.
 ---
 
-# Polish Branch
+# Polish a branch
 
-## Quick Start
+Run this skill on a committed branch. An optional issue or written instruction
+can focus the review, but it does not add implementation work.
 
-Invoke on the committed branch you want to review, with an optional scope: an
-issue reference, free-form instructions, or both.
+For each set of commits not yet reviewed, `polish` checks the design, runs the
+repository's verification, and asks fresh reviewers to check repository
+standards and issue requirements. It records the result before fixing clear
+findings. Each fix is committed and reviewed in a new pass.
+
+`polish` stops only when the current commit passes with no findings or the next
+step needs a person. It does not push or open a pull request.
+
+## Input
+
+Examples:
 
 ```text
 /polish
@@ -17,183 +27,97 @@ issue reference, free-form instructions, or both.
 /polish <issue-reference> focus on the parser
 ```
 
-`polish` owns the complete local review loop. For each committed delta it runs:
+Written instructions tell reviewers where to pay extra attention. Findings
+must still come from code changed or affected by the commits under review.
+`working-on-issue` finds the issue and branch when possible. Without an issue,
+skip the issue-requirements review but continue the design and standards
+reviews. Report any meaningful difference between the finished work and the
+issue body. Do not edit the issue.
 
-1. delta-bounded architecture review;
-2. repository verification; and
-3. fresh, report-only Standards and Spec review.
+## Required skills
 
-A completed review advances disposable local coverage even when it requests
-changes. `polish` fixes agent-ready findings, verifies and commits the fixes,
-then reviews only that new committed delta. It returns successfully only when
-the current head passes with no findings.
+Confirm these skills are installed:
 
-This skill does not push or open a pull request. `develop` sequences successful
-`polish` before `ready-pr`; directly invoking `ready-pr` remains independent of
-this review state.
+- `working-on-issue`
+- `new-branch`
+- `code-review`
+- `implement`
+- `tdd`
+- `diagnosing-bugs`
+- `codebase-design`
 
-## Scope Contract
+If one is missing, stop, name it, and provide a project-local install command
+for its current source.
 
-The optional scope selects the issue and weights review attention. It never adds
-build work.
+## Steps
 
-- Free-form instructions weight each stage toward the named modules while
-  findings stay limited to code caused or exposed by the selected delta.
-- `working-on-issue` resolves the issue from the scope or current branch and
-  aligns the branch best-effort. A missing issue skips the Spec axis while
-  architecture and Standards review continue.
-- Material divergence from the issue body belongs in the final report. This
-  skill leaves issue editing to its caller.
+1. Run `working-on-issue` with the full input. Keep the issue for the later
+   requirements review.
+2. Read [`review-record.md`](review-record.md) in full. Resolve the target branch
+   from `origin/HEAD`, then run its `scope` command from a clean committed
+   worktree. Keep the returned base and current commit unchanged for this pass.
 
-## Required Child Skills
+   | Mode | Work to review |
+   | --- | --- |
+   | `full` | Merge base through the current commit |
+   | `incremental` | Commits after `reviewedHead` through the current commit |
+   | `recheck` | Previously reported findings at the same commit |
+   | `skip` | The current commit already passed with no findings |
 
-- `working-on-issue`: resolve the issue and align its branch, best-effort.
-- `code-review`: supply the separate Standards and Spec rubrics through fresh
-  report-only subagents.
-- `implement`: apply accepted deepenings and clear findings through its
-  build/TDD portion.
-- `diagnosing-bugs`: investigate unclear causes, missing reproductions, flaky
-  behavior, or performance regressions.
-- `codebase-design`: supply the architecture vocabulary and principles.
+   Missing, corrupt, unreadable, unrelated, or outdated review data produces
+   `full`. A passing record that no longer includes the commit that earned it
+   produces `recheck`. In `skip`, report that the current commit already passed
+   and stop without changing the record.
+3. Review the design for every changed module and interface in a non-empty
+   `full` or `incremental` range. Read unchanged callers and neighboring code
+   when needed. Recheck any earlier design findings.
 
-`working-on-issue` reaches `new-branch`; `implement` reaches `tdd`. Confirm all
-seven skills are installed before the run. If one is missing, stop and report
-the missing name with the install guidance:
+   Follow the complete review rules in `codebase-design`. Read relevant
+   `CONTEXT.md` and ADR files first. Report only design improvements that belong
+   with the reviewed change and satisfy those rules. Do not edit code during
+   this review. In `recheck`, review only the named findings.
+4. Require a clean committed worktree and record `HEAD`. Run the repository's
+   documented verification against that exact commit. If verification fails or
+   stops early, keep the last completed review result unchanged. Save useful
+   findings from the unfinished review, then fix the problem or report what
+   prevents progress.
+5. Run the Standards and Spec reviews from `code-review` as fresh parallel
+   subagents. Give both reviewers the fixed base and commit, the exact diff for
+   `full` or `incremental`, any needed unchanged context, the issue or a clear
+   no-issue instruction, earlier findings to recheck, and the matching
+   `code-review` rules.
 
-```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill working-on-issue new-branch -y
-npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --skill implement tdd code-review diagnosing-bugs codebase-design -y
-```
+   Reviewers only report findings. They do not edit, stage, commit, or fix code.
+   A documented standards violation or a missing, partial, or incorrect issue
+   requirement blocks the pass. Code smells require judgment. If a reviewer
+   fails, times out, or stops early, keep the last completed result and save any
+   useful finding from the unfinished review.
+6. Confirm that `HEAD` still matches the commit from step 4. Combine the design,
+   Standards, and Spec results. Store only one stable ID, review type, current
+   location, and short summary for each blocking finding.
 
-## Step 0 — Align
+   - With no blocking findings, record `passed` for the current commit.
+   - With blocking findings, record `changes_requested` before fixing them.
+   - If a review did not finish or `HEAD` changed, preserve the last completed
+     result and save only useful findings from that unfinished review.
+7. Decide what to do with every completed finding:
 
-Run `working-on-issue` with the supplied scope. Carry its resolved issue into
-the Spec stage. Re-confirming an already aligned issue branch is an idempotent
-success.
+   - Fix clear local problems with `implement`. Use `diagnosing-bugs` when local
+     investigation can answer the question.
+   - Ask the user when the finding needs judgment, access, manual testing,
+     design input, permission, changed requirements, or conflicting
+     instructions.
+   - Dismiss a finding when it is outdated, incorrect, non-blocking, or
+     conflicts with repository rules. Explain why and remove it from the
+     blocking list.
 
-## Step 1 — Select the Review Scope
+   Verify and commit every agent fix, then restart at step 2. Review even small
+   fix commits. Finish only when the current commit itself has a passing record
+   with no findings.
 
-Read [`review-record.md`](review-record.md) in full before using the bundled
-state command. Resolve the target branch from `origin/HEAD`, then run `scope`
-from a clean committed worktree, passing the resolved bare branch name rather
-than the full ref. Keep the returned base and head fixed for this iteration.
+## Final report
 
-| Mode | Review subject |
-| --- | --- |
-| `full` | Branch merge-base through committed `HEAD` |
-| `incremental` | Exact `reviewedHead..HEAD` delta |
-| `recheck` | Outstanding authoritative and provisional findings at the same head |
-| `skip` | Current head already passed with no findings |
-
-Missing, corrupt, unavailable, foreign, or non-ancestral state produces `full`.
-A passing record that no longer carries the endpoint which earned it produces
-`recheck` rather than `skip`.
-Provisional findings never narrow the selected delta. Both authoritative and
-provisional findings are advisory inputs to revalidate at their current
-locations.
-
-In `skip` mode, report the visible no-op and stop without rewriting the passing
-record.
-
-## Step 2 — Architecture Review
-
-Every non-empty `full` or `incremental` delta receives architecture review.
-Review the exact returned range and read unchanged neighboring modules,
-interfaces, contracts, and callers when context requires it. Findings remain
-attributable to architecture caused or exposed by the selected delta. Revalidate
-outstanding architecture findings in the same pass.
-
-Use the **deep-module vocabulary** from `codebase-design`: **module**,
-**interface**, **depth** (**deep**/**shallow**), **seam**, **adapter**,
-**leverage**, **locality**, and the **deletion test**. Read `CONTEXT.md` and the
-relevant ADRs before proposing a deepening.
-
-Report an architecture finding only when the proposed deepening passes the
-deletion test, increases depth, improves locality or the test surface, and fits
-the selected change. Keep this pass report-only. Carry every accepted finding
-into Step 5 so architecture, Standards, and Spec findings share one completed
-outcome and one fix loop.
-
-The pass is complete when every changed module and interface in the selected
-delta has been assessed against those criteria, every outstanding architecture
-finding has been revalidated, and the report names every accepted finding or
-explicitly reports none.
-
-In `recheck` mode, revalidate named architecture findings without inventing an
-empty-delta architecture audit.
-
-## Step 3 — Pin and Verify the Candidate
-
-After architecture review, require a clean committed worktree and capture
-`HEAD` as the candidate endpoint. Run repository-documented verification
-against that candidate. Keep the Step 1 base and this endpoint fixed through
-the remaining review stages.
-
-A failed or interrupted verification leaves authoritative state unchanged.
-Save useful located findings as provisional state, then fix locally or report
-the blocker.
-
-## Step 4 — Standards and Spec Review
-
-Run the two `code-review` axes as fresh parallel subagents. Their prompts carry:
-
-- the exact Step 1 base and Step 3 candidate endpoint;
-- `git diff <base>..<candidate>` for `full` and `incremental` modes;
-- unchanged neighbors as read-only context;
-- the resolved issue or an explicit no-spec instruction;
-- every authoritative and provisional finding to revalidate; and
-- the `code-review` Standards rubric, smell baseline, and Spec rubric.
-
-The reviewers report only: they do not edit, stage, commit, or fix their own
-findings. In `recheck` mode, revalidate the named finding set despite the empty
-diff. Keep the two axis reports separate.
-
-Documented Standards violations and missing, partial, or incorrect Spec
-requirements are blocking. Fowler smells remain judgment calls. Benign scope
-notes are non-blocking unless they require a product or scope decision.
-
-If either reviewer fails, times out, or stops early, the iteration is incomplete.
-Save useful located findings as provisional data and retain the prior
-authoritative record.
-
-## Step 5 — Record, Route, and Repeat
-
-Confirm `HEAD` still equals the Step 3 candidate after both reviewers finish.
-Combine the architecture, Standards, and Spec reports. Build the minimal
-finding array defined by the review-record reference: one stable ID, axis,
-current location, and concise summary per outstanding blocking finding. Store
-no source excerpts or reviewer transcript.
-
-- No blocking findings: record `passed` at the candidate.
-- Blocking findings: record `changes_requested` at the candidate before routing
-  them.
-- Any incomplete stage or moving head: preserve authoritative state and save
-  only useful provisional findings.
-
-Route completed findings through the Finding Router. Fix architecture,
-Standards, and Spec findings only after the completed outcome is recorded. Use
-`implement` or `diagnosing-bugs`, verify and commit the fixes, then restart at
-Step 1. Restarting is not discretionary and no fix is too small to re-review:
-`complete` accepts only an endpoint `scope` handed out, so recording an outcome
-at a head reached by a later commit fails rather than silently skipping the
-iteration that would have reviewed it. The next iteration reviews only that fix delta while rechecking the
-outstanding concerns. A human-owned finding records `changes_requested` and
-stops with a concrete blocker.
-
-## Finding Router
-
-Classify every architecture, Standards, and Spec finding into one outcome:
-
-| Outcome | Use when | Next action |
-| --- | --- | --- |
-| `ready-for-agent` | The change is clear or evidence can be gathered locally | Route implementation to `implement`; route investigation to `diagnosing-bugs` |
-| `ready-for-human` | It needs judgment, external access, manual testing, design input, changed scope, permissions, or conflicting direction | Stop with the evidence and needed decision |
-| `wontfix` | It is stale, incorrect, non-blocking, or conflicts with repository rules | Explain the disposition; retain no outstanding blocking finding |
-
-## Final Report
-
-Lead with the final review outcome. Include the resolved issue, reviewed base
-and endpoint, stages completed, outstanding and provisional findings, whether
-`reviewedHead` advanced, architecture passes and deepenings, verification
-failures or blockers, and any scope divergence. Keep successful verification
-to one line.
+Lead with `Passed` or `Blocked`. Include the issue, reviewed commit range,
+completed reviews, remaining findings, whether the review record advanced,
+design changes made, failed or skipped verification, and any difference from
+the issue body. Summarize successful verification in one sentence.

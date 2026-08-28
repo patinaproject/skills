@@ -1,6 +1,6 @@
 # using-github
 
-Forge-only GitHub guidance for patinaproject agents: pull requests, review
-threads, checks, repository metadata, and releases. Issue workflows live
-elsewhere: the tracker adapter defines the mechanics, `/to-spec` files a spec,
-and `working-on-issue`, `new-branch`, and `write-changelog` cover the rest.
+This skill handles GitHub pull requests, review threads, checks, repository
+settings, and releases. Read `docs/issue-tracker.md` for issue work. Use
+`/to-spec` to publish a specification, `working-on-issue` and `new-branch` to
+start issue work, and `write-changelog` for milestone or release notes.
