@@ -61,7 +61,7 @@ assert.deepEqual(
   }),
   {
     action: 'leave-unchanged',
-    reason: 'no-unblocked-next-action',
+    reason: 'parent-not-idle',
   }
 );
 

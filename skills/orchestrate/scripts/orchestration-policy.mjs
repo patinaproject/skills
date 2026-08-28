@@ -34,12 +34,23 @@ export function decideOrchestrationAction({
     };
   }
 
+  if (parentState === 'active') {
+    return {
+      action: 'leave-unchanged',
+      reason: 'parent-active',
+    };
+  }
+
+  if (parentState !== 'idle') {
+    return {
+      action: 'leave-unchanged',
+      reason: 'parent-not-idle',
+    };
+  }
+
   return {
     action: 'leave-unchanged',
-    reason:
-      parentState === 'active'
-        ? 'parent-active'
-        : 'no-unblocked-next-action',
+    reason: 'no-unblocked-next-action',
   };
 }
 
