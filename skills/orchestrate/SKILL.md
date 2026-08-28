@@ -16,19 +16,47 @@ Background implementation is outside this skill's inventory. This includes subag
 ## Sweep
 
 1. List every incomplete user-visible Codex chat.
-2. Read each chat's recent status and current run state.
+2. Read each chat's recent status and current run state. Separately inspect its
+   attached delegated work with the available session-state tools.
 3. Inspect the current mergeability of each open pull request owned by a chat.
-4. Classify each chat:
-   - **Active:** A command, check, or agent turn is running.
-   - **Idle and actionable:** No work is running, and the next action is clear, safe, and within the task's existing scope and authority. A current failing check or pull request with merge conflicts is actionable.
-   - **Operator required:** No safe work remains without an operator decision, approval, credential, clarification, or external action.
+4. Record the policy inputs for each chat:
+   - `parentState`: `active`, `idle`, `interrupted`, or the observed state.
+   - `delegatedWorkState`: `active`, `inactive`, or `unknown`. Use `inactive`
+     only when the session-state tools explicitly verify that no attached
+     delegated work is running. Missing delegated sessions from the
+     user-visible chat inventory is not verification.
+   - `nextActionState`: `unblocked`, `operator-required`, or `none`. A current
+     failing check or pull request with merge conflicts is `unblocked` when its
+     repair remains within the chat's authority.
 5. Account for every incomplete user-visible chat before proceeding.
 
-Elapsed time alone does not prove that a chat is idle. Inspect its current state.
+Elapsed time and a top-level `idle` or `interrupted` state do not prove that a
+chat is safe to resume.
+
+## Decision policy
+
+Keep discovery separate from the decision. Change to this skill's directory,
+then pass each chat's three recorded inputs as JSON to the bundled policy:
+
+```sh
+node scripts/orchestration-policy.mjs '{"parentState":"idle","delegatedWorkState":"inactive","nextActionState":"unblocked"}'
+```
+
+Use the returned action exactly:
+
+- `send-instruction` permits one message through **Advance actionable chats**.
+- `report-operator` adds the chat to the operator report without messaging it.
+- `leave-unchanged` sends no message. Include an `unknown` delegated-work state
+  in the report as an unverifiable chat; active work needs no report unless it
+  also creates an operator dependency.
+
+If the policy helper cannot run, leave the chat unchanged and report the
+failure. No other observation authorizes a message.
 
 ## Advance actionable chats
 
-Send one instruction to each idle and actionable chat. The instruction must:
+Send one instruction only to a chat whose policy action is `send-instruction`.
+The instruction must:
 
 - State the next concrete action.
 - Preserve the chat's existing scope and authority.
