@@ -31,7 +31,7 @@ SKILLS=(
   design-by-contract
   grill-system-design
   review-system-design
-  resolve-qa-feedback
+  fix
   orchestrate
   write-changelog
   prompting-fable
@@ -42,6 +42,15 @@ fail() {
   echo "FAIL: $1" >&2
   FAIL_COUNT=$((FAIL_COUNT + 1))
 }
+
+for retired_path in \
+  skills/resolve-qa-feedback \
+  .claude/skills/resolve-qa-feedback \
+  .agents/skills/resolve-qa-feedback; do
+  if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
+    fail "$retired_path still exposes the retired resolve-qa-feedback skill"
+  fi
+done
 
 # Portable realpath: try realpath (GNU coreutils / macOS coreutils via Homebrew),
 # then readlink -f (GNU), then python3 as a final fallback.

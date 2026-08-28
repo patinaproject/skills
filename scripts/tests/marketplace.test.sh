@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-issue","./skills/develop","./skills/develop-with-workflow","./skills/ready-pr","./skills/merge-pr","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/polish","./skills/update-branch","./skills/move-branch-here","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/resolve-qa-feedback","./skills/orchestrate","./skills/write-changelog","./skills/prompting-fable"]'
-retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog'
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-issue","./skills/develop","./skills/develop-with-workflow","./skills/ready-pr","./skills/merge-pr","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/polish","./skills/update-branch","./skills/move-branch-here","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/fix","./skills/orchestrate","./skills/write-changelog","./skills/prompting-fable"]'
+retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback'
+
+read_frontmatter_field() {
+  local file="$1"
+  local field="$2"
+
+  awk -F ': *' -v field="$field" '
+    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
+    in_frontmatter && $0 == "---" { exit }
+    in_frontmatter && $1 == field {
+      sub(/^[^:]+: */, "")
+      print
+      exit
+    }
+  ' "$file"
+}
 
 # Validate the Claude Code marketplace catalog.
 test -f .claude-plugin/marketplace.json
@@ -73,6 +88,9 @@ if [ "$claude_skills" != "$expected_marketplace_skills" ]; then
   echo "  Actual:   $claude_skills" >&2
   exit 1
 fi
+
+test "$(read_frontmatter_field skills/develop/SKILL.md disable-model-invocation)" = 'true'
+test "$(read_frontmatter_field skills/fix/SKILL.md disable-model-invocation)" = 'true'
 
 unexpected_lock_entries="$(
   jq -r '

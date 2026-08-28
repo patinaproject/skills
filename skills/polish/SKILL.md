@@ -34,6 +34,10 @@ skip the issue-requirements review but continue the design and standards
 reviews. Report any meaningful difference between the finished work and the
 issue body. Do not edit the issue.
 
+Pass any behavioral observation context from the caller unchanged to both
+reviewers. Continue normally when it is missing. This local review never
+requires a simulator, device, or deployed build.
+
 ## Required skills
 
 Confirm these skills are installed:
@@ -92,6 +96,12 @@ for its current source.
    requirement blocks the pass. Code smells require judgment. If a reviewer
    fails, times out, or stops early, keep the last completed result and save any
    useful finding from the unfinished review.
+
+   For a reported defect, both reviewers must apply the
+   [reporter-fidelity evidence rules](../ready-pr/references/reporter-fidelity.md#matching-evidence-to-the-report).
+   Record missing reporter-matched evidence for later fixed-build testing.
+   Treat it as a `polish` finding only when the implementation, regression seam,
+   or supplied requirements require that evidence here.
 6. Confirm that `HEAD` still matches the commit from step 4. Combine the design,
    Standards, and Spec results. Store only one stable ID, review type, current
    location, and short summary for each blocking finding.

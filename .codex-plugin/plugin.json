@@ -20,7 +20,7 @@
     "./skills/design-by-contract",
     "./skills/grill-system-design",
     "./skills/review-system-design",
-    "./skills/resolve-qa-feedback",
+    "./skills/fix",
     "./skills/orchestrate",
     "./skills/write-changelog",
     "./skills/prompting-fable"

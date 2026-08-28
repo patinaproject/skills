@@ -15,6 +15,11 @@ updates a draft pull request, handles available feedback, watches required
 checks, and repeats after each fix. It never merges the pull request or enables
 auto-merge.
 
+Carry every supplied field from the
+[reporter-fidelity reference](references/reporter-fidelity.md#observation-context)
+unchanged through the run. Missing context does not change pull request
+readiness or draft state.
+
 A failed check does not stop the run by itself. Investigate it, fix any cause
 introduced by the branch, and report causes that require a person. Open work
 created by the agent as a draft while this process runs. Use the
@@ -47,6 +52,8 @@ to ready for human review.
    issue status unchanged.
 9. Immediately before reporting, fetch fresh local status, pull request state,
    required checks, and all paginated GraphQL review threads.
+10. Apply the reporter-fidelity reference and report its evidence verdict
+    separately from pull request readiness.
 
 ## Branch updates
 
@@ -101,5 +108,6 @@ When a condition fails, report `not ready to merge` and explain what remains.
 When all conditions pass, summarize the evidence in one sentence instead of
 listing every condition.
 
-Do not create follow-up issues from review feedback, wait indefinitely for new
-comments, or add agent attribution unless the repository requires it.
+After reporting the reporter-fidelity handoff, return control instead of waiting
+indefinitely for new comments. Add agent attribution only when the repository
+requires it.

@@ -1,6 +1,7 @@
 ---
 name: develop
-description: Build one issue or instruction set through implementation, local review, and a ready-to-merge pull request. Use when the user runs `/develop` or asks to develop one change from start to finish.
+description: Build one issue or instruction set through implementation, local review, and a ready-to-merge pull request.
+disable-model-invocation: true
 ---
 
 # Develop
@@ -22,6 +23,10 @@ It runs four skills in order:
 `develop` never merges the pull request. It also uses the regular
 `implement` flow. Use `develop-with-workflow` when the user asks for parallel
 implementation.
+
+Run `develop` only when the operator invokes it. It must work without a
+simulator, device, or deployed build. Use diagnosis and supplied behavioral
+observations when they help.
 
 ## Input
 
@@ -77,6 +82,14 @@ into the real implementation before `polish`, unless the user asked to keep it.
 Before using either skill, confirm that it is installed. If it is missing, stop,
 name it, and give a project-local install command for its current source.
 
+## Behavioral observations
+
+Use the context fields in the
+[reporter-fidelity observation fields](../ready-pr/references/reporter-fidelity.md#observation-context).
+Pass every available field unchanged to `polish` and `ready-pr`. Diagnose when
+it helps implementation. Continue without adding work when the caller supplies
+no observation context.
+
 ## Workflow
 
 1. Read `AGENTS.md`, `CLAUDE.md`, and any files they require.
@@ -96,16 +109,16 @@ name it, and give a project-local install command for its current source.
    [verification rules](../update-branch/SKILL.md#workflow). A proven problem
    that already exists on the target branch does not stop `develop`. Keep the
    target commit, command, failure, and proof for the final report.
-8. Run `polish` against the current commit. Pass it the issue and the
-   written instructions. Fix accepted findings, commit the fixes, and run
-   `polish` again. Continue until it passes with no findings or asks for a
-   human decision.
+8. Run `polish` against the current commit. Pass it the issue, written
+   instructions, and available behavioral observations. Fix accepted findings,
+   commit the fixes, and run `polish` again. Continue until it passes with no
+   findings or asks for a human decision.
 9. If the repository requires an issue reference and step 3 found no issue,
    stop before `ready-pr`. Report the completed local work and ask the user for
    an issue.
-10. Run `ready-pr`. Let it commit and push the branch, create or update the
-    pull request, handle available feedback, and check the current pull request
-    state.
+10. Run `ready-pr` with the same behavioral observations. Let it commit and
+    push the branch, create or update the pull request, handle available
+    feedback, and check the current pull request state.
 11. When local checks or pull request checks fail, fix problems caused by this
     branch. Do the same when review feedback identifies one. Verify and review
     each new commit, push it, and repeat until the pull request is ready to

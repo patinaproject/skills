@@ -208,6 +208,12 @@ verification, handled feedback, open human-started threads, and the one next
 action when needed. Include another branch's local files only when they remain
 in the worktree, with the issue or branch they belong to.
 
+Apply the
+[reporter-fidelity handoff](../references/reporter-fidelity.md). Report its
+`verified` or `pending` verdict and most direct requested-change link in a
+separate sentence from pull request readiness. Passing checks do not change
+that verdict.
+
 When all conditions pass, do not list them one by one. One sentence stating
 that routine checks, review threads, and merge state are clear is enough.
 
