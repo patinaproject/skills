@@ -19,8 +19,13 @@ node <polish-skill-directory>/scripts/review-state.mjs scope \
 ```
 
 Create both captured files outside the repository at the start of the top-level
-invocation. Use stable source labels and exact source content. Reuse those files
-for every later `scope` in the invocation.
+invocation. The Standards file contains every documented coding standard that
+applies to the full branch diff and every active Standards review rule,
+including the rules and baseline named by `code-review`. The Spec file contains
+the complete originating issue or specification. Use stable source labels and
+the exact content each reviewer will apply. Reuse those files for every later
+`scope` and reviewer prompt in the invocation. Source changes after capture
+apply to the next top-level invocation.
 
 The JSON result contains `mode`, `reason`, `reviewInputDecision`, `base`, `head`,
 `range`, record state, completed findings under `authoritativeFindings`, and

@@ -89,9 +89,11 @@ for its current source.
    prevents progress.
 5. Run the Standards and Spec reviews from `code-review` as fresh parallel
    subagents. Give both reviewers the fixed base and commit, the exact diff for
-   `full` or `incremental`, any needed unchanged context, the issue or a clear
-   no-issue instruction, earlier findings to recheck, and the matching
-   `code-review` rules.
+   `full` or `incremental`, any needed unchanged context, earlier findings to
+   recheck, and the captured input for that axis. The Standards reviewer applies
+   only the captured Standards content. The Spec reviewer applies only the
+   captured Spec content, or receives a clear no-Spec instruction. Do not
+   refetch either source during this invocation.
 
    Reviewers only report findings. They do not edit, stage, commit, or fix code.
    A documented standards violation or a missing, partial, or incorrect issue
