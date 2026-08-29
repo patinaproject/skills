@@ -23,9 +23,10 @@ import {
 import { tmpdir, userInfo } from 'node:os';
 import { basename, isAbsolute, join, resolve } from 'node:path';
 
-const schemaVersion = 2;
+const schemaVersion = 3;
 const axes = new Set(['architecture', 'spec', 'standards']);
 const outcomes = new Set(['changes_requested', 'passed']);
+const reviewInputDecisions = new Set(['changed', 'uncertain', 'unchanged']);
 // `skip` hands out no reviewable delta, so it mints no scope to complete.
 const reviewableModes = new Set(['full', 'incremental', 'recheck']);
 
@@ -223,6 +224,39 @@ function isFindingArray(value) {
   return Array.isArray(value) && value.every(isFinding);
 }
 
+function reviewInputEvidence(content) {
+  return {
+    content,
+    digest: createHash('sha256').update(content).digest('hex'),
+  };
+}
+
+function isReviewInputEvidence(value) {
+  return (
+    isExactObject(value, ['content', 'digest']) &&
+    typeof value.content === 'string' &&
+    typeof value.digest === 'string' &&
+    value.digest === reviewInputEvidence(value.content).digest
+  );
+}
+
+function isReviewInputs(value) {
+  return (
+    isExactObject(value, ['spec', 'standards']) &&
+    isReviewInputEvidence(value.spec) &&
+    isReviewInputEvidence(value.standards)
+  );
+}
+
+function sameReviewInputs(left, right) {
+  return (
+    left.spec.digest === right.spec.digest &&
+    left.spec.content === right.spec.content &&
+    left.standards.digest === right.standards.digest &&
+    left.standards.content === right.standards.content
+  );
+}
+
 function isAuthoritativeReview(value) {
   if (value === null) {
     return true;
@@ -231,6 +265,7 @@ function isAuthoritativeReview(value) {
     !isExactObject(value, [
       'findings',
       'outcome',
+      'reviewInputs',
       'reviewedHead',
       'scopedHead',
     ])
@@ -243,6 +278,7 @@ function isAuthoritativeReview(value) {
     // that `complete` produced from one a hand-edited or carried record simply
     // states. The `earned` gate reads it as self-consistency, not proof.
     typeof value.scopedHead === 'string' &&
+    isReviewInputs(value.reviewInputs) &&
     outcomes.has(value.outcome) &&
     isFindingArray(value.findings) &&
     ((value.outcome === 'passed' && value.findings.length === 0) ||
@@ -283,6 +319,7 @@ function isReviewRecord(value, identity) {
       'repository',
       'schemaVersion',
       'openScopedHead',
+      'openReviewInputs',
       'sourceBranch',
       'targetBranch',
     ]) &&
@@ -292,7 +329,10 @@ function isReviewRecord(value, identity) {
     value.targetBranch === identity.targetBranch &&
     isAuthoritativeReview(value.authoritative) &&
     isProvisionalReview(value.provisional) &&
-    isOpenScopedHead(value.openScopedHead)
+    isOpenScopedHead(value.openScopedHead) &&
+    (value.openReviewInputs === null || isReviewInputs(value.openReviewInputs)) &&
+    ((value.openScopedHead === null && value.openReviewInputs === null) ||
+      (value.openScopedHead !== null && value.openReviewInputs !== null))
   );
 }
 
@@ -517,6 +557,29 @@ function readFindings(path) {
   return value;
 }
 
+function readReviewInput(path, name) {
+  const absolutePath = resolve(path);
+  try {
+    return reviewInputEvidence(readFileSync(absolutePath, 'utf8'));
+  } catch (error) {
+    throw new Error(
+      `${name} review input is unreadable: ${absolutePath}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+function readReviewInputs(options) {
+  return {
+    spec: readReviewInput(requiredOption(options, 'spec'), 'Spec'),
+    standards: readReviewInput(
+      requiredOption(options, 'standards'),
+      'Standards'
+    ),
+  };
+}
+
 function headIsReviewedAncestor(reviewedHead, head) {
   const resolves = tryGit(['rev-parse', '--verify', `${reviewedHead}^{commit}`]);
   if (resolves.status !== 0) {
@@ -531,7 +594,7 @@ function assertCommittedWorktree() {
   }
 }
 
-function selectScope(targetBranch) {
+function selectScope(targetBranch, reviewInputs, decision) {
   assertCommittedWorktree();
   const identity = currentIdentity(targetBranch);
   const target = resolveTarget(targetBranch);
@@ -540,7 +603,93 @@ function selectScope(targetBranch) {
 
   return withRecordLock(identity, () => {
     const loaded = loadRecord(identity);
-    const selection = computeScope(loaded, head, mergeBase);
+    const authoritative =
+      loaded.status === 'valid' ? loaded.record.authoritative : null;
+    const reusable =
+      authoritative !== null &&
+      headIsReviewedAncestor(authoritative.reviewedHead, head);
+
+    if (
+      reusable &&
+      !sameReviewInputs(authoritative.reviewInputs, reviewInputs) &&
+      decision === undefined
+    ) {
+      writeRecord(
+        identity,
+        buildRecord(identity, loaded, {
+          openReviewInputs: null,
+          openScopedHead: null,
+        })
+      );
+      return {
+        base: mergeBase,
+        currentInputs: reviewInputs,
+        head,
+        mode: null,
+        range: null,
+        reason: 'review_input_decision_required',
+        reviewInputDecision: 'required',
+        savedInputs: authoritative.reviewInputs,
+        state: 'valid',
+      };
+    }
+
+    const invalidates =
+      reusable &&
+      !sameReviewInputs(authoritative.reviewInputs, reviewInputs) &&
+      (decision === 'changed' || decision === 'uncertain');
+    let scopeLoaded = loaded;
+
+    if (invalidates) {
+      scopeLoaded = {
+        record: buildRecord(identity, loaded, {
+          authoritative: null,
+          openReviewInputs: null,
+          openScopedHead: null,
+          provisional: null,
+        }),
+        status: 'valid',
+      };
+    } else if (
+      reusable &&
+      !sameReviewInputs(authoritative.reviewInputs, reviewInputs) &&
+      decision === 'unchanged'
+    ) {
+      scopeLoaded = {
+        record: buildRecord(identity, loaded, {
+          authoritative: { ...authoritative, reviewInputs },
+        }),
+        status: 'valid',
+      };
+    }
+
+    const selection = computeScope(scopeLoaded, head, mergeBase);
+    const selected = {
+      ...selection,
+      reason:
+        decision === 'changed'
+          ? 'review_inputs_changed'
+          : decision === 'uncertain'
+            ? 'review_inputs_uncertain'
+            : selection.reason,
+      reviewInputDecision:
+        reusable &&
+        !sameReviewInputs(authoritative.reviewInputs, reviewInputs)
+          ? decision
+          : 'not_required',
+    };
+    const writeLoaded =
+      selection.mode === 'full'
+        ? {
+            record: buildRecord(identity, scopeLoaded, {
+              authoritative: null,
+              openReviewInputs: null,
+              openScopedHead: null,
+              provisional: null,
+            }),
+            status: 'valid',
+          }
+        : scopeLoaded;
 
     // Recording the endpoint is what makes a later outcome earnable: `complete`
     // accepts only a candidate this call handed out.
@@ -553,11 +702,16 @@ function selectScope(targetBranch) {
     if (reviewableModes.has(selection.mode)) {
       writeRecord(
         identity,
-        buildRecord(identity, loaded, { openScopedHead: head })
+        buildRecord(identity, writeLoaded, {
+          openReviewInputs: reviewInputs,
+          openScopedHead: head,
+        })
       );
+    } else if (writeLoaded !== loaded) {
+      writeRecord(identity, writeLoaded.record);
     }
 
-    return selection;
+    return selected;
   });
 }
 
@@ -571,6 +725,7 @@ function buildRecord(identity, loaded, overrides) {
     authoritative: previous?.authoritative ?? null,
     provisional: previous?.provisional ?? null,
     schemaVersion,
+    openReviewInputs: previous?.openReviewInputs ?? null,
     openScopedHead: previous?.openScopedHead ?? null,
     ...overrides,
   };
@@ -584,6 +739,7 @@ function computeScope(loaded, head, mergeBase) {
     mode: 'full',
     provisionalFindings: [],
     range: `${mergeBase}..${head}`,
+    reason: `review_state_${loaded.status}`,
     state: loaded.status,
   };
 
@@ -606,11 +762,16 @@ function computeScope(loaded, head, mergeBase) {
     base = mergeBase;
     mode = 'full';
     range = `${mergeBase}..${head}`;
+    fallback.reason =
+      authoritative === null
+        ? 'no_completed_review'
+        : 'reviewed_head_unrelated';
   } else if (authoritative.reviewedHead !== head) {
     authoritativeFindings = authoritative.findings;
     base = authoritative.reviewedHead;
     mode = 'incremental';
     range = `${authoritative.reviewedHead}..${head}`;
+    fallback.reason = 'later_commits';
   } else {
     const hasFindings =
       authoritative.findings.length > 0 || provisionalFindings.length > 0;
@@ -632,6 +793,7 @@ function computeScope(loaded, head, mergeBase) {
         ? 'skip'
         : 'recheck';
     range = null;
+    fallback.reason = mode === 'skip' ? 'earned_pass' : 'findings_at_head';
   }
 
   return {
@@ -641,6 +803,7 @@ function computeScope(loaded, head, mergeBase) {
     mode,
     provisionalFindings: mode === 'skip' ? [] : provisionalFindings,
     range,
+    reason: fallback.reason,
     state: 'valid',
   };
 }
@@ -672,10 +835,17 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
     const loaded = loadRecord(identity);
     const openScopedHead =
       loaded.status === 'valid' ? loaded.record.openScopedHead : null;
+    const openReviewInputs =
+      loaded.status === 'valid' ? loaded.record.openReviewInputs : null;
 
     if (openScopedHead === null) {
       throw new Error(
         `No review scope is open for ${head}. Run \`scope\` and review the delta it returns before recording an outcome.`
+      );
+    }
+    if (openReviewInputs === null) {
+      throw new Error(
+        `No review inputs are open for ${head}. Run \`scope\` with the captured Standards and Spec before recording an outcome.`
       );
     }
     if (openScopedHead !== head) {
@@ -688,11 +858,18 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
       // `scopedHead` records which open endpoint this outcome consumed. It is
       // the durable evidence the outcome was earned, written here and nowhere
       // else.
-      authoritative: { findings, outcome, reviewedHead: head, scopedHead: openScopedHead },
+      authoritative: {
+        findings,
+        outcome,
+        reviewInputs: openReviewInputs,
+        reviewedHead: head,
+        scopedHead: openScopedHead,
+      },
       // One `complete` consumes one `scope`. Carrying the endpoint forward
       // would leave it open at this head, so a second `complete` could rewrite
       // the outcome — a pass into `changes_requested`, say — with no review
       // between. Nothing legitimate needs it: the next iteration re-scopes.
+      openReviewInputs: null,
       openScopedHead: null,
       provisional: null,
     });
@@ -865,7 +1042,11 @@ function main() {
   const target = requiredOption(options, 'target');
 
   if (command === 'scope') {
-    result = selectScope(target);
+    const decision = options.get('decision');
+    if (decision !== undefined && !reviewInputDecisions.has(decision)) {
+      throw new Error(`Invalid review input decision: ${decision}`);
+    }
+    result = selectScope(target, readReviewInputs(options), decision);
   } else if (command === 'complete') {
     const candidate = requiredOption(options, 'candidate');
     const outcome = requiredOption(options, 'outcome');
