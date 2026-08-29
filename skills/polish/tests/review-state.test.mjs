@@ -48,12 +48,21 @@ function basisManifest({
   standardsSources,
 } = {}) {
   return {
-    designSources,
+    designSources: [...designSources].sort((left, right) =>
+      left.source < right.source ? -1 : left.source > right.source ? 1 : 0
+    ),
     manifestVersion: 1,
-    reviewRules,
+    reviewRules: [...reviewRules].sort((left, right) => {
+      const leftKey = `${left.axis}\u0000${left.source}`;
+      const rightKey = `${right.axis}\u0000${right.source}`;
+      return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+    }),
     spec: spec === null ? null : { content: spec, source: specSource },
-    standards:
-      standardsSources ?? [{ content: standards, source: 'AGENTS.md' }],
+    standards: [
+      ...(standardsSources ?? [{ content: standards, source: 'AGENTS.md' }]),
+    ].sort((left, right) =>
+      left.source < right.source ? -1 : left.source > right.source ? 1 : 0
+    ),
   };
 }
 
@@ -602,6 +611,32 @@ try {
     );
     assert.equal(scope.status, 1);
     assert.match(scope.stderr, /Basis manifest on standard input is unreadable/);
+
+    const manifest = basisManifest();
+    const outOfOrder = reviewCommandResultWithManifest(
+      missingManifest.root,
+      missingManifest.temporaryRoot,
+      { ...manifest, reviewRules: [...manifest.reviewRules].reverse() },
+      'scope',
+      '--target',
+      'main'
+    );
+    assert.equal(outOfOrder.status, 1);
+    assert.match(outOfOrder.stderr, /invalid shape/);
+
+    const duplicate = reviewCommandResultWithManifest(
+      missingManifest.root,
+      missingManifest.temporaryRoot,
+      {
+        ...manifest,
+        standards: [manifest.standards[0], manifest.standards[0]],
+      },
+      'scope',
+      '--target',
+      'main'
+    );
+    assert.equal(duplicate.status, 1);
+    assert.match(duplicate.stderr, /invalid shape/);
   }
 
   {

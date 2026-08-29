@@ -44,8 +44,10 @@ skill-relative identities for skill rules, and the canonical tracker or
 document identifier for the Spec. A different identity is a different basis
 even when its text is equal.
 
-Build the four groups from these deterministic source sets, sorting every file
-set by source identity:
+Build the four groups from these deterministic source sets. Sort `standards`
+and `designSources` by source identity. Sort `reviewRules` first by axis and then
+by source identity. Every sort key must be unique; the helper rejects duplicate
+or out-of-order entries.
 
 - `standards`: `AGENTS.md` at the repository root and every additional
   `AGENTS.md` that governs a path in the full merge-base-through-`HEAD` branch

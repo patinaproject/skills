@@ -246,6 +246,15 @@ function isReviewRuleReference(value) {
   );
 }
 
+function isStrictlySortedBy(values, keyFor) {
+  for (let index = 1; index < values.length; index += 1) {
+    if (!(keyFor(values[index - 1]) < keyFor(values[index]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function isBasisManifest(value) {
   return (
     isExactObject(value, [
@@ -259,10 +268,16 @@ function isBasisManifest(value) {
     value.manifestVersion >= 1 &&
     Array.isArray(value.standards) &&
     value.standards.every(isBasisReference) &&
+    isStrictlySortedBy(value.standards, (entry) => entry.source) &&
     Array.isArray(value.reviewRules) &&
     value.reviewRules.every(isReviewRuleReference) &&
+    isStrictlySortedBy(
+      value.reviewRules,
+      (entry) => `${entry.axis}\u0000${entry.source}`
+    ) &&
     Array.isArray(value.designSources) &&
     value.designSources.every(isBasisReference) &&
+    isStrictlySortedBy(value.designSources, (entry) => entry.source) &&
     (value.spec === null || isBasisReference(value.spec))
   );
 }
