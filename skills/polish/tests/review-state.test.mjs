@@ -18,6 +18,73 @@ const commandPath = fileURLToPath(
 );
 const fixtures = [];
 let findingsFileIndex = 0;
+const openBasisByFixture = new Map();
+
+const defaultStandards = '# Standards\n\nUse the repository rules.\n';
+const defaultSpec = '# Spec\n\nImplement the requested behavior.\n';
+
+function basisManifest({
+  designSources = [],
+  reviewRules = [
+    {
+      axis: 'architecture',
+      content: '# Architecture review rules\n',
+      source: 'skill:codebase-design',
+    },
+    {
+      axis: 'standards',
+      content: '# Standards review rules\n',
+      source: 'skill:code-review#standards',
+    },
+    {
+      axis: 'spec',
+      content: '# Spec review rules\n',
+      source: 'skill:code-review#spec',
+    },
+  ],
+  spec = defaultSpec,
+  specSource = 'github:patinaproject/skills#401',
+  standards = defaultStandards,
+  standardsSources,
+} = {}) {
+  return {
+    designSources: [...designSources].sort((left, right) =>
+      left.source < right.source ? -1 : left.source > right.source ? 1 : 0
+    ),
+    manifestVersion: 1,
+    reviewRules: [...reviewRules].sort((left, right) => {
+      const leftKey = `${left.axis}\u0000${left.source}`;
+      const rightKey = `${right.axis}\u0000${right.source}`;
+      return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+    }),
+    spec: spec === null ? null : { content: spec, source: specSource },
+    standards: [
+      ...(standardsSources ?? [{ content: standards, source: 'AGENTS.md' }]),
+    ].sort((left, right) =>
+      left.source < right.source ? -1 : left.source > right.source ? 1 : 0
+    ),
+  };
+}
+
+function fixtureKey(cwd, temporaryRoot) {
+  return `${cwd}\0${temporaryRoot}`;
+}
+
+function commandInput(cwd, temporaryRoot, args, manifest) {
+  if (args[0] === 'scope') {
+    const selected = manifest ?? basisManifest();
+    openBasisByFixture.set(fixtureKey(cwd, temporaryRoot), selected);
+    return JSON.stringify(selected);
+  }
+  if (args[0] === 'complete') {
+    return JSON.stringify(
+      manifest ??
+        openBasisByFixture.get(fixtureKey(cwd, temporaryRoot)) ??
+        basisManifest()
+    );
+  }
+  return undefined;
+}
 
 const standardsFinding = {
   axis: 'standards',
@@ -51,26 +118,54 @@ function createRepository() {
   return { root, temporaryRoot };
 }
 
+function reviewCommandWithManifest(cwd, temporaryRoot, manifest, ...args) {
+  return execFileSync(
+    process.execPath,
+    [commandPath, ...args],
+    {
+      cwd,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
+      },
+      input: commandInput(cwd, temporaryRoot, args, manifest),
+    }
+  ).trim();
+}
+
 function reviewCommand(cwd, temporaryRoot, ...args) {
-  return execFileSync(process.execPath, [commandPath, ...args], {
-    cwd,
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
-    },
-  }).trim();
+  return reviewCommandWithManifest(cwd, temporaryRoot, undefined, ...args);
+}
+
+function reviewCommandResultWithManifest(
+  cwd,
+  temporaryRoot,
+  manifest,
+  ...args
+) {
+  return spawnSync(
+    process.execPath,
+    [commandPath, ...args],
+    {
+      cwd,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
+      },
+      input: commandInput(cwd, temporaryRoot, args, manifest),
+    }
+  );
 }
 
 function reviewCommandResult(cwd, temporaryRoot, ...args) {
-  return spawnSync(process.execPath, [commandPath, ...args], {
+  return reviewCommandResultWithManifest(
     cwd,
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
-    },
-  });
+    temporaryRoot,
+    undefined,
+    ...args
+  );
 }
 
 // `complete` accepts only an endpoint `scope` handed out, which is the whole
@@ -81,14 +176,53 @@ function openScope(cwd, temporaryRoot, target = 'main') {
 }
 
 function reviewCommandProcess(cwd, temporaryRoot, ...args) {
-  return spawn(process.execPath, [commandPath, ...args], {
-    cwd,
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
-    },
+  const child = spawn(
+    process.execPath,
+    [commandPath, ...args],
+    {
+      cwd,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        PATINAPROJECT_POLISH_TMP_DIR: temporaryRoot,
+      },
+    }
+  );
+  const input = commandInput(cwd, temporaryRoot, args);
+  if (input !== undefined) {
+    child.stdin.end(input);
+  }
+  return child;
+}
+
+function scopeWithInputs(
+  cwd,
+  temporaryRoot,
+  {
+    designSources,
+    reviewContext = false,
+    reviewRules,
+    spec = defaultSpec,
+    specSource,
+    standards = defaultStandards,
+    standardsSources,
+  } = {}
+) {
+  const manifest = basisManifest({
+    designSources,
+    reviewRules,
+    standards,
+    spec,
+    specSource,
+    standardsSources,
   });
+  const args = ['scope', '--target', 'main'];
+  if (reviewContext) {
+    args.push('--review-context', 'present');
+  }
+  return JSON.parse(
+    reviewCommandWithManifest(cwd, temporaryRoot, manifest, ...args)
+  );
 }
 
 function processResult(child) {
@@ -175,15 +309,334 @@ try {
       reviewCommand(root, temporaryRoot, 'scope', '--target', 'main')
     );
 
-    assert.deepEqual(result, {
-      authoritativeFindings: [],
-      base: mergeBase,
+    assert.equal(result.mode, 'full');
+    assert.equal(result.base, mergeBase);
+    assert.equal(result.head, head);
+    assert.equal(result.range, `${mergeBase}..${head}`);
+    assert.equal(result.reason, 'review_state_missing');
+    assert.equal(result.state, 'missing');
+    assert.equal(result.manifestVersion, 1);
+    assert.match(result.basisDigest, /^[a-f0-9]{64}$/);
+    assert.equal(result.skipDisabled, false);
+  }
+
+  {
+    const changed = createRepository();
+    const head = git(changed.root, 'rev-parse', 'HEAD');
+    const mergeBase = git(changed.root, 'merge-base', 'main', 'HEAD');
+    openScope(changed.root, changed.temporaryRoot);
+    reviewCommand(
+      changed.root,
+      changed.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
       head,
-      mode: 'full',
-      provisionalFindings: [],
-      range: `${mergeBase}..${head}`,
-      state: 'missing',
+      '--outcome',
+      'passed'
+    );
+
+    const selected = scopeWithInputs(changed.root, changed.temporaryRoot, {
+      standards: '# Standards\n\nApply the new repository rule.\n',
     });
+    assert.equal(selected.mode, 'full');
+    assert.equal(selected.base, mergeBase);
+    assert.equal(selected.head, head);
+    assert.equal(selected.range, `${mergeBase}..${head}`);
+    assert.equal(selected.reason, 'review_basis_changed');
+
+    const interrupted = scopeWithInputs(changed.root, changed.temporaryRoot, {
+      standards: '# Standards\n\nApply the new repository rule.\n',
+    });
+    assert.equal(interrupted.mode, 'full');
+    assert.equal(interrupted.reason, 'review_basis_changed');
+    assert.deepEqual(interrupted.authoritativeFindings, []);
+    const { directory, names } = recordFiles(changed.temporaryRoot);
+    const record = JSON.parse(readFileSync(join(directory, names[0]), 'utf8'));
+    assert.equal(record.authoritative.reviewedHead, head);
+    assert.notEqual(record.authoritative.basisDigest, selected.basisDigest);
+    assert.equal(record.openScope.basisDigest, selected.basisDigest);
+    assert.doesNotMatch(JSON.stringify(record), /Apply the new repository rule/);
+  }
+
+  {
+    const changedSpec = createRepository();
+    const reviewedHead = git(changedSpec.root, 'rev-parse', 'HEAD');
+    openScope(changedSpec.root, changedSpec.temporaryRoot);
+    reviewCommand(
+      changedSpec.root,
+      changedSpec.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      reviewedHead,
+      '--outcome',
+      'passed'
+    );
+    const head = commitChange(changedSpec.root, 'base\nchange\nlater\n');
+    const mergeBase = git(changedSpec.root, 'merge-base', 'main', 'HEAD');
+    const spec = '# Spec\n\nApply the new requirement to all branch code.\n';
+
+    const selected = scopeWithInputs(changedSpec.root, changedSpec.temporaryRoot, {
+      spec,
+    });
+    assert.equal(selected.mode, 'full');
+    assert.equal(selected.base, mergeBase);
+    assert.equal(selected.head, head);
+    assert.equal(selected.range, `${mergeBase}..${head}`);
+    assert.equal(selected.reason, 'review_basis_changed');
+
+    const changedIdentity = scopeWithInputs(
+      changedSpec.root,
+      changedSpec.temporaryRoot,
+      { spec, specSource: 'linear:PAT-3622' }
+    );
+    assert.equal(changedIdentity.mode, 'full');
+    assert.notEqual(changedIdentity.basisDigest, selected.basisDigest);
+  }
+
+  {
+    const rechecked = createRepository();
+    const head = git(rechecked.root, 'rev-parse', 'HEAD');
+    openScope(rechecked.root, rechecked.temporaryRoot);
+    reviewCommand(
+      rechecked.root,
+      rechecked.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'changes_requested',
+      '--findings',
+      findingsFile([standardsFinding])
+    );
+    const selected = scopeWithInputs(rechecked.root, rechecked.temporaryRoot);
+    assert.equal(selected.mode, 'recheck');
+    assert.equal(selected.reason, 'findings_at_head');
+    assert.deepEqual(selected.authoritativeFindings, [standardsFinding]);
+  }
+
+  {
+    const canonical = createRepository();
+    const head = git(canonical.root, 'rev-parse', 'HEAD');
+    const manifest = basisManifest();
+    const reordered = {
+      standards: manifest.standards,
+      spec: manifest.spec,
+      reviewRules: manifest.reviewRules,
+      manifestVersion: manifest.manifestVersion,
+      designSources: manifest.designSources,
+    };
+    const opened = JSON.parse(
+      reviewCommandWithManifest(
+        canonical.root,
+        canonical.temporaryRoot,
+        manifest,
+        'scope',
+        '--target',
+        'main'
+      )
+    );
+    reviewCommandWithManifest(
+      canonical.root,
+      canonical.temporaryRoot,
+      manifest,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+    const equivalent = JSON.parse(
+      reviewCommandWithManifest(
+        canonical.root,
+        canonical.temporaryRoot,
+        reordered,
+        'scope',
+        '--target',
+        'main'
+      )
+    );
+    assert.equal(equivalent.basisDigest, opened.basisDigest);
+    assert.equal(equivalent.mode, 'skip');
+
+    const versioned = JSON.parse(
+      reviewCommandWithManifest(
+        canonical.root,
+        canonical.temporaryRoot,
+        { ...manifest, manifestVersion: 2 },
+        'scope',
+        '--target',
+        'main'
+      )
+    );
+    assert.equal(versioned.mode, 'full');
+    assert.equal(versioned.reason, 'review_basis_changed');
+
+    const focused = scopeWithInputs(canonical.root, canonical.temporaryRoot, {
+      reviewContext: true,
+    });
+    assert.equal(focused.mode, 'full');
+    assert.equal(focused.reason, 'review_context_present');
+    assert.equal(focused.skipDisabled, true);
+  }
+
+  {
+    const membership = createRepository();
+    const head = git(membership.root, 'rev-parse', 'HEAD');
+    openScope(membership.root, membership.temporaryRoot);
+    reviewCommand(
+      membership.root,
+      membership.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+
+    const variants = [
+      {
+        standardsSources: [
+          { content: defaultStandards, source: 'AGENTS.md' },
+          { content: '# Package standards\n', source: 'packages/a/AGENTS.md' },
+        ],
+      },
+      { standardsSources: [] },
+      {
+        reviewRules: [
+          {
+            axis: 'architecture',
+            content: '# Revised architecture review rules\n',
+            source: 'skill:codebase-design',
+          },
+        ],
+      },
+      {
+        designSources: [
+          { content: '# Context\n\nA design agreement.\n', source: 'CONTEXT.md' },
+        ],
+      },
+      { spec: null },
+    ];
+
+    for (const variant of variants) {
+      const selected = scopeWithInputs(
+        membership.root,
+        membership.temporaryRoot,
+        variant
+      );
+      assert.equal(selected.mode, 'full');
+      assert.equal(selected.reason, 'review_basis_changed');
+    }
+  }
+
+  {
+    const mismatch = createRepository();
+    const head = git(mismatch.root, 'rev-parse', 'HEAD');
+    const opened = openScope(mismatch.root, mismatch.temporaryRoot);
+    const missing = spawnSync(
+      process.execPath,
+      [
+        commandPath,
+        'complete',
+        '--target',
+        'main',
+        '--candidate',
+        head,
+        '--outcome',
+        'passed',
+      ],
+      {
+        cwd: mismatch.root,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          PATINAPROJECT_POLISH_TMP_DIR: mismatch.temporaryRoot,
+        },
+        input: '',
+      }
+    );
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /Basis manifest on standard input is unreadable/);
+
+    const changedManifest = basisManifest({
+      spec: '# Spec\n\nA different requirement.\n',
+    });
+    const rejected = reviewCommandResultWithManifest(
+      mismatch.root,
+      mismatch.temporaryRoot,
+      changedManifest,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      head,
+      '--outcome',
+      'passed'
+    );
+    assert.equal(rejected.status, 1);
+    assert.match(rejected.stderr, /does not match the open review scope/);
+
+    const { directory, names } = recordFiles(mismatch.temporaryRoot);
+    const preserved = JSON.parse(
+      readFileSync(join(directory, names[0]), 'utf8')
+    );
+    assert.equal(preserved.authoritative, null);
+    assert.equal(preserved.openScope.basisDigest, opened.basisDigest);
+  }
+
+  {
+    const missingManifest = createRepository();
+    const scope = spawnSync(
+      process.execPath,
+      [commandPath, 'scope', '--target', 'main'],
+      {
+        cwd: missingManifest.root,
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          PATINAPROJECT_POLISH_TMP_DIR: missingManifest.temporaryRoot,
+        },
+        input: '',
+      }
+    );
+    assert.equal(scope.status, 1);
+    assert.match(scope.stderr, /Basis manifest on standard input is unreadable/);
+
+    const manifest = basisManifest();
+    const outOfOrder = reviewCommandResultWithManifest(
+      missingManifest.root,
+      missingManifest.temporaryRoot,
+      { ...manifest, reviewRules: [...manifest.reviewRules].reverse() },
+      'scope',
+      '--target',
+      'main'
+    );
+    assert.equal(outOfOrder.status, 1);
+    assert.match(outOfOrder.stderr, /invalid shape/);
+
+    const duplicate = reviewCommandResultWithManifest(
+      missingManifest.root,
+      missingManifest.temporaryRoot,
+      {
+        ...manifest,
+        standards: [manifest.standards[0], manifest.standards[0]],
+      },
+      'scope',
+      '--target',
+      'main'
+    );
+    assert.equal(duplicate.status, 1);
+    assert.match(duplicate.stderr, /invalid shape/);
   }
 
   {
@@ -207,27 +660,26 @@ try {
         findingPath
       )
     );
-    assert.deepEqual(record.authoritative, {
-      findings: [standardsFinding],
-      outcome: 'changes_requested',
-      reviewedHead,
-      // Written by `complete` alone: the endpoint this outcome consumed.
-      scopedHead: reviewedHead,
-    });
+    assert.deepEqual(record.authoritative.findings, [standardsFinding]);
+    assert.equal(record.authoritative.outcome, 'changes_requested');
+    assert.equal(record.authoritative.manifestVersion, 1);
+    assert.match(record.authoritative.basisDigest, /^[a-f0-9]{64}$/);
+    assert.equal(record.authoritative.reviewedHead, reviewedHead);
+    // Written by `complete` alone: the endpoint this outcome consumed.
+    assert.equal(record.authoritative.scopedHead, reviewedHead);
+    assert.doesNotMatch(JSON.stringify(record), /Implement the requested behavior/);
 
     const head = commitChange(root, 'base\nchange\nfix\n');
     const scope = JSON.parse(
       reviewCommand(root, temporaryRoot, 'scope', '--target', 'main')
     );
-    assert.deepEqual(scope, {
-      authoritativeFindings: [standardsFinding],
-      base: reviewedHead,
-      head,
-      mode: 'incremental',
-      provisionalFindings: [],
-      range: `${reviewedHead}..${head}`,
-      state: 'valid',
-    });
+    assert.deepEqual(scope.authoritativeFindings, [standardsFinding]);
+    assert.equal(scope.base, reviewedHead);
+    assert.equal(scope.head, head);
+    assert.equal(scope.mode, 'incremental');
+    assert.equal(scope.range, `${reviewedHead}..${head}`);
+    assert.equal(scope.reason, 'later_commits');
+    assert.equal(scope.state, 'valid');
   }
 
   {
@@ -244,6 +696,23 @@ try {
       passingHead,
       '--outcome',
       'passed'
+    );
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          passing.root,
+          passing.temporaryRoot,
+          'status',
+          '--target',
+          'main'
+        )
+      ),
+      {
+        authoritativeFindings: [],
+        provisionalFindings: [],
+        reviewedHead: passingHead,
+        state: 'valid',
+      }
     );
     assert.equal(
       JSON.parse(
@@ -349,26 +818,53 @@ try {
       'main',
       'HEAD'
     );
-    assert.deepEqual(
-      JSON.parse(
-        reviewCommand(
-          incompatible.root,
-          incompatible.temporaryRoot,
-          'scope',
-          '--target',
-          'main'
-        )
-      ),
-      {
-        authoritativeFindings: [],
-        base: incompatibleMergeBase,
-        head: incompatibleHead,
-        mode: 'full',
-        provisionalFindings: [],
-        range: `${incompatibleMergeBase}..${incompatibleHead}`,
-        state: 'corrupt',
-      }
+    const incompatibleScope = JSON.parse(
+      reviewCommand(
+        incompatible.root,
+        incompatible.temporaryRoot,
+        'scope',
+        '--target',
+        'main'
+      )
     );
+    assert.equal(incompatibleScope.mode, 'full');
+    assert.equal(incompatibleScope.base, incompatibleMergeBase);
+    assert.equal(incompatibleScope.head, incompatibleHead);
+    assert.equal(
+      incompatibleScope.range,
+      `${incompatibleMergeBase}..${incompatibleHead}`
+    );
+    assert.equal(incompatibleScope.reason, 'review_state_corrupt');
+    assert.equal(incompatibleScope.state, 'corrupt');
+
+    const oldSchema = createRepository();
+    const oldSchemaHead = git(oldSchema.root, 'rev-parse', 'HEAD');
+    openScope(oldSchema.root, oldSchema.temporaryRoot);
+    reviewCommand(
+      oldSchema.root,
+      oldSchema.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      oldSchemaHead,
+      '--outcome',
+      'passed'
+    );
+    const oldSchemaFiles = recordFiles(oldSchema.temporaryRoot);
+    const oldSchemaPath = join(
+      oldSchemaFiles.directory,
+      oldSchemaFiles.names[0]
+    );
+    const oldSchemaRecord = JSON.parse(readFileSync(oldSchemaPath, 'utf8'));
+    oldSchemaRecord.schemaVersion = 2;
+    writeFileSync(oldSchemaPath, JSON.stringify(oldSchemaRecord));
+    const oldSchemaScope = scopeWithInputs(
+      oldSchema.root,
+      oldSchema.temporaryRoot
+    );
+    assert.equal(oldSchemaScope.mode, 'full');
+    assert.equal(oldSchemaScope.reason, 'review_state_corrupt');
 
     const rewritten = createRepository();
     const oldHead = git(rewritten.root, 'rev-parse', 'HEAD');
@@ -527,7 +1023,7 @@ try {
     const record = JSON.parse(readFileSync(join(directory, names[0]), 'utf8'));
     assert.deepEqual(Object.keys(record).sort(), [
       'authoritative',
-      'openScopedHead',
+      'openScope',
       'provisional',
       'repository',
       'schemaVersion',
@@ -750,15 +1246,13 @@ try {
     const scope = JSON.parse(
       reviewCommand(carried.root, session, 'scope', '--target', 'main')
     );
-    assert.deepEqual(scope, {
-      authoritativeFindings: [standardsFinding],
-      base: reviewedHead,
-      head,
-      mode: 'incremental',
-      provisionalFindings: [],
-      range: `${reviewedHead}..${head}`,
-      state: 'valid',
-    });
+    assert.deepEqual(scope.authoritativeFindings, [standardsFinding]);
+    assert.equal(scope.base, reviewedHead);
+    assert.equal(scope.head, head);
+    assert.equal(scope.mode, 'incremental');
+    assert.equal(scope.range, `${reviewedHead}..${head}`);
+    assert.equal(scope.reason, 'later_commits');
+    assert.equal(scope.state, 'valid');
     // The source root keeps its copy: relocation copies rather than empties.
     assert.equal(recordFiles(carried.temporaryRoot).names.length, 1);
 
@@ -1189,7 +1683,7 @@ try {
     // authoritative block.
     const intact = JSON.parse(readFileSync(recordPath, 'utf8'));
     intact.authoritative.scopedHead = intact.authoritative.reviewedHead;
-    intact.openScopedHead = null;
+    intact.openScope = null;
     writeFileSync(recordPath, `${JSON.stringify(intact, null, 2)}\n`);
     assert.equal(
       JSON.parse(

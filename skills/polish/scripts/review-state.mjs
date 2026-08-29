@@ -23,7 +23,7 @@ import {
 import { tmpdir, userInfo } from 'node:os';
 import { basename, isAbsolute, join, resolve } from 'node:path';
 
-const schemaVersion = 2;
+const schemaVersion = 4;
 const axes = new Set(['architecture', 'spec', 'standards']);
 const outcomes = new Set(['changes_requested', 'passed']);
 // `skip` hands out no reviewable delta, so it mints no scope to complete.
@@ -223,6 +223,141 @@ function isFindingArray(value) {
   return Array.isArray(value) && value.every(isFinding);
 }
 
+function isDigest(value) {
+  return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+}
+
+function isBasisReference(value) {
+  return (
+    isExactObject(value, ['content', 'source']) &&
+    typeof value.source === 'string' &&
+    value.source.length > 0 &&
+    typeof value.content === 'string'
+  );
+}
+
+function isReviewRuleReference(value) {
+  return (
+    isExactObject(value, ['axis', 'content', 'source']) &&
+    axes.has(value.axis) &&
+    typeof value.source === 'string' &&
+    value.source.length > 0 &&
+    typeof value.content === 'string'
+  );
+}
+
+function isStrictlySortedBy(values, keyFor) {
+  for (let index = 1; index < values.length; index += 1) {
+    if (!(keyFor(values[index - 1]) < keyFor(values[index]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isBasisManifest(value) {
+  return (
+    isExactObject(value, [
+      'designSources',
+      'manifestVersion',
+      'reviewRules',
+      'spec',
+      'standards',
+    ]) &&
+    Number.isSafeInteger(value.manifestVersion) &&
+    value.manifestVersion >= 1 &&
+    Array.isArray(value.standards) &&
+    value.standards.every(isBasisReference) &&
+    isStrictlySortedBy(value.standards, (entry) => entry.source) &&
+    Array.isArray(value.reviewRules) &&
+    value.reviewRules.every(isReviewRuleReference) &&
+    isStrictlySortedBy(
+      value.reviewRules,
+      (entry) => `${entry.axis}\u0000${entry.source}`
+    ) &&
+    Array.isArray(value.designSources) &&
+    value.designSources.every(isBasisReference) &&
+    isStrictlySortedBy(value.designSources, (entry) => entry.source) &&
+    (value.spec === null || isBasisReference(value.spec))
+  );
+}
+
+function assertUnicodeScalarString(value) {
+  for (let index = 0; index < value.length; index += 1) {
+    const unit = value.charCodeAt(index);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) {
+        throw new Error('Basis manifest contains an invalid Unicode string.');
+      }
+      index += 1;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+      throw new Error('Basis manifest contains an invalid Unicode string.');
+    }
+  }
+}
+
+// RFC 8785 uses ECMAScript primitive serialization and recursively sorts
+// object properties by UTF-16 code units. JSON input already excludes values
+// outside the JSON data model; the remaining I-JSON constraints are checked
+// here before hashing.
+function canonicalizeJson(value) {
+  if (value === null || typeof value === 'boolean') {
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'string') {
+    assertUnicodeScalarString(value);
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      throw new Error('Basis manifest contains a non-finite number.');
+    }
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalizeJson).join(',')}]`;
+  }
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => {
+        assertUnicodeScalarString(key);
+        return `${JSON.stringify(key)}:${canonicalizeJson(value[key])}`;
+      })
+      .join(',')}}`;
+  }
+  throw new Error('Basis manifest contains a value outside the JSON data model.');
+}
+
+function readBasisManifest() {
+  let manifest;
+  try {
+    manifest = JSON.parse(readFileSync(0, 'utf8'));
+  } catch (error) {
+    throw new Error(
+      `Basis manifest on standard input is unreadable: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+  if (!isBasisManifest(manifest)) {
+    throw new Error('Basis manifest on standard input has an invalid shape.');
+  }
+  const canonical = canonicalizeJson(manifest);
+  return {
+    digest: createHash('sha256').update(canonical).digest('hex'),
+    manifestVersion: manifest.manifestVersion,
+  };
+}
+
+function sameBasis(left, right) {
+  return (
+    left.basisDigest === right.digest &&
+    left.manifestVersion === right.manifestVersion
+  );
+}
+
 function isAuthoritativeReview(value) {
   if (value === null) {
     return true;
@@ -231,8 +366,10 @@ function isAuthoritativeReview(value) {
     !isExactObject(value, [
       'findings',
       'outcome',
+      'basisDigest',
       'reviewedHead',
       'scopedHead',
+      'manifestVersion',
     ])
   ) {
     return false;
@@ -243,6 +380,9 @@ function isAuthoritativeReview(value) {
     // that `complete` produced from one a hand-edited or carried record simply
     // states. The `earned` gate reads it as self-consistency, not proof.
     typeof value.scopedHead === 'string' &&
+    isDigest(value.basisDigest) &&
+    Number.isSafeInteger(value.manifestVersion) &&
+    value.manifestVersion >= 1 &&
     outcomes.has(value.outcome) &&
     isFindingArray(value.findings) &&
     ((value.outcome === 'passed' && value.findings.length === 0) ||
@@ -259,8 +399,16 @@ function isAuthoritativeReview(value) {
 // outcome consumed. This one is live and re-minted by every reviewable `scope`;
 // that one is durable evidence written only by `complete`. Reading the live one
 // where the durable one belongs is what would let a record re-earn its own pass.
-function isOpenScopedHead(value) {
-  return value === null || (typeof value === 'string' && value.length > 0);
+function isOpenScope(value) {
+  return (
+    value === null ||
+    (isExactObject(value, ['basisDigest', 'head', 'manifestVersion']) &&
+      typeof value.head === 'string' &&
+      value.head.length > 0 &&
+      isDigest(value.basisDigest) &&
+      Number.isSafeInteger(value.manifestVersion) &&
+      value.manifestVersion >= 1)
+  );
 }
 
 function isProvisionalReview(value) {
@@ -282,7 +430,7 @@ function isReviewRecord(value, identity) {
       'provisional',
       'repository',
       'schemaVersion',
-      'openScopedHead',
+      'openScope',
       'sourceBranch',
       'targetBranch',
     ]) &&
@@ -292,7 +440,7 @@ function isReviewRecord(value, identity) {
     value.targetBranch === identity.targetBranch &&
     isAuthoritativeReview(value.authoritative) &&
     isProvisionalReview(value.provisional) &&
-    isOpenScopedHead(value.openScopedHead)
+    isOpenScope(value.openScope)
   );
 }
 
@@ -531,7 +679,7 @@ function assertCommittedWorktree() {
   }
 }
 
-function selectScope(targetBranch) {
+function selectScope(targetBranch, basis, hasReviewContext) {
   assertCommittedWorktree();
   const identity = currentIdentity(targetBranch);
   const target = resolveTarget(targetBranch);
@@ -540,24 +688,54 @@ function selectScope(targetBranch) {
 
   return withRecordLock(identity, () => {
     const loaded = loadRecord(identity);
-    const selection = computeScope(loaded, head, mergeBase);
+    const authoritative =
+      loaded.status === 'valid' ? loaded.record.authoritative : null;
+    const reusable =
+      authoritative !== null &&
+      headIsReviewedAncestor(authoritative.reviewedHead, head);
+    const basisChanged = reusable && !sameBasis(authoritative, basis);
+    const selection =
+      basisChanged || hasReviewContext
+        ? {
+            authoritativeFindings: [],
+            base: mergeBase,
+            head,
+            mode: 'full',
+            provisionalFindings: [],
+            range: `${mergeBase}..${head}`,
+            reason: basisChanged
+              ? 'review_basis_changed'
+              : 'review_context_present',
+            state: loaded.status,
+          }
+        : computeScope(loaded, head, mergeBase);
+    const selected = {
+      ...selection,
+      basisDigest: basis.digest,
+      manifestVersion: basis.manifestVersion,
+      skipDisabled: hasReviewContext,
+    };
 
     // Recording the endpoint is what makes a later outcome earnable: `complete`
     // accepts only a candidate this call handed out.
     //
     // A `skip` selection hands out no delta and leaves the record untouched.
-    // Its open endpoint is the evidence that earned the pass, so clearing it
-    // would make the next `scope` on an untouched passing head degrade to
-    // `recheck` — turning the sticky record the design wants into a re-review
-    // every other run.
+    // The durable endpoint in `authoritative.scopedHead` is the evidence that
+    // earned the pass; the live open scope is irrelevant to that decision.
     if (reviewableModes.has(selection.mode)) {
       writeRecord(
         identity,
-        buildRecord(identity, loaded, { openScopedHead: head })
+        buildRecord(identity, loaded, {
+          openScope: {
+            basisDigest: basis.digest,
+            head,
+            manifestVersion: basis.manifestVersion,
+          },
+        })
       );
     }
 
-    return selection;
+    return selected;
   });
 }
 
@@ -571,7 +749,7 @@ function buildRecord(identity, loaded, overrides) {
     authoritative: previous?.authoritative ?? null,
     provisional: previous?.provisional ?? null,
     schemaVersion,
-    openScopedHead: previous?.openScopedHead ?? null,
+    openScope: previous?.openScope ?? null,
     ...overrides,
   };
 }
@@ -584,6 +762,7 @@ function computeScope(loaded, head, mergeBase) {
     mode: 'full',
     provisionalFindings: [],
     range: `${mergeBase}..${head}`,
+    reason: `review_state_${loaded.status}`,
     state: loaded.status,
   };
 
@@ -606,11 +785,16 @@ function computeScope(loaded, head, mergeBase) {
     base = mergeBase;
     mode = 'full';
     range = `${mergeBase}..${head}`;
+    fallback.reason =
+      authoritative === null
+        ? 'no_completed_review'
+        : 'reviewed_head_unrelated';
   } else if (authoritative.reviewedHead !== head) {
     authoritativeFindings = authoritative.findings;
     base = authoritative.reviewedHead;
     mode = 'incremental';
     range = `${authoritative.reviewedHead}..${head}`;
+    fallback.reason = 'later_commits';
   } else {
     const hasFindings =
       authoritative.findings.length > 0 || provisionalFindings.length > 0;
@@ -620,7 +804,7 @@ function computeScope(loaded, head, mergeBase) {
     // rather than to a visible no-op.
     //
     // The evidence is `authoritative.scopedHead`, which only `complete` writes,
-    // and never the live `openScopedHead`. `scope` mints that on every
+    // and never the live `openScope`. `scope` mints that on every
     // reviewable selection including the `recheck` this branch produces, so
     // reading it here would let the degraded record re-earn its own pass on the
     // next call with no review in between.
@@ -632,6 +816,7 @@ function computeScope(loaded, head, mergeBase) {
         ? 'skip'
         : 'recheck';
     range = null;
+    fallback.reason = mode === 'skip' ? 'earned_pass' : 'findings_at_head';
   }
 
   return {
@@ -641,11 +826,12 @@ function computeScope(loaded, head, mergeBase) {
     mode,
     provisionalFindings: mode === 'skip' ? [] : provisionalFindings,
     range,
+    reason: fallback.reason,
     state: 'valid',
   };
 }
 
-function completeReview(targetBranch, candidateHead, outcome, findings) {
+function completeReview(targetBranch, candidateHead, outcome, findings, basis) {
   assertCommittedWorktree();
   resolveTarget(targetBranch);
   const head = git(['rev-parse', 'HEAD']);
@@ -670,17 +856,22 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
     // have reviewed the fix, and `reviewedHead` would name a head no reviewer
     // was ever given. Only an endpoint `scope` handed out can be completed.
     const loaded = loadRecord(identity);
-    const openScopedHead =
-      loaded.status === 'valid' ? loaded.record.openScopedHead : null;
+    const openScope =
+      loaded.status === 'valid' ? loaded.record.openScope : null;
 
-    if (openScopedHead === null) {
+    if (openScope === null) {
       throw new Error(
         `No review scope is open for ${head}. Run \`scope\` and review the delta it returns before recording an outcome.`
       );
     }
-    if (openScopedHead !== head) {
+    if (openScope.head !== head) {
       throw new Error(
-        `Review scope is stale: \`scope\` handed out ${openScopedHead}, but HEAD is now ${head}. Re-run \`scope\` and review the ${openScopedHead}..${head} delta before recording an outcome.`
+        `Review scope is stale: \`scope\` handed out ${openScope.head}, but HEAD is now ${head}. Re-run \`scope\` and review the ${openScope.head}..${head} delta before recording an outcome.`
+      );
+    }
+    if (!sameBasis(openScope, basis)) {
+      throw new Error(
+        'Basis manifest does not match the open review scope. Re-run `scope` with this manifest before recording an outcome.'
       );
     }
 
@@ -688,12 +879,19 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
       // `scopedHead` records which open endpoint this outcome consumed. It is
       // the durable evidence the outcome was earned, written here and nowhere
       // else.
-      authoritative: { findings, outcome, reviewedHead: head, scopedHead: openScopedHead },
+      authoritative: {
+        basisDigest: openScope.basisDigest,
+        findings,
+        manifestVersion: openScope.manifestVersion,
+        outcome,
+        reviewedHead: head,
+        scopedHead: openScope.head,
+      },
       // One `complete` consumes one `scope`. Carrying the endpoint forward
       // would leave it open at this head, so a second `complete` could rewrite
       // the outcome — a pass into `changes_requested`, say — with no review
       // between. Nothing legitimate needs it: the next iteration re-scopes.
-      openScopedHead: null,
+      openScope: null,
       provisional: null,
     });
     writeRecord(identity, record);
@@ -712,6 +910,28 @@ function saveProvisional(targetBranch, candidateHead, findings) {
     writeRecord(identity, record);
     return record;
   });
+}
+
+function reviewStatus(targetBranch) {
+  resolveTarget(targetBranch);
+  const identity = currentIdentity(targetBranch);
+  const loaded = loadRecord(identity);
+
+  if (loaded.status !== 'valid') {
+    return {
+      authoritativeFindings: [],
+      provisionalFindings: [],
+      reviewedHead: null,
+      state: loaded.status,
+    };
+  }
+
+  return {
+    authoritativeFindings: loaded.record.authoritative?.findings ?? [],
+    provisionalFindings: loaded.record.provisional?.findings ?? [],
+    reviewedHead: loaded.record.authoritative?.reviewedHead ?? null,
+    state: 'valid',
+  };
 }
 
 function resolveSourceDirectory(from) {
@@ -843,7 +1063,13 @@ function relocateRecords(from, branch) {
 
 function main() {
   const { command, options } = parseArguments(process.argv.slice(2));
-  const commands = new Set(['complete', 'provisional', 'relocate', 'scope']);
+  const commands = new Set([
+    'complete',
+    'provisional',
+    'relocate',
+    'scope',
+    'status',
+  ]);
   if (!command || !commands.has(command)) {
     throw new Error(`Unknown command: ${command ?? '(missing)'}`);
   }
@@ -864,8 +1090,18 @@ function main() {
 
   const target = requiredOption(options, 'target');
 
-  if (command === 'scope') {
-    result = selectScope(target);
+  if (command === 'status') {
+    result = reviewStatus(target);
+  } else if (command === 'scope') {
+    const reviewContext = options.get('review-context');
+    if (reviewContext !== undefined && reviewContext !== 'present') {
+      throw new Error(`Invalid review context marker: ${reviewContext}`);
+    }
+    result = selectScope(
+      target,
+      readBasisManifest(),
+      reviewContext === 'present'
+    );
   } else if (command === 'complete') {
     const candidate = requiredOption(options, 'candidate');
     const outcome = requiredOption(options, 'outcome');
@@ -876,7 +1112,8 @@ function main() {
       target,
       candidate,
       outcome,
-      readFindings(options.get('findings'))
+      readFindings(options.get('findings')),
+      readBasisManifest()
     );
   } else {
     result = saveProvisional(
