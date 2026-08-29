@@ -70,6 +70,18 @@ the captured Standards and Spec. One `scope` selection accepts one `complete`
 call. The completed result records those inputs. A passing result has no
 findings. A changes-requested result has at least one.
 
+## Inspect a record without opening a scope
+
+Callers that only need relocation status use the read-only command:
+
+```sh
+node <polish-skill-directory>/scripts/review-state.mjs status \
+  --target <target-branch>
+```
+
+It reports record state, the reviewed head, and completed and provisional
+findings. It does not require review inputs or change the record.
+
 These checks prevent a fix commit from being recorded as reviewed before a new
 review sees it. After fixing and committing a finding, call `scope` again and
 review the returned range.

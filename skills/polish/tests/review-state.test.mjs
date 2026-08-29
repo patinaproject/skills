@@ -376,17 +376,17 @@ try {
     );
     const head = commitChange(uncertain.root, 'base\nchange\nlater\n');
     const mergeBase = git(uncertain.root, 'merge-base', 'main', 'HEAD');
-    const changedSpec = '# Spec\n\nApply the requirement to all branch code.\n';
+    const unavailableSpec = '';
 
     assert.equal(
       scopeWithInputs(uncertain.root, uncertain.temporaryRoot, {
-        spec: changedSpec,
+        spec: unavailableSpec,
       }).reviewInputDecision,
       'required'
     );
     const selected = scopeWithInputs(uncertain.root, uncertain.temporaryRoot, {
       decision: 'uncertain',
-      spec: changedSpec,
+      spec: unavailableSpec,
     });
     assert.equal(selected.mode, 'full');
     assert.equal(selected.base, mergeBase);
@@ -399,7 +399,45 @@ try {
     const record = JSON.parse(readFileSync(join(directory, names[0]), 'utf8'));
     assert.equal(record.authoritative, null);
     assert.equal(record.provisional, null);
-    assert.equal(record.openReviewInputs.spec.content, changedSpec);
+    assert.equal(record.openScope.reviewInputs.spec.content, unavailableSpec);
+  }
+
+  {
+    const changedSpec = createRepository();
+    const reviewedHead = git(changedSpec.root, 'rev-parse', 'HEAD');
+    openScope(changedSpec.root, changedSpec.temporaryRoot);
+    reviewCommand(
+      changedSpec.root,
+      changedSpec.temporaryRoot,
+      'complete',
+      '--target',
+      'main',
+      '--candidate',
+      reviewedHead,
+      '--outcome',
+      'passed'
+    );
+    const head = commitChange(changedSpec.root, 'base\nchange\nlater\n');
+    const mergeBase = git(changedSpec.root, 'merge-base', 'main', 'HEAD');
+    const spec = '# Spec\n\nApply the new requirement to all branch code.\n';
+
+    assert.equal(
+      scopeWithInputs(changedSpec.root, changedSpec.temporaryRoot, {
+        spec,
+      }).reviewInputDecision,
+      'required'
+    );
+    const selected = scopeWithInputs(
+      changedSpec.root,
+      changedSpec.temporaryRoot,
+      { decision: 'changed', spec }
+    );
+    assert.equal(selected.mode, 'full');
+    assert.equal(selected.base, mergeBase);
+    assert.equal(selected.head, head);
+    assert.equal(selected.range, `${mergeBase}..${head}`);
+    assert.equal(selected.reason, 'review_inputs_changed');
+    assert.equal(selected.reviewInputDecision, 'changed');
   }
 
   {
@@ -502,6 +540,23 @@ try {
       passingHead,
       '--outcome',
       'passed'
+    );
+    assert.deepEqual(
+      JSON.parse(
+        reviewCommand(
+          passing.root,
+          passing.temporaryRoot,
+          'status',
+          '--target',
+          'main'
+        )
+      ),
+      {
+        authoritativeFindings: [],
+        provisionalFindings: [],
+        reviewedHead: passingHead,
+        state: 'valid',
+      }
     );
     assert.equal(
       JSON.parse(
@@ -817,8 +872,7 @@ try {
     const record = JSON.parse(readFileSync(join(directory, names[0]), 'utf8'));
     assert.deepEqual(Object.keys(record).sort(), [
       'authoritative',
-      'openReviewInputs',
-      'openScopedHead',
+      'openScope',
       'provisional',
       'repository',
       'schemaVersion',
@@ -1482,8 +1536,7 @@ try {
     // authoritative block.
     const intact = JSON.parse(readFileSync(recordPath, 'utf8'));
     intact.authoritative.scopedHead = intact.authoritative.reviewedHead;
-    intact.openReviewInputs = null;
-    intact.openScopedHead = null;
+    intact.openScope = null;
     writeFileSync(recordPath, `${JSON.stringify(intact, null, 2)}\n`);
     assert.equal(
       JSON.parse(

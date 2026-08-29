@@ -295,8 +295,14 @@ function isAuthoritativeReview(value) {
 // outcome consumed. This one is live and re-minted by every reviewable `scope`;
 // that one is durable evidence written only by `complete`. Reading the live one
 // where the durable one belongs is what would let a record re-earn its own pass.
-function isOpenScopedHead(value) {
-  return value === null || (typeof value === 'string' && value.length > 0);
+function isOpenScope(value) {
+  return (
+    value === null ||
+    (isExactObject(value, ['head', 'reviewInputs']) &&
+      typeof value.head === 'string' &&
+      value.head.length > 0 &&
+      isReviewInputs(value.reviewInputs))
+  );
 }
 
 function isProvisionalReview(value) {
@@ -318,8 +324,7 @@ function isReviewRecord(value, identity) {
       'provisional',
       'repository',
       'schemaVersion',
-      'openScopedHead',
-      'openReviewInputs',
+      'openScope',
       'sourceBranch',
       'targetBranch',
     ]) &&
@@ -329,10 +334,7 @@ function isReviewRecord(value, identity) {
     value.targetBranch === identity.targetBranch &&
     isAuthoritativeReview(value.authoritative) &&
     isProvisionalReview(value.provisional) &&
-    isOpenScopedHead(value.openScopedHead) &&
-    (value.openReviewInputs === null || isReviewInputs(value.openReviewInputs)) &&
-    ((value.openScopedHead === null && value.openReviewInputs === null) ||
-      (value.openScopedHead !== null && value.openReviewInputs !== null))
+    isOpenScope(value.openScope)
   );
 }
 
@@ -608,17 +610,20 @@ function selectScope(targetBranch, reviewInputs, decision) {
     const reusable =
       authoritative !== null &&
       headIsReviewedAncestor(authoritative.reviewedHead, head);
+    const reviewInputsChanged =
+      reusable && !sameReviewInputs(authoritative.reviewInputs, reviewInputs);
 
-    if (
-      reusable &&
-      !sameReviewInputs(authoritative.reviewInputs, reviewInputs) &&
-      decision === undefined
-    ) {
+    if (decision !== undefined && !reviewInputsChanged) {
+      throw new Error(
+        'A review input decision requires saved and current evidence that differ.'
+      );
+    }
+
+    if (reviewInputsChanged && decision === undefined) {
       writeRecord(
         identity,
         buildRecord(identity, loaded, {
-          openReviewInputs: null,
-          openScopedHead: null,
+          openScope: null,
         })
       );
       return {
@@ -635,8 +640,7 @@ function selectScope(targetBranch, reviewInputs, decision) {
     }
 
     const invalidates =
-      reusable &&
-      !sameReviewInputs(authoritative.reviewInputs, reviewInputs) &&
+      reviewInputsChanged &&
       (decision === 'changed' || decision === 'uncertain');
     let scopeLoaded = loaded;
 
@@ -644,15 +648,13 @@ function selectScope(targetBranch, reviewInputs, decision) {
       scopeLoaded = {
         record: buildRecord(identity, loaded, {
           authoritative: null,
-          openReviewInputs: null,
-          openScopedHead: null,
+          openScope: null,
           provisional: null,
         }),
         status: 'valid',
       };
     } else if (
-      reusable &&
-      !sameReviewInputs(authoritative.reviewInputs, reviewInputs) &&
+      reviewInputsChanged &&
       decision === 'unchanged'
     ) {
       scopeLoaded = {
@@ -673,18 +675,14 @@ function selectScope(targetBranch, reviewInputs, decision) {
             ? 'review_inputs_uncertain'
             : selection.reason,
       reviewInputDecision:
-        reusable &&
-        !sameReviewInputs(authoritative.reviewInputs, reviewInputs)
-          ? decision
-          : 'not_required',
+        reviewInputsChanged ? decision : 'not_required',
     };
     const writeLoaded =
       selection.mode === 'full'
         ? {
             record: buildRecord(identity, scopeLoaded, {
               authoritative: null,
-              openReviewInputs: null,
-              openScopedHead: null,
+              openScope: null,
               provisional: null,
             }),
             status: 'valid',
@@ -703,8 +701,7 @@ function selectScope(targetBranch, reviewInputs, decision) {
       writeRecord(
         identity,
         buildRecord(identity, writeLoaded, {
-          openReviewInputs: reviewInputs,
-          openScopedHead: head,
+          openScope: { head, reviewInputs },
         })
       );
     } else if (writeLoaded !== loaded) {
@@ -725,8 +722,7 @@ function buildRecord(identity, loaded, overrides) {
     authoritative: previous?.authoritative ?? null,
     provisional: previous?.provisional ?? null,
     schemaVersion,
-    openReviewInputs: previous?.openReviewInputs ?? null,
-    openScopedHead: previous?.openScopedHead ?? null,
+    openScope: previous?.openScope ?? null,
     ...overrides,
   };
 }
@@ -781,7 +777,7 @@ function computeScope(loaded, head, mergeBase) {
     // rather than to a visible no-op.
     //
     // The evidence is `authoritative.scopedHead`, which only `complete` writes,
-    // and never the live `openScopedHead`. `scope` mints that on every
+    // and never the live `openScope`. `scope` mints that on every
     // reviewable selection including the `recheck` this branch produces, so
     // reading it here would let the degraded record re-earn its own pass on the
     // next call with no review in between.
@@ -833,24 +829,17 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
     // have reviewed the fix, and `reviewedHead` would name a head no reviewer
     // was ever given. Only an endpoint `scope` handed out can be completed.
     const loaded = loadRecord(identity);
-    const openScopedHead =
-      loaded.status === 'valid' ? loaded.record.openScopedHead : null;
-    const openReviewInputs =
-      loaded.status === 'valid' ? loaded.record.openReviewInputs : null;
+    const openScope =
+      loaded.status === 'valid' ? loaded.record.openScope : null;
 
-    if (openScopedHead === null) {
+    if (openScope === null) {
       throw new Error(
         `No review scope is open for ${head}. Run \`scope\` and review the delta it returns before recording an outcome.`
       );
     }
-    if (openReviewInputs === null) {
+    if (openScope.head !== head) {
       throw new Error(
-        `No review inputs are open for ${head}. Run \`scope\` with the captured Standards and Spec before recording an outcome.`
-      );
-    }
-    if (openScopedHead !== head) {
-      throw new Error(
-        `Review scope is stale: \`scope\` handed out ${openScopedHead}, but HEAD is now ${head}. Re-run \`scope\` and review the ${openScopedHead}..${head} delta before recording an outcome.`
+        `Review scope is stale: \`scope\` handed out ${openScope.head}, but HEAD is now ${head}. Re-run \`scope\` and review the ${openScope.head}..${head} delta before recording an outcome.`
       );
     }
 
@@ -861,16 +850,15 @@ function completeReview(targetBranch, candidateHead, outcome, findings) {
       authoritative: {
         findings,
         outcome,
-        reviewInputs: openReviewInputs,
+        reviewInputs: openScope.reviewInputs,
         reviewedHead: head,
-        scopedHead: openScopedHead,
+        scopedHead: openScope.head,
       },
       // One `complete` consumes one `scope`. Carrying the endpoint forward
       // would leave it open at this head, so a second `complete` could rewrite
       // the outcome — a pass into `changes_requested`, say — with no review
       // between. Nothing legitimate needs it: the next iteration re-scopes.
-      openReviewInputs: null,
-      openScopedHead: null,
+      openScope: null,
       provisional: null,
     });
     writeRecord(identity, record);
@@ -889,6 +877,28 @@ function saveProvisional(targetBranch, candidateHead, findings) {
     writeRecord(identity, record);
     return record;
   });
+}
+
+function reviewStatus(targetBranch) {
+  resolveTarget(targetBranch);
+  const identity = currentIdentity(targetBranch);
+  const loaded = loadRecord(identity);
+
+  if (loaded.status !== 'valid') {
+    return {
+      authoritativeFindings: [],
+      provisionalFindings: [],
+      reviewedHead: null,
+      state: loaded.status,
+    };
+  }
+
+  return {
+    authoritativeFindings: loaded.record.authoritative?.findings ?? [],
+    provisionalFindings: loaded.record.provisional?.findings ?? [],
+    reviewedHead: loaded.record.authoritative?.reviewedHead ?? null,
+    state: 'valid',
+  };
 }
 
 function resolveSourceDirectory(from) {
@@ -1020,7 +1030,13 @@ function relocateRecords(from, branch) {
 
 function main() {
   const { command, options } = parseArguments(process.argv.slice(2));
-  const commands = new Set(['complete', 'provisional', 'relocate', 'scope']);
+  const commands = new Set([
+    'complete',
+    'provisional',
+    'relocate',
+    'scope',
+    'status',
+  ]);
   if (!command || !commands.has(command)) {
     throw new Error(`Unknown command: ${command ?? '(missing)'}`);
   }
@@ -1041,7 +1057,9 @@ function main() {
 
   const target = requiredOption(options, 'target');
 
-  if (command === 'scope') {
+  if (command === 'status') {
+    result = reviewStatus(target);
+  } else if (command === 'scope') {
     const decision = options.get('decision');
     if (decision !== undefined && !reviewInputDecisions.has(decision)) {
       throw new Error(`Invalid review input decision: ${decision}`);

@@ -57,28 +57,11 @@ for its current source.
 
 1. Run `working-on-issue` with the full input. Keep the issue for the later
    requirements review.
-2. Read [`review-record.md`](review-record.md) in full. At the start of this
-   top-level invocation, capture the current Standards and Spec inputs in two
-   temporary files outside the repository. Standards includes every documented
-   coding standard and active Standards review rule that applies to the branch.
-   Spec is the originating issue or specification. Give each source a stable
-   label in its file, followed by the exact content reviewers will use. Keep
-   credentials, caller focus instructions, behavioral observations, prompts,
-   reviewer transcripts, and pull-request data out of both files.
-
-   Resolve the target branch from `origin/HEAD`, then run the `scope` command
-   with both captured files from a clean committed worktree. When it requests a
-   review-input decision, compare the saved and current Standards and Spec. A
-   change is material when it could change a Standards or Spec verdict for any
-   code in the full branch diff. Return `changed` for a material change,
-   `unchanged` for a harmless text edit, or `uncertain` when the evidence does
-   not support either conclusion. Run the decision-bearing `scope` command once
-   to select the work.
-
-   Reuse the same captured files for every internal fix loop in this invocation.
-   Source changes made after capture apply to the next top-level invocation.
-   Keep the returned base and current commit unchanged for this pass. Remove the
-   captured files when the invocation ends.
+2. Read [`review-record.md`](review-record.md) in full. Resolve the target branch
+   from `origin/HEAD`, then follow its start-of-invocation capture and scope
+   procedure from a clean committed worktree. Run that opening decision once,
+   then reuse its captured inputs for every internal fix loop. Keep the returned
+   base and current commit unchanged for this pass.
 
    | Mode | Work to review |
    | --- | --- |
@@ -87,10 +70,6 @@ for its current source.
    | `recheck` | Previously reported findings at the same commit |
    | `skip` | The current commit already passed with no findings |
 
-   Missing, corrupt, unreadable, unrelated, or outdated review data produces
-   `full`. A `changed` or `uncertain` input decision also produces `full` and
-   clears reusable results before opening the range. An accepted `unchanged`
-   decision saves the current evidence, then keeps the existing mode selection.
    A passing record that no longer includes the commit that earned it produces
    `recheck`. In `skip`, report that the current commit already passed and stop.
 3. Review the design for every changed module and interface in the selected

@@ -72,15 +72,12 @@ the review record was not handled.
 1. Resolve the target branch from `origin/HEAD`, then run:
 
    ```sh
-   node <polish-skill-directory>/scripts/review-state.mjs scope --target <target-branch>
+   node <polish-skill-directory>/scripts/review-state.mjs status --target <target-branch>
    ```
 
    A `valid` result means the record already moved with the branch. Report its
-   mode and open findings. Treat `unavailable` or `corrupt` as `missing`.
-
-   If the command refuses because the current worktree has uncommitted or
-   untracked files, report that `polish` needs a clean worktree to read the
-   record. The branch move still succeeded.
+   reviewed head and open findings. Treat `unavailable` or `corrupt` as
+   `missing`.
 
 2. For `missing` with a `--from` directory, run:
 
@@ -89,7 +86,7 @@ the review record was not handled.
      --from <other-temporary-directory> --branch <branch>
    ```
 
-   Read the record again with the `scope` command. An empty `relocated` list or
+   Read the record again with the `status` command. An empty `relocated` list or
    a source directory with no review data means there is no record to copy.
 
 3. For `missing` without `--from`, report that this session cannot find a
