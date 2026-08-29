@@ -2,9 +2,67 @@
 
 `polish` stores one temporary review file for each repository, source branch,
 and target branch. It contains commit IDs, completed results, short located
-findings, and the exact Standards and Spec evidence that produced the result.
-It does not store source-code excerpts, credentials, caller focus instructions,
-behavioral observations, prompts, reviewer transcripts, or pull-request data.
+findings, and the SHA-256 digest and version of the basis manifest that produced
+the result. It does not store requirement text, source-code excerpts,
+credentials, caller focus instructions, behavioral observations, prompts,
+reviewer transcripts, or pull-request data.
+
+## Build the review basis
+
+At the start of each top-level invocation, create one JSON basis manifest
+outside the repository. Keep it unchanged through every internal fix loop. A
+later invocation builds a fresh manifest.
+
+Use this exact shape:
+
+```json
+{
+  "manifestVersion": 1,
+  "standards": [
+    { "source": "AGENTS.md", "content": "<exact file content>" }
+  ],
+  "reviewRules": [
+    {
+      "axis": "architecture",
+      "source": "skill:codebase-design/SKILL.md",
+      "content": "<exact active rule content>"
+    }
+  ],
+  "designSources": [
+    { "source": "CONTEXT.md", "content": "<exact file content>" }
+  ],
+  "spec": {
+    "source": "github:owner/repository#123",
+    "content": "<complete originating issue or specification>"
+  }
+}
+```
+
+Use `null` for `spec` when the work has no originating issue or specification.
+Use stable source identities: repository-relative paths for repository files,
+skill-relative identities for skill rules, and the canonical tracker or
+document identifier for the Spec. A different identity is a different basis
+even when its text is equal.
+
+Build the four groups from these deterministic source sets, sorting every file
+set by source identity:
+
+- `standards`: `AGENTS.md` at the repository root and every additional
+  `AGENTS.md` that governs a path in the full merge-base-through-`HEAD` branch
+  diff, plus each repository standards document those instructions explicitly
+  require for the changed work.
+- `reviewRules`: the complete active Architecture, Standards, and Spec review
+  rules and each baseline or required reference those rules name. Label every
+  entry with its axis.
+- `designSources`: `CONTEXT.md` when present, every file in `docs/adr/` when
+  present, and the active design-review rules and required references.
+- `spec`: the complete originating issue or specification and its canonical
+  source identity.
+
+Set membership is part of the basis. Include added and empty files; omit removed
+files. Never put credentials in the manifest. The helper can prove that the
+manifest it hashes is the one passed through this invocation, but it cannot
+prove that the caller fetched each source freshly.
 
 ## Select work to review
 
@@ -13,67 +71,60 @@ Resolve `<polish-skill-directory>` to the directory containing the active
 
 ```sh
 node <polish-skill-directory>/scripts/review-state.mjs scope \
-  --target <target-branch> \
-  --standards <captured-standards-file> \
-  --spec <captured-spec-file>
+  --target <target-branch> < <basis-manifest.json>
 ```
 
-Create both captured files outside the repository at the start of the top-level
-invocation. The Standards file contains every documented coding standard that
-applies to the full branch diff and every active Standards review rule,
-including the rules and baseline named by `code-review`. The Spec file contains
-the complete originating issue or specification. Use stable source labels and
-the exact content each reviewer will apply. Reuse those files for every later
-`scope` and reviewer prompt in the invocation. Source changes after capture
-apply to the next top-level invocation.
+When the invocation includes caller focus instructions or behavioral
+observations, add `--review-context present`. This marker contains no supplied
+text and is not stored. It forces `full`, ensuring that the context reaches all
+reviewers instead of allowing `skip` or a narrower range.
 
-The JSON result contains `mode`, `reason`, `reviewInputDecision`, `base`, `head`,
+The helper validates the manifest, canonicalizes it with RFC 8785, and computes
+its SHA-256 digest. It never accepts a caller-supplied hash. The JSON result
+contains `mode`, `reason`, `basisDigest`, `manifestVersion`, `base`, `head`,
 `range`, record state, completed findings under `authoritativeFindings`, and
 findings from an unfinished run under `provisionalFindings`. `range` is the
 exact `<base>..<head>` range. `recheck` and `skip` have no range.
 
-When `reviewInputDecision` is `required`, `mode` is null and the result includes
-`savedInputs` and `currentInputs`. Compare both Standards and Spec versions,
-then run the same command once more with one decision:
+The selection is deterministic:
 
-```sh
-node <polish-skill-directory>/scripts/review-state.mjs scope \
-  --target <target-branch> \
-  --standards <captured-standards-file> \
-  --spec <captured-spec-file> \
-  --decision <changed|unchanged|uncertain>
-```
+| Condition | Mode |
+| --- | --- |
+| Missing, invalid, unrelated, or old-schema state | `full` |
+| Saved digest or manifest version differs | `full` |
+| Caller instructions or observations are present | `full` |
+| Equal basis with later commits | `incremental` |
+| Equal basis with findings at the same commit | `recheck` |
+| Equal basis with an earned pass at the same commit | `skip` |
 
-Use `changed` when the difference could change a verdict over the full branch
-diff. Use `unchanged` for a harmless text edit. Use `uncertain` when either
-version is incomplete or the effect is unclear. `changed` and `uncertain`
-atomically clear completed and provisional results and open a full merge-base
-through `HEAD` scope. `unchanged` saves the current evidence and applies the
-existing code-state rules. Exact evidence matches need no model decision.
+There is no materiality decision or invalidation command. Any basis difference
+is a safe cache miss. `scope` records the open commit and current digest but
+does not change the digest on the last completed review, so an interrupted full
+review cannot expose the older pass.
 
 ## Save a completed review
 
 After design review, verification, Standards, and Spec all finish on one
-unchanged commit, run one command:
+unchanged commit, pass the same captured manifest through standard input:
 
 ```sh
 node <polish-skill-directory>/scripts/review-state.mjs complete \
   --target <target-branch> \
   --candidate <candidate-head> \
-  --outcome passed
+  --outcome passed < <basis-manifest.json>
 
 node <polish-skill-directory>/scripts/review-state.mjs complete \
   --target <target-branch> \
   --candidate <candidate-head> \
   --outcome changes_requested \
-  --findings <findings.json>
+  --findings <findings.json> < <basis-manifest.json>
 ```
 
-The command requires a clean committed worktree, the candidate must equal
-`HEAD`, and a prior `scope` call must have selected that same commit and opened
-the captured Standards and Spec. One `scope` selection accepts one `complete`
-call. The completed result records those inputs. A passing result has no
-findings. A changes-requested result has at least one.
+The command requires a clean committed worktree. The candidate must equal
+`HEAD`, the digest must equal the open scope's digest, and a prior `scope` call
+must have selected that same commit. One `scope` selection accepts one
+`complete` call. Only successful `complete` changes the stored completed digest.
+A passing result has no findings. A changes-requested result has at least one.
 
 ## Inspect a record without opening a scope
 
@@ -85,11 +136,7 @@ node <polish-skill-directory>/scripts/review-state.mjs status \
 ```
 
 It reports record state, the reviewed head, and completed and provisional
-findings. It does not require review inputs or change the record.
-
-These checks prevent a fix commit from being recorded as reviewed before a new
-review sees it. After fixing and committing a finding, call `scope` again and
-review the returned range.
+findings. It does not require a manifest or change the record.
 
 ## Save findings from an unfinished review
 
@@ -103,8 +150,8 @@ node <polish-skill-directory>/scripts/review-state.mjs provisional \
   --findings <findings.json>
 ```
 
-Create the JSON file outside the repository and remove it after the command.
-No state change succeeded unless the command exits 0 and prints the new record.
+Create the findings file outside the repository and remove it afterward. No
+state change succeeded unless the command exits 0 and prints the new record.
 
 ## Move a record between temporary directories
 
@@ -151,11 +198,10 @@ a private `patinaproject-<user>/polish-reviews` directory. Tests may set
 `PATINAPROJECT_POLISH_TMP_DIR`.
 
 The helper accepts a record only when its schema, repository, branches, Git
-history, and stored review inputs match the record contract. Missing, corrupt,
-unreadable, unrelated, or outdated data causes a full review from the merge base
-to `HEAD`. A schema-v2 record has no comparison evidence, so it takes this full
-path. Every full selection clears completed and provisional results before it
-opens the range. Findings from an unfinished review never reduce the range.
+history, manifest version, and digests match the record contract. Missing,
+corrupt, unreadable, unrelated, or old-schema data causes a full review from the
+merge base to `HEAD`. Findings from an unfinished review never reduce the
+range.
 
 `skip` requires `authoritative.scopedHead` to equal `reviewedHead`. Only a
 successful `complete` call writes that value. A moved or hand-edited record is a
@@ -163,6 +209,6 @@ claim from another session, not proof that a review ran.
 
 The helper writes records through a same-directory temporary file and atomic
 rename. It uses private file permissions where supported and lock files to keep
-simultaneous writes in order. Record relocation carries the comparison evidence
-with the completed result. Losing the temporary directory only causes a full
-review next time.
+simultaneous writes in order. Record relocation carries the digest with the
+completed result. Losing the temporary directory only causes a full review next
+time.

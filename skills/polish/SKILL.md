@@ -58,10 +58,12 @@ for its current source.
 1. Run `working-on-issue` with the full input. Keep the issue for the later
    requirements review.
 2. Read [`review-record.md`](review-record.md) in full. Resolve the target branch
-   from `origin/HEAD`, then follow its start-of-invocation capture and scope
-   procedure from a clean committed worktree. Run that opening decision once,
-   then reuse its captured inputs for every internal fix loop. Keep the returned
-   base and current commit unchanged for this pass.
+   from `origin/HEAD`, then follow its basis-manifest and scope procedure from a
+   clean committed worktree. Build the manifest once at the start of this
+   top-level invocation. Pass that unchanged manifest to every later `scope`,
+   `complete`, and reviewer prompt in internal fix loops. Build a fresh manifest
+   only for a later top-level invocation. Keep the returned base and current
+   commit unchanged for this pass.
 
    | Mode | Work to review |
    | --- | --- |
@@ -71,12 +73,17 @@ for its current source.
    | `skip` | The current commit already passed with no findings |
 
    A passing record that no longer includes the commit that earned it produces
-   `recheck`. In `skip`, report that the current commit already passed and stop.
+   `recheck`. Any basis-manifest difference produces `full`; there is no
+   materiality judgment. Caller focus instructions or behavioral observations
+   also force `full`. In `skip`, report that the current commit already passed
+   and stop.
 3. Review the design for every changed module and interface in the selected
    non-empty `full` or `incremental` range. Read unchanged callers and
    neighboring code when needed. Recheck any earlier design findings. Use this
    opening scope for Architecture; Architecture does not choose another full or
-   incremental range.
+   incremental range. Apply only the captured design sources and Architecture
+   review rules from the basis manifest. Do not refetch them during this
+   invocation.
 
    Follow the complete review rules in `codebase-design`. Read relevant
    `CONTEXT.md` and ADR files first. Report only design improvements that belong
@@ -90,10 +97,11 @@ for its current source.
 5. Run the Standards and Spec reviews from `code-review` as fresh parallel
    subagents. Give both reviewers the fixed base and commit, the exact diff for
    `full` or `incremental`, any needed unchanged context, earlier findings to
-   recheck, and the captured input for that axis. The Standards reviewer applies
-   only the captured Standards content. The Spec reviewer applies only the
-   captured Spec content, or receives a clear no-Spec instruction. Do not
-   refetch either source during this invocation.
+   recheck, and the captured basis entries for that axis. The Standards reviewer
+   applies only the captured documented standards and Standards review rules.
+   The Spec reviewer applies only the captured Spec and Spec review rules, or
+   receives a clear no-Spec instruction. Give reviewers the same manifest the
+   helper hashed. Do not refetch any basis source during this invocation.
 
    Reviewers only report findings. They do not edit, stage, commit, or fix code.
    A documented standards violation or a missing, partial, or incorrect issue
@@ -114,6 +122,9 @@ for its current source.
    - With blocking findings, record `changes_requested` before fixing them.
    - If a review did not finish or `HEAD` changed, preserve the last completed
      result and save only useful findings from that unfinished review.
+
+   Pass the unchanged basis manifest to `complete`; a digest mismatch fails
+   instead of recording the result.
 7. Decide what to do with every completed finding:
 
    - Fix clear local problems with `implement`. Use `diagnosing-bugs` when local
