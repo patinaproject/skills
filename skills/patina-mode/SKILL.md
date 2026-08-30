@@ -34,11 +34,36 @@ that document wins.
   conflict, as the instruction to fix it.
 - Before implementing issue work, re-read the issue and spec for amendments.
   The pasted body may be stale.
-- Delegate open design questions to `research` and decide from sources.
 - Settle an observable fork by running it. When a which-approach answer is
   measurable, such as behavior, timing, layout, or output, build a throwaway
   probe and let the result decide. Reserve questions for product and
   preference calls.
+
+## Routing
+
+The operator dispatches work through named skills, and so does this mode.
+Match the task below, read that skill's `SKILL.md` when it is not loaded, and
+follow its contract instead of improvising the workflow.
+
+- Issue work, new or resumed, routes to `develop`. It owns the
+  working-on-issue, build, polish, and ready-pr sequence.
+- A reported defect or a pull-request bug comment routes to `fix`, one
+  evidence case per invocation.
+- An open design question routes to `research`; decide from sources, not
+  priors.
+- A contested or consequential design routes to `grill-system-design`, and
+  the decided plan lands in the spec through `to-spec` before implementation.
+- A contract-level review of a diff or spec routes to `review-system-design`.
+- Proof of behavior routes to `gather-evidence`.
+- An Android emulator or iOS simulator routes to `running-mobile-simulators`
+  before any device state change.
+- Base-branch drift or a merge conflict routes to `update-branch`.
+- Completed branch work routes to `polish` until it passes, then `ready-pr`
+  until the pull request is green.
+- A defective skill or instruction routes to `writing-for-agents`, per Fix
+  the skill first below.
+- Several stopped operator chats with safe work remaining route to
+  `orchestrate`.
 
 ## Evidence
 
