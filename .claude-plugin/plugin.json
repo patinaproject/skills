@@ -20,9 +20,11 @@
     "./skills/grill-system-design",
     "./skills/review-system-design",
     "./skills/fix",
+    "./skills/gather-evidence",
     "./skills/running-mobile-simulators",
     "./skills/orchestrate",
     "./skills/write-changelog",
-    "./skills/prompting-fable"
+    "./skills/prompting-fable",
+    "./skills/patina-mode"
   ]
 }

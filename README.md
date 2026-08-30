@@ -228,6 +228,16 @@ current pull-request head at the reporter's perceived surface.
 
 See [./skills/fix/](./skills/fix/) for the skill contract.
 
+### gather-evidence
+
+A behavior claim is only as good as the artifact behind it. `gather-evidence`
+captures proof on an identified build in the claim's environment under
+realistic conditions, requires the agent to inspect the artifact before any
+claim, and hands it to the operator with a working clipboard action.
+
+See [./skills/gather-evidence/](./skills/gather-evidence/) for the skill
+contract.
+
 ### running-mobile-simulators
 
 Concurrent workspaces can see the same Android emulators, iOS simulators, and
@@ -268,6 +278,15 @@ checkpoints, and route models by a glossary of cost, intelligence, and taste.
 See [./skills/prompting-fable/](./skills/prompting-fable/) for the skill
 contract.
 
+### patina-mode
+
+Repository docs say what to build; they do not say how the operator likes to
+work. `patina-mode` overlays the Patina Project operator's conventions: lead
+with the answer, drive to a green pull request, prove behavior through
+`gather-evidence`, and prefer the simple existing pattern.
+
+See [./skills/patina-mode/](./skills/patina-mode/) for the skill contract.
+
 ### scaffold-repository
 
 Teams spend disproportionate time on repo plumbing - commit conventions,
@@ -299,10 +318,12 @@ README and skill contract.
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [fix](./skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
+| [gather-evidence](./skills/gather-evidence/) | Capture, validate, and hand off proof that behavior matches a claim |
 | [running-mobile-simulators](./skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
+| [patina-mode](./skills/patina-mode/) | Work in the Patina Project operator's style |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
@@ -361,10 +382,12 @@ skills/
   grill-system-design/
   review-system-design/
   fix/
+  gather-evidence/
   running-mobile-simulators/
   orchestrate/
   write-changelog/
   prompting-fable/
+  patina-mode/
 .agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
 .claude-plugin/

@@ -26,10 +26,12 @@ layout.
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/fix/`: diagnosis-first correction and fixed-build evidence skill
+- `skills/gather-evidence/`: evidence capture, validation, and operator handoff skill
 - `skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
+- `skills/patina-mode/`: operator working-style overlay skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
   into `../../skills/<name>/`, vendored third-party skills are real directories
 - `.claude/skills/<name>/`: committed overlay; repo-owned skills symlink into
@@ -81,10 +83,12 @@ Skills owned by this repository:
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
 | `fix` | `skills/fix/` | Diagnosis-first correction and fixed-build evidence |
+| `gather-evidence` | `skills/gather-evidence/` | Evidence capture, validation, and operator handoff |
 | `running-mobile-simulators` | `skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `orchestrate` | `skills/orchestrate/` | User-visible Codex chat coordination |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |
+| `patina-mode` | `skills/patina-mode/` | Operator working-style overlay |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
 installed via the vercel-labs CLI and is not owned by this repository. Install

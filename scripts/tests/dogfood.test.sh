@@ -32,10 +32,12 @@ SKILLS=(
   grill-system-design
   review-system-design
   fix
+  gather-evidence
   running-mobile-simulators
   orchestrate
   write-changelog
   prompting-fable
+  patina-mode
 )
 FAIL_COUNT=0
 

@@ -24,10 +24,12 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/fix/`: diagnosis-first correction and fixed-build evidence skill
+- `skills/gather-evidence/`: evidence capture, validation, and operator handoff skill
 - `skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
+- `skills/patina-mode/`: operator working-style overlay skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
   real directories restored by `pnpm skills:install`. All entries are tracked.
@@ -279,10 +281,12 @@ This repo owns these skills at flat paths:
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
 | fix | `skills/fix/` |
+| gather-evidence | `skills/gather-evidence/` |
 | running-mobile-simulators | `skills/running-mobile-simulators/` |
 | orchestrate | `skills/orchestrate/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
+| patina-mode | `skills/patina-mode/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
