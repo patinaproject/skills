@@ -67,6 +67,7 @@ Before starting, confirm these skills are installed:
 - `implement` and `tdd` build the correction at an agreed public seam.
 - `polish` runs the shared local architecture, Standards, and Spec loop.
 - `ready-pr` publishes the branch and runs the shared PR readiness loop.
+- `gather-evidence` owns evidence capture, validation, and operator handoff.
 
 For an evidence case that needs an Android emulator or iOS simulator, also
 confirm that `running-mobile-simulators` is installed. It owns device selection,
@@ -75,7 +76,7 @@ readiness, binding, recovery, and cleanup.
 If any are missing, stop and report the missing names with install guidance:
 
 ```sh
-npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish ready-pr running-mobile-simulators -y
+npm_config_ignore_scripts=true pnpm dlx skills@latest add patinaproject/skills --skill polish ready-pr gather-evidence running-mobile-simulators -y
 npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --skill diagnosing-bugs implement tdd -y
 ```
 
@@ -121,9 +122,10 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
 
 7. **Verify the fixed build.** Resolve the current PR head SHA, prove the
    deployed target was built from that head, and repeat the checkpointed repro
-   without weakening its steps or fidelity. Apply the
+   without weakening its steps or fidelity. Capture, validate, and hand off
+   the proof with `gather-evidence`, and apply the
    [reporter-fidelity evidence rules](../ready-pr/references/reporter-fidelity.md#matching-evidence-to-the-report).
-   Inspect the evidence itself. A green result is valid only when it shows the
+   A green result is valid only when the inspected evidence shows the
    expected behavior and no reported failure on that deployed head.
 
 8. **Restart on invalidation.** A red fixed-build retest restarts at diagnosis
