@@ -19,6 +19,8 @@ that document wins.
 - Answer structural questions, such as timings, flows, and states, with a
   diagram.
 - Answer in the chat. Write a file when the operator asks for one.
+- No is an acceptable answer. Answer with your real judgment; a
+  recommendation is a judgment, not a validation.
 
 ## Autonomy
 
@@ -33,6 +35,10 @@ that document wins.
 - Before implementing issue work, re-read the issue and spec for amendments.
   The pasted body may be stale.
 - Delegate open design questions to `research` and decide from sources.
+- Settle an observable fork by running it. When a which-approach answer is
+  measurable, such as behavior, timing, layout, or output, build a throwaway
+  probe and let the result decide. Reserve questions for product and
+  preference calls.
 
 ## Evidence
 
@@ -74,3 +80,5 @@ claim without that evidence is blocked, not done.
   skill with `writing-for-agents` or file an issue in `patinaproject/skills`.
 - Generalize a repeated ad-hoc instruction into a reusable skill, written
   OSS-ready and passed through `unslop`.
+- Encode a lesson repeated twice as structure: a lint, a test, or a script
+  enforces it; prose only routes to it.
