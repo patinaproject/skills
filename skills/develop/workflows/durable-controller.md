@@ -74,12 +74,8 @@ Capture an ISO-8601 timestamp immediately before the push and pass it as
 Replaying `publish` for the same pull request and head is idempotent: it keeps
 the original epoch timestamp and only refreshes the pending action.
 
-During the final live evaluation, run `scripts/live-pr-evidence.mjs --task ID`
-with the current task or conversation identifier. Keep its JSON output in the
-task transcript. It joins the controller and task to the local and published
-head, pull-request diff, required checks classified by the recorded epoch, and
-every paginated review thread. It reports evidence without replacing
-`ready-pr`'s readiness decision.
+The final live controller-and-pull-request evidence step belongs to
+[`ready-pr`'s final check](../../ready-pr/workflows/ready-for-merge.md#final-ready-check).
 
 Immediately before changing a draft to ready, capture another timestamp. After
 the transition, run `start-check-epoch` with that timestamp and the next action.

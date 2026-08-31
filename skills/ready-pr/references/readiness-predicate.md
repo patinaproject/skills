@@ -27,6 +27,11 @@ gate. Keep context identity by check name and workflow; do not substitute an
 older row with the same head commit. A missing or invalid `startedAt` is pending,
 not current-epoch evidence.
 
+Within one context, a queued replacement takes precedence over completed
+history. Otherwise select the row with the latest `startedAt`. Evaluate only
+that selected row: an older failure cannot override its later pass, and an older
+pass cannot override its queued or running replacement.
+
 Optional review services are not part of this decision. Their comments still
 need the same fix or explanation as other bot feedback.
 

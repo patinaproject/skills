@@ -126,6 +126,26 @@ if (args[0] === 'repo' && args[1] === 'view') {
       link: 'https://example.com/check/old', name: 'lint',
       startedAt: '2026-08-31T07:58:00Z', state: 'SUCCESS', workflow: 'CI',
     },
+    {
+      bucket: 'pass', completedAt: '2026-08-31T07:59:00Z', event: 'pull_request',
+      link: 'https://example.com/check/pending-old', name: 'replacement-pending',
+      startedAt: '2026-08-31T07:58:00Z', state: 'SUCCESS', workflow: 'CI',
+    },
+    {
+      bucket: 'pending', completedAt: null, event: 'pull_request',
+      link: 'https://example.com/check/pending-new', name: 'replacement-pending',
+      startedAt: null, state: 'QUEUED', workflow: 'CI',
+    },
+    {
+      bucket: 'fail', completedAt: '2026-08-31T08:02:00Z', event: 'pull_request',
+      link: 'https://example.com/check/passed-old', name: 'replacement-passed',
+      startedAt: '2026-08-31T08:01:00Z', state: 'FAILURE', workflow: 'CI',
+    },
+    {
+      bucket: 'pass', completedAt: '2026-08-31T08:04:00Z', event: 'pull_request',
+      link: 'https://example.com/check/passed-new', name: 'replacement-passed',
+      startedAt: '2026-08-31T08:03:00Z', state: 'SUCCESS', workflow: 'CI',
+    },
   ]));
   process.exitCode = 1;
 } else if (args[0] === 'api' && args[1] === 'graphql') {
@@ -173,10 +193,18 @@ assert.equal(evidence.task, 'task-409');
 assert.equal(evidence.local.headSha, headSha);
 assert.equal(evidence.pullRequest.headRefOid, headSha);
 assert.deepEqual(evidence.diffPaths, ['changed.md']);
-assert.equal(evidence.requiredChecks.currentEpoch.length, 1);
+assert.equal(evidence.requiredChecks.currentEpoch.length, 2);
 assert.deepEqual(evidence.requiredChecks.awaitingContexts, [
   { name: 'lint', workflow: 'CI' },
+  { name: 'replacement-pending', workflow: 'CI' },
 ]);
+assert.equal(
+  evidence.requiredChecks.currentEpoch.find(
+    ({ name }) => name === 'replacement-passed',
+  ).bucket,
+  'pass',
+);
+assert.equal(evidence.requiredChecks.history.length, 7);
 assert.equal(evidence.requiredChecks.terminal, false);
 assert.equal(evidence.reviewThreads.pageCount, 2);
 assert.equal(evidence.reviewThreads.nodes.length, 2);

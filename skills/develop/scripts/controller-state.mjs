@@ -178,15 +178,7 @@ function completeRequirement(options) {
 function advance(options) {
   const { path, state } = loadState();
   const phase = requiredOption(options, 'phase');
-  const phases = new Set([
-    'prerequisites',
-    'implementation',
-    'verification',
-    'polish',
-    'publication',
-    'readiness',
-  ]);
-  if (!phases.has(phase)) {
+  if (!phaseTransitions.has(phase)) {
     fail(`Unknown develop controller phase: ${phase}.`);
   }
   if (new Set(['polish', 'publication', 'readiness']).has(phase)) {

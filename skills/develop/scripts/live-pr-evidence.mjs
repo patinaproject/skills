@@ -99,20 +99,39 @@ const checkResult = run(
 );
 const requiredChecks = JSON.parse(checkResult.stdout);
 const epochStartedAt = Date.parse(controller.checkEpochStartedAt);
-const currentEpochChecks = requiredChecks.filter(
+
+function selectCurrentContextRuns(checks) {
+  const contexts = new Map();
+  for (const check of checks) {
+    const identity = `${check.workflow}\0${check.name}`;
+    const candidates = contexts.get(identity) ?? [];
+    candidates.push(check);
+    contexts.set(identity, candidates);
+  }
+  return [...contexts.values()].map((candidates) => {
+    const queued = candidates.find(
+      ({ completedAt, startedAt }) => !completedAt && !startedAt,
+    );
+    if (queued) {
+      return queued;
+    }
+    return candidates.toSorted(
+      (left, right) => Date.parse(right.startedAt) - Date.parse(left.startedAt),
+    )[0];
+  });
+}
+
+const selectedChecks = selectCurrentContextRuns(requiredChecks);
+const currentEpochChecks = selectedChecks.filter(
   ({ startedAt }) =>
     Number.isFinite(Date.parse(startedAt)) &&
     Date.parse(startedAt) >= epochStartedAt,
 );
-const currentContextIdentities = new Set(
-  currentEpochChecks.map(({ name, workflow }) => `${workflow}\0${name}`),
-);
-const awaitingContexts = requiredChecks
+const awaitingContexts = selectedChecks
   .filter(
-    ({ name, startedAt, workflow }) =>
-      (!Number.isFinite(Date.parse(startedAt)) ||
-        Date.parse(startedAt) < epochStartedAt) &&
-      !currentContextIdentities.has(`${workflow}\0${name}`),
+    ({ startedAt }) =>
+      !Number.isFinite(Date.parse(startedAt)) ||
+      Date.parse(startedAt) < epochStartedAt,
   )
   .map(({ name, workflow }) => ({ name, workflow }));
 const terminalBuckets = new Set(['pass', 'fail', 'skipping', 'cancel']);
@@ -167,6 +186,7 @@ process.stdout.write(`${JSON.stringify({
   requiredChecks: {
     awaitingContexts,
     currentEpoch: currentEpochChecks,
+    history: requiredChecks,
     passing:
       awaitingContexts.length === 0 &&
       currentEpochChecks.every(({ bucket }) => passingBuckets.has(bucket)),
