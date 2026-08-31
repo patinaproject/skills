@@ -3,6 +3,7 @@ import {
   chmodSync,
   mkdtempSync,
   mkdirSync,
+  readFileSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -80,6 +81,21 @@ for (const args of [
     '--pending-action',
     'Collect live evidence',
   ],
+  [
+    'record-check-contexts',
+    '--context',
+    'CI=test',
+    '--context',
+    'CI=lint',
+    '--context',
+    'CI=replacement-pending',
+    '--context',
+    'CI=replacement-passed',
+    '--evidence',
+    'The pull request required-check query returned four contexts',
+    '--pending-action',
+    'Collect live evidence',
+  ],
 ]) {
   result = run(process.execPath, [controllerScript, ...args], repository);
   assert.equal(result.status, 0, result.stderr);
@@ -91,11 +107,15 @@ const fakeGh = join(fakeBin, 'gh');
 writeFileSync(
   fakeGh,
   `#!/usr/bin/env node
+const fs = require('node:fs');
 const args = process.argv.slice(2);
 const head = process.env.FAKE_PR_HEAD;
 if (args[0] === 'repo' && args[1] === 'view') {
   console.log(JSON.stringify({ nameWithOwner: 'patinaproject/skills' }));
 } else if (args[0] === 'pr' && args[1] === 'view') {
+  const counterPath = process.env.FAKE_PR_VIEW_COUNTER;
+  const viewCount = Number(fs.readFileSync(counterPath, 'utf8') || '0') + 1;
+  fs.writeFileSync(counterPath, String(viewCount));
   console.log(JSON.stringify({
     number: 77,
     url: 'https://github.com/patinaproject/skills/pull/77',
@@ -104,13 +124,13 @@ if (args[0] === 'repo' && args[1] === 'view') {
     baseRefName: 'main',
     isDraft: false,
     mergeable: 'MERGEABLE',
-    mergeStateStatus: 'CLEAN',
+    mergeStateStatus: viewCount > 1 ? 'CLEAN' : 'BLOCKED',
     reviewDecision: '',
   }));
 } else if (args[0] === 'pr' && args[1] === 'diff') {
   console.log('changed.md');
 } else if (args[0] === 'pr' && args[1] === 'checks') {
-  console.log(JSON.stringify([
+  const historicalChecks = [
     {
       bucket: 'pass', completedAt: '2026-08-31T08:02:00Z', event: 'pull_request',
       link: 'https://example.com/check/current', name: 'test',
@@ -146,8 +166,22 @@ if (args[0] === 'repo' && args[1] === 'view') {
       link: 'https://example.com/check/passed-new', name: 'replacement-passed',
       startedAt: '2026-08-31T08:03:00Z', state: 'SUCCESS', workflow: 'CI',
     },
-  ]));
-  process.exitCode = 1;
+  ];
+  const terminalChecks = [
+    ['test', '2026-08-31T08:01:00Z'],
+    ['lint', '2026-08-31T08:02:00Z'],
+    ['replacement-pending', '2026-08-31T08:03:00Z'],
+    ['replacement-passed', '2026-08-31T08:04:00Z'],
+  ].map(([name, startedAt]) => ({
+    bucket: 'pass', completedAt: '2026-08-31T08:05:00Z',
+    event: 'pull_request', link: 'https://example.com/check/' + name,
+    name, startedAt, state: 'SUCCESS', workflow: 'CI',
+  }));
+  const mode = process.env.FAKE_CHECK_MODE;
+  console.log(JSON.stringify(
+    mode === 'empty' ? [] : mode === 'terminal' ? terminalChecks : historicalChecks,
+  ));
+  if (!mode) process.exitCode = 1;
 } else if (args[0] === 'api' && args[1] === 'graphql') {
   const page = (hasNextPage, endCursor, thread) => ({
     data: { repository: { pullRequest: { reviewThreads: {
@@ -179,8 +213,10 @@ chmodSync(fakeGh, 0o755);
 const env = {
   ...process.env,
   FAKE_PR_HEAD: headSha,
+  FAKE_PR_VIEW_COUNTER: join(repository, 'pr-view-count'),
   PATH: `${fakeBin}:${process.env.PATH}`,
 };
+writeFileSync(env.FAKE_PR_VIEW_COUNTER, '0');
 result = run(
   process.execPath,
   [evidenceScript, '--task', 'task-409'],
@@ -209,6 +245,35 @@ assert.equal(evidence.requiredChecks.terminal, false);
 assert.equal(evidence.reviewThreads.pageCount, 2);
 assert.equal(evidence.reviewThreads.nodes.length, 2);
 
+writeFileSync(env.FAKE_PR_VIEW_COUNTER, '0');
+result = run(
+  process.execPath,
+  [evidenceScript, '--task', 'task-409'],
+  repository,
+  { ...env, FAKE_CHECK_MODE: 'empty' },
+);
+assert.equal(result.status, 0, result.stderr);
+const emptyEvidence = JSON.parse(result.stdout);
+assert.equal(emptyEvidence.requiredChecks.terminal, false);
+assert.equal(emptyEvidence.requiredChecks.passing, false);
+assert.equal(emptyEvidence.requiredChecks.awaitingContexts.length, 4);
+assert.equal(emptyEvidence.pullRequest.mergeStateStatus, 'BLOCKED');
+
+writeFileSync(env.FAKE_PR_VIEW_COUNTER, '0');
+result = run(
+  process.execPath,
+  [evidenceScript, '--task', 'task-409'],
+  repository,
+  { ...env, FAKE_CHECK_MODE: 'terminal' },
+);
+assert.equal(result.status, 0, result.stderr);
+const terminalEvidence = JSON.parse(result.stdout);
+assert.equal(terminalEvidence.requiredChecks.terminal, true);
+assert.equal(terminalEvidence.requiredChecks.passing, true);
+assert.equal(terminalEvidence.pullRequest.mergeStateStatus, 'CLEAN');
+assert.equal(readFileSync(env.FAKE_PR_VIEW_COUNTER, 'utf8'), '2');
+
+writeFileSync(env.FAKE_PR_VIEW_COUNTER, '0');
 result = run(
   process.execPath,
   [evidenceScript, '--task', 'task-409'],

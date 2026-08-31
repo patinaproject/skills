@@ -68,18 +68,30 @@ The helper enforces that order. A repair may return from verification, `polish`,
 publication, or readiness to implementation, but a later head cannot skip
 verification or `polish` on its way back to publication.
 
-After a push, record the pull request and full published commit with `publish`.
-Capture an ISO-8601 timestamp immediately before the push and pass it as
-`--check-epoch-started-at`. A new published head starts a new check epoch.
-Replaying `publish` for the same pull request and head is idempotent: it keeps
-the original epoch timestamp and only refreshes the pending action.
+Capture an ISO-8601 timestamp immediately before a push. Immediately after the
+push, run `publish` with the full head and `--check-epoch-started-at`. Include
+`--pull-request` when one already exists. For the first push, omit it so the
+published head is durable before pull-request creation, then run
+`attach-pull-request` as soon as creation succeeds. A new published head starts
+a new check epoch. Replaying the recorded publication or attachment is
+idempotent: it keeps the original epoch timestamp and only refreshes the pending
+action.
+
+After the pull request exists, record its required context identities with
+`record-check-contexts --context WORKFLOW=NAME --evidence TEXT`. Use every row
+from `gh pr checks --required --json name,workflow` and refresh the record when
+the target's required contexts change. Do not treat a momentarily empty check
+list as proof that no contexts are required. Record an empty set only when the
+repository's authoritative protection or ruleset configuration proves it, and
+put that proof in `--evidence`.
 
 The final live controller-and-pull-request evidence step belongs to
 [`ready-pr`'s final check](../../ready-pr/workflows/ready-for-merge.md#final-ready-check).
 
 Immediately before changing a draft to ready, capture another timestamp. After
 the transition, run `start-check-epoch` with that timestamp and the next action.
-This creates a new epoch even when the commit did not change.
+This creates a new epoch even when the commit did not change. The helper refuses
+the transition until the required context set is known.
 
 When a branch-caused failure needs a fix, advance to `implementation`. The new
 commit returns through verification, `polish`, publication, and readiness.

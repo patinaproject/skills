@@ -55,28 +55,36 @@ const repository = json('gh', [
   '--json',
   'nameWithOwner',
 ]).nameWithOwner;
-const pullRequest = json('gh', [
-  'pr',
-  'view',
-  controller.pullRequest,
-  '--json',
-  'number,url,headRefName,headRefOid,baseRefName,isDraft,mergeable,mergeStateStatus,reviewDecision',
-]);
+function readPullRequest() {
+  return json('gh', [
+    'pr',
+    'view',
+    controller.pullRequest,
+    '--json',
+    'number,url,headRefName,headRefOid,baseRefName,isDraft,mergeable,mergeStateStatus,reviewDecision',
+  ]);
+}
+
+let pullRequest = readPullRequest();
 const local = {
   branch: git('branch', '--show-current'),
   headSha: git('rev-parse', 'HEAD'),
 };
 
-for (const [name, actual, expected] of [
-  ['branch', local.branch, controller.branch],
-  ['local head', local.headSha, controller.headSha],
-  ['pull-request branch', pullRequest.headRefName, controller.branch],
-  ['pull-request head', pullRequest.headRefOid, controller.headSha],
-]) {
-  if (actual !== expected) {
-    fail(`Develop evidence ${name} mismatch: expected ${expected}, found ${actual}.`);
+function requireMatchingHeads(currentPullRequest) {
+  for (const [name, actual, expected] of [
+    ['branch', local.branch, controller.branch],
+    ['local head', local.headSha, controller.headSha],
+    ['pull-request branch', currentPullRequest.headRefName, controller.branch],
+    ['pull-request head', currentPullRequest.headRefOid, controller.headSha],
+  ]) {
+    if (actual !== expected) {
+      fail(`Develop evidence ${name} mismatch: expected ${expected}, found ${actual}.`);
+    }
   }
 }
+
+requireMatchingHeads(pullRequest);
 
 const diffPaths = run('gh', [
   'pr',
@@ -122,20 +130,50 @@ function selectCurrentContextRuns(checks) {
 }
 
 const selectedChecks = selectCurrentContextRuns(requiredChecks);
-const currentEpochChecks = selectedChecks.filter(
-  ({ startedAt }) =>
-    Number.isFinite(Date.parse(startedAt)) &&
-    Date.parse(startedAt) >= epochStartedAt,
+const checkIdentity = ({ name, workflow }) => `${workflow}\0${name}`;
+const selectedByIdentity = new Map(
+  selectedChecks.map((check) => [checkIdentity(check), check]),
 );
-const awaitingContexts = selectedChecks
-  .filter(
-    ({ startedAt }) =>
-      !Number.isFinite(Date.parse(startedAt)) ||
-      Date.parse(startedAt) < epochStartedAt,
-  )
-  .map(({ name, workflow }) => ({ name, workflow }));
+const expectedContexts = controller.requiredCheckContexts ?? [];
+const contextByIdentity = new Map(
+  expectedContexts.map((context) => [checkIdentity(context), context]),
+);
+for (const check of selectedChecks) {
+  contextByIdentity.set(checkIdentity(check), {
+    name: check.name,
+    workflow: check.workflow,
+  });
+}
+const currentEpochChecks = [];
+const awaitingContexts = [];
+for (const [identity, context] of contextByIdentity) {
+  const check = selectedByIdentity.get(identity);
+  if (
+    !check ||
+    !Number.isFinite(Date.parse(check.startedAt)) ||
+    Date.parse(check.startedAt) < epochStartedAt
+  ) {
+    awaitingContexts.push(context);
+  } else {
+    currentEpochChecks.push(check);
+  }
+}
 const terminalBuckets = new Set(['pass', 'fail', 'skipping', 'cancel']);
 const passingBuckets = new Set(['pass', 'skipping']);
+const contextsKnown = controller.requiredCheckContextsKnown === true;
+const epochTerminal =
+  contextsKnown &&
+  awaitingContexts.length === 0 &&
+  currentEpochChecks.every(({ bucket }) => terminalBuckets.has(bucket));
+const epochPassing =
+  contextsKnown &&
+  awaitingContexts.length === 0 &&
+  currentEpochChecks.every(({ bucket }) => passingBuckets.has(bucket));
+
+if (epochTerminal) {
+  pullRequest = readPullRequest();
+  requireMatchingHeads(pullRequest);
+}
 
 const [owner, name] = repository.split('/');
 const reviewQuery = `
@@ -185,14 +223,13 @@ process.stdout.write(`${JSON.stringify({
   repository,
   requiredChecks: {
     awaitingContexts,
+    contextsEvidence: controller.requiredCheckContextsEvidence ?? null,
+    contextsKnown,
     currentEpoch: currentEpochChecks,
+    expectedContexts,
     history: requiredChecks,
-    passing:
-      awaitingContexts.length === 0 &&
-      currentEpochChecks.every(({ bucket }) => passingBuckets.has(bucket)),
-    terminal:
-      awaitingContexts.length === 0 &&
-      currentEpochChecks.every(({ bucket }) => terminalBuckets.has(bucket)),
+    passing: epochPassing,
+    terminal: epochTerminal,
   },
   reviewThreads: {
     nodes: reviewThreads,

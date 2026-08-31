@@ -58,6 +58,9 @@ function createRepository() {
     pendingAction: 'Verify publication prerequisites',
     phase: 'prerequisites',
     pullRequest: null,
+    requiredCheckContexts: [],
+    requiredCheckContextsEvidence: null,
+    requiredCheckContextsKnown: false,
     requirements: [
       {
         evidence: null,
@@ -160,8 +163,6 @@ function createRepository() {
   const published = run(
     'publish',
     [
-      '--pull-request',
-      '123',
       '--head',
       firstHead,
       '--check-epoch-started-at',
@@ -173,8 +174,8 @@ function createRepository() {
   );
   assert.equal(published.status, 0, published.stderr);
   let publishedState = JSON.parse(readFileSync(statePath, 'utf8'));
-  assert.equal(publishedState.phase, 'readiness');
-  assert.equal(publishedState.pullRequest, '123');
+  assert.equal(publishedState.phase, 'publication');
+  assert.equal(publishedState.pullRequest, null);
   assert.equal(publishedState.headSha, firstHead);
   assert.equal(publishedState.checkEpoch, 1);
   assert.equal(publishedState.checkEpochStartedAt, publicationEpoch);
@@ -182,8 +183,6 @@ function createRepository() {
   const replayedPublication = run(
     'publish',
     [
-      '--pull-request',
-      '123',
       '--head',
       firstHead,
       '--check-epoch-started-at',
@@ -201,6 +200,53 @@ function createRepository() {
     publishedState.pendingAction,
     'Resume waiting for required checks',
   );
+
+  const attached = run(
+    'attach-pull-request',
+    [
+      '--pull-request',
+      '123',
+      '--pending-action',
+      'Observe the required check contexts',
+    ],
+    repository,
+  );
+  assert.equal(attached.status, 0, attached.stderr);
+  publishedState = JSON.parse(readFileSync(statePath, 'utf8'));
+  assert.equal(publishedState.phase, 'readiness');
+  assert.equal(publishedState.pullRequest, '123');
+
+  const unknownContexts = run(
+    'start-check-epoch',
+    [
+      '--pending-action',
+      'Do not start without required check identities',
+      '--check-epoch-started-at',
+      '2026-08-31T08:09:00.000Z',
+    ],
+    repository,
+  );
+  assert.equal(unknownContexts.status, 1);
+  assert.match(unknownContexts.stderr, /record required check contexts/);
+
+  const recordedContexts = run(
+    'record-check-contexts',
+    [
+      '--context',
+      'CI=test',
+      '--evidence',
+      'gh pr checks --required returned the CI test context',
+      '--pending-action',
+      'Start the ready-for-review epoch',
+    ],
+    repository,
+  );
+  assert.equal(recordedContexts.status, 0, recordedContexts.stderr);
+  publishedState = JSON.parse(readFileSync(statePath, 'utf8'));
+  assert.deepEqual(publishedState.requiredCheckContexts, [
+    { name: 'test', workflow: 'CI' },
+  ]);
+  assert.equal(publishedState.requiredCheckContextsKnown, true);
 
   const readyReviewEpoch = '2026-08-31T08:10:00.000Z';
   const readyEpoch = run(

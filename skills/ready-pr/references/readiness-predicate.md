@@ -32,6 +32,11 @@ history. Otherwise select the row with the latest `startedAt`. Evaluate only
 that selected row: an older failure cannot override its later pass, and an older
 pass cannot override its queued or running replacement.
 
+The durable controller's recorded required-context set defines what must
+appear. A missing expected row is pending. An empty query is not passing until
+the repository's protection or ruleset configuration has authoritatively
+confirmed that the required-context set is empty.
+
 Optional review services are not part of this decision. Their comments still
 need the same fix or explanation as other bot feedback.
 

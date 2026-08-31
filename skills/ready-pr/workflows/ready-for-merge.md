@@ -45,9 +45,11 @@ workflow result. Mark and stop the controller only after this workflow reaches
    exact commit. Fix and commit clear findings, then repeat checks and review
    until the current commit passes.
 5. Push only after the exact commit passes. In a durable `develop` run, capture
-   the check-epoch timestamp immediately before the push, then record the pull
-   request and published full commit with the controller's `publish` command.
-   Every later fix commit returns to step 3 before another push.
+   the check-epoch timestamp immediately before the push. Immediately after the
+   push, record the full published commit with `publish`; include the pull
+   request when one already exists. Do not leave the pushed head unrecorded
+   while creating its first pull request. Every later fix commit returns to
+   step 3 before another push.
 
 ## Create or update the pull request
 
@@ -62,6 +64,12 @@ workflow result. Mark and stop the controller only after this workflow reaches
    produced file.
 5. Open agent-created work as a draft. Leave a draft created by a person
    unchanged unless the user asks the agent to take it over.
+
+For a durable controller's first pull request, run `attach-pull-request` after
+creation. Then record every required check name/workflow pair as described in
+[the controller workflow](../../develop/workflows/durable-controller.md#move-through-phases).
+An empty live result is a discovery gap unless authoritative target-branch
+configuration proves that no contexts are required.
 
 ## Check the current pull request commit
 
@@ -197,7 +205,8 @@ For a durable `develop` run, run the develop skill's bundled
 `scripts/live-pr-evidence.mjs --task ID` with the current task identifier. Keep
 the JSON result in the task transcript as the joined live evidence record. A
 mismatch exits unsuccessfully and blocks a ready result; the helper does not
-decide readiness by itself.
+decide readiness by itself. When the recorded epoch is terminal, the helper
+fetches merge state again after that result; use this post-epoch value.
 
 Account for every path from `git status --short`:
 

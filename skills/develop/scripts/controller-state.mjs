@@ -41,6 +41,14 @@ function requiredOption(options, name) {
   return values[0].trim();
 }
 
+function optionalOption(options, name) {
+  const values = options.get(name) ?? [];
+  if (values.length > 1 || (values.length === 1 && !values[0].trim())) {
+    fail(`--${name} accepts at most one non-empty value.`);
+  }
+  return values.length === 1 ? values[0].trim() : null;
+}
+
 const phaseTransitions = new Map([
   ['prerequisites', new Set(['implementation'])],
   ['implementation', new Set(['verification'])],
@@ -154,6 +162,9 @@ function init(options) {
     pendingAction: requiredOption(options, 'pending-action'),
     phase: 'prerequisites',
     pullRequest: null,
+    requiredCheckContexts: [],
+    requiredCheckContextsEvidence: null,
+    requiredCheckContextsKnown: false,
     requirements,
     status: 'nonterminal',
     version: 1,
@@ -211,13 +222,13 @@ function publish(options) {
   if (!/^[0-9a-f]{40}$/.test(headSha)) {
     fail('--head requires one full 40-character commit SHA.');
   }
-  const pullRequest = requiredOption(options, 'pull-request');
+  const pullRequest = optionalOption(options, 'pull-request');
   const pendingAction = requiredOption(options, 'pending-action');
   const epochStartedAt = checkEpochStartedAt(options);
   if (
-    state.phase === 'readiness' &&
     state.headSha === headSha &&
-    state.pullRequest === pullRequest
+    ((state.phase === 'publication' && !state.pullRequest && !pullRequest) ||
+      (state.phase === 'readiness' && state.pullRequest === pullRequest))
   ) {
     state.pendingAction = pendingAction;
     writeState(path, state);
@@ -238,10 +249,65 @@ function publish(options) {
   }
   state.checkEpoch += 1;
   state.checkEpochStartedAt = epochStartedAt;
-  state.phase = 'readiness';
+  state.phase = pullRequest ? 'readiness' : 'publication';
   state.pullRequest = pullRequest;
   state.headSha = headSha;
   state.pendingAction = pendingAction;
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function attachPullRequest(options) {
+  const { path, state } = loadState();
+  const pullRequest = requiredOption(options, 'pull-request');
+  const pendingAction = requiredOption(options, 'pending-action');
+  if (
+    state.phase === 'readiness' &&
+    state.pullRequest === pullRequest &&
+    state.headSha
+  ) {
+    state.pendingAction = pendingAction;
+    writeState(path, state);
+    process.stdout.write(`${path}\n`);
+    return;
+  }
+  if (state.phase !== 'publication' || !state.headSha || state.pullRequest) {
+    fail('Develop controller can attach a pull request only to a published head without one.');
+  }
+  state.phase = 'readiness';
+  state.pullRequest = pullRequest;
+  state.pendingAction = pendingAction;
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function recordCheckContexts(options) {
+  const { path, state } = loadState();
+  if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
+    fail('Develop controller can record required checks only during published readiness.');
+  }
+  const contexts = (options.get('context') ?? []).map((entry) => {
+    const separator = entry.indexOf('=');
+    if (separator < 1 || separator === entry.length - 1) {
+      fail('--context must use WORKFLOW=NAME with both values present.');
+    }
+    const context = {
+      name: entry.slice(separator + 1).trim(),
+      workflow: entry.slice(0, separator).trim(),
+    };
+    if (!context.name || !context.workflow) {
+      fail('--context must use WORKFLOW=NAME with both values present.');
+    }
+    return context;
+  });
+  const identities = contexts.map(({ name, workflow }) => `${workflow}\0${name}`);
+  if (new Set(identities).size !== identities.length) {
+    fail('Develop controller required check contexts must be unique.');
+  }
+  state.requiredCheckContexts = contexts;
+  state.requiredCheckContextsEvidence = requiredOption(options, 'evidence');
+  state.requiredCheckContextsKnown = true;
+  state.pendingAction = requiredOption(options, 'pending-action');
   writeState(path, state);
   process.stdout.write(`${path}\n`);
 }
@@ -250,6 +316,9 @@ function startCheckEpoch(options) {
   const { path, state } = loadState();
   if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
     fail('Develop controller cannot start a check epoch before publication.');
+  }
+  if (!state.requiredCheckContextsKnown) {
+    fail('Develop controller must record required check contexts before starting a new epoch.');
   }
   const epochStartedAt = checkEpochStartedAt(options);
   const pendingAction = requiredOption(options, 'pending-action');
@@ -275,6 +344,9 @@ function ready() {
   requireCompleteRequirements(state, 'ready-to-merge');
   if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
     fail('Develop controller cannot become ready before published readiness.');
+  }
+  if (!state.requiredCheckContextsKnown) {
+    fail('Develop controller cannot become ready before required check contexts are known.');
   }
   state.status = 'ready-to-merge';
   state.pendingAction = null;
@@ -307,6 +379,10 @@ try {
     advance(options);
   } else if (command === 'publish') {
     publish(options);
+  } else if (command === 'attach-pull-request') {
+    attachPullRequest(options);
+  } else if (command === 'record-check-contexts') {
+    recordCheckContexts(options);
   } else if (command === 'start-check-epoch') {
     startCheckEpoch(options);
   } else if (command === 'ready') {
