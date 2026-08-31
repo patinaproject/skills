@@ -29,6 +29,7 @@ SKILLS=(
   move-branch-here
   grill-to-spec
   design-by-contract
+  offensive-programming
   grill-system-design
   review-system-design
   fix
