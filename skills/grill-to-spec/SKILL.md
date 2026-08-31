@@ -34,11 +34,12 @@ instructions, every ADR authority they name, and the relevant current ADRs.
 Decide whether a design needs an ADR, whether to create, amend, or supersede a
 record, which issue identifier it uses, where it belongs, and how to name and
 structure it. Follow the repository's naming, placement, and format rules. When
-those rules leave the format open, use `ADR-FORMAT.md` from `domain-modeling`.
-When they leave placement open, put a context-only ADR in that context's
-`docs/adr/` and a wider decision in the root `docs/adr/`. Resolve any other open
-mechanic from first principles by choosing the path that best maintains the
-existing decision history.
+they leave a mechanic open, derive the answer from the relevant current ADRs
+and first principles, choosing the path that best maintains the existing
+decision history. Only when the authorities and current records supply no
+maintainable precedent, use `ADR-FORMAT.md` from `domain-modeling` for format,
+or put a context-only ADR in that context's `docs/adr/` and a wider decision in
+the root `docs/adr/` for placement.
 
 NEVER ask the operator to decide any ADR mechanic. Report the path you chose and
 the proposal you wrote.
