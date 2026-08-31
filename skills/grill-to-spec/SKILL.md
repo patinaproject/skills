@@ -24,11 +24,28 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
 `to-spec` is user-invoked. Name it in the final instruction instead of running
 it yourself.
 
+## Question boundary
+
+Use operator questions for design choices and domain language. Propose each
+glossary term, definition, and owning context, then let the operator decide.
+
+Own the ADR mechanics. Before the interview, read the target repository's
+instructions, every ADR authority they name, and the relevant current ADRs.
+Decide whether a design needs an ADR, whether to create, amend, or supersede a
+record, which issue identifier it uses, where it belongs, and how to name and
+structure it. Follow the repository's naming, placement, and format rules. When
+those rules leave a case open, choose the path that best maintains the existing
+decision history from first principles.
+
+NEVER ask the operator to decide any ADR mechanic. Report the path you chose and
+the proposal you wrote.
+
 ## Steps
 
-1. Record `git status --porcelain`, then run `grilling` until it has answered
-   the important design questions. Keep every agreed documentation change in
-   the conversation.
+1. Record `git status --porcelain`, read the ADR sources required by the
+   question boundary, then run `grilling` until it has answered the important
+   design questions. Keep every agreed documentation change in the
+   conversation.
 2. Read the rules and formats from `domain-modeling`. Draft one complete
    proposal for each new glossary term and each decision that requires an ADR.
    Use `CONTEXT-FORMAT.md` for glossary entries and `ADR-FORMAT.md` for ADRs.
