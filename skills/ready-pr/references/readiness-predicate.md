@@ -30,10 +30,26 @@ draft readiness checks. If the configured workflow has not passed on the draft,
 the agent cannot mark it ready. Record a blocker with the exact workflow or
 policy change that needs a person.
 
-When a pull request is already ready and the context set is unknown, start the
-new epoch and poll the live required-check query. Record the rows as soon as
-they appear. The unknown set keeps the epoch pending and cannot satisfy the
-final ready predicate.
+When a pull request is already ready, recover its epoch boundary from GitHub
+instead of using the time when the agent noticed it. Query `createdAt` and the
+latest `READY_FOR_REVIEW_EVENT` with this GraphQL selection:
+
+```graphql
+pullRequest(number: $number) {
+  createdAt
+  timelineItems(last: 1, itemTypes: [READY_FOR_REVIEW_EVENT]) {
+    nodes {
+      ... on ReadyForReviewEvent { createdAt }
+    }
+  }
+}
+```
+
+Use the event's `createdAt` when it exists. A pull request created ready has no
+such event, so use the pull request's `createdAt`. Start the epoch with that
+timestamp, then poll the live required-check query and record each row as soon
+as it appears. An unknown set remains pending and cannot satisfy the final ready
+predicate.
 
 If the live query remains empty, inspect the target branch's protection with
 `gh api repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`

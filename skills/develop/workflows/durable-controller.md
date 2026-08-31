@@ -86,13 +86,11 @@ Refresh the record when the target's required contexts change.
 The final live controller-and-pull-request evidence step belongs to
 [`ready-pr`'s final check](../../ready-pr/workflows/ready-for-merge.md#final-ready-check).
 
-Immediately before changing a draft to ready, capture another timestamp. After
-the transition, run `start-check-epoch` with that timestamp and the next action.
-This creates a new epoch even when the commit did not change. It does not waive
-`ready-pr`'s draft readiness checks. The set may remain unknown when another
-actor already made the pull request ready and workflows triggered by
-`ready_for_review` are starting. An unknown set keeps the epoch pending and
-prevents a terminal `ready` transition.
+Use [the readiness predicate](../../ready-pr/references/readiness-predicate.md)
+to decide whether the draft may change to ready and to recover the epoch
+boundary when another actor already changed it. Run `start-check-epoch` with
+that timestamp and the next action. This creates a new epoch even when the
+commit did not change.
 
 When a branch-caused failure needs a fix, advance to `implementation`. The new
 commit returns through verification, `polish`, publication, and readiness.
