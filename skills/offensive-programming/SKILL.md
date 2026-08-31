@@ -27,21 +27,19 @@ untrusted external input from trusted internal state.
 5. Route the traced internal state to one response:
 
    - Handle expected, reachable product behavior at its owning boundary.
-   - For a reachable invariant violation, fix the root cause and fail fast with
-     identifying context. Do not recover with a fallback, default, or swallowed
-     error.
-   - For an unreachable state, write no guard. Restructure the code so the
-     branch does not exist, and make the authoritative writer refuse the
-     invalid state.
+   - For a reachable invariant violation, fix the root cause at the
+     authoritative writer and fail fast with identifying context. One invariant
+     has one enforcing layer, so remove any downstream guard that repeats it.
+     Do not recover with a fallback, default, or swallowed error.
+   - For an unreachable state, write no guard. Delete or restructure the branch
+     so it does not exist, and make the authoritative writer refuse the invalid
+     state. Do not add a test only to cover the removed branch.
 
 After selecting one response, return control to the calling skill or user. The
 caller owns the implementation, tests, and completion.
 
 ## Rules
 
-- One invariant has one enforcing layer. Fix the authoritative writer. A
-  downstream guard that repeats its invariant hides the broken writer.
-- Delete an unreachable branch. Do not add a test only to cover it.
 - A catch on an unattended path ends in one of these outcomes: bounded retry,
   dead-letter storage with the full payload, or a report through an existing
   error-reporting seam with identifying context. Logging and continuing is not
