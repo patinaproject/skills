@@ -5,6 +5,9 @@ description: Question the user about important system design decisions, then pre
 
 # Grill system design
 
-1. Run `design-by-contract` to identify the important agreements in the design.
-2. Run `grill-to-spec` to question the user and prepare the decided result for
+1. Before interviewing the operator, read and apply `grill-to-spec`'s
+   [question boundary](../grill-to-spec/SKILL.md#question-boundary). It is the
+   single authority for ADR mechanics and operator questions in this flow.
+2. Run `design-by-contract` to identify the important agreements in the design.
+3. Run `grill-to-spec` to question the user and prepare the decided result for
    `/to-spec`.

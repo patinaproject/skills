@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.33.1](https://github.com/patinaproject/skills/compare/v2.33.0...v2.33.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* [#401](https://github.com/patinaproject/skills/issues/401) recheck polish when review inputs change ([#402](https://github.com/patinaproject/skills/issues/402)) ([706f1b5](https://github.com/patinaproject/skills/commit/706f1b5268ef19acacd7b4bf1a011cefe2ccf82c))
+* [#405](https://github.com/patinaproject/skills/issues/405) keep ADR mechanics out of grilling questions ([#410](https://github.com/patinaproject/skills/issues/410)) ([952ba76](https://github.com/patinaproject/skills/commit/952ba763e4093351f3cf12a5d974cdbb57552983))
+
 ## [2.33.0](https://github.com/patinaproject/skills/compare/v2.32.0...v2.33.0) (2026-08-28)
 
 
