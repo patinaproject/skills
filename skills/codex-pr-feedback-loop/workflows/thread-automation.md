@@ -31,7 +31,7 @@ below. Add repository details only when they help identify the current pull
 request.
 
 ```text
-Resume the current task's durable develop controller. Work in the current worktree. Run the installed develop skill's bundled controller-state script with `show`. If the record is missing, this is standalone pull request feedback work. If the record is terminal, report its result and stop this automation.
+Resume the current task's durable develop controller. Work in the current worktree. Run the installed develop skill's bundled controller-state script with `show`. If no controller file exists, this is standalone pull request feedback work. An invalid record or branch mismatch is a blocker, not a missing record. If the record is terminal, report its result and stop this automation.
 
 For a nonterminal controller, perform its pending action and follow the phase recorded there. Keep every pending issue requirement in scope. Update the record before this turn ends whenever the phase, pull request, published head, check epoch, pending action, or terminal result changes. A normal turn boundary is progress, not a completed workflow result.
 
@@ -53,7 +53,7 @@ If a human says a previously fixed bug remains or returned, reproduce the latest
 
 Before changing a draft to ready, apply the draft readiness checks in ../../ready-pr/references/readiness-predicate.md. Capture the check-epoch timestamp before the transition. When the checks pass, run gh pr ready, start the controller's new same-head check epoch, and continue until the new required checks finish and a fresh merge state is clean. Do not change issue status.
 
-Stop the automation only when ready-pr reports ready to merge or the next action requires a person. Record `ready-to-merge` or `blocked` in the controller first. Pending or failed checks, a draft pull request, agent-authored feedback, unpublished work, and an ordinary host turn end remain nonterminal. A human-started thread is complete for this automation after its code fix is on the latest commit and it has been reported to the user. Report the pull request URL, latest commit, handled thread URLs, useful check results, whether the draft became ready, every unresolved human-started thread, and any remaining item with the reason it was left open.
+Stop the automation only when ready-pr reports ready to merge or the next action requires a person. Record `ready-to-merge`, or record `blocked` with the evidence and exact operator action, before stopping. Pending or failed checks, a draft pull request, agent-authored feedback, unpublished work, and an ordinary host turn end remain nonterminal. A human-started thread is complete for this automation after its code fix is on the latest commit and it has been reported to the user. Report the pull request URL, latest commit, handled thread URLs, useful check results, whether the draft became ready, every unresolved human-started thread, and any remaining item with the reason it was left open.
 ```
 
 Create a heartbeat automation attached to the current task when the Codex app

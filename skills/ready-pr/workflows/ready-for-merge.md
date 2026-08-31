@@ -148,10 +148,12 @@ Fix every failure introduced by the branch. Optional checks and replaced runs
 are history, but comments they posted still require attention. Stop after two
 unchanged ten-minute windows.
 
-For a durable controller, use its epoch timestamp to distinguish runs started
-for the current publication or ready transition from older runs on the same
-commit. After two unchanged windows, store the next check action and yield the
-current turn with the controller active. This is not a terminal stop.
+For a durable controller, run the epoch-filtered check query from
+[the readiness predicate](../references/readiness-predicate.md). After two
+unchanged windows, store the next check action and yield the current turn with
+the controller active. This is not a terminal stop. A standalone invocation may
+return `not ready to merge` after the same two windows, but it does not ask for
+operator action unless a person actually owns the next step.
 
 After checks finish, fail, or time out, fetch all feedback again. Handle any new
 or changed item before reporting.
@@ -191,6 +193,12 @@ Use paginated GraphQL as described in
 [the comment instructions](../../using-github/workflows/pr-comments.md) to read
 every review thread. A REST comment list is not enough.
 
+For a durable `develop` run, run the develop skill's bundled
+`scripts/live-pr-evidence.mjs --task ID` with the current task identifier. Keep
+the JSON result in the task transcript as the joined live evidence record. A
+mismatch exits unsuccessfully and blocks a ready result; the helper does not
+decide readiness by itself.
+
 Account for every path from `git status --short`:
 
 - A file for this pull request must be committed, checked, reviewed, and pushed.
@@ -219,8 +227,9 @@ resolution.
 
 If every condition passes, mark a durable controller `ready`, stop its
 continuation, and report `ready to merge`. When the next action needs a person,
-record `block` with that exact action, stop the continuation, and report
-`Blocked`. Otherwise keep the controller active and report nonterminal progress.
+record `block` with the blocking evidence and that exact action, stop the
+continuation, and report `Blocked`. Otherwise keep the controller active and
+report nonterminal progress.
 Never describe a blocked pull request as finished.
 
 ## Final report
@@ -245,11 +254,13 @@ reason, say so instead of guessing.
 
 ## Stop and ask the user
 
-Stop when the issue is unclear, local files cannot be assigned to this or named
-other work, a required check for changed code cannot pass, a target branch
-failure cannot be proven unchanged, a conflict needs judgment, feedback changes
-requirements, another actor changes the pull request commit, checks make no
-progress for two windows, or merging is the next action.
+Stop and ask when the issue is unclear, local files cannot be assigned to this
+or named other work, a required check for changed code cannot pass without a
+human-owned change, a target branch failure cannot be proven unchanged, a
+conflict needs judgment, feedback changes requirements, another actor changes
+the pull request commit, or merging is the next action. Two unchanged check
+windows follow the nonterminal or standalone behavior above; they are not by
+themselves a request for user action.
 
 Do not create follow-up issues, store handled-comment state in repository files,
 wait indefinitely for new comments, or add agent attribution unless required.

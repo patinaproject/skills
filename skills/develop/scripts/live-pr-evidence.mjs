@@ -1,0 +1,182 @@
+#!/usr/bin/env node
+
+import { spawnSync } from 'node:child_process';
+import { resolve } from 'node:path';
+import process from 'node:process';
+
+function fail(message) {
+  throw new Error(message);
+}
+
+function requiredArgument(name) {
+  const index = process.argv.indexOf(`--${name}`);
+  const value = index >= 0 ? process.argv[index + 1] : null;
+  if (!value?.trim()) {
+    fail(`--${name} requires one non-empty value.`);
+  }
+  return value.trim();
+}
+
+function run(command, args, acceptedStatuses = new Set([0])) {
+  const result = spawnSync(command, args, { encoding: 'utf8' });
+  if (!acceptedStatuses.has(result.status)) {
+    fail(result.stderr.trim() || `${command} ${args.join(' ')} failed.`);
+  }
+  return result;
+}
+
+function json(command, args, acceptedStatuses) {
+  const result = run(command, args, acceptedStatuses);
+  try {
+    return JSON.parse(result.stdout);
+  } catch {
+    fail(`Expected JSON from ${command} ${args.join(' ')}.`);
+  }
+}
+
+function git(...args) {
+  return run('git', args).stdout.trim();
+}
+
+const controllerScript = resolve(
+  import.meta.dirname,
+  'controller-state.mjs',
+);
+
+const task = requiredArgument('task');
+const controller = json(process.execPath, [controllerScript, 'show']);
+if (!controller.pullRequest || !controller.headSha || !controller.checkEpochStartedAt) {
+  fail('The develop controller has no published pull request epoch to inspect.');
+}
+
+const repository = json('gh', [
+  'repo',
+  'view',
+  '--json',
+  'nameWithOwner',
+]).nameWithOwner;
+const pullRequest = json('gh', [
+  'pr',
+  'view',
+  controller.pullRequest,
+  '--json',
+  'number,url,headRefName,headRefOid,baseRefName,isDraft,mergeable,mergeStateStatus,reviewDecision',
+]);
+const local = {
+  branch: git('branch', '--show-current'),
+  headSha: git('rev-parse', 'HEAD'),
+};
+
+for (const [name, actual, expected] of [
+  ['branch', local.branch, controller.branch],
+  ['local head', local.headSha, controller.headSha],
+  ['pull-request branch', pullRequest.headRefName, controller.branch],
+  ['pull-request head', pullRequest.headRefOid, controller.headSha],
+]) {
+  if (actual !== expected) {
+    fail(`Develop evidence ${name} mismatch: expected ${expected}, found ${actual}.`);
+  }
+}
+
+const diffPaths = run('gh', [
+  'pr',
+  'diff',
+  controller.pullRequest,
+  '--name-only',
+]).stdout.trim().split('\n').filter(Boolean);
+
+const checkResult = run(
+  'gh',
+  [
+    'pr',
+    'checks',
+    controller.pullRequest,
+    '--required',
+    '--json',
+    'bucket,completedAt,event,link,name,startedAt,state,workflow',
+  ],
+  new Set([0, 1, 8]),
+);
+const requiredChecks = JSON.parse(checkResult.stdout);
+const epochStartedAt = Date.parse(controller.checkEpochStartedAt);
+const currentEpochChecks = requiredChecks.filter(
+  ({ startedAt }) =>
+    Number.isFinite(Date.parse(startedAt)) &&
+    Date.parse(startedAt) >= epochStartedAt,
+);
+const currentContextIdentities = new Set(
+  currentEpochChecks.map(({ name, workflow }) => `${workflow}\0${name}`),
+);
+const awaitingContexts = requiredChecks
+  .filter(
+    ({ name, startedAt, workflow }) =>
+      (!Number.isFinite(Date.parse(startedAt)) ||
+        Date.parse(startedAt) < epochStartedAt) &&
+      !currentContextIdentities.has(`${workflow}\0${name}`),
+  )
+  .map(({ name, workflow }) => ({ name, workflow }));
+const terminalBuckets = new Set(['pass', 'fail', 'skipping', 'cancel']);
+const passingBuckets = new Set(['pass', 'skipping']);
+
+const [owner, name] = repository.split('/');
+const reviewQuery = `
+  query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        reviewThreads(first: 100, after: $endCursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes {
+            id isResolved isOutdated path line startLine
+            comments(first: 1) {
+              nodes {
+                url databaseId body
+                author { login __typename }
+                commit { oid }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+const reviewPages = json('gh', [
+  'api',
+  'graphql',
+  '--paginate',
+  '--slurp',
+  '-f',
+  `query=${reviewQuery}`,
+  '-F',
+  `owner=${owner}`,
+  '-F',
+  `name=${name}`,
+  '-F',
+  `number=${pullRequest.number}`,
+]);
+const reviewThreads = reviewPages.flatMap(
+  ({ data }) => data.repository.pullRequest.reviewThreads.nodes,
+);
+
+process.stdout.write(`${JSON.stringify({
+  controller,
+  diffPaths,
+  local,
+  pullRequest,
+  repository,
+  requiredChecks: {
+    awaitingContexts,
+    currentEpoch: currentEpochChecks,
+    passing:
+      awaitingContexts.length === 0 &&
+      currentEpochChecks.every(({ bucket }) => passingBuckets.has(bucket)),
+    terminal:
+      awaitingContexts.length === 0 &&
+      currentEpochChecks.every(({ bucket }) => terminalBuckets.has(bucket)),
+  },
+  reviewThreads: {
+    nodes: reviewThreads,
+    pageCount: reviewPages.length,
+  },
+  task,
+}, null, 2)}\n`);

@@ -19,8 +19,11 @@ resume that record. Starting over would discard the pending action.
 
 Reconcile the ledger after implementation. Mark one item complete with
 `complete-requirement --id ID --evidence TEXT --pending-action TEXT` only when
-the current work proves it. The controller refuses `polish`, publication, and
-readiness while an item remains pending.
+the evidence directly names the requirement's current proof: a changed path or
+line, a command and result, or a live pull-request observation. An intention,
+general progress summary, or proof from an older head is not completion. The
+controller refuses `polish`, publication, and readiness while an item remains
+pending.
 
 ## Check prerequisites
 
@@ -35,9 +38,10 @@ Complete these checks before advancing from `prerequisites`:
 - the execution host can resume this same task after a turn ends.
 
 Use a repository-provided capability check when one exists. Do not test write
-access by creating an unrelated remote object. If a check fails, run
-`block --pending-action TEXT` with the exact operator repair, stop the
-controller automation, and report `Blocked`. Implementation has not started.
+access by creating an unrelated remote object. If a check fails, run `block
+--pending-action TEXT --evidence TEXT` with the exact operator repair and the
+observation that prevents safe progress, stop the controller automation, and
+report `Blocked`. Implementation has not started.
 
 ## Start continuation
 
@@ -60,10 +64,22 @@ before implementation. Name the mechanism the operator must enable.
 Use `advance --phase PHASE --pending-action TEXT` before implementation,
 verification, `polish`, or publication. Valid phases are `prerequisites`,
 `implementation`, `verification`, `polish`, `publication`, and `readiness`.
+The helper enforces that order. A repair may return from verification, `polish`,
+publication, or readiness to implementation, but a later head cannot skip
+verification or `polish` on its way back to publication.
 
 After a push, record the pull request and full published commit with `publish`.
 Capture an ISO-8601 timestamp immediately before the push and pass it as
 `--check-epoch-started-at`. A new published head starts a new check epoch.
+Replaying `publish` for the same pull request and head is idempotent: it keeps
+the original epoch timestamp and only refreshes the pending action.
+
+During the final live evaluation, run `scripts/live-pr-evidence.mjs --task ID`
+with the current task or conversation identifier. Keep its JSON output in the
+task transcript. It joins the controller and task to the local and published
+head, pull-request diff, required checks classified by the recorded epoch, and
+every paginated review thread. It reports evidence without replacing
+`ready-pr`'s readiness decision.
 
 Immediately before changing a draft to ready, capture another timestamp. After
 the transition, run `start-check-epoch` with that timestamp and the next action.
@@ -75,8 +91,8 @@ commit returns through verification, `polish`, publication, and readiness.
 ## End only at a terminal result
 
 Run `ready` only after `ready-pr` passes its fresh final predicate. Run `block`
-only when the next action belongs to a person. Then stop the controller's event
-or heartbeat.
+with `--evidence` only when the next action belongs to a person. Then stop the
+controller's event or heartbeat.
 
 Pending checks, draft state, unpublished work, agent feedback, and a host-ended
 turn remain nonterminal. Leave their exact next action in the record and keep

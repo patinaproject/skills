@@ -1,6 +1,6 @@
 ---
 name: codex-pr-feedback-loop
-description: Keep a Codex app task working through feedback on an existing pull request. Use after the task has pushed the pull request once and should continue handling new automated review feedback.
+description: Keep a Codex develop task active across turns, or continue feedback work on an existing pull request. Use when develop needs durable continuation or a pushed pull request should keep handling automated review feedback.
 ---
 
 # Pull request feedback loop

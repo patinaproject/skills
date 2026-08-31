@@ -49,6 +49,7 @@ function createRepository() {
   const statePath = result.stdout.trim();
   const state = JSON.parse(readFileSync(statePath, 'utf8'));
   assert.deepEqual(state, {
+    blockerEvidence: null,
     branch: '409-controller',
     checkEpoch: 0,
     checkEpochStartedAt: null,
@@ -110,7 +111,7 @@ function createRepository() {
     repository,
   );
   assert.equal(completed.status, 0, completed.stderr);
-  const polished = run(
+  const skippedImplementation = run(
     'advance',
     [
       '--phase',
@@ -120,11 +121,33 @@ function createRepository() {
     ],
     repository,
   );
+  assert.equal(skippedImplementation.status, 1);
+  assert.match(skippedImplementation.stderr, /prerequisites to polish/);
+
+  for (const [phase, pendingAction] of [
+    ['implementation', 'Implement the complete requirement ledger'],
+    ['verification', 'Run repository verification'],
+    ['polish', 'Run the current-head review'],
+    ['publication', 'Publish the reviewed head'],
+  ]) {
+    const advanced = run(
+      'advance',
+      ['--phase', phase, '--pending-action', pendingAction],
+      repository,
+    );
+    assert.equal(advanced.status, 0, advanced.stderr);
+  }
+
+  const polished = run(
+    'show',
+    [],
+    repository,
+  );
   assert.equal(polished.status, 0, polished.stderr);
 
   const advancedState = JSON.parse(readFileSync(statePath, 'utf8'));
-  assert.equal(advancedState.phase, 'polish');
-  assert.equal(advancedState.pendingAction, 'Run the current-head review');
+  assert.equal(advancedState.phase, 'publication');
+  assert.equal(advancedState.pendingAction, 'Publish the reviewed head');
   assert.deepEqual(advancedState.requirements[0], {
     evidence: 'Controller state survives a separate process',
     id: 'R1',
@@ -156,6 +179,29 @@ function createRepository() {
   assert.equal(publishedState.checkEpoch, 1);
   assert.equal(publishedState.checkEpochStartedAt, publicationEpoch);
 
+  const replayedPublication = run(
+    'publish',
+    [
+      '--pull-request',
+      '123',
+      '--head',
+      firstHead,
+      '--check-epoch-started-at',
+      '2026-08-31T08:05:00.000Z',
+      '--pending-action',
+      'Resume waiting for required checks',
+    ],
+    repository,
+  );
+  assert.equal(replayedPublication.status, 0, replayedPublication.stderr);
+  publishedState = JSON.parse(readFileSync(statePath, 'utf8'));
+  assert.equal(publishedState.checkEpoch, 1);
+  assert.equal(publishedState.checkEpochStartedAt, publicationEpoch);
+  assert.equal(
+    publishedState.pendingAction,
+    'Resume waiting for required checks',
+  );
+
   const readyReviewEpoch = '2026-08-31T08:10:00.000Z';
   const readyEpoch = run(
     'start-check-epoch',
@@ -177,6 +223,19 @@ function createRepository() {
     'Wait for checks triggered by the ready-for-review transition',
   );
 
+  const staleEpoch = run(
+    'start-check-epoch',
+    [
+      '--pending-action',
+      'Do not replace the current epoch',
+      '--check-epoch-started-at',
+      publicationEpoch,
+    ],
+    repository,
+  );
+  assert.equal(staleEpoch.status, 1);
+  assert.match(staleEpoch.stderr, /later check-epoch timestamp/);
+
   const resumedImplementation = run(
     'advance',
     [
@@ -189,6 +248,53 @@ function createRepository() {
   );
   assert.equal(resumedImplementation.status, 0, resumedImplementation.stderr);
   const secondHead = 'b'.repeat(40);
+  const prematureRepublish = run(
+    'publish',
+    [
+      '--pull-request',
+      '123',
+      '--head',
+      secondHead,
+      '--check-epoch-started-at',
+      '2026-08-31T08:20:00.000Z',
+      '--pending-action',
+      'Recheck the new published head',
+    ],
+    repository,
+  );
+  assert.equal(prematureRepublish.status, 1);
+  assert.match(prematureRepublish.stderr, /cannot publish from implementation/);
+
+  for (const [phase, pendingAction] of [
+    ['verification', 'Verify the repaired branch'],
+    ['polish', 'Review the repaired branch'],
+    ['publication', 'Publish the repaired branch'],
+  ]) {
+    const advanced = run(
+      'advance',
+      ['--phase', phase, '--pending-action', pendingAction],
+      repository,
+    );
+    assert.equal(advanced.status, 0, advanced.stderr);
+  }
+
+  const sameHeadPublication = run(
+    'publish',
+    [
+      '--pull-request',
+      '123',
+      '--head',
+      firstHead,
+      '--check-epoch-started-at',
+      '2026-08-31T08:20:00.000Z',
+      '--pending-action',
+      'Do not create a publication epoch without a new head',
+    ],
+    repository,
+  );
+  assert.equal(sameHeadPublication.status, 1);
+  assert.match(sameHeadPublication.stderr, /requires a new head/);
+
   const republished = run(
     'publish',
     [
@@ -248,12 +354,18 @@ function createRepository() {
     [
       '--pending-action',
       'Install a task heartbeat capability and resume this develop task',
+      '--evidence',
+      'The host exposes no same-task event or heartbeat mechanism',
     ],
     repository,
   );
   assert.equal(blocked.status, 0, blocked.stderr);
   const blockedState = JSON.parse(run('show', [], repository).stdout);
   assert.equal(blockedState.status, 'blocked');
+  assert.equal(
+    blockedState.blockerEvidence,
+    'The host exposes no same-task event or heartbeat mechanism',
+  );
   assert.equal(
     blockedState.pendingAction,
     'Install a task heartbeat capability and resume this develop task',

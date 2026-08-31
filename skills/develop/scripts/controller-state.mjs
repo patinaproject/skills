@@ -33,12 +33,36 @@ function parseOptions(args) {
   return options;
 }
 
-function one(options, name) {
+function requiredOption(options, name) {
   const values = options.get(name) ?? [];
   if (values.length !== 1 || !values[0].trim()) {
     fail(`--${name} requires one non-empty value.`);
   }
   return values[0].trim();
+}
+
+const phaseTransitions = new Map([
+  ['prerequisites', new Set(['implementation'])],
+  ['implementation', new Set(['verification'])],
+  ['verification', new Set(['implementation', 'polish'])],
+  ['polish', new Set(['implementation', 'publication'])],
+  ['publication', new Set(['implementation'])],
+  ['readiness', new Set(['implementation'])],
+]);
+
+function pendingRequirementIds(state) {
+  return state.requirements
+    .filter(({ status }) => status !== 'complete')
+    .map(({ id }) => id);
+}
+
+function requireCompleteRequirements(state, destination) {
+  const pending = pendingRequirementIds(state);
+  if (pending.length > 0) {
+    fail(
+      `Develop controller cannot enter ${destination}; requirements remain pending: ${pending.join(', ')}.`,
+    );
+  }
 }
 
 function statePath() {
@@ -84,7 +108,7 @@ function loadState({ requireNonterminal = true } = {}) {
 }
 
 function init(options) {
-  const branch = one(options, 'branch');
+  const branch = requiredOption(options, 'branch');
   const currentBranch = git('branch', '--show-current');
   if (currentBranch !== branch) {
     fail(
@@ -121,12 +145,13 @@ function init(options) {
     }
   }
   writeState(path, {
+    blockerEvidence: null,
     branch,
     checkEpoch: 0,
     checkEpochStartedAt: null,
     headSha: null,
-    issue: one(options, 'issue'),
-    pendingAction: one(options, 'pending-action'),
+    issue: requiredOption(options, 'issue'),
+    pendingAction: requiredOption(options, 'pending-action'),
     phase: 'prerequisites',
     pullRequest: null,
     requirements,
@@ -138,21 +163,21 @@ function init(options) {
 
 function completeRequirement(options) {
   const { path, state } = loadState();
-  const id = one(options, 'id');
+  const id = requiredOption(options, 'id');
   const requirement = state.requirements.find((item) => item.id === id);
   if (!requirement) {
     fail(`Develop controller has no requirement ${id}.`);
   }
   requirement.status = 'complete';
-  requirement.evidence = one(options, 'evidence');
-  state.pendingAction = one(options, 'pending-action');
+  requirement.evidence = requiredOption(options, 'evidence');
+  state.pendingAction = requiredOption(options, 'pending-action');
   writeState(path, state);
   process.stdout.write(`${path}\n`);
 }
 
 function advance(options) {
   const { path, state } = loadState();
-  const phase = one(options, 'phase');
+  const phase = requiredOption(options, 'phase');
   const phases = new Set([
     'prerequisites',
     'implementation',
@@ -165,34 +190,21 @@ function advance(options) {
     fail(`Unknown develop controller phase: ${phase}.`);
   }
   if (new Set(['polish', 'publication', 'readiness']).has(phase)) {
-    const pending = state.requirements
-      .filter(({ status }) => status !== 'complete')
-      .map(({ id }) => id);
-    if (pending.length > 0) {
-      fail(
-        `Develop controller cannot enter ${phase}; requirements remain pending: ${pending.join(', ')}.`,
-      );
-    }
+    requireCompleteRequirements(state, phase);
+  }
+  if (phase !== state.phase && !phaseTransitions.get(state.phase)?.has(phase)) {
+    fail(
+      `Develop controller cannot advance from ${state.phase} to ${phase}.`,
+    );
   }
   state.phase = phase;
-  state.pendingAction = one(options, 'pending-action');
+  state.pendingAction = requiredOption(options, 'pending-action');
   writeState(path, state);
   process.stdout.write(`${path}\n`);
 }
 
-function requireCompleteRequirements(state, destination) {
-  const pending = state.requirements
-    .filter(({ status }) => status !== 'complete')
-    .map(({ id }) => id);
-  if (pending.length > 0) {
-    fail(
-      `Develop controller cannot enter ${destination}; requirements remain pending: ${pending.join(', ')}.`,
-    );
-  }
-}
-
 function checkEpochStartedAt(options) {
-  const value = one(options, 'check-epoch-started-at');
+  const value = requiredOption(options, 'check-epoch-started-at');
   const milliseconds = Date.parse(value);
   if (!Number.isFinite(milliseconds)) {
     fail('--check-epoch-started-at requires an ISO-8601 timestamp.');
@@ -203,32 +215,65 @@ function checkEpochStartedAt(options) {
 function publish(options) {
   const { path, state } = loadState();
   requireCompleteRequirements(state, 'publication');
-  const headSha = one(options, 'head').toLowerCase();
+  const headSha = requiredOption(options, 'head').toLowerCase();
   if (!/^[0-9a-f]{40}$/.test(headSha)) {
     fail('--head requires one full 40-character commit SHA.');
   }
-  const pullRequest = one(options, 'pull-request');
-  if (state.headSha !== headSha) {
-    state.checkEpoch += 1;
+  const pullRequest = requiredOption(options, 'pull-request');
+  const pendingAction = requiredOption(options, 'pending-action');
+  const epochStartedAt = checkEpochStartedAt(options);
+  if (
+    state.phase === 'readiness' &&
+    state.headSha === headSha &&
+    state.pullRequest === pullRequest
+  ) {
+    state.pendingAction = pendingAction;
+    writeState(path, state);
+    process.stdout.write(`${path}\n`);
+    return;
   }
-  state.checkEpochStartedAt = checkEpochStartedAt(options);
+  if (state.phase !== 'publication') {
+    fail(`Develop controller cannot publish from ${state.phase}.`);
+  }
+  if (state.headSha === headSha) {
+    fail('A publication cycle requires a new head; use start-check-epoch for the same head.');
+  }
+  if (
+    state.checkEpochStartedAt &&
+    Date.parse(epochStartedAt) <= Date.parse(state.checkEpochStartedAt)
+  ) {
+    fail('A new published head requires a later check-epoch timestamp.');
+  }
+  state.checkEpoch += 1;
+  state.checkEpochStartedAt = epochStartedAt;
   state.phase = 'readiness';
   state.pullRequest = pullRequest;
   state.headSha = headSha;
-  state.pendingAction = one(options, 'pending-action');
+  state.pendingAction = pendingAction;
   writeState(path, state);
   process.stdout.write(`${path}\n`);
 }
 
 function startCheckEpoch(options) {
   const { path, state } = loadState();
-  if (!state.pullRequest || !state.headSha) {
+  if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
     fail('Develop controller cannot start a check epoch before publication.');
+  }
+  const epochStartedAt = checkEpochStartedAt(options);
+  const pendingAction = requiredOption(options, 'pending-action');
+  if (epochStartedAt === state.checkEpochStartedAt) {
+    state.pendingAction = pendingAction;
+    writeState(path, state);
+    process.stdout.write(`${path}\n`);
+    return;
+  }
+  if (Date.parse(epochStartedAt) < Date.parse(state.checkEpochStartedAt)) {
+    fail('A new check epoch requires a later check-epoch timestamp.');
   }
   state.phase = 'readiness';
   state.checkEpoch += 1;
-  state.checkEpochStartedAt = checkEpochStartedAt(options);
-  state.pendingAction = one(options, 'pending-action');
+  state.checkEpochStartedAt = epochStartedAt;
+  state.pendingAction = pendingAction;
   writeState(path, state);
   process.stdout.write(`${path}\n`);
 }
@@ -248,7 +293,8 @@ function ready() {
 function block(options) {
   const { path, state } = loadState();
   state.status = 'blocked';
-  state.pendingAction = one(options, 'pending-action');
+  state.blockerEvidence = requiredOption(options, 'evidence');
+  state.pendingAction = requiredOption(options, 'pending-action');
   writeState(path, state);
   process.stdout.write(`${path}\n`);
 }

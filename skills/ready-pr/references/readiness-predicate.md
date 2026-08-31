@@ -17,6 +17,16 @@ transition starts a new epoch even when `headRefOid` stays the same. Wait for
 required runs created in that epoch, then fetch a fresh merge state. An older
 same-head pass cannot satisfy a pending replacement run.
 
+Read required runs with `gh pr checks --required --json
+bucket,completedAt,event,link,name,startedAt,state,workflow`. A row belongs to the
+current epoch only when `startedAt` is at or after the controller's
+`checkEpochStartedAt`. Until every required context has a current-epoch row, the
+epoch is pending. When they do, require every row to have a passing state, then
+run the ordinary `gh pr checks --required` command as the final required-context
+gate. Keep context identity by check name and workflow; do not substitute an
+older row with the same head commit. A missing or invalid `startedAt` is pending,
+not current-epoch evidence.
+
 Optional review services are not part of this decision. Their comments still
 need the same fix or explanation as other bot feedback.
 
