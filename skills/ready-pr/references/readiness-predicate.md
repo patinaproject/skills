@@ -12,6 +12,11 @@ Immediately before `gh pr ready`, fetch local `HEAD`, the pull request
 `headRefOid`, required checks, and every paginated GraphQL review thread. If any
 value changes before the command runs, discard the result and check again.
 
+Capture a check-epoch timestamp immediately before `gh pr ready`. The ready
+transition starts a new epoch even when `headRefOid` stays the same. Wait for
+required runs created in that epoch, then fetch a fresh merge state. An older
+same-head pass cannot satisfy a pending replacement run.
+
 Optional review services are not part of this decision. Their comments still
 need the same fix or explanation as other bot feedback.
 
@@ -37,4 +42,4 @@ Those runs are history. Report them when useful, but do not count them as a
 current required failure.
 
 Required checks do not prove that the branch merges cleanly. Check
-`mergeStateStatus` separately.
+`mergeStateStatus` separately after the current epoch becomes terminal.

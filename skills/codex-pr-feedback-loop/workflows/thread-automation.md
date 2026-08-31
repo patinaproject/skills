@@ -1,11 +1,12 @@
 # Automate pull request feedback
 
-Create this Codex task automation after the branch has been pushed and its pull
-request exists. The automation checks for new feedback, fixes clear problems,
-pushes verified changes, and marks an agent-created draft ready when its checks
-pass.
+Create this Codex task automation before implementation when `develop` points
+here. It resumes the durable controller through implementation, publication,
+checks, and feedback. For standalone feedback work, create it after the branch
+has been pushed and its pull request exists.
 
-Before creating it, require an authenticated `gh` session and run:
+Before a standalone feedback automation, require an authenticated `gh` session
+and run:
 
 ```sh
 gh repo view --json nameWithOwner --jq .nameWithOwner
@@ -16,17 +17,24 @@ If no pull request exists, finish the normal pull request workflow first.
 
 ## Settings
 
-- Name: `PR feedback loop`
+- Name: `Develop controller` for `develop`, or `PR feedback loop` for standalone
+  feedback
 - Kind: heartbeat automation
 - Destination: current task
 - Interval: the user's positive whole number of minutes, or 10 minutes when
   they have no preference
 - Status: `ACTIVE`
 
-Ask for the interval before creating the automation. Use the prompt below. Add
-repository details only when they help identify the current pull request.
+An explicit `develop` invocation uses ten minutes without asking. For standalone
+feedback, ask for the interval before creating the automation. Use the prompt
+below. Add repository details only when they help identify the current pull
+request.
 
 ```text
+Resume the current task's durable develop controller. Work in the current worktree. Run the installed develop skill's bundled controller-state script with `show`. If the record is missing, this is standalone pull request feedback work. If the record is terminal, report its result and stop this automation.
+
+For a nonterminal controller, perform its pending action and follow the phase recorded there. Keep every pending issue requirement in scope. Update the record before this turn ends whenever the phase, pull request, published head, check epoch, pending action, or terminal result changes. A normal turn boundary is progress, not a completed workflow result.
+
 Check the current branch's GitHub pull request for new unresolved review feedback. Use the current working directory's default gh repository. Resolve the repository, pull request, branch, latest commit, and URL before changing anything.
 
 List every review thread with paginated GraphQL. Keep the thread ID, resolution and outdated state, file and line details, comment URL, numeric review comment database ID, author, body, and comment commit. Read the opening comment's author type. Bot means a bot or GitHub App started the thread. Treat every other or unclear author as human. Later replies do not change who started the thread.
@@ -43,9 +51,9 @@ For a thread started by a bot, post a reply with the fix commit, check result, a
 
 If a human says a previously fixed bug remains or returned, reproduce the latest report before making another fix, even when the pull request commit is unchanged. Finish with a new failing-then-passing reproduction or report what prevents it. Leave the human-started thread unchanged.
 
-Before stopping, apply the draft readiness checks in ../../ready-pr/references/readiness-predicate.md. When they pass, run gh pr ready. Do not change issue status.
+Before changing a draft to ready, apply the draft readiness checks in ../../ready-pr/references/readiness-predicate.md. Capture the check-epoch timestamp before the transition. When the checks pass, run gh pr ready, start the controller's new same-head check epoch, and continue until the new required checks finish and a fresh merge state is clean. Do not change issue status.
 
-Stop the automation when no clear review work remains, every small item is fixed or explained, and the draft readiness check has run. A human-started thread is complete for this automation after its code fix is on the latest commit and it has been reported to the user. Report the pull request URL, latest commit, handled thread URLs, useful check results, whether the draft became ready, every unresolved human-started thread, and any remaining item with the reason it was left open.
+Stop the automation only when ready-pr reports ready to merge or the next action requires a person. Record `ready-to-merge` or `blocked` in the controller first. Pending or failed checks, a draft pull request, agent-authored feedback, unpublished work, and an ordinary host turn end remain nonterminal. A human-started thread is complete for this automation after its code fix is on the latest commit and it has been reported to the user. Report the pull request URL, latest commit, handled thread URLs, useful check results, whether the draft became ready, every unresolved human-started thread, and any remaining item with the reason it was left open.
 ```
 
 Create a heartbeat automation attached to the current task when the Codex app

@@ -49,7 +49,8 @@ to ready for human review.
      every exit or timeout
    - run local checks and review again before every new push
 8. Apply the draft readiness checks and run `gh pr ready` when they pass. Leave
-   issue status unchanged.
+   issue status unchanged. In a durable `develop` run, start a new check epoch
+   for checks triggered by this transition, even when the head did not change.
 9. Immediately before reporting, fetch fresh local status, pull request state,
    required checks, and all paginated GraphQL review threads.
 10. Apply the reporter-fidelity reference and report its evidence verdict
@@ -103,6 +104,8 @@ check:
 
 Optional checks and older replaced runs are history. They do not replace the
 required-check result. A reply does not count as resolving a review thread.
+An earlier same-head pass does not replace a pending run in the current check
+epoch. Required-check names do not override a blocked merge state.
 
 When a condition fails, report `not ready to merge` and explain what remains.
 When all conditions pass, summarize the evidence in one sentence instead of

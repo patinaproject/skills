@@ -1,0 +1,286 @@
+#!/usr/bin/env node
+
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import process from 'node:process';
+
+function fail(message) {
+  throw new Error(message);
+}
+
+function git(...args) {
+  const result = spawnSync('git', args, { encoding: 'utf8' });
+  if (result.status !== 0) {
+    fail(result.stderr.trim() || `git ${args.join(' ')} failed.`);
+  }
+  return result.stdout.trim();
+}
+
+function parseOptions(args) {
+  const options = new Map();
+  for (let index = 0; index < args.length; index += 2) {
+    const name = args[index];
+    const value = args[index + 1];
+    if (!name?.startsWith('--') || value === undefined) {
+      fail(`Expected --name value, received ${name ?? 'nothing'}.`);
+    }
+    const key = name.slice(2);
+    const values = options.get(key) ?? [];
+    values.push(value);
+    options.set(key, values);
+  }
+  return options;
+}
+
+function one(options, name) {
+  const values = options.get(name) ?? [];
+  if (values.length !== 1 || !values[0].trim()) {
+    fail(`--${name} requires one non-empty value.`);
+  }
+  return values[0].trim();
+}
+
+function statePath() {
+  return join(
+    git('rev-parse', '--path-format=absolute', '--git-dir'),
+    'patinaproject-develop-controller.json',
+  );
+}
+
+function writeState(path, state) {
+  const temporaryPath = join(
+    dirname(path),
+    `.patinaproject-develop-controller-${process.pid}.tmp`,
+  );
+  writeFileSync(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, {
+    flag: 'wx',
+    mode: 0o600,
+  });
+  renameSync(temporaryPath, path);
+}
+
+function loadState({ requireNonterminal = true } = {}) {
+  const path = statePath();
+  let state;
+  try {
+    state = JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    fail(`Develop controller state is missing or invalid at ${path}.`);
+  }
+  if (state.version !== 1) {
+    fail(`Develop controller state version ${String(state.version)} is unsupported.`);
+  }
+  const currentBranch = git('branch', '--show-current');
+  if (state.branch !== currentBranch) {
+    fail(
+      `Develop controller branch mismatch: expected ${state.branch}, found ${currentBranch || 'detached HEAD'}.`,
+    );
+  }
+  if (requireNonterminal && state.status !== 'nonterminal') {
+    fail(`Develop controller is already terminal: ${state.status}.`);
+  }
+  return { path, state };
+}
+
+function init(options) {
+  const branch = one(options, 'branch');
+  const currentBranch = git('branch', '--show-current');
+  if (currentBranch !== branch) {
+    fail(
+      `Develop controller branch mismatch: expected ${branch}, found ${currentBranch || 'detached HEAD'}.`,
+    );
+  }
+  const requirements = (options.get('requirement') ?? []).map((entry) => {
+    const separator = entry.indexOf('=');
+    if (separator < 1 || separator === entry.length - 1) {
+      fail('--requirement must use ID=text with both values present.');
+    }
+    return {
+      evidence: null,
+      id: entry.slice(0, separator).trim(),
+      status: 'pending',
+      text: entry.slice(separator + 1).trim(),
+    };
+  });
+  if (new Set(requirements.map(({ id }) => id)).size !== requirements.length) {
+    fail('Develop controller requirement IDs must be unique.');
+  }
+  const path = statePath();
+  if (existsSync(path)) {
+    let existing;
+    try {
+      existing = JSON.parse(readFileSync(path, 'utf8'));
+    } catch {
+      fail(`Develop controller state is invalid at ${path}.`);
+    }
+    if (existing.status === 'nonterminal') {
+      fail(
+        `Develop controller is already nonterminal for ${existing.issue ?? 'an unknown issue'} on ${existing.branch ?? 'an unknown branch'}. Resume it instead of initializing another.`,
+      );
+    }
+  }
+  writeState(path, {
+    branch,
+    checkEpoch: 0,
+    checkEpochStartedAt: null,
+    headSha: null,
+    issue: one(options, 'issue'),
+    pendingAction: one(options, 'pending-action'),
+    phase: 'prerequisites',
+    pullRequest: null,
+    requirements,
+    status: 'nonterminal',
+    version: 1,
+  });
+  process.stdout.write(`${path}\n`);
+}
+
+function completeRequirement(options) {
+  const { path, state } = loadState();
+  const id = one(options, 'id');
+  const requirement = state.requirements.find((item) => item.id === id);
+  if (!requirement) {
+    fail(`Develop controller has no requirement ${id}.`);
+  }
+  requirement.status = 'complete';
+  requirement.evidence = one(options, 'evidence');
+  state.pendingAction = one(options, 'pending-action');
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function advance(options) {
+  const { path, state } = loadState();
+  const phase = one(options, 'phase');
+  const phases = new Set([
+    'prerequisites',
+    'implementation',
+    'verification',
+    'polish',
+    'publication',
+    'readiness',
+  ]);
+  if (!phases.has(phase)) {
+    fail(`Unknown develop controller phase: ${phase}.`);
+  }
+  if (new Set(['polish', 'publication', 'readiness']).has(phase)) {
+    const pending = state.requirements
+      .filter(({ status }) => status !== 'complete')
+      .map(({ id }) => id);
+    if (pending.length > 0) {
+      fail(
+        `Develop controller cannot enter ${phase}; requirements remain pending: ${pending.join(', ')}.`,
+      );
+    }
+  }
+  state.phase = phase;
+  state.pendingAction = one(options, 'pending-action');
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function requireCompleteRequirements(state, destination) {
+  const pending = state.requirements
+    .filter(({ status }) => status !== 'complete')
+    .map(({ id }) => id);
+  if (pending.length > 0) {
+    fail(
+      `Develop controller cannot enter ${destination}; requirements remain pending: ${pending.join(', ')}.`,
+    );
+  }
+}
+
+function checkEpochStartedAt(options) {
+  const value = one(options, 'check-epoch-started-at');
+  const milliseconds = Date.parse(value);
+  if (!Number.isFinite(milliseconds)) {
+    fail('--check-epoch-started-at requires an ISO-8601 timestamp.');
+  }
+  return new Date(milliseconds).toISOString();
+}
+
+function publish(options) {
+  const { path, state } = loadState();
+  requireCompleteRequirements(state, 'publication');
+  const headSha = one(options, 'head').toLowerCase();
+  if (!/^[0-9a-f]{40}$/.test(headSha)) {
+    fail('--head requires one full 40-character commit SHA.');
+  }
+  const pullRequest = one(options, 'pull-request');
+  if (state.headSha !== headSha) {
+    state.checkEpoch += 1;
+  }
+  state.checkEpochStartedAt = checkEpochStartedAt(options);
+  state.phase = 'readiness';
+  state.pullRequest = pullRequest;
+  state.headSha = headSha;
+  state.pendingAction = one(options, 'pending-action');
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function startCheckEpoch(options) {
+  const { path, state } = loadState();
+  if (!state.pullRequest || !state.headSha) {
+    fail('Develop controller cannot start a check epoch before publication.');
+  }
+  state.phase = 'readiness';
+  state.checkEpoch += 1;
+  state.checkEpochStartedAt = checkEpochStartedAt(options);
+  state.pendingAction = one(options, 'pending-action');
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function ready() {
+  const { path, state } = loadState();
+  requireCompleteRequirements(state, 'ready-to-merge');
+  if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
+    fail('Develop controller cannot become ready before published readiness.');
+  }
+  state.status = 'ready-to-merge';
+  state.pendingAction = null;
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function block(options) {
+  const { path, state } = loadState();
+  state.status = 'blocked';
+  state.pendingAction = one(options, 'pending-action');
+  writeState(path, state);
+  process.stdout.write(`${path}\n`);
+}
+
+function show() {
+  const { state } = loadState({ requireNonterminal: false });
+  process.stdout.write(`${JSON.stringify(state, null, 2)}\n`);
+}
+
+try {
+  const [command, ...args] = process.argv.slice(2);
+  const options = parseOptions(args);
+  if (command === 'init') {
+    init(options);
+  } else if (command === 'complete-requirement') {
+    completeRequirement(options);
+  } else if (command === 'advance') {
+    advance(options);
+  } else if (command === 'publish') {
+    publish(options);
+  } else if (command === 'start-check-epoch') {
+    startCheckEpoch(options);
+  } else if (command === 'ready') {
+    ready();
+  } else if (command === 'block') {
+    block(options);
+  } else if (command === 'show') {
+    show();
+  } else {
+    fail(`Unknown controller command: ${command ?? 'none'}.`);
+  }
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+}

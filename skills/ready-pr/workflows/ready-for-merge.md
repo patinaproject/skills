@@ -19,6 +19,11 @@ blocker. When everything passes, summarize verification in one sentence. Show
 exact failed commands, skipped checks, or unresolved feedback only when they
 explain what remains.
 
+When `develop` supplied a durable controller, update it before every turn
+boundary. A pending controller turn reports progress without emitting a final
+workflow result. Mark and stop the controller only after this workflow reaches
+`ready to merge` or a human-owned blocker.
+
 ## Publish local work
 
 1. Resolve the current branch, repository visibility, default branch, issue,
@@ -39,8 +44,10 @@ explain what remains.
 4. Commit with the repository's format. Run any required local review on that
    exact commit. Fix and commit clear findings, then repeat checks and review
    until the current commit passes.
-5. Push only after the exact commit passes. Every later fix commit returns to
-   step 3 before another push.
+5. Push only after the exact commit passes. In a durable `develop` run, capture
+   the check-epoch timestamp immediately before the push, then record the pull
+   request and published full commit with the controller's `publish` command.
+   Every later fix commit returns to step 3 before another push.
 
 ## Create or update the pull request
 
@@ -141,6 +148,11 @@ Fix every failure introduced by the branch. Optional checks and replaced runs
 are history, but comments they posted still require attention. Stop after two
 unchanged ten-minute windows.
 
+For a durable controller, use its epoch timestamp to distinguish runs started
+for the current publication or ready transition from older runs on the same
+commit. After two unchanged windows, store the next check action and yield the
+current turn with the controller active. This is not a terminal stop.
+
 After checks finish, fail, or time out, fetch all feedback again. Handle any new
 or changed item before reporting.
 
@@ -148,11 +160,15 @@ or changed item before reporting.
 
 Immediately before changing draft state, follow
 [the draft readiness checks](../references/readiness-predicate.md). When they
-pass, run:
+pass, capture the check-epoch timestamp and run:
 
 ```sh
 gh pr ready
 ```
+
+In a durable `develop` run, record `start-check-epoch` with the captured
+timestamp. Wait for every required run in this new epoch. Then read a fresh
+merge state before continuing to the final check.
 
 Do not change issue status. Ready for human review and ready to merge are
 different results, so continue to the final check below.
@@ -168,6 +184,7 @@ git status --short
 git rev-parse HEAD
 gh pr view <pr-number-or-url> --json url,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,isDraft,reviewDecision,statusCheckRollup
 gh pr checks <pr-number-or-url> --required
+gh pr diff <pr-number-or-url> --name-only
 ```
 
 Use paginated GraphQL as described in
@@ -193,13 +210,18 @@ The pull request is ready to merge only when:
 - every paginated GraphQL review thread has `isResolved: true`
 - no pending decision, permission, credential, or stopped check needs the user
 
+Use the live pull-request diff against `baseRefName` for the final scope check.
+The task workspace diff is diagnostic evidence only.
+
 Optional and replaced check runs do not change the required-check result.
 Passing checks do not replace a clean merge state. Replies do not replace thread
 resolution.
 
-If every condition passes, report `ready to merge`. Otherwise report `not ready
-to merge` and name the remaining problem. Never describe a blocked pull request
-as finished.
+If every condition passes, mark a durable controller `ready`, stop its
+continuation, and report `ready to merge`. When the next action needs a person,
+record `block` with that exact action, stop the continuation, and report
+`Blocked`. Otherwise keep the controller active and report nonterminal progress.
+Never describe a blocked pull request as finished.
 
 ## Final report
 

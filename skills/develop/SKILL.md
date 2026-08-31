@@ -68,6 +68,7 @@ Confirm these skills are installed before implementation:
 - `diagnosing-bugs`
 - `update-branch`
 - `ready-pr`
+- `codex-pr-feedback-loop`
 
 Stop and name any missing skill. Give a project-local install command for its
 current source.
@@ -99,30 +100,41 @@ no observation context.
 4. Confirm that the request is clear enough to implement. Stop when work needs
    a product decision, design decision, credentials, permissions, external
    access, or instructions that resolve a conflict.
-5. Run `writing-for-agents` or `prototype` when the request needs them.
-6. Use the build and test steps from `implement`. Follow the written
+5. Read [the durable controller workflow](workflows/durable-controller.md).
+   Build the explicit requirement ledger, check publication and continuation
+   prerequisites, initialize its state, and start the current task's controller.
+   A missing prerequisite is a terminal `Blocked` result before implementation.
+6. Run `writing-for-agents` or `prototype` when the request needs them.
+7. Advance the controller to implementation. Use the build and test steps from
+   `implement`. Follow the written
    instructions when they differ from the issue body. Skip `implement`'s final
    standalone code review because `polish` performs that review.
-7. Run the verification commands documented by the repository. Add or update
+8. Advance the controller to verification. Run the verification commands
+   documented by the repository. Add or update
    tests when the change affects executable behavior. After merging the target
    branch, follow `update-branch`'s
    [verification rules](../update-branch/SKILL.md#workflow). A proven problem
    that already exists on the target branch does not stop `develop`. Keep the
    target commit, command, failure, and proof for the final report.
-8. Run `polish` against the current commit. Pass it the issue, written
+9. Reconcile the requirement ledger. Complete each requirement with evidence.
+   Continue implementation while any named requirement remains. Advance the
+   controller to `polish`, then run `polish` against the current commit. Pass it the issue, written
    instructions, and available behavioral observations. Fix accepted findings,
    commit the fixes, and run `polish` again. Continue until it passes with no
    findings or asks for a human decision.
-9. If the repository requires an issue reference and step 3 found no issue,
+10. If the repository requires an issue reference and step 3 found no issue,
    stop before `ready-pr`. Report the completed local work and ask the user for
    an issue.
-10. Run `ready-pr` with the same behavioral observations. Let it commit and
+11. Advance the controller to publication. Run `ready-pr` with the same
+    behavioral observations. Let it commit and
     push the branch, create or update the pull request, handle available
     feedback, and check the current pull request state.
-11. When local checks or pull request checks fail, fix problems caused by this
+12. When local checks or pull request checks fail, fix problems caused by this
     branch. Do the same when review feedback identifies one. Verify and review
     each new commit, push it, and repeat until the pull request is ready to
-    merge or the next step needs a person.
+    merge or the next step needs a person. Keep the controller nonterminal
+    across ordinary turn boundaries. Mark it terminal and stop its continuation
+    only for `ready-to-merge` or `blocked`.
 
 ## When the work is done
 
@@ -169,8 +181,8 @@ When all checks pass, summarize verification in one sentence. Include exact
 commands only for failures, skipped checks, or steps the user must run. Do not
 repeat GitHub status fields or list every successful check.
 
-During a long run, keep a short note with the request, issue, branch, current
-result, blocker, and next step. Use that note to resume without repeating
-completed work. If an extra full-repository command found a proven target-branch
-problem, also keep the target commit, command, failure, and proof. Apply
-`update-branch`'s verification rules again before reusing that proof.
+During a long run, treat the durable controller record as the resume source.
+Update it before ending any nonterminal turn. If an extra full-repository
+command found a proven target-branch problem, keep the target commit, command,
+failure, and proof in the pending-action evidence. Apply `update-branch`'s
+verification rules again before reusing that proof.
