@@ -58,9 +58,7 @@ function createRepository() {
     pendingAction: 'Verify publication prerequisites',
     phase: 'prerequisites',
     pullRequest: null,
-    requiredCheckContexts: [],
-    requiredCheckContextsEvidence: null,
-    requiredCheckContextsKnown: false,
+    requiredCheckSet: { status: 'unknown' },
     requirements: [
       {
         evidence: null,
@@ -216,19 +214,6 @@ function createRepository() {
   assert.equal(publishedState.phase, 'readiness');
   assert.equal(publishedState.pullRequest, '123');
 
-  const unknownContexts = run(
-    'start-check-epoch',
-    [
-      '--pending-action',
-      'Do not start without required check identities',
-      '--check-epoch-started-at',
-      '2026-08-31T08:09:00.000Z',
-    ],
-    repository,
-  );
-  assert.equal(unknownContexts.status, 1);
-  assert.match(unknownContexts.stderr, /record required check contexts/);
-
   const recordedContexts = run(
     'record-check-contexts',
     [
@@ -243,10 +228,11 @@ function createRepository() {
   );
   assert.equal(recordedContexts.status, 0, recordedContexts.stderr);
   publishedState = JSON.parse(readFileSync(statePath, 'utf8'));
-  assert.deepEqual(publishedState.requiredCheckContexts, [
-    { name: 'test', workflow: 'CI' },
-  ]);
-  assert.equal(publishedState.requiredCheckContextsKnown, true);
+  assert.deepEqual(publishedState.requiredCheckSet, {
+    contexts: [{ name: 'test', workflow: 'CI' }],
+    evidence: 'gh pr checks --required returned the CI test context',
+    status: 'known',
+  });
 
   const readyReviewEpoch = '2026-08-31T08:10:00.000Z';
   const readyEpoch = run(
@@ -373,6 +359,69 @@ function createRepository() {
   );
   assert.equal(lateAdvance.status, 1);
   assert.match(lateAdvance.stderr, /already terminal/);
+}
+
+{
+  const repository = createRepository();
+  const statePath = run(
+    'init',
+    [
+      '--issue',
+      '#409',
+      '--branch',
+      '409-controller',
+      '--pending-action',
+      'Publish the draft',
+    ],
+    repository,
+  ).stdout.trim();
+  for (const [phase, pendingAction] of [
+    ['implementation', 'Implement'],
+    ['verification', 'Verify'],
+    ['polish', 'Review'],
+    ['publication', 'Publish'],
+  ]) {
+    const advanced = run(
+      'advance',
+      ['--phase', phase, '--pending-action', pendingAction],
+      repository,
+    );
+    assert.equal(advanced.status, 0, advanced.stderr);
+  }
+  const published = run(
+    'publish',
+    [
+      '--pull-request',
+      '456',
+      '--head',
+      'c'.repeat(40),
+      '--check-epoch-started-at',
+      '2026-08-31T09:00:00.000Z',
+      '--pending-action',
+      'Mark the draft ready to trigger required workflows',
+    ],
+    repository,
+  );
+  assert.equal(published.status, 0, published.stderr);
+
+  const started = run(
+    'start-check-epoch',
+    [
+      '--pending-action',
+      'Discover required contexts after the ready-for-review transition',
+      '--check-epoch-started-at',
+      '2026-08-31T09:05:00.000Z',
+    ],
+    repository,
+  );
+  assert.equal(started.status, 0, started.stderr);
+  const state = JSON.parse(readFileSync(statePath, 'utf8'));
+  assert.equal(state.checkEpoch, 2);
+  assert.deepEqual(state.requiredCheckSet, { status: 'unknown' });
+
+  const prematureReady = run('ready', [], repository);
+  assert.equal(prematureReady.status, 1);
+  assert.match(prematureReady.stderr, /required check contexts are known/);
 }
 
 {

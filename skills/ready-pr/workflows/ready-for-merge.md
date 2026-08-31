@@ -66,10 +66,8 @@ workflow result. Mark and stop the controller only after this workflow reaches
    unchanged unless the user asks the agent to take it over.
 
 For a durable controller's first pull request, run `attach-pull-request` after
-creation. Then record every required check name/workflow pair as described in
-[the controller workflow](../../develop/workflows/durable-controller.md#move-through-phases).
-An empty live result is a discovery gap unless authoritative target-branch
-configuration proves that no contexts are required.
+creation. Discover and record required checks through
+[the readiness predicate](../references/readiness-predicate.md#discover-the-required-context-set).
 
 ## Check the current pull request commit
 
@@ -177,7 +175,8 @@ gh pr ready
 ```
 
 In a durable `develop` run, record `start-check-epoch` with the captured
-timestamp. Wait for every required run in this new epoch. Then read a fresh
+timestamp. Discover any contexts that first appear after `ready_for_review`,
+then wait for every required run in this new epoch. Then read a fresh
 merge state before continuing to the final check.
 
 Do not change issue status. Ready for human review and ready to merge are

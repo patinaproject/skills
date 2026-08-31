@@ -92,6 +92,34 @@ function writeState(path, state) {
   renameSync(temporaryPath, path);
 }
 
+function normalizeRequiredCheckSet(state) {
+  if (!state.requiredCheckSet) {
+    state.requiredCheckSet = state.requiredCheckContextsKnown === true
+      ? {
+          contexts: state.requiredCheckContexts ?? [],
+          evidence: state.requiredCheckContextsEvidence,
+          status: 'known',
+        }
+      : { status: 'unknown' };
+  }
+  delete state.requiredCheckContexts;
+  delete state.requiredCheckContextsEvidence;
+  delete state.requiredCheckContextsKnown;
+
+  if (state.requiredCheckSet.status === 'unknown') {
+    state.requiredCheckSet = { status: 'unknown' };
+    return;
+  }
+  if (
+    state.requiredCheckSet.status !== 'known' ||
+    !Array.isArray(state.requiredCheckSet.contexts) ||
+    typeof state.requiredCheckSet.evidence !== 'string' ||
+    !state.requiredCheckSet.evidence.trim()
+  ) {
+    fail('Develop controller required check set is invalid.');
+  }
+}
+
 function loadState({ requireNonterminal = true } = {}) {
   const path = statePath();
   let state;
@@ -103,6 +131,7 @@ function loadState({ requireNonterminal = true } = {}) {
   if (state.version !== 1) {
     fail(`Develop controller state version ${String(state.version)} is unsupported.`);
   }
+  normalizeRequiredCheckSet(state);
   const currentBranch = git('branch', '--show-current');
   if (state.branch !== currentBranch) {
     fail(
@@ -162,9 +191,7 @@ function init(options) {
     pendingAction: requiredOption(options, 'pending-action'),
     phase: 'prerequisites',
     pullRequest: null,
-    requiredCheckContexts: [],
-    requiredCheckContextsEvidence: null,
-    requiredCheckContextsKnown: false,
+    requiredCheckSet: { status: 'unknown' },
     requirements,
     status: 'nonterminal',
     version: 1,
@@ -304,9 +331,11 @@ function recordCheckContexts(options) {
   if (new Set(identities).size !== identities.length) {
     fail('Develop controller required check contexts must be unique.');
   }
-  state.requiredCheckContexts = contexts;
-  state.requiredCheckContextsEvidence = requiredOption(options, 'evidence');
-  state.requiredCheckContextsKnown = true;
+  state.requiredCheckSet = {
+    contexts,
+    evidence: requiredOption(options, 'evidence'),
+    status: 'known',
+  };
   state.pendingAction = requiredOption(options, 'pending-action');
   writeState(path, state);
   process.stdout.write(`${path}\n`);
@@ -316,9 +345,6 @@ function startCheckEpoch(options) {
   const { path, state } = loadState();
   if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
     fail('Develop controller cannot start a check epoch before publication.');
-  }
-  if (!state.requiredCheckContextsKnown) {
-    fail('Develop controller must record required check contexts before starting a new epoch.');
   }
   const epochStartedAt = checkEpochStartedAt(options);
   const pendingAction = requiredOption(options, 'pending-action');
@@ -345,7 +371,7 @@ function ready() {
   if (state.phase !== 'readiness' || !state.pullRequest || !state.headSha) {
     fail('Develop controller cannot become ready before published readiness.');
   }
-  if (!state.requiredCheckContextsKnown) {
+  if (state.requiredCheckSet.status !== 'known') {
     fail('Develop controller cannot become ready before required check contexts are known.');
   }
   state.status = 'ready-to-merge';

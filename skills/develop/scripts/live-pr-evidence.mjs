@@ -134,7 +134,9 @@ const checkIdentity = ({ name, workflow }) => `${workflow}\0${name}`;
 const selectedByIdentity = new Map(
   selectedChecks.map((check) => [checkIdentity(check), check]),
 );
-const expectedContexts = controller.requiredCheckContexts ?? [];
+const requiredCheckSet = controller.requiredCheckSet ?? { status: 'unknown' };
+const contextsKnown = requiredCheckSet.status === 'known';
+const expectedContexts = contextsKnown ? requiredCheckSet.contexts : [];
 const contextByIdentity = new Map(
   expectedContexts.map((context) => [checkIdentity(context), context]),
 );
@@ -160,7 +162,6 @@ for (const [identity, context] of contextByIdentity) {
 }
 const terminalBuckets = new Set(['pass', 'fail', 'skipping', 'cancel']);
 const passingBuckets = new Set(['pass', 'skipping']);
-const contextsKnown = controller.requiredCheckContextsKnown === true;
 const epochTerminal =
   contextsKnown &&
   awaitingContexts.length === 0 &&
@@ -223,7 +224,7 @@ process.stdout.write(`${JSON.stringify({
   repository,
   requiredChecks: {
     awaitingContexts,
-    contextsEvidence: controller.requiredCheckContextsEvidence ?? null,
+    contextsEvidence: contextsKnown ? requiredCheckSet.evidence : null,
     contextsKnown,
     currentEpoch: currentEpochChecks,
     expectedContexts,

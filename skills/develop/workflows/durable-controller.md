@@ -78,20 +78,19 @@ idempotent: it keeps the original epoch timestamp and only refreshes the pending
 action.
 
 After the pull request exists, record its required context identities with
-`record-check-contexts --context WORKFLOW=NAME --evidence TEXT`. Use every row
-from `gh pr checks --required --json name,workflow` and refresh the record when
-the target's required contexts change. Do not treat a momentarily empty check
-list as proof that no contexts are required. Record an empty set only when the
-repository's authoritative protection or ruleset configuration proves it, and
-put that proof in `--evidence`.
+`record-check-contexts --context WORKFLOW=NAME --evidence TEXT`. Discover the
+set and handle an empty live result according to
+[the readiness predicate](../../ready-pr/references/readiness-predicate.md#discover-the-required-context-set).
+Refresh the record when the target's required contexts change.
 
 The final live controller-and-pull-request evidence step belongs to
 [`ready-pr`'s final check](../../ready-pr/workflows/ready-for-merge.md#final-ready-check).
 
 Immediately before changing a draft to ready, capture another timestamp. After
 the transition, run `start-check-epoch` with that timestamp and the next action.
-This creates a new epoch even when the commit did not change. The helper refuses
-the transition until the required context set is known.
+This creates a new epoch even when the commit did not change. The set may remain
+unknown while workflows triggered by `ready_for_review` start. An unknown set
+keeps the epoch pending and prevents a terminal `ready` transition.
 
 When a branch-caused failure needs a fix, advance to `implementation`. The new
 commit returns through verification, `polish`, publication, and readiness.
