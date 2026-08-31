@@ -34,8 +34,11 @@ instructions, every ADR authority they name, and the relevant current ADRs.
 Decide whether a design needs an ADR, whether to create, amend, or supersede a
 record, which issue identifier it uses, where it belongs, and how to name and
 structure it. Follow the repository's naming, placement, and format rules. When
-those rules leave a case open, choose the path that best maintains the existing
-decision history from first principles.
+those rules leave the format open, use `ADR-FORMAT.md` from `domain-modeling`.
+When they leave placement open, put a context-only ADR in that context's
+`docs/adr/` and a wider decision in the root `docs/adr/`. Resolve any other open
+mechanic from first principles by choosing the path that best maintains the
+existing decision history.
 
 NEVER ask the operator to decide any ADR mechanic. Report the path you chose and
 the proposal you wrote.
@@ -48,13 +51,13 @@ the proposal you wrote.
    conversation.
 2. Read the rules and formats from `domain-modeling`. Draft one complete
    proposal for each new glossary term and each decision that requires an ADR.
-   Use `CONTEXT-FORMAT.md` for glossary entries and `ADR-FORMAT.md` for ADRs.
-   Follow the target repository's ADR naming rules.
+   Use `CONTEXT-FORMAT.md` for glossary entries and apply the question boundary
+   to every ADR.
 3. Put each proposal in one fenced block. Label it with the destination path
    and include the complete text that the implementing branch should copy.
    When the repository has a `CONTEXT-MAP.md`, place a glossary term in its
-   context's `CONTEXT.md`. Put an ADR in that context's `docs/adr/` when it
-   affects only that context, otherwise use the root `docs/adr/`.
+   context's `CONTEXT.md`. Use the ADR path selected under the question
+   boundary.
 4. If later discussion changes a proposal, draft it again. The newest draft is
    the one to publish. Account for every agreed term and decision with either a
    proposal or a stated reason for skipping it.
