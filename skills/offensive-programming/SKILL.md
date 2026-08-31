@@ -1,6 +1,6 @@
 ---
 name: offensive-programming
-description: Offensive programming applies before writing a try/catch or error handler, null or existence check, default or fallback, optional chaining over possibly invalid data, retry, assertion, guard branch, feature-flag or environment-variable skip, workaround, or shortcut.
+description: Offensive programming applies before writing an error handler, null check, fallback, optional chain over uncertain data, retry, assertion, guard branch, configuration skip, or workaround.
 ---
 
 # Offensive programming
@@ -31,7 +31,7 @@ separates untrusted external input from trusted internal state.
      Do not recover with a fallback, default, or swallowed error.
    - For an unreachable state, write no guard. Delete or restructure the branch
      so it does not exist, and make the authoritative writer refuse the invalid
-     state. Do not add a test only to cover the removed branch.
+     state. Test the reachable behavior and the writer's refusal instead.
 
 ## Rules
 
