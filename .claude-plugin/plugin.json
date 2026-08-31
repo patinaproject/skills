@@ -17,6 +17,7 @@
     "./skills/install-skills",
     "./skills/grill-to-spec",
     "./skills/design-by-contract",
+    "./skills/offensive-programming",
     "./skills/grill-system-design",
     "./skills/review-system-design",
     "./skills/fix",

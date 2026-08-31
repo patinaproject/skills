@@ -4,10 +4,10 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging,
-contract-based system design, diagnosis-first correction, shared-host mobile
-simulator sessions, system design review, focused system design grilling, Codex
-chat coordination, settled-design documentation capture, release changelog
-ceremonies, and local branch updating.
+contract-based system design, offensive-programming decisions, diagnosis-first
+correction, shared-host mobile simulator sessions, system design review,
+focused system design grilling, Codex chat coordination, settled-design
+documentation capture, release changelog ceremonies, and local branch updating.
 They are available across Claude Code, Codex, and any agent runtime that reads
 `AGENTS.md`.
 
@@ -201,6 +201,16 @@ visual explanation materially improves clarity.
 See [./skills/design-by-contract/](./skills/design-by-contract/) for the skill
 contract.
 
+### offensive-programming
+
+`offensive-programming` classifies a proposed check, assertion, fallback, or
+shortcut by its source and reachability. It validates untrusted input, handles
+expected behavior at its owner, and makes internal defects fail close to their
+cause.
+
+See [./skills/offensive-programming/](./skills/offensive-programming/) for the
+skill contract.
+
 ### grill-system-design
 
 System design grilling should focus on choices that deserve durable context.
@@ -296,6 +306,7 @@ README and skill contract.
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
+| [offensive-programming](./skills/offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [fix](./skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
@@ -358,6 +369,7 @@ skills/
   move-branch-here/
   grill-to-spec/
   design-by-contract/
+  offensive-programming/
   grill-system-design/
   review-system-design/
   fix/
