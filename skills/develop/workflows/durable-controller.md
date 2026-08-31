@@ -88,9 +88,11 @@ The final live controller-and-pull-request evidence step belongs to
 
 Immediately before changing a draft to ready, capture another timestamp. After
 the transition, run `start-check-epoch` with that timestamp and the next action.
-This creates a new epoch even when the commit did not change. The set may remain
-unknown while workflows triggered by `ready_for_review` start. An unknown set
-keeps the epoch pending and prevents a terminal `ready` transition.
+This creates a new epoch even when the commit did not change. It does not waive
+`ready-pr`'s draft readiness checks. The set may remain unknown when another
+actor already made the pull request ready and workflows triggered by
+`ready_for_review` are starting. An unknown set keeps the epoch pending and
+prevents a terminal `ready` transition.
 
 When a branch-caused failure needs a fix, advance to `implementation`. The new
 commit returns through verification, `polish`, publication, and readiness.

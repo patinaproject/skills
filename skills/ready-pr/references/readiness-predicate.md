@@ -5,9 +5,7 @@ three checks pass:
 
 1. Local `HEAD` equals the latest pull request commit, and the repository's
    required local review passed on that commit.
-2. Every known required GitHub check passes on that commit. This check may be
-   deferred only when authoritative repository configuration shows that a
-   required workflow cannot start until `ready_for_review`.
+2. Every required GitHub check passes on that commit.
 3. No unresolved GraphQL review thread started by a bot or GitHub App remains.
 
 Immediately before `gh pr ready`, fetch local `HEAD`, the pull request
@@ -27,11 +25,15 @@ controller. A nonempty result is the required context set for that commit.
 
 A draft can have no rows when a required workflow listens only for
 `ready_for_review`. Confirm that trigger from the repository's workflow and
-target-branch protection or ruleset configuration. The agent may then mark its
-own draft ready and start a new epoch while the controller's set is unknown.
-Poll the live required-check query after the transition and record the rows as
-soon as they appear. The unknown set keeps the epoch pending and cannot satisfy
-the final ready predicate.
+target-branch protection or ruleset configuration. This does not waive the
+draft readiness checks. If the configured workflow has not passed on the draft,
+the agent cannot mark it ready. Record a blocker with the exact workflow or
+policy change that needs a person.
+
+When a pull request is already ready and the context set is unknown, start the
+new epoch and poll the live required-check query. Record the rows as soon as
+they appear. The unknown set keeps the epoch pending and cannot satisfy the
+final ready predicate.
 
 If the live query remains empty, inspect the target branch's protection with
 `gh api repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
