@@ -105,7 +105,9 @@ const checkResult = run(
   ],
   new Set([0, 1, 8]),
 );
-const requiredChecks = JSON.parse(checkResult.stdout);
+const requiredChecks = checkResult.stdout.trim()
+  ? JSON.parse(checkResult.stdout)
+  : [];
 const epochStartedAt = Date.parse(controller.checkEpochStartedAt);
 
 function selectCurrentContextRuns(checks) {

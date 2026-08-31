@@ -178,9 +178,11 @@ if (args[0] === 'repo' && args[1] === 'view') {
     name, startedAt, state: 'SUCCESS', workflow: 'CI',
   }));
   const mode = process.env.FAKE_CHECK_MODE;
-  console.log(JSON.stringify(
-    mode === 'empty' ? [] : mode === 'terminal' ? terminalChecks : historicalChecks,
-  ));
+  if (mode !== 'empty-output') {
+    console.log(JSON.stringify(
+      mode === 'empty' ? [] : mode === 'terminal' ? terminalChecks : historicalChecks,
+    ));
+  }
   if (!mode) process.exitCode = 1;
 } else if (args[0] === 'api' && args[1] === 'graphql') {
   const page = (hasNextPage, endCursor, thread) => ({
@@ -258,6 +260,19 @@ assert.equal(emptyEvidence.requiredChecks.terminal, false);
 assert.equal(emptyEvidence.requiredChecks.passing, false);
 assert.equal(emptyEvidence.requiredChecks.awaitingContexts.length, 4);
 assert.equal(emptyEvidence.pullRequest.mergeStateStatus, 'BLOCKED');
+
+writeFileSync(env.FAKE_PR_VIEW_COUNTER, '0');
+result = run(
+  process.execPath,
+  [evidenceScript, '--task', 'task-409'],
+  repository,
+  { ...env, FAKE_CHECK_MODE: 'empty-output' },
+);
+assert.equal(result.status, 0, result.stderr);
+const emptyOutputEvidence = JSON.parse(result.stdout);
+assert.equal(emptyOutputEvidence.requiredChecks.terminal, false);
+assert.equal(emptyOutputEvidence.requiredChecks.passing, false);
+assert.equal(emptyOutputEvidence.requiredChecks.awaitingContexts.length, 4);
 
 writeFileSync(env.FAKE_PR_VIEW_COUNTER, '0');
 result = run(
