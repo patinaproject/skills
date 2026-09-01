@@ -22,12 +22,14 @@ Apply each criterion to every finding:
 - Already-covered: read the target skill before accepting any body-edit row. If the proposal duplicates clear, well-placed existing guidance, reject as `already-covered`. The issue is execution, not the skill. If the existing guidance is buried, weak, or easy to skip past, accept the row but reframe the proposal as a wording / placement improvement to make it fire (not a duplicate addition).
 
 Drop (implementation details that drift):
+
 - "linter at SHA `bd91aa7` uses chars/4 heuristic"
 - "`<specific-skill-name>` has 175 tokens at limit 80"
 - "Bugbot flagged regex backtracking on May 2"
 - "we renamed `gpt-4` to `gpt-4o` in `encodingForModel`"
 
 Keep (durable patterns):
+
 - "closed regex enums for trigger detection are brittle; prefer schema-validated structures"
 - "skill descriptions front-load trigger keywords (60/40 trigger-vs-action)"
 - "skill-bundled scripts run under bun with own lockfile, not pnpm workspace"
@@ -48,6 +50,7 @@ One row per finding. The user approves row by row.
 ## Rejected
 
 For each rejected finding:
+
 - Principle: <one sentence>
 - Reason: <durability | specificity | existing-skill-first | convergence | decision-changing | structural | duplicate | skill-not-used | already-covered>
 

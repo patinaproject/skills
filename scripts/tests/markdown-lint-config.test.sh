@@ -106,13 +106,6 @@ done
 [ -n "$EXCLUDED_SAMPLE" ] ||
   fail "no vendored overlay markdown found to probe the exclusion with"
 
-# The Engineering plugin owns its fork, but its initial pstack payload stays
-# byte-comparable to upstream. Imported baseline files are excluded while
-# Patina-authored additions in the same plugin remain first-party lint targets.
-assert_ignored \
-  "plugins/engineering/skills/patina-mode/SKILL.md" \
-  "imported Engineering pstack baseline"
-
 # 2. Rule configuration from .markdownlint.jsonc still loads for linted files.
 probe_dir="$(scratch_dir)"
 probe="$probe_dir/probe.md"
@@ -135,13 +128,16 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-engineering_first_party="plugins/engineering/skills/working-on-issues/SKILL.md"
-engineering_output="$(pnpm exec markdownlint-cli2 "$engineering_first_party" 2>&1)" || {
+if rg -n '"plugins/engineering/' .markdownlint-cli2.jsonc >/dev/null; then
+  fail "Engineering Markdown must not be exempt from repository linting"
+fi
+
+engineering_output="$(pnpm exec markdownlint-cli2 "plugins/engineering/**/*.md" 2>&1)" || {
   printf '%s\n' "$engineering_output" >&2
-  fail "Patina-authored Engineering skill markdown must lint clean"
+  fail "Engineering plugin Markdown must lint clean"
 }
 if printf '%s\n' "$engineering_output" | grep -q "$NO_FILES_SELECTED_LINE"; then
-  fail "Patina-authored Engineering skill markdown must be linted, not excluded"
+  fail "Engineering plugin Markdown must be linted, not excluded"
 fi
 
 # 4. The exclusion above is load-bearing, not vacuous: a payload written against

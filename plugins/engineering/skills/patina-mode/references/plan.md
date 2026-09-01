@@ -35,7 +35,7 @@ The user specifies where the plan lives.
 
 Single file `NN-slug.md` for small plans. For three or more phases, a directory with `overview.md` plus phase files:
 
-```
+```text
 NN-slug/
 ├── overview.md
 ├── phase-1-scaffold.md

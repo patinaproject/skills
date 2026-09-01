@@ -58,7 +58,7 @@ For each finding, provide:
 
 Return your findings as a structured list. If you have zero findings, say so. An empty review is a valid outcome.
 
-```
+```markdown
 ## Findings
 
 ### 1. [Severity] Short title

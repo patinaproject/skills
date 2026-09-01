@@ -20,14 +20,14 @@ Use the Datadog MCP. Start broad, then narrow.
 
 1. **Identify the owning service(s).**
 
-   ```
+   ```text
    search_datadog_services (filter by name or team)
    search_datadog_service_dependencies (see upstream/downstream)
    ```
 
 2. **Dashboards and monitors first. They tell you what the team cares about.**
 
-   ```
+   ```text
    search_datadog_dashboards (query: feature name, service name, symbol)
    search_datadog_monitors   (same queries)
    ```
@@ -36,7 +36,7 @@ Use the Datadog MCP. Start broad, then narrow.
 
 3. **Metrics around the target.**
 
-   ```
+   ```text
    search_datadog_metrics (by name pattern, e.g., the feature or symbol)
    get_datadog_metric_context (metadata: description, units, tags)
    get_datadog_metric (timeseries; "was there a spike around the PR date?")
@@ -46,7 +46,7 @@ Use the Datadog MCP. Start broad, then narrow.
 
 4. **Logs. Narrow, don't dump.**
 
-   ```
+   ```text
    search_datadog_logs (raw log patterns near the target, set use_log_patterns=true)
    analyze_datadog_logs (SQL-style aggregations, only when you need counts)
    ```
@@ -55,7 +55,7 @@ Use the Datadog MCP. Start broad, then narrow.
 
 5. **APM spans and traces.**
 
-   ```
+   ```text
    aggregate_spans    (stats: "how often does this endpoint fail?")
    search_datadog_spans (inspect individual spans)
    get_datadog_trace  (a specific trace ID)
@@ -65,7 +65,7 @@ Use the Datadog MCP. Start broad, then narrow.
 
 6. **Incidents.**
 
-   ```
+   ```text
    search_datadog_incidents (by title, team, date range)
    get_datadog_incident     (full detail for a specific incident)
    ```
@@ -91,6 +91,7 @@ Use the Datadog MCP. Start broad, then narrow.
 ## What to return
 
 For each relevant item:
+
 - Type (dashboard / monitor / metric / log pattern / trace / incident / notebook)
 - Title or name
 - Link or identifier (dashboard ID, monitor ID, metric name, incident ID)

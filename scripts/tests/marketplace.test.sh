@@ -149,7 +149,7 @@ if rg --hidden -n 'pstack:|poteto-mode|poteto-agent|setup-pstack|pstack-models\.
   exit 1
 fi
 
-test "$(find plugins/engineering -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '185'
+test "$(find plugins/engineering -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '187'
 test "$(find plugins/engineering/skills/patina-mode -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '46'
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
