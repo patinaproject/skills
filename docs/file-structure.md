@@ -9,7 +9,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `plugins/engineering/skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/ready-pr/`: PR readiness and publication skill
@@ -73,7 +73,7 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
-| `working-on-issue` | `plugins/engineering/skills/working-on-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
+| `working-on-issues` | `plugins/engineering/skills/working-on-issues/` | Resolve the live tracker, align the issue branch and worktree, and mark work started |
 | `develop` | `skills/develop/` | Issue development orchestration |
 | `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
 | `ready-pr` | `skills/ready-pr/` | Publish and prove a PR ready to merge |

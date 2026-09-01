@@ -16,6 +16,10 @@ These skills use Claude Code tool names (the `Skill` tool, the `Agent` tool, `As
 
 Remaining triggers:
 
+- Issue-linked work begins or resumes → run the **working-on-issues** skill
+  before editing, committing, or opening a pull request. Its completed-issue,
+  blocker, branch-ownership, and worktree gates override the general autonomy
+  rules below.
 - Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. The ask is the slow path. A throwaway probe usually answers faster, and it hands the human a result to react to instead of a decision to make.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.

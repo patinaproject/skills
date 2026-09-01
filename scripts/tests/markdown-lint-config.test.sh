@@ -135,7 +135,7 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-engineering_first_party="plugins/engineering/skills/working-on-issue/SKILL.md"
+engineering_first_party="plugins/engineering/skills/working-on-issues/SKILL.md"
 engineering_output="$(pnpm exec markdownlint-cli2 "$engineering_first_party" 2>&1)" || {
   printf '%s\n' "$engineering_output" >&2
   fail "Patina-authored Engineering skill markdown must lint clean"

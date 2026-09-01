@@ -17,7 +17,7 @@ SKILLS=(
   install-skills
   using-github
   new-branch
-  working-on-issue
+  working-on-issues
   develop
   develop-with-workflow
   ready-pr
@@ -47,7 +47,7 @@ fail() {
 
 canonical_skill_dir() {
   case "$1" in
-    working-on-issue|offensive-programming|fix|running-mobile-simulators)
+    working-on-issues|offensive-programming|fix|running-mobile-simulators)
       printf 'plugins/engineering/skills/%s\n' "$1"
       ;;
     *)
@@ -59,9 +59,12 @@ canonical_skill_dir() {
 for retired_path in \
   skills/resolve-qa-feedback \
   .claude/skills/resolve-qa-feedback \
-  .agents/skills/resolve-qa-feedback; do
+  .agents/skills/resolve-qa-feedback \
+  plugins/engineering/skills/working-on-issue \
+  .claude/skills/working-on-issue \
+  .agents/skills/working-on-issue; do
   if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
-    fail "$retired_path still exposes the retired resolve-qa-feedback skill"
+    fail "$retired_path still exposes a retired skill"
   fi
 done
 

@@ -12,7 +12,7 @@ branches, and status changes. If the file is missing, stop and say that
 `scaffold-repository` provides it.
 
 Use `/to-spec` when the user needs to publish a new specification or issue.
-Use `working-on-issue` to begin issue work and `write-changelog` for milestone
+Use `working-on-issues` to begin issue work and `write-changelog` for milestone
 or release summaries. Follow `docs/issue-tracker.md` for all other issue work,
 even when it selects GitHub.
 

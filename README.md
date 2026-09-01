@@ -81,15 +81,15 @@ committing, or creating a PR.
 
 See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
-### working-on-issue
+### working-on-issues
 
-Every controller needs the same begin-work step. `working-on-issue`
-resolves the issue best-effort — from an explicit reference or the current
-branch — then uses the tracker adapter to mark it started and lands on its
-canonical branch via `new-branch`. It returns cleanly when there is no issue and
+Every controller needs the same begin-work step. `working-on-issues` resolves
+one issue from an explicit reference or the current branch, discovers the live
+tracker contract, and enforces completed-issue, blocker, branch, and worktree
+gates before marking work started. It returns cleanly when there is no issue and
 never edits the issue body, so every entrypoint aligns work identically.
 
-See [./plugins/engineering/skills/working-on-issue/](./plugins/engineering/skills/working-on-issue/) for the skill contract.
+See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skills/working-on-issues/) for the skill contract.
 
 ### Filing and editing issues
 
@@ -104,7 +104,7 @@ defines them for every provider.
 End-to-end work needs a single entrypoint without weakening the focused skills
 that already own branch setup, test-driven implementation, diagnosis,
 architecture polish, and PR readiness. `develop` takes a **scope** — an issue
-reference, free-form instructions, or both — coordinates `working-on-issue`,
+reference, free-form instructions, or both — coordinates `working-on-issues`,
 `implement`, `polish`, and `ready-pr`, and stops for human-owned ambiguity
 instead of inventing scope.
 
@@ -295,8 +295,8 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [working-on-issue](./plugins/engineering/skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
-| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
+| [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
+| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issues, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Run incremental local architecture and code review |
 | [ready-pr](./skills/ready-pr/) | Publish completed branch work and prove its PR ready to merge |
@@ -386,7 +386,7 @@ plugins/engineering/
     architect/
     arena/
     ...
-    working-on-issue/
+    working-on-issues/
     offensive-programming/
     fix/
     running-mobile-simulators/

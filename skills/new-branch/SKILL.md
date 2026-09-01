@@ -1,6 +1,6 @@
 ---
 name: new-branch
-description: Create or switch to the issue branch supplied by the repository's tracker instructions. Use for branch setup or when working-on-issue needs the issue branch.
+description: Create or switch to the issue branch supplied by the repository's tracker instructions. Use for standalone branch setup; working-on-issues owns issue-session preflight.
 ---
 
 # New branch

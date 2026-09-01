@@ -10,7 +10,7 @@ one branch with all completed parts combined and verified. It does not run
 `polish` or open a pull request. Run `polish`, then `ready-pr`, afterward.
 
 The request may contain an issue, written instructions, or both. Written
-instructions control what to build. `working-on-issue` finds the issue and its
+instructions control what to build. `working-on-issues` finds the issue and its
 branch when one exists.
 
 ## Required tools and skills
@@ -18,8 +18,7 @@ branch when one exists.
 Confirm these are available before planning:
 
 - Claude Workflow tool
-- `working-on-issue`
-- `new-branch`
+- `working-on-issues`
 - `implement`
 - `tdd`
 - `code-review`
@@ -37,7 +36,7 @@ agents in separate worktrees for this run.
 
 ## Steps
 
-1. Run `working-on-issue` with the full request. If it finds no issue, warn that
+1. Run `working-on-issues` with the full request. If it finds no issue, warn that
    later commits and a pull request may need an issue reference, then continue
    on the current branch.
 2. Use `to-tickets` as a planning guide. Split the request into parts that each

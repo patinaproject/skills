@@ -7,7 +7,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `plugins/engineering/skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/ready-pr/`: PR readiness and publication skill
@@ -72,16 +72,15 @@ issue body framing, and the adapter owns readiness and priority.
 ### Working an issue
 
 When you begin or resume issue-linked work, run the
-`working-on-issue` skill first, before branching, editing, or opening a
+`working-on-issues` skill first, before branching, editing, or opening a
 pull request. It resolves the issue, lands you on the tracker-provided branch,
-and marks it started (self-assign and started state, best-effort). The skill is
+and marks it started after its gates pass. The skill is
 idempotent, so run it at the start of every issue-linked session even if you are
 unsure it has already run — re-running while already aligned is a no-op. A
 session or worktree branch the harness starts you on, such as `claude/<...>`, is
-not issue-linked: use `new-branch` to land on the adapter-provided branch and work
-there rather than committing on the session branch. If a branch genuinely cannot
-move onto the issue-linked name, stop and state the deviation rather than
-proceeding silently.
+not issue-linked: let `working-on-issues` align it rather than committing on the
+session branch. If another worktree owns the issue branch, follow the skill's
+handoff gate instead of moving it implicitly.
 
 ### Triage labels
 
@@ -270,7 +269,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | scaffold-repository | `skills/scaffold-repository/` |
 | using-github | `skills/using-github/` |
 | new-branch | `skills/new-branch/` |
-| working-on-issue | `plugins/engineering/skills/working-on-issue/` |
+| working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | develop | `skills/develop/` |
 | develop-with-workflow | `skills/develop-with-workflow/` |
 | ready-pr | `skills/ready-pr/` |
