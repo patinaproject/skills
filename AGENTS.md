@@ -18,6 +18,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
+- `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
@@ -283,7 +284,8 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
-| move-branch-here | `skills/move-branch-here/` |
+| move-branch-here (Patina Project Skills) | `skills/move-branch-here/` |
+| move-branch-here (Engineering) | `plugins/engineering/skills/move-branch-here/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | design-by-contract | `skills/design-by-contract/` |

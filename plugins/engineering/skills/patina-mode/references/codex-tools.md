@@ -27,7 +27,8 @@ Subagent dispatch needs `multi_agent` enabled. Add to `~/.codex/config.toml`:
 multi_agent = true
 ```
 
-Without it, `spawn_agent` is unavailable and the fan-out skills (`interrogate`, `why`, `how`, `arena`, `reflect`) degrade to a single sequential pass.
+Without it, `spawn_agent` is unavailable. Patina-mode must stop before it
+selects a playbook or changes anything. Do not degrade to a sequential pass.
 
 ## Subagent policy
 

@@ -10,6 +10,12 @@ menu-description: default entry point for any non-trivial task
 
 These skills use Claude Code tool names (the `Skill` tool, the `Agent` tool, `AskUserQuestion`) and Claude model slugs (`claude-*`). On Claude Code they work as written. On Codex and other runtimes, the skills are the same files; only the tool, model, and built-in-skill names resolve differently. When a skill names a Claude tool, a `claude-*` model, or a Claude built-in skill (`run`, `verify`, `plugin-dev:skill-development`), read [`references/codex-tools.md`](references/codex-tools.md) for the Codex equivalent.
 
+On Codex, patina-mode requires the `multi_agent` feature. Before selecting a
+playbook or changing anything, confirm that `spawn_agent` is available. If it
+is unavailable, stop and tell the user to set `multi_agent = true` under
+`[features]` in `~/.codex/config.toml`, then restart Codex. Do not continue with
+a sequential substitute.
+
 ## Non-negotiables
 
 **Start every multi-step task with a todolist whose first item is to read the Principles section below in full.** The principles ground every trigger here. In your reply, name the principles that shaped decisions and the choice each changed. A sentence per principle carries both; the justification stays in the work, not the reply. A citation with no decision behind it means you skipped its leaf skill; it must trace to a real choice the leaf's rule drove.
@@ -24,6 +30,9 @@ Remaining triggers:
   before editing, committing, or opening a pull request. Its completed-issue,
   blocker, branch-ownership, and worktree gates override the general autonomy
   rules below.
+- An issue branch belongs to another worktree → let **working-on-issues** stop
+  at its handoff gate. Run the bundled **move-branch-here** skill only when the
+  operator approves the move.
 - Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. The ask is the slow path. A throwaway probe usually answers faster, and it hands the human a result to react to instead of a decision to make.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
@@ -37,6 +46,10 @@ Remaining triggers:
 - Before review → the **no-comments** skill (`/no-comments`).
 - Shipping UI / IDE / CLI → the driver skill (`run` for CLIs/TUIs, `verify` for UIs). Both ship as Claude Code built-ins. For bug fixes, reproduce first on the same surface yourself; hand to the user only under the narrow Bug fix step 1 exception.
 - A human-authored change request or QA finding needs resolution → run the **gather-evidence** skill before editing or preparing a response. Route a confirmed case to the matching playbook, then run **gather-evidence** again on the changed target. Leave replies, thread resolution, and review state to the operator. Automated review uses the existing bot triage instead.
+- Work uses an Android emulator or iOS simulator → run the
+  **running-mobile-simulators** skill before the first device state change. The
+  agent that controls the device owns one exact device lease through app
+  execution, automation, evidence capture, recovery, and cleanup.
 - Any PR-status request → the **Babysit** playbook (`playbooks/babysit.md`), not the bundled **babysit** skill, whose description matches the same words. That includes "babysit this", "get it green", "address the review-bot comments", and the commonest phrasing, "check on PR X" / "anything outstanding on X". Never triggered by merely opening a PR. Declare its mode before polling; the playbook's step 1 owns the request-to-mode mapping. Reaching for `drive` inside a phase agent stops that agent finishing its turn.
 - Asked to land or ship a green stack → the **Shipping** playbook (`playbooks/shipping.md`). Green is not safe. Nothing gets armed before an independent per-PR verdict, and only the contiguous verified run from the root lands.
 - An automated PR-review bot or the agentic security review commented → skeptical posture. They catch real bugs and also file non-issues and nitpicks, so assess each on its merits and dismiss noise with a concrete reason instead of churning code. Triage fix / dismiss / ask per `references/bugbot-triage.md`.

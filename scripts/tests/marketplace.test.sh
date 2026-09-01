@@ -2,7 +2,7 @@
 set -euo pipefail
 
 expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-issue","./skills/develop","./skills/develop-with-workflow","./skills/ready-pr","./skills/merge-pr","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/polish","./skills/update-branch","./skills/move-branch-here","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/offensive-programming","./skills/grill-system-design","./skills/review-system-design","./skills/fix","./skills/running-mobile-simulators","./skills/orchestrate","./skills/write-changelog","./skills/prompting-fable"]'
-expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","no-comments","patina-mode","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
+expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","no-comments","patina-mode","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
 expected_engineering_prompts='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","no-comments","patina-mode","recall","reflect","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why"]'
 expected_engineering_agents='["comment-sicko","patina-agent"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback'
@@ -34,7 +34,7 @@ test "$mp_names" = '["patinaproject-skills","engineering"]'
 test "$(jq -r '.plugins[] | select(.name == "engineering") | .source' .claude-plugin/marketplace.json)" = './plugins/engineering'
 test -f plugins/engineering/.claude-plugin/plugin.json
 test "$(jq -r '.name' plugins/engineering/.claude-plugin/plugin.json)" = 'engineering'
-test "$(jq -c '.dependencies' plugins/engineering/.claude-plugin/plugin.json)" = '["patinaproject-skills"]'
+test "$(jq -c '.dependencies // []' plugins/engineering/.claude-plugin/plugin.json)" = '[]'
 test -f plugins/engineering/agents/patina-agent.md
 test -f plugins/engineering/hooks/hooks.json
 test -f plugins/engineering/models.json
@@ -149,17 +149,22 @@ if rg --hidden -n 'pstack:|poteto-mode|poteto-agent|setup-pstack|pstack-models\.
   exit 1
 fi
 
-test "$(find plugins/engineering -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '183'
+test "$(find plugins/engineering -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '185'
 test "$(find plugins/engineering/skills/patina-mode -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '46'
-engineering_executables="$(find plugins/engineering -type f -perm -111 -print | sort)"
+engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/hooks/run-hook.cmd \
   plugins/engineering/hooks/session-start \
+  plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh \
   plugins/engineering/skills/patina-mode/scripts/orch/orch.ts \
   plugins/engineering/skills/patina-mode/scripts/watch-pr/watch-pr \
   plugins/engineering/skills/patina-mode/scripts/worktree-audit.sh \
   plugins/engineering/skills/show-me-your-work/scripts/log.sh | sort)"
 test "$engineering_executables" = "$expected_engineering_executables"
+
+cmp \
+  skills/move-branch-here/scripts/worktree-context.sh \
+  plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh
 
 test "$(read_frontmatter_field skills/develop/SKILL.md disable-model-invocation)" = 'true'
 test -n "$(read_frontmatter_field plugins/engineering/skills/gather-evidence/SKILL.md description)"

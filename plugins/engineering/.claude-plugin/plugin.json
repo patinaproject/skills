@@ -16,8 +16,5 @@
     "principles",
     "subagents",
     "unslop"
-  ],
-  "dependencies": [
-    "patinaproject-skills"
   ]
 }

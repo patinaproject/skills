@@ -20,6 +20,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
+- `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
@@ -87,7 +88,8 @@ Skills owned by this repository:
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
 | `polish` | `skills/polish/` | Incremental local architecture and code review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
-| `move-branch-here` | `skills/move-branch-here/` | Worktree branch handover workflow |
+| `move-branch-here` (Patina Project Skills) | `skills/move-branch-here/` | Worktree branch handover workflow |
+| `move-branch-here` (Engineering) | `plugins/engineering/skills/move-branch-here/` | Worktree branch handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |

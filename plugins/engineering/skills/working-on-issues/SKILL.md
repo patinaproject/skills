@@ -70,7 +70,8 @@ prefix, or regenerated title slug.
    stop if an existing remote branch cannot be fetched.
 4. Inspect `git worktree list --porcelain` before switching branches.
 5. If the issue branch belongs to another worktree, stop and ask whether the
-   operator wants to run `move-branch-here`. Do not move it automatically.
+   operator wants to run the bundled `move-branch-here` skill. Do not move it
+   automatically.
 6. If the current worktree already owns the branch, stay there. Otherwise,
    switch to the local branch, create it from the fetched remote branch, or
    create it from the fetched default branch, in that order.

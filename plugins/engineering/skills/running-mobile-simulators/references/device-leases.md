@@ -1,7 +1,7 @@
 # Device leases
 
-Use one host-visible lease namespace for every worktree running as the current
-user:
+Use one host-visible lease namespace shared by every agent running as the
+current user:
 
 ```bash
 lease_root="/tmp/running-mobile-simulators-$(id -u)"
@@ -9,7 +9,7 @@ mkdir -p "$lease_root"
 ```
 
 Do not place leases inside a worktree. A worktree-local lock cannot coordinate
-an external device.
+an external device or separate agents that share the worktree.
 
 ## Name the canonical device
 
@@ -36,38 +36,44 @@ identity and its lease path, with no device mutation performed.
 
 ## Claim atomically
 
-Generate a unique session ID, then use `mkdir` as the atomic claim:
+Generate the agent session ID once. Reuse it for retries and recovery. Use
+`mkdir` as the atomic claim:
 
 ```bash
-session_id="$(uuidgen)"
+session_id="<agent-session-uuid>"
 if mkdir "$lease_dir"; then
   printf '%s\n' "$session_id" >"$lease_dir/session-id"
   printf '%s\n' "$workspace_real_path" >"$lease_dir/workspace"
   printf '%s\n' "$device_identity" >"$lease_dir/device"
+elif test -f "$lease_dir/session-id" &&
+    test "$(sed -n '1p' "$lease_dir/session-id")" = "$session_id"; then
+  :
 else
   printf 'device already leased: %s\n' "$device_identity" >&2
   exit 1
 fi
 ```
 
-Directory creation succeeds for only one contender. A missing or partially
-written lease record is still held; another workspace must not repair or take
-it while the holder may be starting.
+Directory creation succeeds for only one contender. A retry by the owning agent
+adopts its existing lease. A missing or partially written lease record is still
+held. Another agent must not repair or take it while the holder may be starting.
 
-Copy the lease directory, canonical identity, and session ID into the session
-record. After claiming an Android AVD, add its exact serial to the record as
-soon as startup resolves it. All later tools bind to the recorded serial or
-UDID, while the lease remains keyed by the canonical identity.
+Use the lease directory as the host-visible session record. Add the platform,
+ownership mode, launcher details, owned process IDs, required app build, and
+exact serial or UDID as those values become known. After claiming an Android
+AVD, add its exact serial as soon as startup resolves it. All later tools bind
+to the recorded serial or UDID. The lease remains keyed by the canonical
+identity.
 
-Claiming is complete when the lease directory contains the session ID,
-workspace real path, and canonical identity, and the session record contains
-the same values. Do not proceed from an incomplete record.
+Claiming is complete when the lease directory contains the agent session ID,
+workspace real path, and canonical identity. Do not proceed from an incomplete
+record.
 
 ## Handle conflicts and stale leases
 
 On conflict, inspect the lease record and current device and process inventory
 without changing them. Select another unleased device or stop and report the
-holding workspace and canonical identity.
+holding agent session, workspace, and canonical identity.
 
 Do not steal a lease because it is old, its workspace is absent, or a recorded
 PID is dead. PID reuse and delayed launch make those checks insufficient. A
@@ -80,8 +86,8 @@ canonical device or has stopped without mutating the contested device.
 
 ## Release exactly one claim
 
-After owned-resource cleanup, compare the lease's `session-id` with the current
-session record. If they differ or either value is missing, stop without removing
+After owned-resource cleanup, compare the lease's `session-id` with the agent
+session ID. If they differ or either value is missing, stop without removing
 the lease. When they match, remove only that lease's files and directory. Never
 remove the lease root or another session's directory.
 

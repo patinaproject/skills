@@ -26,16 +26,28 @@ Claude Code:
 
 ```text
 /plugin marketplace add patinaproject/skills
-/plugin install patinaproject-skills@patinaproject-skills
 /plugin install engineering@patinaproject-skills
+```
+
+Install the Patina Project Skills plugin separately when you need its legacy
+controllers:
+
+```text
+/plugin install patinaproject-skills@patinaproject-skills
 ```
 
 Codex:
 
 ```text
 /marketplace add patinaproject/skills
-/install patinaproject-skills
 /install engineering
+```
+
+Install the Patina Project Skills plugin separately when you need its legacy
+controllers:
+
+```text
+/install patinaproject-skills
 ```
 
 > **Security note:** For environments where you want to prevent install scripts
@@ -188,8 +200,10 @@ releases the branch from that worktree, attaches it to the current one,
 restores the holder when attaching fails, and carries the branch's `polish`
 review record into this session.
 
-See [./skills/move-branch-here/](./skills/move-branch-here/) for the skill
-contract.
+Engineering bundles the same branch move helper. Its `polish` review-record
+step remains optional because patina-mode does not depend on `polish`. See
+[the existing skill](./skills/move-branch-here/) and
+[the Engineering copy](./plugins/engineering/skills/move-branch-here/).
 
 ### grill-to-spec
 
@@ -334,6 +348,7 @@ README and skill contract.
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [move-branch-here](./skills/move-branch-here/) | Take a branch from the worktree holding it, with its polish review state |
+| [move-branch-here (Engineering)](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree, with optional polish review-state transfer |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
@@ -422,6 +437,7 @@ plugins/engineering/
     arena/
     ...
     working-on-issues/
+    move-branch-here/
     principle-offensive-programming/
     gather-evidence/
     running-mobile-simulators/

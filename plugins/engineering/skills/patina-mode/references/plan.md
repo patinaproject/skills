@@ -85,7 +85,9 @@ Each phase needs both:
 
 - Browser / Electron / Web UIs: Claude Code's **verify** skill (VS Code extension launches/inspects browser/Electron UIs).
 - CLIs and TUIs: Claude Code's **run** skill (launches/drives CLIs/TUIs).
-- Native mobile: whatever simulator-driving skill your team has.
+- Native mobile: the **running-mobile-simulators** skill. Run it before the
+  first device state change, then verify on the exact device leased to the
+  implementing agent.
 - No control skill for the touched surface: flag it in the plan.
 
 For bug fixes, the loop is reproduce on the surface, fix, verify on the same surface. Unit tests show a branch behaves a certain way; they do not prove the bug is gone (the **prove-it-works** principle skill).

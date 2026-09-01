@@ -6,12 +6,13 @@ List available simulated devices and select one exact UDID:
 
 ```bash
 xcrun simctl list devices available -j
-xcrun simctl boot <udid>
+xcrun simctl bootstatus <udid> -b
 ```
 
-An iOS simulator uses its UDID instead of an emulator console port. Record the
-UDID and launcher command before boot. If the launcher is not persistent,
-record that fact instead of a PID.
+`bootstatus -b` starts the selected simulator when needed and waits until it is
+ready. An iOS simulator uses its UDID instead of an emulator console port.
+Record the UDID and launcher command before boot. If the launcher is not
+persistent, record that fact instead of a PID.
 
 Startup is complete when the session record contains the selected UDID and
 launcher details.
@@ -30,8 +31,10 @@ successfully for that UDID.
 
 ## Bind operations and cleanup
 
-Pass the recorded UDID to every targeted `xcrun simctl` command. A different
-booted simulator cannot satisfy readiness or receive a mutation.
+Pass the recorded UDID to every targeted `xcrun simctl` command. Never use the
+`booted` alias. When several simulators are active, `simctl` can choose any one
+of them for that alias. A different booted simulator cannot satisfy readiness
+or receive a mutation.
 
 For an owned simulator, shut it down through its exact UDID:
 
@@ -41,3 +44,9 @@ xcrun simctl shutdown <udid>
 
 Leave attached and unrelated simulators running. iOS cleanup is complete when
 the recorded simulator is shut down and every owned launcher has exited.
+
+Apple documents `simctl` in the Xcode command-line tools reference. Run
+`xcrun simctl help` and `xcrun simctl help <subcommand>` for the command set
+installed with the active Xcode:
+
+- [Xcode command-line tool reference](https://developer.apple.com/documentation/xcode/xcode-command-line-tool-reference)

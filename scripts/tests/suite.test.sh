@@ -22,6 +22,13 @@ bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 
+(
+  cd plugins/engineering/skills/patina-mode/scripts
+  ./watch-pr/watch-pr --help >/dev/null
+  bun run test
+  bun run typecheck
+)
+
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.
 run_cli_canary() {

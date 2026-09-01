@@ -34,6 +34,10 @@ Select the recorded device for each CLI flow:
 maestro --device <serial-or-udid> test <flow-or-directory>
 ```
 
+Do not pass several identifiers or use local sharding across agent-owned
+devices. Delegate one device to each agent and run one explicitly targeted
+Maestro process per agent.
+
 For Maestro MCP, call `list_devices` first and verify the recorded identifier.
 Pass that identifier as `device_id` to every device tool call.
 
@@ -65,3 +69,7 @@ browser must also show the Viewer before the run.
 Stop only the Maestro MCP and Viewer processes that this session started. Use
 their recorded PIDs. Maestro cleanup is complete when those owned processes
 exit and unrelated Maestro sessions remain available.
+
+The command forms follow Maestro's device selection reference:
+
+- [Specify and start devices](https://docs.maestro.dev/cli/start-device)

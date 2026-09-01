@@ -5,9 +5,10 @@ description: Manage Android emulators and iOS simulators on shared development h
 
 # Running mobile simulators
 
-A virtual mobile device exists outside the workspace that uses it. Bind one
-session to one workspace, one exact device, and the processes that the session
-starts.
+A virtual mobile device exists outside the workspace that uses it. Bind each
+agent session to one workspace, one exact device, and the processes that the
+agent starts. Agents that share a worktree still need separate devices and
+leases.
 
 ## Establish the session boundary
 
@@ -32,18 +33,25 @@ Choose one ownership mode:
 - **Owned device.** Select one named device that this session will start. The
   session owns its launcher, recovery, and cleanup.
 
-Start one session record before launch. Record the workspace, platform,
-ownership mode, selected device, launcher intent, owned processes, and required
-app build. For an attached device, record its exact serial or UDID now. For a
-new owned Android emulator, record the AVD name and add its serial immediately
-after launch. Record an owned iOS simulator's UDID before launch.
+The agent that controls the device owns its session. A coordinator may delegate
+the device work, but it must not acquire, mutate, recover, or release the
+worker's device. Assign at most one device to each worker. If the task needs
+several devices, delegate one device to each worker.
+
+Create one unique session ID and reuse it for the life of the agent session.
+Start one session record before launch. Record the agent session ID, workspace,
+platform, ownership mode, selected device, launcher intent, owned processes,
+and required app build. For an attached device, record its exact serial or UDID
+now. For a new owned Android emulator, record the AVD name and add its serial
+immediately after launch. Record an owned iOS simulator's UDID before launch.
 
 Acquire the lease atomically under the device's canonical identity. The lease
-must include the workspace's real path and a unique session ID. An attached
-device still requires a lease even though its lifecycle remains externally
-owned. Hold the lease through app execution, automation, evidence, recovery,
-and cleanup. If another session holds it, select a different device or stop;
-never wait while mutating the contested device.
+is the host-visible session record. It must include the workspace's real path
+and the agent session ID. An attached device still requires a lease even though
+its lifecycle remains externally owned. Hold the lease through app execution,
+automation, evidence, recovery, and cleanup. If another session holds it,
+select a different device or stop. Never wait while mutating the contested
+device.
 
 This step is complete when the session record names one device and ownership
 mode, and any required lease is held.
