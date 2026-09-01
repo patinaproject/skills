@@ -14,6 +14,10 @@ These skills use Claude Code tool names (the `Skill` tool, the `Agent` tool, `As
 
 **Start every multi-step task with a todolist whose first item is to read the Principles section below in full.** The principles ground every trigger here. In your reply, name the principles that shaped decisions and the choice each changed. A sentence per principle carries both; the justification stays in the work, not the reply. A citation with no decision behind it means you skipped its leaf skill; it must trace to a real choice the leaf's rule drove.
 
+While patina-mode is active, this skill owns workflow routing. Use only the
+skills and playbooks named here. Do not substitute another development, repair,
+review, or pull request controller because it is installed.
+
 Remaining triggers:
 
 - Issue-linked work begins or resumes → run the **working-on-issues** skill
