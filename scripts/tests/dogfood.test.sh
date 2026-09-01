@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # dogfood.test.sh — Asserts that all in-repo skills are discoverable
-# via the flat skills/<name>/ layout and the dogfood overlay symlinks.
+# through their canonical plugin paths and the dogfood overlay symlinks.
 # (find-skills is a third-party vendored skill, not an in-repo skill.)
 # Exit 0: all in-repo skills pass all assertions.
 # Exit 1: at least one assertion failed (with a clear FAIL message).
@@ -45,6 +45,17 @@ fail() {
   FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
+canonical_skill_dir() {
+  case "$1" in
+    working-on-issue|offensive-programming|fix|running-mobile-simulators)
+      printf 'plugins/engineering/skills/%s\n' "$1"
+      ;;
+    *)
+      printf 'skills/%s\n' "$1"
+      ;;
+  esac
+}
+
 for retired_path in \
   skills/resolve-qa-feedback \
   .claude/skills/resolve-qa-feedback \
@@ -67,11 +78,11 @@ _realpath() {
 }
 
 for name in "${SKILLS[@]}"; do
-  CANONICAL="skills/$name/SKILL.md"
+  CANONICAL="$(canonical_skill_dir "$name")/SKILL.md"
   CLAUDE_LINK=".claude/skills/$name/SKILL.md"
   AGENTS_LINK=".agents/skills/$name/SKILL.md"
 
-  # 1. Assert skills/<name>/SKILL.md is a regular file (not a symlink, not missing).
+  # 1. Assert the canonical SKILL.md is a regular file.
   if [ ! -f "$CANONICAL" ]; then
     fail "$CANONICAL missing or not a regular file"
     continue
@@ -146,5 +157,5 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 fi
 
 echo ""
-echo "OK: all in-repo skills discoverable via flat layout"
+echo "OK: all in-repo skills discoverable via canonical plugin layout"
 exit 0

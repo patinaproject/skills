@@ -3,9 +3,9 @@
 The Patina Project skills repo releases via `release-please` with a single root package
 (`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-Skills live flat at `skills/<name>/` in this repo. In-repo skills ship as
-`patinaproject-skills` and are versioned together as a single marketplace
-surface. On each release,
+General skills live at `skills/<name>/`. Engineering skills live at
+`plugins/engineering/skills/<name>/`. Both Patina plugins are versioned together
+as one marketplace release. On each release,
 `release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json` via the
 `extra-files` block in `release-please-config.json`. `find-skills` is no longer part of
 `patinaproject-skills`; install it separately from `vercel-labs/skills` (see root README).
@@ -39,12 +39,13 @@ npx skills@latest add patinaproject/skills#v1.0.0 --skill scaffold-repository
 ```
 
 **Supply-chain fallback:** If the upstream CLI is unavailable or distrusted, clone the repo
-and copy `skills/<name>/` directly into the agent's skill directory. No build step required.
+and copy the selected skill directory into the agent's skill directory. No
+build step is required.
 
 ## Lifecycle
 
-1. A contributor opens a PR against `main` with changes under `skills/<name>/` (bug fix,
-   new feature, content update). The PR merges via squash merge.
+1. A contributor opens a PR against `main` with changes under `skills/<name>/`
+   or `plugins/<plugin>/skills/<name>/`. The PR merges via squash merge.
 2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main`
    and maintains a standing Release PR for the root package. When a Release PR is merged,
    release-please:
@@ -71,8 +72,8 @@ The vercel-labs CLI consumer pins a specific tag via `#<git-ref>`:
 npx skills@latest add patinaproject/skills#v1.0.0 --skill scaffold-repository
 ```
 
-The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. Because all
-skills live under `skills/<name>/SKILL.md` in the same repo, one tag pins the full set.
+The `v<X.Y.Z>` ref selects the state of the entire repo at that tag. One tag
+pins every Patina plugin and skill in the repository.
 `skills-lock.json`'s `computedHash` records per-skill content provenance for reproducible
 re-installs within a given tag.
 
@@ -95,8 +96,8 @@ in the changelog. See
 
 - An untagged skill is not pinnable. The first `v<X.Y.Z>` tag is what introduces the repo
   to the install path with a pinnable `#<ref>`.
-- In-repo skills are not separate release-please packages;
-  they share the single root `patinaproject-skills` release and tag.
+- In-repo plugins are not separate release-please packages. They share the
+  single root release and tag.
   Third-party skills such as `find-skills` are installed separately from their
   source repo's default branch or a specific `#<git-ref>`.
 - `skills-lock.json` must be committed after any `npx skills@latest add` invocation. The lockfile

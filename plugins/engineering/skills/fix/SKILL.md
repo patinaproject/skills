@@ -52,7 +52,7 @@ exists. Otherwise use the report's expected behavior, actual behavior, steps,
 and environment as the contract.
 
 Collect every field defined by the
-[reporter-fidelity observation fields](../ready-pr/references/reporter-fidelity.md#observation-context)
+[reporter-fidelity observation fields](references/reporter-fidelity.md#observation-context)
 and carry it unchanged through every stage. `/fix` requires the exact
 reproduction, required environment, and red result.
 
@@ -122,7 +122,7 @@ npm_config_ignore_scripts=true pnpm dlx skills@latest add mattpocock/skills --sk
 7. **Verify the fixed build.** Resolve the current PR head SHA, prove the
    deployed target was built from that head, and repeat the checkpointed repro
    without weakening its steps or fidelity. Apply the
-   [reporter-fidelity evidence rules](../ready-pr/references/reporter-fidelity.md#matching-evidence-to-the-report).
+   [reporter-fidelity evidence rules](references/reporter-fidelity.md#matching-evidence-to-the-report).
    Inspect the evidence itself. A green result is valid only when it shows the
    expected behavior and no reported failure on that deployed head.
 

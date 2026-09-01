@@ -16,6 +16,19 @@
       },
       "category": "Productivity",
       "description": "Patina Project workflow skills."
+    },
+    {
+      "name": "engineering",
+      "source": {
+        "source": "local",
+        "path": "./plugins/engineering"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools",
+      "description": "Patina Project's owned engineering workflows, forked from pstack."
     }
   ]
 }

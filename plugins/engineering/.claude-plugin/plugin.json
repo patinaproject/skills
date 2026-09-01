@@ -1,0 +1,23 @@
+{
+  "name": "engineering",
+  "displayName": "Engineering",
+  "version": "2.33.1",
+  "description": "Patina Project's owned engineering workflows, forked from pstack.",
+  "author": {
+    "name": "Patina Project"
+  },
+  "homepage": "https://github.com/patinaproject/skills",
+  "repository": "https://github.com/patinaproject/skills",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "patina-mode",
+    "workflow",
+    "principles",
+    "subagents",
+    "unslop"
+  ],
+  "dependencies": [
+    "patinaproject-skills"
+  ]
+}

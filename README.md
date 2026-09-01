@@ -26,6 +26,7 @@ Claude Code:
 ```text
 /plugin marketplace add patinaproject/skills
 /plugin install patinaproject-skills@patinaproject-skills
+/plugin install engineering@patinaproject-skills
 ```
 
 Codex:
@@ -33,6 +34,7 @@ Codex:
 ```text
 /marketplace add patinaproject/skills
 /install patinaproject-skills
+/install engineering
 ```
 
 > **Security note:** For environments where you want to prevent install scripts
@@ -87,7 +89,7 @@ branch — then uses the tracker adapter to mark it started and lands on its
 canonical branch via `new-branch`. It returns cleanly when there is no issue and
 never edits the issue body, so every entrypoint aligns work identically.
 
-See [./skills/working-on-issue/](./skills/working-on-issue/) for the skill contract.
+See [./plugins/engineering/skills/working-on-issue/](./plugins/engineering/skills/working-on-issue/) for the skill contract.
 
 ### Filing and editing issues
 
@@ -208,7 +210,7 @@ shortcut by its source and reachability. It validates untrusted input, handles
 expected behavior at its owner, and makes internal defects fail close to their
 cause.
 
-See [./skills/offensive-programming/](./skills/offensive-programming/) for the
+See [./plugins/engineering/skills/offensive-programming/](./plugins/engineering/skills/offensive-programming/) for the
 skill contract.
 
 ### grill-system-design
@@ -236,7 +238,7 @@ before a fix claim. Operator-invoked `fix` carries that evidence case through
 implementation, shared review and publication, then verifies the deployed
 current pull-request head at the reporter's perceived surface.
 
-See [./skills/fix/](./skills/fix/) for the skill contract.
+See [./plugins/engineering/skills/fix/](./plugins/engineering/skills/fix/) for the skill contract.
 
 ### running-mobile-simulators
 
@@ -245,7 +247,7 @@ automation processes. `running-mobile-simulators` binds one session to an exact
 device and limits readiness, recovery, evidence, and cleanup to that ownership
 boundary.
 
-See [./skills/running-mobile-simulators/](./skills/running-mobile-simulators/)
+See [./plugins/engineering/skills/running-mobile-simulators/](./plugins/engineering/skills/running-mobile-simulators/)
 for the skill contract.
 
 ### orchestrate
@@ -293,7 +295,7 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [working-on-issue](./skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
+| [working-on-issue](./plugins/engineering/skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Run incremental local architecture and code review |
@@ -306,11 +308,11 @@ README and skill contract.
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
-| [offensive-programming](./skills/offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
+| [offensive-programming](./plugins/engineering/skills/offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [fix](./skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
-| [running-mobile-simulators](./skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
+| [fix](./plugins/engineering/skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
+| [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
@@ -357,7 +359,6 @@ skills/
   install-skills/
   using-github/
   new-branch/
-  working-on-issue/
   develop/
   develop-with-workflow/
   ready-pr/
@@ -369,16 +370,28 @@ skills/
   move-branch-here/
   grill-to-spec/
   design-by-contract/
-  offensive-programming/
   grill-system-design/
   review-system-design/
-  fix/
-  running-mobile-simulators/
   orchestrate/
   write-changelog/
   prompting-fable/
-.agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
-.claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
+plugins/engineering/
+  .claude-plugin/plugin.json
+  .codex-plugin/plugin.json
+  agents/
+  hooks/
+  models.json
+  skills/
+    patina-mode/
+    architect/
+    arena/
+    ...
+    working-on-issue/
+    offensive-programming/
+    fix/
+    running-mobile-simulators/
+.agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
+.claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror
 .claude-plugin/
   marketplace.json                   Claude marketplace catalog
   plugin.json                        Claude plugin manifest
