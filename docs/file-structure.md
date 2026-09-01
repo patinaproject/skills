@@ -23,7 +23,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
 - `skills/design-by-contract/`: consequential system contract design overlay
-- `plugins/engineering/skills/offensive-programming/`: authoring-time checks and fallback decision overlay
+- `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `plugins/engineering/skills/fix/`: diagnosis-first correction and fixed-build evidence skill
@@ -86,7 +86,7 @@ Skills owned by this repository:
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
-| `offensive-programming` | `plugins/engineering/skills/offensive-programming/` | Authoring-time checks and fallback decision overlay |
+| `principle-offensive-programming` | `plugins/engineering/skills/principle-offensive-programming/` | Defensive-code classification principle |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
 | `fix` | `plugins/engineering/skills/fix/` | Diagnosis-first correction and fixed-build evidence |

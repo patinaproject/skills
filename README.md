@@ -203,15 +203,16 @@ visual explanation materially improves clarity.
 See [./skills/design-by-contract/](./skills/design-by-contract/) for the skill
 contract.
 
-### offensive-programming
+### principle-offensive-programming
 
-`offensive-programming` classifies a proposed check, assertion, fallback, or
-shortcut by its source and reachability. It validates untrusted input, handles
-expected behavior at its owner, and makes internal defects fail close to their
-cause.
+`principle-offensive-programming` classifies a proposed check, assertion,
+fallback, or shortcut by its source and reachability. It validates untrusted
+input, handles expected behavior at its owner, and makes internal defects fail
+close to their cause.
 
-See [./plugins/engineering/skills/offensive-programming/](./plugins/engineering/skills/offensive-programming/) for the
-skill contract.
+See
+[./plugins/engineering/skills/principle-offensive-programming/](./plugins/engineering/skills/principle-offensive-programming/)
+for the skill contract.
 
 ### grill-system-design
 
@@ -308,7 +309,7 @@ README and skill contract.
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
-| [offensive-programming](./plugins/engineering/skills/offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
+| [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [fix](./plugins/engineering/skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
@@ -387,7 +388,7 @@ plugins/engineering/
     arena/
     ...
     working-on-issues/
-    offensive-programming/
+    principle-offensive-programming/
     fix/
     running-mobile-simulators/
 .agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs

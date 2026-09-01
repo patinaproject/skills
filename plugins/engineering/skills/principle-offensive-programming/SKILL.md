@@ -1,9 +1,10 @@
 ---
-name: offensive-programming
-description: Offensive programming applies before writing an error handler, null check, fallback, optional chain over uncertain data, retry, assertion, guard branch, configuration skip, or workaround.
+name: principle-offensive-programming
+description: Apply before writing an error handler, null check, fallback, optional chain over uncertain data, retry, assertion, guard branch, configuration skip, or workaround.
+user-invocable: false
 ---
 
-# Offensive programming
+# Offensive Programming
 
 The [line of defense](https://en.wikipedia.org/wiki/Offensive_programming)
 separates untrusted external input from trusted internal state.
@@ -45,8 +46,3 @@ separates untrusted external input from trusted internal state.
   other shortcut over a defect. Fix the root cause. If that cause is outside the
   change's scope, tell the operator what blocks the fix. Keep the change narrow
   and leave the defect visible.
-
-The calling skill or user chooses the implementation and tests and decides when
-the work is done. Before returning to the caller, apply repository-specific
-rules from `AGENTS.md` at the repository root and the repo-root-relative
-documents it routes to.

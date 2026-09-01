@@ -21,7 +21,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
 - `skills/design-by-contract/`: consequential system contract design overlay
-- `plugins/engineering/skills/offensive-programming/`: authoring-time checks and fallback decision overlay
+- `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `plugins/engineering/skills/fix/`: diagnosis-first correction and fixed-build evidence skill
@@ -282,7 +282,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | design-by-contract | `skills/design-by-contract/` |
-| offensive-programming | `plugins/engineering/skills/offensive-programming/` |
+| principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
 | fix | `plugins/engineering/skills/fix/` |

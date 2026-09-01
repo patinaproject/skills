@@ -29,7 +29,7 @@ SKILLS=(
   move-branch-here
   grill-to-spec
   design-by-contract
-  offensive-programming
+  principle-offensive-programming
   grill-system-design
   review-system-design
   fix
@@ -47,7 +47,7 @@ fail() {
 
 canonical_skill_dir() {
   case "$1" in
-    working-on-issues|offensive-programming|fix|running-mobile-simulators)
+    working-on-issues|principle-offensive-programming|fix|running-mobile-simulators)
       printf 'plugins/engineering/skills/%s\n' "$1"
       ;;
     *)
@@ -62,7 +62,10 @@ for retired_path in \
   .agents/skills/resolve-qa-feedback \
   plugins/engineering/skills/working-on-issue \
   .claude/skills/working-on-issue \
-  .agents/skills/working-on-issue; do
+  .agents/skills/working-on-issue \
+  plugins/engineering/skills/offensive-programming \
+  .claude/skills/offensive-programming \
+  .agents/skills/offensive-programming; do
   if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
     fail "$retired_path still exposes a retired skill"
   fi
