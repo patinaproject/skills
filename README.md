@@ -4,10 +4,11 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging,
-contract-based system design, offensive-programming decisions, diagnosis-first
-correction, shared-host mobile simulator sessions, system design review,
-focused system design grilling, Codex chat coordination, settled-design
-documentation capture, release changelog ceremonies, and local branch updating.
+contract-based system design, offensive-programming decisions, current-target
+evidence for human feedback, shared-host mobile simulator sessions, system
+design review, focused system design grilling, Codex chat coordination,
+settled-design documentation capture, release changelog ceremonies, and local
+branch updating.
 They are available across Claude Code, Codex, and any agent runtime that reads
 `AGENTS.md`.
 
@@ -232,14 +233,15 @@ rounds for a human reviewer.
 See [./skills/review-system-design/](./skills/review-system-design/) for the
 skill contract.
 
-### fix
+### gather-evidence
 
-One reported behavior needs a red diagnosis and a same-repro fixed-build retest
-before a fix claim. Operator-invoked `fix` carries that evidence case through
-implementation, shared review and publication, then verifies the deployed
-current pull-request head at the reporter's perceived surface.
+Human change requests and QA findings need direct evidence from the current
+target before the agent edits code or prepares a response. `gather-evidence`
+records a verdict for each claim and routes confirmed work back to patina-mode.
+It does not own implementation, replies, thread resolution, or review state.
 
-See [./plugins/engineering/skills/fix/](./plugins/engineering/skills/fix/) for the skill contract.
+See [./plugins/engineering/skills/gather-evidence/](./plugins/engineering/skills/gather-evidence/)
+for the skill contract.
 
 ### running-mobile-simulators
 
@@ -312,7 +314,7 @@ README and skill contract.
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [fix](./plugins/engineering/skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
+| [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
@@ -389,7 +391,7 @@ plugins/engineering/
     ...
     working-on-issues/
     principle-offensive-programming/
-    fix/
+    gather-evidence/
     running-mobile-simulators/
 .agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror

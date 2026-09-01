@@ -32,7 +32,7 @@ SKILLS=(
   principle-offensive-programming
   grill-system-design
   review-system-design
-  fix
+  gather-evidence
   running-mobile-simulators
   orchestrate
   write-changelog
@@ -47,7 +47,7 @@ fail() {
 
 canonical_skill_dir() {
   case "$1" in
-    working-on-issues|principle-offensive-programming|fix|running-mobile-simulators)
+    working-on-issues|principle-offensive-programming|gather-evidence|running-mobile-simulators)
       printf 'plugins/engineering/skills/%s\n' "$1"
       ;;
     *)
@@ -65,7 +65,10 @@ for retired_path in \
   .agents/skills/working-on-issue \
   plugins/engineering/skills/offensive-programming \
   .claude/skills/offensive-programming \
-  .agents/skills/offensive-programming; do
+  .agents/skills/offensive-programming \
+  plugins/engineering/skills/fix \
+  .claude/skills/fix \
+  .agents/skills/fix; do
   if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
     fail "$retired_path still exposes a retired skill"
   fi
