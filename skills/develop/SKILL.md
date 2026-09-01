@@ -12,8 +12,8 @@ both.
 
 It runs four skills in order:
 
-1. `working-on-issues` finds the issue, aligns its branch and worktree, assigns
-   it, and marks it started.
+1. `working-on-issue` finds the issue, switches to its branch, assigns it, and
+   marks it started.
 2. `implement` changes the code and adds tests.
 3. `polish` reviews the committed changes and fixes problems before
    publication.
@@ -46,7 +46,7 @@ Ask the user when the request is too vague to implement without making a
 product or design decision. A formal list of acceptance criteria is optional.
 Clear written instructions are enough.
 
-When `working-on-issues` finds no issue, warn the user and continue with the
+When `working-on-issue` finds no issue, warn the user and continue with the
 implementation and local review. Before committing or opening a pull request,
 read the repository rules. Stop if they require an issue reference.
 
@@ -58,7 +58,8 @@ before editing the issue.
 
 Confirm these skills are installed before implementation:
 
-- `working-on-issues`
+- `working-on-issue`
+- `new-branch`
 - `implement`
 - `tdd`
 - `polish`
@@ -93,7 +94,7 @@ no observation context.
 
 1. Read `AGENTS.md`, `CLAUDE.md`, and any files they require.
 2. Confirm the required skills are installed.
-3. Run `working-on-issues` with the full request. Keep its issue, branch, and
+3. Run `working-on-issue` with the full request. Keep its issue, branch, and
    status results for the final report.
 4. Confirm that the request is clear enough to implement. Stop when work needs
    a product decision, design decision, credentials, permissions, external

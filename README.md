@@ -82,13 +82,21 @@ committing, or creating a PR.
 
 See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
+### working-on-issue
+
+Every existing Patina Project controller keeps the same begin-work step.
+`working-on-issue` resolves an issue from an explicit reference or the current
+branch, marks it started, and uses `new-branch` to select its branch.
+
+See [./skills/working-on-issue/](./skills/working-on-issue/) for the skill
+contract.
+
 ### working-on-issues
 
-Every controller needs the same begin-work step. `working-on-issues` resolves
-one issue from an explicit reference or the current branch, discovers the live
-tracker contract, and enforces completed-issue, blocker, branch, and worktree
-gates before marking work started. It returns cleanly when there is no issue and
-never edits the issue body, so every entrypoint aligns work identically.
+Engineering uses `working-on-issues` for its stricter issue preflight. It
+resolves one issue, discovers the live tracker contract, and enforces the
+completed-issue, blocker, branch, and worktree gates before marking work
+started.
 
 See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skills/working-on-issues/) for the skill contract.
 
@@ -105,7 +113,7 @@ defines them for every provider.
 End-to-end work needs a single entrypoint without weakening the focused skills
 that already own branch setup, test-driven implementation, diagnosis,
 architecture polish, and PR readiness. `develop` takes a **scope** — an issue
-reference, free-form instructions, or both — coordinates `working-on-issues`,
+reference, free-form instructions, or both — coordinates `working-on-issue`,
 `implement`, `polish`, and `ready-pr`, and stops for human-owned ambiguity
 instead of inventing scope.
 
@@ -204,6 +212,14 @@ visual explanation materially improves clarity.
 See [./skills/design-by-contract/](./skills/design-by-contract/) for the skill
 contract.
 
+### offensive-programming
+
+The existing `offensive-programming` skill keeps its authoring-time decision
+flow for checks, fallbacks, assertions, and workarounds.
+
+See [./skills/offensive-programming/](./skills/offensive-programming/) for the
+skill contract.
+
 ### principle-offensive-programming
 
 `principle-offensive-programming` classifies a proposed check, assertion,
@@ -233,6 +249,13 @@ rounds for a human reviewer.
 See [./skills/review-system-design/](./skills/review-system-design/) for the
 skill contract.
 
+### fix
+
+The existing `fix` controller carries one reported behavior through diagnosis,
+implementation, review, publication, and a deployed current-head retest.
+
+See [./skills/fix/](./skills/fix/) for the skill contract.
+
 ### gather-evidence
 
 Human change requests and QA findings need direct evidence from the current
@@ -250,8 +273,10 @@ automation processes. `running-mobile-simulators` binds one session to an exact
 device and limits readiness, recovery, evidence, and cleanup to that ownership
 boundary.
 
-See [./plugins/engineering/skills/running-mobile-simulators/](./plugins/engineering/skills/running-mobile-simulators/)
-for the skill contract.
+The same skill remains in the Patina Project Skills plugin and is also bundled
+with Engineering. See
+[the existing skill](./skills/running-mobile-simulators/) and
+[the Engineering copy](./plugins/engineering/skills/running-mobile-simulators/).
 
 ### orchestrate
 
@@ -298,8 +323,9 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
+| [working-on-issue](./skills/working-on-issue/) | Prepare an issue for the existing Patina Project controllers |
 | [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
-| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issues, build, polish, and ready-pr |
+| [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Run incremental local architecture and code review |
 | [ready-pr](./skills/ready-pr/) | Publish completed branch work and prove its PR ready to merge |
@@ -311,11 +337,13 @@ README and skill contract.
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
+| [offensive-programming](./skills/offensive-programming/) | Apply the existing authoring-time checks and fallback decision flow |
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
+| [fix](./skills/fix/) | Run the existing diagnosis, correction, publication, and deployed-head verification controller |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
-| [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
+| [running-mobile-simulators](./skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
 | [prompting-fable](./skills/prompting-fable/) | Guidelines for prompting and configuring Claude Fable 5 |
@@ -362,6 +390,7 @@ skills/
   install-skills/
   using-github/
   new-branch/
+  working-on-issue/
   develop/
   develop-with-workflow/
   ready-pr/
@@ -373,8 +402,11 @@ skills/
   move-branch-here/
   grill-to-spec/
   design-by-contract/
+  offensive-programming/
   grill-system-design/
   review-system-design/
+  fix/
+  running-mobile-simulators/
   orchestrate/
   write-changelog/
   prompting-fable/

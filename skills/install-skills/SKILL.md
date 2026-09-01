@@ -76,7 +76,7 @@ requested names. Common repository defaults are:
 - `scaffold-repository`
 - `using-github`
 - `new-branch`
-- `working-on-issues`
+- `working-on-issue`
 - `write-changelog`
 - `develop`
 - `ready-pr`

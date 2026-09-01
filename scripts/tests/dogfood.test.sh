@@ -17,6 +17,7 @@ SKILLS=(
   install-skills
   using-github
   new-branch
+  working-on-issue
   working-on-issues
   develop
   develop-with-workflow
@@ -29,9 +30,11 @@ SKILLS=(
   move-branch-here
   grill-to-spec
   design-by-contract
+  offensive-programming
   principle-offensive-programming
   grill-system-design
   review-system-design
+  fix
   gather-evidence
   running-mobile-simulators
   orchestrate
@@ -47,7 +50,7 @@ fail() {
 
 canonical_skill_dir() {
   case "$1" in
-    working-on-issues|principle-offensive-programming|gather-evidence|running-mobile-simulators)
+    working-on-issues|principle-offensive-programming|gather-evidence)
       printf 'plugins/engineering/skills/%s\n' "$1"
       ;;
     *)
@@ -61,14 +64,8 @@ for retired_path in \
   .claude/skills/resolve-qa-feedback \
   .agents/skills/resolve-qa-feedback \
   plugins/engineering/skills/working-on-issue \
-  .claude/skills/working-on-issue \
-  .agents/skills/working-on-issue \
   plugins/engineering/skills/offensive-programming \
-  .claude/skills/offensive-programming \
-  .agents/skills/offensive-programming \
-  plugins/engineering/skills/fix \
-  .claude/skills/fix \
-  .agents/skills/fix; do
+  plugins/engineering/skills/fix; do
   if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
     fail "$retired_path still exposes a retired skill"
   fi

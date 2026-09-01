@@ -7,6 +7,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
+- `skills/working-on-issue/`: Patina Project Skills issue preparation skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
@@ -21,10 +22,13 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
 - `skills/design-by-contract/`: consequential system contract design overlay
+- `skills/offensive-programming/`: Patina Project Skills defensive-code decision overlay
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
+- `skills/fix/`: Patina Project Skills diagnosis-first correction and publication controller
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
+- `skills/running-mobile-simulators/`: Patina Project Skills mobile simulator lifecycle skill
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
@@ -269,6 +273,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | scaffold-repository | `skills/scaffold-repository/` |
 | using-github | `skills/using-github/` |
 | new-branch | `skills/new-branch/` |
+| working-on-issue | `skills/working-on-issue/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | develop | `skills/develop/` |
 | develop-with-workflow | `skills/develop-with-workflow/` |
@@ -282,11 +287,14 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | design-by-contract | `skills/design-by-contract/` |
+| offensive-programming | `skills/offensive-programming/` |
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
+| fix | `skills/fix/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
-| running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
+| running-mobile-simulators (Patina Project Skills) | `skills/running-mobile-simulators/` |
+| running-mobile-simulators (Engineering) | `plugins/engineering/skills/running-mobile-simulators/` |
 | orchestrate | `skills/orchestrate/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |

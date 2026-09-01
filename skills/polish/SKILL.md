@@ -29,7 +29,7 @@ Examples:
 
 Written instructions tell reviewers where to pay extra attention. Findings
 must still come from code changed or affected by the commits under review.
-`working-on-issues` finds the issue and branch when possible. Without an issue,
+`working-on-issue` finds the issue and branch when possible. Without an issue,
 skip the issue-requirements review but continue the design and standards
 reviews. Report any meaningful difference between the finished work and the
 issue body. Do not edit the issue.
@@ -42,7 +42,8 @@ requires a simulator, device, or deployed build.
 
 Confirm these skills are installed:
 
-- `working-on-issues`
+- `working-on-issue`
+- `new-branch`
 - `code-review`
 - `implement`
 - `tdd`
@@ -54,7 +55,7 @@ for its current source.
 
 ## Steps
 
-1. Run `working-on-issues` with the full input. Keep the issue for the later
+1. Run `working-on-issue` with the full input. Keep the issue for the later
    requirements review.
 2. Read [`review-record.md`](review-record.md) in full. Resolve the target branch
    from `origin/HEAD`, then follow its basis-manifest and scope procedure from a
