@@ -143,14 +143,46 @@ test "$(jq -r '.transforms.skills["poteto-mode"]' plugins/engineering/upstream.j
 test "$(jq -r '.transforms.skills["setup-pstack"]' plugins/engineering/upstream.json)" = 'setup-engineering'
 test "$(jq -r '.transforms.agents["poteto-agent"]' plugins/engineering/upstream.json)" = 'patina-agent'
 
-if rg --hidden -n 'pstack:|poteto-mode|poteto-agent|setup-pstack|pstack-models\.md' plugins/engineering \
-  --glob '!upstream.json'; then
-  echo "FAIL: Engineering contains an obsolete upstream runtime identity" >&2
+obsolete_runtime_metadata="$(
+  jq -r '.. | strings' \
+    plugins/engineering/.claude-plugin/plugin.json \
+    plugins/engineering/.codex-plugin/plugin.json \
+    plugins/engineering/hooks/hooks.json \
+    plugins/engineering/models.json |
+    grep -E 'pstack:|poteto-mode|poteto-agent|setup-pstack|pstack-models\.md' || true
+)"
+if [ -n "$obsolete_runtime_metadata" ]; then
+  echo "FAIL: Engineering runtime metadata contains an obsolete upstream identity" >&2
+  printf '%s\n' "$obsolete_runtime_metadata" >&2
   exit 1
 fi
 
-test "$(find plugins/engineering -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '187'
-test "$(find plugins/engineering/skills/patina-mode -type f -not -path '*/node_modules/*' | wc -l | tr -d ' ')" = '46'
+for forbidden_path in \
+  plugins/engineering/skills/poteto-mode \
+  plugins/engineering/skills/setup-pstack \
+  plugins/engineering/agents/poteto-agent.md \
+  plugins/engineering/pstack-models.md; do
+  if [ -e "$forbidden_path" ]; then
+    echo "FAIL: obsolete upstream runtime path remains: $forbidden_path" >&2
+    exit 1
+  fi
+done
+
+for skill_dir in plugins/engineering/skills/*; do
+  if [ ! -f "$skill_dir/SKILL.md" ]; then
+    echo "FAIL: Engineering skill directory lacks SKILL.md: $skill_dir" >&2
+    exit 1
+  fi
+done
+
+tools_package="plugins/engineering/skills/patina-mode/scripts/package.json"
+if ! jq -e \
+  '[((.dependencies // {}) + (.devDependencies // {}))[] | test("^[0-9]+\\.[0-9]+\\.[0-9]+$")] | all' \
+  "$tools_package" >/dev/null; then
+  echo "FAIL: patina-mode tooling dependencies must use exact semantic versions" >&2
+  exit 1
+fi
+
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/hooks/run-hook.cmd \
