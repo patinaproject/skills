@@ -1,0 +1,17 @@
+{
+  "source": "https://github.com/michael-denyer/pstack-claude",
+  "plugin": "pstack",
+  "version": "0.9.15",
+  "transforms": {
+    "plugin": {
+      "pstack": "engineering"
+    },
+    "skills": {
+      "poteto-mode": "patina-mode",
+      "setup-pstack": "setup-engineering"
+    },
+    "agents": {
+      "poteto-agent": "patina-agent"
+    }
+  }
+}

@@ -23,7 +23,8 @@ and a naive fix deletes the only adapter.
 The consuming skills split the same way. `docs/agents/issue-tracker.md` is read
 by `code-review`, `to-spec`, `to-tickets`, `triage`, `wayfinder`, and
 `ask-matt`; `docs/issue-tracker.md` by `new-branch`, `using-github`,
-`working-on-issue`, and `write-changelog`. Both sets are installed together.
+`working-on-issue`, `working-on-issues`, and `write-changelog`. Both sets are
+available from this marketplace.
 
 A second, independent gap sat behind the path question. Even with the symlink in
 place, the adapter `scaffold-repository` produced had no content for three

@@ -128,6 +128,18 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
+if rg -n '"plugins/engineering/' .markdownlint-cli2.jsonc >/dev/null; then
+  fail "Engineering Markdown must not be exempt from repository linting"
+fi
+
+engineering_output="$(pnpm exec markdownlint-cli2 "plugins/engineering/**/*.md" 2>&1)" || {
+  printf '%s\n' "$engineering_output" >&2
+  fail "Engineering plugin Markdown must lint clean"
+}
+if printf '%s\n' "$engineering_output" | grep -q "$NO_FILES_SELECTED_LINE"; then
+  fail "Engineering plugin Markdown must be linted, not excluded"
+fi
+
 # 4. The exclusion above is load-bearing, not vacuous: a payload written against
 #    another repository's config really does violate this one's rules.
 collision_dir="$(scratch_dir)"

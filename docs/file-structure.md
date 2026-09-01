@@ -1,15 +1,16 @@
 # Repository File Structure
 
 This repository is the marketplace surface for Patina Project plugins and
-related install documentation. Skills live under `skills/<name>/` in a flat
-layout.
+related install documentation. General skills live under `skills/<name>/`.
+Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 
 ## Top level
 
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/working-on-issue/`: Patina Project Skills issue preparation skill
+- `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/ready-pr/`: PR readiness and publication skill
@@ -19,22 +20,33 @@ layout.
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
+- `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
 - `skills/design-by-contract/`: consequential system contract design overlay
-- `skills/offensive-programming/`: authoring-time checks and fallback decision overlay
+- `skills/offensive-programming/`: Patina Project Skills defensive-code decision overlay
+- `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
-- `skills/fix/`: diagnosis-first correction and fixed-build evidence skill
-- `skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `skills/fix/`: Patina Project Skills diagnosis-first correction and publication controller
+- `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
+- `skills/running-mobile-simulators/`: Patina Project Skills mobile simulator lifecycle skill
+- `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
+- `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
+- `plugins/engineering/hooks/`: Engineering session-start integration
+- `plugins/engineering/models.json`: Engineering model-role defaults
+- `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
+- `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
 - `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
-  into `../../skills/<name>/`, vendored third-party skills are real directories
+  into their owning plugin or `skills/`, vendored third-party skills are real
+  directories
 - `.claude/skills/<name>/`: committed overlay; repo-owned skills symlink into
-  `../../skills/<name>/`, vendored third-party skills symlink into
+  their owning plugin or `skills/`, vendored third-party skills symlink into
   `../../.agents/skills/<name>`
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing skill paths
@@ -57,7 +69,7 @@ layout.
 - `.lintstagedrc.js`: lint-staged config; markdown exclusions come from
   `.markdownlint-cli2.jsonc`
 
-## Flat skill layout
+## Owned skill layout
 
 Skills owned by this repository:
 
@@ -66,7 +78,8 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `new-branch` | `skills/new-branch/` | Issue branch preparation |
-| `working-on-issue` | `skills/working-on-issue/` | Shared align step: resolve issue (ref or branch), mark started, branch |
+| `working-on-issue` | `skills/working-on-issue/` | Patina Project Skills issue preparation workflow |
+| `working-on-issues` | `plugins/engineering/skills/working-on-issues/` | Resolve the live tracker, align the issue branch and worktree, and mark work started |
 | `develop` | `skills/develop/` | Issue development orchestration |
 | `develop-with-workflow` | `skills/develop-with-workflow/` | Parallel vertical-slice build converged onto one branch |
 | `ready-pr` | `skills/ready-pr/` | Publish and prove a PR ready to merge |
@@ -75,15 +88,19 @@ Skills owned by this repository:
 | `codex-pr-feedback-loop` | `skills/codex-pr-feedback-loop/` | Codex app PR review feedback automation |
 | `polish` | `skills/polish/` | Incremental local architecture and code review |
 | `update-branch` | `skills/update-branch/` | Local branch update workflow |
-| `move-branch-here` | `skills/move-branch-here/` | Worktree branch handover workflow |
+| `move-branch-here` (Patina Project Skills) | `skills/move-branch-here/` | Worktree branch handover workflow |
+| `move-branch-here` (Engineering) | `plugins/engineering/skills/move-branch-here/` | Worktree branch handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
-| `offensive-programming` | `skills/offensive-programming/` | Authoring-time checks and fallback decision overlay |
+| `offensive-programming` | `skills/offensive-programming/` | Patina Project Skills defensive-code decision overlay |
+| `principle-offensive-programming` | `plugins/engineering/skills/principle-offensive-programming/` | Defensive-code classification principle |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
-| `fix` | `skills/fix/` | Diagnosis-first correction and fixed-build evidence |
-| `running-mobile-simulators` | `skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
+| `fix` | `skills/fix/` | Patina Project Skills diagnosis-first correction and publication controller |
+| `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
+| `running-mobile-simulators` (Patina Project Skills) | `skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
+| `running-mobile-simulators` (Engineering) | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `orchestrate` | `skills/orchestrate/` | User-visible Codex chat coordination |
 | `write-changelog` | `skills/write-changelog/` | Render milestone or shipped Release notes from tracker issues |
 | `prompting-fable` | `skills/prompting-fable/` | Guidelines for prompting and configuring Claude Fable 5 |
@@ -92,7 +109,7 @@ Skills owned by this repository:
 installed via the vercel-labs CLI and is not owned by this repository. Install
 with: `npx skills@latest add vercel-labs/skills@find-skills`
 
-Each `skills/<name>/` directory contains at minimum a `SKILL.md` with YAML
+Each owned skill directory contains at minimum a `SKILL.md` with YAML
 frontmatter including `name: <name>` and `description:` fields. Supporting
 files such as templates, agents, and workflow docs live alongside `SKILL.md`.
 
@@ -102,12 +119,15 @@ The agent runtime discovers skills through two committed overlay directories.
 Both repo-owned and vendored third-party skills are committed, so they load
 immediately in a fresh clone or worktree with no install step.
 
-Repo-owned skills in `skills/` appear as one-hop symlinks:
+Repo-owned skills appear as one-hop symlinks to either `skills/` or their plugin
+directory.
 
 | Overlay path | Symlink target | Mode |
 | --- | --- | --- |
 | `.agents/skills/<name>` | `../../skills/<name>` | `120000` |
 | `.claude/skills/<name>` | `../../skills/<name>` | `120000` |
+| `.agents/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
+| `.claude/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
 
 Vendored third-party skills (recorded in `skills-lock.json`) are committed as
 real directories under `.agents/skills/<name>`, with `.claude/skills/<name>`

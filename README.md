@@ -4,10 +4,11 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, beginning issue work, issue branch setup, issue
 or instruction development (serial and Workflow-parallel), pre-PR branch
 polishing, isolated local branch-diff review, PR readiness and merging,
-contract-based system design, offensive-programming decisions, diagnosis-first
-correction, shared-host mobile simulator sessions, system design review,
-focused system design grilling, Codex chat coordination, settled-design
-documentation capture, release changelog ceremonies, and local branch updating.
+contract-based system design, offensive-programming decisions, current-target
+evidence for human feedback, shared-host mobile simulator sessions, system
+design review, focused system design grilling, Codex chat coordination,
+settled-design documentation capture, release changelog ceremonies, and local
+branch updating.
 They are available across Claude Code, Codex, and any agent runtime that reads
 `AGENTS.md`.
 
@@ -25,6 +26,13 @@ Claude Code:
 
 ```text
 /plugin marketplace add patinaproject/skills
+/plugin install engineering@patinaproject-skills
+```
+
+Install the Patina Project Skills plugin separately when you need its legacy
+controllers:
+
+```text
 /plugin install patinaproject-skills@patinaproject-skills
 ```
 
@@ -32,6 +40,13 @@ Codex:
 
 ```text
 /marketplace add patinaproject/skills
+/install engineering
+```
+
+Install the Patina Project Skills plugin separately when you need its legacy
+controllers:
+
+```text
 /install patinaproject-skills
 ```
 
@@ -81,13 +96,21 @@ See [./skills/new-branch/](./skills/new-branch/) for the skill contract.
 
 ### working-on-issue
 
-Every controller needs the same begin-work step. `working-on-issue`
-resolves the issue best-effort — from an explicit reference or the current
-branch — then uses the tracker adapter to mark it started and lands on its
-canonical branch via `new-branch`. It returns cleanly when there is no issue and
-never edits the issue body, so every entrypoint aligns work identically.
+Every existing Patina Project controller keeps the same begin-work step.
+`working-on-issue` resolves an issue from an explicit reference or the current
+branch, marks it started, and uses `new-branch` to select its branch.
 
-See [./skills/working-on-issue/](./skills/working-on-issue/) for the skill contract.
+See [./skills/working-on-issue/](./skills/working-on-issue/) for the skill
+contract.
+
+### working-on-issues
+
+Engineering uses `working-on-issues` for its stricter issue preflight. It
+resolves one issue, discovers the live tracker contract, and enforces the
+completed-issue, blocker, branch, and worktree gates before marking work
+started.
+
+See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skills/working-on-issues/) for the skill contract.
 
 ### Filing and editing issues
 
@@ -177,8 +200,10 @@ releases the branch from that worktree, attaches it to the current one,
 restores the holder when attaching fails, and carries the branch's `polish`
 review record into this session.
 
-See [./skills/move-branch-here/](./skills/move-branch-here/) for the skill
-contract.
+Engineering bundles the same branch move helper. Its `polish` review-record
+step remains optional because patina-mode does not depend on `polish`. See
+[the existing skill](./skills/move-branch-here/) and
+[the Engineering copy](./plugins/engineering/skills/move-branch-here/).
 
 ### grill-to-spec
 
@@ -203,13 +228,22 @@ contract.
 
 ### offensive-programming
 
-`offensive-programming` classifies a proposed check, assertion, fallback, or
-shortcut by its source and reachability. It validates untrusted input, handles
-expected behavior at its owner, and makes internal defects fail close to their
-cause.
+The existing `offensive-programming` skill keeps its authoring-time decision
+flow for checks, fallbacks, assertions, and workarounds.
 
 See [./skills/offensive-programming/](./skills/offensive-programming/) for the
 skill contract.
+
+### principle-offensive-programming
+
+`principle-offensive-programming` classifies a proposed check, assertion,
+fallback, or shortcut by its source and reachability. It validates untrusted
+input, handles expected behavior at its owner, and makes internal defects fail
+close to their cause.
+
+See
+[./plugins/engineering/skills/principle-offensive-programming/](./plugins/engineering/skills/principle-offensive-programming/)
+for the skill contract.
 
 ### grill-system-design
 
@@ -231,12 +265,20 @@ skill contract.
 
 ### fix
 
-One reported behavior needs a red diagnosis and a same-repro fixed-build retest
-before a fix claim. Operator-invoked `fix` carries that evidence case through
-implementation, shared review and publication, then verifies the deployed
-current pull-request head at the reporter's perceived surface.
+The existing `fix` controller carries one reported behavior through diagnosis,
+implementation, review, publication, and a deployed current-head retest.
 
 See [./skills/fix/](./skills/fix/) for the skill contract.
+
+### gather-evidence
+
+Human change requests and QA findings need direct evidence from the current
+target before the agent edits code or prepares a response. `gather-evidence`
+records a verdict for each claim and routes confirmed work back to patina-mode.
+It does not own implementation, replies, thread resolution, or review state.
+
+See [./plugins/engineering/skills/gather-evidence/](./plugins/engineering/skills/gather-evidence/)
+for the skill contract.
 
 ### running-mobile-simulators
 
@@ -245,8 +287,10 @@ automation processes. `running-mobile-simulators` binds one session to an exact
 device and limits readiness, recovery, evidence, and cleanup to that ownership
 boundary.
 
-See [./skills/running-mobile-simulators/](./skills/running-mobile-simulators/)
-for the skill contract.
+The same skill remains in the Patina Project Skills plugin and is also bundled
+with Engineering. See
+[the existing skill](./skills/running-mobile-simulators/) and
+[the Engineering copy](./plugins/engineering/skills/running-mobile-simulators/).
 
 ### orchestrate
 
@@ -293,7 +337,8 @@ README and skill contract.
 |---|---|
 | [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
 | [new-branch](./skills/new-branch/) | Prepare local issue branches from the default branch |
-| [working-on-issue](./skills/working-on-issue/) | Align an issue: resolve (from ref or branch), mark started, land on its branch |
+| [working-on-issue](./skills/working-on-issue/) | Prepare an issue for the existing Patina Project controllers |
+| [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
 | [develop](./skills/develop/) | Drive one scope (issue and/or instructions) end to end via working-on-issue, build, polish, and ready-pr |
 | [develop-with-workflow](./skills/develop-with-workflow/) | Build one scope's independent slices in parallel onto one converged branch |
 | [polish](./skills/polish/) | Run incremental local architecture and code review |
@@ -303,13 +348,16 @@ README and skill contract.
 | [codex-pr-feedback-loop](./skills/codex-pr-feedback-loop/) | Keep a pushed Codex PR iterating on actionable review feedback |
 | [update-branch](./skills/update-branch/) | Update a local work branch from the base branch |
 | [move-branch-here](./skills/move-branch-here/) | Take a branch from the worktree holding it, with its polish review state |
+| [move-branch-here (Engineering)](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree, with optional polish review-state transfer |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
 | [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
-| [offensive-programming](./skills/offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
+| [offensive-programming](./skills/offensive-programming/) | Apply the existing authoring-time checks and fallback decision flow |
+| [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [fix](./skills/fix/) | Diagnose and correct one evidence case, then verify the deployed current PR head |
+| [fix](./skills/fix/) | Run the existing diagnosis, correction, publication, and deployed-head verification controller |
+| [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [running-mobile-simulators](./skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [orchestrate](./skills/orchestrate/) | Keep user-visible Codex chats moving within their existing authority |
 | [write-changelog](./skills/write-changelog/) | Render milestone or shipped Release notes from tracker issues |
@@ -377,8 +425,24 @@ skills/
   orchestrate/
   write-changelog/
   prompting-fable/
-.agents/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ (owned) or vendored dirs
-.claude/skills/<name>/               Committed overlay: symlinks to ../../skills/<name>/ or ../../.agents/skills/<name>
+plugins/engineering/
+  .claude-plugin/plugin.json
+  .codex-plugin/plugin.json
+  agents/
+  hooks/
+  models.json
+  skills/
+    patina-mode/
+    architect/
+    arena/
+    ...
+    working-on-issues/
+    move-branch-here/
+    principle-offensive-programming/
+    gather-evidence/
+    running-mobile-simulators/
+.agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
+.claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror
 .claude-plugin/
   marketplace.json                   Claude marketplace catalog
   plugin.json                        Claude plugin manifest

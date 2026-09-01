@@ -1,0 +1,38 @@
+{
+  "name": "engineering",
+  "version": "2.33.1",
+  "description": "Patina Project's owned engineering workflows, forked from pstack.",
+  "author": {
+    "name": "Patina Project"
+  },
+  "homepage": "https://github.com/patinaproject/skills",
+  "repository": "https://github.com/patinaproject/skills",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "patina-mode",
+    "workflow",
+    "principles",
+    "subagents",
+    "unslop"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Engineering",
+    "shortDescription": "Patina Project's rigorous, parallelizable engineering workflows",
+    "longDescription": "Engineering owns a Patina Project fork of pstack's skills, agents, hooks, principles, playbooks, model configuration, and verification tooling.",
+    "developerName": "Patina Project",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Work on this in patina-mode.",
+      "Interrogate this diff with multiple models."
+    ],
+    "websiteURL": "https://github.com/patinaproject/skills",
+    "brandColor": "#7C3AED"
+  }
+}

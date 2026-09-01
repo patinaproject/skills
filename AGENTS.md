@@ -7,7 +7,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-issue/`: shared align skill (resolve issue from ref or branch, mark started, branch)
+- `skills/working-on-issue/`: Patina Project Skills issue preparation skill
+- `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `skills/develop/`: issue development orchestration skill
 - `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
 - `skills/ready-pr/`: PR readiness and publication skill
@@ -17,25 +18,35 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/polish/`: incremental local architecture and code-review skill
 - `skills/update-branch/`: local branch update skill
 - `skills/move-branch-here/`: worktree branch handover skill
+- `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
 - `skills/design-by-contract/`: consequential system contract design overlay
-- `skills/offensive-programming/`: authoring-time checks and fallback decision overlay
+- `skills/offensive-programming/`: Patina Project Skills defensive-code decision overlay
+- `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
-- `skills/fix/`: diagnosis-first correction and fixed-build evidence skill
-- `skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `skills/fix/`: Patina Project Skills diagnosis-first correction and publication controller
+- `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
+- `skills/running-mobile-simulators/`: Patina Project Skills mobile simulator lifecycle skill
+- `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
+- `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
+- `plugins/engineering/hooks/`: Engineering session-start integration
+- `plugins/engineering/models.json`: Engineering model-role defaults
+- `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
+- `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
 - `skills/orchestrate/`: user-visible Codex chat coordination skill
 - `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
 - `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
-  into `../../skills/<name>/` (dogfood overlay); vendored third-party skills are
-  real directories restored by `pnpm skills:install`. All entries are tracked.
+  into their owning plugin or `skills/`; vendored third-party skills are real
+  directories restored by `pnpm skills:install`. All entries are tracked.
 - `.claude/skills/<name>/`: committed Claude Code overlay. Repo-owned skills
-  symlink into `../../skills/<name>/`; vendored third-party skills are relative
-  symlinks into `../../.agents/skills/<name>`. All entries are tracked.
-- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth (plugin slug: `patinaproject-skills`)
+  symlink into their owning plugin or `skills/`; vendored third-party skills are
+  relative symlinks into `../../.agents/skills/<name>`. All entries are tracked.
+- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth for `patinaproject-skills` and `engineering`
 - `.claude-plugin/plugin.json`: Claude plugin manifest listing skill paths
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `docs/`: contributor docs such as `docs/file-structure.md` and
@@ -66,16 +77,15 @@ issue body framing, and the adapter owns readiness and priority.
 ### Working an issue
 
 When you begin or resume issue-linked work, run the
-`working-on-issue` skill first, before branching, editing, or opening a
+`working-on-issues` skill first, before branching, editing, or opening a
 pull request. It resolves the issue, lands you on the tracker-provided branch,
-and marks it started (self-assign and started state, best-effort). The skill is
+and marks it started after its gates pass. The skill is
 idempotent, so run it at the start of every issue-linked session even if you are
 unsure it has already run — re-running while already aligned is a no-op. A
 session or worktree branch the harness starts you on, such as `claude/<...>`, is
-not issue-linked: use `new-branch` to land on the adapter-provided branch and work
-there rather than committing on the session branch. If a branch genuinely cannot
-move onto the issue-linked name, stop and state the deviation rather than
-proceeding silently.
+not issue-linked: let `working-on-issues` align it rather than committing on the
+session branch. If another worktree owns the issue branch, follow the skill's
+handoff gate instead of moving it implicitly.
 
 ### Triage labels
 
@@ -257,7 +267,7 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns these skills at flat paths:
+This repo owns skills in the root plugin and the Engineering plugin:
 
 | Skill | Path |
 | --- | --- |
@@ -265,6 +275,7 @@ This repo owns these skills at flat paths:
 | using-github | `skills/using-github/` |
 | new-branch | `skills/new-branch/` |
 | working-on-issue | `skills/working-on-issue/` |
+| working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | develop | `skills/develop/` |
 | develop-with-workflow | `skills/develop-with-workflow/` |
 | ready-pr | `skills/ready-pr/` |
@@ -273,15 +284,19 @@ This repo owns these skills at flat paths:
 | codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
 | polish | `skills/polish/` |
 | update-branch | `skills/update-branch/` |
-| move-branch-here | `skills/move-branch-here/` |
+| move-branch-here (Patina Project Skills) | `skills/move-branch-here/` |
+| move-branch-here (Engineering) | `plugins/engineering/skills/move-branch-here/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | design-by-contract | `skills/design-by-contract/` |
 | offensive-programming | `skills/offensive-programming/` |
+| principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
 | fix | `skills/fix/` |
-| running-mobile-simulators | `skills/running-mobile-simulators/` |
+| gather-evidence | `plugins/engineering/skills/gather-evidence/` |
+| running-mobile-simulators (Patina Project Skills) | `skills/running-mobile-simulators/` |
+| running-mobile-simulators (Engineering) | `plugins/engineering/skills/running-mobile-simulators/` |
 | orchestrate | `skills/orchestrate/` |
 | write-changelog | `skills/write-changelog/` |
 | prompting-fable | `skills/prompting-fable/` |
@@ -294,8 +309,8 @@ maintains a single standing Release PR for the repo as a whole. Tag form: `v<X.Y
 component prefix. The marketplace only publishes tagged (`v<X.Y.Z>`) releases. See
 [docs/release-flow.md](./docs/release-flow.md).
 
-The in-repo skills share the single root `patinaproject-skills` release and
-tag; they are not separate release-please packages. Third-party skills such as
+The in-repo plugins share one root release and tag; they are not separate
+release-please packages. Third-party skills such as
 `find-skills` are installed separately from their source repo's default branch
 or a specific `#<git-ref>`.
 
