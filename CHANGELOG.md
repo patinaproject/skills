@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.34.0](https://github.com/patinaproject/skills/compare/v2.33.1...v2.34.0) (2026-09-01)
+
+
+### Features
+
+* [#408](https://github.com/patinaproject/skills/issues/408) add offensive-programming skill ([#411](https://github.com/patinaproject/skills/issues/411)) ([505290a](https://github.com/patinaproject/skills/commit/505290a2ba66c27b21b004f68ff387101ede5e2c))
+* [#414](https://github.com/patinaproject/skills/issues/414) add standalone Engineering plugin ([#415](https://github.com/patinaproject/skills/issues/415)) ([1b3d7d8](https://github.com/patinaproject/skills/commit/1b3d7d8d157564cf04099056e80a68a8aeedfcec))
+
 ## [2.33.1](https://github.com/patinaproject/skills/compare/v2.33.0...v2.33.1) (2026-08-31)
 
 
