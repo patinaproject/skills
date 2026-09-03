@@ -89,6 +89,20 @@ mkdir -p "$FRESH"
 bash "$SCRIPT" --repo "$FRESH" >/dev/null
 [ "$(count "$BEGIN" "$FRESH/CLAUDE.md")" -eq 1 ] || fail "fresh repo CLAUDE.md missing single mandate block"
 
+# A hand-corrupted block (lone BEGIN, END deleted) must never swallow the content
+# beneath it, on the first run or any run after. Exactly one closed block ends up
+# installed; a harmless orphan BEGIN comment may remain.
+CORRUPT="$TMP/corrupt"
+mkdir -p "$CORRUPT"
+FULL_BEGIN="$BEGIN (managed by setup-engineering; re-running overwrites this block) -->"
+printf '%s\ndangling half-block\nSENTINEL trailing content\n' "$FULL_BEGIN" > "$CORRUPT/CLAUDE.md"
+bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
+grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on first run"
+[ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 1 ] || fail "corrupted repo did not gain exactly one closed block"
+bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
+grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on second run"
+[ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 1 ] || fail "second run did not converge on one closed block"
+
 if [ "$FAIL" -gt 0 ]; then
   echo "" >&2
   echo "FAIL: $FAIL assertion(s) failed" >&2

@@ -64,16 +64,25 @@ upsert_block() {
   blockfile="$(mktemp)"
   { printf '%s\n' "$BEGIN_MARKER"; cat "$payload"; printf '%s\n' "$END_MARKER"; } > "$blockfile"
 
-  if [ -f "$file" ] && grep -qF "$BEGIN_MARKER" "$file"; then
+  # Replace only when a well-formed BEGIN..END pair exists; otherwise append.
+  # The awk buffers each candidate region and only substitutes the fresh block
+  # for a region that actually closes with END, flushing an unclosed BEGIN
+  # verbatim. A hand-corrupted block (a BEGIN whose END was deleted) therefore
+  # never swallows the content beneath it; the mandate body itself carries no
+  # markers, so a real managed block is always well-formed.
+  if [ -f "$file" ] && grep -qF "$BEGIN_MARKER" "$file" && grep -qF "$END_MARKER" "$file"; then
     tmp="$(mktemp)"
     awk -v b="$BEGIN_MARKER" -v e="$END_MARKER" -v bf="$blockfile" '
-      $0 == b {
+      function flush(   i) { for (i = 1; i <= nbuf; i++) print buf[i]; nbuf = 0 }
+      $0 == b { flush(); inblock = 1; buf[++nbuf] = $0; next }
+      inblock && $0 == e {
+        inblock = 0; nbuf = 0
         if (!emitted) { while ((getline l < bf) > 0) print l; emitted = 1 }
-        skip = 1; next
+        next
       }
-      skip && $0 == e { skip = 0; next }
-      skip { next }
+      inblock { buf[++nbuf] = $0; next }
       { print }
+      END { flush() }
     ' "$file" > "$tmp"
     write_in_place "$file" "$tmp"
   else
