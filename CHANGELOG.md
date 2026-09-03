@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.35.0](https://github.com/patinaproject/skills/compare/v2.34.1...v2.35.0) (2026-09-03)
+
+
+### Features
+
+* [#422](https://github.com/patinaproject/skills/issues/422) install Engineering repo machinery from setup-engineering ([#423](https://github.com/patinaproject/skills/issues/423)) ([0f999d5](https://github.com/patinaproject/skills/commit/0f999d533c02dbafe83394c00aef5a8e2a10959e))
+* [#422](https://github.com/patinaproject/skills/issues/422) write Codex machinery to repo-scoped config instead of user global ([#426](https://github.com/patinaproject/skills/issues/426)) ([d637d06](https://github.com/patinaproject/skills/commit/d637d0649db7d807106af64fe8a85de8c3bf48b8))
+
 ## [2.34.1](https://github.com/patinaproject/skills/compare/v2.34.0...v2.34.1) (2026-09-03)
 
 
