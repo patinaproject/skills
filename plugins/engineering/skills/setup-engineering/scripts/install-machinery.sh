@@ -7,8 +7,11 @@
 #
 # Repo side (always): copies the patina-agent and comment-sicko subagents into
 # <repo>/.claude/agents/ and upserts the patina-mode mandate block into
-# <repo>/CLAUDE.md. Codex side (--codex): upserts the mandate block into the
-# Codex global AGENTS.md and enables multi_agent in the Codex config.
+# <repo>/CLAUDE.md. Codex side (--codex): upserts the mandate block into
+# <repo>/AGENTS.md and enables multi_agent in <repo>/.codex/config.toml, so the
+# machinery is committed and shared across contributors rather than written into
+# any one user's global Codex config. Codex loads a repo-scoped .codex/config.toml
+# only for trusted projects.
 #
 # Usage:
 #   install-machinery.sh [--repo <dir>] [--instructions <file>]
@@ -25,7 +28,6 @@ END_MARKER='<!-- END engineering:patina-mode -->'
 repo=""
 instructions=""
 do_codex=0
-codex_home="${CODEX_HOME:-$HOME/.codex}"
 codex_config=""
 codex_agents=""
 
@@ -44,8 +46,8 @@ if [ -z "$repo" ]; then
   repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 fi
 [ -n "$instructions" ] || instructions="${repo}/CLAUDE.md"
-[ -n "$codex_config" ] || codex_config="${codex_home}/config.toml"
-[ -n "$codex_agents" ] || codex_agents="${codex_home}/AGENTS.md"
+[ -n "$codex_config" ] || codex_config="${repo}/.codex/config.toml"
+[ -n "$codex_agents" ] || codex_agents="${repo}/AGENTS.md"
 
 # Rewrite a file through its own path so a symlinked instructions file (for
 # example a CLAUDE.md pointing at AGENTS.md) keeps pointing where it did.

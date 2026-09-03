@@ -103,6 +103,16 @@ bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
 grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on second run"
 [ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 1 ] || fail "second run did not converge on one closed block"
 
+# --codex with no explicit paths writes repo-scoped targets, never a user global.
+CODEXREPO="$TMP/codexrepo"
+mkdir -p "$CODEXREPO"
+bash "$SCRIPT" --repo "$CODEXREPO" --codex >/dev/null
+bash "$SCRIPT" --repo "$CODEXREPO" --codex >/dev/null
+[ "$(grep -c '^multi_agent = true$' "$CODEXREPO/.codex/config.toml" 2>/dev/null || echo 0)" -eq 1 ] \
+  || fail "--codex did not write repo-scoped .codex/config.toml with multi_agent"
+[ "$(count "$BEGIN" "$CODEXREPO/AGENTS.md")" -eq 1 ] \
+  || fail "--codex did not upsert a single mandate block into repo AGENTS.md"
+
 if [ "$FAIL" -gt 0 ]; then
   echo "" >&2
   echo "FAIL: $FAIL assertion(s) failed" >&2
