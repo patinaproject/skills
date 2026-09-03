@@ -49,19 +49,23 @@ target elsewhere.
 ### Codex
 
 Codex has no `SessionStart` hook and no subagent registry. There the default-on
-trigger is the same mandate block in the global `AGENTS.md`, and delegates route
-through the spawn-prompt convention in the patina-mode
-`references/codex-tools.md` (dispatch a `spawn_agent` told to read the
-`patina-mode` skill, or `agents/comment-sicko.md`, first). Subagent dispatch also
-needs the `multi_agent` feature. Add `--codex` to install both:
+trigger is the same mandate block in the repo's `AGENTS.md`, which Codex reads
+per project, and delegates route through the spawn-prompt convention in the
+patina-mode `references/codex-tools.md` (dispatch a `spawn_agent` told to read
+the `patina-mode` skill, or `agents/comment-sicko.md`, first). Subagent dispatch
+also needs the `multi_agent` feature. Add `--codex` to install both:
 
 ```bash
 bash "<this-skill>/scripts/install-machinery.sh" --codex
 ```
 
-That upserts the mandate block into `~/.codex/AGENTS.md` and enables
-`multi_agent` under `[features]` in `~/.codex/config.toml`, both idempotently.
-Override the paths with `--codex-agents <file>` and `--codex-config <file>`.
+That upserts the mandate block into `<repo>/AGENTS.md` and enables `multi_agent`
+under `[features]` in `<repo>/.codex/config.toml`, both idempotently. Writing the
+repo-scoped config rather than the user's global `~/.codex/config.toml` keeps the
+machinery committed and shared across contributors. Codex honors a repo-scoped
+`.codex/config.toml` only for a project the user has marked trusted, so the flag
+takes effect after Codex's one-time trust prompt. Override the paths with
+`--codex-agents <file>` and `--codex-config <file>`.
 
 The 30+ `.codex-plugin/prompts/*` stubs give Codex `/command` entry points but
 are not required: skills load natively by name on Codex, so patina-mode is

@@ -103,6 +103,25 @@ bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
 grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on second run"
 [ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 1 ] || fail "second run did not converge on one closed block"
 
+# --codex with no explicit paths writes repo-scoped targets, and must never reach
+# for the user's global Codex config. A sentinel HOME/CODEX_HOME proves the
+# negative: the pre-seeded global config stays untouched and no global AGENTS.md
+# appears.
+CODEXREPO="$TMP/codexrepo"
+SENTINEL_HOME="$TMP/home"
+mkdir -p "$CODEXREPO" "$SENTINEL_HOME/.codex"
+printf 'PRE-EXISTING GLOBAL\n' > "$SENTINEL_HOME/.codex/config.toml"
+HOME="$SENTINEL_HOME" CODEX_HOME="$SENTINEL_HOME/.codex" bash "$SCRIPT" --repo "$CODEXREPO" --codex >/dev/null
+HOME="$SENTINEL_HOME" CODEX_HOME="$SENTINEL_HOME/.codex" bash "$SCRIPT" --repo "$CODEXREPO" --codex >/dev/null
+[ "$(grep -c '^multi_agent = true$' "$CODEXREPO/.codex/config.toml" 2>/dev/null || echo 0)" -eq 1 ] \
+  || fail "--codex did not write repo-scoped .codex/config.toml with multi_agent"
+[ "$(count "$BEGIN" "$CODEXREPO/AGENTS.md")" -eq 1 ] \
+  || fail "--codex did not upsert a single mandate block into repo AGENTS.md"
+[ "$(cat "$SENTINEL_HOME/.codex/config.toml")" = "PRE-EXISTING GLOBAL" ] \
+  || fail "--codex mutated the user global ~/.codex/config.toml"
+[ ! -e "$SENTINEL_HOME/.codex/AGENTS.md" ] \
+  || fail "--codex created a global ~/.codex/AGENTS.md"
+
 if [ "$FAIL" -gt 0 ]; then
   echo "" >&2
   echo "FAIL: $FAIL assertion(s) failed" >&2
