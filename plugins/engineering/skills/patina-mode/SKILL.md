@@ -33,6 +33,15 @@ exceptions are the references already carrying their own namespace, such as
 `run` and `verify`. On Codex, see
 [`references/codex-tools.md`](references/codex-tools.md).
 
+Every `scripts/...` and `playbooks/...` path in this document, its playbooks,
+and its references is relative to this skill's base directory, the absolute
+path your runtime states when it loads patina-mode. Join the two, then run or
+read the result. The bundled `watch-pr` watcher, `orch` store CLI, and
+`worktree-audit.sh` live under `scripts/` there. Two other anchors look
+plausible and both fail. `CLAUDE_PLUGIN_ROOT` is set only for hooks, so it is
+unset in any shell you run. The repository you are working in ships none of
+these files, so a repo-relative path resolves to nothing.
+
 Remaining triggers:
 
 - Issue-linked work begins or resumes → run the **working-on-issues** skill
