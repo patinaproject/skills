@@ -10,6 +10,7 @@ node skills/orchestrate/tests/orchestration-policy.test.mjs
 node skills/polish/tests/review-state.test.mjs
 bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
+bash scripts/tests/patina-mode-script-paths.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/pr-readiness-flip.test.sh
 bash scripts/tests/pr-workflow-boundary.test.sh

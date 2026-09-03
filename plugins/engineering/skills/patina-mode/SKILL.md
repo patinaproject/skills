@@ -10,6 +10,8 @@ menu-description: default entry point for any non-trivial task
 
 These skills use Claude Code tool names (the `Skill` tool, the `Agent` tool, `AskUserQuestion`) and Claude model slugs (`claude-*`). On Claude Code they work as written. On Codex and other runtimes, the skills are the same files; only the tool, model, and built-in-skill names resolve differently. When a skill names a Claude tool, a `claude-*` model, or a Claude built-in skill (`run`, `verify`, `plugin-dev:skill-development`), read [`references/codex-tools.md`](references/codex-tools.md) for the Codex equivalent.
 
+Bundled scripts are named under `<skill-directory>/scripts/`. Resolve `<skill-directory>` to this skill's installed directory, the base directory your loader states when it opens this file, and pass the absolute path to the shell. `${CLAUDE_PLUGIN_ROOT}` is set for hooks only and is unset in an agent shell, so it is not a substitute.
+
 On Codex, patina-mode requires the `multi_agent` feature. Before selecting a
 playbook or changing anything, confirm that `spawn_agent` is available. If it
 is unavailable, stop and tell the user to set `multi_agent = true` under
