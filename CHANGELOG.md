@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.34.1](https://github.com/patinaproject/skills/compare/v2.34.0...v2.34.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* [#416](https://github.com/patinaproject/skills/issues/416) instruct patina-mode to invoke engineering-namespaced skills ([#417](https://github.com/patinaproject/skills/issues/417)) ([138d901](https://github.com/patinaproject/skills/commit/138d9010ed463e1ba5445a022fcd763a3b4fb42c))
+* [#419](https://github.com/patinaproject/skills/issues/419) anchor patina-mode script paths to the skill base directory ([#420](https://github.com/patinaproject/skills/issues/420)) ([8eefc13](https://github.com/patinaproject/skills/commit/8eefc13f076d33bb04a75e7c201919c6877cff6f))
+
 ## [2.34.0](https://github.com/patinaproject/skills/compare/v2.33.1...v2.34.0) (2026-09-01)
 
 
