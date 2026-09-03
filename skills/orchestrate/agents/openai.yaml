@@ -1,4 +1,0 @@
-interface:
-  display_name: "Orchestrate"
-  short_description: "Keep existing Codex chats moving"
-  default_prompt: "Use $orchestrate to resume actionable idle chats, advance merge-conflicted pull requests, and report operator dependencies."

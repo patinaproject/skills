@@ -3,27 +3,10 @@
   "skills": [
     "./skills/scaffold-repository",
     "./skills/using-github",
-    "./skills/new-branch",
-    "./skills/working-on-issue",
-    "./skills/develop",
-    "./skills/develop-with-workflow",
-    "./skills/ready-pr",
-    "./skills/merge-pr",
-    "./skills/finish-pr",
-    "./skills/codex-pr-feedback-loop",
-    "./skills/polish",
-    "./skills/update-branch",
-    "./skills/move-branch-here",
     "./skills/install-skills",
     "./skills/grill-to-spec",
     "./skills/design-by-contract",
-    "./skills/offensive-programming",
     "./skills/grill-system-design",
-    "./skills/review-system-design",
-    "./skills/fix",
-    "./skills/running-mobile-simulators",
-    "./skills/orchestrate",
-    "./skills/write-changelog",
-    "./skills/prompting-fable"
+    "./skills/review-system-design"
   ]
 }

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-HELPER="$REPO_ROOT/skills/move-branch-here/scripts/worktree-context.sh"
+HELPER="$REPO_ROOT/plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh"
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
 

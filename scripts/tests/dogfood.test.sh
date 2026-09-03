@@ -16,30 +16,13 @@ SKILLS=(
   scaffold-repository
   install-skills
   using-github
-  new-branch
-  working-on-issue
   working-on-issues
-  develop
-  develop-with-workflow
-  ready-pr
-  merge-pr
-  finish-pr
-  codex-pr-feedback-loop
-  polish
-  update-branch
-  move-branch-here
   grill-to-spec
   design-by-contract
-  offensive-programming
   principle-offensive-programming
   grill-system-design
   review-system-design
-  fix
   gather-evidence
-  running-mobile-simulators
-  orchestrate
-  write-changelog
-  prompting-fable
 )
 FAIL_COUNT=0
 

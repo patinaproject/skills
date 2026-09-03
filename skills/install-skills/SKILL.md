@@ -75,14 +75,11 @@ requested names. Common repository defaults are:
 
 - `scaffold-repository`
 - `using-github`
-- `new-branch`
-- `working-on-issue`
-- `write-changelog`
-- `develop`
-- `ready-pr`
-- `merge-pr`
-- `polish`
 - `install-skills`
+- `grill-to-spec`
+- `design-by-contract`
+- `grill-system-design`
+- `review-system-design`
 
 ## Verify
 

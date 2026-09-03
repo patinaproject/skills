@@ -12,9 +12,9 @@ branches, and status changes. If the file is missing, stop and say that
 `scaffold-repository` provides it.
 
 Use `/to-spec` when the user needs to publish a new specification or issue.
-Use `working-on-issue` to begin issue work and `write-changelog` for milestone
-or release summaries. Follow `docs/issue-tracker.md` for all other issue work,
-even when it selects GitHub.
+Begin issue work with the Engineering plugin's `working-on-issues` skill.
+Follow `docs/issue-tracker.md` for all other issue work, even when it selects
+GitHub.
 
 For GitHub work:
 
@@ -29,10 +29,10 @@ For GitHub work:
 
 - For pull request comments, read
   [the pull request comment instructions](workflows/pr-comments.md).
-- To publish completed work, run `polish`, then `ready-pr`.
-- To create or update a pull request, use `ready-pr` so it follows the template,
-  draft rules, checks, and review process.
-- To merge a pull request, use `merge-pr`.
+- To build, publish, and merge completed work, use the Engineering plugin's
+  `patina-mode` skill, which owns the pull request and shipping workflow.
+- To create or update a pull request by hand, follow the pull request template
+  with `gh pr create --body-file`, honoring its draft, checks, and review rules.
 - For checks, releases, repository settings, and other GitHub data, use `gh`
   after reading the repository instructions.
 
