@@ -6,30 +6,16 @@ This repository is the marketplace surface for Patina Project plugins and relate
 
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
-- `skills/new-branch/`: issue branch preparation skill
-- `skills/working-on-issue/`: Patina Project Skills issue preparation skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
-- `skills/develop/`: issue development orchestration skill
-- `skills/develop-with-workflow/`: Claude Workflow-orchestrated parallel slice build skill
-- `skills/ready-pr/`: PR readiness and publication skill
-- `skills/merge-pr/`: repository-managed auto-merge skill
-- `skills/finish-pr/`: deprecated compatibility alias for `ready-pr`
-- `skills/codex-pr-feedback-loop/`: Codex PR review feedback automation skill
-- `skills/polish/`: incremental local architecture and code-review skill
-- `skills/update-branch/`: local branch update skill
-- `skills/move-branch-here/`: worktree branch handover skill
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
 - `skills/design-by-contract/`: consequential system contract design overlay
-- `skills/offensive-programming/`: Patina Project Skills defensive-code decision overlay
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
-- `skills/fix/`: Patina Project Skills diagnosis-first correction and publication controller
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
-- `skills/running-mobile-simulators/`: Patina Project Skills mobile simulator lifecycle skill
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
@@ -37,9 +23,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/models.json`: Engineering model-role defaults
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
 - `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
-- `skills/orchestrate/`: user-visible Codex chat coordination skill
-- `skills/write-changelog/`: tracker-backed milestone and Release changelog skill
-- `skills/prompting-fable/`: Claude Fable 5 prompting and configuration guidelines skill
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into their owning plugin or `skills/`; vendored third-party skills are real
   directories restored by `pnpm skills:install`. All entries are tracked.
@@ -173,8 +156,8 @@ linking them. The file lives in the consumer's repository, not alongside the
 skill, so a path is the honest reference and a link is a layout assumption.
 
 Relative links between sibling skills are fine and should stay links: skills
-remain siblings in both layouts, so `../../ready-pr/references/...` from
-`skills/merge-pr/workflows/` resolves either way. Links to files bundled inside
+remain siblings in both layouts, so `../../design-by-contract/references/...` from
+`skills/using-github/workflows/` resolves either way. Links to files bundled inside
 the same skill (`./audit-checklist.md`) are likewise unaffected.
 
 If `writing-for-agents` is not installed in the local agent environment, install
@@ -203,9 +186,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/worktree-setup.test.sh` after changing
   `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/move-branch-here.test.sh` after changing
-  `skills/move-branch-here/scripts/worktree-context.sh`.
-- Run `bash scripts/tests/base-update-recovery.test.sh` after changing
-  `skills/ready-pr/scripts/base-update-verify.sh`.
+  `plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing
@@ -277,33 +258,16 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | --- | --- |
 | scaffold-repository | `skills/scaffold-repository/` |
 | using-github | `skills/using-github/` |
-| new-branch | `skills/new-branch/` |
-| working-on-issue | `skills/working-on-issue/` |
-| working-on-issues | `plugins/engineering/skills/working-on-issues/` |
-| develop | `skills/develop/` |
-| develop-with-workflow | `skills/develop-with-workflow/` |
-| ready-pr | `skills/ready-pr/` |
-| merge-pr | `skills/merge-pr/` |
-| finish-pr (deprecated alias) | `skills/finish-pr/` |
-| codex-pr-feedback-loop | `skills/codex-pr-feedback-loop/` |
-| polish | `skills/polish/` |
-| update-branch | `skills/update-branch/` |
-| move-branch-here (Patina Project Skills) | `skills/move-branch-here/` |
-| move-branch-here (Engineering) | `plugins/engineering/skills/move-branch-here/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | design-by-contract | `skills/design-by-contract/` |
-| offensive-programming | `skills/offensive-programming/` |
-| principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
-| fix | `skills/fix/` |
+| working-on-issues | `plugins/engineering/skills/working-on-issues/` |
+| move-branch-here | `plugins/engineering/skills/move-branch-here/` |
+| principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
-| running-mobile-simulators (Patina Project Skills) | `skills/running-mobile-simulators/` |
-| running-mobile-simulators (Engineering) | `plugins/engineering/skills/running-mobile-simulators/` |
-| orchestrate | `skills/orchestrate/` |
-| write-changelog | `skills/write-changelog/` |
-| prompting-fable | `skills/prompting-fable/` |
+| running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/new-branch","./skills/working-on-issue","./skills/develop","./skills/develop-with-workflow","./skills/ready-pr","./skills/merge-pr","./skills/finish-pr","./skills/codex-pr-feedback-loop","./skills/polish","./skills/update-branch","./skills/move-branch-here","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/offensive-programming","./skills/grill-system-design","./skills/review-system-design","./skills/fix","./skills/running-mobile-simulators","./skills/orchestrate","./skills/write-changelog","./skills/prompting-fable"]'
+expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design"]'
 expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","no-comments","patina-mode","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
 expected_engineering_prompts='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","no-comments","patina-mode","recall","reflect","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why"]'
 expected_engineering_agents='["comment-sicko","patina-agent"]'
-retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback'
+retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback|develop|develop-with-workflow|ready-pr|finish-pr|merge-pr|polish|fix|orchestrate|codex-pr-feedback-loop|prompting-fable|offensive-programming|move-branch-here|running-mobile-simulators|working-on-issue|write-changelog|new-branch|update-branch'
 
 read_frontmatter_field() {
   local file="$1"
@@ -195,11 +195,6 @@ expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/skills/show-me-your-work/scripts/log.sh | sort)"
 test "$engineering_executables" = "$expected_engineering_executables"
 
-cmp \
-  skills/move-branch-here/scripts/worktree-context.sh \
-  plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh
-
-test "$(read_frontmatter_field skills/develop/SKILL.md disable-model-invocation)" = 'true'
 test -n "$(read_frontmatter_field plugins/engineering/skills/gather-evidence/SKILL.md description)"
 test -z "$(read_frontmatter_field plugins/engineering/skills/gather-evidence/SKILL.md disable-model-invocation)"
 test "$(read_frontmatter_field plugins/engineering/skills/principle-offensive-programming/SKILL.md user-invocable)" = 'false'

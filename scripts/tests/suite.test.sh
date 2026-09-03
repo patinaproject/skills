@@ -6,17 +6,11 @@ bash scripts/tests/esm-tooling.test.sh
 pnpm exec commitlint --version >/dev/null
 bash scripts/tests/issue-reference-contract.test.sh
 node scripts/tests/history-rewrite.test.mjs
-node skills/orchestrate/tests/orchestration-policy.test.mjs
-node skills/polish/tests/review-state.test.mjs
 bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
-bash scripts/tests/pr-readiness-flip.test.sh
-bash scripts/tests/pr-workflow-boundary.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
-bash scripts/tests/update-branch.test.sh
-bash scripts/tests/base-update-recovery.test.sh
 bash scripts/tests/move-branch-here.test.sh
 bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
@@ -50,9 +44,7 @@ run_cli_canary() {
 
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
-run_cli_canary ./skills/update-branch
-run_cli_canary ./skills/develop 'develop'
-run_cli_canary ./skills/codex-pr-feedback-loop 'codex-pr-feedback-loop'
+run_cli_canary ./skills/grill-to-spec 'grill-to-spec'
 
 run_cli_install_canary() {
   local repo_root tmpdir status

@@ -75,11 +75,8 @@ assert_no_match "skills:restore|skills:refresh" \
 test ! -e scripts/install-skills.sh ||
   fail "scripts/install-skills.sh should be removed in favor of skills experimental_install"
 
-# Preserve the PR-facing Claude comment surfaces while GitHub issue intake is
-# active.
-assert_match '^  issue_comment:' .github/workflows/code.yml
-assert_match '^  pull_request_review_comment:' .github/workflows/code.yml
-assert_match '^  pull_request_review:' .github/workflows/code.yml
+test ! -e .github/workflows/code.yml ||
+  fail ".github/workflows/code.yml should be removed with the develop pipeline"
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
