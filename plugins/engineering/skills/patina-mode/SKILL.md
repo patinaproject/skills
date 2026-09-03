@@ -24,6 +24,15 @@ While patina-mode is active, this skill owns workflow routing. Use only the
 skills and playbooks named here. Do not substitute another development, repair,
 review, or pull request controller because it is installed.
 
+Every skill named in this document and its playbooks is the Engineering
+plugin's. On Claude Code, invoke it as `engineering:<name>` rather than the bare
+name. Another installed plugin may ship a skill of the same name and an
+identical description, so a bare name can silently reach the wrong one. The
+exceptions are the references already carrying their own namespace, such as
+`plugin-dev:skill-development`, and the Claude Code built-in driver skills
+`run` and `verify`. On Codex, see
+[`references/codex-tools.md`](references/codex-tools.md).
+
 Remaining triggers:
 
 - Issue-linked work begins or resumes → run the **working-on-issues** skill
