@@ -217,6 +217,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/scaffold-baseline-manifest.test.sh` after changing
   `skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
+- Run `bash scripts/tests/setup-engineering-machinery.test.sh` after changing
+  `plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh` or
+  its bundled `assets/`; it asserts installer idempotency, the no-clobber
+  contract, and that the bundled payloads match their canonical plugin sources
 
 ## Pull request labels
 

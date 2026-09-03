@@ -1,24 +1,96 @@
 ---
 name: setup-engineering
-description: Configure which models Engineering uses per role. Detects your available Claude models and writes a per-role override file that the user can include from their CLAUDE.md. Use for /setup-engineering, "configure Engineering models", or changing Engineering's model choices.
-menu-description: configure Engineering per-role model choices
+description: Install Engineering's repo-level machinery for skills-only consumers — the default-on patina-mode mandate, the patina-agent and comment-sicko subagents, and Codex multi_agent — and configure which models Engineering uses per role. Use for /setup-engineering, setting Engineering up in a repository, or changing Engineering's model choices.
+menu-description: install Engineering machinery and per-role model choices
 ---
 
 # Setup Engineering
 
-Write `~/.claude/engineering-models.md`, a per-role model override sheet you include from your global `CLAUDE.md`. Each Engineering skill names a default model inline; the override sheet is the layer that adapts those defaults to the models you actually have access to.
+Engineering ships as a full plugin (hook, subagents, models) and also as a
+vendored skill catalog. Vendoring carries the skills but not the hook or the
+subagents, so a skills-only consumer loses the default-on entry point and the
+delegation targets the playbooks name. This skill installs that machinery into
+the target repo and, on Codex, the user's Codex config, then writes the per-role
+model override sheet.
 
-**Platform note.** On Codex or another non-Claude runtime, the override sheet is `~/.codex/engineering-models.md`, the slugs are your Codex models (for example `gpt-5.5`) not `claude-*`, and you load it by adding the sheet's contents to `~/.codex/AGENTS.md` (Codex has no `@`-include into a rules file). The role rows in step 5 are identical; only the slugs, the file path, and the load mechanism change. Detect Codex slugs from `~/.codex/config.toml` (`model = ...`) plus whatever the user confirms. See [`codex-tools.md`](../patina-mode/references/codex-tools.md).
+Run both parts. The machinery install is non-interactive and idempotent; the
+model override sheet is interactive.
 
-Claude Code has no auto-applied "rules" mechanism like Cursor's `.mdc`. Inclusion is explicit: the user adds a line to `~/.claude/CLAUDE.md` (or their project `CLAUDE.md`) such as:
+## Install repo-level machinery
+
+`scripts/install-machinery.sh` (in this skill's base directory) owns the
+idempotency and no-clobber contract. Run it rather than editing the target files
+by hand. It writes a single marker-delimited mandate block and leaves everything
+outside the markers untouched, so re-running updates in place with no
+duplication.
+
+What it materializes, from the byte-identical payloads under `assets/`:
+
+- The **patina-mode mandate** (from `assets/mandate.md`) into the repo's
+  `CLAUDE.md`, wrapped in managed markers. This is the skills-only substitute
+  for the plugin's `SessionStart` hook. The hook's own text defers to `CLAUDE.md`,
+  so the block is an equal-or-stronger default-on trigger: a non-trivial task
+  routes through patina-mode without the user invoking it.
+- The **`patina-agent` and `comment-sicko` subagents** (from `assets/agents/`)
+  into the repo's `.claude/agents/`, so `subagent_type: "patina-agent"` resolves
+  and playbook delegates read patina-mode's SKILL.md first instead of drifting to
+  `general-purpose`.
+
+Run it from the target repo:
+
+```bash
+bash "<this-skill>/scripts/install-machinery.sh"
+```
+
+The script defaults `--repo` to the current Git toplevel and the instructions
+file to `<repo>/CLAUDE.md`. Pass `--repo <dir>` or `--instructions <file>` to
+target elsewhere.
+
+### Codex
+
+Codex has no `SessionStart` hook and no subagent registry. There the default-on
+trigger is the same mandate block in the global `AGENTS.md`, and delegates route
+through the spawn-prompt convention in the patina-mode
+`references/codex-tools.md` (dispatch a `spawn_agent` told to read the
+`patina-mode` skill, or `agents/comment-sicko.md`, first). Subagent dispatch also
+needs the `multi_agent` feature. Add `--codex` to install both:
+
+```bash
+bash "<this-skill>/scripts/install-machinery.sh" --codex
+```
+
+That upserts the mandate block into `~/.codex/AGENTS.md` and enables
+`multi_agent` under `[features]` in `~/.codex/config.toml`, both idempotently.
+Override the paths with `--codex-agents <file>` and `--codex-config <file>`.
+
+The 30+ `.codex-plugin/prompts/*` stubs give Codex `/command` entry points but
+are not required: skills load natively by name on Codex, so patina-mode is
+reachable without them. Leave them to the full plugin install.
+
+## Configure per-role models
+
+Write `~/.claude/engineering-models.md`, a per-role model override sheet you
+include from your global `CLAUDE.md`. Each Engineering skill names a default
+model inline; the override sheet is the layer that adapts those defaults to the
+models you actually have access to.
+
+**Platform note.** On Codex or another non-Claude runtime, the override sheet is
+`~/.codex/engineering-models.md`, the slugs are your Codex models (for example
+`gpt-5.5`) not `claude-*`, and you load it by adding the sheet's contents to
+`~/.codex/AGENTS.md` (Codex has no `@`-include into a rules file). The role rows
+in step 5 are identical; only the slugs, the file path, and the load mechanism
+change. Detect Codex slugs from `~/.codex/config.toml` (`model = ...`) plus
+whatever the user confirms. See [`codex-tools.md`](../patina-mode/references/codex-tools.md).
+
+Claude Code has no auto-applied "rules" mechanism like Cursor's `.mdc`.
+Inclusion is explicit: the user adds a line to `~/.claude/CLAUDE.md` (or their
+project `CLAUDE.md`) such as:
 
 ```text
 @~/.claude/engineering-models.md
 ```
 
 so the file is loaded as context for every session.
-
-## Steps
 
 ### 1. Detect available models
 
@@ -71,7 +143,10 @@ If `~/.claude/CLAUDE.md` does not already include `~/.claude/engineering-models.
 
 ### 7. Confirm
 
-Tell the user where the override was written and how it loads (via the `@` include in CLAUDE.md). Re-running this skill updates the override sheet.
+Tell the user what the machinery install wrote (the mandate block, the two
+subagents, and on Codex the `multi_agent` flag), where the model override was
+written, and how it loads (via the `@` include in CLAUDE.md). Re-running this
+skill updates all of it in place.
 
 ## Models
 
