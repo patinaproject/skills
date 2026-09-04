@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.37.0](https://github.com/patinaproject/skills/compare/v2.36.0...v2.37.0) (2026-09-04)
+
+
+### Features
+
+* [#430](https://github.com/patinaproject/skills/issues/430) add cross-agent session handoff skill ([#432](https://github.com/patinaproject/skills/issues/432)) ([0ce5eba](https://github.com/patinaproject/skills/commit/0ce5eba8b4819bcae455379ff1377419a5f5e8c8))
+
 ## [2.36.0](https://github.com/patinaproject/skills/compare/v2.35.0...v2.36.0) (2026-09-03)
 
 
