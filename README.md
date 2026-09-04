@@ -250,7 +250,6 @@ plugins/engineering/
   .codex-plugin/plugin.json
   agents/
   hooks/
-  models.json
   skills/
     patina-mode/
     architect/

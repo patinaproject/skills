@@ -22,7 +22,6 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
-- `plugins/engineering/models.json`: Engineering model-role defaults
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
 - `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
