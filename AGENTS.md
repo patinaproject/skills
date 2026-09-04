@@ -307,7 +307,9 @@ Merging a Release PR tags the commit and publishes a GitHub Release. The workflo
 auto-merges Release PRs after required checks pass.
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only no-issue exceptions to the issue-tag rule.
+bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions to the issue-tag rule
+(the `sync-pstack` carrier commit is the one commit-level exception; see Commit & Pull Request
+Guidelines).
 
 ## Commit & Pull Request Guidelines
 
@@ -326,7 +328,11 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 `type: #123 short description`
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
+bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions. The one no-issue
+*commit* exception is the script-generated carrier commit
+`chore: sync open-pstack@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
+the `pstack-sync` carrier branch (committed with `--no-verify`); it enters `main` history through
+the sync merge.
 
 Use the PR template as written: one `Closes #N`, `Fixes #N`, or `Resolves #N`
 line and a
