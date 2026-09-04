@@ -35,7 +35,7 @@ export interface Unit {
   readonly brief: string;
 }
 
-interface LedgerEntry {
+export interface LedgerEntry {
   readonly pr: string;
   readonly sha: string;
   readonly verdict: Verdict;
@@ -52,7 +52,7 @@ export interface InboxPointer {
   readonly report: string;
 }
 
-interface InboxPushResult {
+export interface InboxPushResult {
   readonly pointer: InboxPointer;
   readonly filename: string;
 }
@@ -65,7 +65,7 @@ export interface OpenGate {
   readonly defaultAnswer: string;
 }
 
-interface ResolvedGate {
+export interface ResolvedGate {
   readonly kind: "resolved";
   readonly id: string;
   readonly question: string;
@@ -76,9 +76,9 @@ interface ResolvedGate {
 
 export type Gate = OpenGate | ResolvedGate;
 
-type FrontierPrState = "OPEN" | "MERGED" | "CLOSED";
+export type FrontierPrState = "OPEN" | "MERGED" | "CLOSED";
 
-interface FrontierPr {
+export interface FrontierPr {
   readonly pr: number;
   readonly branches: string;
   readonly sha: string;
@@ -98,7 +98,7 @@ export interface StandingLine {
 
 export type Counts = Readonly<Record<string, number>>;
 
-interface StatusSummary {
+export interface StatusSummary {
   readonly unitStates: Counts;
   readonly ledgerVerdicts: Counts;
   readonly frontierGeneration: number;
@@ -114,13 +114,13 @@ export interface StatusReport {
   readonly changed: string;
 }
 
-interface AddUnitParams {
+export interface AddUnitParams {
   readonly id: string;
   readonly track: string;
   readonly brief?: string;
 }
 
-interface SetUnitParams {
+export interface SetUnitParams {
   readonly id: string;
   readonly state: string;
   readonly branch?: string;
@@ -128,12 +128,12 @@ interface SetUnitParams {
   readonly sha?: string;
 }
 
-interface ListUnitsParams {
+export interface ListUnitsParams {
   readonly state?: string;
   readonly track?: string;
 }
 
-interface RecordLedgerParams {
+export interface RecordLedgerParams {
   readonly pr: number;
   readonly sha: string;
   readonly verdict: Verdict;
@@ -141,36 +141,36 @@ interface RecordLedgerParams {
   readonly verifier?: string;
 }
 
-interface CheckLedgerParams {
+export interface CheckLedgerParams {
   readonly pr: number;
   readonly sha: string;
 }
 
-interface PushInboxParams {
+export interface PushInboxParams {
   readonly agent: string;
   readonly unit: string;
   readonly status: string;
   readonly report?: string;
 }
 
-interface ParkGateParams {
+export interface ParkGateParams {
   readonly id: string;
   readonly question: string;
   readonly options: string;
   readonly defaultAnswer: string;
 }
 
-interface ResolveGateParams {
+export interface ResolveGateParams {
   readonly id: string;
   readonly answer: string;
 }
 
-interface SetFrontierParams {
+export interface SetFrontierParams {
   readonly repo: string;
   readonly prs?: readonly number[];
 }
 
-interface AddStandingParams {
+export interface AddStandingParams {
   readonly line: string;
 }
 
@@ -219,7 +219,7 @@ export interface Store {
   readonly close: () => Promise<void>;
 }
 
-interface NotFoundOutput {
+export interface NotFoundOutput {
   readonly compact: string;
   readonly json: unknown;
 }
@@ -342,8 +342,7 @@ async function atomicWrite(path: string, contents: string): Promise<void> {
     await writeFile(temporary, contents, { flag: "wx" });
     await rename(temporary, path);
   } finally {
-    // Best-effort cleanup: a throw here would replace the write's own error.
-    await rm(temporary, { force: true }).catch(() => {});
+    await rm(temporary, { force: true });
   }
 }
 
@@ -882,10 +881,7 @@ function changed(before: StatusSummary | null, after: StatusSummary): string {
 }
 
 function markdown(value: string): string {
-  return value
-    .replace(/[\t\n\r]/g, " ")
-    .replace(/\\/g, "\\\\")
-    .replace(/\|/g, "\\|");
+  return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 }
 
 function table(
@@ -1014,7 +1010,7 @@ function parseGtPullRequest({
   detail: string;
 }): GtPullRequest {
   const match =
-    /^(?:\[origin\] )?PR #([1-9]\d*)(?: \(([^)\r\n]+)\))?( .+)?$/.exec(
+    /^(?:\[origin\] )?PR #([1-9]\d*)(?: \(([^)\r\n]+)\))?(?: .+)?$/.exec(
       detail
     );
   const pr = Number(match?.[1] ?? 0);
@@ -1024,14 +1020,6 @@ function parseGtPullRequest({
     );
   }
   const status = match[2];
-  // A "(" right after the PR number that the status group did not capture
-  // means a nested-paren status like "Needs approvals (2)"; treating it as
-  // no-status would silently report the PR as OPEN.
-  if (status === undefined && (match[3] ?? "").startsWith(" (")) {
-    throw new UserError(
-      `gt info output has an invalid PR row for branch ${branch}: ${detail}`
-    );
-  }
   if (status === "Merged") {
     return { pr, state: "MERGED" };
   }
@@ -1053,10 +1041,8 @@ function parseGtBranches(raw: string): readonly string[] {
     if (line.length === 0) {
       continue;
     }
-    // (?!-) rejects leading-dash names, which git and gt would parse as
-    // options when the branch is later passed to them as an argument.
     const branchMatch =
-      /^(?:│ )*[◯◉] +((?!-)[^\s]+)((?: \([^()\r\n]*\))*)$/.exec(line);
+      /^(?:│ )*[◯◉] +([^\s]+)((?: \([^()\r\n]*\))*)$/.exec(line);
     if (branchMatch === null) {
       throw new UserError(
         `gt log short output has an unparseable line ${index + 1}: ${JSON.stringify(line)}`
@@ -1285,7 +1271,7 @@ export function openStore(
         const rows = [...(await readUnits(store))];
         const index = rows.findIndex((unit) => unit.id === id);
         const old = rows[index];
-        if (old === undefined) {
+        if (index < 0 || old === undefined) {
           throw new NotFoundError(`unit ${id} not found`);
         }
         const row: Unit = {
@@ -1478,7 +1464,7 @@ export function openStore(
         const rows = [...(await readGates(store))];
         const index = rows.findIndex((gate) => gate.id === id);
         const old = rows[index];
-        if (old === undefined) {
+        if (index < 0 || old === undefined) {
           throw new NotFoundError(`gate ${id} not found`);
         }
         const gate: ResolvedGate = {

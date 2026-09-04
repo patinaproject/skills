@@ -1,6 +1,7 @@
 # Notice
 
-Engineering adapts pstack under the terms recorded in
+Engineering adapts [Eric Litman's open-pstack](https://github.com/ericlitman/open-pstack),
+a port of Cursor's pstack, under the terms recorded in
 [`LICENSE.pstack`](./LICENSE.pstack).
 
 The cross-platform hook wrapper in [`hooks/run-hook.cmd`](./hooks/run-hook.cmd)

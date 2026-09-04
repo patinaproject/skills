@@ -23,7 +23,8 @@
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "test": "bash scripts/tests/suite.test.sh",
-    "skills:install": "pnpm dlx skills@latest experimental_install --yes"
+    "skills:install": "pnpm dlx skills@latest experimental_install --yes",
+    "sync-pstack": "bash scripts/sync-pstack.sh"
   },
   "config": {
     "commitizen": {

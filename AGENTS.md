@@ -21,7 +21,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
-- `plugins/engineering/models.json`: Engineering model-role defaults
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
 - `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
@@ -116,6 +115,11 @@ the vendored `domain-modeling` payload; see
   refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
+- `pnpm sync-pstack`: re-sync `plugins/engineering/**` from the current tip of
+  `ericlitman/open-pstack`'s `main`, renaming only `poteto-mode` → `patina-mode`
+  and `poteto-agent` → `patina-agent`, and leaving Patina's local edits as real
+  merge conflicts to resolve. See
+  [ADR-429](docs/adr/ADR-429-sync-pstack-carrier-branch.md) for the mechanism.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -205,6 +209,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh` or
   its bundled `assets/`; it asserts installer idempotency, the no-clobber
   contract, and that the bundled payloads match their canonical plugin sources
+- Run `bash scripts/tests/sync-pstack.test.sh` after changing
+  `scripts/pstack-transform.sh` or `scripts/sync-pstack.sh`; it asserts the
+  rebrand transform is deterministic and that a diverged sync produces real
+  merge-conflict markers
 
 ## Pull request labels
 
@@ -299,7 +307,9 @@ Merging a Release PR tags the commit and publishes a GitHub Release. The workflo
 auto-merges Release PRs after required checks pass.
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only no-issue exceptions to the issue-tag rule.
+bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions to the issue-tag rule
+(the `sync-pstack` carrier commit is the one commit-level exception; see Commit & Pull Request
+Guidelines).
 
 ## Commit & Pull Request Guidelines
 
@@ -318,7 +328,11 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 `type: #123 short description`
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only no-issue exceptions.
+bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions. The one no-issue
+*commit* exception is the script-generated carrier commit
+`chore: sync open-pstack@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
+the `pstack-sync` carrier branch (committed with `--no-verify`); it enters `main` history through
+the sync merge.
 
 Use the PR template as written: one `Closes #N`, `Fixes #N`, or `Resolves #N`
 line and a

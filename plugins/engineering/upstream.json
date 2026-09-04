@@ -1,14 +1,10 @@
 {
-  "source": "https://github.com/michael-denyer/pstack-claude",
+  "source": "https://github.com/ericlitman/open-pstack",
   "plugin": "pstack",
-  "version": "0.9.15",
+  "ref": "main",
   "transforms": {
-    "plugin": {
-      "pstack": "engineering"
-    },
     "skills": {
-      "poteto-mode": "patina-mode",
-      "setup-pstack": "setup-engineering"
+      "poteto-mode": "patina-mode"
     },
     "agents": {
       "poteto-agent": "patina-agent"

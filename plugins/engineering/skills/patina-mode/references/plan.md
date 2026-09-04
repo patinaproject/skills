@@ -25,7 +25,7 @@ Resolve what is in scope vs explicitly out, technical or platform constraints, p
 Delegate codebase exploration (the **guard-the-context-window** principle skill).
 
 - Prefer `subagent_type: "patina-agent"`. `general-purpose` is the fallback. Never use Claude Code's built-in `Plan` agent; it ignores this skill.
-- Pass `model:` explicitly per the configured roles (the single-role default in patina-mode's Models section covers code-writing delegations and judgment; multi-model panels run the configured panel — defaults in each panel skill's Models section, overridden via `/setup-engineering`).
+- Pass `model:` explicitly per the configured roles (the descriptors in [`references/provider-dispatch.md`](provider-dispatch.md) cover code-writing delegations and judgment; multi-model panels run the configured panel, enumerated in each panel skill — all written and overridden via `/setup-pstack`).
 
 Each explorer returns file pointers, conventions, dependencies, test infrastructure, and entry points. No inlined dumps.
 

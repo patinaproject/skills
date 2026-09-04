@@ -2,9 +2,8 @@
 set -euo pipefail
 
 expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design"]'
-expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-mode","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
-expected_engineering_prompts='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","no-comments","patina-mode","recall","reflect","setup-engineering","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why"]'
-expected_engineering_agents='["comment-sicko","patina-agent"]'
+expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-mode","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
+expected_engineering_agents='["comment-sicko","patina-agent","pstack-fable-high","pstack-fable-low","pstack-fable-max","pstack-fable-medium","pstack-fable-xhigh","pstack-opus-high","pstack-opus-low","pstack-opus-max","pstack-opus-medium","pstack-opus-xhigh"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback|develop|develop-with-workflow|ready-pr|finish-pr|merge-pr|polish|fix|orchestrate|codex-pr-feedback-loop|prompting-fable|offensive-programming|move-branch-here|running-mobile-simulators|working-on-issue|write-changelog|new-branch|update-branch'
 
 read_frontmatter_field() {
@@ -37,7 +36,6 @@ test "$(jq -r '.name' plugins/engineering/.claude-plugin/plugin.json)" = 'engine
 test "$(jq -c '.dependencies // []' plugins/engineering/.claude-plugin/plugin.json)" = '[]'
 test -f plugins/engineering/agents/patina-agent.md
 test -f plugins/engineering/hooks/hooks.json
-test -f plugins/engineering/models.json
 for path in $(jq -r '.skills[]' .claude-plugin/plugin.json); do
   if ! echo "$path" | grep -qE '^\./skills/[a-z-]+$'; then
     echo "FAIL: Claude plugin.json skill path '$path' does not match flat form './skills/<name>'" >&2
@@ -118,14 +116,12 @@ for skill_file in plugins/engineering/skills/*/SKILL.md; do
   test "$(read_frontmatter_field "$skill_file" name)" = "$skill_name"
 done
 
-engineering_prompts="$({
-  find plugins/engineering/.codex-plugin/prompts -mindepth 1 -maxdepth 1 -name '*.md' -print
-} | sed 's#.*/##; s/\.md$//' | sort | jq -Rsc 'split("\n") | map(select(length > 0))')"
-test "$engineering_prompts" = "$expected_engineering_prompts"
-for prompt_file in plugins/engineering/.codex-plugin/prompts/*.md; do
-  prompt_name="$(basename "$prompt_file" .md)"
-  test "$(read_frontmatter_field "$prompt_file" name)" = "$prompt_name"
-done
+# open-pstack ships no .codex-plugin/prompts mechanism; skills load natively by
+# name on Codex. Assert the directory stays absent so the surface is not revived.
+if [ -e plugins/engineering/.codex-plugin/prompts ]; then
+  echo "FAIL: plugins/engineering/.codex-plugin/prompts must not exist (open-pstack ships no Codex prompt stubs)" >&2
+  exit 1
+fi
 
 engineering_agents="$({
   find plugins/engineering/agents -mindepth 1 -maxdepth 1 -name '*.md' -print
@@ -137,19 +133,17 @@ for agent_file in plugins/engineering/agents/*.md; do
 done
 
 test -f plugins/engineering/LICENSE.pstack
-test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/michael-denyer/pstack-claude'
-test "$(jq -r '.version' plugins/engineering/upstream.json)" = '0.9.15'
+test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/ericlitman/open-pstack'
+test "$(jq -r '.ref' plugins/engineering/upstream.json)" = 'main'
 test "$(jq -r '.transforms.skills["poteto-mode"]' plugins/engineering/upstream.json)" = 'patina-mode'
-test "$(jq -r '.transforms.skills["setup-pstack"]' plugins/engineering/upstream.json)" = 'setup-engineering'
 test "$(jq -r '.transforms.agents["poteto-agent"]' plugins/engineering/upstream.json)" = 'patina-agent'
 
 obsolete_runtime_metadata="$(
   jq -r '.. | strings' \
     plugins/engineering/.claude-plugin/plugin.json \
     plugins/engineering/.codex-plugin/plugin.json \
-    plugins/engineering/hooks/hooks.json \
-    plugins/engineering/models.json |
-    grep -E 'pstack:|poteto-mode|poteto-agent|setup-pstack|pstack-models\.md' || true
+    plugins/engineering/hooks/hooks.json |
+    grep -E 'pstack:|poteto-mode|poteto-agent|pstack-models\.md' || true
 )"
 if [ -n "$obsolete_runtime_metadata" ]; then
   echo "FAIL: Engineering runtime metadata contains an obsolete upstream identity" >&2
@@ -159,7 +153,6 @@ fi
 
 for forbidden_path in \
   plugins/engineering/skills/poteto-mode \
-  plugins/engineering/skills/setup-pstack \
   plugins/engineering/agents/poteto-agent.md \
   plugins/engineering/pstack-models.md; do
   if [ -e "$forbidden_path" ]; then
@@ -188,7 +181,9 @@ expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/hooks/run-hook.cmd \
   plugins/engineering/hooks/session-start \
   plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh \
+  plugins/engineering/skills/patina-mode/scripts/check-plan.mjs \
   plugins/engineering/skills/patina-mode/scripts/orch/orch.ts \
+  plugins/engineering/skills/patina-mode/scripts/runner/pstack-runner \
   plugins/engineering/skills/patina-mode/scripts/watch-pr/watch-pr \
   plugins/engineering/skills/patina-mode/scripts/worktree-audit.sh \
   plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh \
