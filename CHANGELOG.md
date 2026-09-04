@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.36.0](https://github.com/patinaproject/skills/compare/v2.35.0...v2.36.0) (2026-09-03)
+
+
+### Features
+
+* [#425](https://github.com/patinaproject/skills/issues/425) retire root workflow skills superseded by patina-mode ([#427](https://github.com/patinaproject/skills/issues/427)) ([a58b624](https://github.com/patinaproject/skills/commit/a58b62440e0a512e1054108ce5a758c3c497ac93))
+
 ## [2.35.0](https://github.com/patinaproject/skills/compare/v2.34.1...v2.35.0) (2026-09-03)
 
 
