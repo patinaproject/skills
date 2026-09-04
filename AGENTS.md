@@ -8,6 +8,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/using-github/`: using-github skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
+- `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
 - `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
   `/to-spec` as proposals instead of the worktree
@@ -187,6 +188,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/move-branch-here.test.sh` after changing
   `plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh`.
+- Run `bash scripts/tests/move-session-here.test.sh` after changing
+  `plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing
@@ -265,6 +268,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | review-system-design | `skills/review-system-design/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |
+| move-session-here | `plugins/engineering/skills/move-session-here/` |
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
