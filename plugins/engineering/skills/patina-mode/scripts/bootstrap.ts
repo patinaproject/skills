@@ -2,11 +2,9 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-// This tooling is bun-only (import.meta.dir, Bun.spawnSync, bun.lock). Fail with a
-// clear message instead of an opaque `import.meta.dir is undefined` crash under node.
 if (typeof Bun === "undefined") {
   console.error(
-    "pstack patina-mode tooling requires bun (https://bun.sh). Install bun, then re-run."
+    "pstack patina-mode tooling requires Bun (https://bun.sh). Install Bun, then re-run."
   );
   process.exit(1);
 }
