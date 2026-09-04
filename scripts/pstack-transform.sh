@@ -49,12 +49,11 @@ if [ -e "$dest" ] && [ -n "$(ls -A "$dest" 2>/dev/null)" ]; then
 fi
 
 # Two renames, applied identically to paths and content.
-content_rules='s/poteto-mode/patina-mode/g; s/poteto-agent/patina-agent/g'
-path_rules='s/poteto-mode/patina-mode/g; s/poteto-agent/patina-agent/g'
+rules='s/poteto-mode/patina-mode/g; s/poteto-agent/patina-agent/g'
 
 rename_path() {
   # Rebrand each path segment. LC_ALL=C keeps byte semantics stable.
-  printf '%s' "$1" | LC_ALL=C sed -E "$path_rules"
+  printf '%s' "$1" | LC_ALL=C sed -E "$rules"
 }
 
 # Walk files in a stable, locale-independent order for reproducibility.
@@ -68,7 +67,7 @@ while IFS= read -r rel; do
     # bit; the redirect truncates and rewrites content while preserving that
     # mode, so no non-portable stat/chmod dance is needed.
     cp -p "$src/$rel" "$out_path"
-    LC_ALL=C sed -E "$content_rules" "$src/$rel" > "$out_path"
+    LC_ALL=C sed -E "$rules" "$src/$rel" > "$out_path"
   else
     # Binary (or empty) file: copy verbatim, preserving mode.
     cp -p "$src/$rel" "$out_path"

@@ -43,12 +43,12 @@ patina-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 
 ## Model names
 
-Skills name Claude defaults (a single-role default for code/prose/judgment plus a diverse-model panel for diverse-model panels; each model-consuming skill lists its own in a Models section). These slugs do not resolve on Codex. Substitute your configured Codex models:
+Skills name Claude defaults (a single-role default for code/prose/judgment plus a diverse-model panel for diverse-model panels; the descriptors live in [`provider-dispatch.md`](provider-dispatch.md)). These slugs do not resolve on Codex. Substitute your configured Codex models:
 
 - Single-model roles: your primary Codex model (for example `gpt-5.6-sol`).
 - Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial signal comes from model diversity, so use the distinct Codex models available to you. A good default quad on ChatGPT is `gpt-5.6-sol`, `gpt-5.5`, `gpt-5.4`, `gpt-5.6-luna`. If only one model family is reachable, vary reasoning effort and note in the verdict that diversity was reduced.
 
-`/setup-engineering` writes the configured model list. On Codex, set it to your Codex model slugs.
+`/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs.
 
 ## Claude built-in skills pstack references
 

@@ -2,7 +2,6 @@
   "source": "https://github.com/ericlitman/open-pstack",
   "plugin": "pstack",
   "ref": "main",
-  "commit": "56bfd14",
   "transforms": {
     "skills": {
       "poteto-mode": "patina-mode"
