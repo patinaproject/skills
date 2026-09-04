@@ -12,6 +12,7 @@ bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
 bash scripts/tests/move-branch-here.test.sh
+bash scripts/tests/move-session-here.test.sh
 bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
