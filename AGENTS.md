@@ -115,6 +115,11 @@ the vendored `domain-modeling` payload; see
   refreshed `.agents/skills/**` and `.claude/skills/**` overlays. This is a
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
+- `pnpm sync-pstack`: re-sync `plugins/engineering/**` from the current tip of
+  `ericlitman/open-pstack`'s `main`, renaming only `poteto-mode` → `patina-mode`
+  and `poteto-agent` → `patina-agent`, and leaving Patina's local edits as real
+  merge conflicts to resolve. See
+  [ADR-429](docs/adr/ADR-429-sync-pstack-carrier-branch.md) for the mechanism.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -202,6 +207,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh` or
   its bundled `assets/`; it asserts installer idempotency, the no-clobber
   contract, and that the bundled payloads match their canonical plugin sources
+- Run `bash scripts/tests/sync-pstack.test.sh` after changing
+  `scripts/pstack-transform.sh` or `scripts/sync-pstack.sh`; it asserts the
+  rebrand transform is deterministic and that a diverged sync produces real
+  merge-conflict markers
 
 ## Pull request labels
 
