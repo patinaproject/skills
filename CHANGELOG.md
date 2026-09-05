@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.42.0](https://github.com/patinaproject/skills/compare/v2.41.0...v2.42.0) (2026-09-05)
+
+
+### Features
+
+* [#458](https://github.com/patinaproject/skills/issues/458) end grill-to-spec and grill-system-design like grill-me ([#462](https://github.com/patinaproject/skills/issues/462)) ([2c04f0d](https://github.com/patinaproject/skills/commit/2c04f0d2affd11203e213f254ad1790746085637))
+* [#459](https://github.com/patinaproject/skills/issues/459) refresh vendored skill catalog ([#460](https://github.com/patinaproject/skills/issues/460)) ([fe236e1](https://github.com/patinaproject/skills/commit/fe236e1232c552c23f565562d7e7162362c7f6e3))
+* [#463](https://github.com/patinaproject/skills/issues/463) rename writing-for-patina-mode to writing-for-pstack ([#467](https://github.com/patinaproject/skills/issues/467)) ([7ad8f05](https://github.com/patinaproject/skills/commit/7ad8f0591ce3209a18aa87d97742f6fcbdd3b273))
+
 ## [2.41.0](https://github.com/patinaproject/skills/compare/v2.40.0...v2.41.0) (2026-09-05)
 
 
