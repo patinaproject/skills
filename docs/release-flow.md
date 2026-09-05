@@ -119,27 +119,38 @@ CLI break may fail PR checks even when the branch did not change skill files. In
 that case, confirm the break against the local-path commands, then update the
 examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
-## Token setup (required before first release)
+## Configure the release GitHub App
 
-`release-please-action` runs with `token: ${{ github.token }}` by default. This
-works for opening release PRs, but has a known GitHub limitation:
+The organization-owned `patina-project-release` GitHub App authors Release PRs, so
+their events start the PR workflows without manual approval. Give the App these
+repository permissions:
 
-> PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
+- Grant **Contents** read and write access to update release branches and create tags.
+- Grant **Pull requests** read and write access to open and update Release PRs.
 
-The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
-NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
-will wait indefinitely.
+Do not pre-grant **Issues** write access. Add it only if a failed release-please
+label update provides evidence that the App needs it.
 
-To enable fully-automated release PRs:
+Install the App on `patinaproject/skills`. Sync Infisical `/ci/release` keys
+`APP_ID` and `PRIVATE_KEY` to the organization-level Actions secrets
+`RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_PRIVATE_KEY`. Give both secrets
+selected-repository visibility that includes `patinaproject/skills`.
 
-1. Create a GitHub App or PAT with these scopes:
-   - `contents: write` — to push tags
-   - `pull-requests: write` — to open and update release PRs
-   - `issues: write` — to manage `autorelease:*` labels
-2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
-3. Edit `.github/workflows/release-please.yml`: replace
-   `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
+The workflow passes those secrets to `actions/create-github-app-token`. Each run
+mints an installation token that expires after one hour and is scoped to this
+repository, then passes it to `release-please`. No stored access token or personal
+access token is used. If either App credential is missing or invalid, token creation
+fails and the release job stops. The auto-merge job continues to use `github.token`.
 
-Until that's done, release PRs need a manual `git commit --allow-empty` or
-maintainer push to trigger checks. The first-release fix can be deferred until
-that scenario actually occurs.
+Keep the active **Protected branches** organization ruleset (ID `15382168`)
+unchanged, with `patina-project-release` (App ID `4269276`) as a bypass actor.
+
+The auto-merge job depends on a separate repository-level ruleset that targets
+`main` and requires these four contexts:
+
+- `Lint Actions workflows`
+- `Lint Markdown`
+- `Validate pull request`
+- `Verify skill overlay`
+
+Without this rule, GitHub can merge a Release PR before its checks finish.
