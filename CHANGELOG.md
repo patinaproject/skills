@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.39.0](https://github.com/patinaproject/skills/compare/v2.38.1...v2.39.0) (2026-09-05)
+
+
+### Features
+
+* [#445](https://github.com/patinaproject/skills/issues/445) dogfood engineering machinery ([#447](https://github.com/patinaproject/skills/issues/447)) ([5992104](https://github.com/patinaproject/skills/commit/599210406f9fd0925c5c5b51500d956c18f4614a))
+* [#448](https://github.com/patinaproject/skills/issues/448) run setup-pstack after engineering setup ([#452](https://github.com/patinaproject/skills/issues/452)) ([85defae](https://github.com/patinaproject/skills/commit/85defae6627f06ec2d521ee0986ba9038b165db1))
+
 ## [2.38.1](https://github.com/patinaproject/skills/compare/v2.38.0...v2.38.1) (2026-09-05)
 
 
