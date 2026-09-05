@@ -196,20 +196,22 @@ test "$(read_frontmatter_field plugins/engineering/skills/principle-offensive-pr
 test -n "$(read_frontmatter_field plugins/engineering/skills/running-mobile-simulators/SKILL.md description)"
 test -z "$(read_frontmatter_field plugins/engineering/skills/running-mobile-simulators/SKILL.md disable-model-invocation)"
 
-unexpected_lock_entries="$(
+vendored_first_party_skills="$(
   jq -r '
     .skills
     | to_entries[]
-    | select(
-        (.value.source != "mattpocock/skills")
-        and (.key != "find-skills" or .value.source != "vercel-labs/skills")
-      )
-    | "\(.key): \(.value.source)"
+    | select(.value.source == "patinaproject/skills")
+    | .key
   ' skills-lock.json
 )"
-if [ -n "$unexpected_lock_entries" ]; then
-  echo "FAIL: skills-lock.json may only keep mattpocock/skills entries plus find-skills" >&2
-  printf '%s\n' "$unexpected_lock_entries" >&2
+if [ -n "$vendored_first_party_skills" ]; then
+  echo "FAIL: repo-owned skills must use overlay symlinks instead of skills-lock.json" >&2
+  printf '%s\n' "$vendored_first_party_skills" >&2
+  exit 1
+fi
+
+if jq -e '.skills.implement' skills-lock.json >/dev/null; then
+  echo "FAIL: the vendored implement skill conflicts with patina-mode implementation routing" >&2
   exit 1
 fi
 
