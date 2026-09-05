@@ -43,8 +43,8 @@ maintainable precedent, use `ADR-FORMAT.md` from `domain-modeling` for format,
 or put a context-only ADR in that context's `docs/adr/` and a wider decision in
 the root `docs/adr/` for placement.
 
-NEVER ask the operator to decide any ADR mechanic. Report the path you chose and
-the decision it records as the design settles.
+NEVER ask the operator to decide any ADR mechanic. During the interview, report
+the path you chose and the decision it records as each design choice settles.
 
 ## Capture
 
@@ -76,6 +76,7 @@ documentation change.
    shared understanding. Capture decisions per [Capture](#capture).
 3. Confirm that `git status --porcelain` matches the result from step 1. Stop if
    this session changed the worktree.
-4. Finish with only a confirmation of shared understanding and a one-line
-   instruction to run `/to-spec` to publish the design with complete file-ready
-   ADR and glossary proposals from this conversation.
+4. Finish with two paragraphs and no other content. Use `Shared understanding
+   confirmed.` as the entire first paragraph. Use ``Run `/to-spec` to publish
+   the design with complete file-ready ADR and glossary proposals from this
+   conversation.`` as the entire second paragraph.
