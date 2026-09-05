@@ -105,3 +105,10 @@ Return the issue identifier, URL, title, provider, ending branch, worktree path,
 assignee result, status result, and task-title result. Name any blocker or
 unsupported provider operation that stopped the preflight. Never edit the issue
 body or decide whether its requested work is sufficiently specified.
+
+When **patina-mode** invokes this skill, also return the machine result defined
+in [`../patina-mode/references/issue-handoff.md`](../patina-mode/references/issue-handoff.md).
+Return `passed` only after every gate, branch alignment, and supported tracker
+mutation completes. Return `failed` before stopping on any gate or failed
+mutation. Return `no-issue` when no issue resolves. The caller passes this
+result unchanged to the issue handoff gate.

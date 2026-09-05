@@ -44,16 +44,19 @@ these files, so a repo-relative path resolves to nothing.
 
 Remaining triggers:
 
-- Issue-linked work begins or resumes → run the **working-on-issues** skill
-  before editing, committing, or opening a pull request. Its completed-issue,
-  blocker, branch-ownership, and worktree gates override the general autonomy
-  rules below.
+- Issue-linked work begins or resumes → follow
+  [`references/issue-handoff.md`](references/issue-handoff.md). Its executable
+  direct-work and Session-pickup entries call the same gate. Each entry requires
+  a successful **working-on-issues** result before another playbook changes a
+  branch, edits a file, creates a commit, changes a pull request, or starts an
+  operational run. Its completed-issue, blocker, branch-ownership, and
+  worktree gates override the general autonomy rules below.
 - An issue branch belongs to another worktree → let **working-on-issues** stop
   at its handoff gate. Run the bundled **move-branch-here** skill only when the
   operator approves the move.
 - A Claude session ID or `codex://threads/<id>` handoff → run the bundled
   **move-session-here** skill, then route its recovered resume point through the
-  Session pickup playbook.
+  Session pickup playbook. Session pickup enters the same issue handoff gate.
 - Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. The ask is the slow path. A throwaway probe usually answers faster, and it hands the human a result to react to instead of a decision to make.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
