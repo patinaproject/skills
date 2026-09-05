@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.42.1](https://github.com/patinaproject/skills/compare/v2.42.0...v2.42.1) (2026-09-05)
+
+
+### Bug Fixes
+
+* [#465](https://github.com/patinaproject/skills/issues/465) limit PR templates to closing references ([#466](https://github.com/patinaproject/skills/issues/466)) ([2a57bf9](https://github.com/patinaproject/skills/commit/2a57bf9e8d02e5478fa8e1942e133571cdb926ec))
+
 ## [2.42.0](https://github.com/patinaproject/skills/compare/v2.41.0...v2.42.0) (2026-09-05)
 
 
