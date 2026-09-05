@@ -142,11 +142,11 @@ repository, then passes it to `release-please`. No stored access token or person
 access token is used. If either App credential is missing or invalid, token creation
 fails and the release job stops. The auto-merge job continues to use `github.token`.
 
-The auto-merge job depends on the protected-branches ruleset to hold a Release PR
-until its checks pass. Keep `patina-project-release` (App ID `4269276`) in the bypass
-list for the active **Protected branches** organization ruleset (ID `15382168`).
+Keep the active **Protected branches** organization ruleset (ID `15382168`)
+unchanged, with `patina-project-release` (App ID `4269276`) as a bypass actor.
 
-Require these four contexts in that ruleset:
+The auto-merge job depends on a separate repository-level ruleset that targets
+`main` and requires these four contexts:
 
 - `Lint Actions workflows`
 - `Lint Markdown`
