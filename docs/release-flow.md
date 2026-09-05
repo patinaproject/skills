@@ -119,27 +119,44 @@ CLI break may fail PR checks even when the branch did not change skill files. In
 that case, confirm the break against the local-path commands, then update the
 examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
-## Token setup (required before first release)
+## Configure the release token
 
-`release-please-action` runs with `token: ${{ github.token }}` by default. This
-works for opening release PRs, but has a known GitHub limitation:
+`.github/workflows/release-please.yml` requires a repository Actions secret named
+`RELEASE_PLEASE_TOKEN`. The credential authors Release PRs, so their events start
+the PR workflows without manual approval. Give the credential access only to
+`patinaproject/skills` and these repository permissions:
 
-> PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
+- Grant **Contents** read and write access to update release branches and create tags.
+- Grant **Issues** read and write access to manage `autorelease:*` labels.
+- Grant **Pull requests** read and write access to open and update Release PRs.
 
-The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
-NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
-will wait indefinitely.
+Create either credential:
 
-To enable fully-automated release PRs:
+- For a GitHub App, create an organization-owned app under **Settings** >
+  **Developer settings** > **GitHub Apps**. Assign the permissions above and install
+  the app only on `patinaproject/skills`. Generate a user access token for the account
+  that release-please uses. This workflow stores one token, so disable user-to-server
+  token expiration before generating it. Do not store an installation access token,
+  which expires after one hour. See
+  [Generating a user access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app).
+- For a fine-grained PAT, open the release account's **Settings** >
+  **Developer settings** > **Personal access tokens** > **Fine-grained tokens**.
+  Select the Patina Project organization as the resource owner, select only
+  `patinaproject/skills`, and assign the permissions above. Set and track an
+  expiration date that follows the organization's credential policy.
 
-1. Create a GitHub App or PAT with these scopes:
-   - `contents: write` — to push tags
-   - `pull-requests: write` — to open and update release PRs
-   - `issues: write` — to manage `autorelease:*` labels
-2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
-3. Edit `.github/workflows/release-please.yml`: replace
-   `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
+Store the credential in the repository:
 
-Until that's done, release PRs need a manual `git commit --allow-empty` or
-maintainer push to trigger checks. The first-release fix can be deferred until
-that scenario actually occurs.
+1. Open `patinaproject/skills` **Settings** > **Secrets and variables** > **Actions**.
+2. Select **New repository secret**.
+3. Enter `RELEASE_PLEASE_TOKEN` as the name and the token as the value.
+
+If the secret is missing, empty, expired, or revoked, the release-please job fails.
+The auto-merge job continues to use `github.token`; this secret changes only Release
+PR authorship.
+
+The auto-merge job depends on the protected-branches ruleset to hold a Release PR
+until its checks pass. In the Patina Project organization settings, add a required
+status checks rule to the active **Protected branches** ruleset. Require the check
+runs that apply to a Release PR, including the `Lint` jobs and `Verify skill overlay`.
+Without this rule, GitHub can merge a Release PR before its checks finish.
