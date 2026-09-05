@@ -119,50 +119,34 @@ CLI break may fail PR checks even when the branch did not change skill files. In
 that case, confirm the break against the local-path commands, then update the
 examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
-## Configure the release token
+## Configure the release GitHub App
 
-`.github/workflows/release-please.yml` requires a repository Actions secret named
-`RELEASE_PLEASE_TOKEN`. The credential authors Release PRs, so their events start
-the PR workflows without manual approval. Give the credential access only to
-`patinaproject/skills` and these repository permissions:
+The organization-owned `patina-project-release` GitHub App authors Release PRs, so
+their events start the PR workflows without manual approval. Give the App these
+repository permissions:
 
 - Grant **Contents** read and write access to update release branches and create tags.
-- Grant **Issues** read and write access to manage `autorelease:*` labels.
 - Grant **Pull requests** read and write access to open and update Release PRs.
 
-Create either credential:
+Do not pre-grant **Issues** write access. Add it only if a failed release-please
+label update provides evidence that the App needs it.
 
-- For a GitHub App, create an organization-owned app under **Settings** >
-  **Developer settings** > **GitHub Apps**. Assign the permissions above and install
-  the app only on `patinaproject/skills`. Generate a user access token for the account
-  that release-please uses. This workflow stores one token, so disable user-to-server
-  token expiration before generating it. Do not store an installation access token,
-  which expires after one hour. See
-  [Generating a user access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app).
-- For a fine-grained PAT, open the release account's **Settings** >
-  **Developer settings** > **Personal access tokens** > **Fine-grained tokens**.
-  Select the Patina Project organization as the resource owner, select only
-  `patinaproject/skills`, and assign the permissions above. Set and track an
-  expiration date that follows the organization's credential policy.
+Install the App on `patinaproject/skills`. Sync Infisical `/ci/release` keys
+`APP_ID` and `PRIVATE_KEY` to the organization-level Actions secrets
+`RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_PRIVATE_KEY`. Give both secrets
+selected-repository visibility that includes `patinaproject/skills`.
 
-Store the credential in the repository:
-
-1. Open `patinaproject/skills` **Settings** > **Secrets and variables** > **Actions**.
-2. Select **New repository secret**.
-3. Enter `RELEASE_PLEASE_TOKEN` as the name and the token as the value.
-
-If the secret is missing, empty, expired, or revoked, the release-please job fails.
-The auto-merge job continues to use `github.token`; this secret changes only Release
-PR authorship.
+The workflow passes those secrets to `actions/create-github-app-token`. Each run
+mints an installation token that expires after one hour and is scoped to this
+repository, then passes it to `release-please`. No stored access token or personal
+access token is used. If either App credential is missing or invalid, token creation
+fails and the release job stops. The auto-merge job continues to use `github.token`.
 
 The auto-merge job depends on the protected-branches ruleset to hold a Release PR
-until its checks pass. Before adding required checks, remove `patina-project-release`
-(App ID `4269276`) from the bypass list in the active **Protected branches** ruleset.
-`release-please` authors Release PRs with the App token, but auto-merge uses
-`github.token`, so the bypass is unnecessary.
+until its checks pass. Keep `patina-project-release` (App ID `4269276`) in the bypass
+list for the active **Protected branches** organization ruleset (ID `15382168`).
 
-In the Patina Project organization settings, add a required status checks rule to the
-active **Protected branches** ruleset. Require these four contexts:
+Require these four contexts in that ruleset:
 
 - `Lint Actions workflows`
 - `Lint Markdown`

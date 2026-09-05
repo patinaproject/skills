@@ -20,13 +20,20 @@ jobs:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
+      # actions/create-github-app-token@v3.2.0
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
+
       # googleapis/release-please-action@v4.1.3
       - uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f
         id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
   auto-merge:
     name: Enable auto-merge on release PRs
@@ -44,5 +51,5 @@ jobs:
           # Enable auto-merge on any open release-please PRs
           prs=$(gh pr list --label "autorelease: pending" --json number --jq '.[].number')
           for pr in $prs; do
-            gh pr merge "$pr" --auto --squash || true
+            gh pr merge "$pr" --auto --squash
           done
