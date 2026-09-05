@@ -43,31 +43,27 @@ even when its general mechanism already has an owner.
 
 ## Write the prompt
 
-Write the prompt in this order:
+Write one line containing the route and a plain-English sentence of at most 30
+words:
 
 ```text
-/patina-mode
-
-Playbook: <one canonical playbook name>
-Objective: <the work definition>
-Ownership: <only boundaries the playbook cannot infer>
-Proof: <observable evidence>
-Done when: <a checkable predicate>
+/patina-mode <one canonical playbook name> <imperative work definition ending in an observable done condition>.
 ```
 
-Omit `Ownership` when the operator sets no boundary. Name the selected
-playbook once. Do not name alternatives.
+Fold the proof into the done condition. Weave in an ownership boundary only
+when the operator sets one. Name the selected playbook once. Do not name
+alternatives or use field labels.
 
-For Autopilot-full and Orchestrate, replace `Objective` with `Program
-objective`. Add `Be fully autonomous.` and end the prompt with `Go.` These
-lines are mandatory because those runs need a standing objective, a session
-override, and explicit authorization to start.
+For Autopilot-full and Orchestrate, begin the sentence with `Go, be fully
+autonomous, and`, call the work the `program objective`, and keep the proof and
+done condition in that sentence. Those words supply the standing objective,
+session override, and authorization to start.
 
-When the intent names a condition that requires a person's decision, add one
-line in this form:
+When the intent names a condition that requires a person's decision, weave this
+clause into the sentence:
 
 ```text
-Checkpoint gate: <condition and person>. Continue work that does not depend on the decision.
+and treat <condition> as a checkpoint gate for <person> while continuing independent work
 ```
 
 Keep the condition and owner. Let the selected playbook own storage, batching,
@@ -78,10 +74,12 @@ and notification mechanics.
 Before returning the prompt, confirm all of these statements:
 
 - The prompt names exactly one current `patina-mode` playbook.
+- The prompt is one line containing exactly one plain-English sentence of at
+  most 30 words after the route.
 - The done predicate contains an observable result, count, state, or artifact.
 - Every line changes the run beyond what its governing documents already say.
-- An Autopilot-full or Orchestrate prompt contains `Program objective`, `Be
-  fully autonomous.`, and the final `Go.`
+- An Autopilot-full or Orchestrate sentence begins `Go, be fully autonomous,
+  and` and contains `program objective`.
 - A human escalation appears as a checkpoint gate, never as a mid-run question.
 - The prompt uses positive, direct instructions.
 
