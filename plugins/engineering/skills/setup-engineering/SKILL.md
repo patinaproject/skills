@@ -1,16 +1,16 @@
 ---
 name: setup-engineering
-description: Install Engineering's repo-level machinery for skills-only consumers — the default-on patina-mode mandate, the patina-agent and comment-sicko subagents, and Codex multi_agent. Use for /setup-engineering or setting Engineering up in a repository.
+description: Install Engineering's repo-level machinery for skills-only consumers — the default-on patina-mode mandate, Claude-native pstack agents, comment-sicko, and Codex multi_agent. Use for /setup-engineering or setting Engineering up in a repository.
 menu-description: install Engineering repo-level machinery
 ---
 
 # Setup Engineering
 
 Engineering ships as a full plugin (hook, subagents) and also as a vendored
-skill catalog. Vendoring carries the skills but not the hook or the subagents,
-so a skills-only consumer loses the default-on entry point and the delegation
-targets the playbooks name. This skill installs that machinery into the target
-repo and, on Codex, the user's Codex config.
+skill catalog. Vendoring carries the skills but not the hook or the agents, so a
+skills-only consumer loses the default-on entry point and the Claude-native
+targets that provider dispatch names. This skill installs that machinery into
+the target repo and, on Codex, the repo-scoped Codex config.
 
 The machinery install is non-interactive and idempotent.
 
@@ -22,6 +22,11 @@ by hand. It writes a single marker-delimited mandate block and leaves everything
 outside the markers untouched, so re-running updates in place with no
 duplication.
 
+The installer first checks that the sibling `setup-pstack` skill and the
+`patina-mode` provider-dispatch references are present. If any required file is
+missing, the install fails and tells the reader to install the full Engineering
+skill catalog.
+
 What it materializes, from the byte-identical payloads under `assets/`:
 
 - The **patina-mode mandate** (from `assets/mandate.md`) into the repo's
@@ -29,10 +34,10 @@ What it materializes, from the byte-identical payloads under `assets/`:
   for the plugin's `SessionStart` hook. The hook's own text defers to `CLAUDE.md`,
   so the block is an equal-or-stronger default-on trigger: a non-trivial task
   routes through patina-mode without the user invoking it.
-- The **`patina-agent` and `comment-sicko` subagents** (from `assets/agents/`)
-  into the repo's `.claude/agents/`, so `subagent_type: "patina-agent"` resolves
-  and playbook delegates read patina-mode's SKILL.md first instead of drifting to
-  `general-purpose`.
+- The **Engineering agents** (from `assets/agents/`) into the repo's
+  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves, no-comments
+  can reach `comment-sicko`, and each Claude-native provider-dispatch lane can
+  reach its `pstack-<stem>-<effort>` agent.
 
 Run it from the target repo:
 
@@ -71,14 +76,15 @@ follows it.
 
 ## Model configuration
 
-Model choice per role is not part of this install. Engineering routes models
-through the provider-qualified descriptors in patina-mode's
-[`references/provider-dispatch.md`](../patina-mode/references/provider-dispatch.md),
-written and refreshed by `/setup-pstack`. Run that skill to configure or change
-which models each role uses.
+This install provides the files that make provider-qualified routing executable:
+the `setup-pstack` skill, the `patina-mode` provider-dispatch references, and
+the Claude-native pstack agents. It refuses to choose, probe, or rewrite the
+model descriptors. `/setup-pstack` owns that configuration through
+[`references/provider-dispatch.md`](../patina-mode/references/provider-dispatch.md).
+Run `/setup-pstack` to configure or change which models each role uses.
 
 ## Confirm
 
-Tell the user what the machinery install wrote — the mandate block, the two
-subagents, and on Codex the `multi_agent` flag. Re-running this skill updates all
-of it in place.
+Tell the user what the machinery install wrote: the mandate block, the
+Engineering agents, and on Codex the `multi_agent` flag. Re-running this skill
+updates all of it in place.
