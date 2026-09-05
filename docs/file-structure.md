@@ -9,6 +9,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
+- `plugins/engineering/skills/code-review/`: standalone Standards and Spec review with commit and criteria identity evidence
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
@@ -62,6 +63,7 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `working-on-issues` | `plugins/engineering/skills/working-on-issues/` | Resolve the live tracker, align the issue branch and worktree, and mark work started |
+| `code-review` | `plugins/engineering/skills/code-review/` | Review committed changes against repository standards and accepted requirements |
 | `move-branch-here` | `plugins/engineering/skills/move-branch-here/` | Worktree branch handover workflow |
 | `move-session-here` | `plugins/engineering/skills/move-session-here/` | Claude Code and Codex session transcript handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
