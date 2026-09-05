@@ -119,27 +119,25 @@ CLI break may fail PR checks even when the branch did not change skill files. In
 that case, confirm the break against the local-path commands, then update the
 examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
-## Token setup (required before first release)
+## App token setup (required before first release)
 
-`release-please-action` runs with `token: ${{ github.token }}` by default. This
-works for opening release PRs, but has a known GitHub limitation:
+`release-please-action` runs with a short-lived installation token. The
+`patina-project-release` GitHub App authors the release PR. The App ID is
+`4269276`. The `actions/create-github-app-token` step mints the token from two
+org-level secrets, `RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_PRIVATE_KEY`.
+Infisical syncs both secrets. Their visibility is set to selected repositories.
 
-> PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
+An App-authored release PR triggers the required PR checks. A `GITHUB_TOKEN` PR
+does not trigger those checks. This is why the App token replaces `GITHUB_TOKEN`.
 
-The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
-NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
-will wait indefinitely.
+The App must be installed on this repo. The mint step fails closed on an empty
+private key. There is no `GITHUB_TOKEN` fallback and no PAT fallback.
 
-To enable fully-automated release PRs:
+An installation token expires after one hour. A stored long-lived token is
+therefore wrong for this flow. The workflow mints a fresh token on each run.
 
-1. Create a GitHub App or PAT with these scopes:
-   - `contents: write` — to push tags
-   - `pull-requests: write` — to open and update release PRs
-   - `issues: write` — to manage `autorelease:*` labels
-2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
-3. Edit `.github/workflows/release-please.yml`: replace
-   `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
+Before the first release, complete these steps:
 
-Until that's done, release PRs need a manual `git commit --allow-empty` or
-maintainer push to trigger checks. The first-release fix can be deferred until
-that scenario actually occurs.
+1. Install the `patina-project-release` App on this repo.
+2. Confirm the org-level secrets `RELEASE_PLEASE_APP_ID` and
+   `RELEASE_PLEASE_PRIVATE_KEY` are synced and visible to this repo.

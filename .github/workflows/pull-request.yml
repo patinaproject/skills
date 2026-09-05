@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint PR
     runs-on: blacksmith-2vcpu-ubuntu-2404
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') }}"
     steps:
