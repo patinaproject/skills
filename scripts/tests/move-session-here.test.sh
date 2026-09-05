@@ -110,4 +110,6 @@ test "$not_found_status" -eq 2 || fail "not-found exit status was $not_found_sta
 test "$(jq -r '.error' <<<"$not_found_output")" = "not_found" || fail "not-found error missing"
 test "$(jq -r '.searchedHomes | sort | join(",")' <<<"$not_found_output")" = "$FIXTURE_ROOT/home/.claude,$FIXTURE_ROOT/home/.claude-t3" || fail "not-found homes missing"
 
+node "$REPO_ROOT/scripts/tests/t3-session-handoff.test.mjs"
+
 echo "OK: move-session-here transcript contract passed"
