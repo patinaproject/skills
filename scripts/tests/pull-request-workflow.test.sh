@@ -35,6 +35,90 @@ assert_no_match() {
 
 assert_file "$WORKFLOW"
 
+node --input-type=commonjs <<'NODE'
+const fs = require('node:fs')
+const path = require('node:path')
+
+const workflowDirectory = '.github/workflows'
+const requiredContexts = [
+  'Lint Actions workflows',
+  'Lint Markdown',
+  'Validate pull request',
+  'Verify skill overlay',
+]
+
+const workflowFiles = fs.readdirSync(workflowDirectory)
+  .filter((file) => /\.ya?ml$/.test(file))
+  .map((file) => path.join(workflowDirectory, file))
+  .filter((file) => {
+    const lines = fs.readFileSync(file, 'utf8').split('\n')
+    const onIndex = lines.findIndex((line) => /^on:\s*$/.test(line))
+    if (onIndex === -1) return false
+    const onBlock = lines.slice(onIndex + 1).findIndex((line) => /^\S/.test(line))
+    const endIndex = onBlock === -1 ? lines.length : onIndex + 1 + onBlock
+    return lines.slice(onIndex + 1, endIndex).some((line) => /^  pull_request:\s*/.test(line))
+  })
+
+const jobs = []
+for (const file of workflowFiles) {
+  const lines = fs.readFileSync(file, 'utf8').split('\n')
+  const jobsIndex = lines.findIndex((line) => /^jobs:\s*$/.test(line))
+  if (jobsIndex === -1) {
+    console.error(`FAIL: pull request workflow has no jobs block: ${file}`)
+    process.exit(1)
+  }
+
+  const jobsBlock = lines.slice(jobsIndex + 1)
+  const jobsEnd = jobsBlock.findIndex((line) => /^\S/.test(line))
+  const jobLines = jobsEnd === -1 ? jobsBlock : jobsBlock.slice(0, jobsEnd)
+
+  for (let index = 0; index < jobLines.length; index += 1) {
+    const jobMatch = jobLines[index].match(/^  ([A-Za-z0-9_-]+):\s*$/)
+    if (!jobMatch) continue
+
+    const nextJobOffset = jobLines.slice(index + 1).findIndex((line) => /^  [A-Za-z0-9_-]+:\s*$/.test(line))
+    const endIndex = nextJobOffset === -1 ? jobLines.length : index + 1 + nextJobOffset
+    const nameLine = jobLines.slice(index + 1, endIndex).find((line) => /^    name:\s*\S/.test(line))
+    if (!nameLine) {
+      console.error(`FAIL: pull request job has no display name: ${file} jobs.${jobMatch[1]}`)
+      process.exit(1)
+    }
+
+    const name = nameLine.replace(/^    name:\s*/, '').trim()
+    jobs.push({ file, id: jobMatch[1], name })
+  }
+}
+
+let failures = 0
+const jobsByName = new Map()
+for (const job of jobs) {
+  const matchingJobs = jobsByName.get(job.name) ?? []
+  matchingJobs.push(job)
+  jobsByName.set(job.name, matchingJobs)
+}
+
+for (const [name, matchingJobs] of jobsByName) {
+  if (matchingJobs.length < 2) continue
+  const locations = matchingJobs.map((job) => `${job.file} jobs.${job.id}`).join(', ')
+  console.error(`FAIL: duplicate pull request job display name "${name}": ${locations}`)
+  failures += 1
+}
+
+const actualContexts = [...jobsByName.keys()].sort()
+const expectedContexts = [...requiredContexts].sort()
+if (JSON.stringify(actualContexts) !== JSON.stringify(expectedContexts)) {
+  console.error('FAIL: pull request job display names do not match the required contexts')
+  console.error(`  expected: ${expectedContexts.join(', ')}`)
+  console.error(`  actual:   ${actualContexts.join(', ')}`)
+  failures += 1
+}
+
+if (failures > 0) {
+  console.error(`FAIL: ${failures} required check context assertion(s) failed`)
+  process.exit(1)
+}
+NODE
+
 if [ -f "$WORKFLOW" ]; then
   assert_match "name: Pull Request" "$WORKFLOW"
   assert_match "pull_request:" "$WORKFLOW"
