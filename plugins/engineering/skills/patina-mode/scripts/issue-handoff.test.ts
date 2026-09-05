@@ -1,5 +1,6 @@
-import { describe, expect, it } from "bun:test";
-import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { afterAll, describe, expect, it } from "bun:test";
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -38,6 +39,17 @@ function request(
 }
 
 describe("issue handoff policy", () => {
+  it("defines both issue-linked entries and every protected operation", () => {
+    expect(ISSUE_ENTRY_POINTS).toEqual(["direct", "session-pickup"]);
+    expect(PROTECTED_OPERATIONS).toEqual([
+      "branch-change",
+      "edit",
+      "commit",
+      "pull-request-change",
+      "operational-run",
+    ]);
+  });
+
   for (const entry of ISSUE_ENTRY_POINTS) {
     for (const operation of PROTECTED_OPERATIONS) {
       it(`refuses ${entry} ${operation} when the preflight is missing`, () => {
@@ -89,7 +101,7 @@ describe("issue handoff policy", () => {
     });
   }
 
-  it("records no-issue as a terminal routing result", () => {
+  it("treats no-issue as a terminal routing result", () => {
     expect(
       decideContinuation(
         {
@@ -135,6 +147,13 @@ describe("issue handoff policy", () => {
 
 describe("issue handoff CLI", () => {
   const script = join(import.meta.dir, "issue-handoff.ts");
+  const receiptRoots: string[] = [];
+
+  afterAll(() => {
+    for (const path of receiptRoots) {
+      rmSync(path, { recursive: true });
+    }
+  });
 
   function git(...args: string[]): string {
     const result = Bun.spawnSync(["git", ...args], {
@@ -146,15 +165,17 @@ describe("issue handoff CLI", () => {
 
   async function run(input: unknown) {
     const receiptRoot = await mkdtemp(join(tmpdir(), "issue-handoff-test-"));
-    const result = Bun.spawnSync([process.execPath, script, "route"], {
+    receiptRoots.push(receiptRoot);
+    const result = spawnSync(process.execPath, [script, "route"], {
       cwd: import.meta.dir,
       env: { ...process.env, PATINA_ISSUE_RECEIPT_DIR: receiptRoot },
-      stdin: JSON.stringify(input),
+      input: JSON.stringify(input),
+      encoding: "utf8",
     });
     return {
-      exitCode: result.exitCode,
-      stderr: result.stderr.toString(),
-      stdout: result.stdout.toString(),
+      exitCode: result.status,
+      stderr: result.stderr,
+      stdout: result.stdout,
     };
   }
 
