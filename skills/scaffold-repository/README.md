@@ -5,9 +5,11 @@ files or compares an existing repository with the current Patina setup.
 
 It configures commit and pull request rules, pnpm, Husky, Markdown linting,
 agent instructions, GitHub workflows, issue tracking, and repository settings.
-It reads live files from the root of
+It reads most live files from the root of
 [`patinaproject/skills`](https://github.com/patinaproject/skills) instead of
-shipping copied templates.
+shipping copied templates. The consumer pull request template stays with this
+skill because the source repository uses a plugin-only body contract that
+ordinary consumers do not receive.
 
 ## What it does
 
@@ -46,8 +48,10 @@ contact default to `git config user.name` and `git config user.email`.
 
 ## Development
 
-This repository is the reference implementation. Running the existing
-repository check here should report no differences.
+This repository is the reference implementation except for its repo-only pull
+request body contract. The source repository's
+`docs/adr/ADR-445-repository-pull-request-body-contract.md` records why
+consumers keep the standalone template in `pr-body-template.md`.
 
 ```bash
 pnpm install

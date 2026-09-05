@@ -331,13 +331,6 @@ bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions. The one
 `chore: sync open-pstack@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
 the `pstack-sync` carrier branch (committed with `--no-verify`); it enters `main` history through
 the sync merge.
-
-Use the pull request body sections from the Descriptions rule in
-`plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`. Put exactly
-one `Closes #N`, `Fixes #N`, or `Resolves #N` line in `## Scope` for each
-completed issue. GitHub Checks are the source of truth for routine automated
-verification.
-
 <!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->
 <EXTREMELY_IMPORTANT>
 You have the Patina Project Engineering plugin, forked from pstack.
