@@ -62,11 +62,8 @@ Use existing-repository update when any of those files already exist.
    `npx --yes skills@latest list --json`, and include the refreshed
    `.agents/skills/` directories and `.claude/skills/` links.
 
-The `patinaproject/skills` repository itself may use this mode. Do not skip it
-because it is the source repository. Its root pull request template is the
-intentional repo-only exception recorded in
-`docs/adr/ADR-445-repository-pull-request-body-contract.md`; apply every other
-audit check normally.
+Apply the same audit checks to `patinaproject/skills` when it is the target
+repository.
 
 ## Repository inputs
 
@@ -104,14 +101,13 @@ skill.
 Four entries require special handling:
 
 - Copy `.github/pull_request_template.md` from
-  [`pr-body-template.md`](./pr-body-template.md), not from this repository's
-  root template. The root's comment-only template is usable only with the
-  Engineering plugin body contract that ordinary scaffold consumers do not
-  receive.
+  [`pr-body-template.md`](./pr-body-template.md). Select closing references
+  through the target repository's tracker adapter and verify them against its
+  integration and closing-reference check.
 - When the target does not contain the `opening-a-pr` playbook, adapt the
-  copied `AGENTS.md` and `CONTRIBUTING.md` to name the local pull request
-  template as their body contract. Every referenced contract must exist in the
-  target repository.
+  copied `AGENTS.md` and `CONTRIBUTING.md` to name the target's active workflow
+  as the body contract. If no body contract exists, leave body structure to the
+  author. The template owns only the closing-reference reminder.
 - Create `SECURITY.md` only for public repositories.
 - Keep the real tracker instructions at `docs/agents/issue-tracker.md`. Create
   `docs/issue-tracker.md` as the relative link `agents/issue-tracker.md`.
