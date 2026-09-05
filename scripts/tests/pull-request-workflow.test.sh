@@ -47,17 +47,90 @@ const requiredContexts = [
   'Verify skill overlay',
 ]
 
+const indentation = (line) => line.match(/^\s*/)[0].length
+
+const findPullRequestEvent = (workflow) => {
+  const lines = workflow.split('\n')
+  const onIndex = lines.findIndex((line) => /^on:\s*$/.test(line))
+  if (onIndex === -1) return null
+
+  const onIndent = indentation(lines[onIndex])
+  const followingLines = lines.slice(onIndex + 1)
+  const onEnd = followingLines.findIndex((line) => {
+    const trimmed = line.trim()
+    return trimmed !== '' && !trimmed.startsWith('#') && indentation(line) <= onIndent
+  })
+  const onBlock = onEnd === -1 ? followingLines : followingLines.slice(0, onEnd)
+  const eventLines = onBlock.filter((line) => {
+    const trimmed = line.trim()
+    return trimmed !== '' && !trimmed.startsWith('#')
+  })
+  if (eventLines.length === 0) return null
+
+  const eventIndent = Math.min(...eventLines.map(indentation))
+  const pullRequestIndex = onBlock.findIndex((line) => (
+    indentation(line) === eventIndent && /^pull_request\s*:/.test(line.trim())
+  ))
+  if (pullRequestIndex === -1) return null
+
+  const eventLine = onBlock[pullRequestIndex]
+  const inlineValue = eventLine.trim().replace(/^pull_request\s*:\s*/, '')
+  const eventFollowingLines = onBlock.slice(pullRequestIndex + 1)
+  const eventEnd = eventFollowingLines.findIndex((line) => {
+    const trimmed = line.trim()
+    return trimmed !== '' && !trimmed.startsWith('#') && indentation(line) <= eventIndent
+  })
+
+  return {
+    inlineValue,
+    block: eventEnd === -1
+      ? eventFollowingLines
+      : eventFollowingLines.slice(0, eventEnd),
+  }
+}
+
+const pathFilterKey = /^['"]?paths(?:-ignore)?['"]?\s*:/
+const hasPullRequestPathFilter = (event) => {
+  if (!event) return false
+  const inlineEntries = event.inlineValue
+    .replace(/^\{\s*/, '')
+    .replace(/\s*\}$/, '')
+    .split(',')
+
+  return inlineEntries.some((entry) => pathFilterKey.test(entry.trim()))
+    || event.block.some((line) => pathFilterKey.test(line.trim()))
+}
+
+const pathFilterCases = [
+  {
+    name: 'inline paths filter',
+    workflow: 'on:\n  pull_request: { paths: ["skills/**"] }\n',
+    expected: true,
+  },
+  {
+    name: 'deeply indented paths-ignore filter',
+    workflow: 'on:\n    pull_request:\n        paths-ignore:\n          - "docs/**"\n',
+    expected: true,
+  },
+  {
+    name: 'event types without path filtering',
+    workflow: 'on:\n  pull_request:\n    types: [opened, synchronize]\n',
+    expected: false,
+  },
+]
+
+for (const testCase of pathFilterCases) {
+  const actual = hasPullRequestPathFilter(findPullRequestEvent(testCase.workflow))
+  if (actual !== testCase.expected) {
+    console.error(`FAIL: ${testCase.name} path-filter classification was ${actual}`)
+    process.exit(1)
+  }
+}
+
 const workflowFiles = fs.readdirSync(workflowDirectory)
   .filter((file) => /\.ya?ml$/.test(file))
   .map((file) => path.join(workflowDirectory, file))
-  .filter((file) => {
-    const lines = fs.readFileSync(file, 'utf8').split('\n')
-    const onIndex = lines.findIndex((line) => /^on:\s*$/.test(line))
-    if (onIndex === -1) return false
-    const onBlock = lines.slice(onIndex + 1).findIndex((line) => /^\S/.test(line))
-    const endIndex = onBlock === -1 ? lines.length : onIndex + 1 + onBlock
-    return lines.slice(onIndex + 1, endIndex).some((line) => /^  pull_request:\s*/.test(line))
-  })
+  .filter((file) => findPullRequestEvent(fs.readFileSync(file, 'utf8')) !== null)
 
 const jobs = []
 for (const file of workflowFiles) {
@@ -98,15 +171,8 @@ for (const job of jobs) {
 }
 
 for (const file of workflowFiles) {
-  const lines = fs.readFileSync(file, 'utf8').split('\n')
-  const pullRequestIndex = lines.findIndex((line) => /^  pull_request:\s*/.test(line))
-  const followingLines = lines.slice(pullRequestIndex + 1)
-  const nextKeyOffset = followingLines.findIndex((line) => /^(?:  \S|\S)/.test(line))
-  const pullRequestBlock = nextKeyOffset === -1
-    ? followingLines
-    : followingLines.slice(0, nextKeyOffset)
-
-  if (pullRequestBlock.some((line) => /^    paths(?:-ignore)?:\s*/.test(line))) {
+  const event = findPullRequestEvent(fs.readFileSync(file, 'utf8'))
+  if (hasPullRequestPathFilter(event)) {
     console.error(`FAIL: required check workflow filters pull requests by path: ${file}`)
     failures += 1
   }
