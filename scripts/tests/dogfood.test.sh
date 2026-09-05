@@ -20,6 +20,7 @@ ROOT_SKILLS=(
   design-by-contract
   grill-system-design
   review-system-design
+  writing-for-patina-mode
 )
 FAIL_COUNT=0
 

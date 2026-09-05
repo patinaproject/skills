@@ -18,6 +18,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
+- `skills/writing-for-patina-mode/`: operator prompt authoring for `patina-mode`
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
@@ -69,6 +70,7 @@ Skills owned by this repository:
 | `principle-offensive-programming` | `plugins/engineering/skills/principle-offensive-programming/` | Defensive-code classification principle |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
+| `writing-for-patina-mode` | `skills/writing-for-patina-mode/` | Operator prompt authoring for `patina-mode` |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 
