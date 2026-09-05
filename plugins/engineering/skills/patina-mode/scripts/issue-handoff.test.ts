@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   ISSUE_ENTRY_POINTS,
+  ISSUE_ROUTE_ENTRYPOINTS,
   PROTECTED_OPERATIONS,
   decideContinuation,
   type CheckoutSnapshot,
@@ -41,6 +42,10 @@ function request(
 describe("issue handoff policy", () => {
   it("defines both issue-linked entries and every protected operation", () => {
     expect(ISSUE_ENTRY_POINTS).toEqual(["direct", "session-pickup"]);
+    expect(ISSUE_ROUTE_ENTRYPOINTS).toEqual({
+      direct: "issue-routes/direct.ts",
+      "session-pickup": "issue-routes/session-pickup.ts",
+    });
     expect(PROTECTED_OPERATIONS).toEqual([
       "branch-change",
       "edit",
@@ -145,13 +150,12 @@ describe("issue handoff policy", () => {
   });
 });
 
-describe("issue handoff CLI", () => {
+describe("issue route entries", () => {
   const entryPoints = {
-    direct: join(import.meta.dir, "issue-routes", "direct.ts"),
+    direct: join(import.meta.dir, ISSUE_ROUTE_ENTRYPOINTS.direct),
     "session-pickup": join(
       import.meta.dir,
-      "issue-routes",
-      "session-pickup.ts"
+      ISSUE_ROUTE_ENTRYPOINTS["session-pickup"]
     ),
   } as const;
   const receiptRoots: string[] = [];
@@ -204,48 +208,52 @@ describe("issue handoff CLI", () => {
     };
   }
 
-  it("refuses a direct route with no working-on-issues result", async () => {
-    const result = await run("direct", { operation: "edit" });
+  for (const entry of ISSUE_ENTRY_POINTS) {
+    it(`refuses the ${entry} entry with no working-on-issues result`, async () => {
+      const result = await run(entry, { operation: "edit" });
 
-    expect(result.exitCode).toBe(2);
-    const output = JSON.parse(result.stdout);
-    expect(output.kind).toBe("stop");
-    expect(output.reason).toBe("missing-preflight");
-    expect(existsSync(output.receiptPath)).toBe(true);
-  });
+      expect(result.exitCode).toBe(2);
+      const output = JSON.parse(result.stdout);
+      expect(output.kind).toBe("stop");
+      expect(output.reason).toBe("missing-preflight");
+      expect(existsSync(output.receiptPath)).toBe(true);
+      const receipt = JSON.parse(readFileSync(output.receiptPath, "utf8"));
+      expect(receipt.request.entry).toBe(entry);
+    });
 
-  it("routes session pickup only after a matching pass", async () => {
-    const checkoutPath = await makeCheckout();
-    const branch = git(checkoutPath, "branch", "--show-current");
-    const worktreePath = realpathSync(
-      git(checkoutPath, "rev-parse", "--show-toplevel")
-    );
-    const result = await run(
-      "session-pickup",
-      {
-        operation: "operational-run",
-        preflight: {
-          kind: "passed",
-          issue: {
-            id: "#435",
-            provider: "github",
-            url: "https://github.com/patinaproject/skills/issues/435",
+    it(`routes the ${entry} entry only after a matching pass`, async () => {
+      const checkoutPath = await makeCheckout();
+      const branch = git(checkoutPath, "branch", "--show-current");
+      const worktreePath = realpathSync(
+        git(checkoutPath, "rev-parse", "--show-toplevel")
+      );
+      const result = await run(
+        entry,
+        {
+          operation: "operational-run",
+          preflight: {
+            kind: "passed",
+            issue: {
+              id: "#435",
+              provider: "github",
+              url: "https://github.com/patinaproject/skills/issues/435",
+            },
+            endingBranch: branch,
+            worktreePath,
           },
-          endingBranch: branch,
-          worktreePath,
         },
-      },
-      checkoutPath
-    );
+        checkoutPath
+      );
 
-    expect(result.exitCode).toBe(0);
-    const output = JSON.parse(result.stdout);
-    expect(output.kind).toBe("continue");
-    expect(existsSync(output.receiptPath)).toBe(true);
-    const receipt = JSON.parse(readFileSync(output.receiptPath, "utf8"));
-    expect(receipt.request.entry).toBe("session-pickup");
-    expect(receipt.decision.kind).toBe("continue");
-  });
+      expect(result.exitCode).toBe(0);
+      const output = JSON.parse(result.stdout);
+      expect(output.kind).toBe("continue");
+      expect(existsSync(output.receiptPath)).toBe(true);
+      const receipt = JSON.parse(readFileSync(output.receiptPath, "utf8"));
+      expect(receipt.request.entry).toBe(entry);
+      expect(receipt.decision.kind).toBe("continue");
+    });
+  }
 
   it("persists an explicit no-issue receipt while refusing the route", async () => {
     const result = await run("direct", {

@@ -64,10 +64,11 @@ Some triggers name skills that ship with Claude Code, not pstack. They do not ex
 ## Vendored scripts
 
 `scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the
-`orch` store CLI, the issue handoff gate, and `worktree-audit.sh`. Join that base
-directory to the path before invoking them. They are plain bun and bash, so they
-run the same on Codex; invoke them through `shell`. They need `bun`, `gh`, (for
-stack work) `gt`, and (for `worktree-audit.sh`) `jq` and `rg`.
+`orch` store CLI, the issue handoff route entries under `issue-routes/`, and
+`worktree-audit.sh`. Join that base directory to the path before invoking them.
+They are plain bun and bash, so they run the same on Codex; invoke them through
+`shell`. They need `bun`, `gh`, (for stack work) `gt`, and (for
+`worktree-audit.sh`) `jq` and `rg`.
 `worktree-audit.sh` reads Claude Code transcripts under `~/.claude/projects/`;
 point it at your runtime's transcript directory instead when you run it
 elsewhere.

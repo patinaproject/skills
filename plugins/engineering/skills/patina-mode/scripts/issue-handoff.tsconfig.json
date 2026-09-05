@@ -9,5 +9,9 @@
     "target": "esnext",
     "types": ["bun-types"]
   },
-  "include": ["issue-handoff.ts", "issue-handoff.test.ts"]
+  "include": [
+    "issue-handoff.ts",
+    "issue-handoff.test.ts",
+    "issue-routes/*.ts"
+  ]
 }

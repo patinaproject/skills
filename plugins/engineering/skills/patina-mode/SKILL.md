@@ -46,11 +46,11 @@ Remaining triggers:
 
 - Issue-linked work begins or resumes → follow
   [`references/issue-handoff.md`](references/issue-handoff.md). Its executable
-  gate requires a successful **working-on-issues** result before another
-  playbook changes a branch, edits a file, creates a commit, changes a pull
-  request, or starts an operational run. Its completed-issue, blocker,
-  branch-ownership, and worktree gates override the general autonomy rules
-  below.
+  direct-work and Session-pickup entries call the same gate. Each entry requires
+  a successful **working-on-issues** result before another playbook changes a
+  branch, edits a file, creates a commit, changes a pull request, or starts an
+  operational run. Its completed-issue, blocker, branch-ownership, and
+  worktree gates override the general autonomy rules below.
 - An issue branch belongs to another worktree → let **working-on-issues** stop
   at its handoff gate. Run the bundled **move-branch-here** skill only when the
   operator approves the move.

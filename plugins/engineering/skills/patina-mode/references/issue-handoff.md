@@ -1,14 +1,13 @@
 # Gate issue-linked routing
 
-Use the issue handoff gate when direct work names an issue or Session pickup
-resolves one issue. The gate controls the transition from
-**working-on-issues** to another Patina playbook. It does not intercept host
+Issue-linked Patina routing has two executable entries. Direct work enters
+through `scripts/issue-routes/direct.ts`. Session pickup enters through
+`scripts/issue-routes/session-pickup.ts`. Both call the same handoff gate before
+returning a continuation decision. They control the transition from
+**working-on-issues** to another Patina playbook. They do not intercept host
 tools used outside Patina routing.
 
 ## Run the preflight
-
-Set `entry` to `direct` for a request that names an issue. Set it to
-`session-pickup` when a recovered session resolves one issue.
 
 Run **working-on-issues** for that issue. Keep its normal report and its
 machine result. The machine result has one of these shapes:
@@ -42,18 +41,18 @@ result.
 
 Before another playbook changes a branch, edits a file, creates a commit,
 changes a pull request, or starts an operational run, send one route request
-as JSON on standard input:
+as JSON on standard input to the entry that owns the route:
 
 ```sh
-bun <patina-mode-directory>/scripts/issue-handoff.ts route
+bun <patina-mode-directory>/scripts/issue-routes/direct.ts
+bun <patina-mode-directory>/scripts/issue-routes/session-pickup.ts
 ```
 
-The request names the entry, the next protected operation, and the exact
-machine result from **working-on-issues**:
+The executable fixes the entry identity. The request names the next protected
+operation and the exact machine result from **working-on-issues**:
 
 ```json
 {
-  "entry": "direct",
   "operation": "edit",
   "preflight": {
     "kind": "passed",
@@ -68,7 +67,9 @@ machine result from **working-on-issues**:
 }
 ```
 
-Continue only when the command exits `0` and returns `kind: "continue"`.
+Do not run `scripts/issue-handoff.ts` directly. It is the shared policy module,
+not a route entry. Continue only when the selected entry command exits `0` and
+returns `kind: "continue"`.
 Keep the returned `receiptPath` with the task evidence. Exit `2` records and
 refuses a missing, failed, `no-issue`, or stale-checkout handoff. Exit `1`
 means that the request or runtime boundary is invalid.

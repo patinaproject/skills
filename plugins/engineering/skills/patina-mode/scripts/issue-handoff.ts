@@ -17,9 +17,14 @@ export const PROTECTED_OPERATIONS = [
   "operational-run",
 ] as const;
 
-type IssueEntryPoint = (typeof ISSUE_ENTRY_POINTS)[number];
+export type IssueEntryPoint = (typeof ISSUE_ENTRY_POINTS)[number];
 type ProtectedOperation = (typeof PROTECTED_OPERATIONS)[number];
 type Provider = "github" | "linear" | "other";
+
+export const ISSUE_ROUTE_ENTRYPOINTS = {
+  direct: "issue-routes/direct.ts",
+  "session-pickup": "issue-routes/session-pickup.ts",
+} as const satisfies Readonly<Record<IssueEntryPoint, string>>;
 
 export interface CheckoutSnapshot {
   readonly branch: string;
@@ -179,12 +184,15 @@ function parsePreflight(value: unknown): WorkingOnIssuesResult {
   };
 }
 
-export function parseRouteRequest(value: unknown): RouteRequest {
+export function parseRouteInput(
+  entry: IssueEntryPoint,
+  value: unknown
+): RouteRequest {
   if (!isRecord(value)) {
     throw new Error("route request must be an object");
   }
   return {
-    entry: readEnum(value.entry, "entry", ISSUE_ENTRY_POINTS),
+    entry,
     operation: readEnum(value.operation, "operation", PROTECTED_OPERATIONS),
     ...(value.preflight === undefined
       ? {}
@@ -240,31 +248,31 @@ function writeReceipt(receipt: Receipt): string {
   return path;
 }
 
-async function main(): Promise<void> {
-  if (process.argv.length !== 3 || process.argv[2] !== "route") {
-    throw new Error("usage: bun issue-handoff.ts route");
-  }
-  const source = await Bun.stdin.text();
-  const raw = JSON.parse(source);
-  const request = parseRouteRequest(raw);
-  const checkout = readCheckout(process.cwd());
-  const decision = decideContinuation(request, checkout);
-  const receiptPath = writeReceipt({
-    schemaVersion: 1,
-    request,
-    checkout,
-    decision,
-  });
-  process.stdout.write(`${JSON.stringify({ ...decision, receiptPath })}\n`);
-  if (decision.kind === "stop") {
-    process.exitCode = 2;
-  }
-}
-
-if (import.meta.main) {
-  main().catch((error) => {
+export async function runIssueRoute(entry: IssueEntryPoint): Promise<void> {
+  try {
+    if (process.argv.length !== 2) {
+      throw new Error(
+        `usage: bun ${ISSUE_ROUTE_ENTRYPOINTS[entry]} < route-request.json`
+      );
+    }
+    const source = await Bun.stdin.text();
+    const raw = JSON.parse(source);
+    const request = parseRouteInput(entry, raw);
+    const checkout = readCheckout(process.cwd());
+    const decision = decideContinuation(request, checkout);
+    const receiptPath = writeReceipt({
+      schemaVersion: 1,
+      request,
+      checkout,
+      decision,
+    });
+    process.stdout.write(`${JSON.stringify({ ...decision, receiptPath })}\n`);
+    if (decision.kind === "stop") {
+      process.exitCode = 2;
+    }
+  } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     process.stderr.write(`${message}\n`);
     process.exitCode = 1;
-  });
+  }
 }

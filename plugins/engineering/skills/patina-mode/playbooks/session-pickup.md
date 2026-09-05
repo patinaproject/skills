@@ -16,9 +16,10 @@ A pickup is inheritance. The prior agent already paid the cost of reading the co
 3. Diff done vs pending. Compare what shipped against what was planned, name the resume point, do not re-run the prior repro or redo completed work. A "let me verify from scratch" pass is the tell that you're treating the trail as untrustworthy when it's actually authoritative.
 4. Before state-changing work resumes, follow
    [`../references/issue-handoff.md`](../references/issue-handoff.md) with the
-   `session-pickup` entry. Run **working-on-issues** when the recovered state
-   resolves one issue. Record `no-issue` when it resolves none. The gate must
-   return `continue` before the next playbook changes state.
+   `scripts/issue-routes/session-pickup.ts` entry. Run **working-on-issues**
+   when the recovered state resolves one issue. Record `no-issue` when it
+   resolves none. The entry must return `continue` before the next playbook
+   changes state.
 5. Route the remaining work to the matching playbook and pick the verdict: continue the execution, ship a finished recommendation, ratify or override a prior conclusion, or postmortem a failed run. The pickup playbook ends here; the routed playbook owns the rest.
 6. Verify the inherited claims against the original goal on the real artifact (the **principle-prove-it-works** skill). A passing prior self-report is not the proof.
 
