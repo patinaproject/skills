@@ -2,15 +2,6 @@ name: Verify
 
 on:
   pull_request:
-    paths:
-      - "skills/**"
-      - "scripts/**"
-      - ".agents/skills/**"
-      - ".agents/plugins/**"
-      - ".claude/skills/**"
-      - ".claude-plugin/**"
-      - ".codex-plugin/**"
-      - "package.json"
 
 permissions:
   contents: read

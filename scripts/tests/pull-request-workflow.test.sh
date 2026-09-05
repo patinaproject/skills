@@ -97,6 +97,21 @@ for (const job of jobs) {
   jobsByName.set(job.name, matchingJobs)
 }
 
+for (const file of workflowFiles) {
+  const lines = fs.readFileSync(file, 'utf8').split('\n')
+  const pullRequestIndex = lines.findIndex((line) => /^  pull_request:\s*/.test(line))
+  const followingLines = lines.slice(pullRequestIndex + 1)
+  const nextKeyOffset = followingLines.findIndex((line) => /^(?:  \S|\S)/.test(line))
+  const pullRequestBlock = nextKeyOffset === -1
+    ? followingLines
+    : followingLines.slice(0, nextKeyOffset)
+
+  if (pullRequestBlock.some((line) => /^    paths(?:-ignore)?:\s*/.test(line))) {
+    console.error(`FAIL: required check workflow filters pull requests by path: ${file}`)
+    failures += 1
+  }
+}
+
 for (const [name, matchingJobs] of jobsByName) {
   if (matchingJobs.length < 2) continue
   const locations = matchingJobs.map((job) => `${job.file} jobs.${job.id}`).join(', ')
