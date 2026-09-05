@@ -61,3 +61,21 @@ the target changes, run `gather-evidence` again before preparing a response.
 Return the feedback source, verdict, target identity, direct observation, and
 artifact or command for each case. State exactly what blocks a `blocked` case.
 Leave every human-authored conversation open for the operator.
+
+When a case has local video evidence, add a compact `Linear handoff` directly
+after that case:
+
+- Write a short Markdown note the operator can paste without rewriting. Name
+  the verdict, tested target, observation, and video filename. Include build,
+  deployment, and device identity when available. Write one note per evidence
+  case and name every video that proves it.
+- Before cleanup, copy any video from a simulator, lease, or temporary directory
+  that cleanup will remove to a path the current run will preserve. Leave the
+  copy on disk at the reported path.
+- Put one clickable file link per video immediately after its note. Render it as
+  `[filename.mp4](/absolute/path/filename.mp4)`. Wrap a target containing spaces
+  in angle brackets. Keep the local link outside the paste-ready note because a
+  Linear reader cannot open the operator's local path.
+- If the host cannot render a clickable local file, return the exact absolute
+  path and state that the operator must locate it manually. Report only actions
+  that occurred; a link or path is not a copy, attachment, or upload.

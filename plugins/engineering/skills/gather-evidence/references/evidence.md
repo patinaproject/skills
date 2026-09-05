@@ -11,6 +11,7 @@ Record these fields without inventing missing values:
 - required environment
 - current target identity
 - gathered evidence and the target it covers
+- whether the host can render each local video as a clickable file link
 - unavailable evidence
 - known mismatches between available checks and the feedback
 
