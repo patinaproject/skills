@@ -86,9 +86,14 @@ Remaining triggers:
 
 Keep one compact grounding record through the task. Record established findings, evidence pointers, the scope and input identities they depend on, and unresolved questions. Before reusing investigation or verification, confirm that the relevant scope, inputs, and evidence remain current. Reuse the valid portion. Refresh only the findings or checks affected by a change. Record which requirement the reused evidence satisfies.
 
-Pass the relevant grounding and each scoped routing exception in every executor brief. Require the executor to carry them into further delegation. Name the affected child requirement in the brief:
+Before launching any **How** or **Architect Ground** investigation, including a mandatory step in a routed child playbook, apply this check:
 
-- **How** and **Architect Ground** can reuse findings that answer the same questions from unchanged inputs. Investigate missing or changed facts. Run **Why** when consequential rationale remains unresolved.
+1. Match the step's questions to the current grounding record. When valid findings answer them, mark that investigation requirement satisfied by the cited evidence and continue without launching another investigation lane. This satisfies the child's How or Ground requirement, including How in **Investigation**, **Feature**, and **Refactoring**, and Architect's request for How during Ground.
+2. Before repeating an investigation, name each missing or changed question and explain why the existing evidence no longer answers it. Investigate only those gaps. A child instruction to invoke How or produce a handoff is not itself a missing question. Gather routine facts directly. Run **Why** when consequential rationale remains unresolved.
+3. In each executor brief, name the child requirement satisfied, cite the findings and their current scope and inputs, and list any remaining questions. Explicitly instruct the executor to continue from the satisfied requirement without another lane for the same questions. Require this scoped discharge and any gaps to appear in onward briefs.
+
+Pass the relevant grounding and each other scoped routing exception in every executor brief. Require the executor to carry them into further delegation. Name the affected child requirement in the brief:
+
 - Skip the **Feature** or **Refactoring** Architect step only when no consequential ownership, interface, or competing-design decision remains. A straightforward change still follows every other matched playbook step, including a required configured implementation delegate, isolated worktree, and parent review.
 - **Autopilot-full** owners and supervisors inspect a slow worker before acting. Inspect process state, output, and task-relevant progress. Elapsed time or the lack of a side effect alone does not prove failure. Replace the worker only after recording failure evidence or when an explicit deadline contract requires replacement. Do not invent a deadline.
 - Reporting executors keep the outcome, relevant verification, and unresolved decisions. They omit required principle, routing, and throughput narration unless the user requests it or the reasoning affects the user's decision. Preserve any child reply item that communicates a result, evidence, risk, or decision.
