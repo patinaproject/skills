@@ -1,7 +1,7 @@
 ---
 name: setup-engineering
-description: Install Engineering's repo-level machinery for skills-only consumers — the default-on patina-mode mandate, Claude-native pstack agents, comment-sicko, and Codex multi_agent. Use for /setup-engineering or setting Engineering up in a repository.
-menu-description: install Engineering repo-level machinery
+description: Install Engineering's repo-level machinery and configure model routing for skills-only consumers. Use for /setup-engineering or setting Engineering up in a repository.
+menu-description: install machinery and configure model routing
 ---
 
 # Setup Engineering
@@ -74,17 +74,16 @@ Skills load natively by name on Codex, so patina-mode is reachable without any
 `.codex-plugin/prompts/*` `/command` stubs; open-pstack ships none and this base
 follows it.
 
-## Model configuration
+## Configure model routing
 
-This install provides the files that make provider-qualified routing executable:
-the `setup-pstack` skill, the `patina-mode` provider-dispatch references, and
-the Claude-native pstack agents. It refuses to choose, probe, or rewrite the
-model descriptors. `/setup-pstack` owns that configuration through
-[`references/provider-dispatch.md`](../patina-mode/references/provider-dispatch.md).
-Run `/setup-pstack` to configure or change which models each role uses.
+After the installer succeeds, read its final `next skill:` line. Load the skill
+at that path and run it. Let `setup-pstack` own its model choices, probes,
+confirmation, and writes.
 
 ## Confirm
 
 Tell the user what the machinery install wrote: the mandate block, the
-Engineering agents, and on Codex the `multi_agent` flag. Re-running this skill
-updates all of it in place.
+Engineering agents, and on Codex the `multi_agent` flag. Relay `setup-pstack`'s
+final report. Report setup-engineering complete only when `setup-pstack`
+succeeds. Otherwise, report it incomplete and include the reason
+`setup-pstack` reported when it stopped.
