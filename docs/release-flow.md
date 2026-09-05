@@ -119,27 +119,33 @@ CLI break may fail PR checks even when the branch did not change skill files. In
 that case, confirm the break against the local-path commands, then update the
 examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
-## Token setup (required before first release)
+## Token setup (required for automated release PRs)
 
-`release-please-action` runs with `token: ${{ github.token }}` by default. This
-works for opening release PRs, but has a known GitHub limitation:
+By default `release-please-action` would run with `token: ${{ github.token }}`,
+which has a known GitHub limitation:
 
 > PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
 
 The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
 NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
-will wait indefinitely.
+would wait indefinitely. GitHub has no per-actor trust allowlist that would let
+you exempt `github-actions[bot]` from the workflow-approval gate, so the fix is
+to author the PRs with a non-`GITHUB_TOKEN` identity.
 
-To enable fully-automated release PRs:
+`release-please.yml` already resolves its token as
+`${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}`: it prefers the App/PAT
+secret and falls back to `GITHUB_TOKEN` when the secret is unset. Adding the
+secret is therefore the only step needed — no workflow edit:
 
-1. Create a GitHub App or PAT with these scopes:
+1. Create a GitHub App (preferred over a PAT, since it is not tied to a person)
+   with these permissions, then install it on this repository and generate a
+   token:
    - `contents: write` — to push tags
    - `pull-requests: write` — to open and update release PRs
    - `issues: write` — to manage `autorelease:*` labels
 2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
-3. Edit `.github/workflows/release-please.yml`: replace
-   `token: ${{ github.token }}` with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
 
-Until that's done, release PRs need a manual `git commit --allow-empty` or
-maintainer push to trigger checks. The first-release fix can be deferred until
-that scenario actually occurs.
+Once the secret exists, release PRs are authored by the App identity, their
+required checks run automatically, and auto-merge proceeds once they pass. Until
+then, release PRs fall back to `GITHUB_TOKEN` and need a manual
+`git commit --allow-empty` or maintainer push to trigger checks.
