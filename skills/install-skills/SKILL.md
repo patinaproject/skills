@@ -80,6 +80,7 @@ requested names. Common repository defaults are:
 - `design-by-contract`
 - `grill-system-design`
 - `review-system-design`
+- `writing-for-patina-mode`
 
 ## Verify
 

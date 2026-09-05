@@ -22,6 +22,7 @@ SKILLS=(
   principle-offensive-programming
   grill-system-design
   review-system-design
+  writing-for-patina-mode
   gather-evidence
 )
 FAIL_COUNT=0
