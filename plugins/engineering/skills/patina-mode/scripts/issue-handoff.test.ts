@@ -146,28 +146,53 @@ describe("issue handoff policy", () => {
 });
 
 describe("issue handoff CLI", () => {
-  const script = join(import.meta.dir, "issue-handoff.ts");
+  const entryPoints = {
+    direct: join(import.meta.dir, "issue-routes", "direct.ts"),
+    "session-pickup": join(
+      import.meta.dir,
+      "issue-routes",
+      "session-pickup.ts"
+    ),
+  } as const;
   const receiptRoots: string[] = [];
+  const checkoutRoots: string[] = [];
 
   afterAll(() => {
     for (const path of receiptRoots) {
       rmSync(path, { recursive: true });
     }
+    for (const path of checkoutRoots) {
+      rmSync(path, { recursive: true });
+    }
   });
 
-  function git(...args: string[]): string {
+  function git(cwd: string, ...args: string[]): string {
     const result = Bun.spawnSync(["git", ...args], {
-      cwd: import.meta.dir,
+      cwd,
     });
     expect(result.exitCode).toBe(0);
     return result.stdout.toString().trim();
   }
 
-  async function run(input: unknown) {
+  async function makeCheckout(): Promise<string> {
+    const path = await mkdtemp(join(tmpdir(), "issue-handoff-checkout-"));
+    checkoutRoots.push(path);
+    git(path, "init", "--initial-branch=435-canonical");
+    git(path, "config", "user.email", "fixture@example.com");
+    git(path, "config", "user.name", "Fixture");
+    git(path, "commit", "--allow-empty", "--message=fixture");
+    return path;
+  }
+
+  async function run(
+    entry: keyof typeof entryPoints,
+    input: unknown,
+    cwd = import.meta.dir
+  ) {
     const receiptRoot = await mkdtemp(join(tmpdir(), "issue-handoff-test-"));
     receiptRoots.push(receiptRoot);
-    const result = spawnSync(process.execPath, [script, "route"], {
-      cwd: import.meta.dir,
+    const result = spawnSync(process.execPath, [entryPoints[entry]], {
+      cwd,
       env: { ...process.env, PATINA_ISSUE_RECEIPT_DIR: receiptRoot },
       input: JSON.stringify(input),
       encoding: "utf8",
@@ -180,7 +205,7 @@ describe("issue handoff CLI", () => {
   }
 
   it("refuses a direct route with no working-on-issues result", async () => {
-    const result = await run({ entry: "direct", operation: "edit" });
+    const result = await run("direct", { operation: "edit" });
 
     expect(result.exitCode).toBe(2);
     const output = JSON.parse(result.stdout);
@@ -190,22 +215,28 @@ describe("issue handoff CLI", () => {
   });
 
   it("routes session pickup only after a matching pass", async () => {
-    const branch = git("branch", "--show-current");
-    const worktreePath = realpathSync(git("rev-parse", "--show-toplevel"));
-    const result = await run({
-      entry: "session-pickup",
-      operation: "operational-run",
-      preflight: {
-        kind: "passed",
-        issue: {
-          id: "#435",
-          provider: "github",
-          url: "https://github.com/patinaproject/skills/issues/435",
+    const checkoutPath = await makeCheckout();
+    const branch = git(checkoutPath, "branch", "--show-current");
+    const worktreePath = realpathSync(
+      git(checkoutPath, "rev-parse", "--show-toplevel")
+    );
+    const result = await run(
+      "session-pickup",
+      {
+        operation: "operational-run",
+        preflight: {
+          kind: "passed",
+          issue: {
+            id: "#435",
+            provider: "github",
+            url: "https://github.com/patinaproject/skills/issues/435",
+          },
+          endingBranch: branch,
+          worktreePath,
         },
-        endingBranch: branch,
-        worktreePath,
       },
-    });
+      checkoutPath
+    );
 
     expect(result.exitCode).toBe(0);
     const output = JSON.parse(result.stdout);
@@ -217,8 +248,7 @@ describe("issue handoff CLI", () => {
   });
 
   it("persists an explicit no-issue receipt while refusing the route", async () => {
-    const result = await run({
-      entry: "direct",
+    const result = await run("direct", {
       operation: "pull-request-change",
       preflight: { kind: "no-issue" },
     });
