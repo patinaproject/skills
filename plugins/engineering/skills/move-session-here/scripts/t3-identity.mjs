@@ -1,4 +1,3 @@
-import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   closeSync,
@@ -103,9 +102,14 @@ function readStableFile(path, databasePath) {
     if (error instanceof T3IdentityError) {
       throw error;
     }
-    throw new T3IdentityError('t3_snapshot_busy', {
+    if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
+      snapshotBusy(databasePath);
+    }
+    throw new T3IdentityError('invalid_t3_store', {
       databasePath,
-      message: 'The T3 state changed while it was being read.',
+      path,
+      cause: error.code,
+      message: 'The T3 state file could not be read.',
     });
   } finally {
     if (descriptor !== undefined) {
@@ -142,22 +146,6 @@ function sameSourceSet(left, right) {
   );
 }
 
-function runSnapshotTestHook(databasePath) {
-  const hook = process.env.MOVE_SESSION_HERE_TEST_SNAPSHOT_HOOK;
-  if (!hook) {
-    return;
-  }
-  const result = spawnSync(process.execPath, [hook, databasePath], {
-    encoding: 'utf8',
-  });
-  if (result.status !== 0) {
-    throw new T3IdentityError('t3_snapshot_test_hook_failed', {
-      databasePath,
-      status: result.status,
-    });
-  }
-}
-
 function acquireSnapshot(databasePath) {
   const temporaryDirectory = mkdtempSync(join(tmpdir(), 'move-session-t3.'));
   chmodSync(temporaryDirectory, 0o700);
@@ -180,7 +168,6 @@ function acquireSnapshot(databasePath) {
         snapshotBusy(databasePath);
       }
     }
-    runSnapshotTestHook(databasePath);
     const after = readSourceSet(databasePath);
     if (!sameSourceSet(before, after)) {
       snapshotBusy(databasePath);
@@ -222,7 +209,7 @@ function selectDatabasePath() {
       message: 'The T3 state database must be a regular file.',
     });
   }
-  return absolutePath;
+  return realpathSync(absolutePath);
 }
 
 function parseCursor(row, threadId, databasePath) {

@@ -9,10 +9,14 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  realpathSync,
+  renameSync,
   rmSync,
   statSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
+import { test } from 'node:test';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,7 +27,9 @@ const helper = join(
   repoRoot,
   'plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs'
 );
-const fixtureRoot = mkdtempSync(join(tmpdir(), 't3-session-handoff-test.'));
+const fixtureRoot = realpathSync(
+  mkdtempSync(join(tmpdir(), 't3-session-handoff-test.'))
+);
 const fixtureHome = join(fixtureRoot, 'home');
 const privateTmp = join(fixtureRoot, 'tmp');
 const sentinel = join(fixtureRoot, 'native-resume-ran');
@@ -78,7 +84,17 @@ function manifest(paths) {
   });
 }
 
-function runHandoff(reference, environment = {}) {
+function writePreload(name, source) {
+  const path = join(fixtureRoot, `${name}.mjs`);
+  writeFileSync(path, `import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+${source}
+syncBuiltinESMExports();
+`);
+  return path;
+}
+
+function runHandoff(reference, environment = {}, preload) {
   const env = {
     ...process.env,
     HOME: fixtureHome,
@@ -88,7 +104,8 @@ function runHandoff(reference, environment = {}) {
   };
   delete env.CLAUDE_CONFIG_DIR;
   delete env.CODEX_HOME;
-  const result = spawnSync(process.execPath, [helper, reference], {
+  const args = [...(preload ? ['--import', preload] : []), helper, reference];
+  const result = spawnSync(process.execPath, args, {
     encoding: 'utf8',
     env,
   });
@@ -261,6 +278,97 @@ try {
     't3_mapping_not_found',
     2
   );
+
+  await test('a symlink store retains committed target WAL mappings', () => {
+    const alias = join(fixtureRoot, 'alias.sqlite');
+    symlinkSync(databasePath, alias);
+    const before = manifest(sourcePaths);
+    const result = parseSuccess(
+      runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: alias })
+    );
+    assert.equal(result.sessionId, codexId);
+    assert.equal(result.t3.databasePath, databasePath);
+    assert.deepEqual(manifest(sourcePaths), before);
+    assert.equal(existsSync(`${alias}-wal`), false);
+    assert.equal(existsSync(`${alias}-shm`), false);
+  });
+
+  for (const code of ['EACCES', 'EPERM']) {
+    await test(`${code} on a stable source is an unreadable store`, () => {
+      const preload = writePreload(`access-denied-${code}`, `
+const openSync = fs.openSync;
+fs.openSync = function (path, ...args) {
+  if (path === ${JSON.stringify(databasePath)}) {
+    throw Object.assign(new Error('private source details'), { code: '${code}' });
+  }
+  return openSync(path, ...args);
+};`);
+      const before = manifest(sourcePaths);
+      const error = expectError(
+        runHandoff(`t3://threads/${t3CodexId}`, {
+          T3_STATE_DB: databasePath,
+        }, preload),
+        'invalid_t3_store',
+        1
+      );
+      assert.equal(error.databasePath, databasePath);
+      assert.equal(error.cause, code);
+      assert.equal(JSON.stringify(error).includes('private source details'), false);
+      assert.deepEqual(manifest(sourcePaths), before);
+      assert.deepEqual(readdirSync(privateTmp), []);
+    });
+  }
+
+  await test('the removed snapshot hook environment variable executes nothing', () => {
+    const hookSentinel = join(fixtureRoot, 'snapshot-hook-ran');
+    const hook = join(fixtureRoot, 'legacy-snapshot-hook.mjs');
+    writeFileSync(hook, `import { writeFileSync } from 'node:fs';
+writeFileSync(${JSON.stringify(hookSentinel)}, 'executed');
+`);
+    parseSuccess(runHandoff(`t3://threads/${t3CodexId}`, {
+      T3_STATE_DB: databasePath,
+      MOVE_SESSION_HERE_TEST_SNAPSHOT_HOOK: hook,
+    }));
+    assert.equal(existsSync(hookSentinel), false);
+  });
+
+  for (const [provider, threadId, path, ownerId] of [
+    ['claude', t3ClaudeId, claudePath, claudeId],
+    ['codex', t3CodexId, codexPath, codexId],
+  ]) {
+    await test(`${provider} rejects an owner replacement after lookup`, () => {
+      const original = readFileSync(path);
+      const replacement = original.toString().replaceAll(ownerId, 'replacement-owner');
+      const marker = join(fixtureRoot, `${provider}-owner-replaced`);
+      const preload = writePreload(`${provider}-replace-owner`, `
+const readFileSync = fs.readFileSync;
+let replaced = false;
+fs.readFileSync = function (path, ...args) {
+  const result = readFileSync(path, ...args);
+  if (path === ${JSON.stringify(path)} && !replaced) {
+    replaced = true;
+    fs.renameSync(path, path + '.old');
+    fs.writeFileSync(path, ${JSON.stringify(replacement)});
+    fs.writeFileSync(${JSON.stringify(marker)}, 'replaced');
+  }
+  return result;
+};`);
+      try {
+        expectError(runHandoff(`t3://threads/${threadId}`, {
+          T3_STATE_DB: databasePath,
+        }, preload), 't3_stale_binding', 2);
+        assert.equal(readFileSync(marker, 'utf8'), 'replaced');
+        assert.equal(readFileSync(path, 'utf8'), replacement);
+      } finally {
+        rmSync(path);
+        renameSync(`${path}.old`, path);
+      }
+      const reference = provider === 'claude' ? ownerId : `codex://threads/${ownerId}`;
+      const direct = parseSuccess(runHandoff(reference));
+      assert.equal(direct.sessionId, ownerId);
+      assert.equal(direct.t3, undefined);
+    });
+  }
 
   const noWalPath = join(fixtureRoot, 'no-wal.sqlite');
   const noWalDatabase = makeRuntimeDatabase(noWalPath, [
@@ -555,6 +663,19 @@ try {
     1
   );
 
+  await test('a symlink store refuses the target rollback journal', () => {
+    const alias = join(fixtureRoot, 'rollback-alias.sqlite');
+    symlinkSync(rollbackPath, alias);
+    const paths = [rollbackPath, `${rollbackPath}-journal`];
+    const before = manifest(paths);
+    expectError(
+      runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: alias }),
+      't3_rollback_journal',
+      1
+    );
+    assert.deepEqual(manifest(paths), before);
+  });
+
   const mutationPath = join(fixtureRoot, 'mutation.sqlite');
   const mutationDatabase = makeRuntimeDatabase(mutationPath, [
     {
@@ -565,16 +686,24 @@ try {
     },
   ]);
   mutationDatabase.close();
-  const mutationHook = join(fixtureRoot, 'mutate-snapshot.mjs');
-  writeFileSync(
-    mutationHook,
-    "import { readFileSync, statSync, utimesSync, writeFileSync } from 'node:fs';\nconst path = process.argv[2];\nconst before = statSync(path);\nconst bytes = readFileSync(path);\nwriteFileSync(path, bytes);\nutimesSync(path, before.atime, before.mtime);\n"
-  );
+  const mutationPreload = writePreload('mutate-snapshot', `
+const writeFileSync = fs.writeFileSync;
+let mutated = false;
+fs.writeFileSync = function (path, ...args) {
+  const result = writeFileSync(path, ...args);
+  if (!mutated && path.endsWith('/state.sqlite')) {
+    mutated = true;
+    const source = ${JSON.stringify(mutationPath)};
+    const before = fs.statSync(source);
+    writeFileSync(source, fs.readFileSync(source));
+    fs.utimesSync(source, before.atime, before.mtime);
+  }
+  return result;
+};`);
   expectError(
     runHandoff(`t3://threads/${t3CodexId}`, {
       T3_STATE_DB: mutationPath,
-      MOVE_SESSION_HERE_TEST_SNAPSHOT_HOOK: mutationHook,
-    }),
+    }, mutationPreload),
     't3_snapshot_busy',
     1
   );
@@ -589,16 +718,23 @@ try {
     },
   ]);
   replacementDatabase.close();
-  const replacementHook = join(fixtureRoot, 'replace-snapshot.mjs');
-  writeFileSync(
-    replacementHook,
-    "import { copyFileSync, renameSync } from 'node:fs';\nconst path = process.argv[2];\nrenameSync(path, `${path}.old`);\ncopyFileSync(`${path}.old`, path);\n"
-  );
+  const replacementPreload = writePreload('replace-snapshot', `
+const writeFileSync = fs.writeFileSync;
+let replaced = false;
+fs.writeFileSync = function (path, ...args) {
+  const result = writeFileSync(path, ...args);
+  if (!replaced && path.endsWith('/state.sqlite')) {
+    replaced = true;
+    const source = ${JSON.stringify(replacementPath)};
+    fs.renameSync(source, source + '.old');
+    fs.copyFileSync(source + '.old', source);
+  }
+  return result;
+};`);
   expectError(
     runHandoff(`t3://threads/${t3CodexId}`, {
       T3_STATE_DB: replacementPath,
-      MOVE_SESSION_HERE_TEST_SNAPSHOT_HOOK: replacementHook,
-    }),
+    }, replacementPreload),
     't3_snapshot_busy',
     1
   );
@@ -622,7 +758,7 @@ try {
 
   assert.deepEqual(readdirSync(privateTmp), []);
   assert.equal(existsSync(sentinel), false);
-  process.stdout.write('OK: T3 session handoff contract passed\n');
+  process.stdout.write('OK: existing T3 session handoff checks passed\n');
 } finally {
   liveDatabase.close();
   rmSync(fixtureRoot, { recursive: true, force: true });
