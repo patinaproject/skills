@@ -156,7 +156,17 @@ The auto-merge job continues to use `github.token`; this secret changes only Rel
 PR authorship.
 
 The auto-merge job depends on the protected-branches ruleset to hold a Release PR
-until its checks pass. In the Patina Project organization settings, add a required
-status checks rule to the active **Protected branches** ruleset. Require the check
-runs that apply to a Release PR, including the `Lint` jobs and `Verify skill overlay`.
+until its checks pass. Before adding required checks, remove `patina-project-release`
+(App ID `4269276`) from the bypass list in the active **Protected branches** ruleset.
+`release-please` authors Release PRs with the App token, but auto-merge uses
+`github.token`, so the bypass is unnecessary.
+
+In the Patina Project organization settings, add a required status checks rule to the
+active **Protected branches** ruleset. Require these four contexts:
+
+- `Lint Actions workflows`
+- `Lint Markdown`
+- `Validate pull request`
+- `Verify skill overlay`
+
 Without this rule, GitHub can merge a Release PR before its checks finish.

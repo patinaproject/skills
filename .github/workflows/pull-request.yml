@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Validate pull request
     runs-on: blacksmith-2vcpu-ubuntu-2404
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') && !(github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.event.pull_request.head.ref, 'release-please--')) }}"
     steps:
