@@ -1,6 +1,10 @@
 # Codex tool mapping for pstack
 
-pstack skills are written in Claude Code tool language (the `Skill` tool, the `Agent` tool, `AskUserQuestion`, `claude-*` model slugs). On Codex the skills are the same files; only the tool names resolve differently. Read this when a pstack skill names a Claude tool, a Claude built-in skill, or a `claude-*` model.
+pstack skills are written in Claude Code tool language (`Skill`, `Agent`,
+`AskUserQuestion`) in shared prose. On Codex the files are the same; only those
+tool names resolve differently. Model execution is not translated here. Read
+[`provider-dispatch.md`](provider-dispatch.md) for the parent-owned
+Claude/Codex/Grok route table and provider-qualified descriptors.
 
 ## Tool actions
 
@@ -28,8 +32,9 @@ Subagent dispatch needs `multi_agent` enabled. Add to `~/.codex/config.toml`:
 multi_agent = true
 ```
 
-Without it, `spawn_agent` is unavailable. Patina-mode must stop before it
-selects a playbook or changes anything. Do not degrade to a sequential pass.
+Without it, the native Codex lane is a named dropout. Independent external lanes
+still run, and the parent records the reduced provider count. Never collapse a
+panel into a sequential single-model pass.
 
 ## Subagent policy
 
@@ -41,14 +46,14 @@ patina-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 - Claude Code runs every subagent on this machine, so the **swarm** skill's workers and the fan-out playbooks (`orchestrate`, `autopilot-full`, `autopilot-stack`) isolate writers with worktrees. The same holds on Codex.
 - Keep the rest of the policy unchanged. Pass file pointers not inlined context, give each worker its own worktree or branch when they write, review every subagent's diff yourself.
 
-## Model names
+## Models and providers
 
-Skills name Claude defaults (a single-role default for code/prose/judgment plus a diverse-model panel for diverse-model panels; the descriptors live in [`provider-dispatch.md`](provider-dispatch.md)). These slugs do not resolve on Codex. Substitute your configured Codex models:
-
-- Single-model roles: your primary Codex model (for example `gpt-5.6-sol`).
-- Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial signal comes from model diversity, so use the distinct Codex models available to you. A good default quad on ChatGPT is `gpt-5.6-sol`, `gpt-5.5`, `gpt-5.4`, `gpt-5.6-luna`. If only one model family is reachable, vary reasoning effort and note in the verdict that diversity was reduced.
-
-`/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs.
+Do not replace every configured entry with a Codex model. `/setup-pstack` writes
+portable descriptors such as `claude:fable@max`, `codex:gpt-5.6-sol@max`, and
+`grok:grok-4.6@xhigh`. In a Codex parent, only `codex:*` is native. Route Claude
+and Grok descriptors through the external launcher exactly as
+`provider-dispatch.md` specifies. The current default panel intentionally keeps
+four-provider frontier diversity and contains no older GPT or Claude substitute.
 
 ## Claude built-in skills pstack references
 

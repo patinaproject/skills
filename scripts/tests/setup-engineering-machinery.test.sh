@@ -18,6 +18,12 @@ fail() { echo "FAIL: $1" >&2; FAIL=$((FAIL + 1)); }
 
 count() { grep -cF "$1" "$2" 2>/dev/null || true; }
 
+snapshot_files() {
+  find "$@" -type f -print | LC_ALL=C sort | while IFS= read -r file; do
+    shasum -a 256 "$file"
+  done
+}
+
 # Vendoring carries the skill's assets, so they must stay byte-identical to the
 # canonical plugin sources or a skills-only consumer gets a stale mandate.
 diff -q plugins/engineering/hooks/session-start-context.md "$SKILL/assets/mandate.md" >/dev/null \
@@ -26,6 +32,12 @@ diff -q plugins/engineering/agents/patina-agent.md "$SKILL/assets/agents/patina-
   || fail "assets/agents/patina-agent.md drifted from agents/patina-agent.md"
 diff -q plugins/engineering/agents/comment-sicko.md "$SKILL/assets/agents/comment-sicko.md" >/dev/null \
   || fail "assets/agents/comment-sicko.md drifted from agents/comment-sicko.md"
+for agent in plugins/engineering/agents/pstack-*.md; do
+  asset="$SKILL/assets/agents/$(basename "$agent")"
+  [ -f "$asset" ] || fail "missing setup-engineering asset: $asset"
+  diff -q "$agent" "$asset" >/dev/null \
+    || fail "$asset drifted from $agent"
+done
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -45,16 +57,21 @@ run_install() {
 }
 
 run_install
-run_install  # second run proves idempotency
+before_second_run="$(snapshot_files "$REPO" "$CODEX")"
+run_install
+after_second_run="$(snapshot_files "$REPO" "$CODEX")"
+[ "$before_second_run" = "$after_second_run" ] || fail "second install changed existing machinery files"
 
 BEGIN='<!-- BEGIN engineering:patina-mode'
 END='<!-- END engineering:patina-mode -->'
 
-# Subagents installed and matching the bundled assets.
-diff -q "$SKILL/assets/agents/patina-agent.md" "$REPO/.claude/agents/patina-agent.md" >/dev/null \
-  || fail "patina-agent.md not installed correctly"
-diff -q "$SKILL/assets/agents/comment-sicko.md" "$REPO/.claude/agents/comment-sicko.md" >/dev/null \
-  || fail "comment-sicko.md not installed correctly"
+# Agents installed and matching the bundled assets.
+for asset in "$SKILL"/assets/agents/*.md; do
+  installed="$REPO/.claude/agents/$(basename "$asset")"
+  [ -f "$installed" ] || fail "agent asset was not installed: $installed"
+  diff -q "$asset" "$installed" >/dev/null \
+    || fail "$(basename "$asset") not installed correctly"
+done
 
 # Exactly one managed block per instructions file, unrelated content intact.
 [ "$(count "$BEGIN" "$REPO/CLAUDE.md")" -eq 1 ] || fail "repo CLAUDE.md has $(count "$BEGIN" "$REPO/CLAUDE.md") mandate blocks, expected 1"
@@ -121,6 +138,34 @@ HOME="$SENTINEL_HOME" CODEX_HOME="$SENTINEL_HOME/.codex" bash "$SCRIPT" --repo "
   || fail "--codex mutated the user global ~/.codex/config.toml"
 [ ! -e "$SENTINEL_HOME/.codex/AGENTS.md" ] \
   || fail "--codex created a global ~/.codex/AGENTS.md"
+
+MISSING="$TMP/missing"
+mkdir -p "$MISSING/skills"
+cp -R "$SKILL" "$MISSING/skills/setup-engineering"
+set +e
+missing_output="$(bash "$MISSING/skills/setup-engineering/scripts/install-machinery.sh" --repo "$TMP/missing-repo" 2>&1)"
+missing_status=$?
+set -e
+[ "$missing_status" -ne 0 ] || fail "installer succeeded without sibling setup-pstack"
+printf '%s\n' "$missing_output" | grep -qF "missing required file: $MISSING/skills/setup-pstack/SKILL.md" \
+  || fail "missing setup-pstack failure did not name the missing file"
+printf '%s\n' "$missing_output" | grep -qF "Install the full Engineering skill catalog" \
+  || fail "missing setup-pstack failure did not name the remedy"
+
+MISSING_REF="$TMP/missing-ref"
+mkdir -p "$MISSING_REF/skills"
+cp -R "$SKILL" "$MISSING_REF/skills/setup-engineering"
+cp -R plugins/engineering/skills/setup-pstack "$MISSING_REF/skills/setup-pstack"
+mkdir -p "$MISSING_REF/skills/patina-mode/references"
+set +e
+missing_ref_output="$(bash "$MISSING_REF/skills/setup-engineering/scripts/install-machinery.sh" --repo "$TMP/missing-ref-repo" 2>&1)"
+missing_ref_status=$?
+set -e
+[ "$missing_ref_status" -ne 0 ] || fail "installer succeeded without patina-mode references"
+printf '%s\n' "$missing_ref_output" | grep -qF "missing required file: $MISSING_REF/skills/patina-mode/references/provider-dispatch.md" \
+  || fail "missing patina-mode reference failure did not name the missing file"
+printf '%s\n' "$missing_ref_output" | grep -qF "Install the full Engineering skill catalog" \
+  || fail "missing patina-mode reference failure did not name the remedy"
 
 if [ "$FAIL" -gt 0 ]; then
   echo "" >&2
