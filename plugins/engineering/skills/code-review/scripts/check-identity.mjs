@@ -43,15 +43,15 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 2) {
     const flag = argv[index];
     const value = argv[index + 1];
-    if (!["--report", "--repo", "--criteria"].includes(flag) || !value) {
-      throw new InputError("usage: check-identity.mjs --report <file> --repo <path> --criteria <file>");
+    if (!["--report", "--repo", "--criteria", "--intended-parent"].includes(flag) || !value) {
+      throw new InputError("usage: check-identity.mjs --report <file> --repo <path> --criteria <file> --intended-parent <ref>");
     }
     if (values[flag]) {
       throw new InputError(`${flag} may appear only once`);
     }
     values[flag] = value;
   }
-  for (const flag of ["--report", "--repo", "--criteria"]) {
+  for (const flag of ["--report", "--repo", "--criteria", "--intended-parent"]) {
     requireString(values[flag], flag);
   }
   return values;
@@ -158,6 +158,9 @@ function validateFinding(finding, axis, sources, name) {
   }
   const tuple = {
     axis,
+    classification: finding.classification,
+    criterionLocator: finding.criterionLocator,
+    citedText: finding.citedText,
     evidenceDigest: finding.evidenceDigest,
     semanticLocation: finding.semanticLocation,
     sourceDigest: finding.sourceDigest,
@@ -363,15 +366,28 @@ function checkAxis(axis, state, context, reasons, affectedAxes) {
     addReason(reasons, affectedAxes, "axis-source-mismatch", `${axis} examined sources do not match its assigned criteria`, [axis]);
   }
   const execution = state.execution;
+  function executionEvidence(value, name) {
+    const path = resolveEvidence(context.reportDir, value, name);
+    if (path) {
+      const { dev, ino } = statSync(path, { bigint: true });
+      const key = `${dev}:${ino}`;
+      const owner = context.artifactOwners.get(key);
+      if (owner && owner !== axis) {
+        addReason(reasons, affectedAxes, "execution-artifact-shared", `${axis} and ${owner} share execution artifact ${value}`);
+      }
+      context.artifactOwners.set(key, axis);
+    }
+    return path;
+  }
   for (const [field, label] of [["observedRouteEvidence", "route evidence"], ["transcriptLocation", "transcript"]]) {
-    if (!resolveEvidence(context.reportDir, execution[field], `report.axes.${axis}.execution.${field}`)) {
+    if (!executionEvidence(execution[field], `report.axes.${axis}.execution.${field}`)) {
       addReason(reasons, affectedAxes, "execution-artifact-missing", `${axis} ${label} is missing`, [axis]);
     }
   }
   const readKinds = new Set();
   for (const read of execution.comparisonReads) {
     const kind = requireString(read.kind, `report.axes.${axis}.execution.comparisonReads.kind`);
-    const artifact = resolveEvidence(context.reportDir, read.artifactPath, `report.axes.${axis}.execution.comparisonReads.artifactPath`);
+    const artifact = executionEvidence(read.artifactPath, `report.axes.${axis}.execution.comparisonReads.artifactPath`);
     readKinds.add(kind);
     if (!artifact) {
       addReason(reasons, affectedAxes, "comparison-artifact-missing", `${axis} ${kind} artifact is missing`, [axis]);
@@ -387,7 +403,7 @@ function checkAxis(axis, state, context, reasons, affectedAxes) {
     const records = new Map();
     for (const record of execution[field]) {
       const sourceKey = requireString(record.sourceKey, `report.axes.${axis}.execution.${field}.sourceKey`);
-      const artifact = resolveEvidence(context.reportDir, record.artifactPath, `report.axes.${axis}.execution.${field}.artifactPath`);
+      const artifact = executionEvidence(record.artifactPath, `report.axes.${axis}.execution.${field}.artifactPath`);
       if (artifact) {
         records.set(sourceKey, artifact);
       }
@@ -406,7 +422,7 @@ function main() {
   const criteriaPath = realpathSync(args["--criteria"]);
   const parsed = readReport(reportPath);
   const currentSources = readCurrentCriteria(criteriaPath);
-  const observed = inspectRepository(args["--repo"], parsed.comparison.intendedParentRef);
+  const observed = inspectRepository(args["--repo"], args["--intended-parent"]);
   const reasons = [];
   const affectedAxes = new Set();
 
@@ -417,7 +433,7 @@ function main() {
     addReason(reasons, affectedAxes, "working-tree-dirty", "the publication candidate has staged, unstaged, or untracked changes");
   }
   compareSources(parsed.sources, currentSources, reasons, affectedAxes);
-  const context = { ...parsed, diffEmpty: observed.diffEmpty };
+  const context = { ...parsed, diffEmpty: observed.diffEmpty, artifactOwners: new Map() };
   for (const axis of AXES) {
     checkAxis(axis, parsed.axes[axis], context, reasons, affectedAxes);
   }

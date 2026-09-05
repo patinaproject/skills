@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { linkSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 const root = realpathSync(execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim());
@@ -122,11 +122,11 @@ function makeFixture(name) {
       affects: source.affects,
     })),
   });
-  return { repo, evidence, report, reportPath, criteriaPath };
+  return { repo, evidence, report, reportPath, criteriaPath, intendedParentRef: "parent" };
 }
 
 function run(fixture) {
-  return spawnSync(process.execPath, [checker, "--report", fixture.reportPath, "--repo", fixture.repo, "--criteria", fixture.criteriaPath], {
+  return spawnSync(process.execPath, [checker, "--report", fixture.reportPath, "--repo", fixture.repo, "--criteria", fixture.criteriaPath, "--intended-parent", fixture.intendedParentRef], {
     encoding: "utf8",
   });
 }
@@ -159,6 +159,30 @@ try {
   git(changedParent.repo, ["branch", "-f", "parent", "HEAD"]);
   expectInvalid(changedParent, "comparison-changed", ["standards", "spec"]);
 
+  for (const tip of ["parent", "HEAD"]) {
+    const changedRef = makeFixture(`changed-ref-${tip}`);
+    git(changedRef.repo, ["branch", "new-parent", tip]);
+    changedRef.intendedParentRef = "new-parent";
+    expectInvalid(changedRef, "comparison-changed", ["standards", "spec"]);
+  }
+
+  const stack = makeFixture("stack-parent");
+  stack.report.comparison.forgeTargetRef = "main";
+  stack.report.comparison.forgeTargetOid = git(stack.repo, ["rev-parse", "main"]);
+  for (const axis of ["standards", "spec"]) {
+    stack.report.axes[axis].examinedComparison = structuredClone(stack.report.comparison);
+  }
+  writeJson(stack.reportPath, stack.report);
+  expectValid(stack);
+  stack.intendedParentRef = "main";
+  expectInvalid(stack, "comparison-changed", ["standards", "spec"]);
+
+  const missingParent = makeFixture("missing-parent-input");
+  const missingParentResult = spawnSync(process.execPath, [checker, "--report", missingParent.reportPath,
+    "--repo", missingParent.repo, "--criteria", missingParent.criteriaPath], { encoding: "utf8" });
+  assert.equal(missingParentResult.status, 2);
+  assert.match(JSON.parse(missingParentResult.stderr).error, /--intended-parent/);
+
   const invalidMergeBase = makeFixture("invalid-merge-base");
   invalidMergeBase.report.comparison.mergeBaseOid = "0000000000000000000000000000000000000000";
   invalidMergeBase.report.axes.standards.examinedComparison = structuredClone(invalidMergeBase.report.comparison);
@@ -173,6 +197,37 @@ try {
   const missingEvidence = makeFixture("missing-evidence");
   rmSync(join(missingEvidence.evidence, "standards", "coverage.json"));
   expectInvalid(missingEvidence, "coverage-missing", ["standards"]);
+
+  for (const field of ["observedRouteEvidence", "transcriptLocation", "comparisonReads", "sourceReads", "coverage"]) {
+    const shared = makeFixture(`shared-${field}`);
+    const standards = shared.report.axes.standards.execution;
+    const spec = shared.report.axes.spec.execution;
+    if (Array.isArray(spec[field])) {
+      spec[field][0].artifactPath = standards[field][0].artifactPath;
+    } else {
+      spec[field] = standards[field];
+    }
+    writeJson(shared.reportPath, shared.report);
+    expectInvalid(shared, "execution-artifact-shared", ["standards", "spec"]);
+  }
+
+  for (const [name, alias] of [["symlink", symlinkSync], ["hardlink", linkSync]]) {
+    const shared = makeFixture(`shared-${name}`);
+    const specPath = join(shared.evidence, "spec/transcript.jsonl");
+    rmSync(specPath);
+    alias(join(shared.evidence, "standards/transcript.jsonl"), specPath);
+    expectInvalid(shared, "execution-artifact-shared", ["standards", "spec"]);
+  }
+
+  const combinedTranscript = makeFixture("combined-transcript");
+  for (const axis of ["standards", "spec"]) {
+    const execution = combinedTranscript.report.axes[axis].execution;
+    for (const field of ["comparisonReads", "sourceReads", "coverage"]) {
+      for (const record of execution[field]) record.artifactPath = execution.transcriptLocation;
+    }
+  }
+  writeJson(combinedTranscript.reportPath, combinedTranscript.report);
+  expectValid(combinedTranscript);
 
   const incomplete = makeFixture("incomplete");
   incomplete.report.axes.spec = { status: "incomplete", reason: "reviewer failed", availableEvidence: [] };
@@ -196,6 +251,9 @@ try {
   const source = finding.report.criteria.sources[0];
   const tuple = {
     axis: "standards",
+    classification: "documentedViolation",
+    criterionLocator: "fixture rule",
+    citedText: "standard",
     evidenceDigest: digest("evidence"),
     semanticLocation: "source behavior",
     sourceDigest: source.contentDigest,
@@ -215,6 +273,47 @@ try {
     evidenceDigest: tuple.evidenceDigest,
     impact: "fixture impact",
   });
+  writeJson(finding.reportPath, finding.report);
+  expectValid(finding);
+
+  const originalFinding = structuredClone(finding.report.axes.standards.findings[0]);
+  for (const [field, value] of [
+    ["criterionLocator", "another rule"],
+    ["citedText", "another criterion in the same section"],
+    ["classification", "heuristic"],
+  ]) {
+    const changed = { ...originalFinding, [field]: value };
+    finding.report.axes.standards.findings[0] = changed;
+    writeJson(finding.reportPath, finding.report);
+    const staleIdentity = run(finding);
+    assert.equal(staleIdentity.status, 2, `reused identity accepted for changed ${field}`);
+    assert.match(JSON.parse(staleIdentity.stderr).error, /stable finding tuple/);
+    changed.identity = digest(stableJson({ ...tuple, [field]: value }));
+    assert.notEqual(changed.identity, originalFinding.identity);
+    writeJson(finding.reportPath, finding.report);
+    expectValid(finding);
+  }
+
+  finding.report.axes.standards.findings[0] = {
+    ...originalFinding, location: "source.txt:900", impact: "reworded fixture impact",
+  };
+  writeJson(finding.reportPath, finding.report);
+  expectValid(finding);
+  git(finding.repo, ["commit", "-q", "--allow-empty", "-m", "new head, identical behavior"]);
+  finding.report.comparison.headOid = git(finding.repo, ["rev-parse", "HEAD"]);
+  for (const axis of ["standards", "spec"]) {
+    finding.report.axes[axis].examinedComparison = structuredClone(finding.report.comparison);
+  }
+  writeJson(finding.reportPath, finding.report);
+  expectValid(finding);
+
+  const substantiated = { ...originalFinding, evidence: "evidence with a newly demonstrated consequence" };
+  substantiated.evidenceDigest = digest(substantiated.evidence);
+  finding.report.axes.standards.findings[0] = substantiated;
+  writeJson(finding.reportPath, finding.report);
+  assert.equal(run(finding).status, 2);
+  substantiated.identity = digest(stableJson({ ...tuple, evidenceDigest: substantiated.evidenceDigest }));
+  assert.notEqual(substantiated.identity, originalFinding.identity);
   writeJson(finding.reportPath, finding.report);
   expectValid(finding);
 

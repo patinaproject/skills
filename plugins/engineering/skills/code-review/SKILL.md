@@ -102,8 +102,13 @@ Run the identity helper when the caller needs a current publication check:
 node <code-review-skill>/scripts/check-identity.mjs \
   --report <task-evidence>/report.json \
   --repo <repository> \
+  --intended-parent <current-implementation-parent-ref> \
   --criteria <task-evidence>/current-criteria.json
 ```
+
+Supply `--intended-parent` from the current task or stack intent each time; the
+helper resolves its tip independently. Use the implementation parent even when
+the forge target differs. Copying the old report ref cannot detect retargeting.
 
 Exit 0 means that the comparison and structural evidence match the current
 inputs. It does not mean that the review passed or that publication is allowed.

@@ -77,9 +77,14 @@ envelope uses schema version 1.
 For a complete axis, copy the full `comparison` object into
 `examinedComparison`. Record one `examinedSources` entry for each source whose
 `affects` contains that axis. Evidence paths resolve relative to `report.json`.
-The helper requires separate reviewer sessions and evidence files for route,
-transcript, merge-base, diff, log, source reads, and coverage. It also requires
-a committed `show` artifact when the diff is nonempty.
+The helper requires distinct reviewer sessions and physically distinct execution
+artifacts between axes: route, transcript, merge-base, diff, log, source reads,
+and coverage. Symlinks and hard links to the same file count as shared evidence.
+Within one axis, a transcript may supply several reads or coverage records.
+Criteria snapshots may be shared between axes. A committed `show` artifact is
+also required when the diff is nonempty. Distinct files prove separation of
+artifacts only; inspect their contents and runtime records to establish actual
+independent execution.
 
 For an incomplete axis, provide a nonempty `reason` and list every available
 artifact in `availableEvidence`. An incomplete axis is a valid report state and
@@ -112,6 +117,9 @@ keys and no extra whitespace. Hash this tuple:
 ```json
 {
   "axis": "standards",
+  "classification": "documentedViolation",
+  "criterionLocator": "Testing Guidelines",
+  "citedText": "short cited criterion",
   "evidenceDigest": "sha256:...",
   "semanticLocation": "symbol or scoped omission",
   "sourceDigest": "sha256:...",
@@ -120,8 +128,17 @@ keys and no extra whitespace. Hash this tuple:
 ```
 
 Compute `evidenceDigest` as SHA-256 over the exact UTF-8 bytes in `evidence`.
-Include the necessary context in that field. Absolute line movement, other
-report wording, report order, and the head object ID do not define the finding.
+Use a stable section or rule name for `criterionLocator` and the exact criterion
+quotation for `citedText`. Together with the source identity, they distinguish
+rules that cite the same code. A changed classification also changes identity.
+
+Include necessary context, assumptions, and substantiation of concrete
+consequences in `evidence`. New substantiation changes its digest and identity.
+Rephrasing `impact`, absolute code line movement, other report wording, report
+order, and the head object ID do not define the finding. A fresh reviewer must
+reconsider a changed concrete consequence or assumption before reusing a
+dismissal, even when the recorded identity matches. The helper cannot judge
+whether an impact edit is merely wording; it checks the supplied tuple only.
 
 ## Readable report
 
