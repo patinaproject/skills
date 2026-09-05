@@ -226,22 +226,20 @@ Verify every label has a non-empty description:
 gh label list --json name,description --jq '.[] | select(.description == "")'
 ```
 
-## Working with `.github/` templates
+## Writing pull requests
 
-This repo ships a canonical pull request template. Agents must use it — do
-not invent parallel PR structure.
+Pull request bodies follow the Descriptions rule in
+`plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`. Use its
+section headings in order and omit empty sections. Put exactly one `Closes #N`,
+`Fixes #N`, or `Resolves #N` line in `## Scope` for each completed issue.
 
-- Pull requests: `.github/pull_request_template.md`. Read it before running `gh pr create`.
-  The PR body must use the template's section headings in the order the template defines,
-  even when the body is passed inline via `--body`.
-- Issues: use the tracker-agnostic issue skills, which consult
-  `docs/issue-tracker.md`.
+`.github/pull_request_template.md` only reminds authors about the closing
+reference and agent mentions. It does not define the body structure. Use
+`gh pr create --body-file <path-to-rendered-body>` with a body that already
+follows the playbook.
 
-Recommended `gh` patterns:
-
-- PRs: `gh pr create --body-file <path-to-rendered-body>` is the safest path. The rendered
-  body must already follow the template. If you pass `--body` inline, copy every template
-  section name and order verbatim before filling them in.
+For issues, use the tracker-agnostic issue skills. They consult
+`docs/issue-tracker.md`.
 
 ## GitHub Actions pinning
 
@@ -333,14 +331,3 @@ bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions. The one
 `chore: sync open-pstack@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
 the `pstack-sync` carrier branch (committed with `--no-verify`); it enters `main` history through
 the sync merge.
-
-Use the PR template as written: one `Closes #N`, `Fixes #N`, or `Resolves #N`
-line and a
-`What changed` summary written for a reader who has not seen the work. There is
-no `Context:` line or `- <change> - <why>` contract — write plain prose.
-GitHub Checks are the source of truth for routine automated verification.
-Add `Testing steps` only ad hoc, when a produced artifact needs human
-inspection (rendered docs, generated files, a template, release notes); make
-each unchecked item describe the expected outcome, and omit the section when no
-human review judgment is needed. Put only pre-merge operational chores in
-`Do before merging`.

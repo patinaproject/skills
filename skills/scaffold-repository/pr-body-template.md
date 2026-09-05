@@ -1,13 +1,35 @@
-# Pull request body
+# Pull Request
 
-`scaffold-repository` does not create pull requests. Use
-`.github/pull_request_template.md` at the repository root. The setup copies
-that template into new repositories.
+<!--
+  PR title rule (squash merges): use the exact commitlint/commitizen format so
+  the squash commit can be reused unchanged — `type: #123 short description`
+  (e.g. `docs: #12 add bootstrap skill guide`). This applies to PR titles only;
+  GitHub issue titles stay plain-language, no conventional-commit prefix.
 
-GitHub Checks report routine automated verification. Do not copy successful
-lint, test, type-check, or repository comparison output into the pull request
-body.
-When a required check is missing or blocked, explain the affected behavior and
-limitation in `What changed` or one result-focused `Testing steps` item. Use
-`Do before merging` only for a specific action a person must complete after
-review.
+  Do not put an `@` immediately before an agent name such as Claude or Codex
+  anywhere in this body unless you intend to trigger that agent.
+-->
+
+## Linked issue
+
+Use one `Closes #N`, `Fixes #N`, or `Resolves #N` line per completed issue.
+
+## What changed
+
+Describe the change for a reader who has not seen the work.
+
+<!--
+  Add either optional section below only when it earns its place; otherwise omit it.
+
+  ## Testing steps
+  Ad hoc — include only when a produced artifact needs human inspection (rendered
+  docs, generated files, a template, release notes). Use an unchecked box per
+  pass/fail decision and state the observable outcome. GitHub Checks own routine
+  automated verification; do not paste passing lint, test, type-check, or hook
+  output here.
+
+  ## Do before merging
+  Work-specific operator chores that must happen after review and before merge
+  (for example, rotate a secret). Keep items concrete and imperative; do not
+  duplicate testing steps or CI status.
+-->

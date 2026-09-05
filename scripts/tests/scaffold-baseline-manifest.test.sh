@@ -14,6 +14,7 @@ cd "$REPO_ROOT"
 
 VERIFIER="skills/scaffold-repository/scripts/verify-baseline.sh"
 MANIFEST="skills/scaffold-repository/core-baseline.txt"
+PR_TEMPLATE_SOURCE="skills/scaffold-repository/pr-body-template.md"
 
 fail() {
   echo "FAIL: $1" >&2
@@ -22,6 +23,7 @@ fail() {
 
 [ -x "$VERIFIER" ] || fail "$VERIFIER is missing or not executable"
 [ -f "$MANIFEST" ] || fail "$MANIFEST is missing"
+[ -f "$PR_TEMPLATE_SOURCE" ] || fail "$PR_TEMPLATE_SOURCE is missing"
 
 # The manifest is the single source the skill documents and the verifier reads.
 # Strips a trailing CR the way `verify-baseline.sh` does, so this independent

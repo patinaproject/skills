@@ -37,12 +37,11 @@ pnpm lint:md
 ## Pull requests
 
 - Keep the PR title in commitlint format.
-- Fill in the [PR template](./.github/pull_request_template.md): a `Linked issue`
-  closing keyword and a plain-prose `What changed` for a reader who has not seen
-  the work.
-- Treat GitHub Checks as the source of truth for routine automated verification.
-- Add `Testing steps` only ad hoc, when a produced artifact needs human
-  inspection (rendered docs, generated files, a template, release notes).
+- Write the body with the Descriptions sections from
+  `plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`.
+- Put one `Closes #N`, `Fixes #N`, or `Resolves #N` line in `## Scope` for each
+  completed issue.
+- State each check and its result in `## Verification`.
 - Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 ## Further reading
