@@ -56,6 +56,103 @@ if [ -f "$WORKFLOW" ]; then
   assert_match 'PR commit messages include.*BREAKING CHANGE.*footer' "$WORKFLOW"
   assert_match 'Add.*to the type' "$WORKFLOW"
   assert_no_match 'Compare title `!` with body BREAKING CHANGE footer' "$WORKFLOW"
+
+  node --input-type=commonjs - "$WORKFLOW" <<'NODE'
+const fs = require('node:fs')
+
+const workflow = fs.readFileSync(process.argv[2], 'utf8')
+const lintJob = workflow.match(/^  lint:\n([\s\S]*?)(?=^  [A-Za-z0-9_-]+:|(?![\s\S]))/m)
+const ifLine = lintJob?.[1].match(/^    if:\s*(.+)$/m)
+
+if (!ifLine) {
+  console.error('FAIL: could not extract jobs.lint.if from the pull request workflow')
+  process.exit(1)
+}
+
+const scalar = ifLine[1].trim()
+const expression = (scalar.startsWith('"') ? JSON.parse(scalar) : scalar)
+  .replace(/^\$\{\{\s*/, '')
+  .replace(/\s*\}\}$/, '')
+  .replace(
+    /github\.event\.pull_request\.labels\.\*\.name/g,
+    'github.event.pull_request.labels.map((label) => label.name)',
+  )
+
+const evaluate = new Function(
+  'github',
+  'contains',
+  'startsWith',
+  `return Boolean(${expression})`,
+)
+const contains = (collection, value) => collection.includes(value)
+const startsWith = (value, prefix) => value.startsWith(prefix)
+const repository = 'patinaproject/skills'
+const cases = [
+  {
+    name: 'same-repository release branch without label',
+    headRepository: repository,
+    headRef: 'release-please--branches--main--components--patinaproject-skills',
+    labels: [],
+    expected: false,
+  },
+  {
+    name: 'same-repository ordinary branch',
+    headRepository: repository,
+    headRef: 'feature/update-workflow',
+    labels: [],
+    expected: true,
+  },
+  {
+    name: 'fork release-looking branch',
+    headRepository: 'contributor/skills',
+    headRef: 'release-please--branches--main--components--patinaproject-skills',
+    labels: [],
+    expected: true,
+  },
+  {
+    name: 'pending-label pull request',
+    headRepository: repository,
+    headRef: 'feature/update-workflow',
+    labels: [{ name: 'autorelease: pending' }],
+    expected: false,
+  },
+  {
+    name: 'near-prefix ordinary branch',
+    headRepository: repository,
+    headRef: 'release-please-branches--main',
+    labels: [],
+    expected: true,
+  },
+]
+
+let failures = 0
+for (const testCase of cases) {
+  const github = {
+    repository,
+    event: {
+      pull_request: {
+        head: {
+          ref: testCase.headRef,
+          repo: { full_name: testCase.headRepository },
+        },
+        labels: testCase.labels,
+      },
+    },
+  }
+  const actual = evaluate(github, contains, startsWith)
+  if (actual !== testCase.expected) {
+    const expected = testCase.expected ? 'run' : 'skip'
+    const observed = actual ? 'run' : 'skip'
+    console.error(`FAIL: ${testCase.name} should ${expected}, observed ${observed}`)
+    failures += 1
+  }
+}
+
+if (failures > 0) {
+  console.error(`FAIL: ${failures} pull request lint classification assertion(s) failed`)
+  process.exit(1)
+}
+NODE
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
