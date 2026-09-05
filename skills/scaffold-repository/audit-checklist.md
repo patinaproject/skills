@@ -56,7 +56,7 @@ each file must contain.
 
 | File or setting | Required | Check |
 | --- | --- | --- |
-| `.github/pull_request_template.md` | yes | Has `## Linked issue` with the correct closing reference for the repository's issue tracker, followed by a plain-language `## What changed` section. It has no permanent `## Testing steps` section. Add that section only when a person must inspect an artifact. The issue reference matches whether the repository is public or private. |
+| `.github/pull_request_template.md` | yes | Contains HTML comments only, with no visible body text or section headings. The comments remind authors to add one closing reference per completed issue using the repository's tracker format and to avoid accidental agent mentions. |
 | `.github/ISSUE_TEMPLATE/config.yml` | yes | Public repositories accept GitHub issues. Private repositories disable blank issues and direct people to Linear. |
 | GitHub issue forms | depends on visibility | Public repositories may have them. Private repositories do not. |
 | `.github/CODEOWNERS` | yes | Has at least one rule that is not a comment. |
@@ -68,9 +68,9 @@ each file must contain.
 | Default workflow permission | yes | `gh api repos/<owner>/<repo>/actions/permissions/workflow --jq .default_workflow_permissions` returns `write`. If it returns `read`, recommend **Settings > Actions > General > Workflow permissions > Read and write permissions**. Run this check even before the first release. |
 | Tag signature rules | yes | `gh api repos/<owner>/<repo>/rulesets --jq '.[] \| select(.target=="tag")'` finds no `required_signatures` rule that applies to release tags. Release Please cannot sign tags. If such a rule exists, recommend limiting it to branches or non-release tags. |
 
-Treat a pull request template as `stale` when it asks for command transcripts,
-routine automated test evidence, or an empty testing section on every pull
-request.
+Treat a pull request template as `stale` when it contains visible body text or
+section headings. The repository's pull request instructions own the body
+structure.
 
 ### Required GitHub label
 
