@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # install-machinery.sh — install Engineering's repo-level machinery for
 # skills-only consumers, idempotently. Re-running converges on the same state:
-# one managed mandate block per instructions file, the two subagent files in
-# place, and multi_agent enabled once. Content outside the managed markers is
+# one managed mandate block per instructions file, the Engineering agent files
+# in place, and multi_agent enabled once. Content outside the managed markers is
 # never touched.
 #
-# Repo side (always): copies the patina-agent and comment-sicko subagents into
-# <repo>/.claude/agents/ and upserts the patina-mode mandate block into
+# Repo side (always): copies the Engineering agents into <repo>/.claude/agents/
+# and upserts the patina-mode mandate block into
 # <repo>/CLAUDE.md. Codex side (--codex): upserts the mandate block into
 # <repo>/AGENTS.md and enables multi_agent in <repo>/.codex/config.toml, so the
 # machinery is committed and shared across contributors rather than written into
@@ -20,7 +20,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ASSETS_DIR="${SCRIPT_DIR}/../assets"
+ASSETS_DIR="$(cd "${SCRIPT_DIR}/../assets" && pwd)"
+SKILLS_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 BEGIN_MARKER='<!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->'
 END_MARKER='<!-- END engineering:patina-mode -->'
@@ -30,6 +31,16 @@ instructions=""
 do_codex=0
 codex_config=""
 codex_agents=""
+
+fail() {
+  echo "install-machinery.sh: $1" >&2
+  exit 1
+}
+
+require_file() {
+  local path="$1"
+  [ -f "$path" ] || fail "missing required file: $path. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering."
+}
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -48,6 +59,11 @@ fi
 [ -n "$instructions" ] || instructions="${repo}/CLAUDE.md"
 [ -n "$codex_config" ] || codex_config="${repo}/.codex/config.toml"
 [ -n "$codex_agents" ] || codex_agents="${repo}/AGENTS.md"
+
+require_file "${SKILLS_DIR}/setup-pstack/SKILL.md"
+require_file "${SKILLS_DIR}/patina-mode/references/provider-dispatch.md"
+require_file "${SKILLS_DIR}/patina-mode/references/codex-tools.md"
+require_file "${ASSETS_DIR}/mandate.md"
 
 # Rewrite a file through its own path so a symlinked instructions file (for
 # example a CLAUDE.md pointing at AGENTS.md) keeps pointing where it did.
@@ -129,11 +145,14 @@ enable_multi_agent() {
 
 agents_dir="${repo}/.claude/agents"
 mkdir -p "$agents_dir"
-cp "${ASSETS_DIR}/agents/patina-agent.md" "${agents_dir}/patina-agent.md"
-cp "${ASSETS_DIR}/agents/comment-sicko.md" "${agents_dir}/comment-sicko.md"
+agent_assets=("${ASSETS_DIR}"/agents/*.md)
+[ -e "${agent_assets[0]}" ] || fail "missing required file: ${ASSETS_DIR}/agents/*.md. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering."
+for agent_asset in "${agent_assets[@]}"; do
+  agent_name="$(basename "$agent_asset")"
+  cp "$agent_asset" "${agents_dir}/${agent_name}"
+  echo "installed: ${agents_dir}/${agent_name}"
+done
 upsert_block "$instructions" "${ASSETS_DIR}/mandate.md"
-echo "installed: ${agents_dir}/patina-agent.md"
-echo "installed: ${agents_dir}/comment-sicko.md"
 echo "mandate block upserted: ${instructions}"
 
 if [ "$do_codex" -eq 1 ]; then
