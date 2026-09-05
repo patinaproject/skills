@@ -46,21 +46,34 @@ the root `docs/adr/` for placement.
 NEVER ask the operator to decide any ADR mechanic. Report the path you chose and
 the decision it records as the design settles.
 
+## Capture
+
+Keep each ADR's decision, rationale, alternatives, consequences, and destination
+in the conversation. Keep each glossary term's agreed fields and owning context
+in the conversation. Settle the term, definition, and words to avoid with the
+operator using `CONTEXT-FORMAT.md`.
+
+Make later revisions explicit so `/to-spec` uses the latest agreement.
+Account for every agreed term and decision.
+Record the reason for each item that needs no documentation change.
+Leave file-ready proposal text to `/to-spec`.
+Do not print fenced documentation proposals in chat.
+
+When the repository has a `CONTEXT-MAP.md`, place each term in its context's
+`CONTEXT.md`. Apply the question boundary to every ADR.
+
+When you run `/to-spec` in this conversation, include one proposal in the
+published spec per agreed ADR and glossary term that needs a documentation
+change. Include each proposal's complete body in the `domain-modeling` format
+and its destination path. State the reason for each agreed item that needs no
+documentation change.
+
 ## Steps
 
 1. Record `git status --porcelain`, read the ADR sources required by the
    question boundary, and read the rules and formats from `domain-modeling`.
 2. Run `grilling` until the frontier is empty and the operator confirms a
-   shared understanding. As decisions settle, keep their substance in the
-   conversation, including each ADR's decision, rationale, alternatives,
-   consequences, and destination, and each glossary term's definition and
-   owning context. Make later revisions explicit so `/to-spec` uses the latest
-   agreement. Account for every agreed term and decision, including the reason
-   for any that needs no documentation change. Leave file-ready proposal text
-   to `/to-spec`. Do not print fenced documentation proposals in chat.
-   Use `CONTEXT-FORMAT.md` for glossary entries. When the repository has a
-   `CONTEXT-MAP.md`, place each term in its context's `CONTEXT.md`. Apply the
-   question boundary to every ADR.
+   shared understanding. Capture decisions per [Capture](#capture).
 3. Confirm that `git status --porcelain` matches the result from step 1. Stop if
    this session changed the worktree.
 4. Finish with only a confirmation of shared understanding and a one-line
