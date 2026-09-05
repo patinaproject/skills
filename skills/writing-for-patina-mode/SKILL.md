@@ -15,8 +15,9 @@ perform the work that the prompt describes.
 2. Open the active `patina-mode` skill's `SKILL.md` from the skills catalog.
    Read it in full without executing it. Treat its Playbooks section as the
    routing source of truth.
-3. Select the one playbook that most specifically matches the operator's work.
-   Read that playbook in full from the path named by `patina-mode`.
+3. Select the one governing playbook that most specifically matches the
+   operator's work. Read that playbook in full from the path named by
+   `patina-mode`; let it invoke other playbooks internally.
 4. When a repository is in scope, read `AGENTS.md` at the repository root and
    the repository documents that it says govern the work.
 
@@ -43,21 +44,23 @@ even when its general mechanism already has an owner.
 
 ## Write the prompt
 
-Write one line containing the route and a plain-English sentence of at most 30
-words:
+Write one line containing `/patina-mode` and a plain-English sentence of at
+most 30 words:
 
 ```text
-/patina-mode <one canonical playbook name> <imperative work definition ending in an observable done condition>.
+/patina-mode <sentence>
 ```
 
 Fold the proof into the done condition. Weave in an ownership boundary only
-when the operator sets one. Name the selected playbook once. Do not name
-alternatives or use field labels.
+when the operator sets one. Name the governing playbook once inside the sentence
+with `Use <canonical playbook name> to`. Let it own any internal composition;
+do not name alternatives or use field labels.
 
 For Autopilot-full and Orchestrate, begin the sentence with `Go, be fully
-autonomous, and`, call the work the `program objective`, and keep the proof and
-done condition in that sentence. Those words supply the standing objective,
-session override, and authorization to start.
+autonomous, and use <canonical playbook name> to`, call the work the `program
+objective`, and keep the proof and done condition in that sentence. Those words
+supply the route, standing objective, session override, and authorization to
+start.
 
 When the intent names a condition that requires a person's decision, weave this
 clause into the sentence:
@@ -73,13 +76,13 @@ and notification mechanics.
 
 Before returning the prompt, confirm all of these statements:
 
-- The prompt names exactly one current `patina-mode` playbook.
-- The prompt is one line containing exactly one plain-English sentence of at
-  most 30 words after the route.
+- The prompt names exactly one governing `patina-mode` playbook.
+- The prompt matches `/patina-mode <sentence>` on one line, with exactly one
+  plain-English sentence of at most 30 words.
 - The done predicate contains an observable result, count, state, or artifact.
 - Every line changes the run beyond what its governing documents already say.
 - An Autopilot-full or Orchestrate sentence begins `Go, be fully autonomous,
-  and` and contains `program objective`.
+  and use <canonical playbook name> to` and contains `program objective`.
 - A human escalation appears as a checkpoint gate, never as a mid-run question.
 - The prompt uses positive, direct instructions.
 
