@@ -12,8 +12,8 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
-- `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
-  `/to-spec` as proposals instead of the worktree
+- `skills/grill-to-spec/`: grill-and-hand-off skill that hands settled
+  decisions to `/to-spec`, which writes the doc-change proposals
 - `skills/design-by-contract/`: consequential system contract design overlay
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
@@ -65,7 +65,7 @@ Skills owned by this repository:
 | `move-branch-here` | `plugins/engineering/skills/move-branch-here/` | Worktree branch handover workflow |
 | `move-session-here` | `plugins/engineering/skills/move-session-here/` | Claude Code and Codex session transcript handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
-| `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| `grill-to-spec` | `skills/grill-to-spec/` | Settle a design for `/to-spec` to publish with doc-change proposals |
 | `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
 | `principle-offensive-programming` | `plugins/engineering/skills/principle-offensive-programming/` | Defensive-code classification principle |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |

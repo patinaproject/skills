@@ -10,8 +10,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
-- `skills/grill-to-spec/`: grill-and-hand-off skill that sends doc changes to
-  `/to-spec` as proposals instead of the worktree
+- `skills/grill-to-spec/`: grill-and-hand-off skill that hands settled
+  decisions to `/to-spec`, which writes the doc-change proposals
 - `skills/design-by-contract/`: consequential system contract design overlay
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill

@@ -110,12 +110,14 @@ the skill contract.
 
 ### grill-to-spec
 
-Grilling usually happens away from the branch that will implement the outcome —
-a separate chat, a scratch worktree, or before any branch exists. Writing the
+Grilling usually happens away from the branch that will implement the outcome,
+in a separate chat, a scratch worktree, or before any branch exists. Writing the
 resulting ADR and glossary edits into that tree strands them there.
-`grill-to-spec` grills the design to settled and hands it to `/to-spec` with its
-doc changes as file-ready proposals, so the worktree can be thrown away and
-the implementing branch can apply them verbatim.
+`grill-to-spec` ends when the frontier is empty and the operator confirms a
+shared understanding, then asks them to run `/to-spec`. The settled decisions
+stay in the conversation. `/to-spec` turns them into complete file-ready ADR
+and glossary proposals on the published spec for the implementing branch to
+apply verbatim.
 
 See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
 
@@ -205,7 +207,7 @@ README and skill contract.
 | [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
 | [move-branch-here](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
-| [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| [grill-to-spec](./skills/grill-to-spec/) | Settle a design for `/to-spec` to publish with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
