@@ -160,14 +160,14 @@ rounds for a human reviewer.
 See [./skills/review-system-design/](./skills/review-system-design/) for the
 skill contract.
 
-### writing-for-patina-mode
+### writing-for-pstack
 
-`writing-for-patina-mode` turns plain-language work or a draft into one short
+`writing-for-pstack` turns plain-language work or a draft into one short
 operator prompt. It selects one current `patina-mode` playbook, keeps the facts
 that only the operator can supply, and names the owner of each rule removed
 from a draft.
 
-See [./skills/writing-for-patina-mode/](./skills/writing-for-patina-mode/) for
+See [./skills/writing-for-pstack/](./skills/writing-for-pstack/) for
 the skill contract.
 
 ### gather-evidence
@@ -212,7 +212,7 @@ README and skill contract.
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [writing-for-patina-mode](./skills/writing-for-patina-mode/) | Write a short operator prompt for one `patina-mode` playbook |
+| [writing-for-pstack](./skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -259,7 +259,7 @@ skills/
   design-by-contract/
   grill-system-design/
   review-system-design/
-  writing-for-patina-mode/
+  writing-for-pstack/
 plugins/engineering/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json

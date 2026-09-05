@@ -16,7 +16,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
-- `skills/writing-for-patina-mode/`: operator prompt authoring for `patina-mode`
+- `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
@@ -273,7 +273,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | design-by-contract | `skills/design-by-contract/` |
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
-| writing-for-patina-mode | `skills/writing-for-patina-mode/` |
+| writing-for-pstack | `skills/writing-for-pstack/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |
 | move-session-here | `plugins/engineering/skills/move-session-here/` |
