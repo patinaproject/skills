@@ -31,10 +31,12 @@ For GitHub work:
   [the pull request comment instructions](workflows/pr-comments.md).
 - To build, publish, and merge completed work, use the Engineering plugin's
   `patina-mode` skill, which owns the pull request and shipping workflow.
-- To create or update a pull request by hand, follow the pull request template
-  with `gh pr create --body-file`, honoring its draft, checks, and review rules.
+- To create or update a pull request by hand, follow the repository's body
+  contract with `gh pr create --body-file`. Honor its draft, check, and review
+  rules.
 - For checks, releases, repository settings, and other GitHub data, use `gh`
   after reading the repository instructions.
 
-Use the pull request template headings in their existing order. Follow the
-commit and pull request title rules in the repository's `AGENTS.md`.
+Use the pull request body headings named by the repository instructions in
+their existing order. Follow the commit and pull request title rules in the
+repository's `AGENTS.md`.
