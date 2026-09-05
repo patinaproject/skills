@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.40.0](https://github.com/patinaproject/skills/compare/v2.39.0...v2.40.0) (2026-09-05)
+
+
+### Features
+
+* [#436](https://github.com/patinaproject/skills/issues/436) add patina-mode prompt authoring skill ([#439](https://github.com/patinaproject/skills/issues/439)) ([f1389f6](https://github.com/patinaproject/skills/commit/f1389f66ad16f52b152db4afa04d8b4903f8dc0d))
+
+
+### Bug Fixes
+
+* [#437](https://github.com/patinaproject/skills/issues/437) mint release PR tokens with the release app ([#441](https://github.com/patinaproject/skills/issues/441)) ([52c34c4](https://github.com/patinaproject/skills/commit/52c34c414a07f8803078e063ba2dac10ee1a3d4b))
+
 ## [2.39.0](https://github.com/patinaproject/skills/compare/v2.38.1...v2.39.0) (2026-09-05)
 
 
