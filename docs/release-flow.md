@@ -119,23 +119,25 @@ CLI break may fail PR checks even when the branch did not change skill files. In
 that case, confirm the break against the local-path commands, then update the
 examples, scaffolded wrappers, or policy here in the same PR that restores CI.
 
-## Token setup (required for automated release PRs)
+## Token setup (required)
 
-By default `release-please-action` would run with `token: ${{ github.token }}`,
-which has a known GitHub limitation:
+`release-please.yml` authors its PRs with `token: ${{ secrets.RELEASE_PLEASE_TOKEN }}`.
+This is required, not optional: the default `GITHUB_TOKEN` has a known GitHub
+limitation:
 
 > PRs created with `GITHUB_TOKEN` do not trigger subsequent workflow runs.
 
-The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore do
-NOT run on bot-created release PRs, so the auto-merge job in `release-please.yml`
+The repo's required PR checks (`lint`, `markdown`, `verify`, etc.) therefore
+would NOT run on release PRs authored by `GITHUB_TOKEN`, and the auto-merge job
 would wait indefinitely. GitHub has no per-actor trust allowlist that would let
-you exempt `github-actions[bot]` from the workflow-approval gate, so the fix is
-to author the PRs with a non-`GITHUB_TOKEN` identity.
+you exempt `github-actions[bot]` from the workflow-approval gate, so the PRs
+must be authored by a non-`GITHUB_TOKEN` identity.
 
-`release-please.yml` already resolves its token as
-`${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}`: it prefers the App/PAT
-secret and falls back to `GITHUB_TOKEN` when the secret is unset. Adding the
-secret is therefore the only step needed — no workflow edit:
+There is deliberately no fallback to `GITHUB_TOKEN`. The workflow asserts the
+secret in a `Require RELEASE_PLEASE_TOKEN` step and fails the run with a clear
+error if it is missing, rather than silently degrading to the broken path.
+
+Configure it once:
 
 1. Create a GitHub App (preferred over a PAT, since it is not tied to a person)
    with these permissions, then install it on this repository and generate a
@@ -146,6 +148,4 @@ secret is therefore the only step needed — no workflow edit:
 2. Add the token as a repository secret named `RELEASE_PLEASE_TOKEN`.
 
 Once the secret exists, release PRs are authored by the App identity, their
-required checks run automatically, and auto-merge proceeds once they pass. Until
-then, release PRs fall back to `GITHUB_TOKEN` and need a manual
-`git commit --allow-empty` or maintainer push to trigger checks.
+required checks run automatically, and auto-merge proceeds once they pass.

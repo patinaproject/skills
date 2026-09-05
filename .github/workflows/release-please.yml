@@ -17,27 +17,31 @@ jobs:
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
     steps:
+      # release-please MUST author its PRs with a GitHub App/PAT identity
+      # (RELEASE_PLEASE_TOKEN). The default GITHUB_TOKEN cannot: PRs it creates
+      # do not trigger workflow runs (GitHub's anti-recursion safeguard), so
+      # required checks never run and auto-merge stalls. A missing secret is a
+      # misconfiguration, not a fallback case — fail the run loudly here rather
+      # than degrading to the broken GITHUB_TOKEN path. See docs/release-flow.md.
+      - name: Require RELEASE_PLEASE_TOKEN
+        env:
+          RELEASE_PLEASE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_PLEASE_TOKEN" ]; then
+            echo "::error::RELEASE_PLEASE_TOKEN secret is not set. Release automation requires a GitHub App or PAT token with contents/pull-requests/issues: write so release PR checks run. See docs/release-flow.md."
+            exit 1
+          fi
+
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       # googleapis/release-please-action@v4.1.3
-      #
-      # NOTE: PRs created with the default GITHUB_TOKEN do NOT trigger subsequent
-      # workflow runs (GitHub's anti-recursion safeguard), so required PR checks
-      # never run on bot release PRs and the auto-merge job below waits forever.
-      #
-      # The token below prefers `RELEASE_PLEASE_TOKEN` (a GitHub App token or PAT
-      # with `contents: write` + `pull-requests: write` + `issues: write`) and
-      # falls back to GITHUB_TOKEN when that secret is unset. Adding the secret
-      # is therefore the only step needed to enable fully-automated release PRs:
-      # release PRs authored by the App identity trigger checks normally and
-      # auto-merge once green, with no workflow edit. See docs/release-flow.md.
       - uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f
         id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
   auto-merge:
     name: Enable auto-merge on release PRs
