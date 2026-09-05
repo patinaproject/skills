@@ -296,6 +296,17 @@ function mapRuntimeRow(row, threadId, databasePath) {
 
 async function openSnapshot(snapshot, databasePath) {
   let DatabaseSync;
+  const emitWarning = process.emitWarning;
+  process.emitWarning = function (warning, type, ...args) {
+    // Keep the lazy SQLite import's notice out of the CLI's JSON error stream.
+    if (
+      type === 'ExperimentalWarning' &&
+      warning === 'SQLite is an experimental feature and might change at any time'
+    ) {
+      return;
+    }
+    return emitWarning.call(this, warning, type, ...args);
+  };
   try {
     ({ DatabaseSync } = await import('node:sqlite'));
   } catch {
@@ -303,6 +314,8 @@ async function openSnapshot(snapshot, databasePath) {
       databasePath,
       message: 'This Node.js runtime does not provide node:sqlite.',
     });
+  } finally {
+    process.emitWarning = emitWarning;
   }
   try {
     return new DatabaseSync(snapshot.databasePath, { readOnly: true });

@@ -114,11 +114,13 @@ function runHandoff(reference, environment = {}, preload) {
 
 function parseSuccess(result) {
   assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr, '');
   return JSON.parse(result.stdout);
 }
 
 function expectError(result, code, status) {
   assert.equal(result.status, status, result.stderr || result.stdout);
+  assert.equal(result.stdout, '');
   const error = JSON.parse(result.stderr);
   assert.equal(error.error, code);
   return error;
@@ -270,6 +272,49 @@ try {
   );
   assert.equal(existsSync(sentinel), false);
   assert.deepEqual(readdirSync(privateTmp), []);
+
+  for (const failImport of [false, true]) {
+    await test(`SQLite warning filtering preserves other warnings and restores after import ${failImport ? 'failure' : 'success'}`, () => {
+      const preload = writePreload(`sqlite-warnings-${failImport}`, `
+import { registerHooks } from 'node:module';
+const sqliteWarning = 'SQLite is an experimental feature and might change at any time';
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === 'node:sqlite') {
+      process.emitWarning('Synthetic unrelated experiment', 'ExperimentalWarning');
+      process.emitWarning(sqliteWarning, 'Warning');
+      ${failImport ? "throw new Error('Synthetic unavailable SQLite');" : ''}
+    }
+    return nextResolve(specifier, context);
+  },
+});
+process.once('beforeExit', () => {
+  process.emitWarning(sqliteWarning, 'ExperimentalWarning');
+});`);
+      const result = runHandoff(`t3://threads/${t3CodexId}`, {
+        T3_STATE_DB: databasePath,
+      }, preload);
+      assert.equal(result.status, failImport ? 1 : 0, result.stderr);
+      if (failImport) {
+        assert.equal(result.stdout, '');
+        assert.match(result.stderr, /"error": "t3_sqlite_unavailable"/);
+      } else {
+        assert.equal(JSON.parse(result.stdout).sessionId, codexId);
+      }
+      assert.equal(
+        result.stderr.match(/ExperimentalWarning: SQLite is an experimental feature/g)?.length,
+        1
+      );
+      assert.match(result.stderr, /\) Warning: SQLite is an experimental feature/);
+      assert.match(result.stderr, /ExperimentalWarning: Synthetic unrelated experiment/);
+
+      const direct = runHandoff(claudeId, {}, preload);
+      assert.equal(direct.status, 0, direct.stderr);
+      assert.equal(JSON.parse(direct.stdout).sessionId, claudeId);
+      assert.match(direct.stderr, /ExperimentalWarning: SQLite is an experimental feature/);
+      assert.doesNotMatch(direct.stderr, /Synthetic unrelated experiment/);
+    });
+  }
 
   const mainOnlyPath = join(fixtureRoot, 'main-only.sqlite');
   copyFileSync(databasePath, mainOnlyPath);
