@@ -235,7 +235,7 @@ section headings in order and omit empty sections. Put exactly one `Closes #N`,
 `Fixes #N`, or `Resolves #N` line in `## Scope` for each completed issue.
 
 `.github/pull_request_template.md` only reminds authors about the closing
-reference and agent mentions. It does not define the body structure. Use
+reference. It does not define the body structure. Use
 `gh pr create --body-file <path-to-rendered-body>` with a body that already
 follows the playbook.
 

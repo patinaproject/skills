@@ -15,13 +15,19 @@ repositories created by `scaffold-repository` do not receive that playbook
 
 The root `.github/pull_request_template.md` is a comment-only reminder, and
 this repository's instructions give `opening-a-pr` sole ownership of body
-structure. `scaffold-repository` keeps its standalone consumer contract in
-`skills/scaffold-repository/pr-body-template.md` and copies that file instead
-of the root template. This supersedes ADR-257's single shared template.
+structure. `scaffold-repository` copies its bundled
+`skills/scaffold-repository/pr-body-template.md` for consumers. This supersedes
+ADR-257's single shared template.
+
+[#465](https://github.com/patinaproject/skills/issues/465) limits both templates
+to a closing-reference reminder. The consuming repository's tracker adapter
+selects one authoritative reference per completed issue. The integration and
+existing closing-reference check determine the accepted reference forms.
 
 ## Consequences
 
 This repository dogfoods the playbook it publishes without leaving ordinary
-scaffold consumers with a pointer to an unavailable contract. The scaffold
-template continues to provide `Linked issue` and `What changed` sections, and
-consumer instructions must point to a body contract present in their own tree.
+scaffold consumers with a pointer to an unavailable contract. Consumer
+instructions name their active workflow when it defines body structure.
+Otherwise, the author chooses the structure. Neither template prescribes body
+sections or duplicate references to synchronized issues.
