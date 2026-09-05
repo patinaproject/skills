@@ -11,7 +11,8 @@
 # <repo>/AGENTS.md and enables multi_agent in <repo>/.codex/config.toml, so the
 # machinery is committed and shared across contributors rather than written into
 # any one user's global Codex config. Codex loads a repo-scoped .codex/config.toml
-# only for trusted projects.
+# only for trusted projects. On success, the final output line names the
+# setup-pstack skill that continues configuration.
 #
 # Usage:
 #   install-machinery.sh [--repo <dir>] [--instructions <file>]
@@ -22,6 +23,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ASSETS_DIR="$(cd "${SCRIPT_DIR}/../assets" && pwd)"
 SKILLS_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SETUP_PSTACK_SKILL="${SKILLS_DIR}/setup-pstack/SKILL.md"
 
 BEGIN_MARKER='<!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->'
 END_MARKER='<!-- END engineering:patina-mode -->'
@@ -60,7 +62,7 @@ fi
 [ -n "$codex_config" ] || codex_config="${repo}/.codex/config.toml"
 [ -n "$codex_agents" ] || codex_agents="${repo}/AGENTS.md"
 
-require_file "${SKILLS_DIR}/setup-pstack/SKILL.md"
+require_file "$SETUP_PSTACK_SKILL"
 require_file "${SKILLS_DIR}/patina-mode/references/provider-dispatch.md"
 require_file "${SKILLS_DIR}/patina-mode/references/codex-tools.md"
 require_file "${ASSETS_DIR}/mandate.md"
@@ -161,3 +163,5 @@ if [ "$do_codex" -eq 1 ]; then
   echo "mandate block upserted: ${codex_agents}"
   echo "multi_agent enabled: ${codex_config}"
 fi
+
+echo "next skill: ${SETUP_PSTACK_SKILL}"

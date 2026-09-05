@@ -53,14 +53,19 @@ printf '# My Codex rules\n\nUnrelated line.\n' > "$CODEX/AGENTS.md"
 
 run_install() {
   bash "$SCRIPT" --repo "$REPO" --codex \
-    --codex-config "$CODEX/config.toml" --codex-agents "$CODEX/AGENTS.md" >/dev/null
+    --codex-config "$CODEX/config.toml" --codex-agents "$CODEX/AGENTS.md"
 }
 
-run_install
+first_output="$(run_install)"
 before_second_run="$(snapshot_files "$REPO" "$CODEX")"
-run_install
+second_output="$(run_install)"
 after_second_run="$(snapshot_files "$REPO" "$CODEX")"
 [ "$before_second_run" = "$after_second_run" ] || fail "second install changed existing machinery files"
+expected_next="next skill: $REPO_ROOT/${SKILL%/*}/setup-pstack/SKILL.md"
+for install_output in "$first_output" "$second_output"; do
+  [ "$(printf '%s\n' "$install_output" | tail -n 1)" = "$expected_next" ] \
+    || fail "install did not end with the setup-pstack handoff"
+done
 
 BEGIN='<!-- BEGIN engineering:patina-mode'
 END='<!-- END engineering:patina-mode -->'
@@ -151,6 +156,10 @@ printf '%s\n' "$missing_output" | grep -qF "missing required file: $MISSING/skil
   || fail "missing setup-pstack failure did not name the missing file"
 printf '%s\n' "$missing_output" | grep -qF "Install the full Engineering skill catalog" \
   || fail "missing setup-pstack failure did not name the remedy"
+[ "$(printf '%s\n' "$missing_output" | grep -c '^next skill:' || true)" -eq 0 ] \
+  || fail "missing setup-pstack failure emitted a success handoff"
+[ ! -e "$TMP/missing-repo" ] \
+  || fail "missing setup-pstack failure changed the target repository"
 
 MISSING_REF="$TMP/missing-ref"
 mkdir -p "$MISSING_REF/skills"
