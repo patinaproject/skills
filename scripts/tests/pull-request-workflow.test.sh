@@ -33,6 +33,23 @@ assert_no_match() {
   fi
 }
 
+closing_check_script() {
+  awk '
+    /^      - name: Check for closing keyword in PR body$/ { step = 1; next }
+    step && /^        run: \|$/ { run = 1; next }
+    run && /^      - name:/ { exit }
+    run { sub(/^          /, ""); print }
+  ' "$WORKFLOW"
+}
+
+run_closing_check() {
+  local body="$1"
+  closing_check_script | env \
+    PR_BODY="$body" \
+    GITHUB_REPOSITORY="patinaproject/skills" \
+    bash >/dev/null 2>&1
+}
+
 assert_file "$WORKFLOW"
 
 node --input-type=commonjs <<'NODE'
@@ -318,6 +335,46 @@ if (failures > 0) {
   process.exit(1)
 }
 NODE
+fi
+
+OPENING_BODY='## Why
+
+Use one pull request body contract.
+
+## Scope
+
+Closes #445
+
+## Blast Radius
+
+Pull request authors use the opening-a-pr sections.
+
+## Verification
+
+The closing-reference check accepts this body.'
+
+if ! run_closing_check "$OPENING_BODY"; then
+  fail "opening-a-pr body with a closing reference failed the workflow check"
+fi
+
+BODY_WITHOUT_CLOSE='## Why
+
+Use one pull request body contract.
+
+## Scope
+
+Retire the old headings.
+
+## Blast Radius
+
+Pull request authors use the opening-a-pr sections.
+
+## Verification
+
+The closing-reference check rejects this body.'
+
+if run_closing_check "$BODY_WITHOUT_CLOSE"; then
+  fail "opening-a-pr body without a closing reference passed the workflow check"
 fi
 
 if [ "$FAIL_COUNT" -gt 0 ]; then

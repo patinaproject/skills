@@ -52,10 +52,10 @@ Check any other `sourceType` with that source's own listing command. Every
 entry must print `ok`. For each missing path, use the source listing from step 1
 to find a replacement or remove the lock entry, then run the check again.
 
-## Pull request summary
+## Pull request scope
 
-In the pull request's `What changed` section, summarize the lockfile change with
-counts taken from `git diff -- skills-lock.json`:
+In the pull request's `## Scope` section, summarize the lockfile change with
+counts from `git diff -- skills-lock.json`:
 
 ```md
 The installed skill list changed from N to M skills.
