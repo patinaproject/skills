@@ -8,6 +8,6 @@
     "./skills/design-by-contract",
     "./skills/grill-system-design",
     "./skills/review-system-design",
-    "./skills/writing-for-patina-mode"
+    "./skills/writing-for-pstack"
   ]
 }

@@ -1,5 +1,5 @@
 ---
-name: writing-for-patina-mode
+name: writing-for-pstack
 description: Write or tighten an operator prompt for a patina-mode run. Use when the operator asks to write, revise, or review a prompt that will be passed to patina-mode.
 ---
 
