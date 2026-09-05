@@ -1,6 +1,6 @@
 {
   "name": "patinaproject-skills",
-  "version": "2.41.0",
+  "version": "2.42.0",
   "skills": [
     "./skills/scaffold-repository",
     "./skills/using-github",
@@ -9,6 +9,6 @@
     "./skills/design-by-contract",
     "./skills/grill-system-design",
     "./skills/review-system-design",
-    "./skills/writing-for-patina-mode"
+    "./skills/writing-for-pstack"
   ]
 }

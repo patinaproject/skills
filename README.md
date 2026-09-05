@@ -110,12 +110,14 @@ the skill contract.
 
 ### grill-to-spec
 
-Grilling usually happens away from the branch that will implement the outcome —
-a separate chat, a scratch worktree, or before any branch exists. Writing the
+Grilling usually happens away from the branch that will implement the outcome,
+in a separate chat, a scratch worktree, or before any branch exists. Writing the
 resulting ADR and glossary edits into that tree strands them there.
-`grill-to-spec` grills the design to settled and hands it to `/to-spec` with its
-doc changes as file-ready proposals, so the worktree can be thrown away and
-the implementing branch can apply them verbatim.
+`grill-to-spec` ends when the frontier is empty and the operator confirms a
+shared understanding, then asks them to run `/to-spec`. The settled decisions
+stay in the conversation. `/to-spec` turns them into complete file-ready ADR
+and glossary proposals on the published spec for the implementing branch to
+apply verbatim.
 
 See [./skills/grill-to-spec/](./skills/grill-to-spec/) for the skill contract.
 
@@ -158,14 +160,14 @@ rounds for a human reviewer.
 See [./skills/review-system-design/](./skills/review-system-design/) for the
 skill contract.
 
-### writing-for-patina-mode
+### writing-for-pstack
 
-`writing-for-patina-mode` turns plain-language work or a draft into one short
+`writing-for-pstack` turns plain-language work or a draft into one short
 operator prompt. It selects one current `patina-mode` playbook, keeps the facts
 that only the operator can supply, and names the owner of each rule removed
 from a draft.
 
-See [./skills/writing-for-patina-mode/](./skills/writing-for-patina-mode/) for
+See [./skills/writing-for-pstack/](./skills/writing-for-pstack/) for
 the skill contract.
 
 ### gather-evidence
@@ -205,12 +207,12 @@ README and skill contract.
 | [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
 | [move-branch-here](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
-| [grill-to-spec](./skills/grill-to-spec/) | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| [grill-to-spec](./skills/grill-to-spec/) | Settle a design for `/to-spec` to publish with doc-change proposals |
 | [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to a specification |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [writing-for-patina-mode](./skills/writing-for-patina-mode/) | Write a short operator prompt for one `patina-mode` playbook |
+| [writing-for-pstack](./skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -257,7 +259,7 @@ skills/
   design-by-contract/
   grill-system-design/
   review-system-design/
-  writing-for-patina-mode/
+  writing-for-pstack/
 plugins/engineering/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json
