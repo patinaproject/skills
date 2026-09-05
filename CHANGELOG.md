@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.0](https://github.com/patinaproject/skills/compare/v2.40.0...v2.41.0) (2026-09-05)
+
+
+### Features
+
+* [#450](https://github.com/patinaproject/skills/issues/450) support optional model families ([#456](https://github.com/patinaproject/skills/issues/456)) ([332b04d](https://github.com/patinaproject/skills/commit/332b04d9eafd0c08a235be24516463f72764f357))
+
 ## [2.40.0](https://github.com/patinaproject/skills/compare/v2.39.0...v2.40.0) (2026-09-05)
 
 
