@@ -38,6 +38,9 @@ envelope uses schema version 1.
       "examinedSources": [
         {
           "sourceKey": "repo-guidance",
+          "origin": "repository:AGENTS.md",
+          "acceptanceBasis": "applies to every changed path",
+          "affects": ["standards"],
           "contentDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         }
       ],
@@ -76,7 +79,12 @@ envelope uses schema version 1.
 
 For a complete axis, copy the full `comparison` object into
 `examinedComparison`. Record one `examinedSources` entry for each source whose
-`affects` contains that axis. Evidence paths resolve relative to `report.json`.
+`affects` contains that axis. Each reviewer records the full source identity:
+`sourceKey`, `origin`, `acceptanceBasis`, `contentDigest`, and `affects` (compared
+as a sorted set). Preserve that reviewer-owned tuple when assembling the report;
+changing only the aggregate source cannot update an old axis result. The helper
+returns these tuples in `axisSourceIdentities` on success. Snapshot storage paths
+are outside identity. Evidence paths resolve relative to `report.json`.
 The helper requires distinct reviewer sessions and physically distinct execution
 artifacts between axes: route, transcript, merge-base, diff, log, source reads,
 and coverage. Symlinks and hard links to the same file count as shared evidence.
@@ -123,9 +131,17 @@ keys and no extra whitespace. Hash this tuple:
   "evidenceDigest": "sha256:...",
   "semanticLocation": "symbol or scoped omission",
   "sourceDigest": "sha256:...",
-  "sourceKey": "repo-guidance"
+  "sourceKey": "repo-guidance",
+  "sourceOrigin": "repository:AGENTS.md",
+  "sourceAcceptanceBasis": "applies to every changed path"
 }
 ```
+
+Derive `sourceOrigin` and `sourceAcceptanceBasis` from the report's criteria
+source selected by the finding's `sourceKey`; these tuple members are not extra
+finding fields. A changed authority changes the finding identity even when its
+text is identical, so it cannot inherit the old dismissal. Applicability remains
+in axis source identity; the finding already names its axis.
 
 Compute `evidenceDigest` as SHA-256 over the exact UTF-8 bytes in `evidence`.
 Use a stable section or rule name for `criterionLocator` and the exact criterion

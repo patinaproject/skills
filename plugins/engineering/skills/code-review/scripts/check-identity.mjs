@@ -102,6 +102,16 @@ function axesFor(value, name) {
   return [...axes].sort();
 }
 
+function sourceIdentity(source) {
+  return {
+    sourceKey: source.sourceKey,
+    origin: source.origin,
+    acceptanceBasis: source.acceptanceBasis,
+    contentDigest: source.contentDigest,
+    affects: source.affects,
+  };
+}
+
 function validateComparison(value, name) {
   const comparison = requireObject(value, name);
   requireString(comparison.repositoryIdentity, `${name}.repositoryIdentity`);
@@ -165,6 +175,8 @@ function validateFinding(finding, axis, sources, name) {
     semanticLocation: finding.semanticLocation,
     sourceDigest: finding.sourceDigest,
     sourceKey,
+    sourceOrigin: source.origin,
+    sourceAcceptanceBasis: source.acceptanceBasis,
   };
   if (finding.identity !== sha256(stableJson(tuple))) {
     throw new InputError(`${name}.identity does not match its stable finding tuple`);
@@ -218,7 +230,12 @@ function readReport(reportPath) {
     validateComparison(axes[axis].examinedComparison, `report.axes.${axis}.examinedComparison`);
     const examined = requireArray(axes[axis].examinedSources, `report.axes.${axis}.examinedSources`);
     for (const [index, source] of examined.entries()) {
-      requireString(source.sourceKey, `report.axes.${axis}.examinedSources[${index}].sourceKey`);
+      const name = `report.axes.${axis}.examinedSources[${index}]`;
+      requireObject(source, name);
+      for (const field of ["sourceKey", "origin", "acceptanceBasis"]) {
+        requireString(source[field], `${name}.${field}`);
+      }
+      source.affects = axesFor(source.affects, `${name}.affects`);
       if (!DIGEST.test(source.contentDigest || "")) {
         throw new InputError(`report.axes.${axis}.examinedSources[${index}].contentDigest must be a SHA-256 digest`);
       }
@@ -265,12 +282,17 @@ function readCurrentCriteria(criteriaPath) {
     if (sources.has(sourceKey)) {
       throw new InputError(`duplicate current sourceKey ${sourceKey}`);
     }
+    const origin = requireString(source.origin, `${name}.origin`);
+    const acceptanceBasis = requireString(source.acceptanceBasis, `${name}.acceptanceBasis`);
     const affects = axesFor(source.affects, `${name}.affects`);
     const snapshotPath = resolveEvidence(base, source.snapshotPath, `${name}.snapshotPath`);
     if (!snapshotPath) {
       throw new InputError(`${name}.snapshotPath does not name a readable file`);
     }
     sources.set(sourceKey, {
+      sourceKey,
+      origin,
+      acceptanceBasis,
       affects,
       contentDigest: sha256(readFileSync(snapshotPath)),
       snapshotPath,
@@ -335,6 +357,9 @@ function compareSources(reportSources, currentSources, reasons, affectedAxes) {
     if (prior.affects.join(",") !== current.affects.join(",")) {
       addReason(reasons, affectedAxes, "criteria-axis-map-changed", `criteria source ${key} changed affected axes`, axes);
     }
+    if (prior.origin !== current.origin || prior.acceptanceBasis !== current.acceptanceBasis) {
+      addReason(reasons, affectedAxes, "criteria-provenance-changed", `criteria source ${key} changed origin or acceptance basis`, axes);
+    }
     if (prior.contentDigest !== current.contentDigest) {
       addReason(reasons, affectedAxes, "criteria-content-changed", `criteria source ${key} changed content`, axes);
     }
@@ -352,15 +377,13 @@ function checkAxis(axis, state, context, reasons, affectedAxes) {
   if (!sameComparison(state.examinedComparison, context.comparison)) {
     addReason(reasons, affectedAxes, "axis-comparison-mismatch", `${axis} did not record the report comparison`, [axis]);
   }
-  const expected = [...context.sources.entries()]
-    .filter(([, source]) => source.affects.includes(axis))
-    .map(([sourceKey, source]) => `${sourceKey}\0${source.contentDigest}`)
-    .sort();
+  const assigned = [...context.sources.values()].filter((source) => source.affects.includes(axis));
+  const expected = assigned.map((source) => stableJson(sourceIdentity(source))).sort();
   if (expected.length === 0) {
     addReason(reasons, affectedAxes, "axis-source-missing", `${axis} has no accepted criteria source`, [axis]);
   }
   const examined = state.examinedSources
-    .map((source) => `${source.sourceKey}\0${source.contentDigest}`)
+    .map((source) => stableJson(sourceIdentity(source)))
     .sort();
   if (JSON.stringify(expected) !== JSON.stringify(examined)) {
     addReason(reasons, affectedAxes, "axis-source-mismatch", `${axis} examined sources do not match its assigned criteria`, [axis]);
@@ -408,7 +431,7 @@ function checkAxis(axis, state, context, reasons, affectedAxes) {
         records.set(sourceKey, artifact);
       }
     }
-    for (const key of expected.map((entry) => entry.split("\0")[0])) {
+    for (const { sourceKey: key } of assigned) {
       if (!records.has(key)) {
         addReason(reasons, affectedAxes, `${field}-missing`, `${axis} lacks ${field} evidence for ${key}`, [axis]);
       }
@@ -444,13 +467,13 @@ function main() {
     return;
   }
 
-  const axisSourceDigests = Object.fromEntries(AXES.map((axis) => [
+  const axisSourceIdentities = Object.fromEntries(AXES.map((axis) => [
     axis,
     [...parsed.sources.entries()]
       .filter(([, source]) => source.affects.includes(axis))
-      .map(([sourceKey, source]) => ({ sourceKey, contentDigest: source.contentDigest })),
+      .map(([, source]) => sourceIdentity(source)),
   ]));
-  process.stdout.write(`${JSON.stringify({ valid: true, affectedAxes: [], reasons: [], comparison: observed.comparison, axisSourceDigests }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ valid: true, affectedAxes: [], reasons: [], comparison: observed.comparison, axisSourceIdentities }, null, 2)}\n`);
 }
 
 try {

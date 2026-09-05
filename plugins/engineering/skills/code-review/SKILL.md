@@ -74,7 +74,8 @@ separate output paths.
 Each reviewer must:
 
 1. Run its own immutable comparison reads and retain the tool records.
-2. Read and hash every source assigned to its axis.
+2. Read and hash every assigned source; record its full source identity from
+   the report template, including canonical origin and acceptance basis.
 3. Map every applicable criterion to inspected behavior, a finding, or a
    reasoned non-applicability result.
 4. Cite the criterion and committed source evidence for every finding.
@@ -93,8 +94,8 @@ findings and incomplete states without turning either into a pass claim.
 
 Use the stable finding identity from
 [`report-template.md`](report-template.md). A prior dismissal remains relevant
-only when a fresh reviewer confirms the same criterion, semantic location,
-evidence, and assumptions. New evidence gets a new finding identity.
+only when a fresh reviewer confirms the same criterion and accepted authority,
+semantic location, evidence, and assumptions. New evidence gets a new finding identity.
 
 Run the identity helper when the caller needs a current publication check:
 

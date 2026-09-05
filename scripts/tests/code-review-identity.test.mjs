@@ -86,7 +86,13 @@ function makeFixture(name) {
       status: "complete",
       reviewerSession: `${axis}-session`,
       examinedComparison: structuredClone(comparison),
-      examinedSources: [{ sourceKey: source.sourceKey, contentDigest: source.contentDigest }],
+      examinedSources: [{
+        sourceKey: source.sourceKey,
+        origin: source.origin,
+        acceptanceBasis: source.acceptanceBasis,
+        contentDigest: source.contentDigest,
+        affects: [...source.affects],
+      }],
       execution: {
         assignedRoute: "fixture-route",
         observedRouteEvidence: `${axis}/route.json`,
@@ -118,6 +124,8 @@ function makeFixture(name) {
     schemaVersion: 1,
     sources: sources.map((source) => ({
       sourceKey: source.sourceKey,
+      origin: source.origin,
+      acceptanceBasis: source.acceptanceBasis,
       snapshotPath: source.snapshotLocation,
       affects: source.affects,
     })),
@@ -148,6 +156,80 @@ function expectInvalid(fixture, code, axes) {
 
 try {
   expectValid(makeFixture("valid"));
+
+  for (const field of ["origin", "acceptanceBasis"]) {
+    const changed = makeFixture(`changed-${field}`);
+    const current = JSON.parse(readFileSync(changed.criteriaPath, "utf8"));
+    current.sources[1][field] = `replacement ${field}`;
+    writeJson(changed.criteriaPath, current);
+    expectInvalid(changed, "criteria-provenance-changed", ["spec"]);
+
+    changed.report.criteria.sources[1][field] = current.sources[1][field];
+    writeJson(changed.reportPath, changed.report);
+    expectInvalid(changed, "axis-source-mismatch", ["spec"]);
+
+    changed.report.axes.spec.examinedSources[0][field] = current.sources[1][field];
+    writeJson(changed.reportPath, changed.report);
+    expectValid(changed);
+    const output = JSON.parse(run(changed).stdout);
+    assert.equal(output.axisSourceIdentities.spec[0][field], current.sources[1][field]);
+
+    delete current.sources[1][field];
+    writeJson(changed.criteriaPath, current);
+    const missing = run(changed);
+    assert.equal(missing.status, 2);
+    assert(JSON.parse(missing.stderr).error.includes(`criteria.sources[1].${field}`));
+  }
+
+  for (const [field, value] of [
+    ["origin", "different reviewer origin"],
+    ["acceptanceBasis", "different reviewer acceptance"],
+    ["contentDigest", digest("different reviewer bytes")],
+    ["affects", ["standards", "spec"]],
+  ]) {
+    const changed = makeFixture(`changed-axis-${field}`);
+    changed.report.axes.spec.examinedSources[0][field] = value;
+    writeJson(changed.reportPath, changed.report);
+    expectInvalid(changed, "axis-source-mismatch", ["spec"]);
+  }
+
+  const changedAxes = makeFixture("changed-source-axes");
+  const axesManifest = JSON.parse(readFileSync(changedAxes.criteriaPath, "utf8"));
+  axesManifest.sources[1].affects = ["standards"];
+  axesManifest.sources[1].origin = "different authority with identical bytes";
+  writeJson(changedAxes.criteriaPath, axesManifest);
+  expectInvalid(changedAxes, "criteria-provenance-changed", ["standards", "spec"]);
+  expectInvalid(changedAxes, "criteria-axis-map-changed", ["standards", "spec"]);
+
+  const shared = makeFixture("shared-source-provenance");
+  const sharedManifest = JSON.parse(readFileSync(shared.criteriaPath, "utf8"));
+  shared.report.criteria.sources[1].affects = ["standards", "spec"];
+  sharedManifest.sources[1].affects = ["spec", "standards"];
+  shared.report.axes.spec.examinedSources[0].affects = ["spec", "standards"];
+  shared.report.axes.standards.examinedSources.push(structuredClone(shared.report.axes.spec.examinedSources[0]));
+  for (const field of ["sourceReads", "coverage"]) {
+    shared.report.axes.standards.execution[field].push({
+      sourceKey: "spec-source", artifactPath: "standards/transcript.jsonl",
+    });
+  }
+  writeJson(shared.reportPath, shared.report);
+  writeJson(shared.criteriaPath, sharedManifest);
+  expectValid(shared);
+  sharedManifest.sources[1].acceptanceBasis = "replacement accepted decision";
+  writeJson(shared.criteriaPath, sharedManifest);
+  expectInvalid(shared, "criteria-provenance-changed", ["standards", "spec"]);
+
+  for (const operation of ["add", "remove"]) {
+    const changed = makeFixture(`source-set-${operation}`);
+    const current = JSON.parse(readFileSync(changed.criteriaPath, "utf8"));
+    if (operation === "add") {
+      current.sources.push({ ...current.sources[1], sourceKey: "new-source" });
+    } else {
+      current.sources.pop();
+    }
+    writeJson(changed.criteriaPath, current);
+    expectInvalid(changed, "criteria-source-set-changed", ["spec"]);
+  }
 
   const changedHead = makeFixture("changed-head");
   writeFileSync(join(changedHead.repo, "source.txt"), "next head\n");
@@ -258,6 +340,8 @@ try {
     semanticLocation: "source behavior",
     sourceDigest: source.contentDigest,
     sourceKey: source.sourceKey,
+    sourceOrigin: source.origin,
+    sourceAcceptanceBasis: source.acceptanceBasis,
   };
   finding.report.axes.standards.findings.push({
     identity: digest(stableJson(tuple)),
@@ -292,6 +376,29 @@ try {
     assert.notEqual(changed.identity, originalFinding.identity);
     writeJson(finding.reportPath, finding.report);
     expectValid(finding);
+  }
+
+  for (const [field, tupleField] of [["origin", "sourceOrigin"], ["acceptanceBasis", "sourceAcceptanceBasis"]]) {
+    const originalSourceValue = source[field];
+    source[field] = `new accepted ${field}`;
+    finding.report.axes.standards.examinedSources[0][field] = source[field];
+    const current = JSON.parse(readFileSync(finding.criteriaPath, "utf8"));
+    current.sources[0][field] = source[field];
+    writeJson(finding.criteriaPath, current);
+    finding.report.axes.standards.findings[0] = structuredClone(originalFinding);
+    writeJson(finding.reportPath, finding.report);
+    const staleIdentity = run(finding);
+    assert.equal(staleIdentity.status, 2, `finding identity omitted ${field}`);
+    assert.match(JSON.parse(staleIdentity.stderr).error, /stable finding tuple/);
+    const replacement = digest(stableJson({ ...tuple, [tupleField]: source[field] }));
+    assert.notEqual(replacement, originalFinding.identity);
+    finding.report.axes.standards.findings[0].identity = replacement;
+    writeJson(finding.reportPath, finding.report);
+    expectValid(finding);
+    source[field] = originalSourceValue;
+    finding.report.axes.standards.examinedSources[0][field] = originalSourceValue;
+    current.sources[0][field] = originalSourceValue;
+    writeJson(finding.criteriaPath, current);
   }
 
   finding.report.axes.standards.findings[0] = {

@@ -58,6 +58,8 @@ Use this machine-readable current criteria manifest:
   "sources": [
     {
       "sourceKey": "repo-guidance",
+      "origin": "repository:AGENTS.md",
+      "acceptanceBasis": "applies to every changed path",
       "snapshotPath": "criteria/repo-guidance.md",
       "affects": ["standards"]
     }
@@ -67,7 +69,12 @@ Use this machine-readable current criteria manifest:
 
 Resolve `snapshotPath` relative to the criteria manifest. Refresh the manifest
 from authoritative sources before implementation, final review, and the last
-publication identity check.
+publication identity check. `origin` identifies the canonical repository/path,
+issue, discussion, or task; `acceptanceBasis` records the accepted decision or
+applicability basis. Keep both strings stable while that authority is unchanged.
+A snapshot's local path is storage, not its canonical origin. The helper hashes
+the current bytes and compares provenance exactly; the caller establishes that
+the declared source is authoritative.
 
 ## Classify findings
 
@@ -91,8 +98,9 @@ A repository, head, intended parent ref, parent tip, or merge-base change
 invalidates both axes. Patch-ID equality does not preserve a Standards or Spec
 review on a new commit.
 
-A source digest or applicability change invalidates every axis in its `affects`
-set. Use both axes when ownership is ambiguous. An unavailable authoritative
+A source key, canonical origin, acceptance basis, digest, or applicability
+change invalidates every axis in the union of its old and current `affects`
+sets. Use both axes when ownership is ambiguous. An unavailable authoritative
 source prevents a current result for its axes.
 
 An empty committed diff still requires complete criteria coverage. Dirty work
