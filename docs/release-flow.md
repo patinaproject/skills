@@ -131,26 +131,30 @@ repository permissions:
 Do not pre-grant **Issues** write access. Add it only if a failed release-please
 label update provides evidence that the App needs it.
 
-Install the App on `patinaproject/skills`. Sync Infisical `/ci/release` keys
-`APP_ID` and `PRIVATE_KEY` to the organization-level Actions secrets
-`RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_PRIVATE_KEY`. Give both secrets
-selected-repository visibility that includes `patinaproject/skills`.
+Install the App on `patinaproject/skills`. Use the Infisical development environment
+and its `/ci/organization` folder for the organization Actions secret sync.
+Sync `RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_PRIVATE_KEY` without a name prefix.
+Give both secrets visibility to all repositories.
 
 The workflow passes those secrets to `actions/create-github-app-token`. Each run
-mints an installation token that expires after one hour and is scoped to this
-repository, then passes it to `release-please`. No stored access token or personal
-access token is used. If either App credential is missing or invalid, token creation
-fails and the release job stops. The auto-merge job continues to use `github.token`.
+creates an installation token for this repository. The release action and the
+auto-merge step use that token in the same job. The action revokes the token when
+the job ends; otherwise, the token expires after one hour. The workflow stores no
+access token and uses no personal access token. If either App credential is
+missing or invalid, token creation fails and the release job stops.
+
+The App token lets the release merge start the next push workflow, which publishes
+the tag and GitHub Release. GitHub suppresses that push workflow when auto-merge
+uses `GITHUB_TOKEN`. See [GitHub's event rules](https://docs.github.com/en/actions/concepts/security/github_token).
 
 Keep the active **Protected branches** organization ruleset (ID `15382168`)
 unchanged, with `patina-project-release` (App ID `4269276`) as a bypass actor.
 
-The auto-merge job depends on a separate repository-level ruleset that targets
-`main` and requires these four contexts:
+The auto-merge step depends on a separate repository-level ruleset that targets
+`main` and requires these three contexts:
 
 - `Lint Actions workflows`
 - `Lint Markdown`
 - `Validate pull request`
-- `Verify skill overlay`
 
 Without this rule, GitHub can merge a Release PR before its checks finish.

@@ -14,8 +14,6 @@ jobs:
   release-please:
     name: Open or update release PRs
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    outputs:
-      releases_created: ${{ steps.release.outputs.releases_created }}
     steps:
       # actions/checkout@v4.3.1
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -35,18 +33,10 @@ jobs:
           manifest-file: .release-please-manifest.json
           token: ${{ steps.app-token.outputs.token }}
 
-  auto-merge:
-    name: Enable auto-merge on release PRs
-    needs: release-please
-    if: needs.release-please.outputs.releases_created != 'true'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      # actions/checkout@v4.3.1
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
       - name: Enable auto-merge on open release PRs
+        if: steps.release.outputs.releases_created != 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           # Enable auto-merge on any open release-please PRs
           prs=$(gh pr list --label "autorelease: pending" --json number --jq '.[].number')
