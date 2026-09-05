@@ -65,7 +65,7 @@ Skills owned by this repository:
 | `move-branch-here` | `plugins/engineering/skills/move-branch-here/` | Worktree branch handover workflow |
 | `move-session-here` | `plugins/engineering/skills/move-session-here/` | Claude Code and Codex session transcript handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
-| `grill-to-spec` | `skills/grill-to-spec/` | Grill a design and hand it to `/to-spec` with doc-change proposals |
+| `grill-to-spec` | `skills/grill-to-spec/` | Settle a design for `/to-spec` to publish with doc-change proposals |
 | `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
 | `principle-offensive-programming` | `plugins/engineering/skills/principle-offensive-programming/` | Defensive-code classification principle |
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
