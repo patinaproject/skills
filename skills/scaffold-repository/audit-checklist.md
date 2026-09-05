@@ -56,7 +56,7 @@ each file must contain.
 
 | File or setting | Required | Check |
 | --- | --- | --- |
-| `.github/pull_request_template.md` | yes | Has `## Linked issue` with the correct closing reference for the repository's issue tracker, followed by a plain-language `## What changed` section. It has no permanent `## Testing steps` section. Add that section only when a person must inspect an artifact. The issue reference matches whether the repository is public or private. |
+| `.github/pull_request_template.md` | yes | In an ordinary consumer, matches `pr-body-template.md` after adapting its issue references to the repository's tracker. It has `## Linked issue`, followed by plain-language `## What changed`, and no permanent `## Testing steps` section. The `patinaproject/skills` root uses the comment-only exception recorded in `docs/adr/ADR-445-repository-pull-request-body-contract.md`. |
 | `.github/ISSUE_TEMPLATE/config.yml` | yes | Public repositories accept GitHub issues. Private repositories disable blank issues and direct people to Linear. |
 | GitHub issue forms | depends on visibility | Public repositories may have them. Private repositories do not. |
 | `.github/CODEOWNERS` | yes | Has at least one rule that is not a comment. |
@@ -92,10 +92,10 @@ repository records the choice in
 
 | File | Required | Check |
 | --- | --- | --- |
-| `AGENTS.md` | yes | Covers the project structure, commands, conventions, commits, and pull requests. The "Commit type selection" section begins with the product-file patterns and one sentence telling agents to choose the type from the changed paths. It then contains the type table, a table of common excuses and corrections, a stop rule for warning signs, and at least one WRONG to RIGHT example. Check equivalent agent instruction files with `rg`. |
+| `AGENTS.md` | yes | Covers the project structure, commands, conventions, commits, and pull requests. Its pull request guidance names a body contract that exists in the target repository. The "Commit type selection" section begins with the product-file patterns and one sentence telling agents to choose the type from the changed paths. It then contains the type table, a table of common excuses and corrections, a stop rule for warning signs, and at least one WRONG to RIGHT example. Check equivalent agent instruction files with `rg`. |
 | `AGENTS.md` testing rule | yes | Says that tests may check code behavior and machine-read formats, but must not assert on documentation prose. Markdown linting is still allowed. Add the rule if it is missing. |
 | `CLAUDE.md` | yes | Imports `@AGENTS.md`, followed by any Claude-only instructions. |
-| `CONTRIBUTING.md` | yes | Points contributors to `AGENTS.md`. |
+| `CONTRIBUTING.md` | yes | Points contributors to `AGENTS.md`. Its pull request guidance names a body contract that exists in the target repository. |
 | `SECURITY.md` | public only | Exists in public repositories and is absent from private repositories. |
 | `README.md` | yes | Includes the repository name, description, and a short conventions summary. |
 | `docs/file-structure.md` | yes | Exists. |

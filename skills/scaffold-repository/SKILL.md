@@ -7,7 +7,7 @@ description: Set up a new repository with the Patina Project standard files, or 
 
 Use the current root of
 [`patinaproject/skills`](https://github.com/patinaproject/skills) as the source
-for file contents. This skill does not contain copied templates. Read
+for file contents except the consumer pull request template named below. Read
 [`core-baseline.txt`](./core-baseline.txt) for the required file list and
 [`audit-checklist.md`](./audit-checklist.md) for every required check.
 
@@ -63,7 +63,10 @@ Use existing-repository update when any of those files already exist.
    `.agents/skills/` directories and `.claude/skills/` links.
 
 The `patinaproject/skills` repository itself may use this mode. Do not skip it
-because it is the source repository.
+because it is the source repository. Its root pull request template is the
+intentional repo-only exception recorded in
+`docs/adr/ADR-445-repository-pull-request-body-contract.md`; apply every other
+audit check normally.
 
 ## Repository inputs
 
@@ -98,8 +101,17 @@ owner and name.
 `scripts/verify-baseline.sh`. Use it instead of copying a second list into this
 skill.
 
-Two entries require special handling:
+Four entries require special handling:
 
+- Copy `.github/pull_request_template.md` from
+  [`pr-body-template.md`](./pr-body-template.md), not from this repository's
+  root template. The root's comment-only template is usable only with the
+  Engineering plugin body contract that ordinary scaffold consumers do not
+  receive.
+- When the target does not contain the `opening-a-pr` playbook, adapt the
+  copied `AGENTS.md` and `CONTRIBUTING.md` to name the local pull request
+  template as their body contract. Every referenced contract must exist in the
+  target repository.
 - Create `SECURITY.md` only for public repositories.
 - Keep the real tracker instructions at `docs/agents/issue-tracker.md`. Create
   `docs/issue-tracker.md` as the relative link `agents/issue-tracker.md`.

@@ -12,35 +12,21 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-SKILLS=(
+ROOT_SKILLS=(
   scaffold-repository
   install-skills
   using-github
-  working-on-issues
   grill-to-spec
   design-by-contract
-  principle-offensive-programming
   grill-system-design
   review-system-design
   writing-for-patina-mode
-  gather-evidence
 )
 FAIL_COUNT=0
 
 fail() {
   echo "FAIL: $1" >&2
   FAIL_COUNT=$((FAIL_COUNT + 1))
-}
-
-canonical_skill_dir() {
-  case "$1" in
-    working-on-issues|principle-offensive-programming|gather-evidence)
-      printf 'plugins/engineering/skills/%s\n' "$1"
-      ;;
-    *)
-      printf 'skills/%s\n' "$1"
-      ;;
-  esac
 }
 
 for retired_path in \
@@ -67,78 +53,101 @@ _realpath() {
   fi
 }
 
-for name in "${SKILLS[@]}"; do
-  CANONICAL="$(canonical_skill_dir "$name")/SKILL.md"
-  CLAUDE_LINK=".claude/skills/$name/SKILL.md"
-  AGENTS_LINK=".agents/skills/$name/SKILL.md"
+assert_skill_overlay() {
+  local name="$1"
+  local canonical_dir="$2"
+  local canonical="$canonical_dir/SKILL.md"
+  local claude_link=".claude/skills/$name/SKILL.md"
+  local agents_link=".agents/skills/$name/SKILL.md"
+  local frontmatter_name=""
+  local in_frontmatter=0
+  local line
 
-  # 1. Assert the canonical SKILL.md is a regular file.
-  if [ ! -f "$CANONICAL" ]; then
-    fail "$CANONICAL missing or not a regular file"
-    continue
+  if [ ! -f "$canonical" ]; then
+    fail "$canonical missing or not a regular file"
+    return
   fi
-  if [ -L "$CANONICAL" ]; then
-    fail "$CANONICAL is a symlink — expected a real file"
-    continue
+  if [ -L "$canonical" ]; then
+    fail "$canonical is a symlink; expected a real file"
+    return
   fi
 
-  # 2. Parse YAML frontmatter name: field and assert it equals <name>.
-  FRONTMATTER_NAME=""
-  IN_FM=0
   while IFS= read -r line; do
     if [ "$line" = "---" ]; then
-      if [ "$IN_FM" -eq 0 ]; then
-        IN_FM=1
+      if [ "$in_frontmatter" -eq 0 ]; then
+        in_frontmatter=1
       else
         break
       fi
       continue
     fi
-    if [ "$IN_FM" -eq 1 ]; then
+    if [ "$in_frontmatter" -eq 1 ]; then
       if [[ "$line" =~ ^name:[[:space:]]*(.+)$ ]]; then
-        FRONTMATTER_NAME="${BASH_REMATCH[1]}"
-        # Trim trailing whitespace / carriage return
-        FRONTMATTER_NAME="${FRONTMATTER_NAME%%[[:space:]]}"
+        frontmatter_name="${BASH_REMATCH[1]}"
+        frontmatter_name="${frontmatter_name%%[[:space:]]}"
         break
       fi
     fi
-  done < "$CANONICAL"
+  done < "$canonical"
 
-  if [ -z "$FRONTMATTER_NAME" ]; then
+  if [ -z "$frontmatter_name" ]; then
     fail "$name: SKILL.md frontmatter missing 'name:' field"
-    continue
+    return
   fi
-  if [ "$FRONTMATTER_NAME" != "$name" ]; then
-    fail "$name: SKILL.md frontmatter 'name: $FRONTMATTER_NAME' != expected '$name'"
-    continue
-  fi
-
-  # 3. Assert .claude/skills/<name>/SKILL.md resolves to the same real path as
-  #    skills/<name>/SKILL.md via symlink traversal.
-  if [ ! -e "$CLAUDE_LINK" ]; then
-    fail "$CLAUDE_LINK does not resolve (broken symlink or missing)"
-    continue
-  fi
-  CANONICAL_REAL="$(_realpath "$CANONICAL")"
-  CLAUDE_REAL="$(_realpath "$CLAUDE_LINK")"
-  if [ "$CLAUDE_REAL" != "$CANONICAL_REAL" ]; then
-    fail "$CLAUDE_LINK resolves to '$CLAUDE_REAL', expected '$CANONICAL_REAL'"
-    continue
+  if [ "$frontmatter_name" != "$name" ]; then
+    fail "$name: SKILL.md frontmatter 'name: $frontmatter_name' != expected '$name'"
+    return
   fi
 
-  # 4. Same assertion for .agents/skills/<name>/SKILL.md.
-  if [ ! -e "$AGENTS_LINK" ]; then
-    fail "$AGENTS_LINK does not resolve (broken symlink or missing)"
-    continue
+  if [ ! -e "$claude_link" ]; then
+    fail "$claude_link does not resolve (broken symlink or missing)"
+    return
   fi
-  AGENTS_REAL="$(_realpath "$AGENTS_LINK")"
-  if [ "$AGENTS_REAL" != "$CANONICAL_REAL" ]; then
-    fail "$AGENTS_LINK resolves to '$AGENTS_REAL', expected '$CANONICAL_REAL'"
-    continue
+  if [ "$(_realpath "$claude_link")" != "$(_realpath "$canonical")" ]; then
+    fail "$claude_link does not resolve to $canonical"
+    return
+  fi
+
+  if [ ! -e "$agents_link" ]; then
+    fail "$agents_link does not resolve (broken symlink or missing)"
+    return
+  fi
+  if [ "$(_realpath "$agents_link")" != "$(_realpath "$canonical")" ]; then
+    fail "$agents_link does not resolve to $canonical"
+    return
   fi
 
   echo "OK: $name"
+}
+
+for name in "${ROOT_SKILLS[@]}"; do
+  assert_skill_overlay "$name" "skills/$name"
 done
+
+for skill_dir in plugins/engineering/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
+done
+
+for instructions_file in CLAUDE.md AGENTS.md; do
+  begin_count="$(grep -cF '<!-- BEGIN engineering:patina-mode' "$instructions_file" || true)"
+  end_count="$(grep -cF '<!-- END engineering:patina-mode -->' "$instructions_file" || true)"
+  [ "$begin_count" -eq 1 ] || fail "$instructions_file has $begin_count patina-mode mandate starts, expected 1"
+  [ "$end_count" -eq 1 ] || fail "$instructions_file has $end_count patina-mode mandate ends, expected 1"
+done
+
+for canonical_agent in plugins/engineering/agents/*.md; do
+  installed_agent=".claude/agents/$(basename "$canonical_agent")"
+  [ -f "$installed_agent" ] || fail "$installed_agent missing"
+done
+
+multi_agent_count="$(awk '
+  /^\[features\][[:space:]]*$/ { in_features = 1; next }
+  /^\[/ { in_features = 0 }
+  in_features && /^[[:space:]]*multi_agent[[:space:]]*=[[:space:]]*true[[:space:]]*$/ { count++ }
+  END { print count + 0 }
+' .codex/config.toml)"
+[ "$multi_agent_count" -eq 1 ] || fail ".codex/config.toml enables multi_agent $multi_agent_count times under [features], expected 1"
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2

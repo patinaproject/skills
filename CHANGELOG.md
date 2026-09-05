@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.38.1](https://github.com/patinaproject/skills/compare/v2.38.0...v2.38.1) (2026-09-05)
+
+
+### Bug Fixes
+
+* [#442](https://github.com/patinaproject/skills/issues/442) install full routing machinery ([#443](https://github.com/patinaproject/skills/issues/443)) ([934c93d](https://github.com/patinaproject/skills/commit/934c93db7812ff41bd7299c65540aea255694ec8))
+* [#445](https://github.com/patinaproject/skills/issues/445) separate repository and scaffold pull request contracts ([#446](https://github.com/patinaproject/skills/issues/446)) ([ff267be](https://github.com/patinaproject/skills/commit/ff267be0ad804458da9f6f85dfa7d813bef1900b))
+
 ## [2.38.0](https://github.com/patinaproject/skills/compare/v2.37.0...v2.38.0) (2026-09-05)
 
 
