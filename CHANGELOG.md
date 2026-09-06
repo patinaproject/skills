@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.45.0](https://github.com/patinaproject/skills/compare/v2.44.0...v2.45.0) (2026-09-06)
+
+
+### Features
+
+* [#469](https://github.com/patinaproject/skills/issues/469) make patina-mode routing selective ([#472](https://github.com/patinaproject/skills/issues/472)) ([d1f457e](https://github.com/patinaproject/skills/commit/d1f457e1961054b2ed2eceed1ef513350262ad69))
+
 ## [2.44.0](https://github.com/patinaproject/skills/compare/v2.43.0...v2.44.0) (2026-09-06)
 
 
