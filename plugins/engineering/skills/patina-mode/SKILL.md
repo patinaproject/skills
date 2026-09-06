@@ -18,7 +18,7 @@ a sequential substitute.
 
 ## Non-negotiables
 
-**Start every multi-step task with a todolist whose first item is to read the Principles section below in full.** The principles ground every trigger here. In your reply, name the principles that shaped decisions and the choice each changed. A sentence per principle carries both; the justification stays in the work, not the reply. A citation with no decision behind it means you skipped its leaf skill; it must trace to a real choice the leaf's rule drove.
+**Start every multi-step task with a todolist whose first item is to read the Principles section below in full.** The principles ground every trigger here. Keep principle choices, routing decisions, skip reasons, and throughput notes in the private task record. Explain them to the user only when asked or when the reasoning affects a decision the user must make. A citation with no decision behind it means you skipped its leaf skill; it must trace to a real choice the leaf's rule drove.
 
 While patina-mode is active, this skill owns workflow routing. Use only the
 skills and playbooks named here. Do not substitute another development, repair,
@@ -42,6 +42,8 @@ plausible and both fail. `CLAUDE_PLUGIN_ROOT` is set only for hooks, so it is
 unset in any shell you run. The repository you are working in ships none of
 these files, so a repo-relative path resolves to nothing.
 
+Choose the smallest workflow that can establish the required result. Gather a routine fact directly. Route to another skill only when its workflow adds needed evidence or resolves a decision.
+
 Remaining triggers:
 
 - Issue-linked work begins or resumes → follow
@@ -58,13 +60,13 @@ Remaining triggers:
   the bundled **move-session-here** skill, then route its recovered resume point
   through the Session pickup playbook. Session pickup enters the same issue
   handoff gate.
-- Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
+- Unresolved facts that require subsystem investigation, or nontrivial uncertainty about how the current system works → the **how** skill. Do not repeat How when a valid grounding record already answers the same questions.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. The ask is the slow path. A throwaway probe usually answers faster, and it hands the human a result to react to instead of a decision to make.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
-- Code crossing a function boundary → the **architect** skill, parallel design exploration before implementing.
+- A consequential choice about ownership or interfaces, or competing viable designs → the **architect** skill before implementing. A function boundary alone does not trigger Architect. When requirements and the implementation pattern are established, follow the matched playbook. Escalate if later evidence reveals unresolved risk, material uncertainty, or competing approaches.
 - Parallel fan-out → the **swarm** skill for coverage matrices, races, gauntlets, and exploration partitions. Use **arena** for design or code bakeoffs with base selection and grafting.
 - Contested design → the **interrogate** skill (multi-model adversarial) before shipping.
-- Nontrivial multi-step → write the throughput checkpoint (Feature step 3).
+- Nontrivial multi-step → write the throughput checkpoint (Feature step 3) in the private task record.
 - Before implementation → use the **code-review** criteria reference to snapshot the applicable repository standards and accepted requirements. Give the implementer those exact sources and provenance.
 - Any prose surface → the **unslop** skill. Your reply is a prose surface; write it per **Writing the reply**. Agent-facing prose also follows the **plugin-dev:skill-development** skill (Claude Code's authoring guidance for SKILL.md files).
 - Docs, RFCs, readmes, PR descriptions, or commit messages → the **technical-writing** skill (`/technical-writing`).
@@ -82,6 +84,25 @@ Remaining triggers:
 - An automated PR-review bot or the agentic security review commented → skeptical posture. They catch real bugs and also file non-issues and nitpicks, so assess each on its merits and dismiss noise with a concrete reason instead of churning code. Triage fix / dismiss / ask per `references/bugbot-triage.md`.
 - Broken skill mid-task → fix it in its own PR. Don't block. Don't silently work around it.
 - Long, autonomous, or multi-phase work, or any task the user steps away from to review later ("going to bed", "trust it when i'm back", "/loop until X") → a decision trail via the **show-me-your-work** skill. Commit it when stakes need an auditable record; keep it local otherwise.
+
+## Carry grounding through the route
+
+Keep one compact grounding record through the task. Record established findings, evidence pointers, the scope and input identities they depend on, and unresolved questions. Before reusing investigation or verification, confirm that the relevant scope, inputs, and evidence remain current. Reuse the valid portion. Refresh only the findings or checks affected by a change. Record which requirement the reused evidence satisfies.
+
+Before launching any **How** or **Architect Ground** investigation, including a mandatory step in a routed child playbook, apply this check:
+
+1. Match the step's questions to the current grounding record. When valid findings answer them, mark that investigation requirement satisfied by the cited evidence and continue without launching another investigation lane. This satisfies the child's How or Ground requirement, including How in **Investigation**, **Feature**, and **Refactoring**, and Architect's request for How during Ground.
+2. Before repeating an investigation, name each missing or changed question and explain why the existing evidence no longer answers it. Investigate only those gaps. A child instruction to invoke How or produce a handoff is not itself a missing question. Gather routine facts directly. Run **Why** when consequential rationale remains unresolved.
+3. In each executor brief, name the child requirement satisfied, cite the findings and their current scope and inputs, and list any remaining questions. Explicitly instruct the executor to continue from the satisfied requirement without another lane for the same questions. Require this scoped discharge and any gaps to appear in onward briefs.
+
+Pass the relevant grounding and each other scoped routing exception in every executor brief. Require the executor to carry them into further delegation. Name the affected child requirement in the brief:
+
+- Skip the **Feature** or **Refactoring** Architect step only when no consequential ownership, interface, or competing-design decision remains. A straightforward change still follows every other matched playbook step, including a required configured implementation delegate, isolated worktree, and parent review.
+- **Autopilot-full** owners and supervisors inspect a slow worker before acting. Inspect process state, output, and task-relevant progress. Elapsed time or the lack of a side effect alone does not prove failure. Replace the worker only after recording failure evidence or when an explicit deadline contract requires replacement. Do not invent a deadline.
+- Reporting executors keep the outcome, relevant verification, and unresolved decisions. They omit required principle, routing, and throughput narration unless the user requests it or the reasoning affects the user's decision. Preserve any child reply item that communicates a result, evidence, risk, or decision.
+- Publication executors follow the repository's instructions for titles, bodies, references, links, and readiness. Use compatible playbook defaults only when the repository is silent.
+
+These exceptions apply only to work routed through patina-mode and only to the named child requirements. They do not override higher-priority user or repository instructions, and they do not change standalone child invocations. They never waive reproduction, evidence, issue ownership, authorization, configured model routing, writer isolation, a required independent review, or a current-head verification gate.
 
 ## Principles
 
@@ -149,11 +170,11 @@ Write the reply clean as you draft it. The cleanup-afterward pass has been measu
 - **Short declarative sentences.** One thought per sentence, ended with a period.
 - **The long-dash character is banned outright.** Two cases. A file-list bullet joining a filename to its description with a dash. Write it as a sentence ("`main.js` owns persistence and the IPC handlers"). A bold section header joined to its text by a dash. Write the header as its own sentence ("**Verification.** End to end via CDP").
 - **A colon as a mid-sentence connector is also out** (unslop rule 14). A colon before a list is fine.
-- **Terse is not an excuse to drop content.** Every item the playbook's reply names stays. Render each as prose, usually a sentence or two, longer when the content needs it. No section headers, and no item expanded into its own block.
+- **Terse is not an excuse to drop content.** Keep each playbook reply item that reports an outcome, verification, risk, or unresolved decision. Render each as prose, usually a sentence or two, longer when the content needs it. No section headers, and no item expanded into its own block.
 - **Frame impact for the consumer and the maintainer.** Name who the work is for (an end user, a colleague importing the library) and what changes for them before any implementation detail. Then what the next engineer who owns this code inherits. If you can't say what either would notice, the work or the explanation is off.
 - **Never fabricate a link, citation, or transcript reference.** Link only artifacts you produced or read this session.
 
-Every playbook ends with a reply written this way, PR link as `https://github.com/<owner>/<repo>/pull/<number>`. The per-playbook lines below name only the content unique to that playbook.
+Every playbook ends with a reply written this way. Report the outcome, relevant verification, and unresolved decisions. Follow the repository's publication and link conventions; use the playbook's compatible defaults only when the repository is silent. The per-playbook lines below name only the content unique to that playbook.
 
 ## Comments
 
