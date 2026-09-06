@@ -7,8 +7,10 @@ import {
 } from 'node:fs';
 import { homedir } from 'node:os';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
+import { resolveT3Thread } from './t3-identity.mjs';
 
 const CODEX_LINK = /^codex:\/\/threads\/([A-Fa-f0-9-]+)$/;
+const T3_LINK = /^t3:\/\/threads\/([A-Za-z0-9][A-Za-z0-9_-]{2,127})$/;
 const SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$/;
 const CODEX_RESPONSE_TYPES = new Set([
   'agent_message',
@@ -152,7 +154,7 @@ function claudeOwnerSessionId(records) {
   );
 }
 
-function locateClaude(id) {
+function locateClaude(id, validateExactOwner = false) {
   const homes = discoverHomes('claude');
   const projectRoots = homes
     .map((home) => join(home, 'projects'))
@@ -172,15 +174,25 @@ function locateClaude(id) {
       ])
     )
   );
-  if (exactMatches.length > 1) {
+  const ownedExactMatches = validateExactOwner
+    ? exactMatches.filter(
+        (path) => claudeOwnerSessionId(readJsonLines(path)) === id
+      )
+    : exactMatches;
+  if (ownedExactMatches.length > 1) {
     throw new HandoffError(
       'ambiguous_session',
-      { format: 'claude', id, matches: exactMatches, searchedHomes: homes },
+      {
+        format: 'claude',
+        id,
+        matches: ownedExactMatches,
+        searchedHomes: homes,
+      },
       3
     );
   }
-  if (exactMatches.length === 1) {
-    return { path: exactMatches[0], homes };
+  if (ownedExactMatches.length === 1) {
+    return { path: ownedExactMatches[0], homes };
   }
 
   const fallbackMatches = [];
@@ -261,8 +273,20 @@ function claudeChain(records, path) {
   return chain;
 }
 
-function normalizeClaudeTrack(path, name) {
+function normalizeClaudeTrack(
+  path,
+  name,
+  expectedOwner = null,
+  searchedHomes = []
+) {
   const records = readJsonLines(path);
+  if (expectedOwner && claudeOwnerSessionId(records) !== expectedOwner) {
+    throw new HandoffError('not_found', {
+      format: 'claude',
+      id: expectedOwner,
+      searchedHomes,
+    }, 2);
+  }
   const chain = claudeChain(records, path);
   const events = chain
     .filter((record) => record.type === 'user' || record.type === 'assistant')
@@ -328,15 +352,20 @@ function distinctMcp(values) {
   return [...byIdentity.values()];
 }
 
-function extractClaude(id) {
-  const located = locateClaude(id);
+function extractClaude(id, validateExactOwner = false) {
+  const located = locateClaude(id, validateExactOwner);
   const sidecarRoot = join(dirname(located.path), id, 'subagents');
   const sidecars =
     existsSync(sidecarRoot) && statSync(sidecarRoot).isDirectory()
       ? findPaths([sidecarRoot, '-type', 'f', '-name', '*.jsonl']).sort()
       : [];
   const tracks = [
-    normalizeClaudeTrack(located.path, 'main'),
+    normalizeClaudeTrack(
+      located.path,
+      'main',
+      validateExactOwner ? id : null,
+      located.homes
+    ),
     ...sidecars.map((path) =>
       normalizeClaudeTrack(path, `subagent:${basename(path, '.jsonl')}`)
     ),
@@ -416,9 +445,16 @@ function sanitizeCodexPayload(payload) {
   return sanitized;
 }
 
-function extractCodex(id) {
+function extractCodex(id, validateOwner = false) {
   const located = locateCodex(id);
   const records = readJsonLines(located.path);
+  if (validateOwner && codexSessionId(records) !== id) {
+    throw new HandoffError(
+      'not_found',
+      { format: 'codex', id, searchedHomes: located.homes },
+      2
+    );
+  }
   const sessionMeta = lastValue(records, (record) =>
     record.type === 'session_meta' && record.payload ? record.payload : null
   );
@@ -480,6 +516,10 @@ function extractCodex(id) {
 }
 
 function parseReference(reference) {
+  const t3Match = reference.match(T3_LINK);
+  if (t3Match) {
+    return { format: 't3', id: t3Match[1] };
+  }
   const codexMatch = reference.match(CODEX_LINK);
   if (codexMatch) {
     return { format: 'codex', id: codexMatch[1] };
@@ -488,32 +528,67 @@ function parseReference(reference) {
     throw new HandoffError('invalid_session_reference', {
       reference,
       message:
-        'Pass one Claude session ID or a codex://threads/<id> deeplink.',
+        'Pass one Claude session ID, codex://threads/<id>, or t3://threads/<id>.',
     });
   }
   return { format: 'claude', id: reference };
 }
 
-function main() {
+function translateT3ProviderError(error, mapping) {
+  const details = {
+    t3ThreadId: mapping.t3.threadId,
+    databasePath: mapping.t3.databasePath,
+    format: mapping.format,
+    sessionId: mapping.sessionId,
+    ...error.details,
+  };
+  delete details.id;
+  if (error.code === 'not_found') {
+    throw new HandoffError('t3_stale_binding', details, 2);
+  }
+  if (error.code === 'ambiguous_session') {
+    throw new HandoffError('t3_ambiguous_binding', details, 3);
+  }
+  throw new HandoffError(error.code, details, error.exitCode);
+}
+
+async function main() {
   if (process.argv.length !== 3 || process.argv[2] === '--help') {
     process.stdout.write(
-      'Usage: node session-handoff.mjs <claude-session-id|codex://threads/id>\n'
+      'Usage: node session-handoff.mjs <claude-session-id|codex://threads/id|t3://threads/id>\n'
     );
     process.exitCode = process.argv[2] === '--help' ? 0 : 1;
     return;
   }
   const reference = parseReference(process.argv[2]);
-  const result =
-    reference.format === 'claude'
-      ? extractClaude(reference.id)
-      : extractCodex(reference.id);
+  let result;
+  if (reference.format === 't3') {
+    const mapping = await resolveT3Thread(reference.id);
+    try {
+      result =
+        mapping.format === 'claude'
+          ? extractClaude(mapping.sessionId, true)
+          : extractCodex(mapping.sessionId, true);
+    } catch (error) {
+      if (error instanceof HandoffError) {
+        translateT3ProviderError(error, mapping);
+      }
+      throw error;
+    }
+    result.t3 = mapping.t3;
+  } else {
+    result =
+      reference.format === 'claude'
+        ? extractClaude(reference.id)
+        : extractCodex(reference.id);
+  }
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 
 try {
-  main();
+  await main();
 } catch (error) {
-  if (error instanceof HandoffError) {
+  if (error instanceof HandoffError || error?.name === 'T3IdentityError') {
     process.stderr.write(
       `${JSON.stringify({ error: error.code, ...error.details }, null, 2)}\n`
     );

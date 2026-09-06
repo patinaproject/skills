@@ -56,9 +56,10 @@ Remaining triggers:
 - An issue branch belongs to another worktree → let **working-on-issues** stop
   at its handoff gate. Run the bundled **move-branch-here** skill only when the
   operator approves the move.
-- A Claude session ID or `codex://threads/<id>` handoff → run the bundled
-  **move-session-here** skill, then route its recovered resume point through the
-  Session pickup playbook. Session pickup enters the same issue handoff gate.
+- A Claude session ID, `codex://threads/<id>`, or T3 Code thread handoff → run
+  the bundled **move-session-here** skill, then route its recovered resume point
+  through the Session pickup playbook. Session pickup enters the same issue
+  handoff gate.
 - Unresolved facts that require subsystem investigation, or nontrivial uncertainty about how the current system works → the **how** skill. Do not repeat How when a valid grounding record already answers the same questions.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. The ask is the slow path. A throwaway probe usually answers faster, and it hands the human a result to react to instead of a decision to make.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
