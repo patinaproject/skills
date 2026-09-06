@@ -19,6 +19,7 @@ bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/setup-engineering-machinery.test.sh
 bash scripts/tests/sync-pstack.test.sh
+node scripts/tests/code-review-identity.test.mjs
 
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.
@@ -48,6 +49,7 @@ run_cli_canary() {
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
 run_cli_canary ./skills/grill-to-spec 'grill-to-spec'
+run_cli_canary ./plugins/engineering 'code-review'
 
 run_cli_install_canary() {
   local repo_root tmpdir status
@@ -94,3 +96,27 @@ run_cli_all_skill_canary() {
 
 run_cli_install_canary
 run_cli_all_skill_canary
+
+run_cli_engineering_canary() {
+  local repo_root tmpdir status
+  repo_root="$(pwd)"
+  tmpdir="$(mktemp -d)"
+  set +e
+  (
+    set -e
+    cd "$tmpdir"
+    if command -v timeout >/dev/null 2>&1; then
+      timeout 60 env npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/engineering" --skill code-review --agent '*' --yes
+    else
+      npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/engineering" --skill code-review --agent '*' --yes
+    fi
+    test -f .agents/skills/code-review/SKILL.md
+    test -f .agents/skills/code-review/scripts/check-identity.mjs
+  )
+  status=$?
+  set -e
+  rm -rf "$tmpdir"
+  return "$status"
+}
+
+run_cli_engineering_canary

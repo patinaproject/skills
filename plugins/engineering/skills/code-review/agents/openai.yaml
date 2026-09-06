@@ -1,0 +1,3 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review committed changes against standards and requirements"
