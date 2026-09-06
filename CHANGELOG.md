@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.44.0](https://github.com/patinaproject/skills/compare/v2.43.0...v2.44.0) (2026-09-06)
+
+
+### Features
+
+* [#464](https://github.com/patinaproject/skills/issues/464) support T3 Code thread handoffs ([#470](https://github.com/patinaproject/skills/issues/470)) ([9e5c342](https://github.com/patinaproject/skills/commit/9e5c342a87a50e42b2aa7a961ae8b3b469c087d9))
+
 ## [2.43.0](https://github.com/patinaproject/skills/compare/v2.42.0...v2.43.0) (2026-09-06)
 
 
