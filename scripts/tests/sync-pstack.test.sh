@@ -115,6 +115,9 @@ grep -q 'shared-line-v1' "$dest_file" || fail "first sync did not import upstrea
 
 # Local Patina edit on the shared line.
 perl -0pi -e 's/shared-line-v1/shared-line-PATINA-EDIT/' "$dest_file"
+mkdir -p "$consumer/plugins/engineering/skills/code-review"
+touch "$consumer/plugins/engineering/skills/code-review/SKILL.md"
+printf 'local-only-code-review\n' > "$consumer/plugins/engineering/skills/code-review/payload.txt"
 git -C "$consumer" add -A
 git -C "$consumer" commit -q -m "patina local edit"
 
@@ -131,5 +134,9 @@ fi
 grep -q '^<<<<<<<' "$dest_file" || fail "expected conflict markers not present after diverged sync"
 grep -q 'shared-line-PATINA-EDIT' "$dest_file" || fail "ours side missing from conflict"
 grep -q 'shared-line-UPSTREAM-CHANGE' "$dest_file" || fail "theirs side missing from conflict"
+test -f "$consumer/plugins/engineering/skills/code-review/SKILL.md" \
+  || fail "sync removed the local-only Engineering code-review skill"
+grep -q '^local-only-code-review$' "$consumer/plugins/engineering/skills/code-review/payload.txt" \
+  || fail "sync changed the local-only Engineering code-review payload"
 
 echo "PASS: sync-pstack.test.sh"
