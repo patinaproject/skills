@@ -61,15 +61,22 @@ new paths cannot be missed. Record every accepted source change before review.
 
 ## Run two fresh reviewers
 
-Use two separate fresh read-only contexts. Bind both to the configured
-`judgment and prose` role. Read
-[`../patina-mode/references/provider-dispatch.md`](../patina-mode/references/provider-dispatch.md)
-before the parent launches either reviewer. Use that reference's native or
-external route without substitution.
+**Dispatch contract.** Resolve every configured role through
+[`provider-dispatch.md`](../patina-mode/references/provider-dispatch.md).
+Values are provider-qualified descriptors; the parent chooses native versus
+external execution.
+
+Use two separate fresh read-only contexts. Use your configured
+`judgment and prose` descriptor (default `inherit-parent`) for both axes.
+Honor explicit session overrides and retain them in task evidence before
+resumed review. Label a default as a default; unresolved conflicting instructions
+make both axes incomplete. Check only the selected provider's prerequisites.
+A changed selection requires two fresh reviewers.
 
 Give each reviewer the pinned comparison, its complete criteria snapshots, the
-required output path, and any prior dispositions. Keep Standards and Spec in
-separate output paths.
+selected descriptor and configuration source, the required output path, and
+any prior dispositions. Keep Standards and Spec in separate output paths, with
+each axis's observed provider, model, effort, and route evidence.
 
 Each reviewer must:
 
