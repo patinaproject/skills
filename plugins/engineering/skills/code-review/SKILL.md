@@ -61,28 +61,25 @@ new paths cannot be missed. Record every accepted source change before review.
 
 ## Run two fresh reviewers
 
-Use two separate fresh read-only contexts. Resolve the effective
-`judgment and prose` role once for both axes. Read
+Use two separate fresh read-only contexts. Use the `judgment and prose` role
+from the active session's configuration, honoring explicit session overrides.
+The host supplies the applicable instructions, including custom profiles. Keep
+an explicit override in the task evidence and recover it before resumed review.
+If the role is absent, use `inherit-parent` and label it as a default. If the
+session instructions leave the choice ambiguous, return both axes incomplete
+with the conflicting sources.
+
+Read
 [`../patina-mode/references/provider-dispatch.md`](../patina-mode/references/provider-dispatch.md)
-and complete its configuration discovery and precedence steps before the parent
-launches either reviewer or checks provider authentication. Keep explicit
-session overrides in the task evidence and recover them before a resumed
-review. If resolution is incomplete, return both axes incomplete with the
-actual missing or conflicting sources.
-
-When no source defines the review role, use `inherit-parent` as an explicitly
-unconfigured runtime default. This keeps both fresh contexts on the current
-parent model and effort without treating a setup example as operator intent.
-
-Save the configuration source, selection basis, descriptor, resolved provider,
-model, effort, and native or external route with the review inputs. Give this
-record to both reviewers and retain separate observed dispatch evidence for
-each axis. Use the resolved route without substitution. A changed effective
-selection requires two fresh reviewers; keep the old reports as prior evidence.
+before the parent launches either reviewer. Resolve the selected descriptor
+through that contract, including `inherit-parent`, `auto`, and explicit external
+providers. Check only the selected provider's prerequisites. Use its model and
+effort without substitution; a changed selection requires two fresh reviewers.
 
 Give each reviewer the pinned comparison, its complete criteria snapshots, the
-resolved model record, the required output path, and any prior dispositions.
-Keep Standards and Spec in separate output paths.
+selected descriptor and configuration source, the required output path, and
+any prior dispositions. Keep Standards and Spec in separate output paths, with
+each axis's observed provider, model, effort, and route evidence.
 
 Each reviewer must:
 

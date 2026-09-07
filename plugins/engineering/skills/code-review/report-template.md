@@ -53,7 +53,7 @@ envelope uses schema version 1.
           "model": "gpt-6-astra",
           "effort": "high",
           "selectionBasis": "loaded instruction",
-          "configurationSource": "active-profile/AGENTS.md pstack:models block",
+          "configurationSource": "session AGENTS.md, judgment and prose role",
           "sourceEvidence": "model-selection.json"
         },
         "observedRouteEvidence": "standards/route.json",
@@ -104,12 +104,11 @@ also required when the diff is nonempty. Distinct files prove separation of
 artifacts only; inspect their contents and runtime records to establish actual
 independent execution.
 
-Each axis retains the parent's `modelSelection` and its own observed route
-evidence. The shared `sourceEvidence` record contains the exact configuration
-bytes or session override, source identity, active home and resolved file paths,
-and any missing or overridden source diagnostics. For aliases, keep the alias
-in `descriptor` and record the actual parent model and effort, or explicitly
-unknown runtime metadata. Label a default as a default. Compare the observed
+Each axis retains the selected descriptor, its configuration source or explicit
+session override, and its own observed route evidence. `sourceEvidence` points
+to the applicable instruction or saved override; a default is labeled as such.
+For `inherit-parent` and `auto`, keep the alias and record the actual parent
+model and effort, or explicitly unknown runtime metadata. Compare the observed
 dispatch with the selection; a mismatch makes that axis incomplete. The identity
 helper does not validate model resolution or prove that dispatch honored it.
 
