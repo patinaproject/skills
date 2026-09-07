@@ -46,16 +46,6 @@ envelope uses schema version 1.
       ],
       "execution": {
         "assignedRoute": "<resolved native or external route>",
-        "modelSelection": {
-          "role": "judgment and prose",
-          "descriptor": "<configured descriptor or default alias>",
-          "provider": "<resolved provider>",
-          "model": "<resolved model>",
-          "effort": "<resolved effort>",
-          "selectionBasis": "<configured role, explicit override, or default>",
-          "configurationSource": "<applicable instruction or saved override>",
-          "sourceEvidence": "model-selection.json"
-        },
         "observedRouteEvidence": "standards/route.json",
         "transcriptLocation": "standards/transcript.jsonl",
         "comparisonReads": [
@@ -104,13 +94,16 @@ also required when the diff is nonempty. Distinct files prove separation of
 artifacts only; inspect their contents and runtime records to establish actual
 independent execution.
 
-Each axis retains the selected descriptor, its configuration source or explicit
-session override, and its own observed route evidence. `sourceEvidence` points
-to the applicable instruction or saved override; a default is labeled as such.
-For `inherit-parent` and `auto`, keep the alias and record the actual parent
-model and effort, or explicitly unknown runtime metadata. Compare the observed
-dispatch with the selection; a mismatch makes that axis incomplete. The identity
-helper does not validate model resolution or prove that dispatch honored it.
+`assignedRoute` records the selected descriptor and native or external route.
+Cite its configuration source or saved override in the readable report, labeling
+a default as a default. `observedRouteEvidence` points to the native dispatch
+tool record or external runner receipt described in
+[`provider-dispatch.md`](../patina-mode/references/provider-dispatch.md);
+`transcriptLocation` points to that lane's execution transcript. Use those
+records' provider, model, effort, and verification evidence; mark unavailable
+runtime metadata as unknown. Compare the observed dispatch with the assignment:
+a mismatch makes the axis incomplete. The identity helper does not validate
+model resolution or prove that dispatch honored it.
 
 For an incomplete axis, provide a nonempty `reason` and list every available
 artifact in `availableEvidence`. An incomplete axis is a valid report state and
