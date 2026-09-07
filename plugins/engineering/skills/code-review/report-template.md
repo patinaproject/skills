@@ -45,7 +45,17 @@ envelope uses schema version 1.
         }
       ],
       "execution": {
-        "assignedRoute": "configured judgment and prose route",
+        "assignedRoute": "native spawn_agent",
+        "modelSelection": {
+          "role": "judgment and prose",
+          "descriptor": "codex:gpt-6-astra@high",
+          "provider": "codex",
+          "model": "gpt-6-astra",
+          "effort": "high",
+          "selectionBasis": "loaded instruction",
+          "configurationSource": "active-profile/AGENTS.md pstack:models block",
+          "sourceEvidence": "model-selection.json"
+        },
         "observedRouteEvidence": "standards/route.json",
         "transcriptLocation": "standards/transcript.jsonl",
         "comparisonReads": [
@@ -93,6 +103,15 @@ Criteria snapshots may be shared between axes. A committed `show` artifact is
 also required when the diff is nonempty. Distinct files prove separation of
 artifacts only; inspect their contents and runtime records to establish actual
 independent execution.
+
+Each axis retains the parent's `modelSelection` and its own observed route
+evidence. The shared `sourceEvidence` record contains the exact configuration
+bytes or session override, source identity, active home and resolved file paths,
+and any missing or overridden source diagnostics. For aliases, keep the alias
+in `descriptor` and record the actual parent model and effort, or explicitly
+unknown runtime metadata. Label a default as a default. Compare the observed
+dispatch with the selection; a mismatch makes that axis incomplete. The identity
+helper does not validate model resolution or prove that dispatch honored it.
 
 For an incomplete axis, provide a nonempty `reason` and list every available
 artifact in `availableEvidence`. An incomplete axis is a valid report state and

@@ -7,17 +7,26 @@ description: Configure pstack's provider-qualified models, per-family requested 
 
 Configure one portable model sheet for the current parent harness. Read [`provider-dispatch.md`](../patina-mode/references/provider-dispatch.md) before probing or writing anything. Its model matrix, descriptor grammar, and route table are the contract. Choose one requested effort per active matrix family. Do not add a second configuration file, a runtime resolver, or a weaker-model fallback.
 
-Claude Code writes `~/.claude/pstack-models.md` and loads it from `~/.claude/CLAUDE.md` with:
+Resolve the active home through provider-dispatch's configuration discovery
+contract. Write `<active-home>/pstack-models.md`. The conventional homes are
+defaults only; a T3 shadow profile can supply the effective home through
+`CODEX_HOME`. Retain resolved symlink targets and preserve the links when
+updating their contents.
+
+Claude Code loads the sheet from `<active-home>/CLAUDE.md` with an include of
+the resolved sheet path:
 
 ```text
-@~/.claude/pstack-models.md
+@<active-home>/pstack-models.md
 ```
 
-Codex writes `~/.codex/pstack-models.md`. Codex has no `@` include, so mirror the sheet's exact bytes inside one bounded block in `~/.codex/AGENTS.md` and retain the sheet as the editable source of truth:
+Codex has no `@` include, so mirror the sheet's exact bytes inside one bounded
+block in `<active-home>/AGENTS.md` and retain the sheet as the editable source
+of truth:
 
 ```text
 <!-- pstack:models:begin -->
-<exact contents of ~/.codex/pstack-models.md>
+<exact contents of the active sheet>
 <!-- pstack:models:end -->
 ```
 
@@ -25,13 +34,13 @@ Codex writes `~/.codex/pstack-models.md`. Codex has no `@` include, so mirror th
 
 ### 1. Establish the parent
 
-Use the harness and tool surface running this skill: Claude Code or Codex. Environment markers may corroborate that top-level answer, but do not launch a child and ask it to detect where it came from. Record the parent because the same descriptor takes a different route in each harness.
+Use the harness and tool surface running this skill: Claude Code or Codex. Environment markers may corroborate that top-level answer, but do not launch a child and ask it to detect where it came from. Record the parent and effective home because the same descriptor takes a different route in each harness. If profile identity is ambiguous, resolve it before probing or choosing write targets.
 
 ### 2. Load current state
 
-Read the current parent-specific sheet when it exists. Before matrix validation, normalize only versioned predecessors of the supported rolling aliases. A provider-qualified Claude model is migratable when its model component starts with `claude-fable-`, `claude-opus-`, or `claude-sonnet-` and the remaining revision contains only digits and hyphens. Replace that component in memory with `fable`, `opus`, or `sonnet`, preserving the provider, effort, role, and lane order. Record each original and normalized descriptor for the confirmation in step 8. This migration is valid loaded state and does not require a separate operator choice.
+Read the current sheet from the effective home when it exists. Distinguish a missing sheet from a failed read. If the sheet is absent but applicable parent instructions contain a model map, use that map as recovered state and identify its source. Report differences between the editable sheet and loaded instructions before proposing a write. Keep temporary session overrides separate from persisted setup state unless the operator explicitly asks to save them. Before matrix validation, normalize only versioned predecessors of the supported rolling aliases. A provider-qualified Claude model is migratable when its model component starts with `claude-fable-`, `claude-opus-`, or `claude-sonnet-` and the remaining revision contains only digits and hyphens. Replace that component in memory with `fable`, `opus`, or `sonnet`, preserving the provider, effort, role, and lane order. Record each original and normalized descriptor for the confirmation in step 8. This migration is valid loaded state and does not require a separate operator choice.
 
-Treat the normalized loaded values as current role-to-family assignments. Keep any documented role missing from the sheet as a pending row seeded from the complete first-run role map. A pending row is not current state and does not activate its seeded families. Materialize it only in the next successful write after step 4 assigns every lane to a target family or alias. A duplicate or unknown role row is inconsistent state; report it and resolve it before probing. A bare host-native slug from an older sheet is also invalid because it does not say which provider owns it. A versioned Claude model outside the three migration families remains inconsistent state. If the sheet is missing, use the complete first-run role map. Its non-alias descriptors already equal the matrix rows marked First-run active `yes` at their Default effort.
+Treat the normalized loaded values as current role-to-family assignments. Keep any documented role missing from the sheet as a pending row seeded from the complete first-run role map. A pending row is not current state and does not activate its seeded families. Materialize it only in the next successful write after step 4 assigns every lane to a target family or alias. A duplicate or unknown role row is inconsistent state; report it and resolve it before probing. A bare host-native slug from an older sheet is also invalid because it does not say which provider owns it. A versioned Claude model outside the three migration families remains inconsistent state. If neither a sheet nor a recovered map exists, use the complete first-run role map as a setup proposal. Its non-alias descriptors already equal the matrix rows marked First-run active `yes` at their Default effort. This proposal does not define runtime defaults for an unconfigured review.
 
 ### 3. Parse the role map and active families
 
@@ -79,7 +88,7 @@ Derive the rendered active family set again and require it to equal both the cho
 
 ### 8. Confirm and commit
 
-Show any rolling-alias migrations as original and normalized descriptors. Then show the route table for this parent and every rendered role and descriptor. Ask for confirmation before writing.
+Show any rolling-alias migrations as original and normalized descriptors. Then show the route table for this parent and every rendered role and descriptor. Show the effective paths and any shared symlink targets so the operator can review the actual write scope. Ask for confirmation before writing.
 
 Why and Reflect require the parent's live MCP surface. Keep their investigator, reviewer, and synthesizer roles on `inherit-parent` or `auto`; the bounded external runner deliberately omits ambient MCPs. `inherit-parent` and `auto` always validate, but say when they reduce a panel's provider diversity. For panel roles, one lane runs per entry. The list length is the fan-out count. `arena cross-judge pool` is a list from which Arena chooses a provider different from the parent and base candidate when possible. `swarm workers` is the default for every worker unless a race explicitly assigns another descriptor.
 
@@ -112,7 +121,7 @@ interrogate reviewers: claude:fable@max, codex:gpt-5.6-sol@max, grok:grok-4.6@xh
 
 ### 9. Wire it in
 
-Render the parent integration in memory before either write. On Claude, the integration is the single `@~/.claude/pstack-models.md` include in `~/.claude/CLAUDE.md`. On Codex, it is the exact sheet bytes between one `<!-- pstack:models:begin -->` and `<!-- pstack:models:end -->` pair in `~/.codex/AGENTS.md`. Replace that whole bounded block on a rerun. Insert one block at the end on first run. If either marker is missing, duplicated, or reversed, stop and report inconsistent state instead of guessing a boundary.
+Render the parent integration in memory before either write. On Claude, the integration is one include of the active sheet in `<active-home>/CLAUDE.md`. On Codex, it is the exact sheet bytes between one `<!-- pstack:models:begin -->` and `<!-- pstack:models:end -->` pair in `<active-home>/AGENTS.md`. Replace that whole bounded block on a rerun. Insert one block at the end on first run. If either marker is missing, duplicated, or reversed, stop and report inconsistent state instead of guessing a boundary.
 
 Snapshot every target's current bytes. Write the sheet and parent integration only after every target-active probe passes and the operator confirms. Read both targets back and compare them with the in-memory render. If either write or readback fails, restore every snapshot and report the failure. An unchanged rerun must produce byte-identical sheet and integration content after normalization.
 

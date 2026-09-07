@@ -6,6 +6,67 @@ pstack model choices are provider-qualified descriptors:
 <provider>:<model>@<effort>
 ```
 
+## Resolve effective configuration
+
+Before any lane or authentication probe, the parent resolves the requested
+role from the active session. Apply the instruction hierarchy, then this order
+within it:
+
+1. The latest explicit session override for the role or lane, including an
+   override retained in the task's resume evidence. Keep its scope and duration.
+2. Applicable model instructions already loaded by the parent, including a
+   `pstack:models` block in `AGENTS.md` or a loaded Claude model-sheet include.
+   Record the instruction's origin. A missing conventional file does not erase
+   loaded instructions.
+3. The role in the active profile's `pstack-models.md`, discovered below.
+4. If no source defines the role, use the caller's documented runtime default
+   and label it unconfigured. **code-review** uses `inherit-parent` in this case.
+   If the caller has no runtime default, report missing configuration. The
+   first-run map in **setup-pstack** seeds a setup proposal; it is not a
+   configured review requirement.
+
+Resolve the active home from the top-level launch contract. For Codex, use the
+process's nonempty `CODEX_HOME`; use `~/.codex` only when no custom home is set.
+For Claude Code, use `CLAUDE_CONFIG_DIR`, with `~/.claude` as its conventional
+default. A host that supplies the active profile directly can identify the
+effective home without an environment variable. If these identities disagree
+and the launch contract does not establish which is effective, report the
+conflict before dispatch.
+
+T3 Code's Codex instances have `homePath` and optional `shadowHomePath` settings.
+The shadow home becomes the app-server process's `CODEX_HOME` and can contain
+symlinks to the shared home's instructions and model sheet. Read through the
+effective home and retain both the requested and resolved paths. Use the active
+instance's launch metadata when available; do not search other account profiles
+or infer the active profile from the presence of a file. A Codex model selected
+in `config.toml` describes the parent, not a pstack role assignment.
+
+Read the active sheet and applicable parent instructions when their contents
+are not already loaded. Record absent paths and access failures separately.
+Normalize and validate the selected descriptor against the model matrix before
+choosing a route. A malformed selected value, conflicting values at the same
+precedence, or an unreadable required source leaves resolution incomplete.
+Report the exact sources and values; start no affected lane until resolved.
+When a higher-priority instruction overrides a different sheet value, report
+both and the winning authority. This is an effective session choice, not a
+silent repair of the editable sheet. Do not rewrite configuration during
+dispatch.
+
+Save the resolved role, descriptor, provider, model, effort, configuration
+source, selection basis, and route in task-local evidence before fan-out.
+Retain the exact source bytes or session instruction and its identity. For
+`inherit-parent` and `auto`, record the parent's actual model and effort as well
+as the alias; mark unavailable runtime metadata unknown rather than inventing it.
+Only selected external providers receive CLI or authentication checks.
+
+On resumption, read this evidence before selecting a route. Recover explicit
+overrides with their original authority; a later applicable instruction can
+replace or end them. Refresh profile inputs and compare the effective selection
+with the saved record. If the effective selection changes, dispatch fresh lanes
+and retain the prior record as superseded evidence. An unavailable override
+record needed to settle the route makes resolution incomplete. Task evidence
+preserves session intent; it is not another global model configuration file.
+
 ## Model matrix
 
 | Family | Upstream pstack choice | Provider | Model | Default effort | Selectable efforts | Claude-native agent stem | First-run active |
