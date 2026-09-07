@@ -3,6 +3,11 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   chmodSync,
+  closeSync,
+  ftruncateSync,
+  openSync,
+  readSync,
+  writeSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -65,6 +70,54 @@ function makeRuntimeDatabase(path, rows, { wal = false, primaryKey = true } = {}
   return database;
 }
 
+function fileDigest(path) {
+  const descriptor = openSync(path, 'r');
+  const hash = createHash('sha256');
+  const buffer = Buffer.alloc(64 * 1024);
+  try {
+    let count;
+    while ((count = readSync(descriptor, buffer)) > 0) {
+      hash.update(buffer.subarray(0, count));
+    }
+    return hash.digest('hex');
+  } finally {
+    closeSync(descriptor);
+  }
+}
+
+function expandWithSparseFreePages(path) {
+  // SQLite freelist leaves carry no data. Link sparse leaves through real trunk
+  // pages, excluding the reserved lock-byte page: https://sqlite.org/fileformat.html
+  const pageSize = 4096;
+  const pageCount = 524289;
+  const firstFreePage = statSync(path).size / pageSize + 1;
+  const lockPage = 0x40000000 / pageSize + 1;
+  const freePages = [];
+  for (let page = firstFreePage; page <= pageCount; page += 1) {
+    if (page !== lockPage) freePages.push(page);
+  }
+  const descriptor = openSync(path, 'r+');
+  try {
+    ftruncateSync(descriptor, pageCount * pageSize);
+    const header = Buffer.alloc(12);
+    header.writeUInt32BE(pageCount, 0);
+    header.writeUInt32BE(firstFreePage, 4);
+    header.writeUInt32BE(freePages.length, 8);
+    writeSync(descriptor, header, 0, header.length, 28);
+    const leavesPerTrunk = pageSize / 4 - 8;
+    for (let index = 0; index < freePages.length; index += leavesPerTrunk + 1) {
+      const leaves = freePages.slice(index + 1, index + leavesPerTrunk + 1);
+      const trunk = Buffer.alloc(pageSize);
+      trunk.writeUInt32BE(freePages[index + leavesPerTrunk + 1] ?? 0, 0);
+      trunk.writeUInt32BE(leaves.length, 4);
+      leaves.forEach((page, leaf) => trunk.writeUInt32BE(page, 8 + leaf * 4));
+      writeSync(descriptor, trunk, 0, trunk.length, (freePages[index] - 1) * pageSize);
+    }
+  } finally {
+    closeSync(descriptor);
+  }
+}
+
 function manifest(paths) {
   return paths.map((path) => {
     if (!existsSync(path)) {
@@ -74,7 +127,7 @@ function manifest(paths) {
     return {
       path,
       exists: true,
-      sha256: createHash('sha256').update(readFileSync(path)).digest('hex'),
+      sha256: fileDigest(path),
       dev: stats.dev.toString(),
       ino: stats.ino.toString(),
       mode: stats.mode.toString(),
@@ -430,6 +483,26 @@ fs.readFileSync = function (path, ...args) {
     runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: noWalPath })
   );
   assert.equal(noWalResult.sessionId, codexId);
+
+  await test('a valid database larger than 2 GiB resolves its exact binding', () => {
+    const largePath = join(fixtureRoot, 'large.sqlite');
+    copyFileSync(noWalPath, largePath);
+    expandWithSparseFreePages(largePath);
+    assert.ok(statSync(largePath).size > 2 ** 31);
+    const check = spawnSync('sqlite3', ['-readonly', largePath, 'PRAGMA integrity_check;'], {
+      encoding: 'utf8',
+    });
+    assert.equal(check.status, 0, check.stderr);
+    assert.equal(check.stdout.trim(), 'ok');
+    const before = manifest([largePath, codexPath]);
+    const result = parseSuccess(
+      runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: largePath })
+    );
+    assert.equal(result.sessionId, codexId);
+    assert.equal(result.t3.databasePath, largePath);
+    assert.deepEqual(manifest([largePath, codexPath]), before);
+    assert.equal(existsSync(sentinel), false);
+  });
 
   const defaultDatabasePath = join(
     fixtureHome,
