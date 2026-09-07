@@ -61,20 +61,17 @@ new paths cannot be missed. Record every accepted source change before review.
 
 ## Run two fresh reviewers
 
-Use two separate fresh read-only contexts. Use the `judgment and prose` role
-from the active session's configuration, honoring explicit session overrides.
-The host supplies the applicable instructions, including custom profiles. Keep
-an explicit override in the task evidence and recover it before resumed review.
-If the role is absent, use `inherit-parent` and label it as a default. If the
-session instructions leave the choice ambiguous, return both axes incomplete
-with the conflicting sources.
+**Dispatch contract.** Resolve every configured role through
+[`provider-dispatch.md`](../patina-mode/references/provider-dispatch.md).
+Values are provider-qualified descriptors; the parent chooses native versus
+external execution.
 
-Read
-[`../patina-mode/references/provider-dispatch.md`](../patina-mode/references/provider-dispatch.md)
-before the parent launches either reviewer. Resolve the selected descriptor
-through that contract, including `inherit-parent`, `auto`, and explicit external
-providers. Check only the selected provider's prerequisites. Use its model and
-effort without substitution; a changed selection requires two fresh reviewers.
+Use two separate fresh read-only contexts. Use your configured
+`judgment and prose` descriptor (default `inherit-parent`) for both axes.
+Honor explicit session overrides and retain them in task evidence before
+resumed review. Label a default as a default; unresolved conflicting instructions
+make both axes incomplete. Check only the selected provider's prerequisites.
+A changed selection requires two fresh reviewers.
 
 Give each reviewer the pinned comparison, its complete criteria snapshots, the
 selected descriptor and configuration source, the required output path, and

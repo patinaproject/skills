@@ -45,15 +45,15 @@ envelope uses schema version 1.
         }
       ],
       "execution": {
-        "assignedRoute": "native spawn_agent",
+        "assignedRoute": "<resolved native or external route>",
         "modelSelection": {
           "role": "judgment and prose",
-          "descriptor": "codex:gpt-6-astra@high",
-          "provider": "codex",
-          "model": "gpt-6-astra",
-          "effort": "high",
-          "selectionBasis": "loaded instruction",
-          "configurationSource": "session AGENTS.md, judgment and prose role",
+          "descriptor": "<configured descriptor or default alias>",
+          "provider": "<resolved provider>",
+          "model": "<resolved model>",
+          "effort": "<resolved effort>",
+          "selectionBasis": "<configured role, explicit override, or default>",
+          "configurationSource": "<applicable instruction or saved override>",
           "sourceEvidence": "model-selection.json"
         },
         "observedRouteEvidence": "standards/route.json",
