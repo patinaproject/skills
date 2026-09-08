@@ -26,6 +26,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-08T11:06:37Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "implementing",
+      "eventId": "sha256:02789551132c84d6ee92f2373b93fcf0323a714708ea01f8c137a39af67914f4",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/poll-20260908-142604",
+      "issueId": "490",
+      "kind": "claim",
+      "recordedAt": "2026-09-08T14:28:00Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -87,6 +96,12 @@
       "disposition": "Operator-requested eligible issue; retain ownership through human merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/486-issue.json",
       "reservedAt": "2026-09-08T11:06:37Z",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "490": {
+      "disposition": "implementing",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/poll-20260908-142604",
+      "reservedAt": "2026-09-08T14:28:00Z",
       "runId": "skills-teds-macbook-pro"
     }
   },
