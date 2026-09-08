@@ -12,16 +12,20 @@ perform the work that the prompt describes.
 
 1. Read the `writing-for-agents` skill in full. Apply its leading-word,
    positive-phrasing, and completion-criterion rules.
+   Read the Engineering plugin's `unslop` skill in full and apply it to every
+   response, including clarifications, the prompt, and accompanying prose.
 2. Open the active `patina-mode` skill's `SKILL.md` from the skills catalog.
    Read it in full without executing it. Treat its Playbooks section as the
    routing source of truth.
 3. Select the one governing playbook that most specifically matches the
    operator's work. Read that playbook in full from the path named by
-   `patina-mode`; let it invoke other playbooks internally.
+   `patina-mode`; let it invoke other playbooks internally. Use its canonical
+   terms with their existing meanings wherever its concepts appear. Other
+   playbooks supply their own vocabulary.
 4. When a repository is in scope, read `AGENTS.md` at the repository root and
    the repository documents that it says govern the work.
 
-If either required skill is unavailable, stop and name the missing skill.
+If a required skill is unavailable, stop and name the missing skill.
 
 ## Keep only operator-owned facts
 
@@ -33,8 +37,16 @@ Extract these facts from the intent or draft:
 - a checkable done predicate;
 - any condition that requires a person's decision.
 
-Infer a fact when the operator's intent already determines it. Ask only when a
-missing product choice would materially change the prompt.
+Resolve execution-changing ambiguity before drafting. Use the operator's
+context and the selected playbook first. If they leave materially different
+instructions possible, ask one concise question before expressing either.
+
+For Orchestrate, distinguish the program objective and its units from workers
+and the in-flight cap. An in-flight cap limits concurrent workers; an issue
+count does not establish that cap. An issue can require several units. Keep
+issue counts, workers, threads, and execution capacity distinct. Use standing
+orders, inbox, drain, frontier, and verification ledger only for the concepts
+the playbook defines.
 
 Remove instructions that the selected playbook, a principle skill, project
 memory, or a repository document already owns. For each removed instruction,
@@ -44,8 +56,9 @@ even when its general mechanism already has an owner.
 
 ## Write the prompt
 
-Write one line containing `/patina-mode` and a plain-English sentence of at
-most 30 words:
+Write one line containing `/patina-mode` and a plain-English sentence. Aim for
+at most 30 words; exceed that target when needed to preserve operator
+requirements without ambiguity:
 
 ```text
 /patina-mode <sentence>
@@ -74,11 +87,18 @@ and notification mechanics.
 
 ## Check the result
 
-Before returning the prompt, confirm all of these statements:
+Apply `unslop` to the entire response on every draft and revision. Preserve
+canonical playbook terms when editing; remove filler around them. Then confirm
+all of these statements:
 
 - The prompt names exactly one governing `patina-mode` playbook.
-- The prompt matches `/patina-mode <sentence>` on one line, with exactly one
-  plain-English sentence of at most 30 words.
+- The prompt matches `/patina-mode <sentence>` on one line, with one concise
+  plain-English sentence.
+- Every operator requirement survives: ownership, scope, limits, proof,
+  completion, and escalation. Earlier requirements remain unless the operator
+  changes them in the revision.
+- Canonical terms keep their selected playbook's meanings, and every limit
+  names what it counts.
 - The done predicate contains an observable result, count, state, or artifact.
 - Every line changes the run beyond what its governing documents already say.
 - An Autopilot-full or Orchestrate sentence begins `Go, be fully autonomous,
