@@ -20,8 +20,10 @@ perform the work that the prompt describes.
 3. Select the one governing playbook that most specifically matches the
    operator's work. Read that playbook in full from the path named by
    `patina-mode`; let it invoke other playbooks internally. Use its canonical
-   terms with their existing meanings wherever its concepts appear. Other
-   playbooks supply their own vocabulary.
+   terms with their existing meanings wherever its concepts appear. Keep the
+   canonical name itself, even when the operator describes its meaning in
+   other words. Use only terms needed to express the operator's requirements.
+   Other playbooks supply their own vocabulary.
 4. When a repository is in scope, read `AGENTS.md` at the repository root and
    the repository documents that it says govern the work.
 
@@ -56,34 +58,28 @@ even when its general mechanism already has an owner.
 
 ## Write the prompt
 
-Write one line containing `/patina-mode` and a plain-English sentence. Aim for
-at most 30 words; exceed that target when needed to preserve operator
-requirements without ambiguity:
+Write the shortest usable prompt beginning with `/patina-mode`. Use concise
+plain-English sentences, one idea per sentence. Split dense instructions at
+their logical boundaries while preserving every operator requirement:
 
 ```text
-/patina-mode <sentence>
+/patina-mode <prompt>
 ```
 
-Fold the proof into the done condition. Weave in an ownership boundary only
-when the operator sets one. Name the governing playbook once inside the sentence
+Connect the proof to the done condition. Include an ownership boundary only
+when the operator sets one. Name the governing playbook once in the opening
 with `Use <canonical playbook name> to`. Let it own any internal composition;
 do not name alternatives or use field labels.
 
-For Autopilot-full and Orchestrate, begin the sentence with `Go, be fully
-autonomous, and use <canonical playbook name> to`, call the work the `program
-objective`, and keep the proof and done condition in that sentence. Those words
+For Autopilot-full and Orchestrate, begin the text after `/patina-mode` with
+`Go, be fully autonomous, and use <canonical playbook name> to`. Call the work
+the `program objective` and retain the proof and done condition. Those words
 supply the route, standing objective, session override, and authorization to
 start.
 
-When the intent names a condition that requires a person's decision, weave this
-clause into the sentence:
-
-```text
-and treat <condition> as a checkpoint gate for <person> while continuing independent work
-```
-
-Keep the condition and owner. Let the selected playbook own storage, batching,
-and notification mechanics.
+When the intent requires a person's decision, name its condition and owner as
+a checkpoint gate. State that independent work continues while the gate waits.
+Let the selected playbook own storage, batching, and notification mechanics.
 
 ## Check the result
 
@@ -92,17 +88,17 @@ canonical playbook terms when editing; remove filler around them. Then confirm
 all of these statements:
 
 - The prompt names exactly one governing `patina-mode` playbook.
-- The prompt matches `/patina-mode <sentence>` on one line, with one concise
-  plain-English sentence.
+- The prompt begins with `/patina-mode` and uses concise sentences. Independent
+  requirements have their own sentences when combining them would be dense.
 - Every operator requirement survives: ownership, scope, limits, proof,
   completion, and escalation. Earlier requirements remain unless the operator
   changes them in the revision.
-- Canonical terms keep their selected playbook's meanings, and every limit
-  names what it counts.
+- Each selected playbook concept expressed in the prompt keeps its canonical
+  name and meaning. Every limit names what it counts. Unused concepts stay out.
 - The done predicate contains an observable result, count, state, or artifact.
 - Every line changes the run beyond what its governing documents already say.
-- An Autopilot-full or Orchestrate sentence begins `Go, be fully autonomous,
-  and use <canonical playbook name> to` and contains `program objective`.
+- An Autopilot-full or Orchestrate prompt opens with `/patina-mode Go, be fully
+  autonomous, and use <canonical playbook name> to` and contains `program objective`.
 - A human escalation appears as a checkpoint gate, never as a mid-run question.
 - The prompt uses positive, direct instructions.
 
