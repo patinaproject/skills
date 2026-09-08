@@ -23,15 +23,173 @@ Keep reports, criteria snapshots, dispositions, and reviewer artifacts in task-l
 
 **Titles.** Use Conventional Commits in the form `type(scope): subject`. Use `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, or `perf` as the type. Use the changed area, such as `pstack` or `patina-mode`, as the scope. Keep the subject short and imperative. Apply the same `/technical-writing` and `/unslop` pass as the body. Name a real symbol when one carries the change. For example, `fix(pstack): retarget opening-a-pr babysit trigger`. Do not add a trailing period.
 
-**Descriptions.** Use these sections in order. Drop a section when it is empty.
+**Descriptions.** Apply this contract whenever you create or update a PR
+description. Write for a tester who does not know the code or the change.
 
-- `## Why`. State the intent and why this approach fits.
-- `## Scope`. State facts from the diff. Name real symbols and paths. Name both sides of a rename or retarget. State what is in and out when the boundary matters.
-- `## Tradeoffs`. State real choices only. Skip this section when there are none.
-- `## Blast Radius`. State who and what the change touches. Explain why the change is safe or risky. If main is red without the fix, name the continuing cost.
-- `## Verification`. State how you ran each check and its rigor. Name the real path, such as the `run` skill, the `verify` skill, or the targeted tests. State the outcome of each check, not only the command name.
+Use the ticket, the current PR description or thread, and the diff or
+changed-file list. When these inputs lack required evidence, retrieve the full
+ticket discussion, current diff, relevant code, and development-branch
+evidence. Retrieved material becomes source input. A changed-file list alone
+does not establish behavior.
 
-After these sections, attach videos or screenshots when they prove a claim. Do not use `## Summary` or `## Test plan` boilerplate. A commit body does not restate its subject.
+Use only facts that the sources establish. General knowledge about typical
+behavior is not evidence. The source rule overrides any requirement for an
+unsupported statement.
+
+| Section | Ticket | PR | Code |
+| --- | --- | --- | --- |
+| What changed | Yes | Yes | Yes |
+| Repro steps | Yes | Yes | Do not derive steps from code |
+| Happy path | Yes | Yes | Yes |
+| Edge cases | No | No | Yes |
+| Still works | No | No | Yes |
+| Technical notes | Yes | Yes | Yes |
+
+Prefer the ticket for intended requirements and the PR for the delivered
+change and its run instructions. Prefer code for actual behavior. When the
+ticket and code disagree about visible behavior, What changed and Happy path
+describe the code. Do not label checks with their sources.
+
+Include only sections with applicable, useful content, in the order below. Put
+every limitation in a GitHub warning callout in its affected section. When that
+section is omitted, put the limitation in the most relevant retained section.
+This includes known reproduction limits, known verification limits, and
+missing evidence. Try to retrieve missing evidence before reporting the gap.
+Never turn unavailable evidence into a negative finding or imply that you read
+an unavailable source. Missing evidence permits publication only when the
+repository's existing publication gates pass.
+
+For a documentation-only diff with no executable behavior, omit Edge cases and
+Still works. When code is unavailable for an applicable behavior change, omit
+unsupported sections. Put this warning in the most relevant retained section.
+Unavailable code does not prove that no behavior exists.
+
+> [!WARNING]
+> No code supplied
+
+Keep each sentence to 20 words or fewer. Use product nouns and visible
+interface text. In What changed, Edge cases, and Still works, describe what a
+person does and sees. Do not name internal files, functions, packages, fields,
+values, conditions, or states there. Drop any check that lacks a user action
+and an observable result.
+
+#### `## What changed`
+
+Write two or three plain sentences about what the person notices. Name the
+product or interface. For a bug, take the broken behavior from the ticket and
+the corrected behavior from code. Describe code behavior when sources
+disagree. Use a warning callout when evidence does not establish the before or
+after behavior.
+
+#### `## Repro steps`
+
+For a bug, copy the ticket's numbered steps. Use the PR's numbered steps only
+when the ticket has none. Never construct steps from prose or code. When neither
+source has numbered steps, write:
+
+> [!WARNING]
+> No repro steps in the ticket or the pull request
+
+For any other change, omit this section.
+
+#### `## Happy path`
+
+Write the shortest path through the new behavior. Take steps from the ticket or
+PR. Code may supply omitted steps and decides the final result when sources
+disagree.
+
+Write one action per line. Start each action with a verb and use no more than 12
+words. The first action names the phone app, website, content admin tool, or
+other interface. Put required test data in the action that uses it. After the
+last action, write one `Result:` line with only the observable check. Do not add
+results after individual actions or repeat an action as the result.
+
+For a change without a user interface, write `No user interface in this
+change`. Name the command or other interface that exercises the change. List
+the calls in their code-defined order. Use a warning callout if the sources do
+not establish a usable path.
+
+In Edge cases and Still works, format each check as one Markdown bullet. Put the
+action on its first line and end it with `\` for a hard break. Indent the
+`**Result:**` line two spaces directly below it. Leave a blank line between
+bullets.
+
+#### `## Edge cases`
+
+Use code only. Inspect every branch, condition, guard, limit, and error that the
+change adds or alters. Ignore edits that do not change behavior.
+
+Keep only situations that a person can reach through a screen or command. For
+each situation, describe the action and observable outcome in plain language.
+
+Trace each check from the state left by the happy path and earlier checks. Use
+only source-established reset steps or distinct test data. Drop a check when
+the sources do not establish the required starting state.
+
+Do not carry ticket or PR claims into this section.
+
+#### `## Still works`
+
+Use code only. Find old behavior that must survive both on the happy-path
+screen and wherever else the changed code runs. Inspect it in all three ways:
+
+- Search every changed, added, or deleted export name and read its callers.
+- Read deleted and replaced lines to identify prior behavior.
+- Read unchanged behavior along paths through the changed code.
+
+Untouched callers can establish where the code runs and how a tester reaches
+it. Keep only behavior within the changed code's scope. Ignore test files, lock
+files, and generated files.
+
+Exclude the happy path and checks that merely expand one of its actions. Drop
+checks that the tester cannot cause. If no eligible check remains after all
+three inspections, omit this section.
+
+Name the screen in each action. When another interface uses the changed code,
+repeat the happy path once through that interface. Deduplicate checks found by
+multiple methods.
+
+Rank checks by how many people encounter the behavior. Keep the ten highest. A
+shared component, shared constant, or changed access rule outranks the ticket's
+named feature. Rewrite or drop any check that requires code knowledge.
+
+Do not carry ticket or PR claims into this section.
+
+#### `## Technical notes`
+
+Keep this section short. Use the ticket, the PR, and code. Use the following
+labeled lines when they apply:
+
+- `Setup:` Include only environment prerequisites. Examples include a required
+  build, migration, account role, environment setting, browser version, or new
+  dependency. Put actions that launch the app, website, tool, or command in
+  Happy path.
+  Keep test data in the action that uses it. Write `None` only when evidence
+  establishes that setup is unnecessary.
+- `Version change:` State whether the diff changes the app version, native
+  fingerprint, release manifest, or a dependency. Write `No version change`
+  only after checking the diff. If the diff is unavailable, warn that the
+  version change could not be verified.
+- `Development:` For a bug, state whether the evidence establishes the fault on
+  the development branch. Include a source-provided commit. If the fault is
+  absent there, put the absence status and the Repro steps limitation in one
+  warning callout.
+  If retrieval does not establish status, put `Not stated` in a warning
+  callout.
+- `Intermittent:` Include this line only when the ticket calls the fault
+  intermittent. Use the sourced count for repetitions of the Happy path.
+  Retrieve a missing count. If no source supplies one, warn that the repeat
+  count is not stated.
+
+Put one required tracker closing reference for each completed issue in
+Technical notes. Use the consuming repository's authoritative reference syntax.
+Do not add a Scope section.
+
+Put screenshots or videos within the relevant section when they prove a claim.
+Put verification reports and reviewer evidence in PR comments or task-local
+records. Link them from Technical notes when useful. Treat the QA steps as
+proposed until execution evidence proves that they ran. A commit body does not
+restate its subject.
 
 **Forge.** Resolve the forge before the first PR operation and keep that choice for create, edit, view, watch, and merge. GitHub CLI (`gh`) is the default. If `command -v origin` succeeds and Origin can resolve the repository, prefer `origin pr ...`; if Origin is absent or cannot resolve the repository, stay on `gh` and record the fallback. Record the intended PR base repository as canonical `<base-repo>` and validate it through the active forge. Do not infer it from the checkout's default remote. Capture it as a shell variable and pass `--repo "$base_repo"` to every `gh pr` command. When the head repository is a fork, validate its identity and record its owner and repository name as `<fork-owner>` and `<head-name>`. Do not require Graphite (`gt`).
 
