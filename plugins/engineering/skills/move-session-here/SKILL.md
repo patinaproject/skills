@@ -49,8 +49,9 @@ and prepend `$(brew --prefix sqlite)/bin` to `PATH` for the handoff command.
 A version number alone does not establish that a vendor build supports this case.
 
 Query output is limited to 1 MiB; oversized mappings return `invalid_t3_store`.
-SQLite may create or update the database's `-shm` WAL index and locking state.
-The helper leaves that shared bookkeeping to SQLite and never checkpoints,
+SQLite may create an empty `-wal` file and create or update the database's
+`-shm` WAL index and locking state. The helper leaves that shared bookkeeping
+to SQLite and never checkpoints,
 migrates, or writes stored database, WAL, or transcript content.
 
 On a nonzero exit, read the JSON error and stop:
