@@ -3,6 +3,11 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   chmodSync,
+  closeSync,
+  ftruncateSync,
+  openSync,
+  readSync,
+  writeSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -65,6 +70,54 @@ function makeRuntimeDatabase(path, rows, { wal = false, primaryKey = true } = {}
   return database;
 }
 
+function fileDigest(path) {
+  const descriptor = openSync(path, 'r');
+  const hash = createHash('sha256');
+  const buffer = Buffer.alloc(64 * 1024);
+  try {
+    let count;
+    while ((count = readSync(descriptor, buffer)) > 0) {
+      hash.update(buffer.subarray(0, count));
+    }
+    return hash.digest('hex');
+  } finally {
+    closeSync(descriptor);
+  }
+}
+
+function expandWithSparseFreePages(path) {
+  // SQLite freelist leaves carry no data. Link sparse leaves through real trunk
+  // pages, excluding the reserved lock-byte page: https://sqlite.org/fileformat.html
+  const pageSize = 4096;
+  const pageCount = 524289;
+  const firstFreePage = statSync(path).size / pageSize + 1;
+  const lockPage = 0x40000000 / pageSize + 1;
+  const freePages = [];
+  for (let page = firstFreePage; page <= pageCount; page += 1) {
+    if (page !== lockPage) freePages.push(page);
+  }
+  const descriptor = openSync(path, 'r+');
+  try {
+    ftruncateSync(descriptor, pageCount * pageSize);
+    const header = Buffer.alloc(12);
+    header.writeUInt32BE(pageCount, 0);
+    header.writeUInt32BE(firstFreePage, 4);
+    header.writeUInt32BE(freePages.length, 8);
+    writeSync(descriptor, header, 0, header.length, 28);
+    const leavesPerTrunk = pageSize / 4 - 8;
+    for (let index = 0; index < freePages.length; index += leavesPerTrunk + 1) {
+      const leaves = freePages.slice(index + 1, index + leavesPerTrunk + 1);
+      const trunk = Buffer.alloc(pageSize);
+      trunk.writeUInt32BE(freePages[index + leavesPerTrunk + 1] ?? 0, 0);
+      trunk.writeUInt32BE(leaves.length, 4);
+      leaves.forEach((page, leaf) => trunk.writeUInt32BE(page, 8 + leaf * 4));
+      writeSync(descriptor, trunk, 0, trunk.length, (freePages[index] - 1) * pageSize);
+    }
+  } finally {
+    closeSync(descriptor);
+  }
+}
+
 function manifest(paths) {
   return paths.map((path) => {
     if (!existsSync(path)) {
@@ -74,7 +127,7 @@ function manifest(paths) {
     return {
       path,
       exists: true,
-      sha256: createHash('sha256').update(readFileSync(path)).digest('hex'),
+      sha256: fileDigest(path),
       dev: stats.dev.toString(),
       ino: stats.ino.toString(),
       mode: stats.mode.toString(),
@@ -223,7 +276,6 @@ try {
   const sourcePaths = [
     databasePath,
     `${databasePath}-wal`,
-    `${databasePath}-shm`,
     claudePath,
     codexPath,
   ];
@@ -273,49 +325,6 @@ try {
   assert.equal(existsSync(sentinel), false);
   assert.deepEqual(readdirSync(privateTmp), []);
 
-  for (const failImport of [false, true]) {
-    await test(`SQLite warning filtering preserves other warnings and restores after import ${failImport ? 'failure' : 'success'}`, () => {
-      const preload = writePreload(`sqlite-warnings-${failImport}`, `
-import { registerHooks } from 'node:module';
-const sqliteWarning = 'SQLite is an experimental feature and might change at any time';
-registerHooks({
-  resolve(specifier, context, nextResolve) {
-    if (specifier === 'node:sqlite') {
-      process.emitWarning('Synthetic unrelated experiment', 'ExperimentalWarning');
-      process.emitWarning(sqliteWarning, 'Warning');
-      ${failImport ? "throw new Error('Synthetic unavailable SQLite');" : ''}
-    }
-    return nextResolve(specifier, context);
-  },
-});
-process.once('beforeExit', () => {
-  process.emitWarning(sqliteWarning, 'ExperimentalWarning');
-});`);
-      const result = runHandoff(`t3://threads/${t3CodexId}`, {
-        T3_STATE_DB: databasePath,
-      }, preload);
-      assert.equal(result.status, failImport ? 1 : 0, result.stderr);
-      if (failImport) {
-        assert.equal(result.stdout, '');
-        assert.match(result.stderr, /"error": "t3_sqlite_unavailable"/);
-      } else {
-        assert.equal(JSON.parse(result.stdout).sessionId, codexId);
-      }
-      assert.equal(
-        result.stderr.match(/ExperimentalWarning: SQLite is an experimental feature/g)?.length,
-        1
-      );
-      assert.match(result.stderr, /\) Warning: SQLite is an experimental feature/);
-      assert.match(result.stderr, /ExperimentalWarning: Synthetic unrelated experiment/);
-
-      const direct = runHandoff(claudeId, {}, preload);
-      assert.equal(direct.status, 0, direct.stderr);
-      assert.equal(JSON.parse(direct.stdout).sessionId, claudeId);
-      assert.match(direct.stderr, /ExperimentalWarning: SQLite is an experimental feature/);
-      assert.doesNotMatch(direct.stderr, /Synthetic unrelated experiment/);
-    });
-  }
-
   const mainOnlyPath = join(fixtureRoot, 'main-only.sqlite');
   copyFileSync(databasePath, mainOnlyPath);
   expectError(
@@ -338,31 +347,18 @@ process.once('beforeExit', () => {
     assert.equal(existsSync(`${alias}-shm`), false);
   });
 
-  for (const code of ['EACCES', 'EPERM']) {
-    await test(`${code} on a stable source is an unreadable store`, () => {
-      const preload = writePreload(`access-denied-${code}`, `
-const openSync = fs.openSync;
-fs.openSync = function (path, ...args) {
-  if (path === ${JSON.stringify(databasePath)}) {
-    throw Object.assign(new Error('private source details'), { code: '${code}' });
-  }
-  return openSync(path, ...args);
-};`);
-      const before = manifest(sourcePaths);
-      const error = expectError(
-        runHandoff(`t3://threads/${t3CodexId}`, {
-          T3_STATE_DB: databasePath,
-        }, preload),
-        'invalid_t3_store',
-        1
-      );
-      assert.equal(error.databasePath, databasePath);
-      assert.equal(error.cause, code);
-      assert.equal(JSON.stringify(error).includes('private source details'), false);
-      assert.deepEqual(manifest(sourcePaths), before);
-      assert.deepEqual(readdirSync(privateTmp), []);
-    });
-  }
+  await test('an unreadable database reports a sanitized store error', () => {
+    const path = join(fixtureRoot, 'unreadable.sqlite');
+    copyFileSync(databasePath, path);
+    chmodSync(path, 0o000);
+    try {
+      expectError(runHandoff(`t3://threads/${t3CodexId}`, {
+        T3_STATE_DB: path,
+      }), 'invalid_t3_store', 1);
+    } finally {
+      chmodSync(path, 0o600);
+    }
+  });
 
   await test('the removed snapshot hook environment variable executes nothing', () => {
     const hookSentinel = join(fixtureRoot, 'snapshot-hook-ran');
@@ -430,6 +426,186 @@ fs.readFileSync = function (path, ...args) {
     runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: noWalPath })
   );
   assert.equal(noWalResult.sessionId, codexId);
+
+  await test('a valid database larger than 2 GiB resolves its exact binding', () => {
+    const largePath = join(fixtureRoot, 'large.sqlite');
+    copyFileSync(noWalPath, largePath);
+    expandWithSparseFreePages(largePath);
+    assert.ok(statSync(largePath).size > 2 ** 31);
+    const check = spawnSync('sqlite3', ['-readonly', largePath, 'PRAGMA integrity_check;'], {
+      encoding: 'utf8',
+    });
+    assert.equal(check.status, 0, check.stderr);
+    assert.equal(check.stdout.trim(), 'ok');
+    const before = manifest([largePath, codexPath]);
+    const result = parseSuccess(
+      runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: largePath })
+    );
+    assert.equal(result.sessionId, codexId);
+    assert.equal(result.t3.databasePath, largePath);
+    assert.deepEqual(manifest([largePath, codexPath]), before);
+    assert.equal(existsSync(sentinel), false);
+  });
+
+  await test('committed WAL without SHM works through an unusual symlink path', () => {
+    const path = join(fixtureRoot, "WAL '?#\n state.sqlite");
+    copyFileSync(databasePath, path);
+    copyFileSync(`${databasePath}-wal`, `${path}-wal`);
+    const alias = join(fixtureRoot, 'missing-shm-alias.sqlite');
+    symlinkSync(path, alias);
+    assert.equal(existsSync(`${path}-shm`), false);
+    const before = manifest([path, `${path}-wal`, codexPath]);
+    const result = parseSuccess(runHandoff(`t3://threads/${t3CodexId}`, {
+      T3_STATE_DB: alias,
+    }));
+    assert.equal(result.sessionId, codexId);
+    assert.equal(result.t3.databasePath, path);
+    assert.deepEqual(manifest([path, `${path}-wal`, codexPath]), before);
+    assert.equal(existsSync(`${alias}-shm`), false);
+    assert.equal(existsSync(`${alias}-wal`), false);
+  });
+
+  await test('uncommitted WAL changes cannot replace the committed binding', () => {
+    liveDatabase.exec('BEGIN');
+    liveDatabase.prepare('UPDATE provider_session_runtime SET resume_cursor_json = ? WHERE thread_id = ?')
+      .run(JSON.stringify({ threadId: 'uncommitted-owner' }), t3CodexId);
+    const before = manifest(sourcePaths);
+    try {
+      const result = parseSuccess(runHandoff(`t3://threads/${t3CodexId}`, {
+        T3_STATE_DB: databasePath,
+      }));
+      assert.equal(result.sessionId, codexId);
+      assert.deepEqual(manifest(sourcePaths), before);
+    } finally {
+      liveDatabase.exec('ROLLBACK');
+    }
+  });
+
+  await test('a commit between schema and binding reads stays outside the lookup snapshot', () => {
+    const realSqlite = spawnSync('which', ['sqlite3'], { encoding: 'utf8' }).stdout.trim();
+    assert.ok(realSqlite);
+    const bin = join(fixtureRoot, 'concurrent-bin');
+    mkdirSync(bin);
+    const marker = join(fixtureRoot, 'concurrent-commit.json');
+    const wrapper = join(bin, 'sqlite3');
+    writeFileSync(wrapper, `#!${process.execPath}
+import { spawn } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
+const input = readFileSync(0, 'utf8');
+const boundary = input.indexOf('SELECT\\n');
+if (boundary < 0) throw new Error('Expected binding query');
+const child = spawn(${JSON.stringify(realSqlite)}, process.argv.slice(2));
+child.stdin.write(input.slice(0, boundary));
+let output = '';
+let committed = false;
+child.stdout.on('data', (data) => {
+  process.stdout.write(data);
+  output += data;
+  if (!committed && output.includes('\\n')) {
+    committed = true;
+    const writer = new DatabaseSync(${JSON.stringify(databasePath)});
+    writer.prepare('UPDATE provider_session_runtime SET resume_cursor_json = ? WHERE thread_id = ?')
+      .run(JSON.stringify({ threadId: 'later-committed-owner' }), ${JSON.stringify(t3CodexId)});
+    writer.close();
+    writeFileSync(${JSON.stringify(marker)}, JSON.stringify({ committed: true }));
+    child.stdin.end(input.slice(boundary));
+  }
+});
+child.stderr.pipe(process.stderr);
+child.on('exit', (code) => { process.exitCode = code; });
+`);
+    chmodSync(wrapper, 0o755);
+    try {
+      const result = parseSuccess(runHandoff(`t3://threads/${t3CodexId}`, {
+        T3_STATE_DB: databasePath,
+        PATH: `${bin}:${process.env.PATH}`,
+        NODE_OPTIONS: '--disable-warning=ExperimentalWarning',
+      }));
+      assert.equal(result.sessionId, codexId);
+      assert.equal(JSON.parse(readFileSync(marker, 'utf8')).committed, true);
+      assert.equal(JSON.parse(liveDatabase.prepare('SELECT resume_cursor_json FROM provider_session_runtime WHERE thread_id = ?')
+        .get(t3CodexId).resume_cursor_json).threadId, 'later-committed-owner');
+    } finally {
+      liveDatabase.prepare('UPDATE provider_session_runtime SET resume_cursor_json = ? WHERE thread_id = ?')
+        .run(JSON.stringify({ threadId: codexId }), t3CodexId);
+    }
+  });
+
+  await test('SQLite startup files cannot run commands or change query output', () => {
+    const startup = join(fixtureHome, '.sqliterc');
+    writeFileSync(startup, `.shell touch ${sentinel}\n.mode csv\n`);
+    const before = manifest(sourcePaths);
+    try {
+      assert.equal(parseSuccess(runHandoff(`t3://threads/${t3CodexId}`, {
+        T3_STATE_DB: databasePath,
+      })).sessionId, codexId);
+      assert.equal(existsSync(sentinel), false);
+      assert.deepEqual(manifest(sourcePaths), before);
+    } finally {
+      rmSync(startup);
+    }
+  });
+
+  await test('missing SQLite reports an actionable dependency error without affecting direct inputs', () => {
+    const bin = join(fixtureRoot, 'without-sqlite');
+    mkdirSync(bin);
+    symlinkSync(spawnSync('which', ['find'], { encoding: 'utf8' }).stdout.trim(), join(bin, 'find'));
+    const environment = { T3_STATE_DB: databasePath, PATH: bin };
+    const error = expectError(runHandoff(`t3://threads/${t3CodexId}`, environment),
+      't3_sqlite_unavailable', 1);
+    assert.match(error.message, /[Ii]nstall.*SQLite.*PATH/);
+    assert.equal(parseSuccess(runHandoff(claudeId, environment)).sessionId, claudeId);
+    assert.equal(parseSuccess(runHandoff(`codex://threads/${codexId}`, environment)).sessionId, codexId);
+  });
+
+  for (const unavailable of ['not-executable', 'unsupported-json']) {
+    await test(`${unavailable} SQLite CLI reports the dependency`, () => {
+      const bin = join(fixtureRoot, unavailable);
+      mkdirSync(bin);
+      const command = join(bin, 'sqlite3');
+      writeFileSync(command, `#!${process.execPath}\nprocess.stderr.write('sqlite3: Error: unknown option: -json\\n'); process.exit(1);\n`);
+      chmodSync(command, unavailable === 'not-executable' ? 0o600 : 0o700);
+      const before = manifest(sourcePaths);
+      const error = expectError(runHandoff(`t3://threads/${t3CodexId}`, {
+        T3_STATE_DB: databasePath,
+        PATH: bin,
+      }), 't3_sqlite_unavailable', 1);
+      assert.match(error.message, /[Ii]nstall.*SQLite.*PATH/);
+      assert.deepEqual(manifest(sourcePaths), before);
+    });
+  }
+
+  for (const column of ['provider_name', 'adapter_key', 'resume_cursor_json']) {
+    await test(`a BLOB ${column} cannot masquerade as mapping text`, () => {
+      const path = join(fixtureRoot, `blob-${column}.sqlite`);
+      copyFileSync(noWalPath, path);
+      const database = new DatabaseSync(path);
+      database.exec(`UPDATE provider_session_runtime SET ${column} = CAST(${column} AS BLOB)`);
+      database.close();
+      const before = manifest([path, codexPath]);
+      expectError(runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: path }),
+        column === 'resume_cursor_json' ? 't3_invalid_mapping' : 't3_unsupported_provider', 1);
+      assert.deepEqual(manifest([path, codexPath]), before);
+    });
+  }
+
+  await test('corrupt storage and oversized mapping output are structured errors', () => {
+    const corrupt = join(fixtureRoot, 'corrupt.sqlite');
+    writeFileSync(corrupt, 'synthetic invalid database');
+    expectError(runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: corrupt }),
+      'invalid_t3_store', 1);
+    const path = join(fixtureRoot, 'oversized.sqlite');
+    copyFileSync(noWalPath, path);
+    const database = new DatabaseSync(path);
+    database.prepare('UPDATE provider_session_runtime SET resume_cursor_json = ?')
+      .run(JSON.stringify({ threadId: codexId, padding: 'x'.repeat(1024 * 1024) }));
+    database.close();
+    const before = manifest([corrupt, path, codexPath]);
+    expectError(runHandoff(`t3://threads/${t3CodexId}`, { T3_STATE_DB: path }),
+      'invalid_t3_store', 1);
+    assert.deepEqual(manifest([corrupt, path, codexPath]), before);
+  });
 
   const defaultDatabasePath = join(
     fixtureHome,
@@ -720,86 +896,6 @@ fs.readFileSync = function (path, ...args) {
     );
     assert.deepEqual(manifest(paths), before);
   });
-
-  const mutationPath = join(fixtureRoot, 'mutation.sqlite');
-  const mutationDatabase = makeRuntimeDatabase(mutationPath, [
-    {
-      threadId: t3CodexId,
-      providerName: 'codex',
-      adapterKey: 'codex',
-      cursor: JSON.stringify({ threadId: codexId }),
-    },
-  ]);
-  mutationDatabase.close();
-  const mutationPreload = writePreload('mutate-snapshot', `
-const writeFileSync = fs.writeFileSync;
-let mutated = false;
-fs.writeFileSync = function (path, ...args) {
-  const result = writeFileSync(path, ...args);
-  if (!mutated && path.endsWith('/state.sqlite')) {
-    mutated = true;
-    const source = ${JSON.stringify(mutationPath)};
-    const before = fs.statSync(source);
-    writeFileSync(source, fs.readFileSync(source));
-    fs.utimesSync(source, before.atime, before.mtime);
-  }
-  return result;
-};`);
-  expectError(
-    runHandoff(`t3://threads/${t3CodexId}`, {
-      T3_STATE_DB: mutationPath,
-    }, mutationPreload),
-    't3_snapshot_busy',
-    1
-  );
-
-  const replacementPath = join(fixtureRoot, 'replacement.sqlite');
-  const replacementDatabase = makeRuntimeDatabase(replacementPath, [
-    {
-      threadId: t3CodexId,
-      providerName: 'codex',
-      adapterKey: 'codex',
-      cursor: JSON.stringify({ threadId: codexId }),
-    },
-  ]);
-  replacementDatabase.close();
-  const replacementPreload = writePreload('replace-snapshot', `
-const writeFileSync = fs.writeFileSync;
-let replaced = false;
-fs.writeFileSync = function (path, ...args) {
-  const result = writeFileSync(path, ...args);
-  if (!replaced && path.endsWith('/state.sqlite')) {
-    replaced = true;
-    const source = ${JSON.stringify(replacementPath)};
-    fs.renameSync(source, source + '.old');
-    fs.copyFileSync(source + '.old', source);
-  }
-  return result;
-};`);
-  expectError(
-    runHandoff(`t3://threads/${t3CodexId}`, {
-      T3_STATE_DB: replacementPath,
-    }, replacementPreload),
-    't3_snapshot_busy',
-    1
-  );
-
-  expectError(
-    runHandoff(`t3://threads/${t3ClaudeId}`, {
-      T3_STATE_DB: databasePath,
-      NODE_OPTIONS: '--no-experimental-sqlite',
-    }),
-    't3_sqlite_unavailable',
-    1
-  );
-  expectError(
-    runHandoff(`t3://threads/${t3ClaudeId}`, {
-      T3_STATE_DB: databasePath,
-      TMPDIR: join(fixtureRoot, 'missing-tmp-parent', 'tmp'),
-    }),
-    't3_runtime_error',
-    1
-  );
 
   assert.deepEqual(readdirSync(privateTmp), []);
   assert.equal(existsSync(sentinel), false);

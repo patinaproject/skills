@@ -1,28 +1,9 @@
-import { createHash } from 'node:crypto';
-import {
-  closeSync,
-  chmodSync,
-  constants,
-  existsSync,
-  fstatSync,
-  mkdtempSync,
-  openSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
-import { homedir, tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
+import { existsSync, realpathSync, statSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { isAbsolute, join, resolve } from 'node:path';
 
 const SESSION_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$/;
-const REQUIRED_COLUMNS = new Set([
-  'thread_id',
-  'provider_name',
-  'adapter_key',
-  'resume_cursor_json',
-]);
 
 class T3IdentityError extends Error {
   constructor(code, details, exitCode = 1) {
@@ -31,154 +12,6 @@ class T3IdentityError extends Error {
     this.code = code;
     this.details = details;
     this.exitCode = exitCode;
-  }
-}
-
-function fingerprint(stats, digest, resolvedPath) {
-  return {
-    resolvedPath,
-    dev: stats.dev.toString(),
-    ino: stats.ino.toString(),
-    size: stats.size.toString(),
-    mtimeNs: stats.mtimeNs.toString(),
-    ctimeNs: stats.ctimeNs.toString(),
-    digest,
-  };
-}
-
-function sameFingerprint(left, right) {
-  return JSON.stringify(left) === JSON.stringify(right);
-}
-
-function snapshotBusy(databasePath) {
-  throw new T3IdentityError('t3_snapshot_busy', { databasePath });
-}
-
-function readStableFile(path, databasePath) {
-  let descriptor;
-  try {
-    const resolvedPath = realpathSync(path);
-    const pathStatsBefore = statSync(resolvedPath, { bigint: true });
-    if (!pathStatsBefore.isFile()) {
-      throw new T3IdentityError('invalid_t3_store', {
-        databasePath,
-        message: 'The T3 state file and its WAL must be regular files.',
-      });
-    }
-    descriptor = openSync(resolvedPath, constants.O_RDONLY);
-    const descriptorStatsBefore = fstatSync(descriptor, { bigint: true });
-    if (
-      descriptorStatsBefore.dev !== pathStatsBefore.dev ||
-      descriptorStatsBefore.ino !== pathStatsBefore.ino
-    ) {
-      snapshotBusy(databasePath);
-    }
-    const bytes = readFileSync(descriptor);
-    const descriptorStatsAfter = fstatSync(descriptor, { bigint: true });
-    const pathStatsAfter = statSync(resolvedPath, { bigint: true });
-    const resolvedPathAfter = realpathSync(path);
-    const digest = createHash('sha256').update(bytes).digest('hex');
-    const before = fingerprint(
-      descriptorStatsBefore,
-      digest,
-      resolvedPath
-    );
-    const pathBefore = fingerprint(pathStatsBefore, digest, resolvedPath);
-    const after = fingerprint(
-      descriptorStatsAfter,
-      digest,
-      resolvedPathAfter
-    );
-    const pathAfter = fingerprint(pathStatsAfter, digest, resolvedPathAfter);
-    if (
-      !sameFingerprint(before, pathBefore) ||
-      !sameFingerprint(before, after) ||
-      !sameFingerprint(before, pathAfter)
-    ) {
-      snapshotBusy(databasePath);
-    }
-    return { bytes, fingerprint: before };
-  } catch (error) {
-    if (error instanceof T3IdentityError) {
-      throw error;
-    }
-    if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
-      snapshotBusy(databasePath);
-    }
-    throw new T3IdentityError('invalid_t3_store', {
-      databasePath,
-      path,
-      cause: error.code,
-      message: 'The T3 state file could not be read.',
-    });
-  } finally {
-    if (descriptor !== undefined) {
-      closeSync(descriptor);
-    }
-  }
-}
-
-function sourcePaths(databasePath) {
-  if (existsSync(`${databasePath}-journal`)) {
-    throw new T3IdentityError('t3_rollback_journal', { databasePath });
-  }
-  return [
-    databasePath,
-    ...(existsSync(`${databasePath}-wal`) ? [`${databasePath}-wal`] : []),
-  ];
-}
-
-function readSourceSet(databasePath) {
-  return sourcePaths(databasePath).map((path) => ({
-    path,
-    ...readStableFile(path, databasePath),
-  }));
-}
-
-function sameSourceSet(left, right) {
-  return (
-    left.length === right.length &&
-    left.every(
-      (entry, index) =>
-        entry.path === right[index].path &&
-        sameFingerprint(entry.fingerprint, right[index].fingerprint)
-    )
-  );
-}
-
-function acquireSnapshot(databasePath) {
-  const temporaryDirectory = mkdtempSync(join(tmpdir(), 'move-session-t3.'));
-  chmodSync(temporaryDirectory, 0o700);
-  try {
-    const before = readSourceSet(databasePath);
-    const copied = readSourceSet(databasePath);
-    if (!sameSourceSet(before, copied)) {
-      snapshotBusy(databasePath);
-    }
-    for (const [index, source] of copied.entries()) {
-      const destination = join(
-        temporaryDirectory,
-        index === 0 ? 'state.sqlite' : 'state.sqlite-wal'
-      );
-      writeFileSync(destination, source.bytes, { mode: 0o600 });
-      const copiedDigest = createHash('sha256')
-        .update(readFileSync(destination))
-        .digest('hex');
-      if (copiedDigest !== source.fingerprint.digest) {
-        snapshotBusy(databasePath);
-      }
-    }
-    const after = readSourceSet(databasePath);
-    if (!sameSourceSet(before, after)) {
-      snapshotBusy(databasePath);
-    }
-    return {
-      temporaryDirectory,
-      databasePath: join(temporaryDirectory, 'state.sqlite'),
-    };
-  } catch (error) {
-    rmSync(temporaryDirectory, { recursive: true, force: true });
-    throw error;
   }
 }
 
@@ -294,91 +127,101 @@ function mapRuntimeRow(row, threadId, databasePath) {
   });
 }
 
-async function openSnapshot(snapshot, databasePath) {
-  let DatabaseSync;
-  const emitWarning = process.emitWarning;
-  process.emitWarning = function (warning, type, ...args) {
-    // Keep the lazy SQLite import's notice out of the CLI's JSON error stream.
-    if (
-      type === 'ExperimentalWarning' &&
-      warning === 'SQLite is an experimental feature and might change at any time'
-    ) {
-      return;
+function queryRuntimeRows(databasePath, threadId) {
+  const threadHex = Buffer.from(threadId, 'utf8').toString('hex');
+  const result = spawnSync(
+    'sqlite3',
+    ['-init', '/dev/null', '-batch', '-bail', '-readonly', '-json', '--', databasePath],
+    {
+      encoding: 'utf8',
+      maxBuffer: 1024 * 1024,
+      input: `BEGIN;
+SELECT count(*) AS required_columns
+FROM pragma_table_info('provider_session_runtime')
+WHERE name IN ('thread_id', 'provider_name', 'adapter_key', 'resume_cursor_json');
+SELECT
+  CASE WHEN typeof(thread_id) = 'text' THEN thread_id END AS thread_id,
+  CASE WHEN typeof(provider_name) = 'text' THEN provider_name END AS provider_name,
+  CASE WHEN typeof(adapter_key) = 'text' THEN adapter_key END AS adapter_key,
+  CASE WHEN typeof(resume_cursor_json) = 'text' THEN resume_cursor_json END AS resume_cursor_json
+FROM provider_session_runtime
+WHERE thread_id = CAST(X'${threadHex}' AS TEXT)
+LIMIT 2;
+COMMIT;
+`,
     }
-    return emitWarning.call(this, warning, type, ...args);
-  };
-  try {
-    ({ DatabaseSync } = await import('node:sqlite'));
-  } catch {
+  );
+  if (
+    ['ENOENT', 'EACCES', 'ENOEXEC'].includes(result.error?.code) ||
+    /(?:unknown|unrecognized) option:.*(?:json|readonly|init)/i.test(result.stderr)
+  ) {
     throw new T3IdentityError('t3_sqlite_unavailable', {
       databasePath,
-      message: 'This Node.js runtime does not provide node:sqlite.',
+      message: 'Install a current upstream SQLite CLI (3.33.0 or later) and ensure sqlite3 is on PATH.',
     });
-  } finally {
-    process.emitWarning = emitWarning;
   }
   try {
-    return new DatabaseSync(snapshot.databasePath, { readOnly: true });
-  } catch {
+    if (result.error) throw result.error;
+    const separator = result.stdout.indexOf('\n');
+    const schema = JSON.parse(result.stdout.slice(0, separator));
+    if (
+      !Array.isArray(schema) || schema.length !== 1 ||
+      !Number.isInteger(schema[0]?.required_columns)
+    ) {
+      throw new Error('Invalid schema result');
+    }
+    if (schema[0].required_columns !== 4) {
+      throw new T3IdentityError('t3_unsupported_schema', { databasePath });
+    }
+    if (result.status !== 0 || result.stderr) throw new Error('SQLite read failed');
+    const rows = JSON.parse(result.stdout.slice(separator + 1).trim() || '[]');
+    if (!Array.isArray(rows) || rows.length > 2) {
+      throw new Error('Invalid row result');
+    }
+    for (const row of rows) {
+      if (row?.thread_id !== threadId) {
+        throw new T3IdentityError('t3_invalid_mapping', {
+          threadId,
+          databasePath,
+          message: 'The provider binding belongs to a different T3 thread.',
+        });
+      }
+    }
+    return rows;
+  } catch (error) {
+    if (error instanceof T3IdentityError) throw error;
     throw new T3IdentityError('invalid_t3_store', {
       databasePath,
-      message: 'The T3 state database could not be opened.',
+      message: 'The T3 state database could not be read. Check file access and use a current upstream sqlite3 on PATH; query output must fit within 1 MiB.',
     });
   }
 }
 
-async function resolveThreadFromStore(threadId) {
+function resolveThreadFromStore(threadId) {
   const databasePath = selectDatabasePath();
-  const snapshot = acquireSnapshot(databasePath);
-  let database;
-  try {
-    database = await openSnapshot(snapshot, databasePath);
-    const columns = database
-      .prepare('PRAGMA table_info(provider_session_runtime)')
-      .all();
-    const columnNames = new Set(columns.map((column) => column.name));
-    if (
-      columns.length === 0 ||
-      [...REQUIRED_COLUMNS].some((column) => !columnNames.has(column))
-    ) {
-      throw new T3IdentityError('t3_unsupported_schema', { databasePath });
-    }
-    const rows = database
-      .prepare(
-        'SELECT thread_id, provider_name, adapter_key, resume_cursor_json FROM provider_session_runtime WHERE thread_id = ? LIMIT 2'
-      )
-      .all(threadId);
-    if (rows.length === 0) {
-      throw new T3IdentityError(
-        't3_mapping_not_found',
-        { threadId, databasePath },
-        2
-      );
-    }
-    if (rows.length > 1) {
-      throw new T3IdentityError(
-        't3_mapping_ambiguous',
-        { threadId, databasePath },
-        3
-      );
-    }
-    const mapping = mapRuntimeRow(rows[0], threadId, databasePath);
-    return {
-      ...mapping,
-      t3: { threadId, databasePath },
-    };
-  } catch (error) {
-    if (error instanceof T3IdentityError) {
-      throw error;
-    }
-    throw new T3IdentityError('invalid_t3_store', {
-      databasePath,
-      message: 'The T3 state database could not be read.',
-    });
-  } finally {
-    database?.close();
-    rmSync(snapshot.temporaryDirectory, { recursive: true, force: true });
+  if (existsSync(`${databasePath}-journal`)) {
+    throw new T3IdentityError('t3_rollback_journal', { databasePath });
   }
+  const rows = queryRuntimeRows(databasePath, threadId);
+  if (rows.length === 0) {
+    throw new T3IdentityError(
+      't3_mapping_not_found',
+      { threadId, databasePath },
+      2
+    );
+  }
+  if (rows.length > 1) {
+    throw new T3IdentityError(
+      't3_mapping_ambiguous',
+      { threadId, databasePath },
+      3
+    );
+  }
+  const mapping = mapRuntimeRow(rows[0], threadId, databasePath);
+  return {
+    ...mapping,
+    t3: { threadId, databasePath },
+  };
 }
 
 export async function resolveT3Thread(threadId) {

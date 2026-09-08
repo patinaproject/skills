@@ -7,7 +7,7 @@ description: Ingest a Claude Code, Codex, or T3 Code conversation by thread or s
 
 Turn one stored Claude Code or Codex transcript into working context for this
 chat. Resolve a T3 Code thread to its provider transcript when needed. This is
-an ingestion workflow. Read each source in place and leave it unchanged.
+an ingestion workflow. Preserve the stored database, WAL, and transcript content.
 
 ```text
 /move-session-here 9e362a1e-b606-4d60-b3fa-4b6a03d2fcf1
@@ -37,11 +37,22 @@ The helper enumerates directory-guarded config homes with `find`, including
 the owning transcript and any Claude subagent sidecars into one JSON document.
 It scopes Codex lookup to `sessions/**/rollout-*.jsonl`.
 
-For a T3 Code reference, the helper reads `~/.t3/userdata/state.sqlite` through
-a private snapshot and resolves its exact provider binding. Set `T3_STATE_DB`
+For a T3 Code reference, use a current upstream SQLite CLI (3.33.0 or later,
+with `-json` support) as `sqlite3` on `PATH`. The helper queries `~/.t3/userdata/state.sqlite` in one read-only
+transaction and resolves its exact provider binding. Set `T3_STATE_DB`
 to an absolute regular file to use one custom state database instead. The
 helper does not scan other T3 stores. It keeps the T3 thread ID and database
 path under `t3`; `format` and `sessionId` still identify the provider transcript.
+Some bundled macOS SQLite builds cannot read a WAL-mode database when its
+sidecars are absent. On macOS, install upstream SQLite with `brew install sqlite`
+and prepend `$(brew --prefix sqlite)/bin` to `PATH` for the handoff command.
+A version number alone does not establish that a vendor build supports this case.
+
+Query output is limited to 1 MiB; oversized mappings return `invalid_t3_store`.
+SQLite may create an empty `-wal` file and create or update the database's
+`-shm` WAL index and locking state. The helper leaves that shared bookkeeping
+to SQLite and never checkpoints,
+migrates, or writes stored database, WAL, or transcript content.
 
 On a nonzero exit, read the JSON error and stop:
 
@@ -49,6 +60,7 @@ On a nonzero exit, read the JSON error and stop:
 - `ambiguous_session` means report every match and ask for a unique source.
 - `t3_store_not_found` or `t3_mapping_not_found` means report the T3 thread and
   database path.
+- `t3_sqlite_unavailable` means install the SQLite CLI and check `PATH`.
 - `t3_stale_binding` means the mapped provider transcript is missing.
 - `t3_mapping_ambiguous` or `t3_ambiguous_binding` means report the identifying
   details and ask for one unambiguous source.
@@ -95,5 +107,6 @@ capsule. Then continue from that action without asking the user to restate the
 session. Stop only for a real permission, product-decision, or safety boundary.
 
 Remove the two temporary files after the brief is established. Leave the T3
-state database, its sidecars, and every source transcript in place. Write only
-the derived temporary artifact, and continue without a native resume command.
+state database, its sidecars, and every source transcript in place. Do not clean
+up SQLite sidecars. Continue from the derived artifact without a native resume
+command.
