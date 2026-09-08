@@ -47,8 +47,8 @@ unsupported statement.
 
 Prefer the ticket for intended requirements and the PR for the delivered
 change and its run instructions. Prefer code for actual behavior. When the
-ticket and code disagree about visible behavior, sections 1 and 3 describe the
-code. Do not label checks with their sources.
+ticket and code disagree about visible behavior, What changed and Happy path
+describe the code. Do not label checks with their sources.
 
 Use all six sections below, in order. Put every limitation in a GitHub warning
 callout within the affected section. This includes known reproduction limits,
@@ -58,11 +58,12 @@ negative finding or imply that you read an unavailable source. Missing evidence
 permits publication only when the repository's existing publication gates pass.
 
 Keep each sentence to 20 words or fewer. Use product nouns and visible
-interface text. In sections 1, 4, and 5, describe what a person does and sees.
-Do not name internal files, functions, packages, fields, values, conditions, or
-states there. Drop any check that lacks a user action and an observable result.
+interface text. In What changed, Edge cases, and Still works, describe what a
+person does and sees. Do not name internal files, functions, packages, fields,
+values, conditions, or states there. Drop any check that lacks a user action
+and an observable result.
 
-#### `## 1. What changed`
+#### `## What changed`
 
 Write two or three plain sentences about what the person notices. Name the
 product or interface. For a bug, take the broken behavior from the ticket and
@@ -70,7 +71,7 @@ the corrected behavior from code. Describe code behavior when sources
 disagree. Use a warning callout when evidence does not establish the before or
 after behavior.
 
-#### `## 2. Repro steps`
+#### `## Repro steps`
 
 For a bug, copy the ticket's numbered steps. Use the PR's numbered steps only
 when the ticket has none. Never construct steps from prose or code. When neither
@@ -82,7 +83,7 @@ source has numbered steps, write:
 For any other change, retain the section and state that repro steps do not
 apply.
 
-#### `## 3. Happy path`
+#### `## Happy path`
 
 Write the shortest path through the new behavior. Take steps from the ticket or
 PR. Code may supply omitted steps and decides the final result when sources
@@ -99,7 +100,7 @@ change`. Name the command or other interface that exercises the change. List
 the calls in their code-defined order. Use a warning callout if the sources do
 not establish a usable path.
 
-#### `## 4. Edge cases`
+#### `## Edge cases`
 
 Use code only. Inspect every branch, condition, guard, limit, and error that the
 change adds or alters. Ignore edits that do not change behavior.
@@ -118,7 +119,7 @@ warning callout:
 > [!WARNING]
 > No code supplied
 
-#### `## 5. Still works`
+#### `## Still works`
 
 Use code only. Find old behavior that must survive both on the happy-path
 screen and wherever else the changed code runs. Inspect it in all three ways:
@@ -150,7 +151,7 @@ warning callout:
 > [!WARNING]
 > No code supplied
 
-#### `## 6. Technical notes`
+#### `## Technical notes`
 
 Keep this section short. Use the ticket, the PR, and code. Use the following
 labeled lines when they apply:
@@ -167,14 +168,14 @@ labeled lines when they apply:
   version change could not be verified.
 - `Development:` For a bug, state whether the evidence establishes the fault on
   the development branch. Include a source-provided commit. If the fault is
-  absent there, put the absence status and the section 2 limitation in one
+  absent there, put the absence status and the Repro steps limitation in one
   warning callout.
   If retrieval does not establish status, put `Not stated` in a warning
   callout.
 - `Intermittent:` Include this line only when the ticket calls the fault
-  intermittent. Use the sourced count for repetitions of section 3. Retrieve a
-  missing count. If no source supplies one, warn that the repeat count is not
-  stated.
+  intermittent. Use the sourced count for repetitions of the Happy path.
+  Retrieve a missing count. If no source supplies one, warn that the repeat
+  count is not stated.
 
 Put one required tracker closing reference for each completed issue in
 Technical notes. Use the consuming repository's authoritative reference syntax.

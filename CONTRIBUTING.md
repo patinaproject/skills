@@ -40,7 +40,7 @@ pnpm lint:md
 - Write the body with the Descriptions sections from
   `plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`.
 - Put one `Closes #N`, `Fixes #N`, or `Resolves #N` line in
-  `## 6. Technical notes` for each completed issue.
+  `## Technical notes` for each completed issue.
 - Keep execution evidence in review comments or other task-local records.
 - Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
