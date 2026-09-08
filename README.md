@@ -4,8 +4,7 @@ Installable agent skills for repository scaffolding, project-local skill
 installation, GitHub workflows, issue preflight, grill-and-hand-off design
 specs, contract-based system design, offensive-programming classification,
 current-target evidence for human feedback, shared-host mobile simulator
-sessions, standalone standards and requirements review, system design review,
-and focused system design grilling.
+sessions, system design review, and focused system design grilling.
 The catalog also includes prompt authoring for `patina-mode` runs.
 They are available across Claude Code, Codex, and any agent runtime that reads
 `AGENTS.md`.
@@ -90,17 +89,6 @@ completed-issue, blocker, branch, and worktree gates before marking work
 started.
 
 See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skills/working-on-issues/) for the skill contract.
-
-### code-review
-
-Engineering owns `code-review`. It reviews one committed comparison in two
-separate read-only contexts. Standards checks repository rules and Spec checks
-accepted requirements. The report records the exact Git comparison, criteria
-snapshots, and reviewer evidence.
-
-See [the Engineering code-review skill](./plugins/engineering/skills/code-review/)
-for its contract. Existing consumers must remove the external
-`mattpocock/skills` lock entry and install the Engineering copy.
 
 ### Filing and editing issues
 

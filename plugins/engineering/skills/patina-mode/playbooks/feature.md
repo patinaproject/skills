@@ -4,7 +4,6 @@
 
 1. `how` over the affected subsystem.
 2. `architect` for parallel design exploration. Skipping stays as `architect skipped: <reason>`; do not fold the design decision silently into implementation.
-   Before implementation, use the **code-review** skill's criteria reference to capture the exact applicable standards and accepted requirements. Include those snapshots and their provenance in the implementation brief.
 3. Write the throughput checkpoint as four todo items. A dimension that genuinely does not apply (single file, no fan-out) keeps its item with `n/a: <reason>` rather than being dropped:
    - **Blocking first steps.** Gates run before fan-out.
    - **Independent workstreams.** Disjoint files, services, or layers parallelize. Shared writes serialize.

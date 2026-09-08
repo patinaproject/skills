@@ -7,7 +7,6 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
-- `plugins/engineering/skills/code-review/`: standalone Standards and Spec review with commit and criteria identity evidence
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
@@ -278,7 +277,6 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | review-system-design | `skills/review-system-design/` |
 | writing-for-pstack | `skills/writing-for-pstack/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
-| code-review | `plugins/engineering/skills/code-review/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |
 | move-session-here | `plugins/engineering/skills/move-session-here/` |
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
