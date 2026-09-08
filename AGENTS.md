@@ -232,12 +232,13 @@ gh label list --json name,description --jq '.[] | select(.description == "")'
 
 Pull request bodies follow the Descriptions rule in
 `plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`. Use
-applicable section headings in order and omit empty sections. Put exactly one
-`Closes #N`, `Fixes #N`, or
-`Resolves #N` line in `## Technical notes` for each completed issue.
+applicable section headings in order and omit empty sections. Put one closing
+line in `## Technical notes` for each completed issue, with both GitHub and
+corresponding Linear references and a closing keyword for each, as the playbook
+specifies.
 
 `.github/pull_request_template.md` only reminds authors about the closing
-reference. It does not define the body structure. Use
+references. It does not define the body structure. Use
 `gh pr create --body-file <path-to-rendered-body>` with a body that already
 follows the playbook.
 
