@@ -37,7 +37,7 @@ pnpm lint:md
 ## Pull requests
 
 - Keep the PR title in commitlint format.
-- Write the body with the Descriptions sections from
+- Write the body with the applicable Descriptions sections from
   `plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`.
 - Put one `Closes #N`, `Fixes #N`, or `Resolves #N` line in
   `## Technical notes` for each completed issue.

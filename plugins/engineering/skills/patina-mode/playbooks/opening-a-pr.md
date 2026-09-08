@@ -50,12 +50,22 @@ change and its run instructions. Prefer code for actual behavior. When the
 ticket and code disagree about visible behavior, What changed and Happy path
 describe the code. Do not label checks with their sources.
 
-Use all six sections below, in order. Put every limitation in a GitHub warning
-callout within the affected section. This includes known reproduction limits,
-known verification limits, and missing evidence. Try to retrieve missing
-evidence before reporting the gap. Never turn unavailable evidence into a
-negative finding or imply that you read an unavailable source. Missing evidence
-permits publication only when the repository's existing publication gates pass.
+Include only sections with applicable, useful content, in the order below. Put
+every limitation in a GitHub warning callout in its affected section. When that
+section is omitted, put the limitation in the most relevant retained section.
+This includes known reproduction limits, known verification limits, and
+missing evidence. Try to retrieve missing evidence before reporting the gap.
+Never turn unavailable evidence into a negative finding or imply that you read
+an unavailable source. Missing evidence permits publication only when the
+repository's existing publication gates pass.
+
+For a documentation-only diff with no executable behavior, omit Edge cases and
+Still works. When code is unavailable for an applicable behavior change, omit
+unsupported sections. Put this warning in the most relevant retained section.
+Unavailable code does not prove that no behavior exists.
+
+> [!WARNING]
+> No code supplied
 
 Keep each sentence to 20 words or fewer. Use product nouns and visible
 interface text. In What changed, Edge cases, and Still works, describe what a
@@ -80,8 +90,7 @@ source has numbered steps, write:
 > [!WARNING]
 > No repro steps in the ticket or the pull request
 
-For any other change, retain the section and state that repro steps do not
-apply.
+For any other change, omit this section.
 
 #### `## Happy path`
 
@@ -113,11 +122,7 @@ Trace each check from the state left by the happy path and earlier checks. Use
 only source-established reset steps or distinct test data. Drop a check when
 the sources do not establish the required starting state.
 
-Do not carry ticket or PR claims into this section. Without code, use this
-warning callout:
-
-> [!WARNING]
-> No code supplied
+Do not carry ticket or PR claims into this section.
 
 #### `## Still works`
 
@@ -134,7 +139,7 @@ files, and generated files.
 
 Exclude the happy path and checks that merely expand one of its actions. Drop
 checks that the tester cannot cause. If no eligible check remains after all
-three inspections, write `Nothing beyond the happy path` and stop the section.
+three inspections, omit this section.
 
 For each check, write one action line followed by one `Result:` line. Name the
 screen in the action. When another interface uses the changed code, repeat the
@@ -145,11 +150,7 @@ Rank checks by how many people encounter the behavior. Keep the ten highest. A
 shared component, shared constant, or changed access rule outranks the ticket's
 named feature. Rewrite or drop any check that requires code knowledge.
 
-Do not carry ticket or PR claims into this section. Without code, use this
-warning callout:
-
-> [!WARNING]
-> No code supplied
+Do not carry ticket or PR claims into this section.
 
 #### `## Technical notes`
 

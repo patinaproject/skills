@@ -46,9 +46,10 @@ Do not push if the tree changed unintentionally.
 ## Add reviewer guidance
 
 When you update the PR description, follow
-[`opening-a-pr.md`](../patina-mode/playbooks/opening-a-pr.md). Keep its six
-sections in order and follow its source restrictions. Put code-review details
-that do not fit that contract in a separate PR comment:
+[`opening-a-pr.md`](../patina-mode/playbooks/opening-a-pr.md). Keep its
+applicable sections in order, omit empty sections, and follow its source
+restrictions. Put code-review details that do not fit that contract in a
+separate PR comment:
 
 - Separate core files from generated or mechanical files.
 - Call out risky behavior changes, migration order, and the rollout plan.
