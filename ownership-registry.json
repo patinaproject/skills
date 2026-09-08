@@ -1,0 +1,19 @@
+{
+  "events": [],
+  "imports": [
+    {
+      "capturedAt": "2026-09-08T10:19:45Z",
+      "importId": "sha256:f66ed1154494972266686f19ba14f8e944a27e5cdf9978faaac3e9d8edd6f413",
+      "issueOwnership": [],
+      "issueOwnershipTransfers": [],
+      "migrationInputSha256": "88d9ba4e8819234216325b4a63254098877b86200ccaf8530a969c26f55062dd",
+      "runs": [],
+      "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
+      "source": "Public Skills registry initialization from authority-source.json; no ownership records imported"
+    }
+  ],
+  "owners": {},
+  "repository": "github.com/patinaproject/skills",
+  "runs": {},
+  "schemaVersion": 1
+}
