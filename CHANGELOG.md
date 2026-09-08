@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.46.0](https://github.com/patinaproject/skills/compare/v2.45.1...v2.46.0) (2026-09-08)
+
+
+### Features
+
+* [#483](https://github.com/patinaproject/skills/issues/483) replace PR descriptions with sourced QA instructions ([#484](https://github.com/patinaproject/skills/issues/484)) ([fc80cf9](https://github.com/patinaproject/skills/commit/fc80cf93451da985eee038975aef0979e4b56d39))
+
+
+### Bug Fixes
+
+* [#478](https://github.com/patinaproject/skills/issues/478) query large T3 state databases with SQLite ([#481](https://github.com/patinaproject/skills/issues/481)) ([03c9c10](https://github.com/patinaproject/skills/commit/03c9c10211cd3abb78de95dc76b0b3bab22942ca))
+
 ## [2.45.1](https://github.com/patinaproject/skills/compare/v2.45.0...v2.45.1) (2026-09-07)
 
 
