@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.45.1](https://github.com/patinaproject/skills/compare/v2.45.0...v2.45.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* [#476](https://github.com/patinaproject/skills/issues/476) align code review with session model selection ([#479](https://github.com/patinaproject/skills/issues/479)) ([f43def6](https://github.com/patinaproject/skills/commit/f43def6b7e94e9d3812b8f34f61a96fe6ea50995))
+
 ## [2.45.0](https://github.com/patinaproject/skills/compare/v2.44.0...v2.45.0) (2026-09-06)
 
 
