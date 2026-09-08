@@ -1,5 +1,15 @@
 {
-  "events": [],
+  "events": [
+    {
+      "disposition": "Implementation authorized; retain through blockers and human merge gate",
+      "eventId": "sha256:00e0f9d6a71608275689af9ef040877d2cc91089f4576f886add7419e0716699",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/485-issue.json",
+      "issueId": "485",
+      "kind": "claim",
+      "recordedAt": "2026-09-08T10:27:13Z",
+      "toRunId": "skills-teds-macbook-pro"
+    }
+  ],
   "imports": [
     {
       "capturedAt": "2026-09-08T10:19:45Z",
@@ -42,8 +52,21 @@
       "source": "Live competing-writer proof lane b; no ownership records imported"
     }
   ],
-  "owners": {},
+  "owners": {
+    "485": {
+      "disposition": "Implementation authorized; retain through blockers and human merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/485-issue.json",
+      "reservedAt": "2026-09-08T10:27:13Z",
+      "runId": "skills-teds-macbook-pro"
+    }
+  },
   "repository": "github.com/patinaproject/skills",
-  "runs": {},
+  "runs": {
+    "skills-teds-macbook-pro": {
+      "createdAt": "2026-09-08T10:11:43.612468+00:00",
+      "repository": "github.com/patinaproject/skills",
+      "storePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro"
+    }
+  },
   "schemaVersion": 1
 }
