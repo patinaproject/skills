@@ -4,22 +4,9 @@ Invoked at the end of every other playbook.
 
 **Worktree.** Work from a git worktree off main; subagents inherit it. Multiple `Agent` calls on the same branch each get their own worktree. To reuse one branch across worktrees, resolve and validate `<head-url>` through Shipping step 1, capture it as `head_url`, then run `git fetch -- "$head_url" "refs/heads/$branch" && git reset --hard FETCH_HEAD` between them. Dirty branch with unrelated work: patch out, fresh worktree, apply. Snarled worktree: reset from main, redo minimally.
 
-**Publication review.** Parents and subagents use this same sequence. The **code-review** skill owns the shared criteria and read-only review contract. Patina owns cleanup, verification, dispositions, fixes, and publication.
+**Commits.** Commit liberally; rebase into small, ordered commits before opening PRs. Each commit is a future PR: landable, ordered to tell the story. Amend when the fix belongs in a just-made commit; new commit when separable.
 
-1. Finish implementation. Run `/deslop`, then `/no-comments`, and complete every accepted source edit.
-2. Run the applicable verification and commit the exact candidate.
-3. Refresh the criteria for the changed paths, including each source's canonical origin, acceptance basis, bytes, and affected axes. Record any accepted standards or requirement change. Resolve the intended implementation parent, its tip, the candidate head, and their merge-base. Record a different forge target separately.
-4. Run Standards and Spec through **code-review** in two separate fresh read-only contexts. Use the same criteria snapshots supplied to implementation, plus each accepted refresh. Retain each reviewer's full examined source identities, immutable Git reads, source reads, coverage, transcript, and route evidence.
-5. Keep either axis incomplete when its reviewer or evidence is incomplete. Inspect the reviewer-owned records. Run `code-review/scripts/check-identity.mjs` against the current repository and refreshed criteria, supplying `--intended-parent` from the current task or stack intent. Exit 0 proves identity and structural evidence only.
-6. Record an accepted, dismissed, or resolved disposition for every finding. Cite supporting evidence. A resolved finding requires evidence from the freshly reviewed commit. Its absence from a later finding list is insufficient. Preserve a reasoned dismissal only when a fresh reviewer confirms the same stable finding evidence. A pass requires both current complete axes and no unresolved substantiated blocker. Raw finding count does not decide the result.
-7. For an accepted blocker, fix the source and return to step 1. The new commit gets two fresh reports. Never relabel an earlier report with the new head.
-8. Immediately before the first forge write, refresh authoritative criteria, resolve the current intended implementation parent again, and rerun the identity helper with that ref. Stop when the head, intended parent, parent tip, merge-base, repository, or applicable source identity changed. Publish only the exact reviewed candidate.
-
-Keep reports, criteria snapshots, dispositions, and reviewer artifacts in task-local evidence outside the source tree. A subagent returns this package to its parent and may continue to the forge only after the same sequence passes. `interrogate` remains conditional on a contested design.
-
-**Commits.** Commit liberally; rebase into small, ordered commits before Publication review step 3. Each commit is a future PR: landable, ordered to tell the story. Amend when the fix belongs in a just-made commit; new commit when separable. Any later history change returns to Publication review step 1.
-
-**PRs.** Write every PR title, PR description, and commit body with `/technical-writing`, then apply `/unslop`. Apply every technical-writing layer except Diátaxis. Use one word for each action, keep articles, and avoid `-ing` when a plain verb works.
+**PRs.** Run `/deslop` over the diff before commit. Run `/no-comments` before review. Write every PR title, PR description, and commit body with `/technical-writing`, then apply `/unslop`. Apply every technical-writing layer except Diátaxis. Use one word for each action, keep articles, and avoid `-ing` when a plain verb works.
 
 **Titles.** Use Conventional Commits in the form `type(scope): subject`. Use `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, or `perf` as the type. Use the changed area, such as `pstack` or `patina-mode`, as the scope. Keep the subject short and imperative. Apply the same `/technical-writing` and `/unslop` pass as the body. Name a real symbol when one carries the change. For example, `fix(pstack): retarget opening-a-pr babysit trigger`. Do not add a trailing period.
 
@@ -205,4 +192,4 @@ restate its subject.
 
 **Babysit.** Opening a PR does not start a babysit. Post the URL and keep building. Finish the phase or stack first. Run a separate babysit pass only when the user asks for one after the whole stack exists, per `babysit.md`. A babysit for each new PR stalls the build and spends checks on commits that later waves restart. Push back when feedback drifts from intent.
 
-A subagent that opens a PR returns the URL and its publication evidence package. It does not babysit. Return to the parent.
+A subagent that opens a PR runs `interrogate`, `/deslop`, and `/no-comments`. It returns the URL and does not babysit. Return to the parent.
