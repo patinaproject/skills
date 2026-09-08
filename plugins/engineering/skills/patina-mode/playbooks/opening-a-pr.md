@@ -109,14 +109,18 @@ change`. Name the command or other interface that exercises the change. List
 the calls in their code-defined order. Use a warning callout if the sources do
 not establish a usable path.
 
+In Edge cases and Still works, format each check as one Markdown bullet. Put the
+action on its first line and end it with `\` for a hard break. Indent the
+`**Result:**` line two spaces directly below it. Leave a blank line between
+bullets.
+
 #### `## Edge cases`
 
 Use code only. Inspect every branch, condition, guard, limit, and error that the
 change adds or alters. Ignore edits that do not change behavior.
 
 Keep only situations that a person can reach through a screen or command. For
-each situation, write one action line followed by one `Result:` line. Describe
-the action and observable outcome in plain language.
+each situation, describe the action and observable outcome in plain language.
 
 Trace each check from the state left by the happy path and earlier checks. Use
 only source-established reset steps or distinct test data. Drop a check when
@@ -141,10 +145,9 @@ Exclude the happy path and checks that merely expand one of its actions. Drop
 checks that the tester cannot cause. If no eligible check remains after all
 three inspections, omit this section.
 
-For each check, write one action line followed by one `Result:` line. Name the
-screen in the action. When another interface uses the changed code, repeat the
-happy path once through that interface. Deduplicate checks found by multiple
-methods.
+Name the screen in each action. When another interface uses the changed code,
+repeat the happy path once through that interface. Deduplicate checks found by
+multiple methods.
 
 Rank checks by how many people encounter the behavior. Keep the ten highest. A
 shared component, shared constant, or changed access rule outranks the ticket's
