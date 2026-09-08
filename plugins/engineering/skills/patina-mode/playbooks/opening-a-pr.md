@@ -167,7 +167,8 @@ labeled lines when they apply:
   version change could not be verified.
 - `Development:` For a bug, state whether the evidence establishes the fault on
   the development branch. Include a source-provided commit. If the fault is
-  absent there, say so and explain that section 2 cannot demonstrate it there.
+  absent there, put the absence status and the section 2 limitation in one
+  warning callout.
   If retrieval does not establish status, put `Not stated` in a warning
   callout.
 - `Intermittent:` Include this line only when the ticket calls the fault
