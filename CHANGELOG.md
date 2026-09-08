@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.46.1](https://github.com/patinaproject/skills/compare/v2.46.0...v2.46.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* [#485](https://github.com/patinaproject/skills/issues/485) preserve playbook terms in concise prompts ([#489](https://github.com/patinaproject/skills/issues/489)) ([da0728a](https://github.com/patinaproject/skills/commit/da0728a014a2fe051a68625ad5121f7e8b5f28f8))
+* [#486](https://github.com/patinaproject/skills/issues/486) require GitHub and Linear closing references ([#487](https://github.com/patinaproject/skills/issues/487)) ([d8aaf57](https://github.com/patinaproject/skills/commit/d8aaf5702e81b4c781072b7f2de725f1a7683958))
+
 ## [2.46.0](https://github.com/patinaproject/skills/compare/v2.45.1...v2.46.0) (2026-09-08)
 
 
