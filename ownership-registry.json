@@ -8,6 +8,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-08T10:27:13Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Requirements and evaluation preparation authorized; retain through blockers and human merge gate",
+      "eventId": "sha256:44d42d322bb5ec647d4e0bcf4f0deda084037493aecdff4255fa571ae535f42c",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/477-issue.json",
+      "issueId": "477",
+      "kind": "claim",
+      "recordedAt": "2026-09-08T10:29:09Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -53,6 +62,12 @@
     }
   ],
   "owners": {
+    "477": {
+      "disposition": "Requirements and evaluation preparation authorized; retain through blockers and human merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/477-issue.json",
+      "reservedAt": "2026-09-08T10:29:09Z",
+      "runId": "skills-teds-macbook-pro"
+    },
     "485": {
       "disposition": "Implementation authorized; retain through blockers and human merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/485-issue.json",
