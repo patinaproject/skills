@@ -50,11 +50,12 @@ change and its run instructions. Prefer code for actual behavior. When the
 ticket and code disagree about visible behavior, sections 1 and 3 describe the
 code. Do not label checks with their sources.
 
-Use all six sections below, in order. If evidence is missing, try to retrieve
-it first. Then put the exact limitation in a GitHub warning callout within the
-affected section and continue. Never turn unavailable evidence into a negative
-finding or imply that you read an unavailable source. Missing evidence permits
-publication only when the repository's existing publication gates pass.
+Use all six sections below, in order. Put every limitation in a GitHub warning
+callout within the affected section. This includes known reproduction limits,
+known verification limits, and missing evidence. Try to retrieve missing
+evidence before reporting the gap. Never turn unavailable evidence into a
+negative finding or imply that you read an unavailable source. Missing evidence
+permits publication only when the repository's existing publication gates pass.
 
 Keep each sentence to 20 words or fewer. Use product nouns and visible
 interface text. In sections 1, 4, and 5, describe what a person does and sees.
@@ -107,6 +108,10 @@ Keep only situations that a person can reach through a screen or command. For
 each situation, write one action line followed by one `Result:` line. Describe
 the action and observable outcome in plain language.
 
+Trace each check from the state left by the happy path and earlier checks. Use
+only source-established reset steps or distinct test data. Drop a check when
+the sources do not establish the required starting state.
+
 Do not carry ticket or PR claims into this section. Without code, use this
 warning callout:
 
@@ -150,8 +155,10 @@ warning callout:
 Keep this section short. Use the ticket, the PR, and code. Use the following
 labeled lines when they apply:
 
-- `Setup:` Include only environment requirements. Examples include a build,
-  migration, account role, environment setting, browser, or new dependency.
+- `Setup:` Include only environment prerequisites. Examples include a required
+  build, migration, account role, environment setting, browser version, or new
+  dependency. Put actions that launch the app, website, tool, or command in
+  Happy path.
   Keep test data in the action that uses it. Write `None` only when evidence
   establishes that setup is unnecessary.
 - `Version change:` State whether the diff changes the app version, native
