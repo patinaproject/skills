@@ -101,9 +101,10 @@ skill.
 Four entries require special handling:
 
 - Copy `.github/pull_request_template.md` from
-  [`pr-body-template.md`](./pr-body-template.md). Select closing references
-  through the target repository's tracker adapter and verify them against its
-  integration and closing-reference check.
+  [`pr-body-template.md`](./pr-body-template.md). Require both GitHub and Linear
+  closing references as specified there. Retrieve counterpart IDs through the
+  target repository's tracker adapter and linked issue data, then verify the
+  reference forms against its integration and closing-reference check.
 - When the target does not contain the `opening-a-pr` playbook, adapt the
   copied `AGENTS.md` and `CONTRIBUTING.md` to name the target's active workflow
   as the body contract. If no body contract exists, leave body structure to the

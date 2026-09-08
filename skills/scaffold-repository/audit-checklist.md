@@ -56,7 +56,7 @@ each file must contain.
 
 | File or setting | Required | Check |
 | --- | --- | --- |
-| `.github/pull_request_template.md` | yes | Prescribes only a closing keyword with one authoritative reference per completed issue, following `pr-body-template.md` and the repository's tracker adapter. Its examples pass the applicable integration and closing-reference check. The active workflow owns body structure. |
+| `.github/pull_request_template.md` | yes | Requires both GitHub and corresponding Linear references, each with its own independently chosen closing keyword, following `pr-body-template.md`. A missing reference or keyword is incomplete. Its examples pass the applicable integration and closing-reference check. The active workflow owns body structure. |
 | `.github/ISSUE_TEMPLATE/config.yml` | yes | Public repositories accept GitHub issues. Private repositories disable blank issues and direct people to Linear. |
 | GitHub issue forms | depends on visibility | Public repositories may have them. Private repositories do not. |
 | `.github/CODEOWNERS` | yes | Has at least one rule that is not a comment. |

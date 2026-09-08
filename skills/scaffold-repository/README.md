@@ -8,8 +8,8 @@ agent instructions, GitHub workflows, issue tracking, and repository settings.
 It reads most live files from the root of
 [`patinaproject/skills`](https://github.com/patinaproject/skills) instead of
 shipping copied templates. The bundled `pr-body-template.md` reminds authors
-to include a closing reference selected through their repository's tracker
-adapter. The active workflow owns the rest of the body.
+to include both GitHub and corresponding Linear references, each with its own
+closing keyword. The active workflow owns the rest of the body.
 
 ## What it does
 

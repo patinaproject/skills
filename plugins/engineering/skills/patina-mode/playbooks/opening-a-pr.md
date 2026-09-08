@@ -181,8 +181,14 @@ labeled lines when they apply:
   Retrieve a missing count. If no source supplies one, warn that the repeat
   count is not stated.
 
-Put one required tracker closing reference for each completed issue in
-Technical notes. Use the consuming repository's authoritative reference syntax.
+Put one closing line per completed issue in Technical notes, including both
+GitHub and corresponding Linear references. Give each reference its own
+`Closes`, `Fixes`, or `Resolves` keyword, chosen independently. For example:
+`Closes #123, closes https://linear.app/WORKSPACE/issue/TEAM-123/title`.
+Retrieve counterpart IDs through the repository's tracker adapter and linked
+issue data. Mark the line incomplete until both IDs are retrieved and each has
+its own keyword. Use reference forms accepted by the repository's integration
+and closing-reference check.
 Do not add a Scope section.
 
 Put screenshots or videos within the relevant section when they prove a claim.
