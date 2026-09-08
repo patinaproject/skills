@@ -19,11 +19,12 @@ perform the work that the prompt describes.
    routing source of truth.
 3. Select the one governing playbook that most specifically matches the
    operator's work. Read that playbook in full from the path named by
-   `patina-mode`; let it invoke other playbooks internally. Use its canonical
-   terms with their existing meanings wherever its concepts appear. Keep the
-   canonical name itself, even when the operator describes its meaning in
-   other words. Use only terms needed to express the operator's requirements.
-   Other playbooks supply their own vocabulary.
+   `patina-mode`; let it invoke other playbooks internally. Map each needed
+   operator concept to the playbook's canonical term before drafting. Use that
+   term in the prompt with the playbook's meaning. For example, express an
+   Orchestrate worker-concurrency limit as `Set the in-flight cap to <limit>
+   concurrent workers.` Leave unused concepts out. Other playbooks supply
+   their own vocabulary.
 4. When a repository is in scope, read `AGENTS.md` at the repository root and
    the repository documents that it says govern the work.
 
