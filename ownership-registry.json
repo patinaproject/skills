@@ -10,6 +10,16 @@
       "runs": [],
       "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
       "source": "Public Skills registry initialization from authority-source.json; no ownership records imported"
+    },
+    {
+      "capturedAt": "2026-09-08T10:22:33Z",
+      "importId": "sha256:c669c2032f2c4d1f2f10018eb6fc9ce1c54285365b9268cb424196112cd0d6bb",
+      "issueOwnership": [],
+      "issueOwnershipTransfers": [],
+      "migrationInputSha256": "9ecdf5e9974d4fbe5aad9d92bce32a0d3c78236c6e25de2d2f7e56a3a0aba678",
+      "runs": [],
+      "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
+      "source": "Protected normal-push verification for repository ruleset 22532072; no ownership records imported"
     }
   ],
   "owners": {},
