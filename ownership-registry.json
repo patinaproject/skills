@@ -20,6 +20,16 @@
       "runs": [],
       "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
       "source": "Protected normal-push verification for repository ruleset 22532072; no ownership records imported"
+    },
+    {
+      "capturedAt": "2026-09-08T10:25:09+00:00",
+      "importId": "sha256:4136dfc9b4c946b62fd81b2346206313d9378693edfce412c23bbc5f251a89cd",
+      "issueOwnership": [],
+      "issueOwnershipTransfers": [],
+      "migrationInputSha256": "951741bc8d2b044cff230c22e81e37d11632d3271b4f80e033effb2cae8c10f8",
+      "runs": [],
+      "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
+      "source": "Live competing-writer proof lane a; no ownership records imported"
     }
   ],
   "owners": {},
