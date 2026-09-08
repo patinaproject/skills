@@ -30,6 +30,16 @@
       "runs": [],
       "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
       "source": "Live competing-writer proof lane a; no ownership records imported"
+    },
+    {
+      "capturedAt": "2026-09-08T10:25:09+00:00",
+      "importId": "sha256:fa160e1c03314aaaa1701d41ae7011dd626135af15a7c7f8b792550741734e83",
+      "issueOwnership": [],
+      "issueOwnershipTransfers": [],
+      "migrationInputSha256": "044d712a6a65646dc44a9ef924e7a9169e2be0b828fab92406483e657668c9a9",
+      "runs": [],
+      "snapshotSha256": "43efb4e38b983bb28d59b6bf52e26d22a87365fd22a40df77168a773b859458e",
+      "source": "Live competing-writer proof lane b; no ownership records imported"
     }
   ],
   "owners": {},
