@@ -1,0 +1,39 @@
+name: Slack failure alerts
+
+on:
+  workflow_run:
+    workflows: [Skills release dispatch]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  notify:
+    name: Notify Slack
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion != 'success' &&
+        github.event.workflow_run.conclusion != 'cancelled' &&
+        github.event.workflow_run.conclusion != 'skipped' &&
+        github.event.workflow_run.conclusion != 'neutral'
+      }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 5
+    steps:
+      - name: Alert engineering
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_FAILURES_WEBHOOK_URL }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          jq --null-input \
+            --arg workflow "$WORKFLOW_NAME" \
+            --arg branch "$BRANCH_NAME" \
+            --arg run_url "$RUN_URL" \
+            '{text: (":rotating_light: *" + $workflow + " workflow failed* on branch " + $branch + ". <" + $run_url + "|View failed run>.")}' \
+            | curl --fail-with-body --silent --show-error \
+                --request POST \
+                --header 'Content-type: application/json' \
+                --data-binary @- \
+                "$SLACK_WEBHOOK_URL"
