@@ -44,6 +44,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-09T16:57:20.158375+00:00",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Implementation authorized; preserve ownership through all blockers and operator merge gate",
+      "eventId": "sha256:011a8471514fd20fd968c13d400abff4bae874d8746a0901f51f32754b882384",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/494-intake-20260909.json",
+      "issueId": "494",
+      "kind": "claim",
+      "recordedAt": "2026-09-09T16:57:40.330790+00:00",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -117,6 +126,12 @@
       "disposition": "Implementation authorized; preserve ownership through all blockers and operator merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/493-intake-20260909.json",
       "reservedAt": "2026-09-09T16:57:20.158375+00:00",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "494": {
+      "disposition": "Implementation authorized; preserve ownership through all blockers and operator merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/494-intake-20260909.json",
+      "reservedAt": "2026-09-09T16:57:40.330790+00:00",
       "runId": "skills-teds-macbook-pro"
     }
   },
