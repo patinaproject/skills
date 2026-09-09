@@ -10,6 +10,7 @@ bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/release-please-workflow.test.sh
+bash scripts/tests/running-mobile-simulators.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
 bash scripts/tests/move-branch-here.test.sh

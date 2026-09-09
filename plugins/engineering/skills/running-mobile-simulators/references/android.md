@@ -43,6 +43,14 @@ Android is ready when the selected serial reports the intended AVD,
 
 Complete this check only when every result came from the recorded serial.
 
+For read-only preflight, run `scripts/check-readiness.sh` from the skill
+directory. The checker connects to the existing loopback ADB server and sends
+only fixed requests for the selected serial, `get-state`,
+`sys.boot_completed`, and `ro.boot.qemu.avd_name`. It does not start an `adb`
+process. A missing server or incomplete protocol response is unmet evidence.
+Use `--adb-port` only when the existing server listens on a nondefault local
+port.
+
 ## Bind operations and cleanup
 
 Scope every targeted ADB command with `adb -s <serial>`. Do not use an

@@ -56,6 +56,41 @@ device.
 This step is complete when the session record names one device and ownership
 mode, and any required lease is held.
 
+## Check readiness without changing state
+
+Run `scripts/check-readiness.sh` when a workflow needs reusable preflight after
+it has selected and leased one device. Pass the canonical device, exact runtime
+target, real workspace, and agent session ID:
+
+```bash
+scripts/check-readiness.sh \
+  --device android-avd:<avd-name> \
+  --target <emulator-serial> \
+  --workspace "$(git rev-parse --show-toplevel)" \
+  --session-id <agent-session-id>
+```
+
+For iOS, use `ios-simulator:<udid>` and pass the same UDID as the target. The
+command reads the existing lease, the selected virtual device, and the fixed
+process fingerprints described in [Device leases](references/device-leases.md).
+It never claims or repairs a lease. It also leaves device launch and recovery
+to the later lifecycle steps.
+
+The JSON result contains one `checks` array. Each check reports `pass`,
+`fail`, `unmet`, or `not-required`. A failed or unmet check includes the
+expected and observed values. Exit status `0` means that every required check
+passed. Exit status `1` means that a precondition failed or lacked evidence.
+Exit status `2` means that the request or checker was invalid. The default
+budget for each external observation is 10 seconds. Use `--timeout` to change
+that budget.
+
+The checker covers generic lease, device, process, and optional Maestro MCP
+readiness. The consuming project still owns its Expo, Metro, build, application
+identity, authentication, and data environment checks.
+
+This step is complete when the result names the selected device and observed
+lease owner, and every check required by the consuming workflow passes.
+
 ## Prepare the exact device
 
 Read the reference for the selected platform before launch, readiness checks,
