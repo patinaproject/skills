@@ -186,6 +186,7 @@ expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/skills/patina-mode/scripts/runner/pstack-runner \
   plugins/engineering/skills/patina-mode/scripts/watch-pr/watch-pr \
   plugins/engineering/skills/patina-mode/scripts/worktree-audit.sh \
+  plugins/engineering/skills/running-mobile-simulators/scripts/check-readiness.sh \
   plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh \
   plugins/engineering/skills/show-me-your-work/scripts/log.sh | sort)"
 test "$engineering_executables" = "$expected_engineering_executables"

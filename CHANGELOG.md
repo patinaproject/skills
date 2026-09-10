@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.47.0](https://github.com/patinaproject/skills/compare/v2.46.1...v2.47.0) (2026-09-09)
+
+
+### Features
+
+* [#490](https://github.com/patinaproject/skills/issues/490) restore upstream review workflow ([#491](https://github.com/patinaproject/skills/issues/491)) ([7aa91b9](https://github.com/patinaproject/skills/commit/7aa91b9dd669092d1b81285d9f58c692d07e8562))
+
 ## [2.46.1](https://github.com/patinaproject/skills/compare/v2.46.0...v2.46.1) (2026-09-08)
 
 
