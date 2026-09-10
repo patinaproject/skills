@@ -587,6 +587,74 @@ invoke --device "$ios_device" --target "$FAKE_IOS_UDID" --workspace "$workspace"
 assert_check "$invoke_output" process.maestro-mcp pass
 export FAKE_PROCESS_COMMAND="$FAKE_LAUNCHER_COMMAND"
 
+missing_ppid_mismatch_failures=""
+check_missing_ppid_mismatch() {
+  local name="$1" device="$2" target="$3" lease="$4" probe="$5" before_snapshot after_snapshot
+  printf '%s\n' "$maestro_command" >"$lease/maestro-mcp-command"
+  printf '%s\n' "$workspace" >"$lease/maestro-mcp-cwd"
+  printf '%s\n' "$FAKE_UID" >"$lease/maestro-mcp-uid"
+  export FAKE_PROCESS_COMMAND="$maestro_command"
+  export FAKE_PROCESS_CWD="$workspace"
+  export FAKE_PROCESS_UID="99999"
+  export FAKE_PROCESS_PPID=""
+
+  before_snapshot="$(snapshot_tree "$lease_root")"
+  if [[ "$device" == android-avd:* ]]; then
+    start_adb_server ready
+    invoke --device "$device" --target "$target" --workspace "$workspace" --session-id session-494 --lease-root "$lease_root" --adb-port "$adb_port" --timeout 1 --maestro-probe "$probe" --require-maestro-process
+    finish_adb_server
+  else
+    invoke --device "$device" --target "$target" --workspace "$workspace" --session-id session-494 --lease-root "$lease_root" --timeout 1 --maestro-probe "$probe" --require-maestro-process
+  fi
+  after_snapshot="$(snapshot_tree "$lease_root")"
+
+  if test "$invoke_status" != "1"; then
+    missing_ppid_mismatch_failures="${missing_ppid_mismatch_failures}${missing_ppid_mismatch_failures:+; }$name exited $invoke_status instead of 1"
+  fi
+  if test -z "$invoke_output"; then
+    missing_ppid_mismatch_failures="${missing_ppid_mismatch_failures}${missing_ppid_mismatch_failures:+; }$name emitted empty stdout"
+  elif ! jq -e --arg uid "$FAKE_UID" --arg workspace "$workspace" '
+      .ok == false and
+      .owner.sessionId == "session-494" and
+      .owner.workspace == $workspace and
+      ([.checks[] | select(
+        .check == "process.maestro-mcp" and
+        .status == "fail" and
+        .expected.uid == ($uid | tonumber) and
+        .observed.uid == 99999 and
+        .observed.ppid == null and
+        (.expected | has("pid")) and
+        (.observed | has("pid")) and
+        (.expected | has("startedAt")) and
+        (.observed | has("startedAt")) and
+        (.expected | has("command")) and
+        (.observed | has("command")) and
+        (.expected | has("cwd")) and
+        (.observed | has("cwd"))
+      )] | length) == 1
+    ' <<<"$invoke_output" >/dev/null; then
+    missing_ppid_mismatch_failures="${missing_ppid_mismatch_failures}${missing_ppid_mismatch_failures:+; }$name did not preserve process mismatch report: $invoke_output"
+  fi
+  if test "$after_snapshot" != "$before_snapshot"; then
+    missing_ppid_mismatch_failures="${missing_ppid_mismatch_failures}${missing_ppid_mismatch_failures:+; }$name mutated lease evidence"
+  fi
+}
+
+android_lease="$(make_lease "$lease_root" "$android_device" emulator-5554 completed)"
+android_maestro="$tmp_dir/android-maestro-ready.json"
+printf '[{"device_id":"emulator-5554","platform":"android","type":"emulator","connected":true}]\n' >"$android_maestro"
+write_fingerprint "$android_lease" maestro-mcp "$maestro_command"
+check_missing_ppid_mismatch android "$android_device" emulator-5554 "$android_lease" "$android_maestro"
+
+ios_lease="$(make_lease "$lease_root" "$ios_device" "$FAKE_IOS_UDID" completed)"
+write_fingerprint "$ios_lease" maestro-mcp "$maestro_command"
+check_missing_ppid_mismatch ios "$ios_device" "$FAKE_IOS_UDID" "$ios_lease" "$maestro_ready"
+
+test -z "$missing_ppid_mismatch_failures" || fail "$missing_ppid_mismatch_failures"
+export FAKE_PROCESS_COMMAND="$FAKE_LAUNCHER_COMMAND"
+export FAKE_PROCESS_UID="$FAKE_UID"
+export FAKE_PROCESS_PPID="41"
+
 set +e
 "$checker" --device "$ios_device" --target "$FAKE_IOS_UDID" --workspace "$workspace" --session-id session-494 --lease-root "$lease_root" --timeout 0 >/dev/null 2>"$tmp_dir/invalid-timeout.err"
 invalid_status=$?

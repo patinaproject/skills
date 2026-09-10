@@ -350,7 +350,7 @@ check_process() {
     return
   fi
   expected_identity="$(expected_object --arg pid "$recorded_pid" --arg uid "$recorded_uid" --arg startedAt "$recorded_started_at" --arg command "$recorded_command" --arg cwd "$recorded_cwd" '{pid:($pid|tonumber),uid:($uid|tonumber),startedAt:$startedAt,command:$command,cwd:$cwd}')"
-  observed_identity="$(expected_object --arg pid "$recorded_pid" --arg uid "$current_uid" --arg ppid "$current_ppid" --arg startedAt "$current_started_at" --arg command "$current_command" --arg cwd "$current_cwd" '{pid:($pid|tonumber),ppid:($ppid|tonumber?),uid:($uid|tonumber?),startedAt:$startedAt,command:$command,cwd:$cwd}')"
+  observed_identity="$(expected_object --arg pid "$recorded_pid" --arg uid "$current_uid" --arg ppid "$current_ppid" --arg startedAt "$current_started_at" --arg command "$current_command" --arg cwd "$current_cwd" '{pid:($pid|tonumber),ppid:(if $ppid == "" then null else ($ppid|tonumber?) end),uid:($uid|tonumber?),startedAt:$startedAt,command:$command,cwd:$cwd}')"
   if test "$recorded_started_at" != "$current_started_at" || \
       test "$recorded_command" != "$current_command" || \
       test "$recorded_uid" != "$current_uid" || \
