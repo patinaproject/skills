@@ -62,6 +62,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-10T07:08:50Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Implementation authorized; preserve ownership through blockers and operator merge gate",
+      "eventId": "sha256:9504a911d5a090ac3620e2e0539a956b66e245b2b96b2a1ad9c1b30b2a13e22f",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/500-intake-20260910.json",
+      "issueId": "500",
+      "kind": "claim",
+      "recordedAt": "2026-09-10T10:32:32Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -147,6 +156,12 @@
       "disposition": "User-authorized repair of existing PR 496 conflict; preserve branch, assignment, and automerge; operator-only merge",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/495-user-authorized-conflict-repair.json",
       "reservedAt": "2026-09-10T07:08:50Z",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "500": {
+      "disposition": "Implementation authorized; preserve ownership through blockers and operator merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/500-intake-20260910.json",
+      "reservedAt": "2026-09-10T10:32:32Z",
       "runId": "skills-teds-macbook-pro"
     }
   },
