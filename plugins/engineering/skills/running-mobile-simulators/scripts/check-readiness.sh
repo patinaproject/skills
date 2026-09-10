@@ -386,12 +386,8 @@ check_process() {
           return
           ;;
       esac
-      if test "$recorded_cwd" != "$workspace"; then
-        check_failure "process.$role" "fail" "$(jstr "$workspace")" "$(jstr "$recorded_cwd")"
-        return
-      fi
-      case " $recorded_command " in
-        *" --working-dir $workspace "*|*" --working-dir=$workspace "*) ;;
+      case "$recorded_command" in
+        *" --working-dir $workspace"|*" --working-dir=$workspace") ;;
         *)
           check_failure "process.$role" "fail" \
             "$(expected_object --arg workspace "$workspace" '{argument:"--working-dir",value:$workspace}')" \

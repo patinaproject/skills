@@ -655,6 +655,57 @@ export FAKE_PROCESS_COMMAND="$FAKE_LAUNCHER_COMMAND"
 export FAKE_PROCESS_UID="$FAKE_UID"
 export FAKE_PROCESS_PPID="41"
 
+workspace_binding_failures=""
+launch_cwd="$tmp_dir/launch-cwd"
+mkdir -p "$launch_cwd" "$workspace other"
+launch_cwd="$(cd "$launch_cwd" && pwd -P)"
+for argument_form in separate equals; do
+  for binding_case in exact longer-path other-cwd cwd-mismatch later-override; do
+    workspace_argument="--working-dir $workspace"
+    if test "$argument_form" = equals; then
+      workspace_argument="--working-dir=$workspace"
+    fi
+    expected_status=0
+    expected_check=pass
+    export FAKE_PROCESS_CWD="$workspace"
+    case "$binding_case" in
+      longer-path) workspace_argument="$workspace_argument other" ;;
+      other-cwd|cwd-mismatch) export FAKE_PROCESS_CWD="$launch_cwd" ;;
+      later-override) workspace_argument="$workspace_argument --working-dir $launch_cwd" ;;
+    esac
+    case "$binding_case" in
+      longer-path|cwd-mismatch|later-override) expected_status=1; expected_check=fail ;;
+    esac
+    export FAKE_PROCESS_COMMAND="/opt/java/bin/java -classpath /opt/maestro/lib/* maestro.cli.AppKt mcp $workspace_argument"
+    write_fingerprint "$ios_lease" maestro-mcp "$FAKE_PROCESS_COMMAND"
+    if test "$binding_case" = other-cwd; then
+      printf '%s\n' "$launch_cwd" >"$ios_lease/maestro-mcp-cwd"
+    fi
+    before="$(snapshot_tree "$lease_root")"
+    : >"$FAKE_LOG"
+    invoke --device "$ios_device" --target "$FAKE_IOS_UDID" --workspace "$workspace" --session-id session-494 --lease-root "$lease_root" --timeout 1 --maestro-probe "$maestro_ready" --require-maestro-process
+    after="$(snapshot_tree "$lease_root")"
+    evidence_name="workspace-$argument_form-$binding_case"
+    save_evidence "$evidence_name" "$before" "$after"
+    if ! (
+      assert_eq "$invoke_status" "$expected_status" "$evidence_name exit"
+      assert_check "$invoke_output" process.maestro-mcp "$expected_check"
+      assert_check "$invoke_output" automation.maestro-mcp pass
+      assert_eq "$after" "$before" "$evidence_name lease mutation"
+      if test "$binding_case" = cwd-mismatch; then
+        jq -e --arg expected "$workspace" --arg observed "$launch_cwd" \
+          'any(.checks[]; .check == "process.maestro-mcp" and .expected.cwd == $expected and .observed.cwd == $observed)' \
+          <<<"$invoke_output" >/dev/null || fail "cwd mismatch identity was not preserved"
+      fi
+    ); then
+      workspace_binding_failures="$workspace_binding_failures $evidence_name"
+    fi
+  done
+done
+test -z "$workspace_binding_failures" || fail "workspace binding regressions:$workspace_binding_failures"
+export FAKE_PROCESS_COMMAND="$FAKE_LAUNCHER_COMMAND"
+export FAKE_PROCESS_CWD="$workspace"
+
 set +e
 "$checker" --device "$ios_device" --target "$FAKE_IOS_UDID" --workspace "$workspace" --session-id session-494 --lease-root "$lease_root" --timeout 0 >/dev/null 2>"$tmp_dir/invalid-timeout.err"
 invalid_status=$?
