@@ -21,8 +21,10 @@ a sequential substitute.
 **Start every multi-step task with a todolist whose first item is to read the Principles section below in full.** The principles ground every trigger here. Keep principle choices, routing decisions, skip reasons, and throughput notes in the private task record. Explain them to the user only when asked or when the reasoning affects a decision the user must make. A citation with no decision behind it means you skipped its leaf skill; it must trace to a real choice the leaf's rule drove.
 
 While patina-mode is active, this skill owns workflow routing. Use only the
-skills and playbooks named here. Do not substitute another development, repair,
-review, or pull request controller because it is installed.
+skills and playbooks named here, plus project verification procedures selected
+through [`references/project-verification.md`](references/project-verification.md).
+Do not substitute another development, repair, review, or pull request
+controller because it is installed.
 
 Every skill named in this document and its playbooks is the Engineering
 plugin's. On Claude Code, invoke it as `engineering:<name>` rather than the bare
@@ -30,7 +32,8 @@ name. Another installed plugin may ship a skill of the same name and an
 identical description, so a bare name can silently reach the wrong one. The
 exceptions are the references already carrying their own namespace, such as
 `plugin-dev:skill-development`, and the Claude Code built-in driver skills
-`run` and `verify`. On Codex, see
+`run` and `verify`. Selected project procedures retain their exact registered
+identity and location. On Codex, see
 [`references/codex-tools.md`](references/codex-tools.md).
 
 Every `scripts/...` and `playbooks/...` path in this document, its playbooks,
@@ -71,7 +74,13 @@ Remaining triggers:
 - Docs, RFCs, readmes, PR descriptions, or commit messages → the **technical-writing** skill (`/technical-writing`).
 - Before commit → the **deslop** skill (`/deslop`).
 - Before review → the **no-comments** skill (`/no-comments`).
-- Shipping UI / IDE / CLI → the driver skill (`run` for CLIs/TUIs, `verify` for UIs). Both ship as Claude Code built-ins. For bug fixes, reproduce first on the same surface yourself; hand to the user only under the narrow Bug fix step 1 exception.
+- Behavior reproduction or verification, including owner proof and independent
+  verification → follow
+  [`references/project-verification.md`](references/project-verification.md)
+  before selecting or mapping platform drivers. This applies whenever a routed
+  playbook names `run`, `verify`, or another driver. For bug fixes, reproduce
+  first on the same surface yourself; hand to the user only under the narrow
+  Bug fix step 1 exception.
 - A human-authored change request or QA finding needs resolution → run the **gather-evidence** skill before editing or preparing a response. Route a confirmed case to the matching playbook, then run **gather-evidence** again on the changed target. Leave replies, thread resolution, and review state to the operator. Automated review uses the existing bot triage instead.
 - Work uses an Android emulator or iOS simulator → run the
   **running-mobile-simulators** skill before the first device state change. The
@@ -158,6 +167,11 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 For `inherit-parent`, `auto`, or an unconfigured native ad-hoc helper, prefer `patina-agent`. `/patina-mode` and `patina-agent` route through the same wrapper. A provider-qualified role instead follows provider dispatch: Claude's shipped frontier agent definitions select the model alias and requested effort, Codex passes both to `spawn_agent`, and external providers run through the deterministic launcher. Routed workflow skills set the task and access mode; do not override their choices.
 
 **Defaults for every delegation.** Start independent lanes together, use file pointers rather than inlined dumps, preserve only the tools or MCPs the task needs, and assign every writer a worktree or unique output directory. `/setup-pstack` configures the descriptor per role. Upstream defaults use Grok 4.6 xhigh for feature/refactoring, exploration, and swarm work; GPT-5.6 Sol max for bug fixes, performance work, hillclimbing, and tooling review; Fable max for judgment, prose, explanation, synthesis, and hardest tasks; and the four-provider frontier panel for model-diverse judgment. The panel defaults are enumerated in `arena`, `architect`, `interrogate`, and `how`. `inherit-parent` and `auto` use the parent model natively and reduce provider diversity when used in a panel.
+
+Every owner and independent-verifier brief carries the selection record and
+execution requirements from
+[`references/project-verification.md`](references/project-verification.md#carry-the-selection-into-every-brief).
+Require recipients to preserve them in onward briefs.
 
 You own every subagent's work. Review the diff and write your own summary, don't pass through what it said. Interrupt-chained resumes silently drop directives, so fire a fresh subagent with consolidated scope rather than trusting a "done" summary. A second opinion is the same prompt against a different model. Agreement is high-signal.
 

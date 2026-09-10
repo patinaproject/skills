@@ -57,7 +57,14 @@ four-provider frontier diversity and contains no older GPT or Claude substitute.
 
 ## Claude built-in skills pstack references
 
-Some triggers name skills that ship with Claude Code, not pstack. They do not exist on Codex. Substitute the behavior:
+Some triggers name skills that ship with Claude Code, not pstack. They do not
+exist on Codex. For reproduction and verification, first complete
+[project-procedure selection](project-verification.md). The `run` and `verify`
+rows below translate underlying controls after that selection, including an
+explicit no-procedure fallback. They do not replace a selected procedure or
+clear its blocked prerequisites.
+
+Substitute the behavior:
 
 | Claude built-in named in pstack | On Codex |
 |---------------------------------|----------|
