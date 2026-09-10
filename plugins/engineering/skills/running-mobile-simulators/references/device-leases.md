@@ -69,6 +69,31 @@ Claiming is complete when the lease directory contains the agent session ID,
 workspace real path, and canonical identity. Do not proceed from an incomplete
 record.
 
+## Record process fingerprints
+
+Set `launcher-disposition` to one of these values:
+
+- `persistent` for an owned launcher that must stay alive;
+- `completed` for an owned launcher that exits after startup; or
+- `external` for the launcher of an attached device.
+
+For a persistent launcher, record `launcher-pid`, `launcher-start-time`,
+`launcher-command`, `launcher-cwd`, and `launcher-uid`. Keep `launcher-pid` as
+the existing launcher PID field. When the session starts a Maestro MCP or
+Viewer process, record the same five fields with the `maestro-mcp-` or
+`viewer-` prefix. These are the only process roles that the readiness checker
+reads.
+
+Capture each fingerprint after launch. Use `LC_ALL=C ps -ww` for the start time,
+full command, and numeric UID. Resolve the working directory to its real path.
+The readiness checker compares every field with the live process. It treats a
+missing field as unmet evidence and a mismatch as a failed check. The checker
+does not fill missing fields, and a matching PID or OS user cannot prove
+session ownership by itself.
+
+Process recording is complete when each session-owned process has all five
+fingerprint fields and the launcher has an explicit disposition.
+
 ## Handle conflicts and stale leases
 
 On conflict, inspect the lease record and current device and process inventory

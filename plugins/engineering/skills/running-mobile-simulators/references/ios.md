@@ -29,6 +29,19 @@ xcrun simctl bootstatus <udid> -b
 iOS is ready when the recorded UDID is booted and `bootstatus` exits
 successfully for that UDID.
 
+For read-only preflight, run `scripts/check-readiness.sh` from the skill
+directory. The checker reads `xcrun simctl list devices -j`, requires the exact
+UDID to be available and `Booted`, and then runs this command:
+
+```bash
+xcrun simctl bootstatus <udid>
+```
+
+The read-only form omits `-b`, so it cannot boot a stopped simulator. The
+checker reads the device list again after `bootstatus` and fails if the selected
+device changed. Each command uses the configured observation budget. On
+timeout, the checker stops and reaps only the command process that it started.
+
 ## Bind operations and cleanup
 
 Pass the recorded UDID to every targeted `xcrun simctl` command. Never use the

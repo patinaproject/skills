@@ -41,6 +41,31 @@ Maestro process per agent.
 For Maestro MCP, call `list_devices` first and verify the recorded identifier.
 Pass that identifier as `device_id` to every device tool call.
 
+To include the MCP binding in read-only preflight, call `list_devices({})` in
+the current agent session and preserve the tool invocation and result with the
+verification evidence. Pass the complete returned JSON tool result to the
+readiness checker:
+
+```bash
+scripts/check-readiness.sh <selection-arguments> --maestro-probe <result-file>
+```
+
+Use `--maestro-probe -` to read the result from standard input. The checker
+decodes Maestro's `CallToolResult` with its single JSON `TextContent` payload.
+It also accepts an already decoded device array or a `devices` array in the
+root or `structuredContent`. The checker requires one entry for the exact
+target with the expected platform, a virtual device type, and
+`connected: true`. An explicit tool error, unavailable, empty, malformed,
+disconnected, or wrong-target result fails. A JSON file alone does not prove
+that the current session called the MCP tool, so retain the session-local tool
+receipt. If the workflow omits `--maestro-probe`, the result reports the MCP
+check as `not-required` instead of claiming that automation passed.
+
+Use `--require-maestro-process` when this session started the MCP host process.
+Use `--require-viewer-process` when this session started the Viewer process.
+These flags require the fixed fingerprints in the device lease. A process
+fingerprint does not replace the `list_devices({})` binding result.
+
 When the session starts Maestro MCP directly, bind file operations to the
 workspace:
 
@@ -48,7 +73,9 @@ workspace:
 maestro mcp --working-dir "$(git rev-parse --show-toplevel)"
 ```
 
-Record the MCP process and its working directory in the session record.
+The installed launcher replaces itself with the Java runtime. Record that
+runtime process and its working directory in the session record. Its full
+command contains `maestro.cli.AppKt mcp` after the Java and classpath arguments.
 
 ## Keep the Viewer connected
 
