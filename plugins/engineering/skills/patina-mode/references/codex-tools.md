@@ -58,11 +58,9 @@ four-provider frontier diversity and contains no older GPT or Claude substitute.
 ## Claude built-in skills pstack references
 
 Some triggers name skills that ship with Claude Code, not pstack. They do not
-exist on Codex. For reproduction and verification, first complete
-[project-procedure selection](project-verification.md). The `run` and `verify`
-rows below translate underlying controls after that selection, including an
-explicit no-procedure fallback. They do not replace a selected procedure or
-clear its blocked prerequisites.
+exist on Codex. For reproduction and verification, invoke the project skill as
+directed by [Project verification](../SKILL.md#project-verification) before
+applying the `run` and `verify` driver substitutions below.
 
 Substitute the behavior:
 
