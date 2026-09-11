@@ -19,6 +19,6 @@ When debugging, do not fix symptoms. Trace every problem to its root cause and f
 - Check for the pattern, not just the instance (grep for the same pattern, fix all instances)
 - When stuck, instrument. Don't guess (add logging, read the actual error)
 
-**Restart bugs: suspect state before code**
+## Restart bugs: suspect state before code
 
 When something "fails after restart," suspect stale persistent state first: config files, caches, lock files, serialized state. If clearing a state file restores behavior, prioritize state validation as the fix.
