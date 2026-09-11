@@ -6,7 +6,7 @@ import { join } from "node:path";
 // clear message instead of an opaque `import.meta.dir is undefined` crash under node.
 if (typeof Bun === "undefined") {
   console.error(
-    "pstack patina-mode tooling requires Bun (https://bun.sh). Install Bun, then re-run."
+    "pstack patina-mode tooling requires bun (https://bun.sh). Install bun, then re-run."
   );
   process.exit(1);
 }
@@ -42,7 +42,7 @@ export function ensureDependenciesInstalled(): void {
   }
 
   const result = Bun.spawnSync(
-    [process.execPath, "install", "--frozen-lockfile"],
+    [process.execPath, "install", "--frozen-lockfile", "--production"],
     { cwd: scriptsDirectory }
   );
   if (result.exitCode !== 0) {
@@ -59,13 +59,4 @@ export function ensureDependenciesInstalled(): void {
   }
 
   writeFileSync(installKeyPath, `${installKey}\n`);
-
-  const restarted = Bun.spawnSync([process.execPath, ...process.argv.slice(1)], {
-    cwd: process.cwd(),
-    env: process.env,
-    stdin: "inherit",
-    stdout: "inherit",
-    stderr: "inherit",
-  });
-  process.exit(restarted.exitCode ?? 1);
 }
