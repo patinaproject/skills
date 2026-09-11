@@ -101,17 +101,20 @@ paragraph too. Write it as an `<img>` element carrying `width`, `height`,
 `01-email-sent`. Add a caption only where the media does not explain itself.
 
 Create the pull request before you supply the media. The description editor
-and its attachment URLs exist only once the pull request does. Supply the
-media through the browser:
+and its attachment URLs exist only once the pull request does. GitHub
+publishes no attachment upload endpoint, so use the browser only for the
+upload:
 
 1. Open the pull request description editor in a logged-in browser.
 2. Select Attach files.
 3. Upload the video and the screenshots with the file chooser.
-4. Move each generated attachment URL under the `## Demo` heading.
-5. Save the description.
+4. Copy each generated attachment URL out of the editor.
+5. Write the URLs under the `## Demo` heading and save the description with
+   the resolved forge, such as `gh pr edit --body-file`.
 
-Save the description without asking the operator to confirm. Commit no media
-file to the repository.
+The browser editor holds its own state. A write there does not register and
+its save button submits nothing. Save the description without asking the
+operator to confirm. Commit no media file to the repository.
 
 #### `## Repro steps`
 
