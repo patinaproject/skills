@@ -26,6 +26,7 @@ unsupported statement.
 | Section | Ticket | PR | Code |
 | --- | --- | --- | --- |
 | What changed | Yes | Yes | Yes |
+| Demo | No | Yes | Record media from the running build |
 | Repro steps | Yes | Yes | Do not derive steps from code |
 | Happy path | Yes | Yes | Yes |
 | Edge cases | No | No | Yes |
@@ -46,10 +47,10 @@ Never turn unavailable evidence into a negative finding or imply that you read
 an unavailable source. Missing evidence permits publication only when the
 repository's existing publication gates pass.
 
-For a documentation-only diff with no executable behavior, omit Edge cases and
-Still works. When code is unavailable for an applicable behavior change, omit
-unsupported sections. Put this warning in the most relevant retained section.
-Unavailable code does not prove that no behavior exists.
+For a documentation-only diff with no executable behavior, omit Demo, Edge
+cases, and Still works. When code is unavailable for an applicable behavior
+change, omit unsupported sections. Put this warning in the most relevant
+retained section. Unavailable code does not prove that no behavior exists.
 
 > [!WARNING]
 > No code supplied
@@ -67,6 +68,50 @@ product or interface. For a bug, take the broken behavior from the ticket and
 the corrected behavior from code. Describe code behavior when sources
 disagree. Use a warning callout when evidence does not establish the before or
 after behavior.
+
+#### `## Demo`
+
+Include this section when a person can see or drive the change, including
+through a command line. Omit it for a documentation-only or internal-only
+diff, under the rule that a section appears only when it has applicable
+content. A change that alters what a person can run or observe carries this
+section, even when every changed file is Markdown. A change that only edits
+prose omits it, so classify by what the change does and not by the file types
+in the diff.
+
+Put one video first, then the screenshots. Capture one still per state the
+flow passes through. Use media only, apart from optional captions. Put a
+limitation about the Demo itself in Technical notes, because this section
+holds media.
+
+The video runs the happy path end to end. It performs the actions that the
+`## Happy path` section lists, in the order listed, and ends at that section's
+`Result:` line. Demo shows the path and Happy path writes it.
+
+The video carries no length cap. Its length follows the path it runs. Cut
+application startup, loading, sign-in, and navigation the reviewer does not
+need. For a change with no user interface, the happy path names the command
+that exercises the change, and the video runs that command.
+
+Write the video as a bare `https://github.com/user-attachments/assets/...` URL
+in its own paragraph, with a blank line above and below. Without those blank
+lines, GitHub renders a raw link instead of a player. Give each still its own
+paragraph too. Write it as an `<img>` element carrying `width`, `height`,
+`alt`, and `src`. Number the `alt` text and walk the flow in order, such as
+`01-email-sent`. Add a caption only where the media does not explain itself.
+
+Create the pull request before you supply the media. The description editor
+and its attachment URLs exist only once the pull request does. Supply the
+media through the browser:
+
+1. Open the pull request description editor in a logged-in browser.
+2. Select Attach files.
+3. Upload the video and the screenshots with the file chooser.
+4. Move each generated attachment URL under the `## Demo` heading.
+5. Save the description.
+
+Save the description without asking the operator to confirm. Commit no media
+file to the repository.
 
 #### `## Repro steps`
 
@@ -157,6 +202,9 @@ labeled lines when they apply:
   fingerprint, release manifest, or a dependency. Write `No version change`
   only after checking the diff. If the diff is unavailable, warn that the
   version change could not be verified.
+- `Demo build:` Name the build the Demo was recorded against. Use the commit
+  that the media came from. Include this line whenever the body carries a Demo
+  section.
 - `Development:` For a bug, state whether the evidence establishes the fault on
   the development branch. Include a source-provided commit. If the fault is
   absent there, put the absence status and the Repro steps limitation in one
@@ -178,11 +226,12 @@ its own keyword. Use reference forms accepted by the repository's integration
 and closing-reference check.
 Do not add a Scope section.
 
-Put screenshots or videos within the relevant section when they prove a claim.
+Put an edge case or still works screenshot within the section it proves.
+Headline proof lives in Demo.
 Put verification reports and reviewer evidence in PR comments or task-local
 records. Link them from Technical notes when useful. Treat the QA steps as
-proposed until execution evidence proves that they ran. A commit body does not
-restate its subject.
+proposed until execution evidence proves that they ran. The Demo section is
+that evidence. A commit body does not restate its subject.
 
 **Forge.** Resolve the forge before the first PR operation and keep that choice for create, edit, view, watch, and merge. GitHub CLI (`gh`) is the default. If `command -v origin` succeeds and Origin can resolve the repository, prefer `origin pr ...`; if Origin is absent or cannot resolve the repository, stay on `gh` and record the fallback. Record the intended PR base repository as canonical `<base-repo>` and validate it through the active forge. Do not infer it from the checkout's default remote. Capture it as a shell variable and pass `--repo "$base_repo"` to every `gh pr` command. When the head repository is a fork, validate its identity and record its owner and repository name as `<fork-owner>` and `<head-name>`. Do not require Graphite (`gt`).
 
