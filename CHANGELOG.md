@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.48.0](https://github.com/patinaproject/skills/compare/v2.47.0...v2.48.0) (2026-09-11)
+
+
+### Features
+
+* [#494](https://github.com/patinaproject/skills/issues/494) provide reusable read-only simulator readiness checks ([#498](https://github.com/patinaproject/skills/issues/498)) ([0e4610c](https://github.com/patinaproject/skills/commit/0e4610cced6fe4b221d02277c09913ef04329aa5))
+
 ## [2.47.0](https://github.com/patinaproject/skills/compare/v2.46.1...v2.47.0) (2026-09-09)
 
 
