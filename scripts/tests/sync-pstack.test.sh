@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Behavioral tests for the open-pstack sync tooling: the rebrand transform's
+# Behavioral tests for the pstack sync tooling: the rebrand transform's
 # determinism contract, and the end-to-end sync producing true 3-way merge
 # conflicts only where local edits diverge. Fully hermetic — no network.
 set -euo pipefail

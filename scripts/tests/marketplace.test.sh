@@ -133,7 +133,7 @@ for agent_file in plugins/engineering/agents/*.md; do
 done
 
 test -f plugins/engineering/LICENSE.pstack
-test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/ericlitman/open-pstack'
+test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/michael-denyer/pstack-claude'
 test "$(jq -r '.ref' plugins/engineering/upstream.json)" = 'main'
 test "$(jq -r '.transforms.skills["poteto-mode"]' plugins/engineering/upstream.json)" = 'patina-mode'
 test "$(jq -r '.transforms.agents["poteto-agent"]' plugins/engineering/upstream.json)" = 'patina-agent'
