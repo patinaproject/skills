@@ -62,7 +62,6 @@ Beyond the pattern shapes above:
 ## What to return
 
 For each relevant finding:
-
 - Type (product event / experiment exposure / usage or billing event / system-table row / dbt model)
 - Fully-qualified table name and the exact query you ran
 - Time window queried
