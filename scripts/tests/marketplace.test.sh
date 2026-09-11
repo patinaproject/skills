@@ -2,8 +2,8 @@
 set -euo pipefail
 
 expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/install-skills","./skills/grill-to-spec","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/writing-for-pstack"]'
-expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-mode","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
-expected_engineering_agents='["comment-sicko","patina-agent","pstack-fable-high","pstack-fable-low","pstack-fable-max","pstack-fable-medium","pstack-fable-xhigh","pstack-opus-high","pstack-opus-low","pstack-opus-max","pstack-opus-medium","pstack-opus-xhigh","pstack-sonnet-high","pstack-sonnet-low","pstack-sonnet-max","pstack-sonnet-medium","pstack-sonnet-xhigh"]'
+expected_engineering_skills='["architect","arena","automate-me","babysit","blast-radius","bro","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-mode","principle-attack-the-premise","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-test-behavior-not-implementation","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
+expected_engineering_agents='["comment-sicko","patina-agent"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback|develop|develop-with-workflow|ready-pr|finish-pr|merge-pr|polish|fix|orchestrate|codex-pr-feedback-loop|prompting-fable|offensive-programming|move-branch-here|running-mobile-simulators|working-on-issue|write-changelog|new-branch|update-branch|writing-for-patina-mode'
 
 read_frontmatter_field() {
@@ -116,12 +116,16 @@ for skill_file in plugins/engineering/skills/*/SKILL.md; do
   test "$(read_frontmatter_field "$skill_file" name)" = "$skill_name"
 done
 
-# open-pstack ships no .codex-plugin/prompts mechanism; skills load natively by
-# name on Codex. Assert the directory stays absent so the surface is not revived.
-if [ -e plugins/engineering/.codex-plugin/prompts ]; then
-  echo "FAIL: plugins/engineering/.codex-plugin/prompts must not exist (open-pstack ships no Codex prompt stubs)" >&2
+# pstack-claude ships Codex prompt stubs. Each stub's frontmatter name must
+# match its filename so the slash command resolves to the skill it names.
+if [ ! -d plugins/engineering/.codex-plugin/prompts ]; then
+  echo "FAIL: plugins/engineering/.codex-plugin/prompts must exist (pstack-claude ships Codex prompt stubs)" >&2
   exit 1
 fi
+for prompt_file in plugins/engineering/.codex-plugin/prompts/*.md; do
+  prompt_name="$(basename "$prompt_file" .md)"
+  test "$(read_frontmatter_field "$prompt_file" name)" = "$prompt_name"
+done
 
 engineering_agents="$({
   find plugins/engineering/agents -mindepth 1 -maxdepth 1 -name '*.md' -print
@@ -181,11 +185,10 @@ expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/hooks/run-hook.cmd \
   plugins/engineering/hooks/session-start \
   plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh \
-  plugins/engineering/skills/patina-mode/scripts/check-plan.mjs \
   plugins/engineering/skills/patina-mode/scripts/orch/orch.ts \
-  plugins/engineering/skills/patina-mode/scripts/runner/pstack-runner \
   plugins/engineering/skills/patina-mode/scripts/watch-pr/watch-pr \
   plugins/engineering/skills/patina-mode/scripts/worktree-audit.sh \
+  plugins/engineering/skills/reflect/scripts/find-transcript.mjs \
   plugins/engineering/skills/running-mobile-simulators/scripts/check-readiness.sh \
   plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh \
   plugins/engineering/skills/show-me-your-work/scripts/log.sh | sort)"

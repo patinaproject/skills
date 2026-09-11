@@ -67,32 +67,41 @@ Don't synthesize or form a final opinion on "the why." Collect the raw material 
 Return your findings in this structure. The synthesizer will read it directly.
 
 ### Source
+
 Which source you investigated (source control, issue / ticket tracker, long-form documents, real-time team chat, infrastructure observability, error / exception tracking, product analytics warehouse, code comments, etc.).
 
 ### What I Searched
+
 The queries you ran, the items you opened, the places you looked. Be specific. This tells the synthesizer how thorough the investigation was and what might still be unsearched.
 
 ### Direct Evidence Found
+
 For each piece that explicitly addresses the question:
+
 - **What it says**: verbatim quote or accurate paraphrase
 - **Where it's from**: PR #123, ticket ID, doc URL, chat permalink, commit hash, or file:line
 - **Author and date** (if available)
 - **Relevance**: one sentence on how it bears on the question
 
 ### Indirect / Circumstantial Evidence
+
 Items that don't explicitly answer the question but bear on it. For each:
+
 - **What it is**: brief description
 - **Where it's from**: location
 - **What it suggests**: what a careful reader might infer, and why. Name the inference chain.
 - **Alternative readings**: if the same evidence could support a different interpretation, note it
 
 ### Contradictions
+
 Two items that disagree with each other, with both citations.
 
 ### Gaps
+
 What you searched for and didn't find. Be specific: "Searched the issue tracker for [query] across [time range]. No matching issues." These absences are valuable data.
 
 ### Additional Leads
+
 Anything that suggests further investigation in a different source. For example, if a PR references a chat thread that wasn't in your source, note it so the real-time team chat investigator or a follow-up pass can pursue it.
 
 ## What You're Not Doing

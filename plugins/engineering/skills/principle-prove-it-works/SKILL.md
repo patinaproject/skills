@@ -13,11 +13,13 @@ Verify every task output by checking the real thing directly. Do not infer from 
 **Pattern:** After completing any task, ask: "how do I prove this actually works?"
 
 Check the real thing, not a proxy:
+
 - Check process liveness directly, not indirectly through derived state
 - Read the actual value, not a cached or derived representation
 - When verification fails, suspect the observation method before suspecting the system
 
 Code and features:
+
 1. Build it (necessary but not sufficient)
 2. Run it and exercise the actual feature path
 3. Check the full chain: does data flow from input to output?

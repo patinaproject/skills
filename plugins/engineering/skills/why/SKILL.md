@@ -79,11 +79,13 @@ Aim for a complete **coverage map**, not a minimal one. Document the null, don't
 Launch all matching investigators in a single message so they run concurrently. Don't ask one agent to cover multiple MCPs.
 
 Subagent config (each):
+
 - `subagent_type`: `general-purpose`
 - `model`: your configured why-investigators model (default in [Models](#models))
 - `readonly`: `false` (agent mode). **Do not use readonly/Ask mode.** It strips MCP access, which disables MCP-backed investigators entirely. Investigators still shouldn't write anything.
 
 Each investigator gets:
+
 1. The base prompt from `references/investigator-prompt.md`
 2. The category playbook `references/sources/<source>.md` for the selected MCP, adapted from the examples in `references/source-playbook.md`
 3. The cross-cutting `references/sources/incident-postmortem.md` **if the target code looks defensive** (null checks, retry logic, timeout handling, rate limiting, feature flags, egress guards, OOM handlers)
@@ -128,6 +130,7 @@ Spawn one synthesizer subagent:
 - `readonly`: `false` (agent mode). The synthesizer's quality check spot-verifies citations, which can require MCP access. Readonly/Ask mode strips MCPs and defeats that.
 
 The synthesizer gets:
+
 1. The investigator findings, including any null results and any categories skipped with justification
 2. The code anchor from Step 2 (file paths, symbols, commit hashes, PR numbers, ticket IDs)
 3. The user's original question

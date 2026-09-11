@@ -46,6 +46,7 @@ Slack MCP tools vary. Check which Slack MCP is available and inspect its tool sc
 ## What to return
 
 For each relevant thread:
+
 - Channel name
 - Permalink or thread ID
 - Participants

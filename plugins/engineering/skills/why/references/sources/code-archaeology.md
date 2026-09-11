@@ -82,6 +82,7 @@ rg -l '<symbol>' --glob '*test*'
 ## What to return
 
 Every commit/PR/comment that bears on the question, with:
+
 - The exact text (quoted)
 - The hash / PR number / file:line
 - Author and date

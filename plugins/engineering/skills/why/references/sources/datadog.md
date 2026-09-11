@@ -91,6 +91,7 @@ Use the Datadog MCP. Start broad, then narrow.
 ## What to return
 
 For each relevant item:
+
 - Type (dashboard / monitor / metric / log pattern / trace / incident / notebook)
 - Title or name
 - Link or identifier (dashboard ID, monitor ID, metric name, incident ID)

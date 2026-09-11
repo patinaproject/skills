@@ -28,15 +28,15 @@ snapshot_files() {
 # canonical plugin sources or a skills-only consumer gets a stale mandate.
 diff -q plugins/engineering/hooks/session-start-context.md "$SKILL/assets/mandate.md" >/dev/null \
   || fail "assets/mandate.md drifted from hooks/session-start-context.md"
-diff -q plugins/engineering/agents/patina-agent.md "$SKILL/assets/agents/patina-agent.md" >/dev/null \
-  || fail "assets/agents/patina-agent.md drifted from agents/patina-agent.md"
-diff -q plugins/engineering/agents/comment-sicko.md "$SKILL/assets/agents/comment-sicko.md" >/dev/null \
-  || fail "assets/agents/comment-sicko.md drifted from agents/comment-sicko.md"
-for agent in plugins/engineering/agents/pstack-*.md; do
+for agent in plugins/engineering/agents/*.md; do
   asset="$SKILL/assets/agents/$(basename "$agent")"
   [ -f "$asset" ] || fail "missing setup-engineering asset: $asset"
   diff -q "$agent" "$asset" >/dev/null \
     || fail "$asset drifted from $agent"
+done
+for asset in "$SKILL"/assets/agents/*.md; do
+  canonical="plugins/engineering/agents/$(basename "$asset")"
+  [ -f "$canonical" ] || fail "$asset has no canonical source at $canonical"
 done
 
 TMP="$(mktemp -d)"
@@ -171,7 +171,7 @@ missing_ref_output="$(bash "$MISSING_REF/skills/setup-engineering/scripts/instal
 missing_ref_status=$?
 set -e
 [ "$missing_ref_status" -ne 0 ] || fail "installer succeeded without patina-mode references"
-printf '%s\n' "$missing_ref_output" | grep -qF "missing required file: $MISSING_REF/skills/patina-mode/references/provider-dispatch.md" \
+printf '%s\n' "$missing_ref_output" | grep -qF "missing required file: $MISSING_REF/skills/patina-mode/references/codex-tools.md" \
   || fail "missing patina-mode reference failure did not name the missing file"
 printf '%s\n' "$missing_ref_output" | grep -qF "Install the full Engineering skill catalog" \
   || fail "missing patina-mode reference failure did not name the remedy"
