@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Accepted. The base choice is superseded by
+[ADR-502](ADR-502-pstack-claude-base-and-system-level-models.md), which returns
+the base to `pstack-claude`. The carrier-branch sync mechanism below stays in
+force and is base-agnostic.
 
 ## Context
 
