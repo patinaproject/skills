@@ -23,7 +23,7 @@ outside the markers untouched, so re-running updates in place with no
 duplication.
 
 The installer first checks that the sibling `setup-pstack` skill and the
-`patina-mode` provider-dispatch references are present. If any required file is
+`patina-mode` Codex tool reference are present. If any required file is
 missing, the install fails and tells the reader to install the full Engineering
 skill catalog.
 
@@ -35,9 +35,9 @@ What it materializes, from the byte-identical payloads under `assets/`:
   so the block is an equal-or-stronger default-on trigger: a non-trivial task
   routes through patina-mode without the user invoking it.
 - The **Engineering agents** (from `assets/agents/`) into the repo's
-  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves, no-comments
-  can reach `comment-sicko`, and each Claude-native provider-dispatch lane can
-  reach its `pstack-<stem>-<effort>` agent.
+  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves and
+  no-comments can reach `comment-sicko`. Model choice per role comes from the
+  `setup-pstack` sheet at runtime, not from an agent definition.
 
 Run it from the target repo:
 
@@ -70,9 +70,9 @@ machinery committed and shared across contributors. Codex honors a repo-scoped
 takes effect after Codex's one-time trust prompt. Override the paths with
 `--codex-agents <file>` and `--codex-config <file>`.
 
-Skills load natively by name on Codex, so patina-mode is reachable without any
-`.codex-plugin/prompts/*` `/command` stubs; open-pstack ships none and this base
-follows it.
+Skills load natively by name on Codex. The `/command` stubs under
+`.codex-plugin/prompts/*` come from the pstack-claude base; the installer does
+not write or edit them.
 
 ## Configure model routing
 

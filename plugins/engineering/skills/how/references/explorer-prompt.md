@@ -52,7 +52,7 @@ Where this subsystem connects to other parts of the codebase. The inputs and out
 
 ### Non-Obvious Things
 
-Anything surprising, historically motivated, or easy to get wrong. Things that look like they should work one way but actually work another.
+Anything surprising, historically motivated, or easy to get wrong. Things that look like they should work one way but work another.
 
 ### Open Questions
 

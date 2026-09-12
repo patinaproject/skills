@@ -117,7 +117,7 @@ the vendored `domain-modeling` payload; see
   manual maintenance command, not a `pnpm install` hook. Each lock entry tracks
   its source's default branch (latest), so re-running picks up upstream updates.
 - `pnpm sync-pstack`: re-sync `plugins/engineering/**` from the current tip of
-  `ericlitman/open-pstack`'s `main`, renaming only `poteto-mode` → `patina-mode`
+  `michael-denyer/pstack-claude`'s `main`, renaming only `poteto-mode` → `patina-mode`
   and `poteto-agent` → `patina-agent`, and leaving Patina's local edits as real
   merge conflicts to resolve. See
   [ADR-429](docs/adr/ADR-429-sync-pstack-carrier-branch.md) for the mechanism.
@@ -332,7 +332,7 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
 bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions. The one no-issue
 *commit* exception is the script-generated carrier commit
-`chore: sync open-pstack@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
+`chore: sync pstack-claude@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
 the `pstack-sync` carrier branch (committed with `--no-verify`); it enters `main` history through
 the sync merge.
 <!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->

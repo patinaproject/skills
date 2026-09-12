@@ -1,5 +1,5 @@
 {
-  "source": "https://github.com/ericlitman/open-pstack",
+  "source": "https://github.com/michael-denyer/pstack-claude",
   "plugin": "pstack",
   "ref": "main",
   "transforms": {

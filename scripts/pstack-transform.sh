@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Deterministically rebrand an open-pstack plugin tree into the Patina
+# Deterministically rebrand an upstream pstack plugin tree into the Patina
 # Engineering layout.
 #
 # Usage: pstack-transform.sh <src-dir> <dest-dir>
 #
-#   <src-dir>   A directory holding the contents of open-pstack's
+#   <src-dir>   A directory holding the contents of the upstream port's
 #               plugins/pstack/** (i.e. the plugin root, so <src-dir>/agents,
 #               <src-dir>/skills, ... exist).
 #   <dest-dir>  Where the transformed plugins/engineering/** contents are

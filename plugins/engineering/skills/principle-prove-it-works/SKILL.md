@@ -25,11 +25,15 @@ Code and features:
 3. Check the full chain: does data flow from input to output?
 4. For integrations, test the full communication path end-to-end
 
+Verify the process as well as the outcome. A correct result can rest on a broken process, and a review that checks results passes it: a clause reconstructed from the user's paste instead of the durable record, a constraint honored by chance from a file never read. For each fact you relied on, name the record it came from and confirm that record is the one the project's rules point at.
+
+Red is a colour, not a measurement. A failing check proves the instrument only when the failure content is the disagreement you predicted. An exception, an empty collection against a non-empty literal, and a real mismatch all print red, so quote the assertion's diff (`Extra items in the right set`), never the assertion (`assert {...} == {...}`). A convergence probe keys on behavior only the new artifact can produce, never an identity field the old one also emits; a same-SHA restart lets old code report the new commit SHA.
+
 Delegation: trust artifacts, not self-reports.
-When verifying delegated work, inspect the actual output artifact (git diff, file contents, runtime behavior), not the delegate's summary. Agents report what they intended, not always what happened.
+When verifying delegated work, inspect the actual output artifact (git diff, file contents, runtime behavior), not the delegate's summary.
 
 ## Script the check when you can
 
-The strongest proof is a deterministic script that re-runs the same comparison, not a one-time eyeball. Write the script, run it, and keep its output as an artifact a reviewer can re-run instead of trusting your word. A script comparing the old and new compiled output catches what a glance misses.
+The strongest proof is a deterministic script that re-runs the same comparison, not a one-time eyeball. Write the script, run it, and keep its output as an artifact a reviewer can re-run instead of trusting your word.
 
-Keep the artifact visible for the human. Commit it only for large or complex work where the trail has to be auditable later, like a big port or migration (the **show-me-your-work** skill). Most work just needs it visible, not committed.
+Keep the artifact visible for the human. Commit it only for large or complex work where the trail has to be auditable later, like a big port or migration (the **show-me-your-work** skill).

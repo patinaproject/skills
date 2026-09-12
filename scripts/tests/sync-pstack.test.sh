@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Behavioral tests for the open-pstack sync tooling: the rebrand transform's
+# Behavioral tests for the pstack sync tooling: the rebrand transform's
 # determinism contract, and the end-to-end sync producing true 3-way merge
 # conflicts only where local edits diverge. Fully hermetic — no network.
 set -euo pipefail
@@ -22,15 +22,15 @@ bash -n "$sync" || fail "sync-pstack.sh has a syntax error"
 # poteto-agent -> patina-agent, applied to both paths and content. Every other
 # upstream token stays as-is.
 src="$work/src"
-mkdir -p "$src/skills/poteto-mode/scripts/runner" "$src/skills/setup-pstack" \
+mkdir -p "$src/skills/poteto-mode/scripts" "$src/skills/setup-pstack" \
   "$src/agents" "$src/assets"
 printf -- '---\nname: poteto-mode\n---\ntrigger /poteto-mode\ndispatches poteto-agent\nbrand pstack and poteto stay\nref pstack:tdd\n' \
   > "$src/skills/poteto-mode/SKILL.md"
 printf 'setup pstack\n' > "$src/skills/setup-pstack/SKILL.md"
 printf -- '---\nname: poteto-agent\n---\nagent body\n' > "$src/agents/poteto-agent.md"
-printf '#!/usr/bin/env bash\necho pstack-runner\n' \
-  > "$src/skills/poteto-mode/scripts/runner/pstack-runner"
-chmod +x "$src/skills/poteto-mode/scripts/runner/pstack-runner"
+printf '#!/usr/bin/env bash\necho poteto-mode tool\n' \
+  > "$src/skills/poteto-mode/scripts/tool.sh"
+chmod +x "$src/skills/poteto-mode/scripts/tool.sh"
 # a binary file whose bytes must NOT be rewritten
 printf 'poteto-mode\x00\xff\xfebinary' > "$src/assets/logo.bin"
 
@@ -63,11 +63,11 @@ grep -q '^name: patina-agent$' "$work/out1/agents/patina-agent.md" || fail "agen
 grep -q 'brand pstack and poteto stay' "$skill" || fail "unrelated tokens were changed in content"
 grep -q 'ref pstack:tdd' "$skill" || fail "unrelated namespaced ref was changed"
 for kept in skills/setup-pstack/SKILL.md \
-            skills/patina-mode/scripts/runner/pstack-runner; do
+            skills/patina-mode/scripts/tool.sh; do
   [ -e "$work/out1/$kept" ] || fail "expected upstream-named path missing: $kept"
 done
-# executable bit preserved (runner keeps its upstream filename under patina-mode)
-[ -x "$work/out1/skills/patina-mode/scripts/runner/pstack-runner" ] \
+# executable bit preserved (script keeps its upstream filename under patina-mode)
+[ -x "$work/out1/skills/patina-mode/scripts/tool.sh" ] \
   || fail "executable bit not preserved"
 # binary copied verbatim
 cmp -s "$src/assets/logo.bin" "$work/out1/assets/logo.bin" \

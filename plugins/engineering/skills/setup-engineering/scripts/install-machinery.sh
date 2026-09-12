@@ -63,7 +63,6 @@ fi
 [ -n "$codex_agents" ] || codex_agents="${repo}/AGENTS.md"
 
 require_file "$SETUP_PSTACK_SKILL"
-require_file "${SKILLS_DIR}/patina-mode/references/provider-dispatch.md"
 require_file "${SKILLS_DIR}/patina-mode/references/codex-tools.md"
 require_file "${ASSETS_DIR}/mandate.md"
 
