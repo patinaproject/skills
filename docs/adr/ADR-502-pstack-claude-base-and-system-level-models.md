@@ -24,8 +24,8 @@ open-pstack's data model then works against that setup. Its descriptor is
 `<provider>:<model>@<effort>`, and the provider component carries no information
 once the proxy owns routing. Its read-time normalization rule rewrites a
 versioned Claude model to a rolling alias and forbids passing the versioned
-slug, but the proxy publishes only versioned slugs and no rolling aliases. That
-rule destroys the identifier the endpoint needs.
+slug. The proxy serves versioned slugs as well as rolling aliases, so that rule
+destroys the identifier a developer chose.
 
 pstack-claude dispatches natively on both harnesses and names models as bare
 slugs. That is the shape both `spawn_agent` and the proxy accept.
