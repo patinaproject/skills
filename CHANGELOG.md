@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.49.0](https://github.com/patinaproject/skills/compare/v2.48.0...v2.49.0) (2026-09-12)
+
+
+### Features
+
+* [#502](https://github.com/patinaproject/skills/issues/502) move the Engineering plugin base to pstack-claude ([#509](https://github.com/patinaproject/skills/issues/509)) ([5b2aa0c](https://github.com/patinaproject/skills/commit/5b2aa0c31ca60d3c97671d58aaa8297080a3d3f5))
+
+
+### Bug Fixes
+
+* [#512](https://github.com/patinaproject/skills/issues/512) restore the Patina path pointers and drop the dead hook wrapper ([#513](https://github.com/patinaproject/skills/issues/513)) ([41dd6c0](https://github.com/patinaproject/skills/commit/41dd6c0100709bda8070940c949f16c802d4a856))
+
 ## [2.48.0](https://github.com/patinaproject/skills/compare/v2.47.0...v2.48.0) (2026-09-11)
 
 
