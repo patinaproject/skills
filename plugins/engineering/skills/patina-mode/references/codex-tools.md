@@ -13,6 +13,7 @@ pstack skills are written in Claude Code tool language (the `Skill` tool, the `A
 | Fetch a URL | `shell` with `curl` / `wget` |
 | Search the web | `web_search` |
 | Invoke a skill (the `Skill` tool, `/command`) | Skills load natively. Follow the instructions presented. |
+| Invoke a skill by its `engineering:` name | Codex documents no `plugin:skill` syntax. Use the bare skill name. `@` addresses this plugin and its bundled skills as `engineering`. |
 | Dispatch a subagent (the `Agent`/`Task` tool) | `spawn_agent` |
 | Dispatch N parallel subagents in one turn | N `spawn_agent` calls in one response |
 | Wait for a subagent result | `wait_agent` |
@@ -77,7 +78,7 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 
 ## Vendored scripts
 
-`skills/patina-mode/scripts/` ships the `watch-pr` PR watcher, the `orch` store CLI, and `worktree-audit.sh`. They are plain bun and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `gh`, (for stack work) `gt`, and (for `worktree-audit.sh`) `jq` and `rg`. `worktree-audit.sh` reads Claude Code transcripts under `~/.claude/projects/`; point it at your runtime's transcript directory instead when you run it elsewhere.
+`scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the `orch` store CLI, the issue handoff route entries under `issue-routes/`, and `worktree-audit.sh`. Join that base directory to the path before invoking them. They are plain bun and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `gh`, (for stack work) `gt`, and (for `worktree-audit.sh`) `jq` and `rg`. `worktree-audit.sh` reads Claude Code transcripts under `~/.claude/projects/`; point it at your runtime's transcript directory instead when you run it elsewhere.
 
 ## Instructions file
 
