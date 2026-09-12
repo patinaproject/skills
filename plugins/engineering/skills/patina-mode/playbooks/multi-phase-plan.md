@@ -63,7 +63,7 @@ Tests alone are not sufficient verification. A PR is verified only when its unit
 
 ### Verdict and merge, for every PR
 
-- [ ] At the merge-ready head SHA, run the swarm per `skills/swarm/SKILL.md`. One gates lane. The ten live lanes from the PR's **Verify, live** block. The perf lane from its **Verify, perf** block. One audit lane that reads the diff and the receipts and distrusts the PR body.
+- [ ] At the merge-ready head SHA, run the swarm per `skills/swarm/SKILL.md`. One gates lane. The ten live lanes from that PR's **Verify, live** plan block. The perf lane from its **Verify, perf** plan block. One audit lane that reads the diff and the receipts and distrusts the PR body.
 - [ ] Clean only when every lane is `PASS`. Findings go back to the owner. A new head gets a fresh swarm and a fresh verdict.
 - [ ] <The merge or append rule from the execution playbook, with the patch-id rule from `playbooks/shipping.md`.>
 
