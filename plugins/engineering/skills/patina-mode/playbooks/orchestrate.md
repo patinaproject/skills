@@ -20,7 +20,7 @@ Depth stays at coordinator, track, worker. Author the track decomposition per pr
 
 #### Store layout
 
-Create `~/.claude/orchestrate/<project-slug>/`, outside the repo and outside the session. The store has to outlive this chat: the program runs for days, a session restart is expected (see Liveness and failure), and the store is the postmortem. The session scratchpad is not a candidate, however convenient; it is session-scoped and temporary, so a restart takes the program's only state with it. Every file has exactly one writer; owners publish facts, readers aggregate at read time. Use `bun skills/patina-mode/scripts/orch/orch.ts` under the installed plugin for bookkeeping, written below as `orch`, while its canonical plain TSV and JSON stay readable without the CLI.
+Create `~/.claude/orchestrate/<project-slug>/`, outside the repo and outside the session. The store has to outlive this chat: the program runs for days, a session restart is expected (see Liveness and failure), and the store is the postmortem. The session scratchpad is not a candidate, however convenient; it is session-scoped and temporary, so a restart takes the program's only state with it. Every file has exactly one writer; owners publish facts, readers aggregate at read time. Use `bun <skill base directory>/scripts/orch/orch.ts` for bookkeeping, written below as `orch`, while its canonical plain TSV and JSON stay readable without the CLI.
 
 - `preferences.md` is the standing-orders register: numbered lines, one constraint each (model policy, stack shape and count, verification bar, forbidden paths, escalation policy). Paste it verbatim into every spawn and every resume; directives decay across resumes, and each dropped one costs a human turn. When you catch yourself restating an instruction, append the line before you act (principle-encode-lessons-in-structure).
 - `overview.md` is the durable PR and issue DB. Append; never rewrite wholesale per event.
@@ -42,19 +42,23 @@ CONTEXT      pointers to files and PRs; upstream reports pasted in full when thi
              depends on them, because workers cannot see siblings
 ACCEPTANCE   checkable criteria, one per line
 VERIFY       exact commands or the driver skill (`run` for CLIs and TUIs, `verify` for
-             UIs), plus known gotchas
+             UIs), plus the target, prerequisites, and known gotchas
 TIMEBOX      rough cap on runtime; on expiry, return partial findings and stop rather than run on
 FORBIDDEN    no gt, no rebase, no force-push, no fixes outside scope, plus unit-specific bans
 REPORT       status, branch, head SHA, PRs, verdict, what you actually ran, deviations,
-             suggested follow-ups
+             suggested follow-ups, and applicable verification context
 STANDING     <preferences.md pasted verbatim>
 ```
 
 Size the brief to the unit. A one-command unit gets the template collapsed to a paragraph that still names goal, scope, the verify command, and the report shape; a 4KB scaffold around a two-line edit costs more to write and obey than the edit. A spawn may reference the standing-orders file by store path; verbatim paste is for every resume and for any brief that has to stand alone.
 
+When a worker establishes a verification procedure, keep a compact verification block in its existing report. Record the candidate commit and affected paths or behavior. List the accepted assertions and cite an authoritative source for each. Record the commands or driver recipe and any required target, fixtures, account state, runtime, and environment. Name blockers and unverified cases. For each artifact, record its path, what it establishes, and the target it describes. If a prerequisite is unknown, record the unknown and its impact. Do not invent a value or add a research phase to fill every field.
+
+A one-command unit may reduce that block to one sentence. This is report content, not a new report, schema, or planning gate.
+
 A sub-coordinator brief adds its track boundary and unit list, its spawn budget, the drain protocol, and the rollup format (per child: name, status, PR, head SHA, verdict, one line; plus track status and frontier delta).
 
-A dependency is a context relay, not just ordering: undeclared upstream context makes the worker guess. Missing fields are a refuse-to-spawn condition. Audit one sampled worker brief per sub-coordinator per wave, concurrently with the wave it samples, never as a gate in front of it; a failing brief stops that track and fixes the sub-coordinator's instructions, not just the worker, because brief quality decays late in a run. Never resume-chain a brief; respawn fresh with consolidated scope.
+A dependency orders work and relays context: undeclared upstream context makes the worker guess. For a local verifier that can read the worker report, point its brief to that report and the authoritative requirements. When a verifier cannot read the store, include the relevant verification context in its brief. Do not make the coordinator reconstruct the worker's investigation. Missing fields are a refuse-to-spawn condition. Audit one sampled worker brief per sub-coordinator per wave, concurrently with the wave it samples and never as a gate in front of it. A failing brief stops that track. Fix the sub-coordinator's instructions because fixing only the worker leaves late-run brief decay unchanged. Never resume-chain a brief. Respawn fresh with consolidated scope.
 
 #### Steps
 
@@ -86,6 +90,8 @@ A dependency is a context relay, not just ordering: undeclared upstream context 
 #### Verification
 
 Scale verification to the unit. When VERIFY is a single cheap command, the worker runs it and reports the output, and the coordinator spot-checks receipts; a dedicated verifier agent (on a different model family than the worker) is for units whose verification is expensive, judgment-laden, or high-blast-radius. A verifier agent whose entire product would be rerunning one command is ceremony, not verification.
+
+The worker's report gives the verifier directions, not a verdict. The verifier compares the procedure with the original requirements, confirms the candidate, target, and prerequisites, adds missing cases, and runs the required checks. If the candidate, runtime, or relevant fixture state differs from the recorded evidence, refresh the affected checks and reuse only the evidence that remains current.
 
 Write ledger rows with `orch ledger record`. Check the current PR and head SHA with `orch ledger check`. `ledger.tsv`, one row per verdict, keyed by PR number plus head SHA: `live-ui-verified | unit-test-verified | type-check-only | verifier-blocked | verifier-failed`. CI green is an input to a verdict, not a verdict. Behavioral work needs better than `type-check-only`. `verifier-blocked` is not a pass; respawn when the environment heals. `verifier-failed` gets a fix unit, not a re-verify. A worker may self-report; a verifier overrides it on the same key. A new head SHA voids the row, so re-verify after restack. The ledger answers "was this verified", not memory and not the transcript.
 

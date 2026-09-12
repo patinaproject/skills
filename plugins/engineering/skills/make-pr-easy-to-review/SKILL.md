@@ -43,14 +43,20 @@ git diff origin/<headRefName> --stat
 
 Do not push if the tree changed unintentionally.
 
-## Reviewer Guidance
+## Add reviewer guidance
 
-When code behavior should stay untouched, prefer PR description and review notes:
+When you update the PR description, follow
+[`opening-a-pr.md`](../patina-mode/playbooks/opening-a-pr.md). Keep its
+applicable sections in order, omit empty sections, and follow its source
+restrictions. Put review details that do not fit that contract in a
+separate PR comment:
 
-- Add a TL;DR that matches the actual diff.
 - Separate core files from generated or mechanical files.
-- Call out risky behavior changes, migration order, rollout plan, and test coverage.
+- Call out risky behavior changes, migration order, and the rollout plan.
+- Record executed tests and their results.
 - Link issue trackers, dashboards, or design docs when they explain intent.
+
+Do not add a TL;DR or extra headings to the PR description.
 
 ## Guardrails
 
