@@ -180,6 +180,18 @@ if ! jq -e \
   exit 1
 fi
 
+# The Engineering plugin tracks pstack-claude. Nothing under the plugin, its
+# overlays, or its sync tooling may name the previous base or the machinery
+# that came only from it. History (CHANGELOG, ADRs) is exempt.
+if git grep -q -i -E 'open-pstack|ericlitman|provider-dispatch|pstack-runner' -- \
+    plugins/engineering .claude/agents .agents scripts/sync-pstack.sh scripts/pstack-transform.sh; then
+  echo "FAIL: previous upstream base still referenced under the Engineering plugin or its sync tooling" >&2
+  git grep -n -i -E 'open-pstack|ericlitman|provider-dispatch|pstack-runner' -- \
+    plugins/engineering .claude/agents .agents scripts/sync-pstack.sh scripts/pstack-transform.sh >&2
+  exit 1
+fi
+test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/michael-denyer/pstack-claude'
+
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
   plugins/engineering/hooks/run-hook.cmd \
