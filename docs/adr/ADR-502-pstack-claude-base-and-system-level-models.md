@@ -40,11 +40,16 @@ its own Models section, and a matching role line in the sheet overrides each at
 runtime. No route table, no launcher, and no per-model agent definition sits
 between a role and its model.
 
-Drop the open-pstack model-routing machinery: `scripts/runner/`,
-`references/provider-dispatch.md`, and the fifteen tiered
-`pstack-<family>-<effort>` agent definitions. `setup-engineering` installs only
-`patina-agent` and `comment-sicko`, and its asset check mirrors the canonical
-agents directory rather than a fixed list.
+Leave no trace of open-pstack. Everything ADR-429 imported from it that
+pstack-claude does not ship goes: `scripts/runner/`,
+`references/provider-dispatch.md`, the read-time normalization rule, and the
+fifteen tiered `pstack-<family>-<effort>` agent definitions, including their
+copies under `setup-engineering/assets/` and `.claude/agents/`. Those agents
+were open-pstack's native leg of its route table, not Patina divergence, and
+they leave with it. `setup-engineering` installs only `patina-agent` and
+`comment-sicko`, and its asset check mirrors the canonical agents directory
+rather than a fixed list. The name survives only in `CHANGELOG.md` and in
+ADRs as history.
 
 ## Consequences
 
@@ -56,7 +61,12 @@ the provenance prose move.
 A base swap is a start-over, not a merge. The carrier branch is deleted so the
 next run seeds from `HEAD`, which is the first-run path ADR-429 describes. The
 merge then takes the new base wholesale and removes the Patina-owned files under
-`plugins/engineering/**`, which the same pull request restores.
+`plugins/engineering/**`, which the same pull request restores. That restore
+covers whole Patina-authored skills and Patina edits inside synced files alike,
+such as the pull request body contract in `playbooks/opening-a-pr.md` and the
+issue handoff step in `playbooks/session-pickup.md`. A wholesale merge cannot
+flag either kind, so the pull request diffs the result against trunk before it
+is opened.
 
 Two upstream principle skills arrive with the new base:
 `principle-attack-the-premise` and `principle-test-behavior-not-implementation`.

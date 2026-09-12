@@ -70,9 +70,9 @@ machinery committed and shared across contributors. Codex honors a repo-scoped
 takes effect after Codex's one-time trust prompt. Override the paths with
 `--codex-agents <file>` and `--codex-config <file>`.
 
-Skills load natively by name on Codex, so patina-mode is reachable without any
-`.codex-plugin/prompts/*` `/command` stubs; open-pstack ships none and this base
-follows it.
+Skills load natively by name on Codex. The `/command` stubs under
+`.codex-plugin/prompts/*` come from the pstack-claude base; the installer does
+not write or edit them.
 
 ## Configure model routing
 
