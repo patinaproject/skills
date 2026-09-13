@@ -161,6 +161,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-13T05:10:00Z",
       "toRunId": "patinaproject-teds-macbook-pro"
+    },
+    {
+      "disposition": "Todo ready-for-agent Linear issue; implementation authorized; retain through operator merge gate",
+      "eventId": "sha256:a48365056ca32d12b4ab9cc270fd258da8bcb303c529bba8d69e6d2f915d0d23",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3910.json",
+      "issueId": "3910",
+      "kind": "claim",
+      "recordedAt": "2026-09-13T05:10:00Z",
+      "toRunId": "patinaproject-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -258,6 +267,12 @@
       "disposition": "Todo ready-for-agent Linear issue; implementation authorized; retain through operator merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3860.json",
       "reservedAt": "2026-09-13T05:05:00Z",
+      "runId": "patinaproject-teds-macbook-pro"
+    },
+    "3910": {
+      "disposition": "Todo ready-for-agent Linear issue; implementation authorized; retain through operator merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3910.json",
+      "reservedAt": "2026-09-13T05:10:00Z",
       "runId": "patinaproject-teds-macbook-pro"
     },
     "477": {
