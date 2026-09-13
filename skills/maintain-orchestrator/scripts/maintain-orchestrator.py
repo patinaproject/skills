@@ -167,7 +167,7 @@ def validate_registry(config: dict[str, Any], check_live: bool) -> tuple[bool, s
 
 
 def validate_slack(config: dict[str, Any]) -> tuple[bool, str]:
-    required = ("appId", "botUserId", "workspaceId", "recipientUserId", "credentialSource", "cliContract")
+    required = ("appId", "botUserId", "botId", "workspaceId", "recipientUserId", "credentialSource", "cliContract")
     missing = [key for key in required if not config.get(key)]
     if missing:
         return False, f"slack-config.json missing {', '.join(missing)}"
@@ -178,6 +178,14 @@ def validate_slack(config: dict[str, Any]) -> tuple[bool, str]:
     for key in ("authTest", "send", "requiredAuthTest"):
         if not isinstance(cli, dict) or not isinstance(cli.get(key), str) or not cli[key].strip():
             return False, f"Slack CLI contract missing {key}"
+    if "slack api auth.test" not in cli["authTest"] or "slack api chat.postMessage" not in cli["send"]:
+        return False, "Slack CLI contract must use the official auth.test and chat.postMessage commands"
+    auth = config.get("authTest")
+    if auth is not None:
+        if not isinstance(auth, dict) or auth.get("ok") is not True:
+            return False, "Slack authTest must record ok=true"
+        if auth.get("team_id") != config["workspaceId"] or auth.get("user_id") != config["botUserId"] or auth.get("bot_id") != config["botId"]:
+            return False, "Slack authTest identity does not match configured workspace or bot"
     policy = str(config.get("notificationPolicy", "")).lower()
     if "checkpoint" not in policy or "deduplic" not in policy:
         return False, "Slack policy must restrict sends to deduplicated checkpoint notifications"

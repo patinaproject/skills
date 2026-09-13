@@ -43,7 +43,7 @@ print('{}')
 EOF
 chmod +x "$TMP/bin/registry.py"
 cat > "$STORE/slack-config.json" <<'EOF'
-{"appId":"A","botUserId":"B","workspaceId":"T","recipientUserId":"U","credentialSource":{"provider":"Infisical","path":"/shell"},"notificationPolicy":"Checkpoint gates only; one deduplicated DM per gate","cliContract":{"authTest":"infisical run -- slack api auth.test","send":"infisical run -- slack api chat.postMessage","requiredAuthTest":"Require ok=true"}}
+{"appId":"A","botUserId":"B","botId":"BOT","workspaceId":"T","recipientUserId":"U","credentialSource":{"provider":"Infisical","path":"/shell"},"notificationPolicy":"Checkpoint gates only; one deduplicated DM per gate","cliContract":{"authTest":"infisical run -- slack api auth.test","send":"infisical run -- slack api chat.postMessage","requiredAuthTest":"Require ok=true"},"authTest":{"ok":true,"team_id":"T","user_id":"B","bot_id":"BOT"}}
 EOF
 printf '# Handoff\nold handoff\n' > "$STORE/HANDOFF.md"
 printf 'ts\tphase\tdecision\twhy\tevidence\tresult\nold\tphase\told decision\told\told\told\n' > "$STORE/decisions.tsv"
