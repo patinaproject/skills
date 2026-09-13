@@ -233,6 +233,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-13T18:30:00Z",
       "toRunId": "patinaproject-teds-macbook-pro"
+    },
+    {
+      "disposition": "Actionable human review finding; preserve existing PR and ownership through operator merge gate",
+      "eventId": "sha256:8e67dc6512219b6dcbb7eb284c410682b732ca48cc527a6c2ccf3ecf53d6673d",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3485.json",
+      "issueId": "3485",
+      "kind": "claim",
+      "recordedAt": "2026-09-13T18:40:00Z",
+      "toRunId": "patinaproject-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -306,6 +315,12 @@
       "disposition": "Todo ready-for-agent Linear issue; implementation authorized; retain through operator merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3413.json",
       "reservedAt": "2026-09-13T05:20:00Z",
+      "runId": "patinaproject-teds-macbook-pro"
+    },
+    "3485": {
+      "disposition": "Actionable human review finding; preserve existing PR and ownership through operator merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3485.json",
+      "reservedAt": "2026-09-13T18:40:00Z",
       "runId": "patinaproject-teds-macbook-pro"
     },
     "3825": {
