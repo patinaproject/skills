@@ -80,6 +80,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-12T15:05:00Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Todo ready-for-agent Linear issue; implementation authorized; retain through operator merge gate",
+      "eventId": "sha256:b2c9a3edd65ee50d3946566c7b2eacd214d9ffd2425b2440ceed07f7ade9bb79",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3331.json",
+      "issueId": "3331",
+      "kind": "claim",
+      "recordedAt": "2026-09-13T04:10:00Z",
+      "toRunId": "patinaproject-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -125,6 +134,12 @@
     }
   ],
   "owners": {
+    "3331": {
+      "disposition": "Todo ready-for-agent Linear issue; implementation authorized; retain through operator merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260913/PAT-3331.json",
+      "reservedAt": "2026-09-13T04:10:00Z",
+      "runId": "patinaproject-teds-macbook-pro"
+    },
     "477": {
       "disposition": "Requirements and evaluation preparation authorized; retain through blockers and human merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/477-issue.json",
@@ -182,6 +197,11 @@
   },
   "repository": "github.com/patinaproject/skills",
   "runs": {
+    "patinaproject-teds-macbook-pro": {
+      "createdAt": "2026-09-07T10:49:43.233186+00:00",
+      "repository": "github.com/patinaproject/skills",
+      "storePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro"
+    },
     "skills-teds-macbook-pro": {
       "createdAt": "2026-09-08T10:11:43.612468+00:00",
       "repository": "github.com/patinaproject/skills",
