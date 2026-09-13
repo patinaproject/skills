@@ -242,6 +242,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-13T18:40:00Z",
       "toRunId": "patinaproject-teds-macbook-pro"
+    },
+    {
+      "disposition": "Todo ready-for-agent issue; implementation authorized; retain through operator merge gate",
+      "eventId": "sha256:7be8b513cd452255ab54fa34c5e929686a2953afd4f4b14cfe4a9fff4cb755eb",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260914/PAT-514-membership.json",
+      "issueId": "514",
+      "kind": "claim",
+      "recordedAt": "2026-09-13T22:42:15Z",
+      "toRunId": "patinaproject-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -448,6 +457,12 @@
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/511-intake-20260912.json",
       "reservedAt": "2026-09-12T15:05:00Z",
       "runId": "skills-teds-macbook-pro"
+    },
+    "514": {
+      "disposition": "Todo ready-for-agent issue; implementation authorized; retain through operator merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/intake-20260914/PAT-514-membership.json",
+      "reservedAt": "2026-09-13T22:42:15Z",
+      "runId": "patinaproject-teds-macbook-pro"
     }
   },
   "repository": "github.com/patinaproject/skills",
