@@ -326,7 +326,8 @@ try {
   assert.deepEqual(readdirSync(privateTmp), []);
 
   const mainOnlyPath = join(fixtureRoot, 'main-only.sqlite');
-  copyFileSync(databasePath, mainOnlyPath);
+  const mainOnlyDatabase = makeRuntimeDatabase(mainOnlyPath, []);
+  mainOnlyDatabase.close();
   expectError(
     runHandoff(`t3://threads/${t3ClaudeId}`, { T3_STATE_DB: mainOnlyPath }),
     't3_mapping_not_found',
