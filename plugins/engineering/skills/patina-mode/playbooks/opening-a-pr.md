@@ -100,21 +100,33 @@ paragraph too. Write it as an `<img>` element carrying `width`, `height`,
 `alt`, and `src`. Number the `alt` text and walk the flow in order, such as
 `01-email-sent`. Add a caption only where the media does not explain itself.
 
-Create the pull request before you supply the media. The description editor
-and its attachment URLs exist only once the pull request does. GitHub
-publishes no attachment upload endpoint, so use the browser only for the
-upload:
+Create the pull request before you supply the media. The pull request number
+is required by the attachment command, and the command updates its body.
 
-1. Open the pull request description editor in a logged-in browser.
-2. Select Attach files.
-3. Upload the video and the screenshots with the file chooser.
-4. Copy each generated attachment URL out of the editor.
-5. Write the URLs under the `## Demo` heading and save the description with
-   the resolved forge, such as `gh pr edit --body-file`.
+Use GitHub CLI version 2.99.0 or newer. Upgrade with your package manager
+before continuing when `gh --version` reports an older release.
 
-The browser editor holds its own state. A write there does not register and
-its save button submits nothing. Save the description without asking the
-operator to confirm. Commit no media file to the repository.
+Use an OAuth, classic PAT, or fine-grained PAT with pull-request write access.
+Actions `GITHUB_TOKEN` and GitHub App tokens cannot upload these attachments.
+GitHub Enterprise Server is unsupported; use github.com.
+
+Keep media outside the repository. Reference each uploaded file locally in
+the body first, using `![descriptive alt text](./file)`. Then upload every
+file with one command, replacing `<number>` and each path:
+
+```sh
+gh pr edit <number> --body-file <body> --attach <image> <video> ...
+```
+
+Attach at most 50 files per command. Images must be 10 MB or smaller, and
+videos must be 100 MB or smaller on paid plans. Supported types are PNG, JPEG,
+GIF, WebP, SVG, MP4, MOV, and WebM. A partial upload still updates the pull
+request with successful files and returns non-zero; retry only failed files.
+
+Use concise, meaningful alt text for images by adding `#alt text` to the path,
+such as `./login.png#The login error state`. Video attachments have no alt-text
+field; describe their visible action and outcome in the surrounding Demo text.
+Preserve the PR-before-attach order, and commit no media files.
 
 #### `## Repro steps`
 
