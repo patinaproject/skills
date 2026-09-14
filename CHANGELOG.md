@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.50.0](https://github.com/patinaproject/skills/compare/v2.49.0...v2.50.0) (2026-09-14)
+
+
+### Features
+
+* [#511](https://github.com/patinaproject/skills/issues/511) document gh pr edit attachment workflow ([#515](https://github.com/patinaproject/skills/issues/515)) ([33ad934](https://github.com/patinaproject/skills/commit/33ad934c17fdf4a0c27b95203b5a5bcf3dac8961))
+
 ## [2.49.0](https://github.com/patinaproject/skills/compare/v2.48.0...v2.49.0) (2026-09-12)
 
 
