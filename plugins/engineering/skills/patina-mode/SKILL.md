@@ -78,7 +78,7 @@ Remaining triggers:
   agent that controls the device owns one exact device lease through app
   execution, automation, evidence capture, recovery, and cleanup.
 - Any PR-status request → the **Babysit** playbook (`playbooks/babysit.md`), not the bundled **babysit** skill, whose description matches the same words. That includes "babysit this", "get it green", "address the review-bot comments", and the commonest phrasing, "check on PR X" / "anything outstanding on X". Never triggered by merely opening a PR. Declare its mode before polling; the playbook's step 1 owns the request-to-mode mapping. Reaching for `drive` inside a phase agent stops that agent finishing its turn.
-- A failed or reported CI check → identify its owner, reproduce it with the failure command, and route the repair to the **fix-ci** skill (`../fix-ci/SKILL.md`). Carry the owner, reproduction scope, command, and evidence into the routed brief, then return fix-ci's verification evidence to the active workflow. Defect, review, and Babysit routing remain unchanged.
+- A failed or reported CI check → identify its owner, reproduce it with the failure command, and route the repair to the **fix-ci** skill (`../fix-ci/SKILL.md`). Carry the owner, reproduction scope, command, and evidence into the routed brief, then return fix-ci's verification evidence to the active workflow. Each attempt follows **Repair from evidence**. Defect, review, and Babysit routing remain unchanged.
 - Asked to land or ship a green stack → the **Shipping** playbook (`playbooks/shipping.md`). Green is not safe. Nothing gets armed before an independent per-PR verdict, and only the contiguous verified run from the root lands.
 - An automated PR-review bot or the agentic security review commented → skeptical posture. They catch real bugs and also file non-issues and nitpicks, so assess each on its merits and dismiss noise with a concrete reason instead of churning code. Triage fix / dismiss / ask per `references/bugbot-triage.md`.
 - Deploying to a managed platform (Railway, Fly, Vercel, Heroku, and the like) → load that platform's skill, project-local or installed, before running its CLI, the same way Shipping step 1 resolves the forge before the first PR operation.
@@ -104,6 +104,19 @@ Pass the relevant grounding and each other scoped routing exception in every exe
 - Publication executors follow the repository's instructions for titles, bodies, references, links, and readiness. Use compatible playbook defaults only when the repository is silent.
 
 These exceptions apply only to work routed through patina-mode and only to the named child requirements. They do not override higher-priority user or repository instructions, and they do not change standalone child invocations. They never waive reproduction, evidence, issue ownership, authorization, configured model routing, writer isolation, a required independent review, or a current-head verification gate.
+
+## Repair from evidence
+
+Every CI or pull request repair attempt starts from a diagnosis. Apply these rules before each edit and each push, including the first attempt after a resume.
+
+1. **Read the owning job.** Open the first failing job that owns the failure. Read its failing command and its first actionable error. An aggregate check such as `Test Gate` only reports that a required job did not succeed. It is never the root cause, so follow it to the owning job.
+2. **Classify the failure.** Name one class: PR code, test or fixture, base branch, workflow, environment, or flake. Only PR code and test or fixture failures get a commit on this branch. A base-branch failure needs an update from the base. A workflow or environment failure goes to its owner. A flake gets the one fresh build that step 7 of `playbooks/babysit.md` allows.
+3. **Reproduce before you change code.** Run the owning command locally on the current head and watch it fail. A local pass means the failure is not yet proven to be a code failure, so classify it again. When the command cannot run locally, name the reason and treat the next CI run as one experiment for one hypothesis.
+4. **Wait for the current head.** A pending or queued check on the current head is evidence to wait for. A new push cancels or supersedes that run and discards its result. Push again only after the decisive check finishes.
+5. **Test one hypothesis per attempt.** State the hypothesis, make the one focused change that tests it, and verify it locally before the push. When the result refutes the hypothesis, revert the change it motivated.
+6. **Verify the requirement.** Green checks prove only what the checks run. Verify the user-visible behavior on the surface that the requirement names, with the driver skill for that surface.
+7. **Carry the attempt forward.** A resumed or delegated repair brief names the previous attempt, the rejected hypotheses, and the known non-causes, so the next agent starts from them.
+8. **Stop when the next action is a guess.** Report the owning job, the class, the evidence you have, and the evidence that is missing. Resume when that evidence arrives.
 
 ## Principles
 
