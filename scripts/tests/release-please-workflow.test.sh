@@ -36,8 +36,14 @@ assert_match 'id: app-token'
 assert_match 'app-id:.*secrets\.RELEASE_PLEASE_APP_ID'
 assert_match 'private-key:.*secrets\.RELEASE_PLEASE_PRIVATE_KEY'
 assert_match 'token:.*steps\.app-token\.outputs\.token'
+assert_match 'steps\.release\.outputs\.prs_created'
+assert_match 'RELEASE_PRS:.*steps\.release\.outputs\.prs'
+assert_match 'jq -r '\''\.\[\]\.number'\'''
+assert_match "--head 'release-please--branches--main--components--patinaproject-skills'"
+assert_match 'exit 1'
 assert_no_match 'RELEASE_PLEASE_TOKEN'
 assert_no_match 'gh pr merge.*\|\| true'
+assert_no_match 'prs=\$\(gh pr list --label "autorelease: pending"'
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
   echo "" >&2
