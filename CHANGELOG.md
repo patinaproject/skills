@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.53.0](https://github.com/patinaproject/skills/compare/v2.52.0...v2.53.0) (2026-09-16)
+
+
+### Features
+
+* [#518](https://github.com/patinaproject/skills/issues/518) require evidence before repeated CI repairs ([#523](https://github.com/patinaproject/skills/issues/523)) ([355368d](https://github.com/patinaproject/skills/commit/355368d240397555923ab1a63fab3a1c9d014d69))
+
 ## [2.52.0](https://github.com/patinaproject/skills/compare/v2.51.0...v2.52.0) (2026-09-16)
 
 
