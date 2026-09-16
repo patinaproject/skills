@@ -33,13 +33,40 @@ jobs:
           manifest-file: .release-please-manifest.json
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Enable auto-merge on open release PRs
-        if: steps.release.outputs.releases_created != 'true'
+      - name: Enable auto-merge on release PRs
+        if: steps.release.outputs.prs_created == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_PRS: ${{ steps.release.outputs.prs }}
         run: |
-          # Enable auto-merge on any open release-please PRs
-          prs=$(gh pr list --label "autorelease: pending" --json number --jq '.[].number')
-          for pr in $prs; do
+          set -euo pipefail
+
+          prs=()
+          if [[ -n "${RELEASE_PRS:-}" && "${RELEASE_PRS}" != "null" ]]; then
+            mapfile -t prs < <(jq -r '.[].number' <<<"${RELEASE_PRS}")
+          fi
+
+          # GitHub can lag briefly after Release Please creates the PR and label.
+          # Retry discovery before failing instead of silently skipping auto-merge.
+          for _ in {1..10}; do
+            if ((${#prs[@]} > 0)); then
+              break
+            fi
+            mapfile -t prs < <(gh pr list \
+              --state open \
+              --head 'release-please--branches--main--components--patinaproject-skills' \
+              --json number \
+              --jq '.[].number')
+            if ((${#prs[@]} == 0)); then
+              sleep 2
+            fi
+          done
+
+          if ((${#prs[@]} == 0)); then
+            echo 'Release Please reported a PR, but it was not discoverable for auto-merge.' >&2
+            exit 1
+          fi
+
+          for pr in "${prs[@]}"; do
             gh pr merge "$pr" --auto --squash
           done

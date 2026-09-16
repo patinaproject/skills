@@ -4,15 +4,16 @@ set -euo pipefail
 # inside one is swallowed rather than refusing the move. Structural, so a future
 # unguarded read cannot reintroduce that silently.
 shopt -s inherit_errexit
+export GIT_OPTIONAL_LOCKS=0
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+
+transaction() {
+  command -v node >/dev/null || fail 'Node.js 24 or newer is required before moving a branch'
+  node "$script_dir/transaction.mjs" "$@"
+}
 
 fail() {
   echo "FAIL: $1" >&2
-  exit 1
-}
-
-fail_with_output() {
-  echo "FAIL: $1" >&2
-  printf '%s\n' "$2" >&2
   exit 1
 }
 
@@ -103,9 +104,8 @@ detaching_states() {
 
 # A worktree mid-rebase or mid-bisect sits on a detached HEAD, so no worktree
 # record claims the branch it will return to. Each operation's own state names
-# that branch instead. The current worktree is left to assert_worktree_quiet,
-# which reports its operations in the first person.
-assert_branch_free_of_operations() {
+# that branch instead.
+assert_other_worktrees_do_not_hide_branch_operation() {
   local branch="$1" current="$2" listing="$3" paths path resolved git_dir
   local state key name
   paths="$(printf '%s\n' "$listing" | awk '/^worktree / { print substr($0, 10) }')" ||
@@ -189,17 +189,12 @@ untracked_count() {
   printf '%s\n' "$files" | awk 'END { print NR + 0 }'
 }
 
-assert_worktree_quiet() {
-  assert_no_operation "$1" "$2"
-  assert_no_tracked_changes "$1" "$2"
-}
-
 assert_holder_releasable() {
   local holder="$1" locked="$2" reason="$3"
   if [ "$locked" = "1" ]; then
     fail "worktree $holder is locked${reason:+ ($reason)}; run: git worktree unlock $holder"
   fi
-  assert_worktree_quiet "$holder" "worktree $holder"
+  assert_no_operation "$holder" "worktree $holder"
 }
 
 # Emits
@@ -222,8 +217,10 @@ resolve_branch() {
     fail "could not read the worktree list"
 
   if [ -z "$record" ]; then
-    assert_branch_free_of_operations "$branch" "$current" "$listing"
-    assert_worktree_quiet "$current" 'this worktree'
+    assert_other_worktrees_do_not_hide_branch_operation "$branch" "$current" "$listing"
+    assert_no_operation "$current" 'this worktree'
+    transaction check "$current"
+    assert_no_tracked_changes "$current" 'this worktree'
     printf 'free\t%s\t%s\t0\t\t\n' "$branch" "$branch_head"
     return
   fi
@@ -245,27 +242,28 @@ resolve_branch() {
   untracked="$(untracked_count "$holder")" || fail_unreadable_worktree "$holder"
 
   if [ "$holder" = "$current" ]; then
+    transaction pending "$current"
     printf 'here\t%s\t%s\t%s\t%s\t%s\n' \
       "$branch" "$branch_head" "$untracked" "$holder" "$branch_head"
     return
   fi
 
   assert_holder_releasable "$holder" "$locked" "$reason"
-  assert_worktree_quiet "$current" 'this worktree'
+  assert_no_operation "$current" 'this worktree'
+  transaction check "$holder" "$current"
+  assert_no_tracked_changes "$current" 'this worktree'
   holder_head="$(git -C "$holder" rev-parse HEAD)"
 
   printf 'held\t%s\t%s\t%s\t%s\t%s\n' \
     "$branch" "$branch_head" "$untracked" "$holder" "$holder_head"
 }
 
-# Detaches the holding worktree and attaches the branch here, restoring the
-# holder when attaching fails.
 move_branch() {
   [ "$#" -ge 2 ] && [ "$#" -le 3 ] ||
     fail "usage: worktree-context.sh move <branch> <branch-head> [holder-path]"
 
   local branch="$1" expected_head="$2" expected_holder="${3:-}"
-  local row mode actual_head holder detached output restore
+  local row mode actual_head holder
 
   row="$(resolve_branch "$branch")"
   IFS=$'\t' read -r mode _ actual_head _ holder _ <<< "$row"
@@ -285,33 +283,7 @@ move_branch() {
       fail "branch $branch is now $mode rather than free; rerun resolve against current context"
   fi
 
-  if [ "$mode" = "held" ]; then
-    output="$(git -C "$holder" checkout --detach 2>&1)" ||
-      fail_with_output "git -C $holder checkout --detach failed" "$output"
-    detached="$(git -C "$holder" rev-parse HEAD)"
-  fi
-
-  if ! output="$(git switch "$branch" 2>&1)"; then
-    if [ "$mode" != "held" ]; then
-      fail_with_output "git switch $branch failed" "$output"
-    fi
-    restore="$(git -C "$holder" switch "$branch" 2>&1)" ||
-      fail_with_output \
-        "git switch $branch failed and worktree $holder could not be restored to $branch" \
-        "$restore
-$output"
-    fail_with_output \
-      "git switch $branch failed; worktree $holder was restored to $branch" "$output"
-  fi
-
-  [ "$(git branch --show-current)" = "$branch" ] ||
-    fail "git switch $branch reported success but this worktree is not on $branch"
-
-  if [ "$mode" = "held" ]; then
-    printf 'moved\t%s\t%s\t%s\n' "$branch" "$holder" "$detached"
-  else
-    printf 'attached\t%s\t\t\n' "$branch"
-  fi
+  transaction move "$branch" "$expected_head" "$holder"
 }
 
 case "${1:-}" in
@@ -322,6 +294,11 @@ case "${1:-}" in
   move)
     shift
     move_branch "$@"
+    ;;
+  recover)
+    shift
+    [ "$#" -eq 1 ] || fail 'recover requires one transaction ID'
+    transaction recover "$1"
     ;;
   *)
     fail "usage: worktree-context.sh {resolve <branch>|move <branch> <branch-head> [holder-path]}"

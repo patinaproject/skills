@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.52.0](https://github.com/patinaproject/skills/compare/v2.51.0...v2.52.0) (2026-09-16)
+
+
+### Features
+
+* [#524](https://github.com/patinaproject/skills/issues/524) transfer uncommitted work between worktrees ([#525](https://github.com/patinaproject/skills/issues/525)) ([f08c9b0](https://github.com/patinaproject/skills/commit/f08c9b05326bf88fb4d3e56c30e519a60fff40cb))
+
+## [2.51.0](https://github.com/patinaproject/skills/compare/v2.50.0...v2.51.0) (2026-09-15)
+
+
+### Features
+
+* [#517](https://github.com/patinaproject/skills/issues/517) route failed CI checks through fix-ci ([#519](https://github.com/patinaproject/skills/issues/519)) ([f46723e](https://github.com/patinaproject/skills/commit/f46723ec155c540d37fd893cf81860357461e074))
+
+
+### Bug Fixes
+
+* [#521](https://github.com/patinaproject/skills/issues/521) make release please auto merge reliable ([#522](https://github.com/patinaproject/skills/issues/522)) ([a723394](https://github.com/patinaproject/skills/commit/a723394e6853a2b55298870a2b044d56898a25b5))
+
 ## [2.50.0](https://github.com/patinaproject/skills/compare/v2.49.0...v2.50.0) (2026-09-14)
 
 
