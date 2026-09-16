@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.52.0](https://github.com/patinaproject/skills/compare/v2.51.0...v2.52.0) (2026-09-16)
+
+
+### Features
+
+* [#524](https://github.com/patinaproject/skills/issues/524) transfer uncommitted work between worktrees ([#525](https://github.com/patinaproject/skills/issues/525)) ([f08c9b0](https://github.com/patinaproject/skills/commit/f08c9b05326bf88fb4d3e56c30e519a60fff40cb))
+
 ## [2.51.0](https://github.com/patinaproject/skills/compare/v2.50.0...v2.51.0) (2026-09-15)
 
 
