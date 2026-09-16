@@ -260,6 +260,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-15T00:00:00Z",
       "toRunId": "patinaproject-teds-macbook-pro"
+    },
+    {
+      "disposition": "Eligible open skills issue; retain through blockers and Ted-owned merge gate",
+      "eventId": "sha256:fc3edbc434a4af2741a220c26f483e1b05a723496c0157527122f0d6154a7da4",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/528-intake-20260917.json",
+      "issueId": "528",
+      "kind": "claim",
+      "recordedAt": "2026-09-16T17:22:53Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -478,6 +487,12 @@
       "evidencePath": "/Users/tlmader/.claude/orchestrate/patinaproject-teds-macbook-pro/evidence/PAT-517-claim-20260915.json",
       "reservedAt": "2026-09-15T00:00:00Z",
       "runId": "patinaproject-teds-macbook-pro"
+    },
+    "528": {
+      "disposition": "Eligible open skills issue; retain through blockers and Ted-owned merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/528-intake-20260917.json",
+      "reservedAt": "2026-09-16T17:22:53Z",
+      "runId": "skills-teds-macbook-pro"
     }
   },
   "repository": "github.com/patinaproject/skills",
