@@ -229,6 +229,17 @@ if jq -e '.skills.implement' skills-lock.json >/dev/null; then
   exit 1
 fi
 
+if jq -e '.skills["resolving-merge-conflicts"]' skills-lock.json >/dev/null; then
+  echo "FAIL: resolving-merge-conflicts is retired in favor of fix-merge-conflicts" >&2
+  exit 1
+fi
+
+if [ -e .agents/skills/resolving-merge-conflicts ] ||
+  [ -e .claude/skills/resolving-merge-conflicts ]; then
+  echo "FAIL: resolving-merge-conflicts must remain absent from skill overlays" >&2
+  exit 1
+fi
+
 # Assert the two version fields stay in lockstep. Each host stores the
 # marketplace version in a different file per its own schema:
 #   Claude: .claude-plugin/marketplace.json metadata.version

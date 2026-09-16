@@ -125,11 +125,14 @@ git -C "$upstream" add -A
 git -C "$upstream" commit -q -m "v2"
 
 # Second sync: must leave a true conflict on the diverged line.
-if run_sync >/dev/null 2>&1; then
+sync_output="$work/sync-output"
+if run_sync >"$sync_output" 2>&1; then
   fail "second sync should exit non-zero because of conflicts"
 fi
 grep -q '^<<<<<<<' "$dest_file" || fail "expected conflict markers not present after diverged sync"
 grep -q 'shared-line-PATINA-EDIT' "$dest_file" || fail "ours side missing from conflict"
 grep -q 'shared-line-UPSTREAM-CHANGE' "$dest_file" || fail "theirs side missing from conflict"
+grep -q 'fix-merge-conflicts skill' "$sync_output" \
+  || fail "conflict output did not route to fix-merge-conflicts"
 
 echo "PASS: sync-pstack.test.sh"

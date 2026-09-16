@@ -98,6 +98,6 @@ else
   echo
   echo "sync-pstack: merge left conflicts (pstack-claude@$short vs your local edits)."
   echo "Resolve them, 'git add' the files, then 'git commit'. See the repo's"
-  echo "resolving-merge-conflicts skill. To abort: 'git merge --abort'."
+  echo "fix-merge-conflicts skill. To abort: 'git merge --abort'."
   exit 1
 fi

@@ -47,6 +47,9 @@ issue or in normal docs when it is broadly useful beyond one issue.
 
 ## Agent skills
 
+Treat any vendored instruction that names the retired
+`resolving-merge-conflicts` skill as a reference to `fix-merge-conflicts`.
+
 ### Issue tracker
 
 Tracker operations are defined in the sole adapter. The real file is

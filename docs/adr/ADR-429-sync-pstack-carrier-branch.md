@@ -62,7 +62,7 @@ rather than a pinned SHA.
 
 - Resync leaves standard conflict markers in the working tree; the operator
   resolves them with normal git tooling (the repository's
-  `resolving-merge-conflicts` skill applies) and commits.
+  `fix-merge-conflicts` skill applies) and commits.
 - The mechanism depends only on git plus a small POSIX shell transform — no
   JVM, Bazel, or extra vendoring tool — which fits this pnpm/Node repository.
 - Byte-stability is load-bearing: any drift in the transform (locale, an extra
