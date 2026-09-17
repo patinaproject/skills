@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.54.0](https://github.com/patinaproject/skills/compare/v2.53.0...v2.54.0) (2026-09-17)
+
+
+### Features
+
+* [#528](https://github.com/patinaproject/skills/issues/528) retire resolving-merge-conflicts ([#529](https://github.com/patinaproject/skills/issues/529)) ([58e7f11](https://github.com/patinaproject/skills/commit/58e7f1145d9366df312bec98ad6a88b3ca461196))
+
 ## [2.53.0](https://github.com/patinaproject/skills/compare/v2.52.0...v2.53.0) (2026-09-16)
 
 
