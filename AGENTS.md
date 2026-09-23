@@ -6,6 +6,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
+- `skills/update-branch/`: local branch update skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
@@ -198,6 +199,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh`.
 - Run `bash scripts/tests/move-session-here.test.sh` after changing
   `plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs`.
+- Run `bash scripts/tests/update-branch.test.sh` after changing
+  `skills/update-branch/**`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing
@@ -273,6 +276,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | --- | --- |
 | scaffold-repository | `skills/scaffold-repository/` |
 | using-github | `skills/using-github/` |
+| update-branch | `skills/update-branch/` |
 | install-skills | `skills/install-skills/` |
 | grill-to-spec | `skills/grill-to-spec/` |
 | design-by-contract | `skills/design-by-contract/` |

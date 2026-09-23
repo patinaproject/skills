@@ -8,6 +8,7 @@ bash scripts/tests/issue-reference-contract.test.sh
 node scripts/tests/history-rewrite.test.mjs
 bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
+bash scripts/tests/update-branch.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/release-please-workflow.test.sh
 node scripts/tests/skills-release-dispatch.test.mjs

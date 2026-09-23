@@ -3,6 +3,7 @@
   "skills": [
     "./skills/scaffold-repository",
     "./skills/using-github",
+    "./skills/update-branch",
     "./skills/install-skills",
     "./skills/grill-to-spec",
     "./skills/design-by-contract",

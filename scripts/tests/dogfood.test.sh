@@ -16,6 +16,7 @@ ROOT_SKILLS=(
   scaffold-repository
   install-skills
   using-github
+  update-branch
   grill-to-spec
   design-by-contract
   grill-system-design
