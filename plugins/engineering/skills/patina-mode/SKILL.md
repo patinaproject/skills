@@ -65,6 +65,9 @@ Remaining triggers:
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
 - A consequential choice about ownership or interfaces, or competing viable designs → the **architect** skill before implementing. A function boundary alone does not trigger Architect. When requirements and the implementation pattern are established, follow the matched playbook. Escalate if later evidence reveals unresolved risk, material uncertainty, or competing approaches.
 - Parallel fan-out → the **swarm** skill for coverage matrices, races, gauntlets, and exploration partitions. Use **arena** for design or code bakeoffs with base selection and grafting.
+- Stacked PRs, a GitHub stack suggestion, or a stack topology change → read
+  [`references/github-stacks.md`](references/github-stacks.md). It distinguishes
+  dependent branches from native stack metadata and covers creation and verification.
 - Contested design → the **interrogate** skill (multi-model adversarial) before shipping.
 - Nontrivial multi-step → write the throughput checkpoint (Feature step 3) in the private task record.
 - Any prose surface → the **unslop** skill. Your reply is a prose surface; write it per **Writing the reply**. Agent-facing prose also follows the **plugin-dev:skill-development** skill (Claude Code's authoring guidance for SKILL.md files).
