@@ -16,8 +16,8 @@ current_branch() {
 open_pull_request() {
   local branch="$1" rows count
   if ! rows="$(gh pr list --state open --head "$branch" \
-    --json number,url,baseRefName,headRefName \
-    --jq '.[] | [.number, .url, .baseRefName, .headRefName] | @tsv')"; then
+    --json number,url,baseRefName,headRefName,headRepository \
+    --jq '.[] | [.number, .url, .baseRefName, .headRefName, (.headRepository.nameWithOwner // "-")] | @tsv')"; then
     fail "gh pr list --state open --head $branch failed"
   fi
 
@@ -27,6 +27,65 @@ open_pull_request() {
   fi
 
   printf '%s' "$rows"
+}
+
+repository_identity() {
+  local url="${1%.git}" host path
+  if [[ "$url" =~ ^https?://([^/]+)/([^/]+/[^/]+)$ ]]; then
+    host="${BASH_REMATCH[1]}" path="${BASH_REMATCH[2]}"
+  elif [[ "$url" =~ ^ssh://git@([^/]+)/([^/]+/[^/]+)$ ]]; then
+    host="${BASH_REMATCH[1]}" path="${BASH_REMATCH[2]}"
+  elif [[ "$url" =~ ^git@([^:]+):([^/]+/[^/]+)$ ]]; then
+    host="${BASH_REMATCH[1]}" path="${BASH_REMATCH[2]}"
+  else
+    return 1
+  fi
+  printf '%s/%s\n' "$host" "$path" | tr '[:upper:]' '[:lower:]'
+}
+
+read_pull_request() {
+  IFS=$'\t' read -r pr_number pr_url pr_base pr_head pr_head_repo <<< "$1"
+  pr_base_repo="$(repository_identity "${pr_url%/pull/*}")" ||
+    fail "cannot identify pull request base repository"
+  pr_head_repo="$(repository_identity "https://${pr_base_repo%%/*}/$pr_head_repo")" ||
+    fail "cannot identify pull request head repository"
+}
+
+remote_identity() {
+  local url
+  url="$(git remote get-url "$@" --all)" || return 1
+  repository_identity "$url"
+}
+
+base_remote() {
+  local expected="$1" remote identity match=""
+  identity="$(remote_identity origin 2>/dev/null)" || identity=""
+  if [ "$identity" = "$expected" ]; then
+    printf 'origin\n'
+    return
+  fi
+  while IFS= read -r remote; do
+    identity="$(remote_identity "$remote")" || continue
+    [ "$identity" = "$expected" ] || continue
+    [ -z "$match" ] || fail "multiple remotes match pull request base repository $expected"
+    match="$remote"
+  done < <(git remote)
+  [ -n "$match" ] || fail "no fetch remote matches pull request base repository $expected"
+  printf '%s\n' "$match"
+}
+
+validate_remotes() {
+  local branch="$1" base_ref="$2" base_repo="$3" head_repo="$4" head_ref="$5"
+  local remote merge_ref identity
+  identity="$(remote_identity "${base_ref%%/*}")" || fail "cannot identify base fetch remote"
+  [ "$identity" = "$base_repo" ] || fail "base fetch remote does not match pull request base repository $base_repo"
+  remote="$(git config --get "branch.$branch.remote")" || fail "branch $branch has no configured push remote"
+  merge_ref="$(git config --get "branch.$branch.merge")" || fail "branch $branch has no configured upstream branch"
+  [ "$merge_ref" = "refs/heads/$head_ref" ] ||
+    fail "configured upstream for branch $branch does not match pull request head $head_ref"
+  identity="$(remote_identity --push "$remote")" || fail "cannot identify a single push destination for $remote"
+  [ "$identity" = "$head_repo" ] || fail "push remote $remote does not match pull request head repository $head_repo"
+  printf '%s\n' "$remote"
 }
 
 normalize_origin_ref() {
@@ -46,18 +105,20 @@ normalize_origin_ref() {
 
 validate_pull_request_context() {
   local row="$1" branch="$2" expected_number="$3" expected_base="$4" expected_head="$5"
-  local pr_number pr_url pr_base pr_head actual_base
-  expected_base="$(normalize_origin_ref "$expected_base")"
+  local expected_base_repo="$6" expected_head_repo="$7"
+  local pr_number pr_url pr_base pr_head pr_base_repo pr_head_repo actual_base
   [ -n "$row" ] || fail "no open pull request exists for branch $branch; the no-PR path remains local-only"
-  IFS=$'\t' read -r pr_number pr_url pr_base pr_head <<< "$row"
-  actual_base="$(normalize_origin_ref "$pr_base")"
+  read_pull_request "$row"
+  actual_base="${expected_base%%/*}/$pr_base"
 
   if [ "$pr_number" != "$expected_number" ]; then
     fail "pull request changed from #$expected_number to #$pr_number; rerun update-branch against current context"
   fi
   if [ "$actual_base" != "$expected_base" ]; then
-    fail "pull request #$pr_number target changed from ${expected_base#origin/} to ${actual_base#origin/}; rerun update-branch against current context"
+    fail "pull request #$pr_number target changed from ${expected_base#*/} to $pr_base; rerun update-branch against current context"
   fi
+  [ "$pr_base_repo" = "$expected_base_repo" ] && [ "$pr_head_repo" = "$expected_head_repo" ] ||
+    fail "pull request repositories changed; rerun update-branch against current context"
   if [ "$pr_head" != "$expected_head" ]; then
     fail "pull request #$pr_number head changed from $expected_head to $pr_head; rerun update-branch against current context"
   fi
@@ -69,15 +130,18 @@ resolve_context() {
   [ "$#" -le 1 ] || fail "resolve accepts at most one optional base ref"
 
   local explicit_base="${1:-}" branch row pr_number pr_url pr_base pr_head base_ref default_ref
+  local pr_base_repo pr_head_repo remote
   branch="$(current_branch)"
   row="$(open_pull_request "$branch")"
 
   if [ -n "$row" ]; then
-    IFS=$'\t' read -r pr_number pr_url pr_base pr_head <<< "$row"
+    read_pull_request "$row"
     [ -n "$pr_base" ] || fail "open pull request #$pr_number has no target branch"
-    base_ref="$(normalize_origin_ref "$pr_base")"
-    printf 'pull-request\t%s\t%s\t%s\t%s\t%s\n' \
-      "$branch" "$base_ref" "$pr_number" "$pr_url" "$pr_head"
+    remote="$(base_remote "$pr_base_repo")"
+    base_ref="$remote/$pr_base"
+    validate_remotes "$branch" "$base_ref" "$pr_base_repo" "$pr_head_repo" "$pr_head" >/dev/null
+    printf 'pull-request\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+      "$branch" "$base_ref" "$pr_number" "$pr_url" "$pr_head" "$pr_base_repo" "$pr_head_repo"
     return
   fi
 
@@ -93,44 +157,26 @@ resolve_context() {
 }
 
 push_pull_request() {
-  [ "$#" -eq 3 ] || fail "push requires the resolved PR number, base ref, and head ref"
+  [ "$#" -eq 5 ] || fail "push requires the resolved PR number, base ref, head ref, base repository, and head repository"
 
   local expected_number="$1" expected_base="$2" expected_head="$3"
-  local branch row post_push_url remote merge_ref remote_branch output
+  local expected_base_repo="$4" expected_head_repo="$5"
+  local branch row post_push_url remote output
   branch="$(current_branch)"
   row="$(open_pull_request "$branch")"
   validate_pull_request_context \
-    "$row" "$branch" "$expected_number" "$expected_base" "$expected_head" >/dev/null
+    "$row" "$branch" "$expected_number" "$expected_base" "$expected_head" "$expected_base_repo" "$expected_head_repo" >/dev/null
+  remote="$(validate_remotes "$branch" "$expected_base" "$expected_base_repo" "$expected_head_repo" "$expected_head")"
 
-  if ! remote="$(git config --get "branch.$branch.remote")" || [ -z "$remote" ]; then
-    fail "branch $branch has no configured push remote"
-  fi
-  if ! merge_ref="$(git config --get "branch.$branch.merge")" || [ -z "$merge_ref" ]; then
-    fail "branch $branch has no configured upstream branch"
-  fi
-  case "$merge_ref" in
-    refs/heads/*)
-      remote_branch="${merge_ref#refs/heads/}"
-      ;;
-    *)
-      fail "configured upstream for branch $branch is not a branch ref: $merge_ref"
-      ;;
-  esac
-
-  if [ "$remote_branch" != "$expected_head" ]; then
-    fail "configured upstream $remote/$remote_branch does not match pull request #$expected_number head $expected_head"
-  fi
-
-  if ! output="$(git push "$remote" "HEAD:$remote_branch" 2>&1)"; then
-    echo "FAIL: git push $remote HEAD:$remote_branch failed" >&2
+  if ! output="$(git push "$remote" "HEAD:$expected_head" 2>&1)"; then
+    echo "FAIL: git push $remote HEAD:$expected_head failed" >&2
     printf '%s\n' "$output" >&2
     exit 1
   fi
   [ -n "$output" ] && printf '%s\n' "$output"
-  row="$(open_pull_request "$branch")"
-  if ! post_push_url="$(validate_pull_request_context \
-    "$row" "$branch" "$expected_number" "$expected_base" "$expected_head")"; then
-    fail "git push $remote HEAD:$remote_branch succeeded, but pull request context changed; the remote branch moved and the pull request update is indeterminate"
+  if ! row="$(open_pull_request "$branch")" || ! post_push_url="$(validate_pull_request_context \
+    "$row" "$branch" "$expected_number" "$expected_base" "$expected_head" "$expected_base_repo" "$expected_head_repo")"; then
+    fail "git push $remote HEAD:$expected_head succeeded, but pull request context changed or could not be read; the remote branch moved and the pull request update is indeterminate"
   fi
   printf 'Updated pull request #%s at %s\n' "$expected_number" "$post_push_url"
 }
@@ -179,6 +225,6 @@ case "${1:-}" in
     require_conflict_skill "$@"
     ;;
   *)
-    fail "usage: update-context.sh {resolve [base-ref]|push <pr-number> <base-ref> <head-ref>|require-conflict-skill}"
+    fail "usage: update-context.sh {resolve [base-ref]|push <pr-number> <base-ref> <head-ref> <base-repository> <head-repository>|require-conflict-skill}"
     ;;
 esac

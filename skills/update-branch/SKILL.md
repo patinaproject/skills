@@ -49,10 +49,16 @@ remote update with the helper's `push` command.
    ```
 
    Record the returned mode, current branch, normalized target, pull request
-   number and URL, and pull request head. `pull-request` mode uses the pull
+   number and URL, pull request head, and both repository identities.
+   The helper requires a fetch remote matching the pull request's base
+   repository and a configured upstream whose push URL matches its head
+   repository. It refuses missing, ambiguous, or mismatched identities before
+   the workflow changes local or remote state. `pull-request` mode uses the pull
    request target. `local-only` mode uses the explicit target or `origin/HEAD`.
-4. Strip a leading `origin/` from the selected target and fetch that branch from
-   `origin`. Record `git rev-parse <target>` as the exact target commit.
+4. Split the selected target at its first `/` into remote and branch. Fetch
+   that branch from that remote. Fork pull requests can select a base remote
+   such as `upstream`; local-only targets use `origin`.
+   Record `git rev-parse <target>` as the exact target commit.
 5. Run `git status --short` and inspect staged, unstaged, and untracked files.
    Commit existing work automatically only when every changed file belongs to
    one clear change, contains no likely secret, and can use the repository's
@@ -104,11 +110,13 @@ remote update with the helper's `push` command.
     explicitly requests the remote update, run:
 
     ```sh
-    scripts/update-context.sh push <pr-number> <target> <pr-head>
+    scripts/update-context.sh push <pr-number> <target> <pr-head> <base-repository> <head-repository>
     ```
 
-    The helper verifies the pull request, pushes to the configured upstream,
-    and verifies it again. If the pull request changes during the push, say
+    Pass the identities captured by `resolve` unchanged. The helper verifies
+    the pull request and both remote identities, pushes to the configured
+    upstream, and verifies the pull request again. If the pull request changes
+    or its lookup fails during the push, say
     that the remote branch moved but the pull request result is uncertain.
     On any failure, report the helper message or failed `git push` output and
     do not claim the pull request was updated. In `local-only` mode, report
