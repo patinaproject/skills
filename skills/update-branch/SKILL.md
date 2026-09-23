@@ -34,7 +34,7 @@ remote update with the helper's `push` command.
 - Do not update the repository's default branch unless the user supplied a
   target and explicitly confirmed the default branch should change.
 - Use `fix-merge-conflicts` for every merge conflict. Before editing a
-  conflict, run `scripts/update-context.sh require-conflict-skill`. Install the
+  conflict, run `"$UPDATE_BRANCH_HELPER" require-conflict-skill`. Install the
   skill or stop when the helper says it is missing.
 
 ## Workflow
@@ -42,10 +42,12 @@ remote update with the helper's `push` command.
 1. Read repository instructions for commits, checks, and protected branches.
 2. Record `git branch --show-current` and compare it with the repository default
    branch. Stop on the default branch unless the user explicitly authorized it.
-3. From this skill's installed directory, run:
+3. Keep the consumer repository as the working directory. Resolve this skill's
+   installed directory to an absolute path, then run:
 
    ```sh
-   scripts/update-context.sh resolve [target]
+   UPDATE_BRANCH_HELPER="<absolute installed skill directory>/scripts/update-context.sh"
+   "$UPDATE_BRANCH_HELPER" resolve [target]
    ```
 
    Record the returned mode, current branch, normalized target, pull request
@@ -78,6 +80,12 @@ remote update with the helper's `push` command.
    this change and can be verified. Abort the merge and ask the user when a
    conflict needs a product decision, unrelated work, unavailable access,
    secret handling, generated-file knowledge, or a guess about behavior.
+   Run the skill check from the consumer repository:
+
+   ```sh
+   "$UPDATE_BRANCH_HELPER" require-conflict-skill
+   ```
+
 8. Check whether the merge changed package manifests, lockfiles, workspace
    files, or toolchain versions. If so, run the install or setup command from
    repository instructions before verification. Stop if no command is
@@ -110,7 +118,7 @@ remote update with the helper's `push` command.
     explicitly requests the remote update, run:
 
     ```sh
-    scripts/update-context.sh push <pr-number> <target> <pr-head> <base-repository> <head-repository>
+    "$UPDATE_BRANCH_HELPER" push <pr-number> <target> <pr-head> <base-repository> <head-repository>
     ```
 
     Pass the identities captured by `resolve` unchanged. The helper verifies

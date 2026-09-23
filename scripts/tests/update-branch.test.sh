@@ -119,6 +119,10 @@ case "${GH_SCENARIO:?GH_SCENARIO must be set}" in
   fork-pr)
     printf '324\thttps://github.com/example/project/pull/324\trelease/1.x\tfeature\tcontributor/project\n'
     ;;
+  fork-name-collision)
+    printf '323\thttps://github.com/example/project/pull/323\tmain\tfeature\tother/project\n'
+    printf '324\thttps://github.com/example/project/pull/324\trelease/1.x\tfeature\tcontributor/project\n'
+    ;;
   missing-head-repository)
     printf '324\thttps://github.com/example/project/pull/324\trelease/1.x\tfeature\t-\n'
     ;;
@@ -165,6 +169,37 @@ build_sandbox() {
 if [ ! -x "$HELPER" ]; then
   fail "missing executable helper: $HELPER"
 else
+  install_repo="$TMP_ROOT/installed-skill"
+  installed_helper="$install_repo/skills/update-branch/scripts/update-context.sh"
+  mkdir -p "$(dirname "$installed_helper")"
+  git init -q -b install-main "$install_repo"
+  cp "$HELPER" "$installed_helper"
+  chmod +x "$installed_helper"
+  git -C "$install_repo" add skills/update-branch/scripts/update-context.sh
+  git -C "$install_repo" "${GIT_ID[@]}" commit -q -m "install update-branch"
+  install_head_before="$(git -C "$install_repo" rev-parse HEAD)"
+  install_refs_before="$(git -C "$install_repo" show-ref)"
+
+  build_sandbox installed-helper-consumer
+  clone="$SANDBOX_CLONE"
+  RELEASE_SHA="$SANDBOX_RELEASE_SHA"
+  context="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=open-pr \
+    "$installed_helper" resolve)"
+  IFS=$'\t' read -r mode branch base_ref _ <<< "$context"
+  assert_equal "$mode" "pull-request" "installed helper should resolve the consumer pull request"
+  assert_equal "$branch" "feature" "installed helper should retain the consumer branch"
+  assert_equal "$base_ref" "origin/release/1.x" "installed helper should select the consumer target"
+  git -C "$clone" fetch -q origin release/1.x
+  git -C "$clone" merge -q --no-ff "$base_ref" -m "merge installed-helper target"
+  git -C "$clone" merge-base --is-ancestor "$RELEASE_SHA" HEAD ||
+    fail "installed helper target was not merged into the consumer branch"
+  assert_equal "$(git -C "$clone" branch --show-current)" "feature" \
+    "installed helper workflow should leave the consumer branch checked out"
+  assert_equal "$(git -C "$install_repo" rev-parse HEAD)" "$install_head_before" \
+    "installed helper workflow should preserve the install repository head"
+  assert_equal "$(git -C "$install_repo" show-ref)" "$install_refs_before" \
+    "installed helper workflow should preserve the install repository refs"
+
   build_sandbox pr-target
   clone="$SANDBOX_CLONE"
   RELEASE_SHA="$SANDBOX_RELEASE_SHA"
@@ -290,6 +325,14 @@ else
   git -C "$clone" remote rename origin upstream
   git -C "$clone" remote add origin "$identity_fixture/fork.git"
   git -C "$clone" config branch.feature.remote origin
+  context="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=fork-name-collision \
+    "$HELPER" resolve main)"
+  IFS=$'\t' read -r mode branch base_ref pr_number pr_url head_ref base_repo head_repo <<< "$context"
+  assert_equal "$pr_number" "324" "fork PR lookup should select the configured head repository"
+  assert_equal "$base_ref" "upstream/release/1.x" "fork PR collision should retain the selected PR target"
+  assert_equal "$head_repo" "github.com/contributor/project" \
+    "fork PR collision should retain the configured head repository"
+
   context="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=fork-pr "$HELPER" resolve main)"
   IFS=$'\t' read -r mode branch base_ref pr_number pr_url head_ref base_repo head_repo <<< "$context"
   assert_equal "$base_ref" "upstream/release/1.x" "fork PR should select the base repository's remote"
@@ -298,7 +341,7 @@ else
   git -C "$clone" merge -q --no-ff "$base_ref" -m "merge fork PR base"
   git -C "$clone" merge-base --is-ancestor "$SANDBOX_RELEASE_SHA" HEAD || fail "fork PR base was not merged"
   before="$(git --git-dir="$identity_fixture/origin.git" rev-parse feature)"
-  push_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=fork-pr \
+  push_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=fork-name-collision \
     "$HELPER" push "$pr_number" "$base_ref" "$head_ref" "$base_repo" "$head_repo")"
   assert_equal "$(git --git-dir="$identity_fixture/fork.git" rev-parse feature)" \
     "$(git -C "$clone" rev-parse HEAD)" "fork PR push should update the actual head repository"
@@ -307,6 +350,7 @@ else
 
   build_sandbox no-pr
   clone="$SANDBOX_CLONE"
+  no_pr_clone="$clone"
   explicit_context="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=no-pr "$HELPER" resolve release/1.x)"
   IFS=$'\t' read -r mode _ base_ref _ <<< "$explicit_context"
   assert_equal "$mode" "local-only" "no-PR explicit-base path should remain local-only"
@@ -316,6 +360,21 @@ else
   IFS=$'\t' read -r mode _ base_ref _ <<< "$default_context"
   assert_equal "$mode" "local-only" "no-PR default-base path should remain local-only"
   assert_equal "$base_ref" "origin/main" "no-PR fallback should use origin/HEAD"
+
+  build_sandbox missing-origin
+  clone="$SANDBOX_CLONE"
+  missing_origin_head="$(git -C "$clone" rev-parse HEAD)"
+  git -C "$clone" remote remove origin
+  if missing_origin_output="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=no-pr \
+    "$HELPER" resolve release/1.x 2>&1)"; then
+    fail "explicit target without origin unexpectedly resolved"
+  elif ! grep -Fq "requires an origin remote" <<< "$missing_origin_output"; then
+    fail "missing-origin refusal was not actionable: $missing_origin_output"
+  fi
+  assert_equal "$(git -C "$clone" rev-parse HEAD)" "$missing_origin_head" \
+    "missing-origin refusal should preserve the consumer head"
+
+  clone="$no_pr_clone"
 
   before_push="$(git --git-dir="$TMP_ROOT/no-pr/origin.git" rev-parse refs/heads/feature)"
   if no_pr_push="$(cd "$clone" && PATH="$FAKE_BIN:$PATH" GH_SCENARIO=no-pr \

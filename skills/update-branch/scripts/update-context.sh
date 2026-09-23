@@ -14,7 +14,8 @@ current_branch() {
 }
 
 open_pull_request() {
-  local branch="$1" rows count
+  local branch="$1" rows count remote expected_repo expected_name matches=""
+  local pr_number pr_url pr_base pr_head pr_head_repo normalized_head_repo
   if ! rows="$(gh pr list --state open --head "$branch" \
     --json number,url,baseRefName,headRefName,headRepository \
     --jq '.[] | [.number, .url, .baseRefName, .headRefName, (.headRepository.nameWithOwner // "-")] | @tsv')"; then
@@ -22,6 +23,26 @@ open_pull_request() {
   fi
 
   count="$(printf '%s\n' "$rows" | awk 'NF { count += 1 } END { print count + 0 }')"
+  if [ "$count" -gt 1 ]; then
+    remote="$(git config --get "branch.$branch.remote")" ||
+      fail "branch $branch has no configured push remote"
+    expected_repo="$(remote_identity --push "$remote")" ||
+      fail "cannot identify a single push destination for $remote"
+    expected_name="${expected_repo#*/}"
+
+    while IFS=$'\t' read -r pr_number pr_url pr_base pr_head pr_head_repo; do
+      [ "$pr_head_repo" != "-" ] || fail "cannot identify pull request head repository"
+      normalized_head_repo="$(printf '%s' "$pr_head_repo" | tr '[:upper:]' '[:lower:]')"
+      [ "$normalized_head_repo" = "$expected_name" ] || continue
+      [ -z "$matches" ] || matches+=$'\n'
+      matches+="$pr_number"$'\t'"$pr_url"$'\t'"$pr_base"$'\t'"$pr_head"$'\t'"$pr_head_repo"
+    done <<< "$rows"
+
+    rows="$matches"
+    count="$(printf '%s\n' "$rows" | awk 'NF { count += 1 } END { print count + 0 }')"
+    [ "$count" -gt 0 ] ||
+      fail "open pull requests for branch $branch do not match push remote $remote repository $expected_repo"
+  fi
   if [ "$count" -gt 1 ]; then
     fail "found $count open pull requests for branch $branch; select one branch context before updating"
   fi
@@ -128,6 +149,7 @@ validate_pull_request_context() {
 
 resolve_context() {
   [ "$#" -le 1 ] || fail "resolve accepts at most one optional base ref"
+  git remote get-url origin >/dev/null 2>&1 || fail "update-branch requires an origin remote"
 
   local explicit_base="${1:-}" branch row pr_number pr_url pr_base pr_head base_ref default_ref
   local pr_base_repo pr_head_repo remote
