@@ -278,6 +278,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-23T04:05:18Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Eligible open member-authored issue; preserve dirty update-branch implementation pending isolated worktree preflight; retain through Ted-owned merge gate",
+      "eventId": "sha256:c3d8be042912e95f9f68fd70cd21ba6ab85d356b7bbbd8add79c5a39a89e8a68",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/intake-20260923.json",
+      "issueId": "532",
+      "kind": "claim",
+      "recordedAt": "2026-09-23T04:05:18Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -505,6 +514,12 @@
     },
     "531": {
       "disposition": "Eligible open member-authored issue; documentation skill change; retain through Ted-owned merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/intake-20260923.json",
+      "reservedAt": "2026-09-23T04:05:18Z",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "532": {
+      "disposition": "Eligible open member-authored issue; preserve dirty update-branch implementation pending isolated worktree preflight; retain through Ted-owned merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/intake-20260923.json",
       "reservedAt": "2026-09-23T04:05:18Z",
       "runId": "skills-teds-macbook-pro"
