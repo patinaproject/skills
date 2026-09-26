@@ -1,6 +1,6 @@
 ---
 name: move-branch-here
-description: Move a branch from another worktree in the same repository to the current worktree, and copy its polish review record when available. Use when Git refuses checkout because another worktree holds the branch or when the user asks to move it here.
+description: Move a branch from another worktree in the same repository to the current worktree. Use when Git refuses checkout because another worktree holds the branch or when the user asks to move it here.
 ---
 
 # Move a branch here
@@ -14,8 +14,8 @@ Node runtime before changing either worktree.
 /move-branch-here 350-add-a-move-branch-here-skill --from /tmp/other-session
 ```
 
-`--from` names the temporary directory of the session that reviewed the branch.
-It is used only when copying the `polish` review record.
+`--from` names the temporary directory of the session that currently holds the
+branch.
 
 This skill moves branches only between worktrees of the same repository. If the
 branch is in another clone, tell the user it must be fetched instead and stop.
@@ -35,7 +35,7 @@ file count, old worktree path, and old worktree commit.
 
 | Mode | Meaning | Next step |
 | --- | --- | --- |
-| `here` | The current worktree already has the branch | Report this and continue to the review record |
+| `here` | The current worktree already has the branch | Report this and continue to the final report |
 | `free` | No worktree has the branch | Attach it here |
 | `held` | Another worktree has the branch | Release it there and attach it here |
 
@@ -95,38 +95,8 @@ reports unexpected state, preserve the artifacts and report the conflicting
 path. A committed move with incomplete artifact cleanup needs only recovery
 cleanup. Repeating completed recovery is safe.
 
-## Copy the polish review record
-
-Resolve `<polish-skill-directory>` to an installed `polish` skill. If no
-`polish` skill is installed or its `scripts/review-state.mjs` is missing,
-report that the branch moved but the review record was not handled.
-
-1. Resolve the target branch from `origin/HEAD`, then run:
-
-   ```sh
-   node <polish-skill-directory>/scripts/review-state.mjs status --target <target-branch>
-   ```
-
-   A `valid` result means the record already moved with the branch. Report its
-   reviewed head and open findings. Treat `unavailable` or `corrupt` as
-   `missing`.
-
-2. For `missing` with a `--from` directory, run:
-
-   ```sh
-   node <polish-skill-directory>/scripts/review-state.mjs relocate \
-     --from <other-temporary-directory> --branch <branch>
-   ```
-
-   Read the record again with the `status` command. An empty `relocated` list or
-   a source directory with no review data means there is no record to copy.
-
-3. For `missing` without `--from`, report that this session cannot find a
-   review record. Show the `relocate` command above when the user can provide
-   the other session's temporary directory.
-
 ## Final report
 
 Report the branch, branch commit, and current worktree. Include the old
 worktree and its detached commit when one was released, every transferred path,
-the review record result, and any refusal or recovery requirement.
+and any refusal or recovery requirement.
