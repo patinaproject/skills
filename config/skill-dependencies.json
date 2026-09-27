@@ -5,9 +5,23 @@
       "engineering/arena",
       "engineering/how",
       "engineering/interrogate",
+      "engineering/principle-boundary-discipline",
+      "engineering/principle-encode-lessons-in-structure",
+      "engineering/principle-fix-root-causes",
+      "engineering/principle-laziness-protocol",
+      "engineering/principle-make-operations-idempotent",
+      "engineering/principle-minimize-reader-load",
+      "engineering/principle-outcome-oriented-execution",
+      "engineering/principle-redesign-from-first-principles",
+      "engineering/principle-separate-before-serializing-shared-state",
+      "engineering/principle-subtract-before-you-add",
       "engineering/why"
     ],
-    "engineering/arena": [],
+    "engineering/arena": [
+      "engineering/principle-prove-it-works",
+      "engineering/principle-redesign-from-first-principles",
+      "engineering/principle-separate-before-serializing-shared-state"
+    ],
     "engineering/automate-me": [
       "engineering/patina-mode",
       "engineering/unslop"
@@ -118,16 +132,28 @@
     "engineering/principle-sequence-verifiable-units": [],
     "engineering/principle-subtract-before-you-add": [],
     "engineering/principle-test-behavior-not-implementation": [],
-    "engineering/principle-type-system-discipline": [],
+    "engineering/principle-type-system-discipline": [
+      "engineering/principle-boundary-discipline",
+      "engineering/principle-encode-lessons-in-structure"
+    ],
     "engineering/recall": [
       "engineering/automate-me",
       "engineering/unslop",
       "engineering/why"
     ],
-    "engineering/reflect": [],
+    "engineering/reflect": [
+      "engineering/principle-encode-lessons-in-structure"
+    ],
     "engineering/running-mobile-simulators": [],
     "engineering/setup-engineering": [
-      "engineering/setup-pstack"
+      "engineering/architect",
+      "engineering/arena",
+      "engineering/how",
+      "engineering/interrogate",
+      "engineering/patina-mode",
+      "engineering/setup-pstack",
+      "engineering/tdd",
+      "engineering/why"
     ],
     "engineering/setup-pstack": [],
     "engineering/show-me-your-work": [
@@ -147,12 +173,15 @@
       "engineering/swarm"
     ],
     "engineering/typescript-best-practices": [
+      "engineering/principle-boundary-discipline",
       "engineering/principle-type-system-discipline"
     ],
     "engineering/unslop": [],
     "engineering/what-did-i-get-done": [],
     "engineering/why": [],
-    "engineering/working-on-issues": [],
+    "engineering/working-on-issues": [
+      "engineering/move-branch-here"
+    ],
     "patinaproject-skills/design-by-contract": [],
     "patinaproject-skills/grill-system-design": [
       "patinaproject-skills/design-by-contract",
