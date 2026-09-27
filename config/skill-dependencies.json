@@ -109,9 +109,16 @@
       "engineering/why",
       "engineering/working-on-issues"
     ],
-    "engineering/principle-attack-the-premise": [],
+    "engineering/principle-attack-the-premise": [
+      "engineering/principle-build-the-lever",
+      "engineering/principle-fix-root-causes",
+      "engineering/principle-laziness-protocol"
+    ],
     "engineering/principle-boundary-discipline": [],
-    "engineering/principle-build-the-lever": [],
+    "engineering/principle-build-the-lever": [
+      "engineering/principle-laziness-protocol",
+      "engineering/principle-prove-it-works"
+    ],
     "engineering/principle-encode-lessons-in-structure": [],
     "engineering/principle-exhaust-the-design-space": [],
     "engineering/principle-experience-first": [],
