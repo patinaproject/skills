@@ -20,6 +20,7 @@
     "clean": "bash scripts/clean.sh",
     "commit": "git-cz",
     "commit:retry": "git-cz --retry",
+    "lint:skill-dependencies": "node scripts/validate-skill-dependencies.mjs",
     "commitlint": "commitlint",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "test": "bash scripts/tests/suite.test.sh",

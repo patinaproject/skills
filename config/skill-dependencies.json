@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "skills": {
+    "engineering/architect": [
+      "engineering/arena",
+      "engineering/how",
+      "engineering/interrogate",
+      "engineering/why"
+    ],
+    "engineering/arena": [],
+    "engineering/automate-me": [
+      "engineering/patina-mode",
+      "engineering/unslop"
+    ],
+    "engineering/babysit": [
+      "engineering/fix-ci",
+      "engineering/fix-merge-conflicts",
+      "engineering/get-pr-comments",
+      "engineering/interrogate",
+      "engineering/unslop"
+    ],
+    "engineering/blast-radius": [
+      "engineering/arena",
+      "engineering/unslop",
+      "engineering/why"
+    ],
+    "engineering/bro": [],
+    "engineering/create-verification-skill": [],
+    "engineering/deslop": [],
+    "engineering/figure-it-out": [
+      "engineering/architect",
+      "engineering/patina-mode",
+      "engineering/principle-sequence-verifiable-units",
+      "engineering/show-me-your-work"
+    ],
+    "engineering/fix-ci": [],
+    "engineering/fix-merge-conflicts": [],
+    "engineering/gather-evidence": [
+      "engineering/running-mobile-simulators"
+    ],
+    "engineering/get-pr-comments": [],
+    "engineering/how": [],
+    "engineering/interrogate": [],
+    "engineering/maintain-verification-skill": [],
+    "engineering/make-pr-easy-to-review": [],
+    "engineering/move-branch-here": [],
+    "engineering/move-session-here": [],
+    "engineering/no-comments": [
+      "engineering/architect",
+      "engineering/how",
+      "engineering/why"
+    ],
+    "engineering/patina-mode": [
+      "engineering/architect",
+      "engineering/arena",
+      "engineering/deslop",
+      "engineering/figure-it-out",
+      "engineering/fix-ci",
+      "engineering/gather-evidence",
+      "engineering/how",
+      "engineering/interrogate",
+      "engineering/move-branch-here",
+      "engineering/move-session-here",
+      "engineering/no-comments",
+      "engineering/principle-attack-the-premise",
+      "engineering/principle-boundary-discipline",
+      "engineering/principle-build-the-lever",
+      "engineering/principle-encode-lessons-in-structure",
+      "engineering/principle-exhaust-the-design-space",
+      "engineering/principle-experience-first",
+      "engineering/principle-fix-root-causes",
+      "engineering/principle-foundational-thinking",
+      "engineering/principle-guard-the-context-window",
+      "engineering/principle-laziness-protocol",
+      "engineering/principle-make-operations-idempotent",
+      "engineering/principle-migrate-callers-then-delete-legacy-apis",
+      "engineering/principle-minimize-reader-load",
+      "engineering/principle-model-the-domain",
+      "engineering/principle-never-block-on-the-human",
+      "engineering/principle-offensive-programming",
+      "engineering/principle-outcome-oriented-execution",
+      "engineering/principle-prove-it-works",
+      "engineering/principle-redesign-from-first-principles",
+      "engineering/principle-separate-before-serializing-shared-state",
+      "engineering/principle-sequence-verifiable-units",
+      "engineering/principle-subtract-before-you-add",
+      "engineering/principle-test-behavior-not-implementation",
+      "engineering/principle-type-system-discipline",
+      "engineering/running-mobile-simulators",
+      "engineering/show-me-your-work",
+      "engineering/swarm",
+      "engineering/tdd",
+      "engineering/technical-writing",
+      "engineering/unslop",
+      "engineering/why",
+      "engineering/working-on-issues"
+    ],
+    "engineering/principle-attack-the-premise": [],
+    "engineering/principle-boundary-discipline": [],
+    "engineering/principle-build-the-lever": [],
+    "engineering/principle-encode-lessons-in-structure": [],
+    "engineering/principle-exhaust-the-design-space": [],
+    "engineering/principle-experience-first": [],
+    "engineering/principle-fix-root-causes": [],
+    "engineering/principle-foundational-thinking": [],
+    "engineering/principle-guard-the-context-window": [],
+    "engineering/principle-laziness-protocol": [],
+    "engineering/principle-make-operations-idempotent": [],
+    "engineering/principle-migrate-callers-then-delete-legacy-apis": [],
+    "engineering/principle-minimize-reader-load": [],
+    "engineering/principle-model-the-domain": [],
+    "engineering/principle-never-block-on-the-human": [],
+    "engineering/principle-offensive-programming": [],
+    "engineering/principle-outcome-oriented-execution": [],
+    "engineering/principle-prove-it-works": [],
+    "engineering/principle-redesign-from-first-principles": [],
+    "engineering/principle-separate-before-serializing-shared-state": [],
+    "engineering/principle-sequence-verifiable-units": [],
+    "engineering/principle-subtract-before-you-add": [],
+    "engineering/principle-test-behavior-not-implementation": [],
+    "engineering/principle-type-system-discipline": [],
+    "engineering/recall": [
+      "engineering/automate-me",
+      "engineering/unslop",
+      "engineering/why"
+    ],
+    "engineering/reflect": [],
+    "engineering/running-mobile-simulators": [],
+    "engineering/setup-engineering": [
+      "engineering/setup-pstack"
+    ],
+    "engineering/setup-pstack": [],
+    "engineering/show-me-your-work": [
+      "engineering/unslop"
+    ],
+    "engineering/swarm": [],
+    "engineering/tdd": [],
+    "engineering/teach": [
+      "engineering/how",
+      "engineering/unslop",
+      "engineering/why"
+    ],
+    "engineering/technical-writing": [
+      "engineering/unslop"
+    ],
+    "engineering/thermo-nuclear-code-quality-review": [
+      "engineering/swarm"
+    ],
+    "engineering/typescript-best-practices": [
+      "engineering/principle-type-system-discipline"
+    ],
+    "engineering/unslop": [],
+    "engineering/what-did-i-get-done": [],
+    "engineering/why": [],
+    "engineering/working-on-issues": [],
+    "patinaproject-skills/design-by-contract": [],
+    "patinaproject-skills/grill-system-design": [
+      "patinaproject-skills/design-by-contract",
+      "patinaproject-skills/grill-to-spec"
+    ],
+    "patinaproject-skills/grill-to-spec": [],
+    "patinaproject-skills/install-skills": [],
+    "patinaproject-skills/review-system-design": [
+      "patinaproject-skills/design-by-contract"
+    ],
+    "patinaproject-skills/scaffold-repository": [],
+    "patinaproject-skills/using-github": [
+      "engineering/patina-mode",
+      "engineering/working-on-issues"
+    ],
+    "patinaproject-skills/writing-for-pstack": [
+      "engineering/patina-mode",
+      "engineering/unslop"
+    ]
+  }
+}

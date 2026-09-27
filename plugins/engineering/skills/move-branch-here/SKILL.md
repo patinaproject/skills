@@ -11,11 +11,7 @@ Node runtime before changing either worktree.
 
 ```text
 /move-branch-here 350-add-a-move-branch-here-skill
-/move-branch-here 350-add-a-move-branch-here-skill --from /tmp/other-session
 ```
-
-`--from` names the temporary directory of the session that currently holds the
-branch.
 
 This skill moves branches only between worktrees of the same repository. If the
 branch is in another clone, tell the user it must be fetched instead and stop.

@@ -111,6 +111,8 @@ if [ "$engineering_skills" != "$expected_engineering_skills" ]; then
   exit 1
 fi
 
+node scripts/validate-skill-dependencies.mjs
+
 for skill_file in plugins/engineering/skills/*/SKILL.md; do
   skill_name="$(basename "$(dirname "$skill_file")")"
   test "$(read_frontmatter_field "$skill_file" name)" = "$skill_name"
@@ -191,50 +193,6 @@ if git grep -q -i -E 'open-pstack|ericlitman|provider-dispatch|pstack-runner' --
   exit 1
 fi
 test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/michael-denyer/pstack-claude'
-
-# Active instructions may only invoke skills that are still published. Keep
-# this check focused on executable references: ordinary words such as "fix"
-# and "ready" are valid prose, while a slash command, a named skill, or a
-# skill-directory placeholder is an invocation. The active roots intentionally
-# exclude changelogs and architecture records, and this test file is outside
-# them, so historical records and the retired-skill guard remain exempt.
-published_skill_names="$({
-  jq -r '.skills[]' .claude-plugin/plugin.json | sed -E 's#^\./skills/##'
-  find plugins/engineering/skills -mindepth 1 -maxdepth 1 -type d | sed 's#.*/##'
-} | sort -u)"
-retired_skill_names="$(printf '%s\n' "$retired_marketplace_skills" | tr '|' '\n')"
-active_skill_files="$({
-  find skills plugins/engineering/skills -type f -name '*.md' \
-    ! -iname '*changelog*.md' \
-    ! -path '*/docs/adr/*'
-} | sort)"
-
-while IFS= read -r skill_file; do
-  [ -n "$skill_file" ] || continue
-  while IFS= read -r retired_name; do
-    [ -n "$retired_name" ] || continue
-    if printf '%s\n' "$published_skill_names" | grep -Fqx "$retired_name"; then
-      continue
-    fi
-
-    # A boundary before the name prevents matches inside longer words. The
-    # suffixes identify an invocation without rejecting ordinary prose.
-    reference_pattern="(^|[^[:alnum:]_-])(/${retired_name}([^[:alnum:]_-]|$)|${retired_name}[^[:alnum:]_-]+skill|<${retired_name}(-skill)?-directory>)"
-    stale_reference="$(grep -inE "$reference_pattern" "$skill_file" || true)"
-    if [ -n "$stale_reference" ]; then
-      echo "FAIL: active skill references retired skill '$retired_name' in $skill_file" >&2
-      printf '%s\n' "$stale_reference" >&2
-      exit 1
-    fi
-  done <<< "$retired_skill_names"
-
-  stale_helper="$(grep -inE 'review-state\.mjs' "$skill_file" || true)"
-  if [ -n "$stale_helper" ]; then
-    echo "FAIL: active skill references retired review-state.mjs in $skill_file" >&2
-    printf '%s\n' "$stale_helper" >&2
-    exit 1
-  fi
-done <<< "$active_skill_files"
 
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
