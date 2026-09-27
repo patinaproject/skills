@@ -18,6 +18,7 @@
       "engineering/why"
     ],
     "engineering/arena": [
+      "engineering/principle-laziness-protocol",
       "engineering/principle-prove-it-works",
       "engineering/principle-redesign-from-first-principles",
       "engineering/principle-separate-before-serializing-shared-state"
@@ -44,6 +45,12 @@
     "engineering/figure-it-out": [
       "engineering/architect",
       "engineering/patina-mode",
+      "engineering/principle-encode-lessons-in-structure",
+      "engineering/principle-foundational-thinking",
+      "engineering/principle-laziness-protocol",
+      "engineering/principle-never-block-on-the-human",
+      "engineering/principle-prove-it-works",
+      "engineering/principle-separate-before-serializing-shared-state",
       "engineering/principle-sequence-verifiable-units",
       "engineering/show-me-your-work"
     ],
@@ -133,7 +140,9 @@
     "engineering/principle-never-block-on-the-human": [],
     "engineering/principle-offensive-programming": [],
     "engineering/principle-outcome-oriented-execution": [],
-    "engineering/principle-prove-it-works": [],
+    "engineering/principle-prove-it-works": [
+      "engineering/show-me-your-work"
+    ],
     "engineering/principle-redesign-from-first-principles": [],
     "engineering/principle-separate-before-serializing-shared-state": [],
     "engineering/principle-sequence-verifiable-units": [],
@@ -164,6 +173,7 @@
     ],
     "engineering/setup-pstack": [],
     "engineering/show-me-your-work": [
+      "engineering/principle-encode-lessons-in-structure",
       "engineering/unslop"
     ],
     "engineering/swarm": [],
