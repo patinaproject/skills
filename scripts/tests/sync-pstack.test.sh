@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Behavioral tests for the pstack sync tooling: the rebrand transform's
 # determinism contract, and the end-to-end sync producing true 3-way merge
-# conflicts only where local edits diverge. Fully hermetic — no network.
+# conflicts only where local edits diverge. Fully hermetic, no network.
 set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
@@ -77,62 +77,120 @@ if bash "$transform" "$src" "$work/out1" 2>/dev/null; then
   fail "transform did not reject a non-empty dest-dir"
 fi
 
-# --- sync produces true 3-way conflicts -----------------------------------
+# --- sync: 3-way conflicts from a regenerated merge base ------------------
+# The repository squash-merges, so a synced tree reaches main with no ancestry
+# back to any sync commit. The merge base must come from the upstream SHA
+# recorded in upstream.json.
 export GIT_AUTHOR_NAME=test GIT_AUTHOR_EMAIL=test@example.com
 export GIT_COMMITTER_NAME=test GIT_COMMITTER_EMAIL=test@example.com
 
+failures=0
+expect() {
+  local what="$1"
+  shift
+  if ! "$@"; then
+    echo "FAIL: $what" >&2
+    failures=$((failures + 1))
+  fi
+}
+no_markers() { ! grep -q '^<<<<<<<' "$1"; }
+recorded_commit() { jq -r '.commit // empty' "$1/plugins/engineering/upstream.json" 2>/dev/null; }
+local_branches() { git -C "$1" for-each-ref --format='%(refname:short)' refs/heads; }
+
 upstream="$work/upstream"
+up_skill="$upstream/plugins/pstack/skills/poteto-mode/SKILL.md"
 git init -q -b main "$upstream"
-mkdir -p "$upstream/plugins/pstack/skills/poteto-mode"
-printf 'line-a\nshared-line-v1\nline-c\n' \
-  > "$upstream/plugins/pstack/skills/poteto-mode/SKILL.md"
+mkdir -p "$(dirname "$up_skill")"
+printf 'line-a\nshared-line-v1\nline-c\n' > "$up_skill"
+printf 'other-v1\n' > "$upstream/plugins/pstack/other.md"
 git -C "$upstream" add -A
 git -C "$upstream" commit -q -m "v1"
+v1="$(git -C "$upstream" rev-parse HEAD)"
 
 consumer="$work/consumer"
 git init -q -b main "$consumer"
 printf 'root\n' > "$consumer/README.md"
+mkdir -p "$consumer/plugins/engineering"
+printf 'patina-only notice\n' > "$consumer/plugins/engineering/NOTICE.md"
 git -C "$consumer" add -A
 git -C "$consumer" commit -q -m "base"
 
 run_sync() {
-  ( cd "$consumer" &&
+  ( cd "$1" &&
     PSTACK_REMOTE=test-upstream \
     PSTACK_REMOTE_URL="$upstream" \
     PSTACK_UPSTREAM_REF=main \
     PSTACK_UPSTREAM_SUBTREE=plugins/pstack \
     PSTACK_DEST=plugins/engineering \
-    PSTACK_CARRIER=pstack-sync \
     bash "$sync" )
 }
 
-# First sync: clean base switch, no conflict. Content is imported verbatim
-# except for the poteto-mode -> patina-mode path rename.
-run_sync >/dev/null 2>&1 || fail "first sync should merge cleanly"
-dest_file="$consumer/plugins/engineering/skills/patina-mode/SKILL.md"
-[ -f "$dest_file" ] || fail "first sync did not import content at the renamed path"
-grep -q 'shared-line-v1' "$dest_file" || fail "first sync did not import upstream content"
+# Initial import: no recorded commit, so everything upstream applies cleanly.
+pre_sync="$(git -C "$consumer" rev-parse HEAD)"
+expect "initial sync exits 0" run_sync "$consumer" >/dev/null 2>&1
+dest_skill="$consumer/plugins/engineering/skills/patina-mode/SKILL.md"
+expect "initial sync imports content at the renamed path" grep -q 'shared-line-v1' "$dest_skill"
+expect "initial sync imports other files" grep -q 'other-v1' "$consumer/plugins/engineering/other.md"
+expect "initial sync leaves Patina-only files untouched" \
+  grep -q 'patina-only notice' "$consumer/plugins/engineering/NOTICE.md"
+expect "initial sync records the upstream commit" test "$(recorded_commit "$consumer")" = "$v1"
+expect "initial sync writes no commit" test "$(git -C "$consumer" rev-parse HEAD)" = "$pre_sync"
 
-# Local Patina edit on the shared line.
-perl -0pi -e 's/shared-line-v1/shared-line-PATINA-EDIT/' "$dest_file"
+# Land the sync on main the way a squash merge does: one new single-parent
+# commit holding the synced tree, with no link to anything the sync created.
 git -C "$consumer" add -A
-git -C "$consumer" commit -q -m "patina local edit"
+synced_tree="$(git -C "$consumer" write-tree)"
+squash="$(git -C "$consumer" commit-tree "$synced_tree" -p "$pre_sync" -m "squash of sync v1")"
+git -C "$consumer" reset -q --hard "$squash"
 
-# Upstream changes the same line.
-perl -0pi -e 's/shared-line-v1/shared-line-UPSTREAM-CHANGE/' \
-  "$upstream/plugins/pstack/skills/poteto-mode/SKILL.md"
-git -C "$upstream" add -A
-git -C "$upstream" commit -q -m "v2"
+# Patina edits the shared line after the squash.
+perl -0pi -e 's/shared-line-v1/shared-line-PATINA-EDIT/' "$dest_skill"
+git -C "$consumer" commit -q -am "patina local edit"
 
-# Second sync: must leave a true conflict on the diverged line.
+# Upstream changes the same line, and separately a file Patina never edited.
+perl -0pi -e 's/shared-line-v1/shared-line-UPSTREAM-CHANGE/' "$up_skill"
+printf 'other-v2\n' > "$upstream/plugins/pstack/other.md"
+git -C "$upstream" commit -q -am "v2"
+v2="$(git -C "$upstream" rev-parse HEAD)"
+
+# Run the next sync from a fresh single-branch clone: nothing but main.
+clone="$work/clone"
+git clone -q --single-branch --branch main "$consumer" "$clone"
+clone_skill="$clone/plugins/engineering/skills/patina-mode/SKILL.md"
+clone_head="$(git -C "$clone" rev-parse HEAD)"
 sync_output="$work/sync-output"
-if run_sync >"$sync_output" 2>&1; then
-  fail "second sync should exit non-zero because of conflicts"
+if run_sync "$clone" >"$sync_output" 2>&1; then
+  expect "diverged sync exits non-zero because of conflicts" false
 fi
-grep -q '^<<<<<<<' "$dest_file" || fail "expected conflict markers not present after diverged sync"
-grep -q 'shared-line-PATINA-EDIT' "$dest_file" || fail "ours side missing from conflict"
-grep -q 'shared-line-UPSTREAM-CHANGE' "$dest_file" || fail "theirs side missing from conflict"
-grep -q 'fix-merge-conflicts skill' "$sync_output" \
-  || fail "conflict output did not route to fix-merge-conflicts"
+expect "only the Patina-edited file conflicts" \
+  test "$(git -C "$clone" diff --name-only --diff-filter=U)" = "plugins/engineering/skills/patina-mode/SKILL.md"
+expect "conflict markers present on the diverged line" grep -q '^<<<<<<<' "$clone_skill"
+expect "ours side present in the conflict" grep -q 'shared-line-PATINA-EDIT' "$clone_skill"
+expect "theirs side present in the conflict" grep -q 'shared-line-UPSTREAM-CHANGE' "$clone_skill"
+expect "unrelated upstream change applies cleanly" grep -qx 'other-v2' "$clone/plugins/engineering/other.md"
+expect "unrelated upstream change has no conflict markers" no_markers "$clone/plugins/engineering/other.md"
+expect "Patina-only files stay untouched" \
+  grep -q 'patina-only notice' "$clone/plugins/engineering/NOTICE.md"
+expect "upstream.json records the new tip" test "$(recorded_commit "$clone")" = "$v2"
+expect "upstream.json update is staged" \
+  test -n "$(git -C "$clone" diff --cached --name-only -- plugins/engineering/upstream.json)"
+expect "sync writes no commit" test "$(git -C "$clone" rev-parse HEAD)" = "$clone_head"
+expect "sync creates no branch" test "$(local_branches "$clone")" = "main"
+expect "conflict output routes to fix-merge-conflicts" grep -q 'fix-merge-conflicts skill' "$sync_output"
 
+# The operator resolves and commits with a normal single-parent commit.
+printf 'line-a\nshared-line-RESOLVED\nline-c\n' > "$clone_skill"
+git -C "$clone" add -A
+expect "operator commit succeeds after resolving" git -C "$clone" commit -q -m "resolve sync"
+expect "operator commit is single-parent" \
+  test "$(git -C "$clone" rev-list --parents -n 1 HEAD | wc -w | tr -d ' ')" = "2"
+expect "tree is clean after the operator commit" test -z "$(git -C "$clone" status --porcelain)"
+
+# Nothing to sync: the recorded commit equals the upstream tip.
+resolved_head="$(git -C "$clone" rev-parse HEAD)"
+expect "up-to-date sync exits 0" run_sync "$clone" >/dev/null 2>&1
+expect "up-to-date sync writes no commit" test "$(git -C "$clone" rev-parse HEAD)" = "$resolved_head"
+expect "up-to-date sync leaves the tree unchanged" test -z "$(git -C "$clone" status --porcelain)"
+
+[ "$failures" -eq 0 ] || fail "$failures sync assertion(s) failed"
 echo "PASS: sync-pstack.test.sh"
