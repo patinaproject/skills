@@ -53,6 +53,9 @@ Remaining triggers:
   branch, edits a file, creates a commit, changes a pull request, or starts an
   operational run. Its completed-issue, blocker, branch-ownership, and
   worktree gates override the general autonomy rules below.
+- The operator asks to triage issues once or on a loop → invoke
+  `engineering:triage-issues`. A loop uses the wake mechanism from
+  `playbooks/autonomous-run.md`.
 - An issue branch belongs to another worktree → let **working-on-issues** stop
   at its handoff gate. Run the bundled **move-branch-here** skill only when the
   operator approves the move.

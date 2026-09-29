@@ -19,6 +19,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `plugins/engineering/skills/triage-issues/`: fixed-set issue triage workflow for one-shot and looped runs
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
@@ -285,6 +286,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
+| triage-issues | `plugins/engineering/skills/triage-issues/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
@@ -347,6 +349,10 @@ Before responding to any non-trivial engineering task — a feature, bug fix, re
 When the intent is already specific, enter directly: `engineering:tdd` (bug with a reproducible failure), `engineering:architect` (types and module shape before code that crosses a function boundary), `engineering:how` (how a subsystem works), `engineering:why` (why it was built this way), `engineering:arena` (N parallel attempts at one task), `engineering:interrogate` (multi-model diff review).
 
 If you were dispatched as a subagent to execute a specific task, ignore this block — patina-mode governs the orchestrating session, and it already shaped your dispatch.
+
+When an operator asks to triage issues once or on a loop, invoke
+`engineering:triage-issues` after patina-mode. The Engineering plugin owns this
+route.
 
 User instructions (CLAUDE.md, AGENTS.md, direct requests) take precedence over this mandate. Other session-start mandates (such as superpowers) compose with it: their skill-check discipline stands, and patina-mode is the implementation entry point they route to for non-trivial code work.
 </EXTREMELY_IMPORTANT>

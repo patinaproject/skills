@@ -18,6 +18,10 @@ When the intent is already specific, enter directly: `engineering:tdd` (bug with
 
 If you were dispatched as a subagent to execute a specific task, ignore this block — patina-mode governs the orchestrating session, and it already shaped your dispatch.
 
+When an operator asks to triage issues once or on a loop, invoke
+`engineering:triage-issues` after patina-mode. The Engineering plugin owns this
+route.
+
 User instructions (CLAUDE.md, AGENTS.md, direct requests) take precedence over this mandate. Other session-start mandates (such as superpowers) compose with it: their skill-check discipline stands, and patina-mode is the implementation entry point they route to for non-trivial code work.
 </EXTREMELY_IMPORTANT>
 <!-- END engineering:patina-mode -->
