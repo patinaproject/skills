@@ -314,6 +314,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-29T21:20:00Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Verified current member-authored open GitHub issue 545; eligible regardless of needs-triage label or absent assignee; retain through isolated repair, exact-head independent verification and Ted-owned protected merge",
+      "eventId": "sha256:8d0ea9cadff9817597b408215e5e1662457b18fe7b51e783aa68d26874e39255",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/intake-20260929-213452/545-issue.json",
+      "issueId": "545",
+      "kind": "claim",
+      "recordedAt": "2026-09-29T21:35:03Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -567,6 +576,12 @@
       "disposition": "Eligible open member-authored issue with existing PR 542; retain through independent exact-head verification and Ted-owned protected merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/541-intake-20260929.json",
       "reservedAt": "2026-09-29T14:45:00Z",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "545": {
+      "disposition": "Verified current member-authored open GitHub issue 545; eligible regardless of needs-triage label or absent assignee; retain through isolated repair, exact-head independent verification and Ted-owned protected merge",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/intake-20260929-213452/545-issue.json",
+      "reservedAt": "2026-09-29T21:35:03Z",
       "runId": "skills-teds-macbook-pro"
     }
   },
