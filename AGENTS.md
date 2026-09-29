@@ -122,8 +122,9 @@ the vendored `domain-modeling` payload; see
 - `pnpm sync-pstack`: re-sync `plugins/engineering/**` from the current tip of
   `michael-denyer/pstack-claude`'s `main`, renaming only `poteto-mode` → `patina-mode`
   and `poteto-agent` → `patina-agent`, and leaving Patina's local edits as real
-  merge conflicts to resolve. See
-  [ADR-429](docs/adr/ADR-429-sync-pstack-carrier-branch.md) for the mechanism.
+  merge conflicts to resolve. It stages the result without committing. See
+  [ADR-541](docs/adr/ADR-541-regenerate-pstack-sync-merge-base.md) for the
+  mechanism.
 - `pnpm clean`: remove generated dependency and transient install files
   (`node_modules`, `.skills-install.lock*`); never prunes committed skill overlays
 - `bash scripts/worktree-setup.sh`: shared worktree bootstrap (fast-forward onto
@@ -312,9 +313,7 @@ Merging a Release PR tags the commit and publishes a GitHub Release. The workflo
 auto-merges Release PRs after required checks pass.
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions to the issue-tag rule
-(the `sync-pstack` carrier commit is the one commit-level exception; see Commit & Pull Request
-Guidelines).
+bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions to the issue-tag rule.
 
 ## Commit & Pull Request Guidelines
 
@@ -333,11 +332,7 @@ For squash-and-merge workflows, PR titles must match the commitlint commit forma
 `type: #123 short description`
 
 Bot-generated release-please PRs from `release-please--*` branches and bot-generated release
-bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions. The one no-issue
-*commit* exception is the script-generated carrier commit
-`chore: sync pstack-claude@<sha> into plugins/engineering` that `scripts/sync-pstack.sh` writes on
-the `pstack-sync` carrier branch (committed with `--no-verify`); it enters `main` history through
-the sync merge.
+bump PRs from `bot/bump-*` branches are the only no-issue PR exceptions.
 <!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->
 <EXTREMELY_IMPORTANT>
 You have the Patina Project Engineering plugin, forked from pstack.
