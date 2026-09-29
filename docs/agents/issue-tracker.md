@@ -55,6 +55,12 @@ the role says what triage decided. An issue that stays in the triage state while
 carrying a role is normal: triage has finished and a person has not yet accepted
 it. A person owns every triage-facing status change.
 
+The repo-owned `triage-issues` route is an authorized exception for terminal
+triage outcomes. When evidence supports no action or a duplicate, it may write
+the provider's native canceled or duplicate status and relationship through
+this adapter. The route records the evidence, preserves unrelated fields, and
+verifies native closure. Other automation keeps the person-owned checkpoint.
+
 In vendored triage guidance, interpret "GitHub issue" as the canonical tracker
 issue and route example commands through this adapter. Pull requests remain
 forge objects.
