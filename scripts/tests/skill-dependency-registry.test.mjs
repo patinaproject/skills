@@ -9,6 +9,7 @@ import {
   collectPublishedSkillIds,
   formatErrors,
   parseRegistry,
+  validateExecutableReferences,
   validateRegistry,
 } from '../validate-skill-dependencies.mjs';
 
@@ -91,7 +92,7 @@ for (const [name, value, pattern] of [
   });
 }
 
-async function makeCatalog(engineeringNames) {
+async function makeCatalog(engineeringNames, bodies = {}) {
   const root = await mkdtemp(path.join(tmpdir(), 'skill-dependencies-'));
   await mkdir(path.join(root, '.claude-plugin'), { recursive: true });
   await mkdir(path.join(root, 'skills', 'root'), { recursive: true });
@@ -103,7 +104,10 @@ async function makeCatalog(engineeringNames) {
   for (const name of engineeringNames) {
     const directory = path.join(root, 'plugins', 'engineering', 'skills', name);
     await mkdir(directory, { recursive: true });
-    await writeFile(path.join(directory, 'SKILL.md'), `---\nname: ${name}\n---\n`);
+    await writeFile(
+      path.join(directory, 'SKILL.md'),
+      bodies[name] ?? `---\nname: ${name}\n---\n`
+    );
   }
   return root;
 }
@@ -195,6 +199,75 @@ test('removing a published target produces a nonzero importer-target diagnostic'
     assert.equal(
       result.stderr.trim(),
       'FAIL: published skill dependency is unavailable: engineering/alpha -> engineering/beta'
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('executable references to unavailable skills name the stale reference and active file', async () => {
+  const root = await makeCatalog(['alpha', 'beta'], {
+    alpha: [
+      '---',
+      'name: alpha',
+      '---',
+      '',
+      'Invoke `engineering:polish` before continuing.',
+      'Run `node ../polish/scripts/review-state.mjs status`.',
+      'The prose word polish and `subagent_type: "engineering:comment-sicko"` are not skill references.',
+    ].join('\n'),
+    beta: '---\nname: beta\n---\n',
+  });
+  const registryPath = path.join(root, 'registry.json');
+  try {
+    await mkdir(path.join(root, 'docs'), { recursive: true });
+    await writeFile(
+      path.join(root, 'docs', 'CHANGELOG.md'),
+      'Historical `engineering:polish` and `../polish/scripts/review-state.mjs` references are allowed.\n'
+    );
+    await writeFile(registryPath, JSON.stringify({
+      version: 1,
+      skills: {
+        'engineering/alpha': [],
+        'engineering/beta': [],
+        'patinaproject-skills/root': [],
+      },
+    }));
+    const result = runCli(root, registryPath);
+    assert.notEqual(result.status, 0);
+    assert.equal(
+      result.stderr.trim(),
+      [
+        'FAIL: executable skill reference is unavailable: ../polish/scripts/review-state.mjs in plugins/engineering/skills/alpha/SKILL.md',
+        'FAIL: executable skill reference is unavailable: engineering:polish in plugins/engineering/skills/alpha/SKILL.md',
+      ].join('\n')
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('available executable references and ordinary history pass validation', async () => {
+  const root = await makeCatalog(['alpha', 'beta'], {
+    alpha: [
+      '---',
+      'name: alpha',
+      '---',
+      '',
+      'Invoke `engineering:beta` before continuing.',
+      'Run `node ../beta/scripts/helper.sh`.',
+      'The prose word polish is not an executable reference.',
+    ].join('\n'),
+  });
+  try {
+    const skillFiles = new Map([
+      ['engineering/alpha', path.join(root, 'plugins', 'engineering', 'skills', 'alpha', 'SKILL.md')],
+      ['engineering/beta', path.join(root, 'plugins', 'engineering', 'skills', 'beta', 'SKILL.md')],
+      ['patinaproject-skills/root', path.join(root, 'skills', 'root', 'SKILL.md')],
+    ]);
+    assert.deepEqual(
+      validateExecutableReferences(new Set(skillFiles.keys()), skillFiles, root),
+      []
     );
   } finally {
     await rm(root, { recursive: true, force: true });

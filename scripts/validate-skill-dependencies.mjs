@@ -22,8 +22,8 @@ function readJson(file) {
   }
 }
 
-export function collectPublishedSkillIds(repoRoot) {
-  const published = new Set();
+export function collectPublishedSkillFiles(repoRoot) {
+  const published = new Map();
   const manifestPath = path.join(repoRoot, '.claude-plugin', 'plugin.json');
   const manifest = readJson(manifestPath);
   if (!isObject(manifest) || !Array.isArray(manifest.skills)) {
@@ -45,7 +45,7 @@ export function collectPublishedSkillIds(repoRoot) {
     if (published.has(id)) {
       throw new Error(`duplicate published skill: ${id}`);
     }
-    published.add(id);
+    published.set(id, skillFile);
   }
 
   const engineeringRoot = path.join(repoRoot, 'plugins', 'engineering', 'skills');
@@ -60,10 +60,14 @@ export function collectPublishedSkillIds(repoRoot) {
     if (!existsSync(path.join(engineeringRoot, entry.name, 'SKILL.md'))) {
       throw new Error(`published Engineering skill is missing SKILL.md: ${id}`);
     }
-    published.add(id);
+    published.set(id, path.join(engineeringRoot, entry.name, 'SKILL.md'));
   }
 
   return published;
+}
+
+export function collectPublishedSkillIds(repoRoot) {
+  return new Set(collectPublishedSkillFiles(repoRoot).keys());
 }
 
 export function parseRegistry(json) {
@@ -120,9 +124,65 @@ function errorMessage(error) {
       return `skill dependencies are not sorted: ${error.source} -> ${error.target}`;
     case 'unpublished-target':
       return `published skill dependency is unavailable: ${error.source} -> ${error.target}`;
+    case 'unpublished-executable-reference':
+      return `executable skill reference is unavailable: ${error.reference} in ${error.file}`;
     default:
       throw new Error(`unknown validation error: ${error.kind}`);
   }
+}
+
+function executableSnippets(contents) {
+  const snippets = [];
+  for (const match of contents.matchAll(/```[^\n]*\n([\s\S]*?)```/g)) {
+    snippets.push(match[1]);
+  }
+  for (const match of contents.matchAll(/`([^`\n]+)`/g)) {
+    snippets.push(match[1]);
+  }
+  return snippets;
+}
+
+export function findExecutableSkillReferences(contents) {
+  const references = [];
+  for (const snippet of executableSnippets(contents)) {
+    for (const match of snippet.matchAll(/\b(?:engineering|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
+      if (/\bsubagent_type\s*:/i.test(snippet)) {
+        continue;
+      }
+      references.push({
+        reference: match[0],
+        target: `${match[0].split(':', 1)[0]}/${match[1]}`,
+      });
+    }
+    for (const match of snippet.matchAll(/\.\.\/[a-z][a-z0-9]*(?:-[a-z0-9]+)*\/scripts\/[^\s`]+/g)) {
+      const skillName = match[0].split('/')[1];
+      references.push({
+        reference: match[0],
+        target: `engineering/${skillName}`,
+      });
+    }
+  }
+  return references;
+}
+
+export function validateExecutableReferences(published, skillFiles, repoRoot = process.cwd()) {
+  const errors = [];
+  for (const [source, filePath] of [...skillFiles.entries()].sort(([left], [right]) => left.localeCompare(right))) {
+    const file = path.relative(repoRoot, filePath);
+    const contents = readFileSync(filePath, 'utf8');
+    for (const reference of findExecutableSkillReferences(contents)) {
+      if (!published.has(reference.target)) {
+        errors.push({
+          kind: 'unpublished-executable-reference',
+          source,
+          file,
+          reference: reference.reference,
+          target: reference.target,
+        });
+      }
+    }
+  }
+  return errors.sort((left, right) => errorMessage(left).localeCompare(errorMessage(right)));
 }
 
 export function validateRegistry(published, registry) {
@@ -185,9 +245,13 @@ function parseArguments(argv) {
 
 export async function main(argv) {
   const options = parseArguments(argv);
-  const published = collectPublishedSkillIds(options.repoRoot);
+  const skillFiles = collectPublishedSkillFiles(options.repoRoot);
+  const published = new Set(skillFiles.keys());
   const registry = parseRegistry(readJson(options.registry));
-  const errors = validateRegistry(published, registry);
+  const errors = [
+    ...validateRegistry(published, registry),
+    ...validateExecutableReferences(published, skillFiles, options.repoRoot),
+  ];
   if (errors.length > 0) {
     throw new Error(formatErrors(errors));
   }
