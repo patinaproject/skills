@@ -296,6 +296,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-26T11:46:07Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Eligible open member-authored issue with existing PR 542; retain through independent exact-head verification and Ted-owned protected merge gate",
+      "eventId": "sha256:f57b97adffbbe79228179eb48da87970c95fd007866690eabaa7937782690192",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/541-intake-20260929.json",
+      "issueId": "541",
+      "kind": "claim",
+      "recordedAt": "2026-09-29T14:45:00Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -537,6 +546,12 @@
       "disposition": "Eligible open member-authored ready-for-agent issue; retain through blockers and Ted-owned merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/537-intake-20260926.json",
       "reservedAt": "2026-09-26T11:46:07Z",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "541": {
+      "disposition": "Eligible open member-authored issue with existing PR 542; retain through independent exact-head verification and Ted-owned protected merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/541-intake-20260929.json",
+      "reservedAt": "2026-09-29T14:45:00Z",
       "runId": "skills-teds-macbook-pro"
     }
   },
