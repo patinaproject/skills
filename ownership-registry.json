@@ -305,6 +305,15 @@
       "kind": "claim",
       "recordedAt": "2026-09-29T14:45:00Z",
       "toRunId": "skills-teds-macbook-pro"
+    },
+    {
+      "disposition": "Direct operator-authorized intake from Ted for Linear PAT-4240 linked to open GitHub #536; retain through implementation, verification, and Ted-owned merge gate",
+      "eventId": "sha256:6e51664b742d464e1688596a1c23a38f7258f5b89ed9aefce6b40b6071b4265c",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/536-intake-20260929.json",
+      "issueId": "536",
+      "kind": "claim",
+      "recordedAt": "2026-09-29T21:20:00Z",
+      "toRunId": "skills-teds-macbook-pro"
     }
   ],
   "imports": [
@@ -540,6 +549,12 @@
       "disposition": "Eligible open member-authored issue; preserve dirty update-branch implementation pending isolated worktree preflight; retain through Ted-owned merge gate",
       "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/intake-20260923.json",
       "reservedAt": "2026-09-23T04:05:18Z",
+      "runId": "skills-teds-macbook-pro"
+    },
+    "536": {
+      "disposition": "Direct operator-authorized intake from Ted for Linear PAT-4240 linked to open GitHub #536; retain through implementation, verification, and Ted-owned merge gate",
+      "evidencePath": "/Users/tlmader/.claude/orchestrate/skills-teds-macbook-pro/evidence/536-intake-20260929.json",
+      "reservedAt": "2026-09-29T21:20:00Z",
       "runId": "skills-teds-macbook-pro"
     },
     "537": {
