@@ -194,8 +194,6 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   package scripts.
 - Run `bash scripts/tests/worktree-setup.test.sh` after changing
   `scripts/worktree-setup.sh`.
-- Run `bash scripts/tests/move-branch-here.test.sh` after changing
-  `plugins/engineering/skills/move-branch-here/scripts/worktree-context.sh`.
 - Run `bash scripts/tests/move-session-here.test.sh` after changing
   `plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check

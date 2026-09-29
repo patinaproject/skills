@@ -62,7 +62,7 @@ Skills owned by this repository:
 | `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
 | `using-github` | `skills/using-github/` | GitHub workflow skill |
 | `working-on-issues` | `plugins/engineering/skills/working-on-issues/` | Resolve the live tracker, align the issue branch and worktree, and mark work started |
-| `move-branch-here` | `plugins/engineering/skills/move-branch-here/` | Worktree branch handover workflow |
+| `move-branch-here` | `plugins/engineering/skills/move-branch-here/` | Model-directed worktree branch handover workflow |
 | `move-session-here` | `plugins/engineering/skills/move-session-here/` | Claude Code and Codex session transcript handover workflow |
 | `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
 | `grill-to-spec` | `skills/grill-to-spec/` | Settle a design for `/to-spec` to publish with doc-change proposals |

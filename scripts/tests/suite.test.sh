@@ -14,8 +14,6 @@ node scripts/tests/skills-release-dispatch.test.mjs
 bash scripts/tests/running-mobile-simulators.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
-bash scripts/tests/move-branch-here.test.sh
-node scripts/tests/move-branch-here-text-normalization.test.mjs
 bash scripts/tests/move-session-here.test.sh
 bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
