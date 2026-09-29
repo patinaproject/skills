@@ -161,8 +161,8 @@ verbatim.
 ## When an issue becomes ready
 
 An issue is ready when an implementation brief can be written from it without a
-new decision and without missing evidence. Whenever a person makes that call,
-use the adapter to:
+new decision and without missing evidence. For ordinary human-controlled
+readiness, use the adapter to:
 
 1. apply the provider's ready state — leave a GitHub issue open, or move a
    Linear issue to `Todo`;
@@ -172,6 +172,13 @@ use the adapter to:
    label string can differ; and
 3. set the planning fields together when the work belongs to a named effort —
    a GitHub milestone, or a Linear project and project milestone.
+
+The repo-owned `triage-issues` route stops at the ready label. It does not move
+Linear issues to `Todo`; a developer makes that decision. The same route may
+write native `Canceled` or `Duplicate` status and relationships when its
+evidence supports a terminal outcome, then must verify the resulting native
+state. If verification fails, record an explicit checkpoint instead of
+claiming closure.
 
 Triage sets the highest priority only when the evidence shows a live,
 user-impacting fault. In every other case the priority stays unset until a
