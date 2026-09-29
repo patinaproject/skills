@@ -8,9 +8,10 @@ description: Move a branch between worktrees of the same repository while preser
 Run this skill from the worktree that should receive the branch.
 
 This is a same-repository worktree transfer. Inspect the current worktree and
-every worktree that can hold the requested branch, then choose the Git
-operations that produce the contract below. Report the observed mode before
-changing either worktree.
+every worktree that can hold the requested branch, determine the observed mode,
+and report it before changing either worktree. Choose the Git operations that
+produce the outcomes below; this skill defines outcomes and safety boundaries,
+leaving operation choice to the model.
 
 ## Transfer contract
 
@@ -48,41 +49,35 @@ When a safe stop applies, leave both worktrees unchanged. Do not ask the
 operator to approve a state that the contract already requires transferring;
 ask for a checkpoint only where the contract does not define safe handling.
 
-Leave commits, pushes, and worktree removal to the operator. Do not create a
-transaction journal, lease, recovery command, or replacement helper engine.
+Leave commits, pushes, and worktree removal to the operator. If a transfer
+stops after mutation or the observed state no longer matches the preconditions,
+stop, preserve the current Git state, and report the exact completed step,
+remaining state, and paths requiring operator recovery. Do not invent a
+destructive overwrite or claim completion without verifying both worktrees.
 
 ## Copy the polish review record
 
-Resolve `<polish-skill-directory>` to an installed `polish` skill. If no
-`polish` skill is installed or its `scripts/review-state.mjs` is missing,
-report that the branch moved but the review record was not handled.
+Resolve an installed `polish` skill and use its review-record capability. If no
+`polish` skill is installed or its review-record support is unavailable, report
+that the branch moved but the review record was not handled.
 
-1. Resolve the target branch from `origin/HEAD`, then run:
-
-   ```sh
-   node <polish-skill-directory>/scripts/review-state.mjs status --target <target-branch>
-   ```
-
+1. Resolve the target branch from `origin/HEAD` and inspect its review record.
    A `valid` result means the record already moved with the branch. Report its
    reviewed head and open findings. Treat `unavailable` or `corrupt` as
    `missing`.
 
-2. For `missing` with a `--from` directory, run:
+2. For `missing` with an available other temporary directory, relocate the
+   record through the `polish` skill, then inspect it again. An empty relocation
+   result or a source directory with no review data means there is no record to
+   copy.
 
-   ```sh
-   node <polish-skill-directory>/scripts/review-state.mjs relocate \
-     --from <other-temporary-directory> --branch <branch>
-   ```
-
-   Read the record again with the `status` command. An empty `relocated` list or
-   a source directory with no review data means there is no record to copy.
-
-3. For `missing` without `--from`, report that this session cannot find a
-   review record. Show the `relocate` command above when the user can provide
-   the other session's temporary directory.
+3. For `missing` without an available source directory, report that this
+   session cannot find a review record and identify the directory the operator
+   can provide.
 
 ## Final report
 
 Report the branch, branch commit, and current worktree. Include the old
 worktree and its detached commit when one was released, every transferred path,
-the review record result, and any refusal or recovery requirement.
+the review record result, and any refusal, incomplete-transfer state, or
+operator recovery requirement.
