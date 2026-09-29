@@ -174,11 +174,18 @@ function filesystemGuard(root) {
   visit(Buffer.alloc(0));
 }
 function attributes(root, keys, env = {}, cached = false) {
-  const result = split(git(root, ['check-attr', ...(cached ? ['--cached'] : []), '-z', '--stdin', 'filter', 'text', 'eol', 'working-tree-encoding', 'ident'], nul(keys.map(decode)), env));
-  for (let i = 0; i < result.length; i += 3) {
-    if (!['unspecified', 'unset'].includes(result[i + 2].toString())) {
-      throw new Error(`conversion attribute ${result[i + 1]} is unsupported for ${JSON.stringify(result[i].toString())}`);
-    }
+  const names = ['filter', 'text', 'eol', 'crlf', 'working-tree-encoding', 'ident'];
+  const result = split(git(root, ['check-attr', ...(cached ? ['--cached'] : []), '-z', '--stdin', ...names], nul(keys.map(decode)), env));
+  const specified = value => !['unspecified', 'unset'].includes(value);
+  for (let i = 0; i < result.length; i += names.length * 3) {
+    const values = Object.fromEntries(names.map((name, offset) => [name, result[i + offset * 3 + 2].toString()]));
+    const refuse = name => {
+      throw new Error(`conversion attribute ${name} is unsupported for ${JSON.stringify(result[i].toString())}`);
+    };
+    for (const name of ['filter', 'crlf', 'working-tree-encoding', 'ident']) if (specified(values[name])) refuse(name);
+    if (values.text === 'auto' && values.eol === 'lf') continue;
+    if (specified(values.text)) refuse(values.text === 'auto' && specified(values.eol) ? 'eol' : 'text');
+    if (specified(values.eol)) refuse('eol');
   }
 }
 function indexBytes(ep) { return fs.readFileSync(path.join(ep.gitDir, 'index')); }
