@@ -45,9 +45,11 @@ Missing, locked, or unreadable worktrees and colliding paths also stop the move.
 Report the helper's refusal without changing those states.
 
 Intent-to-add, split or sparse indexes, skip-worktree, assume-unchanged,
-submodules, nested repositories, special filesystem entries, and file-content
-conversion attributes require separate handling. Differing worktree settings
-for file modes, ignored paths, attributes, or rename detection also stop the move.
+submodules, nested repositories, and special filesystem entries require
+separate handling. The helper supports the paired `text=auto eol=lf`
+normalization declaration. Other file-content conversion attributes stop the
+move. Differing worktree settings for file modes, ignored paths, attributes, or
+rename detection also stop the move.
 The helper refuses these states
 before transfer. Ordinary binary files, executable modes, symlinks, additions,
 deletions, and renames are supported.
