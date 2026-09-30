@@ -5,6 +5,10 @@ Before responding to any non-trivial engineering task — a feature, bug fix, re
 
 When the intent is already specific, enter directly: `engineering:tdd` (bug with a reproducible failure), `engineering:architect` (types and module shape before code that crosses a function boundary), `engineering:how` (how a subsystem works), `engineering:why` (why it was built this way), `engineering:arena` (N parallel attempts at one task), `engineering:interrogate` (multi-model diff review).
 
+When an operator asks to triage issues once or on a loop, invoke
+`engineering:triage-issues` after patina-mode. The repo-owned route keeps this
+follow-up outside the vendored catalog.
+
 If you were dispatched as a subagent to execute a specific task, ignore this block — patina-mode governs the orchestrating session, and it already shaped your dispatch.
 
 User instructions (CLAUDE.md, AGENTS.md, direct requests) take precedence over this mandate. Other session-start mandates (such as superpowers) compose with it: their skill-check discipline stands, and patina-mode is the implementation entry point they route to for non-trivial code work.
