@@ -5,8 +5,9 @@ description: Question the user about important system design decisions, then pre
 
 # Grill system design
 
-1. Before interviewing the operator, read and apply `grill-to-spec`'s
-   [question boundary](../grill-to-spec/SKILL.md#question-boundary). It is the
-   single authority for ADR mechanics and operator questions in this flow.
+1. Before interviewing the operator, load `/grilling` and `domain-modeling`.
+   They own the question boundary, ADR mechanics, and operator questions in
+   this flow.
 2. Run `design-by-contract` to identify the important agreements in the design.
-3. Run `grill-to-spec` through its completion criteria and final message.
+3. When the design is settled, hand off to `to-issue` when the result needs an
+   issue. Keep the worktree unchanged until the handoff is complete.
