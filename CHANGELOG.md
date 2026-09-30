@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.54.0](https://github.com/patinaproject/skills/compare/v2.53.0...v2.54.0) (2026-09-30)
+
+
+### Features
+
+* [#528](https://github.com/patinaproject/skills/issues/528) retire resolving-merge-conflicts ([#529](https://github.com/patinaproject/skills/issues/529)) ([58e7f11](https://github.com/patinaproject/skills/commit/58e7f1145d9366df312bec98ad6a88b3ca461196))
+* [#539](https://github.com/patinaproject/skills/issues/539) let the project own commit types and scopes in titles ([#540](https://github.com/patinaproject/skills/issues/540)) ([e600dfa](https://github.com/patinaproject/skills/commit/e600dfa8bebae9dbaa71472a07daec6978ece7a3))
+* [#548](https://github.com/patinaproject/skills/issues/548) route issue writing to team:to-issue and retire grill-to-spec ([#549](https://github.com/patinaproject/skills/issues/549)) ([c1ac3e8](https://github.com/patinaproject/skills/commit/c1ac3e8158bb4217aa6064c979950dfa980f0c3a))
+
+
+### Bug Fixes
+
+* [#543](https://github.com/patinaproject/skills/issues/543) support repository text normalization ([#544](https://github.com/patinaproject/skills/issues/544)) ([fac294d](https://github.com/patinaproject/skills/commit/fac294db014732519cc8fa098685465ca50bdbce))
+
 ## [2.53.0](https://github.com/patinaproject/skills/compare/v2.52.0...v2.53.0) (2026-09-16)
 
 
