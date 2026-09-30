@@ -209,10 +209,8 @@
     ],
     "patinaproject-skills/design-by-contract": [],
     "patinaproject-skills/grill-system-design": [
-      "patinaproject-skills/design-by-contract",
-      "patinaproject-skills/grill-to-spec"
+      "patinaproject-skills/design-by-contract"
     ],
-    "patinaproject-skills/grill-to-spec": [],
     "patinaproject-skills/install-skills": [],
     "patinaproject-skills/review-system-design": [
       "patinaproject-skills/design-by-contract"
