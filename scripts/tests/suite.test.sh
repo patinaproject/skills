@@ -50,7 +50,6 @@ run_cli_canary() {
 
 run_cli_canary ./skills/scaffold-repository
 run_cli_canary ./skills/install-skills
-run_cli_canary ./skills/grill-to-spec 'grill-to-spec'
 
 run_cli_install_canary() {
   local repo_root tmpdir status
