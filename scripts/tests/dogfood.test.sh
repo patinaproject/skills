@@ -17,7 +17,6 @@ ROOT_SKILLS=(
   install-skills
   using-github
   update-branch
-  grill-to-spec
   design-by-contract
   grill-system-design
   review-system-design
