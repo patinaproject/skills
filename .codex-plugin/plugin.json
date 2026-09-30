@@ -5,7 +5,6 @@
     "./skills/scaffold-repository",
     "./skills/using-github",
     "./skills/install-skills",
-    "./skills/grill-to-spec",
     "./skills/design-by-contract",
     "./skills/grill-system-design",
     "./skills/review-system-design",
