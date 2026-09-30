@@ -20,6 +20,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
+- `plugins/engineering/skills/triage-issues/`: fixed-inbox triage workflow with one-shot and loop modes
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
@@ -286,6 +287,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
+| triage-issues | `plugins/engineering/skills/triage-issues/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.
