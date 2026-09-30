@@ -46,6 +46,9 @@ Choose the smallest workflow that can establish the required result. Gather a ro
 
 Remaining triggers:
 
+- An operator asks to triage a fixed issue inbox once or on a loop → run
+  `engineering:triage-issues`. It owns the fixed starting set, diagnosis,
+  adapter writes, checkpoints, and loop exit condition.
 - Issue-linked work begins or resumes → follow
   [`references/issue-handoff.md`](references/issue-handoff.md). Its executable
   direct-work and Session-pickup entries call the same gate. Each entry requires
