@@ -111,8 +111,8 @@ defines them for every provider.
 
 Git refuses to check out a branch another worktree already holds, and the
 manual recovery strands work or drops review coverage. `move-branch-here`
-releases the branch from that worktree, attaches it to the current one, and
-restores the holder when attaching fails.
+describes how to release the branch from that worktree, attach it to the
+current one, preserve its working state, and retain review coverage.
 
 See [the Engineering copy](./plugins/engineering/skills/move-branch-here/) for
 the skill contract.
