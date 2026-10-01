@@ -61,18 +61,59 @@ fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-# Print the id of HEAD's tree with $DEST replaced by the transformed snapshot
-# of upstream commit $1, or with $DEST removed when $1 is empty.
+# Print the id of HEAD's tree with upstream-owned paths under $DEST replaced by
+# the transformed snapshot of upstream commit $1. Files under $DEST that are
+# absent from both the recorded and current upstream snapshots stay in HEAD.
 snapshot_tree() {
   local commit="$1" name="$2"
   local wt="$tmp/$name" index="$tmp/$name.index"
+  local current_snapshot="$tmp/$name.current"
+  local recorded_snapshot="$tmp/$name.recorded"
+  local local_snapshot="$tmp/$name.local"
   mkdir -p "$wt/$DEST"
   GIT_INDEX_FILE="$index" git read-tree HEAD
-  GIT_INDEX_FILE="$index" git rm -r -q --cached --ignore-unmatch -- "$DEST"
+
   if [ -n "$commit" ]; then
-    mkdir -p "$tmp/$name.src"
-    git archive "$commit:$UPSTREAM_SUBTREE" | tar -x -C "$tmp/$name.src"
-    bash "$script_dir/pstack-transform.sh" "$tmp/$name.src" "$wt/$DEST"
+    mkdir -p "$current_snapshot/src"
+    git archive "$commit:$UPSTREAM_SUBTREE" | tar -x -C "$current_snapshot/src"
+    bash "$script_dir/pstack-transform.sh" "$current_snapshot/src" "$current_snapshot/dest"
+  fi
+
+  if [ -n "$recorded" ] && [ "$recorded" != "$commit" ]; then
+    mkdir -p "$recorded_snapshot/src"
+    git archive "$recorded:$UPSTREAM_SUBTREE" | tar -x -C "$recorded_snapshot/src"
+    bash "$script_dir/pstack-transform.sh" "$recorded_snapshot/src" "$recorded_snapshot/dest"
+  fi
+
+  if git ls-tree -r --name-only HEAD -- "$DEST" | grep -q .; then
+    mkdir -p "$local_snapshot"
+    git archive HEAD "$DEST" | tar -x -C "$local_snapshot"
+  fi
+
+  remove_snapshot_paths() {
+    local root="$1" rel
+    [ -d "$root" ] || return 0
+    while IFS= read -r -d '' rel; do
+      rel="${rel#./}"
+      GIT_INDEX_FILE="$index" git rm -q --cached --ignore-unmatch -- "$DEST/$rel"
+    done < <(cd "$root" && LC_ALL=C find . -type f -print0 | LC_ALL=C sort -z)
+  }
+
+  remove_snapshot_paths "$current_snapshot/dest"
+  remove_snapshot_paths "$recorded_snapshot/dest"
+
+  if [ -d "$local_snapshot/$DEST" ]; then
+    while IFS= read -r -d '' rel; do
+      rel="${rel#./}"
+      if [ ! -e "$current_snapshot/dest/$rel" ] && [ ! -e "$recorded_snapshot/dest/$rel" ]; then
+        mkdir -p "$wt/$DEST/$(dirname "$rel")"
+        cp -p "$local_snapshot/$DEST/$rel" "$wt/$DEST/$rel"
+      fi
+    done < <(cd "$local_snapshot/$DEST" && LC_ALL=C find . -type f -print0 | LC_ALL=C sort -z)
+  fi
+
+  if [ -n "$commit" ]; then
+    cp -pR "$current_snapshot/dest/." "$wt/$DEST/"
     (cd "$wt" && GIT_DIR="$git_dir" GIT_WORK_TREE="$wt" GIT_INDEX_FILE="$index" \
       git add -f -- "$DEST")
   fi
