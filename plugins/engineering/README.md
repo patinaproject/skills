@@ -21,6 +21,20 @@ Codex:
 Engineering contains its complete runtime. It does not require the Patina
 Project Skills plugin or pstack.
 
+## What it contains
+
+- Skills are Markdown instructions that agents read at runtime.
+- Agents include `patina-agent` and `comment-sicko`, with effort-specific
+  variants for supported model settings.
+- Hooks and local scripts cover session setup, PR watching, orchestration, and
+  worktree auditing.
+
+## Data handling
+
+The plugin has no server or telemetry. Anything its skills ask an agent to
+read, including session transcripts, goes to the configured model provider.
+Scripts run locally, and pull-request tools use the user's GitHub CLI login.
+
 ## Codex requirement
 
 Patina mode requires Codex multi-agent support. Set `multi_agent = true` under

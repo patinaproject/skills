@@ -28,7 +28,9 @@ function reviewCell(row: T.PrSnapshot): string {
       : "🤖 running"
     : open
       ? `📝 ${open} open`
-      : "✅";
+      : row.facts.reviewDecision === "REVIEW_REQUIRED"
+        ? "👀 review required"
+        : "✅";
 }
 function mergeCell(row: T.PrSnapshot): string {
   if (row.kind === "merged") return "✅ merged";
@@ -40,7 +42,9 @@ function mergeCell(row: T.PrSnapshot): string {
     row.facts.mergeStateStatus === "DIRTY" ||
     row.facts.mergeStateStatus === "CONFLICTING"
     ? "⚠️ conflict"
-    : "✅";
+    : row.facts.mergeStateStatus === "BLOCKED"
+      ? "⛔ blocked"
+      : "✅";
 }
 export function renderStatusTable(rows: T.NonEmpty<T.PrSnapshot>): string {
   const lines = ["| PR | CI | Review | Merge |", "| --- | --- | --- | --- |"];
@@ -110,7 +114,13 @@ function renderBlocker(blocker: T.MergeBlocker | StatusQueryBlocker): string {
           ? "restore or remove the closed PR from the queued stack"
           : blocker.reason === "draft-pr"
             ? "mark the PR ready for review before waiting for the merge queue"
-            : "resolve the changes-requested review before waiting for the merge queue";
+            : blocker.reason === "review-required"
+              ? "get the required approving review"
+              : blocker.reason === "merge-blocked"
+                ? "find the branch protection rule holding the merge (mergeStateStatus=BLOCKED with clean CI)"
+                : blocker.reason === "changes-requested"
+                  ? "resolve the changes-requested review before waiting for the merge queue"
+                  : (blocker.reason satisfies never);
       return [
         `BLOCKER: ${blocker.reason}`,
         `pr=${blocker.pr.number}`,

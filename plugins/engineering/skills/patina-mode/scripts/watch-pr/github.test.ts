@@ -2,8 +2,10 @@ import { describe, expect, it } from "bun:test";
 import {
   ChecksUnavailable,
   WatcherQueryError,
+  discoverStack,
   mapRollupNode,
   orderStack,
+  parseFastCheck,
   parsePullRequest,
   parseReviewThreads,
   resolveChecks,
@@ -58,7 +60,7 @@ describe("checks fallback chain", () => {
       rollupPages: [{ checks: [pendingCheck("fallback")], endCursor: null }],
     });
     expect((await resolveChecks(reader, context)).checks[0].name).toBe(
-      "fallback",
+      "fallback"
     );
     expect(reader.calls).toEqual(["checksFastPath", "checkRollupPage:null"]);
   });
@@ -72,7 +74,7 @@ describe("checks fallback chain", () => {
       },
     });
     await expect(resolveChecks(reader, context)).rejects.toBeInstanceOf(
-      ChecksUnavailable,
+      ChecksUnavailable
     );
     expect(reader.calls).toEqual(["checksFastPath", "checkRollupPage:null"]);
   });
@@ -96,7 +98,7 @@ describe("rollup node mapping", () => {
           name: "ci",
           status,
           conclusion,
-        }),
+        })
       ).toMatchObject({ kind, reportedState });
     }
   });
@@ -108,14 +110,14 @@ describe("rollup node mapping", () => {
         name: "Code Review Gate",
         status: "IN_PROGRESS",
         conclusion: null,
-      }),
+      })
     ).toMatchObject({ kind: "code-review-gate" });
     expect(
       mapRollupNode({
         __typename: "StatusContext",
         context: "Code Review Gate",
         state: "PENDING",
-      }),
+      })
     ).toMatchObject({ kind: "code-review-gate" });
   });
 
@@ -125,16 +127,43 @@ describe("rollup node mapping", () => {
         __typename: "StatusContext",
         context: "ci",
         state: "EXPECTED",
-      }),
+      })
     ).toMatchObject({ kind: "pending", reportedState: "PENDING" });
     expect(
       mapRollupNode({
         __typename: "StatusContext",
         context: "ci",
         state: "FUTURE_VALUE",
-      }),
+      })
     ).toMatchObject({ kind: "failed", reportedState: "FUTURE_VALUE" });
     expect(mapRollupNode({ __typename: "FutureNode" })).toBeNull();
+  });
+});
+
+describe("fast-path check mapping", () => {
+  // gh's aggregate.go files every state it does not name into the pending
+  // bucket, including completed conclusions.
+  it("fails completed conclusions that gh buckets as pending", () => {
+    for (const state of ["STARTUP_FAILURE", "STALE"]) {
+      expect(
+        parseFastCheck({ name: "ci", state, bucket: "pending" })
+      ).toMatchObject({ kind: "failed", reportedState: state });
+    }
+  });
+
+  it("keeps in-flight states pending", () => {
+    for (const state of [
+      "EXPECTED",
+      "REQUESTED",
+      "WAITING",
+      "QUEUED",
+      "PENDING",
+      "IN_PROGRESS",
+    ]) {
+      expect(
+        parseFastCheck({ name: "ci", state, bucket: "pending" })
+      ).toMatchObject({ kind: "pending", reportedState: state });
+    }
   });
 });
 
@@ -144,6 +173,7 @@ describe("closed enum parsing", () => {
     mergeStateStatus: "CLEAN",
     reviewDecision: "APPROVED",
     headRefOid: "head",
+    baseRefOid: "base",
     headRefName: "feature",
     baseRefName: "main",
     state: "OPEN",
@@ -155,21 +185,21 @@ describe("closed enum parsing", () => {
     expect(
       parsePullRequest(
         { ...rawPullRequest, mergeStateStatus: "CONFLICTING" },
-        context,
-      ).mergeStateStatus,
+        context
+      ).mergeStateStatus
     ).toBe("CONFLICTING");
   });
 
   it("reads gh's empty reviewDecision as no decision rather than a parse failure", () => {
     expect(
       parsePullRequest({ ...rawPullRequest, reviewDecision: "" }, context)
-        .reviewDecision,
+        .reviewDecision
     ).toBeNull();
   });
 
   it("still rejects an unknown reviewDecision", () => {
     expect(() =>
-      parsePullRequest({ ...rawPullRequest, reviewDecision: "MAYBE" }, context),
+      parsePullRequest({ ...rawPullRequest, reviewDecision: "MAYBE" }, context)
     ).toThrow(WatcherQueryError);
   });
 
@@ -177,7 +207,7 @@ describe("closed enum parsing", () => {
     try {
       parsePullRequest(
         { ...rawPullRequest, mergeStateStatus: "FUTURE_STATE" },
-        context,
+        context
       );
       throw new Error("expected parser to throw");
     } catch (error) {
@@ -265,7 +295,7 @@ describe("context and stack discovery", () => {
         owner: "explicit",
         repo: "repo",
         pr: context.number,
-      }),
+      })
     ).toEqual({ owner: "explicit", repo: "repo", number: context.number });
     expect(reader.calls).toEqual([]);
   });
@@ -278,9 +308,34 @@ describe("context and stack discovery", () => {
         owner: null,
         repo: null,
         pr: context.number,
-      }),
+      })
     ).toEqual({ owner: "local", repo: "checkout", number: context.number });
     expect(reader.calls).toEqual(["originRepo"]);
+  });
+
+  it("refuses to pair the checkout's PR number with a different explicit repository", async () => {
+    const reader = fakeReader({
+      current: { owner: "acme", repo: "web", number: parsePrNumber(57) },
+    });
+    const resolved = resolveContext({
+      reader,
+      owner: "acme",
+      repo: "api",
+      pr: null,
+    });
+    await expect(resolved).rejects.toBeInstanceOf(WatcherQueryError);
+    await expect(resolved).rejects.toMatchObject({
+      failure: { retryable: false },
+    });
+  });
+
+  it("accepts an explicit repository that matches the checkout's PR", async () => {
+    const reader = fakeReader({
+      current: { owner: "acme", repo: "web", number: parsePrNumber(57) },
+    });
+    expect(
+      await resolveContext({ reader, owner: "ACME", repo: "Web", pr: null })
+    ).toEqual({ owner: "ACME", repo: "Web", number: parsePrNumber(57) });
   });
 
   it("orders the connected stack bottom-to-top", () => {
@@ -305,5 +360,24 @@ describe("context and stack discovery", () => {
       },
     ]);
     expect(ordered.map((item) => Number(item.number))).toEqual([41, 42, 43]);
+  });
+
+  it("refuses a full open-PR page, which may have cut the stack", async () => {
+    const openPrs = (count: number) =>
+      Array.from({ length: count }, (_, index) => ({
+        number: parsePrNumber(index + 1),
+        headRepository: { owner: "owner", repo: "repo" },
+        headRefName: `branch-${index + 1}`,
+        baseRefName: "main",
+      }));
+    await expect(
+      discoverStack(fakeReader({ openPullRequests: openPrs(300) }), context)
+    ).rejects.toMatchObject({ failure: { kind: "invalid-stack" } });
+    expect(
+      await discoverStack(
+        fakeReader({ openPullRequests: openPrs(299) }),
+        context
+      )
+    ).toEqual([context]);
   });
 });

@@ -1,6 +1,7 @@
 {
   "name": "engineering",
   "displayName": "Engineering",
+  "icon": "./assets/pstack-icon.png",
   "version": "2.54.0",
   "description": "Patina Project's owned engineering workflows, forked from pstack.",
   "author": {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { WatchDeadline } from "./deadline.ts";
 import { WatcherQueryError } from "./github.ts";
 import {
   applyQueueSnapshot,
@@ -108,7 +109,7 @@ describe("snapshot query planning", () => {
       "pullRequest",
       "reviewThreads",
       "checksFastPath",
-      "headCommit",
+      "revision",
     ]);
   });
 
@@ -280,6 +281,7 @@ describe("queued-stack cadence", () => {
     const running = runQueued({
       dependencies: {
         reader,
+        deadline: new WatchDeadline(options.timeout, () => now),
         clock: {
           now: () => now,
           observedAt: () => "2026-07-26T00:00:00.000Z",
@@ -363,6 +365,7 @@ describe("queued-stack cadence", () => {
     const running = runQueued({
       dependencies: {
         reader,
+        deadline: new WatchDeadline(options.timeout, () => now),
         clock: {
           now: () => now,
           observedAt: () => "2026-07-26T00:00:00.000Z",
@@ -418,4 +421,68 @@ it("uses the specified retry floor and cap", () => {
   expect(queryBackoffSeconds(1, 1)).toBe(60);
   expect(queryBackoffSeconds(1, 2)).toBe(120);
   expect(queryBackoffSeconds(60, 4)).toBe(300);
+});
+
+describe("review gate", () => {
+  it("blocks on a required review instead of reporting a blocked PR ready", async () => {
+    const snapshot = await readSnapshot({
+      reader: fakeReader({
+        facts: { reviewDecision: "REVIEW_REQUIRED", mergeStateStatus: "BLOCKED" },
+      }),
+      context: context(23),
+      pendingHistory: "omit",
+      allowDraft: false,
+    });
+    expect(classifyPr(snapshot)).toEqual({
+      kind: "blocker",
+      blocker: { kind: "merge-gate", pr: context(23), reason: "review-required" },
+    });
+    expect(
+      selectTierMajorStackDecision([snapshot] as NonEmpty<typeof snapshot>),
+    ).toMatchObject({
+      kind: "blocker",
+      blocker: { kind: "merge-gate", reason: "review-required" },
+    });
+  });
+
+  it("blocks when branch protection holds an approved PR with clean CI", async () => {
+    const snapshot = await readSnapshot({
+      reader: fakeReader({ facts: { mergeStateStatus: "BLOCKED" } }),
+      context: context(24),
+      pendingHistory: "omit",
+      allowDraft: false,
+    });
+    expect(classifyPr(snapshot)).toMatchObject({
+      kind: "blocker",
+      blocker: { kind: "merge-gate", reason: "merge-blocked" },
+    });
+  });
+
+  it("waits for pending checks before reporting the review gate", async () => {
+    const snapshot = await readSnapshot({
+      reader: fakeReader({
+        facts: { reviewDecision: "REVIEW_REQUIRED", mergeStateStatus: "BLOCKED" },
+        fastPath: { kind: "checks", checks: [pendingCheck()] },
+      }),
+      context: context(26),
+      pendingHistory: "omit",
+      allowDraft: false,
+    });
+    expect(classifyPr(snapshot)).toMatchObject({ kind: "waiting" });
+  });
+
+  it("still reports changes requested as a merge-gate blocker", async () => {
+    const snapshot = await readSnapshot({
+      reader: fakeReader({
+        facts: { reviewDecision: "CHANGES_REQUESTED", mergeStateStatus: "BLOCKED" },
+      }),
+      context: context(25),
+      pendingHistory: "omit",
+      allowDraft: false,
+    });
+    expect(classifyPr(snapshot)).toMatchObject({
+      kind: "blocker",
+      blocker: { kind: "merge-gate", reason: "changes-requested" },
+    });
+  });
 });

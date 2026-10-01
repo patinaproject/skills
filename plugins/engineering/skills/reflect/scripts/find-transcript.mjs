@@ -8,19 +8,19 @@
 // <id>/<id>.jsonl, and subagent <id>/subagents/<child>.jsonl. Each candidate is
 // streamed line by line and abandoned at its first `user` record; the first
 // line is session metadata and files run to megabytes.
-import { createReadStream, readdirSync, statSync } from "node:fs";
+import { createReadStream, readdirSync, realpathSync, statSync } from "node:fs";
 import { join } from "node:path";
 import process from "node:process";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
-export function candidates(projectsDir) {
+export function candidates(projectsDir, maxDepth = 2) {
   const files = [];
   const walk = (dir, depth) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
       if (entry.isFile() && entry.name.endsWith(".jsonl")) files.push(full);
-      else if (entry.isDirectory() && depth < 2) walk(full, depth + 1);
+      else if (entry.isDirectory() && depth < maxDepth) walk(full, depth + 1);
     }
   };
   walk(projectsDir, 0);
@@ -84,6 +84,16 @@ async function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+// node leaves argv[1] unresolved and may set it to a non-file (`node -e ... arg`).
+function invokedDirectly() {
+  if (!process.argv[1]) return false;
+  try {
+    return fileURLToPath(import.meta.url) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (invokedDirectly()) {
   process.exitCode = await main(process.argv.slice(2));
 }

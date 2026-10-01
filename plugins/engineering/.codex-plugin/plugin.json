@@ -33,6 +33,8 @@
       "Interrogate this diff with multiple models."
     ],
     "websiteURL": "https://github.com/patinaproject/skills",
-    "brandColor": "#7C3AED"
+    "brandColor": "#7C3AED",
+    "composerIcon": "./assets/pstack-icon.png",
+    "logo": "./assets/pstack-icon.png"
   }
 }

@@ -1,3 +1,4 @@
+import type { LandingRevision } from "./landing.ts";
 declare const prNumberBrand: unique symbol;
 export type PrNumber = number & { readonly [prNumberBrand]: "PrNumber" };
 export type NonEmpty<T> = readonly [T, ...T[]];
@@ -38,18 +39,25 @@ export type ReviewDecision =
   | "CHANGES_REQUESTED"
   | "REVIEW_REQUIRED"
   | null;
-export interface PullRequestFacts {
+interface PullRequestFields {
   readonly context: PrContext;
   readonly mergeable: "MERGEABLE" | "CONFLICTING" | "UNKNOWN";
   readonly mergeStateStatus: MergeStateStatus;
   readonly reviewDecision: ReviewDecision;
   readonly headRefOid: string | null;
+  readonly baseRefOid: string | null;
   readonly headRefName: string;
   readonly baseRefName: string;
   readonly state: "OPEN" | "CLOSED" | "MERGED";
   readonly mergedAt: string | null;
   readonly isDraft: boolean;
 }
+export type PullRequestFacts = PullRequestFields &
+  (
+    | (LandingRevision & { readonly state: "OPEN" })
+    | { readonly state: "CLOSED" }
+    | { readonly state: "MERGED" }
+  );
 export interface OpenPullRequest {
   readonly number: PrNumber;
   readonly headRepository: Repository | null;
@@ -152,7 +160,7 @@ export type PrSnapshot =
   | {
       readonly kind: "open";
       readonly context: PrContext;
-      readonly facts: PullRequestFacts & { readonly headRefOid: string };
+      readonly facts: Extract<PullRequestFacts, { readonly state: "OPEN" }>;
       readonly threads: readonly ReviewThread[];
       readonly ci: CiState;
       readonly reviewAutomationRunning: boolean;
@@ -161,13 +169,16 @@ export interface ReadyPr {
   readonly kind: "ready-pr";
   readonly context: PrContext;
   readonly proof: {
-    readonly headRefOid: string;
+    readonly revision: LandingRevision;
     readonly mergeability: "clear";
     readonly threads: readonly [];
     readonly ci: CiClean;
     readonly gate: {
       readonly state: "OPEN";
-      readonly reviewDecision: Exclude<ReviewDecision, "CHANGES_REQUESTED">;
+      readonly reviewDecision: Exclude<
+        ReviewDecision,
+        "CHANGES_REQUESTED" | "REVIEW_REQUIRED"
+      >;
       readonly draft: "not-draft" | "draft-allowed";
     };
   };
@@ -180,7 +191,9 @@ export interface MergedPr {
 export type MergeGateReason =
   | "closed-without-merge"
   | "draft-pr"
-  | "changes-requested";
+  | "changes-requested"
+  | "review-required"
+  | "merge-blocked";
 export type MergeBlocker =
   | {
       readonly kind: "merge-conflicts";
@@ -395,12 +408,12 @@ export interface GitHubReader {
   originRepo(): Promise<Repository | null>;
   currentPr(pr: PrNumber | null): Promise<PrContext>;
   pullRequest(context: PrContext): Promise<PullRequestFacts>;
-  headCommit(context: PrContext): Promise<string | null>;
+  revision(context: PrContext): Promise<LandingRevision>;
   openPullRequests(repository: Repository): Promise<readonly OpenPullRequest[]>;
   checksFastPath(context: PrContext): Promise<ChecksFastPath>;
   checkRollupPage(
     context: PrContext,
-    after: string | null,
+    after: string | null
   ): Promise<RollupPage>;
   reviewThreads(context: PrContext): Promise<readonly ReviewThread[]>;
   commitRollups(context: PrContext): Promise<readonly CommitRollup[]>;
