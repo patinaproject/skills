@@ -24,7 +24,7 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
         continue
       fi
 
-      reference_pattern="(^|[^[:alnum:]_-])(/${retired_name}([^[:alnum:]_-]|$)|${retired_name}[^[:alnum:]_-]+skill|<${retired_name}(-skill)?-directory>)"
+      reference_pattern="(^|[^[:alnum:]_-])(/${retired_name}([^[:alnum:]_-]|$)|(engineering|patinaproject-skills):${retired_name}([^[:alnum:]_-]|$)|${retired_name}[^[:alnum:]_-]+skill|<${retired_name}(-skill)?-directory>)"
       stale_reference="$(grep -inE "$reference_pattern" "$skill_file" || true)"
       if [ -n "$stale_reference" ]; then
         printf 'FAIL: active skill references retired skill %s in %s\n' "$retired_name" "$skill_file" >&2

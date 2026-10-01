@@ -19,8 +19,8 @@ leaving operation choice to the model.
   staged change, unstaged change, and non-ignored untracked path, preserving the
   staged/unstaged split. Leave ignored files in their original worktree.
 - In `free` mode, attach the branch here when this worktree is tracked-clean.
-  - In `here` mode, report that the branch is already here and continue to the
-    final report.
+- In `here` mode, report that the branch is already here and continue to the
+  final report.
 - After a held transfer, this worktree has the branch and the same working
   state. The old worktree is detached at its original commit, tracked-clean,
   and contains none of the transferred untracked paths.
