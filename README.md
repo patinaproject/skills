@@ -71,6 +71,15 @@ tracker operations are deliberately delegated to `docs/issue-tracker.md`.
 See [./skills/using-github/](./skills/using-github/) for the full README and
 skill contract.
 
+### update-branch
+
+`update-branch` merges the current pull request target, or an explicit or
+default target when no pull request exists. It keeps remote branch updates
+opt-in, routes merge conflicts through the conflict workflow, and reports the
+exact local and remote state.
+
+See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
+
 ### install-skills
 
 Shared workflow skills should be added to a repository without mutating an
@@ -102,8 +111,8 @@ defines them for every provider.
 
 Git refuses to check out a branch another worktree already holds, and the
 manual recovery strands work or drops review coverage. `move-branch-here`
-releases the branch from that worktree, attaches it to the current one, and
-restores the holder when attaching fails.
+describes how to release the branch from that worktree, attach it to the
+current one, preserve its working state, and retain review coverage.
 
 See [the Engineering copy](./plugins/engineering/skills/move-branch-here/) for
 the skill contract.
@@ -192,6 +201,7 @@ README and skill contract.
 | Skill | Description |
 |---|---|
 | [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
+| [update-branch](./skills/update-branch/) | Merge a branch target locally with explicit remote-update opt-in |
 | [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
 | [move-branch-here](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree |
 | [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
@@ -241,6 +251,7 @@ skills/
   scaffold-repository/
   install-skills/
   using-github/
+  update-branch/
   design-by-contract/
   grill-system-design/
   review-system-design/

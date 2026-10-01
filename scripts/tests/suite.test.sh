@@ -8,14 +8,13 @@ bash scripts/tests/issue-reference-contract.test.sh
 node scripts/tests/history-rewrite.test.mjs
 bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
+bash scripts/tests/update-branch.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
 bash scripts/tests/release-please-workflow.test.sh
 node scripts/tests/skills-release-dispatch.test.mjs
 bash scripts/tests/running-mobile-simulators.test.sh
 bash scripts/tests/skill-install-lifecycle.test.sh
 bash scripts/tests/worktree-setup.test.sh
-bash scripts/tests/move-branch-here.test.sh
-node scripts/tests/move-branch-here-text-normalization.test.mjs
 bash scripts/tests/move-session-here.test.sh
 bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
