@@ -1,6 +1,6 @@
 ---
 name: move-branch-here
-description: Move a branch between worktrees of the same repository while preserving its working state, and copy its polish review record when available. Use when Git refuses checkout because another worktree holds the branch or when the user asks to move it here.
+description: Move a branch between worktrees of the same repository while preserving its working state. Use when Git refuses checkout because another worktree holds the branch or when the user asks to move it here.
 ---
 
 # Move a branch here
@@ -20,7 +20,7 @@ leaving operation choice to the model.
   staged/unstaged split. Leave ignored files in their original worktree.
 - In `free` mode, attach the branch here when this worktree is tracked-clean.
 - In `here` mode, report that the branch is already here and continue to the
-  review-record step.
+  final report.
 - After a held transfer, this worktree has the branch and the same working
   state. The old worktree is detached at its original commit, tracked-clean,
   and contains none of the transferred untracked paths.
@@ -55,29 +55,8 @@ stop, preserve the current Git state, and report the exact completed step,
 remaining state, and paths requiring operator recovery. Do not invent a
 destructive overwrite or claim completion without verifying both worktrees.
 
-## Copy the polish review record
-
-Resolve an installed `polish` skill and use its review-record capability. If no
-`polish` skill is installed or its review-record support is unavailable, report
-that the branch moved but the review record was not handled.
-
-1. Resolve the target branch from `origin/HEAD` and inspect its review record.
-   A `valid` result means the record already moved with the branch. Report its
-   reviewed head and open findings. Treat `unavailable` or `corrupt` as
-   `missing`.
-
-2. For `missing` with an available other temporary directory, relocate the
-   record through the `polish` skill, then inspect it again. An empty relocation
-   result or a source directory with no review data means there is no record to
-   copy.
-
-3. For `missing` without an available source directory, report that this
-   session cannot find a review record and identify the directory the operator
-   can provide.
-
 ## Final report
 
 Report the branch, branch commit, and current worktree. Include the old
 worktree and its detached commit when one was released, every transferred path,
-the review record result, and any refusal, incomplete-transfer state, or
-operator recovery requirement.
+and any refusal, incomplete-transfer state, or operator recovery requirement.
