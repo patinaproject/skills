@@ -78,7 +78,7 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 
 ## Vendored scripts
 
-`scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the `orch` store CLI, the issue handoff route entries under `issue-routes/`, and `worktree-audit.sh`. Join that base directory to the path before invoking them. They are plain bun and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `gh`, (for stack work) `gt`, and (for `worktree-audit.sh`) `jq` and `rg`. `worktree-audit.sh` reads Claude Code transcripts under `~/.claude/projects/`; point it at your runtime's transcript directory instead when you run it elsewhere.
+`scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the `orch` store CLI, the issue handoff route entries under `issue-routes/`, and `worktree-audit.mjs`. Join that base directory to the path before invoking them. They are plain bun, Node.js, and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `node`, `gh`, and (for stack work) `gt`. `worktree-audit.mjs` reads Claude Code transcripts under `~/.claude/projects/`; point it at your runtime's transcript directory instead when you run it elsewhere.
 
 ## Instructions file
 

@@ -31,7 +31,7 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt. Each candidate produces a design package shaped per `references/rationale-template.md`.
 
-Use your configured architect runners (defaults in [Models](#models)).
+Take the runners from the `architect runners` line in `pstack-models.md`, in place of the `arena runners` line. If the sheet or that line is missing, use the defaults in [Models](#models). Alias and rejected entries follow the runner rules in the **arena** skill's Phase A.
 
 Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. This is the **exhaust-the-design-space** principle skill made concrete. Whole-shape alternatives, not point fixes inside one shape.
 
@@ -57,6 +57,10 @@ Replace `not implemented` bodies with code, pseudocode with logic. The synthesiz
 
 Deviations from the sketch are signal worth surfacing, not friction to absorb silently. If a function needs a parameter the sketch didn't anticipate, ask whether the sketch was wrong, the requirement was missed, or the implementation is overreaching.
 
+Before closing each implementation unit or handing its contract to the next worker, compare accepted deviations with the saved behavior contracts, interfaces, and responsibility assignments. Once the appropriate owner or review process accepts a change, update the affected parts of the existing sketch and rationale. Record the acceptance source there. A change from raising an error to returning a refusal must update the outcome contract before the next unit begins.
+
+For a local deviation that leaves the shared contract intact, record the decision and why the design still holds; a local variable rename need not rewrite the architecture. Keep unaccepted changes and unresolved disagreements visible. Do not call the unit reconciled while the next worker would receive contradictory instructions, or edit the specification merely to justify what was implemented. Use the existing design artifact rather than a parallel record per unit. Repeated structural deviations still trigger Phase E.
+
 ## Phase E: Scrap when the architecture is wrong
 
 If implementation keeps producing friction the sketch can't absorb, throw the sketch out. Don't bolt fixes onto a wrong design, per the **redesign-from-first-principles** and **fix-root-causes** principle skills.
@@ -70,7 +74,7 @@ The signal is a *pattern*, not single instances. Tells:
 - Callers having to know the abstraction's internal rules to use it.
 - Two or more independent Phase D deviations of the same shape across the implementation.
 
-Use judgment. A few edge cases don't condemn an architecture. Some problems are legitimately complex; complexity in the data is not complexity in the design.
+Use judgment. A few edge cases don't condemn an architecture. Some problems are legitimately complex. Complexity in the data is not complexity in the design.
 
 When you scrap:
 
@@ -81,10 +85,14 @@ When you scrap:
 
 ## Outputs
 
-The caller's usage is written first and the type sketch derived from it. One file with new types and signatures for small changes; module map plus type definitions for larger work. The rationale ships alongside, shaped per `references/rationale-template.md`, including the usage sketch and the synthesis decision.
+The caller's usage is written first and the type sketch derived from it. One file with new types and signatures for small changes. Module map plus type definitions for larger work. The rationale ships alongside, shaped per `references/rationale-template.md`, including the usage sketch and the synthesis decision.
 
 ## Models
 
-Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in `~/.claude/pstack-models.md` overrides each at runtime; see `/setup-pstack`.
+Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.
 
-- architect runners: `claude-opus-5`, `claude-fable-5`, `claude-sonnet-5`
+- architect runners: `opus`, `fable`, `sonnet`
+
+## Reasoning effort
+
+A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. Levels on Claude Code: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. `pstack:patina-agent` becomes `subagent_type: "pstack:patina-agent-<level>"`. `general-purpose`, or no `subagent_type`, becomes `subagent_type: "pstack:effort-<level>"`. The effort agents set only `effort`, so the model you pass still decides the model. On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions.

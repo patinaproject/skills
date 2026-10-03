@@ -194,9 +194,11 @@ test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.co
 
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
+  plugins/engineering/hooks/session-start.sh \
   plugins/engineering/skills/patina-mode/scripts/orch/orch.ts \
+  plugins/engineering/skills/patina-mode/scripts/watch-pr/ship-pr \
   plugins/engineering/skills/patina-mode/scripts/watch-pr/watch-pr \
-  plugins/engineering/skills/patina-mode/scripts/worktree-audit.sh \
+  plugins/engineering/skills/patina-mode/scripts/worktree-audit.mjs \
   plugins/engineering/skills/reflect/scripts/find-transcript.mjs \
   plugins/engineering/skills/running-mobile-simulators/scripts/check-readiness.sh \
   plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh \

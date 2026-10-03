@@ -4,8 +4,10 @@
 
 Accepted. The base choice is superseded by
 [ADR-502](ADR-502-pstack-claude-base-and-system-level-models.md), which returns
-the base to `pstack-claude`. The carrier-branch sync mechanism below stays in
-force and is base-agnostic.
+the base to `pstack-claude`. The carrier-branch sync mechanism is superseded by
+[ADR-541](ADR-541-regenerate-pstack-sync-merge-base.md), which regenerates the
+merge base from a recorded upstream commit. The rebrand transform below stays in
+force.
 
 ## Context
 

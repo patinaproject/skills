@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { type CliRuntime, main, parseArgs } from "./cli.ts";
+import { WatchDeadline } from "./deadline.ts";
 import { fakeReader, passingCheck } from "./fakes.test-helper.ts";
 import { renderJson, renderPretty } from "./render.ts";
 import type { GitHubReader, WatcherVerdict } from "./types.ts";
@@ -19,6 +20,7 @@ function testRuntime(reader: GitHubReader): {
     stderr,
     runtime: {
       reader,
+      deadline: new WatchDeadline(0, () => 0),
       clock: {
         now: () => 0,
         observedAt: () => "2026-07-26T00:00:00.000Z",
@@ -128,6 +130,7 @@ describe("rendering", () => {
           mergeStateStatus: "CLEAN",
           reviewDecision: "APPROVED",
           headRefOid: "head",
+          baseRefOid: "base",
           headRefName: "feature",
           baseRefName: "main",
           state: "MERGED",

@@ -36,7 +36,7 @@ if (scenario === 'slow') {
 }
 let value;
 if (args[0] === 'pr' && args[1] === 'view') {
-  value = { headRefOid: 'head', mergeable: 'MERGEABLE', mergeStateStatus: 'CLEAN', reviewDecision: 'APPROVED', headRefName: 'feature', baseRefName: 'main', state: 'OPEN', mergedAt: null, isDraft: false };
+  value = { headRefOid: 'head', baseRefOid: 'base', mergeable: 'MERGEABLE', mergeStateStatus: 'CLEAN', reviewDecision: 'APPROVED', headRefName: 'feature', baseRefName: 'main', state: 'OPEN', mergedAt: null, isDraft: false };
 } else if (args[0] === 'pr' && args[1] === 'checks') {
   value = [{ name: 'ci', state: 'SUCCESS', bucket: 'pass', description: '', link: '', workflow: '' }];
 } else if (args[0] === 'pr' && args[1] === 'list') {
@@ -53,13 +53,13 @@ if (args[0] === 'pr' && args[1] === 'view') {
   value = { data: { repository: { pullRequest: { commits: { nodes: [{ commit: { oid: 'head', statusCheckRollup: { state: 'SUCCESS' } } }] } } } } };
 } else { throw new Error('unexpected fixture command: ' + JSON.stringify(args)); }
 console.log(JSON.stringify(value));
-`,
+`
   );
   chmodSync(gh, 0o755);
   const entry = join(dir, "entry.ts");
   writeFileSync(
     entry,
-    `import { main } from ${JSON.stringify(join(import.meta.dir, "cli.ts"))}; process.exitCode = await main(process.argv.slice(2));\n`,
+    `import { main } from ${JSON.stringify(join(import.meta.dir, "cli.ts"))}; process.exitCode = await main(process.argv.slice(2));\n`
   );
   const callsFile = join(dir, "calls.jsonl");
   writeFileSync(callsFile, "");
@@ -78,7 +78,7 @@ console.log(JSON.stringify(value));
         WATCH_CALLS: callsFile,
         WATCH_PID: pidFile,
       },
-    },
+    }
   );
   return {
     ...result,
@@ -100,7 +100,7 @@ it("reads page two before reporting unresolved review threads", () => {
     blocker: { kind: "review-threads", threads: [{ id: "t100" }] },
   });
   expect(
-    result.calls.filter((args) => args.includes("after=next")),
+    result.calls.filter((args) => args.includes("after=next"))
   ).toHaveLength(1);
 });
 
@@ -109,8 +109,8 @@ it("rejects a repeating page cursor instead of looping or silently truncating", 
   expect(result.status).toBe(7);
   expect(
     result.calls.filter((args) =>
-      args.some((arg) => arg.includes("ReviewThreads")),
-    ),
+      args.some((arg) => arg.includes("ReviewThreads"))
+    )
   ).toHaveLength(2);
 });
 

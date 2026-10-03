@@ -14,7 +14,6 @@ Optimize for the intended, verifiable end state rather than preserving smooth in
 
 - Prioritize end-state integrity over transitional stability
 - Intermediate breakage is acceptable when it is planned, scoped, and reversible
-- Always run final verification before declaring done
 
 **Guardrails:**
 
