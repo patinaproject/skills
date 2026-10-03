@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.55.0](https://github.com/patinaproject/skills/compare/v2.54.0...v2.55.0) (2026-10-03)
+
+
+### Features
+
+* [#532](https://github.com/patinaproject/skills/issues/532) restore update-branch skill ([#534](https://github.com/patinaproject/skills/issues/534)) ([d581bf7](https://github.com/patinaproject/skills/commit/d581bf73ef7412bb2d69d8c923ef5f0eeb3b7b0b))
+
+
+### Bug Fixes
+
+* [#537](https://github.com/patinaproject/skills/issues/537) remove retired skill references ([#538](https://github.com/patinaproject/skills/issues/538)) ([e9fa36a](https://github.com/patinaproject/skills/commit/e9fa36aaa53472e4270f141823340046866c18f8))
+* [#541](https://github.com/patinaproject/skills/issues/541) regenerate the pstack sync merge base from a recorded SHA ([#542](https://github.com/patinaproject/skills/issues/542)) ([eb92bca](https://github.com/patinaproject/skills/commit/eb92bca5f1cb400e5698be8f33e93b7c280f4975))
+
 ## [2.54.0](https://github.com/patinaproject/skills/compare/v2.53.0...v2.54.0) (2026-09-30)
 
 
