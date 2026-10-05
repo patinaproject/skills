@@ -45,18 +45,16 @@ Do not push if the tree changed unintentionally.
 
 ## Add reviewer guidance
 
-When you update the PR description, follow
-[`opening-a-pr.md`](../patina-mode/playbooks/opening-a-pr.md). Keep its
-applicable sections in order, omit empty sections, and follow its source
-restrictions. Put review details that do not fit that contract in a
-separate PR comment:
+When you update the PR description, follow [`../pr/SKILL.md`](../pr/SKILL.md).
+Keep its sections in order and omit empty optional sections. Put review details
+that do not fit that contract in a separate PR comment:
 
 - Separate core files from generated or mechanical files.
 - Call out risky behavior changes, migration order, and the rollout plan.
 - Record executed tests and their results.
 - Link issue trackers, dashboards, or design docs when they explain intent.
 
-Do not add a TL;DR or extra headings to the PR description.
+Do not add headings outside the `pr` skill contract to the PR description.
 
 ## Guardrails
 
