@@ -28,6 +28,8 @@ Project Skills plugin or pstack.
   variants for supported model settings.
 - Hooks and local scripts cover session setup, PR watching, orchestration, and
   worktree auditing.
+- The bundled Pi extension supplies subagent, question, and wake-up tools,
+  `/loop`, and the same routing mandate.
 
 ## Data handling
 

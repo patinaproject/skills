@@ -50,6 +50,12 @@ Skills name Claude defaults (a single-role default for code/prose/judgment plus 
 
 `/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs.
 
+## Session routing hook
+
+The native Engineering plugin bundles the same `SessionStart` routing instruction as the Claude Code plugin, through `session-start.sh` on macOS and Linux and `session-start.ps1` on Windows. Codex runs the hook on startup, resume, clear, and compact after the user trusts the hook through `/hooks`. The hook reads `session hook` from the Codex sheet, at the path in [setup-pstack's runtime table](../../setup-pstack/SKILL.md#other-runtimes); `session hook: off` disables injection.
+
+A skills-only installation does not include plugin hooks. Request `patina-mode` explicitly or add a standing instruction to `AGENTS.md` in that case.
+
 ## Claude built-in skills pstack references
 
 Some triggers name skills that ship with Claude Code, not pstack. They do not exist on Codex. Substitute the behavior:
@@ -78,7 +84,7 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 
 ## Vendored scripts
 
-`scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the `orch` store CLI, the issue handoff route entries under `issue-routes/`, and `worktree-audit.mjs`. Join that base directory to the path before invoking them. They are plain bun, Node.js, and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `node`, `gh`, and (for stack work) `gt`. `worktree-audit.mjs` reads Claude Code transcripts under `~/.claude/projects/`; point it at your runtime's transcript directory instead when you run it elsewhere.
+`scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the `orch` store CLI, the issue handoff route entries under `issue-routes/`, and `worktree-audit.mjs`. Join that base directory to the path before invoking them. They are plain bun, Node.js, and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `node`, `gh`, and (for stack work) `gt`. `worktree-audit.mjs` scans Codex sessions under `$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions` (default `~/.codex`), along with any Claude Code or Pi transcript directory that exists. It imports the transcript walker from `skills/reflect/scripts/find-transcript.mjs`, so keep the `reflect` skill installed beside `patina-mode`.
 
 ## Instructions file
 
