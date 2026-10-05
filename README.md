@@ -101,9 +101,9 @@ See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skil
 
 ### Filing and editing issues
 
-This repository owns no issue-filing or issue-editing skill. Operators publish a
-spec with the third-party `/to-spec`, and skills that need issue mechanics —
-claiming, labels, lifecycle, relationships, closure — follow
+The Engineering plugin owns `/to-issue`. It publishes grounded issue bodies and
+uses the adapter for claiming, labels, lifecycle, relationships, and closure.
+Skills that need issue mechanics follow
 [`docs/issue-tracker.md`](./docs/issue-tracker.md), the sole adapter that
 defines them for every provider.
 

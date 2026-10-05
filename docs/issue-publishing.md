@@ -6,13 +6,9 @@ issues. Provider mechanics and ready-state transitions live only in
 
 ## Who applies these rules
 
-This repository owns no filing skill. The operator files with the third-party
-`/to-spec`, and these rules bind that act: they are the reviewer's checklist
-before publishing and the agent's checklist when asked to prepare a draft for
-the operator to file.
-
-`/to-spec` writes a feature-spec body and labels the result `ready-for-agent`
-outright. Two reconciliations follow every run of it. Work that is not yet
+The Engineering plugin's `/to-issue` skill uses these rules as its checklist
+before publishing and when it prepares a draft. It writes a grounded issue body
+and leaves readiness to the tracker adapter. Work that is not yet
 [ready](issue-tracker.md#when-an-issue-becomes-ready) takes the triage state
 instead, and routine work that is not feature-shaped takes the body framing
 below rather than a full spec template.

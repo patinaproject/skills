@@ -227,8 +227,7 @@ repository, a Linear issue on team `PAT` for a private one. Never file the same
 work in both: for a public repository, the GitHub-to-Linear intake creates the
 mirror.
 
-Filing a spec is the operator's to run with the third-party `/to-spec`. Ask them
-to run it rather than filing on their behalf.
+The Engineering plugin's `/to-issue` skill files issues through this adapter.
 
 ## When a skill says "fetch the relevant ticket"
 
