@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.56.0](https://github.com/patinaproject/skills/compare/v2.55.0...v2.56.0) (2026-10-05)
+
+
+### Features
+
+* [#551](https://github.com/patinaproject/skills/issues/551) delegate PR bodies to local pr skill ([#555](https://github.com/patinaproject/skills/issues/555)) ([3cd72a2](https://github.com/patinaproject/skills/commit/3cd72a2be99603fbe773f5b352e527724c26438d))
+
 ## [2.55.0](https://github.com/patinaproject/skills/compare/v2.54.0...v2.55.0) (2026-10-03)
 
 
