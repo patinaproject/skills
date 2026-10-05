@@ -11,7 +11,8 @@ case "${1:-}" in
     ;;
 esac
 
-if grep -qs '^session hook: off$' "$sheet"; then
+bom=$(printf '\357\273\277')
+if [ -f "$sheet" ] && [ -r "$sheet" ] && sed "1s/^$bom//" "$sheet" | tr -d '\r' | grep -qx 'session hook: off'; then
   exit 0
 fi
 

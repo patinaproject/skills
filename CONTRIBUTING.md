@@ -37,11 +37,11 @@ pnpm lint:md
 ## Pull requests
 
 - Keep the PR title in commitlint format.
-- Write the body with the applicable Descriptions sections from
-  `plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`.
+- Write the body with `plugins/engineering/skills/pr/SKILL.md`.
 - Put one `Closes #N`, `Fixes #N`, or `Resolves #N` line in
-  `## Technical notes` for each completed issue.
-- Keep execution evidence in review comments or other task-local records.
+  `## Merge Danger` for each completed issue. Include its corresponding Linear
+  reference on the same line, with its own closing keyword.
+- Include concise execution evidence in the body and link full task-local records.
 - Bot-generated release bump PRs from `bot/bump-*` branches are the only no-issue exception.
 
 ## Further reading

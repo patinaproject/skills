@@ -18,6 +18,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/skills/triage-issues/`: fixed-inbox triage workflow with one-shot and loop modes
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
@@ -233,17 +234,15 @@ gh label list --json name,description --jq '.[] | select(.description == "")'
 
 ## Writing pull requests
 
-Pull request bodies follow the Descriptions rule in
-`plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md`. Use
-applicable section headings in order and omit empty sections. Put one closing
-line in `## Technical notes` for each completed issue, with both GitHub and
-corresponding Linear references and a closing keyword for each, as the playbook
-specifies.
+Pull request bodies follow `plugins/engineering/skills/pr/SKILL.md`. Use its
+section order and omit empty optional sections. Put one closing line in
+`## Merge Danger` for each completed issue, with both GitHub and corresponding
+Linear references and a closing keyword for each.
 
 `.github/pull_request_template.md` only reminds authors about the closing
 references. It does not define the body structure. Use
 `gh pr create --body-file <path-to-rendered-body>` with a body that already
-follows the playbook.
+follows the `pr` skill.
 
 For issues, use the tracker-agnostic issue skills. They consult
 `docs/issue-tracker.md`.
@@ -284,6 +283,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |
 | move-session-here | `plugins/engineering/skills/move-session-here/` |
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
+| pr | `plugins/engineering/skills/pr/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
 | triage-issues | `plugins/engineering/skills/triage-issues/` |

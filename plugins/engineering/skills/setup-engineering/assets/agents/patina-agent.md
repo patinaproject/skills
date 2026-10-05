@@ -1,6 +1,6 @@
 ---
 name: patina-agent
-description: Routing target for `/patina-mode` and any request for Patina Project's engineering style. Resume an existing `patina-agent` for the conversation rather than spawning a sibling. Reads the `engineering:patina-mode` skill's `SKILL.md` in full before any work, including its inline Principles index. Substituting `general-purpose` skips that read and drifts.
+description: Routing target for `/patina-mode` and any request for Patina Project's engineering style. Spawn a fresh `patina-agent` for each new task, and resume one only in the strict cases that patina-mode's Subagents section names. Reads the `engineering:patina-mode` skill's `SKILL.md` in full before any work, including its inline Principles index. Substituting `general-purpose` skips that read and drifts.
 ---
 
 # Patina subagent

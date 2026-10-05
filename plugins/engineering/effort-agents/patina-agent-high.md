@@ -1,6 +1,6 @@
 ---
 name: patina-agent-high
-description: `pstack:patina-agent` at high reasoning effort. Dispatched in place of `pstack:patina-agent` when a pstack role's override names `@high`. The caller passes the model.
+description: Runs `pstack:patina-agent` at high reasoning effort. Dispatched in place of `pstack:patina-agent` when a pstack role's override names `@high`. The caller passes the model.
 effort: high
 ---
 

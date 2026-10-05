@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Body ownership, section placement, and media upload procedure superseded by
+[ADR-551](ADR-551-pr-skill-body-contract.md). Other requirements remain in force.
 
 ## Context
 
