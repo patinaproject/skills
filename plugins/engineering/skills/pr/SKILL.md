@@ -26,10 +26,6 @@ Use this template whenever you create or rewrite a PR body:
 - **Before:** <screenshot/output/failing test run>
   **After:** <screenshot/output/passing test run>
 
-### Demo
-
-<recorded user path, when applicable>
-
 ## Happy Path
 
 <the shortest user path through the changed behavior>
@@ -178,16 +174,7 @@ Screenshots are S-tier - when the environment is set up for it and the change is
 
 Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.
 
-#### Demo
-
-For a change a person can see or drive, put the recorded Happy Path under
-`### Demo` within Evidence. Include one video and screenshots of the states
-it passes through. Classify by observable behavior, including CLI and agent
-workflows, rather than file extensions. Omit Demo for prose-only changes.
-Name the tested commit or build and report verification limitations alongside
-the evidence. Follow the repository's verification skill when one is specified.
-
-For GitHub attachments, follow [the upload guide](references/media.md).
+When attachments are used, follow [the upload guide](references/media.md).
 
 ### Happy Path
 

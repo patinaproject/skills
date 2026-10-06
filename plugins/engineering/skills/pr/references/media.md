@@ -32,5 +32,6 @@ request with successful files and returns non-zero; retry only failed files.
 
 Use concise, meaningful alt text for images by adding `#alt text` to the path,
 such as `./login.png#The login error state`. Video attachments have no alt-text
-field; describe their visible action and outcome in the surrounding Demo text.
+field; describe their visible action and outcome in the surrounding Evidence
+text.
 Preserve the PR-before-attach order, and commit no media files.
