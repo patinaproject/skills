@@ -58,10 +58,9 @@ for (const source of sources) {
   const recordedHash = source.transformsHash ?? source.transformHash;
   if (!recordedHash) fail(`source ${source.name} has no transformsHash; record ${expectedHash} at its pinned commit first.`);
   if (recordedHash !== expectedHash) fail(`source ${source.name} transforms changed; record a new merge base at ${source.pin} and commit the transform change before syncing.`);
-  if (!gitTry(['remote', 'get-url', source.name]).ok) git(['remote', 'add', source.name, source.repo]);
-  git(['fetch', '--no-tags', source.name, source.ref]);
+  git(['fetch', '--no-tags', source.repo, source.ref]);
   const tip = git(['rev-parse', 'FETCH_HEAD']);
-  if (!gitTry(['cat-file', '-e', `${source.pin}^{commit}`]).ok) git(['fetch', '--no-tags', source.name, source.pin]);
+  if (!gitTry(['cat-file', '-e', `${source.pin}^{commit}`]).ok) git(['fetch', '--no-tags', source.repo, source.pin]);
   if (!gitTry(['cat-file', '-e', `${source.pin}^{commit}`]).ok) fail(`pinned commit ${source.pin} for ${source.name} cannot be fetched.`);
   sourceData.set(source.name, {source, tip, base: new Map(), current: new Map()});
 }
@@ -164,7 +163,10 @@ fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`); git(['
 for (const {base, current} of sourceData.values()) for (const pathname of [...new Set([...base.keys(), ...current.keys()])].sort()) {
   const before = base.get(pathname), after = current.get(pathname);
   const classification = !before && after ? 'added' : before && !after ? 'deleted upstream' : before && after && !sameFile({data: fs.readFileSync(before.file), mode: before.mode}, {data: fs.readFileSync(after.file), mode: after.mode}) ? 'updated' : null;
-  if (classification) console.log(`${classification}: ${pathname}`);
+  if (classification) {
+    const status = forked.has(pathname) ? 'forked' : conflicts.split('\n').includes(pathname) ? 'conflicted' : 'merged';
+    console.log(`${status}: ${pathname} (${classification})`);
+  }
 }
 if (applied.status !== 0) { console.error('sync-upstream-skills: upstream changes left merge conflicts; resolve them, then commit.'); process.exit(1); }
 console.log(`sync-upstream-skills: applied ${sources.map(source => source.name).join(', ')}; review staged files, then commit.`);
