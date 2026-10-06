@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.62.0](https://github.com/patinaproject/skills/compare/v2.61.0...v2.62.0) (2026-10-06)
+
+
+### Features
+
+* [#4834](https://github.com/patinaproject/skills/issues/4834) restore patinaproject verification routing ([#575](https://github.com/patinaproject/skills/issues/575)) ([8b3d028](https://github.com/patinaproject/skills/commit/8b3d0288fdd135de19ef2c095ee4bca271d8c469))
+
 ## [2.61.0](https://github.com/patinaproject/skills/compare/v2.60.0...v2.61.0) (2026-10-06)
 
 
