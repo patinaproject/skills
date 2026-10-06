@@ -82,6 +82,24 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 | `babysit` | `loop` and `AskUserQuestion` resolve through the tables above. |
 | `automate-me` | `plugin-dev:skill-development` resolves through the built-in skills table above. |
 
+### Code-review presentation
+
+The shared `code-review` contract stays runtime-neutral: both axes use ordinary
+Markdown findings with exact file and line references, and both runtimes write
+the same typed review record for readiness. Codex may add one inline directive
+for each discrete, actionable finding that belongs to a changed line:
+
+```text
+::code-comment{title="Short issue" body="Actionable explanation" file="/absolute/worktree/src/example.ts" start=12 end=13 priority=1}
+```
+
+Keep the Markdown finding beside the directive. Use the active worktree path
+for `file`, keep `start` and `end` tight, and omit directives when there are no
+actionable changed-line findings. A directive is UI presentation metadata; it
+does not enter the review record or replace its head pinning, separate
+Standards and Spec results, finding dispositions, or current-head validation.
+Claude emits the Markdown finding without Codex directives.
+
 ## Vendored scripts
 
 `scripts/` in this skill's base directory ships the `watch-pr` PR watcher, the `orch` store CLI, the issue handoff route entries under `issue-routes/`, and `worktree-audit.mjs`. Join that base directory to the path before invoking them. They are plain bun, Node.js, and bash, so they run the same on Codex; invoke them through `shell`. They need `bun`, `node`, `gh`, and (for stack work) `gt`. `worktree-audit.mjs` scans Codex sessions under `$CODEX_HOME/sessions` and `$CODEX_HOME/archived_sessions` (default `~/.codex`), along with any Claude Code or Pi transcript directory that exists. It imports the transcript walker from `skills/reflect/scripts/find-transcript.mjs`, so keep the `reflect` skill installed beside `patina-mode`.

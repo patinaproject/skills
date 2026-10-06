@@ -25,6 +25,10 @@ function parseJson(value: string): Record<string, unknown> {
   return parsed as Record<string, unknown>;
 }
 
+function readRecord(path: string, readStdin: () => string): string {
+  return path === "-" ? readStdin() : readFileSync(path, "utf8");
+}
+
 function readForge(
   command: "gh" | "origin",
   number: number,
@@ -142,7 +146,8 @@ export function parseRecord(path: string, text: string): ReviewRecord {
 
 export function run(
   argv: readonly string[],
-  forgeOverride?: ForgeAdapter
+  forgeOverride?: ForgeAdapter,
+  readStdin: () => string = () => readFileSync(0, "utf8")
 ): number {
   try {
     const prIndex = argv.indexOf("--pr");
@@ -151,6 +156,8 @@ export function run(
     const repository = repoIndex >= 0 ? argv[repoIndex + 1] : undefined;
     const recordIndex = argv.indexOf("--record");
     const explicitRecord = recordIndex >= 0 ? argv[recordIndex + 1] : undefined;
+    if (recordIndex >= 0 && (!explicitRecord || explicitRecord.startsWith("--")))
+      throw new Error("--record requires a file path or -");
     const forge =
       forgeOverride ??
       adapter(process.env.PATINA_FORGE === "origin" ? "origin" : "gh");
@@ -163,14 +170,16 @@ export function run(
         current.branch,
         `${current.head}.md`
       );
-    try {
-      accessSync(path);
-    } catch {
-      throw new Error(
-        `no local review exists for current head ${current.head}: ${path}`
-      );
+    if (path !== "-") {
+      try {
+        accessSync(path);
+      } catch {
+        throw new Error(
+          `no local review exists for current head ${current.head}: ${path}`
+        );
+      }
     }
-    const record = parseRecord(path, readFileSync(path, "utf8"));
+    const record = parseRecord(path, readRecord(path, readStdin));
     const check = checkReadiness(record, current.head, current.isDraft);
     if (!check.ok) throw new Error(check.errors.join("; "));
     forge.markReady(pr, repository);
