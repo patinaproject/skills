@@ -44,6 +44,11 @@ build step is required.
 
 ## Lifecycle
 
+Upstream Engineering skills are maintained with `pnpm sync-upstream-skills`.
+The command reads `upstream-skills.json`, applies each source's pinned commit
+with a regenerated three-way merge base, and stages the new pin and content.
+Run `pnpm sync-upstream-skills --dry-run` in CI to validate the forks registry.
+
 1. A contributor opens a PR against `main` with changes under `skills/<name>/`
    or `plugins/<plugin>/skills/<name>/`. The PR merges via squash merge.
 2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main`

@@ -1,0 +1,50 @@
+name: Upstream skills drift
+
+on:
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dry-run:
+    name: Check upstream skill drift
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      # actions/checkout@v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      # actions/setup-node@v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm_config_ignore_scripts=true npx -y pnpm@10 install --frozen-lockfile
+      - name: Run upstream dry run
+        id: sync
+        continue-on-error: true
+        run: npx -y pnpm@10 sync-upstream-skills --dry-run 2>&1 | tee upstream-drift.txt
+      - name: Update the tracking issue
+        if: steps.sync.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title='Upstream skills drift'
+          body_file="$RUNNER_TEMP/upstream-drift-body.md"
+          {
+            echo '<!-- upstream-skills-drift -->'
+            echo 'The scheduled upstream skills dry run needs attention.'
+            echo
+            echo '```text'
+            cat upstream-drift.txt
+            echo '```'
+          } > "$body_file"
+          issue_number="$(gh issue list --state open --search "$title in:title" --json number,title --jq '.[] | select(.title == "Upstream skills drift") | .number' | head -n 1)"
+          if [ -n "$issue_number" ]; then
+            gh issue edit "$issue_number" --body-file "$body_file"
+          else
+            gh issue create --title "$title" --body-file "$body_file" --label enhancement
+          fi
+          exit 1

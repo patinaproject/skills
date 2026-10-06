@@ -23,6 +23,7 @@
     "plugins/engineering/skills/to-spec/**",
     "plugins/engineering/skills/to-tickets/**",
     "plugins/engineering/skills/triage/**",
-    "plugins/engineering/skills/retro/**"
+    "plugins/engineering/skills/retro/**",
+    "plugins/engineering/skills/code-review/**"
   ]
 }
