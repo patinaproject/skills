@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.60.0](https://github.com/patinaproject/skills/compare/v2.59.0...v2.60.0) (2026-10-06)
+
+
+### Features
+
+* [#565](https://github.com/patinaproject/skills/issues/565) mirror upstream engineering skills and add retro ([#568](https://github.com/patinaproject/skills/issues/568)) ([f02dd4d](https://github.com/patinaproject/skills/commit/f02dd4d63e0bc53e9faaad69066cd8f99480d4a1))
+
 ## [2.59.0](https://github.com/patinaproject/skills/compare/v2.58.0...v2.59.0) (2026-10-06)
 
 
