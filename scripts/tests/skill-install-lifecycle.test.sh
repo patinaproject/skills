@@ -82,28 +82,6 @@ if [ "$locked_skill_count" = "0" ]; then
   exit 0
 fi
 
-# Repository-local skills use the marketplace namespace so they cannot collide
-# with host-provided or vendored skills. Vendored entries are identified by the
-# lockfile and remain free to keep their upstream names.
-node <<'NODE'
-const lock = require("./skills-lock.json");
-const localNames = ["patinaproject-verify", "patinaproject-notes"];
-const invalidNames = ["verify-patinaproject", "verify", "notes"];
-const vendoredNames = ["verify-patinaproject", "third-party"];
-const localName = /^patinaproject-[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const validName = (name, source) => source === "vendored" || localName.test(name);
-
-for (const name of localNames) {
-  if (!validName(name, "repository-local")) throw new Error(`${name} must use the patinaproject- prefix`);
-}
-for (const name of invalidNames) {
-  if (validName(name, "repository-local")) throw new Error(`${name} must not pass the local skill-name rule`);
-}
-for (const name of vendoredNames) {
-  if (!validName(name, "vendored")) throw new Error(`${name} must remain exempt as a vendored skill`);
-}
-NODE
-
 # --- committed overlay layout (real repo) -------------------------------------
 # Each locked skill is committed as a real directory under .agents/skills and a
 # relative symlink under .claude/skills pointing at the shared payload.
@@ -168,6 +146,47 @@ mkdir -p "$clean_repo/skills/patinaproject-verify"
 printf '# local\n' >"$clean_repo/skills/patinaproject-verify/SKILL.md"
 ln -s ../../skills/patinaproject-verify "$clean_repo/.agents/skills/patinaproject-verify"
 ln -s ../../skills/patinaproject-verify "$clean_repo/.claude/skills/patinaproject-verify"
+
+check_local_skill_names() {
+  node - "$1" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const repo = process.argv[2];
+const localName = /^patinaproject-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const invalid = [];
+
+for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
+  const overlayPath = path.join(repo, overlayRoot);
+  for (const name of fs.readdirSync(overlayPath)) {
+    const entry = path.join(overlayPath, name);
+    if (!fs.lstatSync(entry).isSymbolicLink()) continue;
+    const target = fs.readlinkSync(entry);
+    if (target.startsWith("../../skills/") && !localName.test(name)) {
+      invalid.push(`${overlayRoot}/${name}`);
+    }
+  }
+}
+
+if (invalid.length) {
+  throw new Error(`repository-local skills must use patinaproject-: ${invalid.join(", ")}`);
+}
+NODE
+}
+
+check_local_skill_names "$clean_repo"
+
+mkdir -p "$clean_repo/skills/verify-patinaproject"
+printf '# invalid local\n' >"$clean_repo/skills/verify-patinaproject/SKILL.md"
+ln -s ../../skills/verify-patinaproject "$clean_repo/.agents/skills/verify-patinaproject"
+ln -s ../../skills/verify-patinaproject "$clean_repo/.claude/skills/verify-patinaproject"
+if check_local_skill_names "$clean_repo" 2>/dev/null; then
+  echo "FAIL: unprefixed repository-local skill passed the prefix check" >&2
+  exit 1
+fi
+rm -rf "$clean_repo/skills/verify-patinaproject"
+rm "$clean_repo/.agents/skills/verify-patinaproject" "$clean_repo/.claude/skills/verify-patinaproject"
+
 printf 'lock\n' >"$clean_repo/.skills-install.lock"
 printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
 
