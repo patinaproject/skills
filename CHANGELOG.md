@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.58.0](https://github.com/patinaproject/skills/compare/v2.57.0...v2.58.0) (2026-10-06)
+
+
+### Features
+
+* [#560](https://github.com/patinaproject/skills/issues/560) update spec and ticket workflows ([#561](https://github.com/patinaproject/skills/issues/561)) ([46d7ec2](https://github.com/patinaproject/skills/commit/46d7ec2e0eb869e372c9fbe3d84bcd82415ae46c))
+
 ## [2.57.0](https://github.com/patinaproject/skills/compare/v2.56.0...v2.57.0) (2026-10-06)
 
 
