@@ -22,7 +22,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
-- `plugins/engineering/skills/triage-issues/`: fixed-inbox triage workflow with one-shot and loop modes
+- `plugins/engineering/skills/triage/`: upstream issue and PR triage workflow
+- `plugins/engineering/skills/retro/`: upstream coding-session retrospective workflow
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
@@ -104,10 +105,10 @@ not exist yet — captures the exact proposed doc text (the complete ADR body an
 each glossary entry) on the GitHub issue that will implement the decision
 instead of editing the tree, creating that issue if none exists. The branch
 implementing such an issue applies the captured text verbatim in its pull
-request. Take the capture rules and the `CONTEXT-FORMAT.md` and `ADR-FORMAT.md`
+request. Take the capture rules and the `GLOSSARY-FORMAT.md` and `ADR-FORMAT.md`
 formats from the vendored `domain-modeling` skill; this repository owns no
 documentation-capture skill. This
-supersedes the inline "update `CONTEXT.md` right there" capture instruction in
+uses `CONTEXT.md` as the local glossary filename and supersedes the inline glossary-update capture instruction in
 the vendored `domain-modeling` payload; see
 [docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
 
@@ -287,7 +288,10 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | pr | `plugins/engineering/skills/pr/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
-| triage-issues | `plugins/engineering/skills/triage-issues/` |
+| retro | `plugins/engineering/skills/retro/` |
+| to-spec | `plugins/engineering/skills/to-spec/` |
+| to-tickets | `plugins/engineering/skills/to-tickets/` |
+| triage | `plugins/engineering/skills/triage/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.

@@ -46,9 +46,6 @@ Choose the smallest workflow that can establish the required result. Gather a ro
 
 Remaining triggers:
 
-- An operator asks to triage a fixed issue inbox once or on a loop → run
-  `engineering:triage-issues`. It owns the fixed starting set, diagnosis,
-  adapter writes, checkpoints, and loop exit condition.
 - Issue-linked work begins or resumes → follow
   [`references/issue-handoff.md`](references/issue-handoff.md). Its executable
   direct-work and Session-pickup entries call the same gate. Each entry requires
@@ -92,6 +89,7 @@ Remaining triggers:
 - Asked to land or ship a green stack → the **Shipping** playbook (`playbooks/shipping.md`). Green is not safe. Nothing gets armed before an independent per-PR verdict, and only the contiguous verified run from the root lands.
 - An automated PR-review bot or the agentic security review commented → skeptical posture. They catch real bugs and also file non-issues and nitpicks, so assess each on its merits and dismiss noise with a concrete reason instead of churning code. Triage fix / dismiss / ask per `references/bugbot-triage.md`.
 - Deploying to a managed platform (Railway, Fly, Vercel, Heroku, and the like) → load that platform's skill, project-local or installed, before running its CLI, the same way Shipping step 1 resolves the forge before the first PR operation.
+- A defect found mid-task → severity decides its artifact, not where it turned up. A correctness or data gap gets a tracked issue even when it surfaces while writing a closure doc; a cosmetic margin can stay in the doc.
 - Broken skill mid-task → fix it in its own PR. Don't block. Don't silently work around it.
 - Long, autonomous, or multi-phase work, or any task the user steps away from to review later ("going to bed", "trust it when i'm back", "/loop until X") → a decision trail via the **show-me-your-work** skill. Commit it when stakes need an auditable record; keep it local otherwise.
 

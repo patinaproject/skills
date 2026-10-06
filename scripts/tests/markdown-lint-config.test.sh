@@ -128,9 +128,10 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-if rg -n '"plugins/engineering/' .markdownlint-cli2.jsonc >/dev/null; then
-  fail "Engineering Markdown must not be exempt from repository linting"
-fi
+for upstream_skill in to-spec to-tickets triage retro; do
+  upstream_file="plugins/engineering/skills/$upstream_skill/SKILL.md"
+  assert_ignored "$upstream_file" "upstream Engineering mirror $upstream_skill"
+done
 
 engineering_output="$(pnpm exec markdownlint-cli2 "plugins/engineering/**/*.md" 2>&1)" || {
   printf '%s\n' "$engineering_output" >&2
