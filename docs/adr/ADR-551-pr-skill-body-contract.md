@@ -18,8 +18,9 @@ and [PAT-4787](https://linear.app/patinaproject/issue/PAT-4787/install-matt-poco
 The Engineering plugin owns a local copy at
 `plugins/engineering/skills/pr/SKILL.md`. Patina-mode delegates PR body
 structure to that skill. The body uses `## Summary`, `## Evidence`,
-`## Happy Path`, and `## Merge Danger` in that order. A user-observable change
-includes a `### Demo` within Evidence.
+`## Happy Path`, and `## Merge Danger` in that order. Evidence follows the
+upstream S-tier and A-tier model. Screenshots are S-tier when the change is
+visual and the environment supports them. Execution-based evidence is A-tier.
 
 The repository keeps its title rules and paired GitHub and Linear closing
 references. Each completed issue gets one closing line in `## Merge Danger`,
@@ -28,7 +29,8 @@ with an independent `Closes`, `Fixes`, or `Resolves` keyword for each reference.
 ## Consequences
 
 Agents read one local skill when they write or update a PR body. The copy can
-carry Patina-specific requirements while preserving the upstream contract.
+carry Patina-specific Happy Path guidance while preserving the upstream
+Evidence contract.
 The copy must be reviewed when the upstream `pr` skill changes.
 
 This supersedes body ownership in ADR-445 and body ownership, section placement,

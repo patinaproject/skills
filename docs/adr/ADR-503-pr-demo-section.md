@@ -2,8 +2,9 @@
 
 ## Status
 
-Body ownership, section placement, and media upload procedure superseded by
-[ADR-551](ADR-551-pr-skill-body-contract.md). Other requirements remain in force.
+Superseded by [ADR-551](ADR-551-pr-skill-body-contract.md), as amended by
+[PAT-4817](https://linear.app/patinaproject/issue/PAT-4817/align-pr-skill-evidence-tiers-with-the-upstream-skill).
+The PR body no longer has a separate Demo evidence tier.
 
 ## Context
 
@@ -26,29 +27,15 @@ is the path a person uses.
 
 ## Decision
 
-A pull request whose change a person can see or drive carries a `## Demo`
-section directly after `## What changed`. The section holds one video that runs
-the happy path and screenshots of the states that path passes through. A
-documentation-only or internal-only diff omits it.
+A pull request body uses the upstream S-tier and A-tier Evidence model. A
+visual change can use screenshots as S-tier evidence when the environment
+supports them. Execution-based evidence such as test results and console
+output is A-tier. Media remains optional and belongs beside the claim it
+proves.
 
-The agent supplies the media through the browser: open the description editor,
-select Attach files, upload with the file chooser, move each generated
-attachment URL under `## Demo`, then save. No media is committed.
-
-The video runs the happy path end to end. It performs the actions that the
-`## Happy path` section lists, in the order listed, and ends at that section's
-`Result:` line. Demo shows the path and Happy path writes it. Where the change
-has no user interface, the video runs the command that the happy path names.
-The video carries no length cap; its length follows the path it runs. It cuts
-startup, loading, sign-in, and dead navigation, and appears as a bare
-attachment URL on its own line. Screenshots are one still per state,
-written as `<img>` elements whose numbered alt text walks the flow in order.
-Captions are optional and appear only where the media needs them.
-
-Technical notes gains a labeled line naming the build the Demo was recorded
-against. The standing media-placement sentence narrows to edge case and still
-works stills. Demo is the execution evidence that the proposed-QA-steps rule
-requires.
+When a pull request includes media, the agent supplies it through the browser
+and places each attachment beside the claim it proves. No media is committed.
+The upload procedure remains in the PR skill's media reference.
 
 This amends the body contract that
 [ADR-445](ADR-445-repository-pull-request-body-contract.md) assigns to
@@ -56,10 +43,8 @@ This amends the body contract that
 
 ## Consequences
 
-- A reviewer sees proof before steps and no longer checks the change out to
-  believe it.
-- The agent needs a logged-in browser session. Without one it cannot complete
-  the section.
+- Reviewers use the same S-tier and A-tier evidence model as the upstream PR
+  skill.
 - `multi-phase-plan.md` keeps its own review video. The two artifacts stay
   separate.
 - Neither pull request template changes, so no `scaffold-repository` consumer
