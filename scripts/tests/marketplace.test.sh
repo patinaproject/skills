@@ -185,10 +185,10 @@ fi
 # overlays, or its sync tooling may name the previous base or the machinery
 # that came only from it. History (CHANGELOG, ADRs) is exempt.
 if git grep -q -i -E 'open-pstack|ericlitman|provider-dispatch|pstack-runner' -- \
-    plugins/engineering .claude/agents .agents scripts/sync-pstack.sh scripts/pstack-transform.sh; then
+    plugins/engineering .claude/agents .agents scripts/sync-upstream-skills.mjs; then
   echo "FAIL: previous upstream base still referenced under the Engineering plugin or its sync tooling" >&2
   git grep -n -i -E 'open-pstack|ericlitman|provider-dispatch|pstack-runner' -- \
-    plugins/engineering .claude/agents .agents scripts/sync-pstack.sh scripts/pstack-transform.sh >&2
+    plugins/engineering .claude/agents .agents scripts/sync-upstream-skills.mjs >&2
   exit 1
 fi
 test -f upstream-skills.json

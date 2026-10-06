@@ -24,8 +24,7 @@
     "lint:md": "node scripts/lint-active-skill-references.mjs && markdownlint-cli2 \"**/*.md\"",
     "test": "bash scripts/tests/suite.test.sh",
     "skills:install": "pnpm dlx skills@latest experimental_install --yes",
-    "sync-upstream-skills": "node scripts/sync-upstream-skills.mjs",
-    "sync-pstack": "node scripts/sync-upstream-skills.mjs pstack"
+    "sync-upstream-skills": "node scripts/sync-upstream-skills.mjs"
   },
   "config": {
     "commitizen": {

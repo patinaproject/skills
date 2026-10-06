@@ -20,7 +20,6 @@ bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/setup-engineering-machinery.test.sh
-bash scripts/tests/sync-pstack.test.sh
 bash scripts/tests/sync-upstream-skills.test.sh
 
 # CLI compatibility canaries: representative network-backed samples that prove
