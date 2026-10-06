@@ -49,7 +49,7 @@ This amends the body contract that
   separate.
 - Neither pull request template changes, so no `scaffold-repository` consumer
   is affected.
-- No CI check enforces the section. The contract is the rule.
+- No CI check enforces the Evidence tiers. The contract remains guidance.
 - `plugins/engineering/**` is vendored from open-pstack, so this edit becomes a
   merge conflict on a later `pnpm sync-pstack` wherever upstream changes the
   same region
