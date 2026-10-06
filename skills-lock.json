@@ -625,6 +625,12 @@
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
       "computedHash": "552b0f48b9fe054aa93c5d432fefbd7bd9645e3f2d20b4e22432453a81800b21"
     },
+    "show-me": {
+      "source": "humanlayer/skills",
+      "sourceType": "github",
+      "skillPath": "plugins/show-me/skills/show-me/SKILL.md",
+      "computedHash": "43766f53afe7eb9feba0bb7716590c35cbb8d39d4a91eddef50e9566a6f6ae19"
+    },
     "signup": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
@@ -672,12 +678,6 @@
       "sourceType": "github",
       "skillPath": "skills/productivity/to-questionnaire/SKILL.md",
       "computedHash": "befbec7005695163741a57bc94810dc5048fb766baaa485d5160b1d7f86335c1"
-    },
-    "to-spec": {
-      "source": "mattpocock/skills",
-      "sourceType": "github",
-      "skillPath": "skills/engineering/to-spec/SKILL.md",
-      "computedHash": "3fa1a0695d4ea242fae9e569e4d22aa1788623197abb33bfadafae7315789bbf"
     },
     "to-tickets": {
       "source": "mattpocock/skills",
