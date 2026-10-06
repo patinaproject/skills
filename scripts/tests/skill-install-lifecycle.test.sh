@@ -130,17 +130,63 @@ clean_repo="$temp_repo/clean-check"
 mkdir -p \
   "$clean_repo/scripts" \
   "$clean_repo/node_modules/example" \
-  "$clean_repo/skills/in-repo" \
+  "$clean_repo/skills/patinaproject-in-repo" \
   "$clean_repo/.agents/skills" \
   "$clean_repo/.agents/skills/third-party" \
   "$clean_repo/.claude/skills" \
-  "$clean_repo/.claude/skills/third-party"
+  "$clean_repo/.claude/skills/third-party" \
+  "$clean_repo/skills/patinaproject-verify"
 cp scripts/clean.sh "$clean_repo/scripts/"
-printf '# in repo\n' >"$clean_repo/skills/in-repo/SKILL.md"
-ln -s ../../skills/in-repo "$clean_repo/.agents/skills/in-repo"
-ln -s ../../skills/in-repo "$clean_repo/.claude/skills/in-repo"
+printf '# in repo\n' >"$clean_repo/skills/patinaproject-in-repo/SKILL.md"
+ln -s ../../skills/patinaproject-in-repo "$clean_repo/.agents/skills/patinaproject-in-repo"
+ln -s ../../skills/patinaproject-in-repo "$clean_repo/.claude/skills/patinaproject-in-repo"
 printf '# third party\n' >"$clean_repo/.agents/skills/third-party/SKILL.md"
 printf '# third party\n' >"$clean_repo/.claude/skills/third-party/SKILL.md"
+mkdir -p "$clean_repo/skills/patinaproject-verify"
+printf '# local\n' >"$clean_repo/skills/patinaproject-verify/SKILL.md"
+ln -s ../../skills/patinaproject-verify "$clean_repo/.agents/skills/patinaproject-verify"
+ln -s ../../skills/patinaproject-verify "$clean_repo/.claude/skills/patinaproject-verify"
+
+check_local_skill_names() {
+  node - "$1" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const repo = process.argv[2];
+const localName = /^patinaproject-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const invalid = [];
+
+for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
+  const overlayPath = path.join(repo, overlayRoot);
+  for (const name of fs.readdirSync(overlayPath)) {
+    const entry = path.join(overlayPath, name);
+    if (!fs.lstatSync(entry).isSymbolicLink()) continue;
+    const target = fs.readlinkSync(entry);
+    if (target.startsWith("../../skills/") && !localName.test(name)) {
+      invalid.push(`${overlayRoot}/${name}`);
+    }
+  }
+}
+
+if (invalid.length) {
+  throw new Error(`repository-local skills must use patinaproject-: ${invalid.join(", ")}`);
+}
+NODE
+}
+
+check_local_skill_names "$clean_repo"
+
+mkdir -p "$clean_repo/skills/verify-patinaproject"
+printf '# invalid local\n' >"$clean_repo/skills/verify-patinaproject/SKILL.md"
+ln -s ../../skills/verify-patinaproject "$clean_repo/.agents/skills/verify-patinaproject"
+ln -s ../../skills/verify-patinaproject "$clean_repo/.claude/skills/verify-patinaproject"
+if check_local_skill_names "$clean_repo" 2>/dev/null; then
+  echo "FAIL: unprefixed repository-local skill passed the prefix check" >&2
+  exit 1
+fi
+rm -rf "$clean_repo/skills/verify-patinaproject"
+rm "$clean_repo/.agents/skills/verify-patinaproject" "$clean_repo/.claude/skills/verify-patinaproject"
+
 printf 'lock\n' >"$clean_repo/.skills-install.lock"
 printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
 
@@ -159,19 +205,25 @@ if [ ! -e "$clean_repo/.agents/skills/third-party/SKILL.md" ] ||
   exit 1
 fi
 
+if [ ! -e "$clean_repo/.agents/skills/patinaproject-verify/SKILL.md" ] ||
+  [ ! -e "$clean_repo/.claude/skills/patinaproject-verify/SKILL.md" ]; then
+  echo "FAIL: repository-local patinaproject-verify overlay must survive clean" >&2
+  exit 1
+fi
+
 node - "$clean_repo" <<'NODE'
 const fs = require("fs");
 const path = require("path");
 
 const repo = process.argv[2];
 for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
-  const overlayPath = path.join(repo, overlayRoot, "in-repo");
+  const overlayPath = path.join(repo, overlayRoot, "patinaproject-in-repo");
   if (!fs.lstatSync(overlayPath).isSymbolicLink()) {
     throw new Error(`${overlayPath} must remain a symlink after clean`);
   }
 
   const target = fs.readlinkSync(overlayPath);
-  if (target !== "../../skills/in-repo") {
+  if (target !== "../../skills/patinaproject-in-repo") {
     throw new Error(`${overlayPath} target changed to ${target}`);
   }
 }
