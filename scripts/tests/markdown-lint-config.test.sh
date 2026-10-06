@@ -128,7 +128,7 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-for upstream_skill in to-spec to-tickets triage retro; do
+for upstream_skill in to-spec to-tickets triage retro code-review; do
   upstream_file="plugins/engineering/skills/$upstream_skill/SKILL.md"
   assert_ignored "$upstream_file" "upstream Engineering mirror $upstream_skill"
 done

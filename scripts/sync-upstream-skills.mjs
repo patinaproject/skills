@@ -31,9 +31,23 @@ function stableJson(value) {
 }
 function transformHash(transforms) { return crypto.createHash('sha256').update(stableJson({denylist: transforms.denylist ?? [], rename: transforms.rename ?? {}})).digest('hex'); }
 
+if (git(['ls-files', '-u'])) fail('index already contains unresolved merge conflicts; resolve them first.');
 if (git(['status', '--porcelain'])) fail('working tree not clean; commit or stash first.');
 const sources = manifest.sources.filter(source => !sourceName || source.name === sourceName);
 if (!sources.length) fail(`unknown source: ${sourceName}`);
+
+const managedDestinations = new Map();
+for (const source of sources) {
+  if (!/^[0-9a-f]{40}$/.test(source.pin)) fail(`source ${source.name} pin must be a full 40-character SHA.`);
+  if (!source.repo || !source.ref || !Array.isArray(source.targets)) fail(`source ${source.name} is missing repo, ref, or targets.`);
+  for (const target of source.targets) {
+    if (!['subtree', 'skill'].includes(target.kind) || !target.source || !target.destination) fail(`source ${source.name} has an invalid target.`);
+    for (const pathname of [target.source, target.destination]) if (path.posix.isAbsolute(pathname) || pathname.split('/').includes('..')) fail(`source ${source.name} target path escapes the repository: ${pathname}`);
+    const previous = managedDestinations.get(target.destination);
+    if (previous && previous !== source.name) fail(`sources ${previous} and ${source.name} overlap at ${target.destination}.`);
+    managedDestinations.set(target.destination, source.name);
+  }
+}
 
 const sourceData = new Map();
 for (const source of sources) {
@@ -111,6 +125,13 @@ function validateForks() {
 const forked = validateForks();
 const ownedPaths = new Set();
 for (const {base, current} of sourceData.values()) for (const pathname of [...base.keys(), ...current.keys()]) ownedPaths.add(pathname);
+function checkConflictMarkers() {
+  for (const pathname of ownedPaths) {
+    const absolute = path.join(root, pathname);
+    if (fs.existsSync(absolute) && fs.readFileSync(absolute).toString().includes('<<<<<<<')) fail(`conflict marker found under synced path ${pathname}`);
+  }
+}
+if (dryRun) checkConflictMarkers();
 if (sources.every(source => sourceData.get(source.name).tip === source.pin)) {
   console.log(`sync-upstream-skills: already at the pinned commit for ${sources.map(source => source.name).join(', ')}; nothing to sync.`);
   process.exit(0);
@@ -130,7 +151,6 @@ function treeFor(label) {
 }
 const baseTree = treeFor('base'), currentTree = treeFor('current');
 if (dryRun) {
-  for (const pathname of ownedPaths) { const absolute = path.join(root, pathname); if (fs.existsSync(absolute) && fs.readFileSync(absolute).toString().includes('<<<<<<<')) fail(`conflict marker found under synced path ${pathname}`); }
   console.log(`sync-upstream-skills: dry run passed for ${sources.map(source => source.name).join(', ')} (${forked.size} declared fork(s)).`); process.exit(0);
 }
 const env = {GIT_AUTHOR_NAME: 'sync-upstream-skills', GIT_AUTHOR_EMAIL: 'sync-upstream-skills@example.invalid', GIT_COMMITTER_NAME: 'sync-upstream-skills', GIT_COMMITTER_EMAIL: 'sync-upstream-skills@example.invalid'};

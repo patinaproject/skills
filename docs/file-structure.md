@@ -44,7 +44,9 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `.codex/config.toml`: Codex hosted Linear MCP registration for private-repo
   operations and mirror inspection
 - `.mcp.json`: hosted Linear MCP registration for supported agent hosts
-- `skills-lock.json`: vercel-labs CLI install lockfile
+- `upstream-skills.json`: pinned upstream sources and sync targets
+- `upstream-skills-forks.json`: deliberate differences from pinned upstreams
+- `skills-lock.json`: vercel-labs CLI install lockfile for local-only skills
 - `docs/`: contributor-facing docs for skill maintenance
 - `docs/agents/`: agent configuration, the canonical location the upstream
   `mattpocock/skills` family writes and reads

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/update-branch","./skills/install-skills","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/writing-for-pstack"]'
-expected_engineering_skills='["architect","arena","automate-me","babysit","benchmark-checklist","blast-radius","bro","correct","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-mode","pr","principle-attack-the-premise","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-explain-the-number","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-test-behavior-not-implementation","principle-type-system-discipline","recall","reflect","retro","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","to-spec","to-tickets","triage","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
+expected_engineering_skills='["architect","arena","automate-me","babysit","benchmark-checklist","blast-radius","bro","code-review","correct","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-mode","pr","principle-attack-the-premise","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-explain-the-number","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-test-behavior-not-implementation","principle-type-system-discipline","recall","reflect","retro","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","to-spec","to-tickets","triage","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
 expected_engineering_agents='["comment-sicko","patina-agent"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback|develop|develop-with-workflow|ready-pr|finish-pr|merge-pr|polish|fix|orchestrate|codex-pr-feedback-loop|prompting-fable|offensive-programming|move-branch-here|running-mobile-simulators|working-on-issue|write-changelog|new-branch|writing-for-patina-mode|grill-to-spec|team:to-issue|to-issue'
 
@@ -137,10 +137,11 @@ for agent_file in plugins/engineering/agents/*.md; do
 done
 
 test -f plugins/engineering/LICENSE.pstack
-test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/michael-denyer/pstack-claude'
-test "$(jq -r '.ref' plugins/engineering/upstream.json)" = 'main'
-test "$(jq -r '.transforms.skills["poteto-mode"]' plugins/engineering/upstream.json)" = 'patina-mode'
-test "$(jq -r '.transforms.agents["poteto-agent"]' plugins/engineering/upstream.json)" = 'patina-agent'
+test "$(jq -r '.sources | length' upstream-skills.json)" = '2'
+test "$(jq -r '.sources[] | select(.name == "pstack") | .repo' upstream-skills.json)" = 'https://github.com/michael-denyer/pstack-claude.git'
+test "$(jq -r '.sources[] | select(.name == "pstack") | .transforms.rename["poteto-mode"]' upstream-skills.json)" = 'patina-mode'
+test "$(jq -r '.sources[] | select(.name == "mattpocock") | .targets[] | select(.destination | endswith("code-review")) | .source' upstream-skills.json)" = 'skills/engineering/code-review'
+test ! -e plugins/engineering/upstream.json
 
 obsolete_runtime_metadata="$(
   jq -r '.. | strings' \
@@ -190,7 +191,7 @@ if git grep -q -i -E 'open-pstack|ericlitman|provider-dispatch|pstack-runner' --
     plugins/engineering .claude/agents .agents scripts/sync-pstack.sh scripts/pstack-transform.sh >&2
   exit 1
 fi
-test "$(jq -r '.source' plugins/engineering/upstream.json)" = 'https://github.com/michael-denyer/pstack-claude'
+test -f upstream-skills.json
 
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
@@ -237,6 +238,16 @@ if jq -e '.skills.triage' skills-lock.json >/dev/null; then
   echo "FAIL: repo-owned triage remains in skills-lock.json" >&2
   exit 1
 fi
+if jq -e '.skills["code-review"]' skills-lock.json >/dev/null; then
+  echo "FAIL: repo-owned code-review remains in skills-lock.json" >&2
+  exit 1
+fi
+while IFS= read -r synced_skill; do
+  if jq -e --arg name "$synced_skill" '.skills[$name]' skills-lock.json >/dev/null; then
+    echo "FAIL: synced skill remains in skills-lock.json: $synced_skill" >&2
+    exit 1
+  fi
+done < <(jq -r '.sources[].targets[] | select(.kind == "skill") | .destination | split("/") | last' upstream-skills.json)
 for retired_path in .agents/skills/to-issue .claude/skills/to-issue; do
   if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
     echo "FAIL: retired to-issue remains installed at $retired_path" >&2
