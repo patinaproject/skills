@@ -7,8 +7,10 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/update-branch/`: local branch update skill
+- `plugins/engineering/skills/to-spec/`: grounded spec and issue drafting and publication
+- `plugins/engineering/skills/to-tickets/`: break specs into tracer-bullet tickets with blocking edges
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
-- `plugins/engineering/skills/to-issue/`: grounded issue drafting and publication
+- `plugins/engineering/skills/to-spec/`: grounded spec and issue drafting and publication
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
@@ -58,7 +60,7 @@ Tracker operations are defined in the sole adapter. The real file is
 `docs/agents/issue-tracker.md`; `docs/issue-tracker.md` is a compatibility
 symlink to it, so either path reaches the same adapter.
 Follow it directly for claiming, labels, lifecycle, relationships, and closure;
-the Engineering plugin owns the `to-issue` skill. Use it for issue filing and
+the Engineering plugin owns the `to-spec` skill. Use it for issue filing and
 editing. `docs/issue-publishing.md` governs issue body framing, and the adapter
 owns readiness and priority.
 

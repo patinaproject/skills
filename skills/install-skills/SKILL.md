@@ -76,7 +76,7 @@ requested names. Common repository defaults are:
 - `scaffold-repository`
 - `using-github`
 - `install-skills`
-- `to-issue`
+- `to-spec`
 - `design-by-contract`
 - `grill-system-design`
 - `review-system-design`

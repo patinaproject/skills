@@ -11,7 +11,7 @@ the commands for issue searches, edits, labels, assignment, relationships,
 branches, and status changes. If the file is missing, stop and say that
 `scaffold-repository` provides it.
 
-Use `/to-issue` when the user needs to publish a new issue.
+Use `/to-spec` when the user needs to publish a new spec or issue.
 Begin issue work with the Engineering plugin's `working-on-issues` skill.
 Follow `docs/issue-tracker.md` for all other issue work, even when it selects
 GitHub.

@@ -6,7 +6,7 @@ issues. Provider mechanics and ready-state transitions live only in
 
 ## Who applies these rules
 
-The Engineering plugin's `/to-issue` skill uses these rules as its checklist
+The Engineering plugin's `/to-spec` skill uses these rules as its checklist
 before publishing and when it prepares a draft. It writes a grounded issue body
 and leaves readiness to the tracker adapter. Work that is not yet
 [ready](issue-tracker.md#when-an-issue-becomes-ready) takes the triage state
