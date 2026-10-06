@@ -1,0 +1,429 @@
+{
+  "plugins/engineering/.claude-plugin/plugin.json": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/.codex-plugin/plugin.json": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/README.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/agents/patina-agent.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/hooks/session-start-context.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/automate-me/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/babysit/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/fix-ci/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/fix-merge-conflicts/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/get-pr-comments/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/how/references/explainer-prompt.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/how/references/explorer-prompt.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/interrogate/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/interrogate/references/lead-judgment.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/interrogate/references/reviewer-prompt.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/make-pr-easy-to-review/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/no-comments/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/autopilot-full.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/autopilot-stack.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/babysit.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/multi-phase-plan.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/orchestrate.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/session-pickup.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/shipping.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/playbooks/worktree-cleanup.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/references/codex-tools.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/scripts/orch/orch.test.ts": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/scripts/package.json": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-attack-the-premise/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-boundary-discipline/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-encode-lessons-in-structure/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-exhaust-the-design-space/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-fix-root-causes/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-guard-the-context-window/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-make-operations-idempotent/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-minimize-reader-load/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-never-block-on-the-human/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-outcome-oriented-execution/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-prove-it-works/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-separate-before-serializing-shared-state/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-sequence-verifiable-units/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/principle-subtract-before-you-add/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/reflect/references/divergent-reviewer.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/reflect/references/judgment-reviewer.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/reflect/references/synthesizer.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/reflect/references/tooling-reviewer.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/show-me-your-work/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/unslop/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/epistemics.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/investigator-prompt.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/code-archaeology.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/databricks.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/datadog.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/linear.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/notion.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/sentry.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/why/references/sources/slack.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  }
+}
