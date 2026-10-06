@@ -63,7 +63,7 @@ Some triggers name skills that ship with Claude Code, not pstack. They do not ex
 | Claude built-in named in pstack | On Codex |
 |---------------------------------|----------|
 | `run` (drive a CLI/TUI to see a change work) | Run the app yourself via `shell` and observe the real output. |
-| `verify` (drive a UI to confirm a fix) | Drive the UI with whatever automation you have, or hand the user a concrete manual check. Do not claim done without observing the artifact. |
+| `patinaproject-verify` (drive a UI to confirm a fix) | Load the repository-local `patinaproject-verify` skill first, then drive the UI with its instructions and available automation. Do not claim done without observing the artifact. |
 | `plugin-dev:skill-development` (Claude's SKILL.md authoring guidance) | Follow your platform's skill-authoring guidance; the `writing-skills` skill if present. Keep `name` + `description` frontmatter and progressive disclosure. |
 | `loop` (recurring/self-paced re-invocation, used by `babysit`) | Codex has no `loop` skill. Re-run the step yourself on a cadence, or use a Codex scheduled task if available. |
 
@@ -77,7 +77,7 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 | `setup-pstack` | The override sheet is `~/.codex/pstack-models.md`, the slugs are your Codex models (see Model names above), and you load it by adding the sheet's contents to `~/.codex/AGENTS.md`; Codex has no `@`-include into a rules file. The role rows in step 5 are identical. |
 | `no-comments` | There is no `comment-sicko` subagent type; see Subagent policy above. |
 | `teach` | Running `how` and `why` in parallel maps to `spawn_agent` fan-out; image generation uses the configured Codex equivalent. |
-| `create-verification-skill` | The generated skill lands under `.claude/skills/verify-<app>/` on Claude Code; write it to Codex's project-skill location instead. The app-driving harness is platform-neutral. |
+| `create-verification-skill` | The generated skill lands under `.claude/skills/patinaproject-verify/` on Claude Code; write it to Codex's project-skill location instead. The app-driving harness is platform-neutral. |
 | `maintain-verification-skill` | The parallel per-feature source readers map to `spawn_agent` fan-out; the project-local skill lives under Codex's skills location, not `.claude/skills/`. |
 | `babysit` | `loop` and `AskUserQuestion` resolve through the tables above. |
 | `automate-me` | `plugin-dev:skill-development` resolves through the built-in skills table above. |

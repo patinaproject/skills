@@ -82,6 +82,28 @@ if [ "$locked_skill_count" = "0" ]; then
   exit 0
 fi
 
+# Repository-local skills use the marketplace namespace so they cannot collide
+# with host-provided or vendored skills. Vendored entries are identified by the
+# lockfile and remain free to keep their upstream names.
+node <<'NODE'
+const lock = require("./skills-lock.json");
+const localNames = ["patinaproject-verify", "patinaproject-notes"];
+const invalidNames = ["verify-patinaproject", "verify", "notes"];
+const vendoredNames = ["verify-patinaproject", "third-party"];
+const localName = /^patinaproject-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const validName = (name, source) => source === "vendored" || localName.test(name);
+
+for (const name of localNames) {
+  if (!validName(name, "repository-local")) throw new Error(`${name} must use the patinaproject- prefix`);
+}
+for (const name of invalidNames) {
+  if (validName(name, "repository-local")) throw new Error(`${name} must not pass the local skill-name rule`);
+}
+for (const name of vendoredNames) {
+  if (!validName(name, "vendored")) throw new Error(`${name} must remain exempt as a vendored skill`);
+}
+NODE
+
 # --- committed overlay layout (real repo) -------------------------------------
 # Each locked skill is committed as a real directory under .agents/skills and a
 # relative symlink under .claude/skills pointing at the shared payload.
@@ -130,17 +152,22 @@ clean_repo="$temp_repo/clean-check"
 mkdir -p \
   "$clean_repo/scripts" \
   "$clean_repo/node_modules/example" \
-  "$clean_repo/skills/in-repo" \
+  "$clean_repo/skills/patinaproject-in-repo" \
   "$clean_repo/.agents/skills" \
   "$clean_repo/.agents/skills/third-party" \
   "$clean_repo/.claude/skills" \
-  "$clean_repo/.claude/skills/third-party"
+  "$clean_repo/.claude/skills/third-party" \
+  "$clean_repo/skills/patinaproject-verify"
 cp scripts/clean.sh "$clean_repo/scripts/"
-printf '# in repo\n' >"$clean_repo/skills/in-repo/SKILL.md"
-ln -s ../../skills/in-repo "$clean_repo/.agents/skills/in-repo"
-ln -s ../../skills/in-repo "$clean_repo/.claude/skills/in-repo"
+printf '# in repo\n' >"$clean_repo/skills/patinaproject-in-repo/SKILL.md"
+ln -s ../../skills/patinaproject-in-repo "$clean_repo/.agents/skills/patinaproject-in-repo"
+ln -s ../../skills/patinaproject-in-repo "$clean_repo/.claude/skills/patinaproject-in-repo"
 printf '# third party\n' >"$clean_repo/.agents/skills/third-party/SKILL.md"
 printf '# third party\n' >"$clean_repo/.claude/skills/third-party/SKILL.md"
+mkdir -p "$clean_repo/skills/patinaproject-verify"
+printf '# local\n' >"$clean_repo/skills/patinaproject-verify/SKILL.md"
+ln -s ../../skills/patinaproject-verify "$clean_repo/.agents/skills/patinaproject-verify"
+ln -s ../../skills/patinaproject-verify "$clean_repo/.claude/skills/patinaproject-verify"
 printf 'lock\n' >"$clean_repo/.skills-install.lock"
 printf 'lock\n' >"$clean_repo/.skills-install.lock.1234-deadbeef.tmp"
 
@@ -159,19 +186,25 @@ if [ ! -e "$clean_repo/.agents/skills/third-party/SKILL.md" ] ||
   exit 1
 fi
 
+if [ ! -e "$clean_repo/.agents/skills/patinaproject-verify/SKILL.md" ] ||
+  [ ! -e "$clean_repo/.claude/skills/patinaproject-verify/SKILL.md" ]; then
+  echo "FAIL: repository-local patinaproject-verify overlay must survive clean" >&2
+  exit 1
+fi
+
 node - "$clean_repo" <<'NODE'
 const fs = require("fs");
 const path = require("path");
 
 const repo = process.argv[2];
 for (const overlayRoot of [".agents/skills", ".claude/skills"]) {
-  const overlayPath = path.join(repo, overlayRoot, "in-repo");
+  const overlayPath = path.join(repo, overlayRoot, "patinaproject-in-repo");
   if (!fs.lstatSync(overlayPath).isSymbolicLink()) {
     throw new Error(`${overlayPath} must remain a symlink after clean`);
   }
 
   const target = fs.readlinkSync(overlayPath);
-  if (target !== "../../skills/in-repo") {
+  if (target !== "../../skills/patinaproject-in-repo") {
     throw new Error(`${overlayPath} target changed to ${target}`);
   }
 }

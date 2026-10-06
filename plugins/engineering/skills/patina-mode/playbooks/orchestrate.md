@@ -14,7 +14,7 @@ Three rules carry the rest.
 
 - **Coordinator (this chat).** Frames, authors briefs, drains the inbox, owns the human report, makes judgment calls. It never authors or edits code: conflicted merges, restacks, and code changes are always tasks. Mechanically landing a verified unit (fast-forward or clean cherry-pick of a worker's commit, then push) is bookkeeping the coordinator may do itself on repos where local git is cheap; queueing finished work behind an idle stacker is how a deadline harvests nothing. The loop is agentic end to end. Agents are spawned, resumed, and drained only through the `Agent` tool. State reads and writes go through the `orch` CLI at drain points, one command in and one line out. The CLI never spawns, waits, or wakes anything.
 - **Sub-coordinator.** Durable, one per track, and only when the program exceeds what one coordinator's drains can manage. A track the coordinator can drain itself needs no middle layer: each nested layer re-pays a full orientation preamble, and a blocking sub-coordinator hides its children while the parent idles. Owns its track's units and boards, authors its workers' briefs, spawns its own workers and verifiers where the runtime lets a subagent spawn one; where it does not, it owns its track's units directly with the same review separation. Rolls up aggregates at wave boundaries; never forwards raw child reports. Cap in-flight children at what one drain can process, roughly ten, as a rolling window; never as blocking batches, which cost the slowest child of every batch.
-- **Worker / verifier.** Background subagents (`run_in_background: true`). Claude Code has no remote worker environment, so isolation is a worktree or branch per writer, not a separate machine. Runtime verification goes through the `run` skill (CLIs and TUIs) or the `verify` skill (UIs). A subagent never sees this chat, so its brief inlines what it needs or points at repo and store paths. Prefer fewer, broader workers; one writer per worktree or branch (principle-separate-before-serializing-shared-state). Run a unit's verifier on a different model family from its worker.
+- **Worker / verifier.** Background subagents (`run_in_background: true`). Claude Code has no remote worker environment, so isolation is a worktree or branch per writer, not a separate machine. Runtime verification goes through the repository's `patinaproject-verify` skill for UIs or `run` for CLIs and TUIs. PR publication always goes through [`opening-a-pr`](opening-a-pr.md): the worker leaves the PR draft until `/deslop`, `/no-comments`, `code-review`, finding resolution, and `mark-ready` complete. A subagent never sees this chat, so its brief inlines what it needs or points at repo and store paths. Prefer fewer, broader workers; one writer per worktree or branch (principle-separate-before-serializing-shared-state). Run a unit's verifier on a different model family from its worker.
 
 Depth stays at coordinator, track, worker. Author the track decomposition per project (build, landing, and verification are common cuts, not a required shape); hard-coded swarm trees were tried and parked as too rigid.
 
@@ -41,12 +41,14 @@ SCOPE        paths this unit may write; paths it may not; its exclusive worktree
 CONTEXT      pointers to files and PRs; upstream reports pasted in full when this unit
              depends on them, because workers cannot see siblings
 ACCEPTANCE   checkable criteria, one per line
-VERIFY       exact commands or the driver skill (`run` for CLIs and TUIs, `verify` for
-             UIs), plus the target, prerequisites, and known gotchas
+VERIFY       exact commands or the repository driver (`run` for CLIs and TUIs,
+             `patinaproject-verify` for UIs), plus target, prerequisites, and gotchas
 TIMEBOX      rough cap on runtime; on expiry, return partial findings and stop rather than run on
 FORBIDDEN    no gt, no rebase, no force-push, no fixes outside scope, plus unit-specific bans
 REPORT       status, branch, head SHA, PRs, verdict, what you actually ran, deviations,
              suggested follow-ups, and applicable verification context
+PUBLICATION  opening-a-pr gate: draft PR, `/deslop`, `/no-comments`, `code-review`,
+             resolve every finding on the current head, then `mark-ready`
 STANDING     <preferences.md pasted verbatim>
 ```
 
@@ -96,6 +98,16 @@ The worker's report gives the verifier directions, not a verdict. The verifier c
 Write ledger rows with `orch ledger record`. Check the current PR and head SHA with `orch ledger check`. `ledger.tsv`, one row per verdict, keyed by PR number plus head SHA: `live-ui-verified | unit-test-verified | type-check-only | verifier-blocked | verifier-failed`. CI green is an input to a verdict, not a verdict. Behavioral work needs better than `type-check-only`. `verifier-blocked` is not a pass; respawn when the environment heals. `verifier-failed` gets a fix unit, not a re-verify. A worker may self-report; a verifier overrides it on the same key. A new head SHA voids the row, so re-verify after restack. The ledger answers "was this verified", not memory and not the transcript.
 
 A unit is not done until its output is externalized the moment it lands, never batched to the end of the run: a worker pushes its branch, a verifier writes its ledger row, receipts land in the store. Work that exists only on one VM when that VM dies was never done.
+
+#### PR publication
+
+Every unit that publishes a PR follows [`opening-a-pr`](opening-a-pr.md) before it
+can report a ready PR. The worker creates a draft, runs `/deslop`, `/no-comments`,
+and `code-review` in that order, resolves every finding against the current head,
+and invokes `scripts/mark-ready/mark-ready` as the only draft-to-ready transition.
+The completion report includes the current head SHA and the resolved code-review
+record. A worker cannot report a ready PR while that record is missing or belongs
+to an older head; return the unit to repair when the head changes.
 
 #### Liveness and failure
 

@@ -78,7 +78,7 @@ Remaining triggers:
 - Before commit → the **deslop** skill (`/deslop`).
 - Before review → the **no-comments** skill (`/no-comments`).
 - Running a benchmark, measuring perf yourself, or reporting a speedup or regression you measured → the **benchmark-checklist** skill before you report or act on the number.
-- Shipping UI / IDE / CLI → the driver skill (`run` for CLIs/TUIs, `verify` for UIs). Both ship as Claude Code built-ins. For bug fixes, reproduce first on the same surface yourself; hand to the user only under the narrow Bug fix step 1 exception.
+- Shipping UI / IDE / CLI → the project `patinaproject-verify` skill for user-observable UI verification, or `run` for CLIs/TUIs. For bug fixes, reproduce first on the same surface yourself; hand to the user only under the narrow Bug fix step 1 exception.
 - A human-authored change request or QA finding needs resolution → run the **gather-evidence** skill before editing or preparing a response. Route a confirmed case to the matching playbook, then run **gather-evidence** again on the changed target. Leave replies, thread resolution, and review state to the operator. Automated review uses the existing bot triage instead.
 - Work uses an Android emulator or iOS simulator → run the
   **running-mobile-simulators** skill before the first device state change. The
@@ -93,6 +93,15 @@ Remaining triggers:
 - A defect found mid-task → severity decides its artifact, not where it turned up. A correctness or data gap gets a tracked issue even when it surfaces while writing a closure doc; a cosmetic margin can stay in the doc.
 - Broken skill mid-task → fix it in its own PR. Don't block. Don't silently work around it.
 - Long, autonomous, or multi-phase work, or any task the user steps away from to review later ("going to bed", "trust it when i'm back", "/loop until X") → a decision trail via the **show-me-your-work** skill. Commit it when stakes need an auditable record; keep it local otherwise.
+
+## Project verification
+
+When behavior verification starts, discover and load the repository's
+`patinaproject-verify` skill before selecting a platform driver. Repository-local
+skills use the `patinaproject-` prefix; vendored skills keep their upstream names.
+Follow the selected skill's launch, doctor, affected-feature, evidence, and
+cleanup instructions. Use generic drivers only when no project skill exists,
+and record that coverage limitation.
 
 ## Carry grounding through the route
 
