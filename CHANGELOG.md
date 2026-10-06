@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.63.0](https://github.com/patinaproject/skills/compare/v2.62.0...v2.63.0) (2026-10-06)
+
+
+### Features
+
+* [#577](https://github.com/patinaproject/skills/issues/577) translate code review presentation across runtimes ([#578](https://github.com/patinaproject/skills/issues/578)) ([46c1691](https://github.com/patinaproject/skills/commit/46c16919045e2aac5fe99c453c297ba13568fdeb))
+
 ## [2.62.0](https://github.com/patinaproject/skills/compare/v2.61.0...v2.62.0) (2026-10-06)
 
 
