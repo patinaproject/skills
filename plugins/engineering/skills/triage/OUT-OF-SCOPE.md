@@ -7,7 +7,7 @@ The `.out-of-scope/` directory in a repo stores persistent records of rejected f
 
 ## Directory structure
 
-```
+```text
 .out-of-scope/
 ├── dark-mode.md
 ├── plugin-system.md
@@ -38,19 +38,20 @@ This is a significant architectural change that doesn't align with the
 project's focus on content authoring. Theming is a concern for downstream
 consumers who embed or redistribute the output.
 
-```ts
+~~~ts
 // The current ThemeConfig interface is not designed for runtime switching:
 interface ThemeConfig {
   colors: ColorPalette; // single palette, resolved at build time
   fonts: FontStack;
 }
-```
+~~~
 
 ## Prior requests
 
 - #42: "Add dark mode support"
 - #87: "Night theme for accessibility"
 - #134: "Dark theme option"
+
 ```
 
 ### Naming the file

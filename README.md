@@ -101,7 +101,7 @@ See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skil
 
 ### Writing specs and issues
 
-The Engineering plugin owns `/to-spec`. It publishes grounded specs and issue bodies and
+The Engineering plugin exposes the upstream `/to-spec` workflow and
 uses the adapter for claiming, labels, lifecycle, relationships, and closure.
 Skills that need issue mechanics follow
 [`docs/issue-tracker.md`](./docs/issue-tracker.md), the sole adapter that

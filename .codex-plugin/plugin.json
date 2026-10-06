@@ -1,6 +1,6 @@
 {
   "name": "patinaproject-skills",
-  "version": "2.58.0",
+  "version": "2.59.0",
   "skills": [
     "./skills/scaffold-repository",
     "./skills/using-github",

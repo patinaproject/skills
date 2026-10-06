@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.59.0](https://github.com/patinaproject/skills/compare/v2.58.0...v2.59.0) (2026-10-06)
+
+
+### Features
+
+* [#565](https://github.com/patinaproject/skills/issues/565) mirror upstream engineering skills ([9227a96](https://github.com/patinaproject/skills/commit/9227a9695a6a06deb4ab0542c510562b7e6e3967))
+
 ## [2.58.0](https://github.com/patinaproject/skills/compare/v2.57.0...v2.58.0) (2026-10-06)
 
 

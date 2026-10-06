@@ -7,10 +7,9 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/update-branch/`: local branch update skill
-- `plugins/engineering/skills/to-spec/`: grounded spec and issue drafting and publication
-- `plugins/engineering/skills/to-tickets/`: break specs into tracer-bullet tickets with blocking edges
+- `plugins/engineering/skills/to-spec/`: upstream to-spec mirror
+- `plugins/engineering/skills/to-tickets/`: upstream to-tickets mirror
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
-- `plugins/engineering/skills/to-spec/`: grounded spec and issue drafting and publication
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
 - `skills/install-skills/`: project-local skills CLI installation skill
