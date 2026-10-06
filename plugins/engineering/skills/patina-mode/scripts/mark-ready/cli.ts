@@ -1,0 +1,187 @@
+import { accessSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { join } from "node:path";
+import type { ForgeAdapter, PullRequestHead, ReviewRecord } from "./types.ts";
+import { checkReadiness } from "./state.ts";
+
+function getReviewRoot(): string {
+  return (
+    process.env.PATINA_CODE_REVIEW_ROOT ??
+    join(process.env.TMPDIR ?? "/tmp", "code-review")
+  );
+}
+
+function parseNumber(value: string | undefined): number {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 1)
+    throw new Error("--pr requires a positive integer");
+  return number;
+}
+
+function parseJson(value: string): Record<string, unknown> {
+  const parsed: unknown = JSON.parse(value);
+  if (!parsed || typeof parsed !== "object")
+    throw new Error("forge returned invalid JSON");
+  return parsed as Record<string, unknown>;
+}
+
+function readForge(
+  command: "gh" | "origin",
+  number: number,
+  repository?: string
+): PullRequestHead {
+  const args = [
+    "pr",
+    "view",
+    String(number),
+    "--json",
+    "headRefOid,headRefName,isDraft",
+  ];
+  if (repository) args.push("--repo", repository);
+  const row = parseJson(execFileSync(command, args, { encoding: "utf8" }));
+  const resolvedRepository = repository ?? process.env.PATINA_REPOSITORY;
+  if (
+    typeof row.headRefOid !== "string" ||
+    typeof row.headRefName !== "string" ||
+    typeof resolvedRepository !== "string"
+  )
+    throw new Error("forge response lacks repository, branch, or head SHA");
+  return {
+    number,
+    repository: resolvedRepository,
+    branch: row.headRefName,
+    head: row.headRefOid,
+    isDraft: row.isDraft === true,
+  };
+}
+
+function adapter(name: "gh" | "origin"): ForgeAdapter {
+  return {
+    name,
+    readPullRequest: (number, repository) =>
+      readForge(name, number, repository),
+    markReady: (number, repository) => {
+      execFileSync(
+        name,
+        [
+          "pr",
+          "ready",
+          String(number),
+          ...(repository ? ["--repo", repository] : []),
+        ],
+        { stdio: "inherit" }
+      );
+    },
+  };
+}
+
+export function parseRecord(path: string, text: string): ReviewRecord {
+  const head = text.match(/^Head(?: SHA)?:\s*(\S+)/m)?.[1] ?? "";
+  const status = (text.match(
+    /^Status:\s*(open|resolved|superseded)\s*$/m
+  )?.[1] ?? "open") as ReviewRecord["status"];
+  const standards =
+    text.match(
+      /^## Standards\s*\n([\s\S]*?)(?=^## Spec\b|^### Resolution\b|^Status:|$)/m
+    )?.[1] ?? "";
+  const spec =
+    text.match(
+      /^## Spec\s*\n([\s\S]*?)(?=^### Resolution\b|^Status:|$)/m
+    )?.[1] ??
+    (/Spec:\s*skipped, no linked issue\./i.test(text) ? "skipped" : "");
+  const section =
+    text.match(/^### Resolution\s*\n([\s\S]*?)(?=^Status:|$)/m)?.[1] ?? "";
+  const resolutions = section
+    .split("\n")
+    .map((line) => line.replace(/^\s*-\s*/, "").trim())
+    .filter(Boolean);
+  const matches = [
+    ...standards.matchAll(
+      /^\s*-\s*Finding\s+(\S+)\s+\((hard|soft|smell|scope-creep)\):/gim
+    ),
+    ...spec.matchAll(
+      /^\s*-\s*Finding\s+(\S+)\s+\((hard|soft|smell|scope-creep)\):/gim
+    ),
+  ];
+  const findings = matches.map((match) => ({
+    id: match[1],
+    kind: match[2].toLowerCase() as "hard" | "soft" | "smell" | "scope-creep",
+  }));
+  const resolved = new Set(
+    resolutions
+      .map(
+        (line) =>
+          line.match(/^\S+:\s*(?:Fixed in|Dismissed:)/i)?.[0]?.split(":")[0]
+      )
+      .filter(Boolean)
+  );
+  for (const [index, resolution] of resolutions.entries())
+    if (
+      !/^\S+:/.test(resolution) &&
+      /^(?:Fixed in|Dismissed:)/i.test(resolution) &&
+      findings[index]
+    )
+      resolved.add(findings[index].id);
+  const blockingFindings = findings.filter(
+    (finding) => finding.kind === "hard" && !resolved.has(finding.id)
+  ).length;
+  return {
+    path,
+    head,
+    status,
+    standards,
+    spec,
+    findings,
+    resolutions,
+    blockingFindings,
+    dismissedFindings: resolutions.filter((line) =>
+      /^\S+:\s*Dismissed:/i.test(line)
+    ).length,
+  };
+}
+
+export function run(
+  argv: readonly string[],
+  forgeOverride?: ForgeAdapter
+): number {
+  try {
+    const prIndex = argv.indexOf("--pr");
+    const pr = parseNumber(prIndex >= 0 ? argv[prIndex + 1] : undefined);
+    const repoIndex = argv.indexOf("--repo");
+    const repository = repoIndex >= 0 ? argv[repoIndex + 1] : undefined;
+    const recordIndex = argv.indexOf("--record");
+    const explicitRecord = recordIndex >= 0 ? argv[recordIndex + 1] : undefined;
+    const forge =
+      forgeOverride ??
+      adapter(process.env.PATINA_FORGE === "origin" ? "origin" : "gh");
+    const current = forge.readPullRequest(pr, repository);
+    const path =
+      explicitRecord ??
+      join(
+        getReviewRoot(),
+        current.repository,
+        current.branch,
+        `${current.head}.md`
+      );
+    try {
+      accessSync(path);
+    } catch {
+      throw new Error(
+        `no local review exists for current head ${current.head}: ${path}`
+      );
+    }
+    const record = parseRecord(path, readFileSync(path, "utf8"));
+    const check = checkReadiness(record, current.head, current.isDraft);
+    if (!check.ok) throw new Error(check.errors.join("; "));
+    forge.markReady(pr, repository);
+    process.stdout.write(
+      `Local code review passed for PR #${pr} at ${current.head}. ${record.dismissedFindings} dismissed finding(s).\n`
+    );
+    return 0;
+  } catch (error) {
+    process.stderr.write(
+      `mark-ready: ${error instanceof Error ? error.message : String(error)}\n`
+    );
+    return 1;
+  }
+}
