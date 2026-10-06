@@ -105,10 +105,10 @@ not exist yet — captures the exact proposed doc text (the complete ADR body an
 each glossary entry) on the GitHub issue that will implement the decision
 instead of editing the tree, creating that issue if none exists. The branch
 implementing such an issue applies the captured text verbatim in its pull
-request. Take the capture rules and the `CONTEXT-FORMAT.md` and `ADR-FORMAT.md`
+request. Take the capture rules and the `GLOSSARY-FORMAT.md` and `ADR-FORMAT.md`
 formats from the vendored `domain-modeling` skill; this repository owns no
 documentation-capture skill. This
-supersedes the inline "update `CONTEXT.md` right there" capture instruction in
+uses `CONTEXT.md` as the local glossary filename and supersedes the inline glossary-update capture instruction in
 the vendored `domain-modeling` payload; see
 [docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
 
