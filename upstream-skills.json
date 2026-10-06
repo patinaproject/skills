@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "name": "pstack",
+      "repo": "https://github.com/michael-denyer/pstack-claude.git",
+      "ref": "main",
+      "pin": "ad396c23e5f3515a008f0b2c1e5316798e3dab0d",
+      "transforms": {
+        "rename": {
+          "poteto-mode": "patina-mode",
+          "poteto-agent": "patina-agent"
+        },
+        "denylist": [
+          "poteto-mode",
+          "poteto-agent"
+        ]
+      },
+      "targets": [
+        {
+          "kind": "subtree",
+          "source": "plugins/pstack",
+          "destination": "plugins/engineering",
+          "exclude": []
+        }
+      ],
+      "transformHash": "9f5f9bc8ac4aa6e08032a0b4503d31b205b97e7a9506307fac09eb936085db1e"
+    },
+    {
+      "name": "mattpocock",
+      "repo": "https://github.com/mattpocock/skills.git",
+      "ref": "main",
+      "pin": "7a030a8b0dcaa601bb0dda9aaf174affb3d61145",
+      "transforms": {
+        "rename": {},
+        "denylist": []
+      },
+      "targets": [
+        {
+          "kind": "skill",
+          "source": "skills/engineering/to-spec",
+          "destination": "plugins/engineering/skills/to-spec"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/to-tickets",
+          "destination": "plugins/engineering/skills/to-tickets"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/triage",
+          "destination": "plugins/engineering/skills/triage"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/retro",
+          "destination": "plugins/engineering/skills/retro"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/code-review",
+          "destination": "plugins/engineering/skills/code-review"
+        }
+      ],
+      "transformHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
+    }
+  ]
+}
