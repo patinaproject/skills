@@ -9,5 +9,5 @@ description: Question the user about important system design decisions, then pre
    They own the question boundary, ADR mechanics, and operator questions in
    this flow.
 2. Run `design-by-contract` to identify the important agreements in the design.
-3. When the design is settled, hand off to `to-issue` when the result needs an
+3. When the design is settled, hand off to `to-spec` when the result needs an
    issue. Keep the worktree unchanged until the handoff is complete.

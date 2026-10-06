@@ -99,9 +99,9 @@ started.
 
 See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skills/working-on-issues/) for the skill contract.
 
-### Filing and editing issues
+### Writing specs and issues
 
-The Engineering plugin owns `/to-issue`. It publishes grounded issue bodies and
+The Engineering plugin owns `/to-spec`. It publishes grounded specs and issue bodies and
 uses the adapter for claiming, labels, lifecycle, relationships, and closure.
 Skills that need issue mechanics follow
 [`docs/issue-tracker.md`](./docs/issue-tracker.md), the sole adapter that
@@ -142,7 +142,7 @@ for the skill contract.
 
 System design grilling should focus on choices that deserve durable context.
 `grill-system-design` runs that interview with `grilling` and `domain-modeling`,
-hands a settled design to `to-issue`, and limits questions to hard-to-reverse,
+hands a settled design to `to-spec`, and limits questions to hard-to-reverse,
 surprising trade-offs.
 
 See [./skills/grill-system-design/](./skills/grill-system-design/) for the skill
