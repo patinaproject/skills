@@ -1,138 +1,75 @@
 ---
 name: to-spec
-description: Turn the current conversation into a grounded spec or tracker issue and publish it through the configured tracker. Use when work needs a new spec or issue.
+description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
 disable-model-invocation: true
 ---
 
-# Write a spec or issue
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-Synthesize the current conversation and codebase into a spec or tracker issue.
-Do not interview the operator about the product requirement. Ask only for
-approval of new names that are hard to reverse.
-
-The issue tracker and triage label vocabulary come from the repository's
-`docs/issue-tracker.md` adapter. Do not select a provider from memory or call a
-provider API directly.
+The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
 
 ## Process
 
-### 1. Gather context
+1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the spec, and respect any ADRs in the area you're touching.
 
-Work from the conversation and the codebase. Use the project's domain glossary
-vocabulary and respect relevant ADRs. Read `docs/issue-tracker.md`,
-`docs/issue-publishing.md`, relevant context files, and relevant ADRs before
-drafting.
+2. Sketch out the seams at which you're going to test the feature. Existing seams should be preferred to new ones. Use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better - the ideal number is one.
 
-Resolve one explicit existing issue when the conversation names one. Fetch its
-current body, comments, and relationships before editing it. Search issue
-titles and full text with several meaningful problem terms before creating a
-new issue. If a strong duplicate exists, stop and report it for operator review.
+Check with the user that these seams match their expectations.
 
-### 2. Review hard-to-reverse names
+1. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
 
-List every new name that an implementation or deployment would be costly to
-change later: published packages and directories, workspaces, deployed
-resources, hostnames and routes, bindings, environment variables and secrets,
-public types and APIs, and outputs consumed by another system. Mark each name
-`existing` or `new`. Keep existing names unless a strong reason supports a
-change. Ask the operator to approve every new name before mutation, then use
-approved names exactly.
-
-### 3. Sketch testing seams
-
-Prefer existing seams and the highest suitable seam. If a new seam is needed,
-propose it at the highest level possible. Keep the seam count as small as the
-behavior allows. Include the testing decision in the spec.
-
-### 4. Draft the spec
-
-Use this order and omit optional sections with no content:
+<spec-template>
 
 ## Problem Statement
 
-Describe the problem from the user's perspective.
+The problem that the user is facing, from the user's perspective.
 
 ## Solution
 
-Describe the observable result from the user's perspective.
-
-## Context
-
-Record the evidence that limits the interpretation of the requirement.
-
-## Business rules
-
-State every grounded rule in one line. Follow the lines with a `gherkin` block.
-The block must contain `Feature`, an optional `Background`, and one or more
-`Scenario` or `Scenario Outline` entries with `Examples` when needed. Cover the
-main case and every edge case grounded in the code, issue, or conversation. Do
-not turn an open question into a settled scenario.
+The solution to the problem, from the user's perspective.
 
 ## User Stories
 
-Write a numbered list in this form:
+A LONG, numbered list of user stories. Each user story should be in the format of:
 
-1. As an `<actor>`, I want a `<feature>`, so that `<benefit>`.
+1. As an <actor>, I want a <feature>, so that <benefit>
 
-Cover the meaningful user-facing aspects of the work.
+<user-story-example>
+1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
+</user-story-example>
+
+This list of user stories should be extremely extensive and cover all aspects of the feature.
 
 ## Implementation Decisions
 
-Record supported module, interface, architecture, schema, and contract
-choices. Do not include file paths or code snippets. A prototype-produced state
-machine, reducer, schema, or type shape may be included when prose cannot state
-the decision precisely; keep only the decision-rich part.
+A list of implementation decisions that were made. This can include:
+
+- The modules that will be built/modified
+- The interfaces of those modules that will be modified
+- Technical clarifications from the developer
+- Architectural decisions
+- Schema changes
+- API contracts
+- Specific interactions
+
+Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
+
+Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it within the relevant decision and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
 
 ## Testing Decisions
 
-Describe the external behavior that makes a good test, the highest seam to use,
-and relevant prior art. Test behavior rather than implementation details.
+A list of testing decisions that were made. Include:
+
+- A description of what makes a good test (only test external behavior, not implementation details)
+- Which modules will be tested
+- Prior art for the tests (i.e. similar types of tests in the codebase)
 
 ## Out of Scope
 
-Record exclusions that keep the spec focused.
+A description of the things that are out of scope for this spec.
 
-## Open Questions
+## Further Notes
 
-List rules that the code, issue, and conversation do not settle. Do not invent
-answers.
+Any further notes about the feature.
 
-## ADR Proposals
-
-When the conversation settles a durable architecture decision, add a file-ready
-proposal in the repository ADR format using the originating issue identifier.
-
-## Glossary Proposals
-
-When the conversation settles a shared domain term, add a file-ready proposal
-in the owning context format with its definition and `_Avoid_` terms.
-
-## Approved Names
-
-List each approved new name and each existing name that constrains the work.
-
-### 5. Format the description visually
-
-After grounding the requirements, invoke `show-me` to choose the smallest useful
-visual for the proposed behavior. Place each visual beside the text it
-explains. Keep Business rules, Gherkin scenarios, acceptance criteria, and
-publishing guardrails unchanged.
-
-### 6. Publish and verify
-
-Apply the publishing guardrails before mutation. Resolve destination teams,
-labels, planning fields, and relationship targets through the adapter. Use live
-labels only. Refuse private-repository, credential, or customer-data leaks.
-
-For a new issue, publish the complete body through the adapter. New public work
-enters GitHub's native `needs-triage` state unless the operator has established
-that the brief is ready; do not apply a ready label by default. Verify the
-created issue, body, labels, lifecycle state, and native relationships.
-
-For an existing issue with no `Business rules` section, add only the missing
-Business rules section and its Gherkin block unless the operator requests
-another change. Verify that no new issue was created.
-
-Report the issue identifier and URL, tracker, lifecycle state, duplicate search,
-naming approvals, and verification result. Report open questions and any
-guardrail that stopped publication.
+</spec-template>
