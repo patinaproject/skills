@@ -55,7 +55,7 @@ the role says what triage decided. An issue that stays in the triage state while
 carrying a role is normal: triage has finished and a person has not yet accepted
 it. A person owns every triage-facing status change.
 
-In vendored triage guidance, interpret "GitHub issue" as the canonical tracker
+In upstream triage guidance, interpret "GitHub issue" as the canonical tracker
 issue and route example commands through this adapter. Pull requests remain
 forge objects.
 

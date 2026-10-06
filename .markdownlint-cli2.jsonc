@@ -18,6 +18,11 @@
     // written against their own upstream markdownlint config and are overwritten
     // on every re-vendor, so they are never linted here.
     ".agents/skills/**",
-    ".claude/skills/**"
+    ".claude/skills/**",
+    // These four Engineering entries are exact mirrors of upstream payloads.
+    "plugins/engineering/skills/to-spec/**",
+    "plugins/engineering/skills/to-tickets/**",
+    "plugins/engineering/skills/triage/**",
+    "plugins/engineering/skills/retro/**"
   ]
 }
