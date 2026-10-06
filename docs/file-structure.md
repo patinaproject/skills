@@ -22,7 +22,10 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
-- `plugins/engineering/skills/triage-issues/`: Fixed-inbox triage workflow with one-shot and loop modes
+- `plugins/engineering/skills/retro/`: Coding-session retrospective workflow
+- `plugins/engineering/skills/to-spec/`: Issue spec drafting and publication workflow
+- `plugins/engineering/skills/to-tickets/`: Tracer-bullet ticket breakdown workflow
+- `plugins/engineering/skills/triage/`: Issue and pull-request triage workflow
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
@@ -74,7 +77,10 @@ Skills owned by this repository:
 | `writing-for-pstack` | `skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
-| `triage-issues` | `plugins/engineering/skills/triage-issues/` | Fixed-inbox triage workflow with one-shot and loop modes |
+| `retro` | `plugins/engineering/skills/retro/` | Coding-session retrospective workflow |
+| `to-spec` | `plugins/engineering/skills/to-spec/` | Issue spec drafting and publication workflow |
+| `to-tickets` | `plugins/engineering/skills/to-tickets/` | Tracer-bullet ticket breakdown workflow |
+| `triage` | `plugins/engineering/skills/triage/` | Issue and pull-request triage workflow |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
