@@ -90,4 +90,21 @@ describe("local review record", () => {
     }
     expect(calls).toEqual(["origin ready"]);
   });
+
+  it("accepts an explicit record from standard input", () => {
+    const calls: string[] = [];
+    const forge: ForgeAdapter = {
+      name: "gh",
+      readPullRequest: () => ({
+        repository: "owner_repo",
+        branch: "feature",
+        number: 1,
+        head: "abc123",
+        isDraft: true,
+      }),
+      markReady: () => calls.push("ready"),
+    };
+    expect(run(["--pr", "1", "--record", "-"], forge, () => markdown())).toBe(0);
+    expect(calls).toEqual(["ready"]);
+  });
 });

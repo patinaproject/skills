@@ -10,6 +10,23 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
+## Output contract
+
+The review has one substance contract across runtimes. Report the separate
+`## Standards` and `## Spec` axes, and write every finding as ordinary Markdown
+with its file and exact line or tight line range. Keep the Markdown findings in
+the review so the result remains readable outside a review UI.
+
+The presentation layer may add runtime metadata, but it does not change the
+finding set. On Codex, follow the platform translation for actionable findings
+that belong to a changed line; on Claude, use the Markdown finding alone.
+
+The review record is separate evidence for readiness. Preserve the reviewed
+head SHA, both axis results, finding IDs, dispositions, and `Status: resolved`
+in the record. Pass that record to `mark-ready` through its explicit
+`--record <path>` or `--record -` interface; UI comments are presentation
+metadata and never replace the record.
+
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
 
 ## Process
