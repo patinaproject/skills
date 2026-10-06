@@ -64,7 +64,7 @@ function transformTree(sourceDir, destinationDir, rules) {
 }
 function archive(commit, sourcePath, destination) {
   fs.mkdirSync(destination, {recursive: true});
-  const archiveResult = spawnSync('git', ['archive', `${commit}:${sourcePath}`], {cwd: root, encoding: null});
+  const archiveResult = spawnSync('git', ['archive', `${commit}:${sourcePath}`], {cwd: root, encoding: null, maxBuffer: 128 * 1024 * 1024});
   if (archiveResult.status !== 0) fail(`cannot archive ${commit}:${sourcePath}`);
   if (spawnSync('tar', ['-x', '-C', destination], {input: archiveResult.stdout}).status !== 0) fail(`cannot extract ${commit}:${sourcePath}`);
 }
