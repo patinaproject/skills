@@ -24,7 +24,7 @@
           "exclude": []
         }
       ],
-      "transformHash": "9f5f9bc8ac4aa6e08032a0b4503d31b205b97e7a9506307fac09eb936085db1e"
+      "transformsHash": "9f5f9bc8ac4aa6e08032a0b4503d31b205b97e7a9506307fac09eb936085db1e"
     },
     {
       "name": "mattpocock",
@@ -62,7 +62,7 @@
           "destination": "plugins/engineering/skills/code-review"
         }
       ],
-      "transformHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
+      "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
     }
   ]
 }

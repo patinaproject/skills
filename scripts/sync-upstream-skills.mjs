@@ -41,8 +41,9 @@ for (const source of sources) {
   source.transforms.rename ??= {};
   source.transforms.denylist ??= [];
   const expectedHash = transformHash(source.transforms);
-  if (!source.transformHash) fail(`source ${source.name} has no transformHash; record ${expectedHash} at its pinned commit first.`);
-  if (source.transformHash !== expectedHash) fail(`source ${source.name} transforms changed; record a new merge base at ${source.pin} and commit the transform change before syncing.`);
+  const recordedHash = source.transformsHash ?? source.transformHash;
+  if (!recordedHash) fail(`source ${source.name} has no transformsHash; record ${expectedHash} at its pinned commit first.`);
+  if (recordedHash !== expectedHash) fail(`source ${source.name} transforms changed; record a new merge base at ${source.pin} and commit the transform change before syncing.`);
   if (!gitTry(['remote', 'get-url', source.name]).ok) git(['remote', 'add', source.name, source.repo]);
   git(['fetch', '--no-tags', source.name, source.ref]);
   const tip = git(['rev-parse', 'FETCH_HEAD']);
@@ -110,6 +111,10 @@ function validateForks() {
 const forked = validateForks();
 const ownedPaths = new Set();
 for (const {base, current} of sourceData.values()) for (const pathname of [...base.keys(), ...current.keys()]) ownedPaths.add(pathname);
+if (sources.every(source => sourceData.get(source.name).tip === source.pin)) {
+  console.log(`sync-upstream-skills: already at the pinned commit for ${sources.map(source => source.name).join(', ')}; nothing to sync.`);
+  process.exit(0);
+}
 function addSnapshotToIndex(index, snapshot) {
   for (const [pathname, item] of snapshot) {
     const blob = git(['hash-object', '-w', item.file]);
