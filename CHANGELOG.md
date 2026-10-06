@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.61.0](https://github.com/patinaproject/skills/compare/v2.60.0...v2.61.0) (2026-10-06)
+
+
+### Features
+
+* [#570](https://github.com/patinaproject/skills/issues/570) sync upstream skills from one pinned manifest ([#573](https://github.com/patinaproject/skills/issues/573)) ([794c0c9](https://github.com/patinaproject/skills/commit/794c0c96edd3cfcfc88549c9944ed791f698f91c))
+* [#571](https://github.com/patinaproject/skills/issues/571) gate patina-mode PRs on local review ([#572](https://github.com/patinaproject/skills/issues/572)) ([e2b65b0](https://github.com/patinaproject/skills/commit/e2b65b032dab57442abac3f639ed5de8ebc07901))
+
 ## [2.60.0](https://github.com/patinaproject/skills/compare/v2.59.0...v2.60.0) (2026-10-06)
 
 
