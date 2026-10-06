@@ -113,7 +113,7 @@ for (const {base, current} of sourceData.values()) for (const pathname of [...ba
 function addSnapshotToIndex(index, snapshot) {
   for (const [pathname, item] of snapshot) {
     const blob = git(['hash-object', '-w', item.file]);
-    git(['update-index', '--add', '--cacheinfo', String(item.mode), blob, pathname], {env: {GIT_INDEX_FILE: index}});
+    git(['update-index', '--add', `--cacheinfo=${item.mode},${blob},${pathname}`], {env: {GIT_INDEX_FILE: index}});
   }
 }
 function treeFor(label) {
