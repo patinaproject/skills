@@ -1,6 +1,7 @@
 import { accessSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
+import { markReadyIfCurrent } from "../../../pr-readiness/scripts/adapters.ts";
 import type { ForgeAdapter, PullRequestHead, ReviewRecord } from "./types.ts";
 import { checkReadiness } from "./state.ts";
 
@@ -64,18 +65,8 @@ function adapter(name: "gh" | "origin"): ForgeAdapter {
     name,
     readPullRequest: (number, repository) =>
       readForge(name, number, repository),
-    markReady: (number, repository) => {
-      execFileSync(
-        name,
-        [
-          "pr",
-          "ready",
-          String(number),
-          ...(repository ? ["--repo", repository] : []),
-        ],
-        { stdio: "inherit" }
-      );
-    },
+    markReady: (number, repository) =>
+      markReadyIfCurrent(name, repository ?? "", number, readForge(name, number, repository).head),
   };
 }
 

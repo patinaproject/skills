@@ -8,6 +8,7 @@ import {
   type ValidityDecision,
   type Validity,
   freezePacket,
+  isObligation,
   sha256,
 } from "./domain.ts";
 
@@ -26,6 +27,25 @@ export interface EvaluationReport {
   readonly decisions: readonly ValidityDecision[];
   readonly bodyErrors: readonly string[];
   readonly packet?: ReadinessPacket;
+}
+
+function validObservation(value: unknown): value is Observation {
+  if (!value || typeof value !== "object") return false;
+  const observation = value as Partial<Observation>;
+  return (
+    typeof observation.id === "string" &&
+    observation.id.length > 0 &&
+    isObligation(observation.obligation) &&
+    !!observation.candidate &&
+    typeof observation.inputDigest === "string" &&
+    typeof observation.scope === "string" &&
+    Array.isArray(observation.artifactRefs) &&
+    typeof observation.producerVersion === "string" &&
+    typeof observation.capturedAt === "string" &&
+    Number.isFinite(Date.parse(observation.capturedAt)) &&
+    (observation.expiresAt === undefined || Number.isFinite(Date.parse(observation.expiresAt))) &&
+    (observation.verdict === "pass" || observation.verdict === "fail")
+  );
 }
 
 const DEFAULT_RULES: readonly ObligationRule[] = [
@@ -54,6 +74,16 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
   const rules = input.rules ?? DEFAULT_RULES;
   const now = input.now ? Date.parse(input.now) : Date.now();
   const decisions: ValidityDecision[] = [];
+  const globalErrors = input.observations.flatMap((observation) =>
+    validObservation(observation)
+      ? []
+      : [`malformed observation${typeof observation === "object" && observation && "id" in observation ? ` ${String((observation as { id?: unknown }).id)}` : ""}`]
+  );
+  const knownRules = new Set(rules.map((rule) => rule.obligation));
+  for (const observation of input.observations) {
+    if (validObservation(observation) && !knownRules.has(observation.obligation))
+      globalErrors.push(`unknown obligation: ${observation.obligation}`);
+  }
   for (const rule of rules) {
     if (!rule.applies(input.candidate)) {
       decisions.push({ obligation: rule.obligation, validity: "not-applicable", reason: `change does not require ${rule.obligation} evidence` });
@@ -65,7 +95,7 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
       decisions.push({ obligation: rule.obligation, validity: "rerun-required", reason: `missing ${rule.obligation} observation` });
       continue;
     }
-    if (!observation.id || !observation.candidate || observation.candidate.repository !== input.candidate.repository || observation.candidate.pullRequest !== input.candidate.pullRequest) {
+    if (!validObservation(observation) || observation.candidate.repository !== input.candidate.repository || observation.candidate.pullRequest !== input.candidate.pullRequest) {
       decisions.push({ obligation: rule.obligation, observationId: observation?.id, validity: "invalid", reason: `${rule.obligation} observation belongs to another candidate`, capturedHead: observation?.candidate?.head });
       continue;
     }
@@ -87,7 +117,7 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
     }
     decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation does not describe current candidate`, capturedHead: observation.candidate.head });
   }
-  const bodyErrors = validateBodyClaims(input.body, input.bodyClaims, decisions);
+  const bodyErrors = [...globalErrors, ...validateBodyClaims(input.body, input.bodyClaims, decisions)];
   const ready = decisions.every((decision) => decision.validity === "observed-current" || decision.validity === "valid-by-equivalence" || decision.validity === "not-applicable") && bodyErrors.length === 0;
   if (!ready) return { ready, decisions, bodyErrors };
   const packet = freezePacket({

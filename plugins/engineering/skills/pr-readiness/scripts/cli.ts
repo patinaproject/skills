@@ -14,7 +14,11 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     if (!["open", "check", "publish"].includes(command)) throw new Error("usage: pr-readiness open|check|publish");
     const repository = required(argv, "--repo");
     if (command === "open") {
-      const state = deps.forge.openPullRequest({ repository, base: required(argv, "--base"), head: required(argv, "--head"), draft: value(argv, "--draft") !== "false" });
+      const mode = value(argv, "--mode");
+      if (mode !== undefined && mode !== "draft" && mode !== "ready")
+        throw new Error("--mode must be draft or ready");
+      const draft = mode ? mode === "draft" : value(argv, "--draft") !== "false";
+      const state = deps.forge.openPullRequest({ repository, base: required(argv, "--base"), head: required(argv, "--head"), draft });
       process.stdout.write(JSON.stringify(state) + "\n");
       return 0;
     }
@@ -26,7 +30,7 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
       return 0;
     }
     const observations = deps.observations?.(initial) ?? loadObservations();
-    const body = value(argv, "--body");
+    const body = value(argv, "--body") ?? initial.body;
     const bodyClaims = deps.bodyClaims?.(initial) ?? (body ? parseBodyClaims(body) : undefined);
     const report = evaluateReadiness({ candidate: candidateFromPullRequest(initial), observations, bodyClaims, body });
     if (command === "check") {

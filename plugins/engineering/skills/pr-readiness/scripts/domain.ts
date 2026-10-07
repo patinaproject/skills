@@ -15,6 +15,15 @@ export type Obligation =
   | "lint"
   | "behavior";
 
+export const OBLIGATIONS: readonly Obligation[] = [
+  "standards",
+  "spec",
+  "hygiene",
+  "tests",
+  "lint",
+  "behavior",
+];
+
 export interface CandidateIdentity {
   readonly repository: string;
   readonly pullRequest: number;
@@ -91,6 +100,10 @@ export function canonicalize(value: unknown): string {
 
 export function sha256(value: unknown): string {
   return createHash("sha256").update(canonicalize(value)).digest("hex");
+}
+
+export function isObligation(value: unknown): value is Obligation {
+  return typeof value === "string" && (OBLIGATIONS as readonly string[]).includes(value);
 }
 
 export function freezePacket(packet: Omit<ReadinessPacket, "digest">): ReadinessPacket {

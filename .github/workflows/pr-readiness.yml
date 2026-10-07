@@ -1,8 +1,13 @@
 name: PR readiness
 
 on:
-  pull_request:
-    types: [opened, edited, synchronize, reopened,ready_for_review]
+  # Evaluate with the base branch workflow so pull-request code cannot decide readiness.
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [pr-readiness-receipt]
   workflow_dispatch:
 
 permissions:
@@ -22,3 +27,6 @@ jobs:
         run: |
           echo "PR readiness evaluator loaded from trusted base: $GITHUB_SHA"
           test -x plugins/engineering/skills/pr-readiness/scripts/pr-readiness
+          if [ -n "${{ github.event.pull_request.number || '' }}" ]; then
+            echo "A missing or stale packet must fail the required PR readiness check."
+          fi

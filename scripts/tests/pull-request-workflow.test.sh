@@ -51,6 +51,13 @@ run_closing_check() {
 }
 
 assert_file "$WORKFLOW"
+assert_file ".github/workflows/pr-readiness.yml"
+
+if rg -n '"pr",[[:space:]]*"ready"|gh pr ready|origin pr ready' plugins/engineering/skills \
+  --glob '*.ts' --glob '*.mjs' --glob '*.sh' --glob '*.md' \
+  --glob '!pr-readiness/scripts/adapters.ts' --glob '!patina-mode/playbooks/opening-a-pr.md' >/dev/null 2>&1; then
+  fail "direct forge ready transition found outside pr-readiness adapters"
+fi
 
 node --input-type=commonjs <<'NODE'
 const fs = require('node:fs')
@@ -61,6 +68,7 @@ const requiredContexts = [
   'Lint Actions workflows',
   'Lint Markdown',
   'Validate pull request',
+  'PR readiness',
   'Verify skill overlay',
 ]
 
@@ -86,12 +94,12 @@ const findPullRequestEvent = (workflow) => {
 
   const eventIndent = Math.min(...eventLines.map(indentation))
   const pullRequestIndex = onBlock.findIndex((line) => (
-    indentation(line) === eventIndent && /^pull_request\s*:/.test(line.trim())
+    indentation(line) === eventIndent && /^pull_request(?:_target)?\s*:/.test(line.trim())
   ))
   if (pullRequestIndex === -1) return null
 
   const eventLine = onBlock[pullRequestIndex]
-  const inlineValue = eventLine.trim().replace(/^pull_request\s*:\s*/, '')
+  const inlineValue = eventLine.trim().replace(/^pull_request(?:_target)?\s*:\s*/, '')
   const eventFollowingLines = onBlock.slice(pullRequestIndex + 1)
   const eventEnd = eventFollowingLines.findIndex((line) => {
     const trimmed = line.trim()

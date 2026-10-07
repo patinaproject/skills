@@ -20,6 +20,6 @@ describe("pr-readiness CLI operations", () => {
   it("is idempotent for an already-ready PR", () => {
     const store = new MemoryPacketStore(); const current = state(false);
     const result = operation(["publish", "--repo", "o/r", "--pr", "1"], { forge: forge(current), store, observations: () => [] });
-    expect(result).toBe(1);
+    expect(result).toBe(0);
   });
 });

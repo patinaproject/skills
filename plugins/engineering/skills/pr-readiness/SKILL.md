@@ -8,12 +8,12 @@ description: Evaluate pull-request evidence against the current candidate and pu
 `pr-readiness` is the single owner of readiness evaluation and publication. Evidence producers emit typed observations; this skill selects applicable obligations, validates current or equivalent evidence, checks machine-readable body claims, and stores an immutable readiness packet.
 
 ```sh
-pr-readiness open --repo OWNER/REPO --base BASE --head BRANCH
+pr-readiness open --repo OWNER/REPO --base BASE --head BRANCH --mode draft|ready
 pr-readiness check --repo OWNER/REPO --pr NUMBER
 pr-readiness publish --repo OWNER/REPO --pr NUMBER
 ```
 
-`check` is read-only. `publish` evaluates, reads the remote head again, rejects a race with both SHAs, writes a packet with put-if-absent semantics, and performs the forge ready transition with an expected head. Publishing an already-ready pull request is idempotent.
+`open` passes the caller's selected creation mode to the forge. `check` is read-only. `publish` evaluates, reads the remote head again, rejects a race with both SHAs, writes a packet with put-if-absent semantics, and performs the forge ready transition with an expected head. Publishing an already-ready pull request is idempotent.
 
 The executable and pure evaluator live under `scripts/`. Forge and packet-store adapters are explicit seams; callers inject them in tests and integrations. Missing, expired, mismatched, or unproven observations fail closed. Historical observations accepted through an equivalence rule retain their capture SHA and are reported as `valid-by-equivalence`.
 
