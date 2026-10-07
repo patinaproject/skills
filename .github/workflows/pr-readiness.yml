@@ -8,6 +8,8 @@ on:
     branches: [main]
   repository_dispatch:
     types: [pr-readiness-receipt]
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       pr_number:
@@ -69,17 +71,25 @@ jobs:
         run: |
           set -euo pipefail
           # The evaluator derives candidate identity from forge metadata and git patch data.
-          set +e
-          bun plugins/engineering/skills/pr-readiness/scripts/pr-readiness check --repo "$GITHUB_REPOSITORY" --pr "$PR_NUMBER" --observations .patina/observations.json > .patina/report.json
-          rc=$?
-          set -e
-          cat .patina/report.json
-          test "$rc" -eq 0
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            rc=0
+            for pr in $(gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number --jq '.[].number'); do
+              bun plugins/engineering/skills/pr-readiness/scripts/pr-readiness check --repo "$GITHUB_REPOSITORY" --pr "$pr" --observations .patina/observations.json > ".patina/report-$pr.json" || rc=1
+            done
+            test "$rc" -eq 0
+          else
+            set +e
+            bun plugins/engineering/skills/pr-readiness/scripts/pr-readiness check --repo "$GITHUB_REPOSITORY" --pr "$PR_NUMBER" --observations .patina/observations.json > .patina/report.json
+            rc=$?
+            set -e
+            cat .patina/report.json
+            test "$rc" -eq 0
+          fi
       - name: Upload immutable readiness packet
         if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: pr-readiness-${{ github.event.pull_request.head.sha || github.sha }}
-          path: .patina/report.json
+          path: .patina/report*.json
           if-no-files-found: error
           retention-days: 90
