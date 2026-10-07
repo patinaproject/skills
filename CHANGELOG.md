@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.65.0](https://github.com/patinaproject/skills/compare/v2.64.0...v2.65.0) (2026-10-07)
+
+
+### Features
+
+* [#580](https://github.com/patinaproject/skills/issues/580) centralize pull-request readiness ([#581](https://github.com/patinaproject/skills/issues/581)) ([ca06173](https://github.com/patinaproject/skills/commit/ca061736ce0d5dfa959c464ebf419ba1d670f015))
+
 ## [2.64.0](https://github.com/patinaproject/skills/compare/v2.63.0...v2.64.0) (2026-10-07)
 
 
