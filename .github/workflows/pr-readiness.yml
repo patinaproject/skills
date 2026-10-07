@@ -44,7 +44,7 @@ jobs:
       # oven-sh/setup-bun@v2.0.2
       - uses: 735343b667d3e6f658f44d0eca948eb6282f2b76
         with:
-          bun-version: latest
+          bun-version: '1.4.2'
       - name: Install trusted evaluator dependencies
         run: bun install --cwd plugins/engineering/skills/patina-mode/scripts --frozen-lockfile
       - name: Download immutable evidence bundle
