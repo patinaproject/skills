@@ -65,6 +65,10 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
       decisions.push({ obligation: rule.obligation, validity: "rerun-required", reason: `missing ${rule.obligation} observation` });
       continue;
     }
+    if (!observation.id || !observation.candidate || observation.candidate.repository !== input.candidate.repository || observation.candidate.pullRequest !== input.candidate.pullRequest) {
+      decisions.push({ obligation: rule.obligation, observationId: observation?.id, validity: "invalid", reason: `${rule.obligation} observation belongs to another candidate`, capturedHead: observation?.candidate?.head });
+      continue;
+    }
     if (observation.verdict !== "pass") {
       decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation failed`, capturedHead: observation.candidate.head });
       continue;
@@ -108,11 +112,27 @@ function validateBodyClaims(body: string | undefined, claims: readonly BodyClaim
   if (!claims && !body) return [];
   const errors: string[] = [];
   const byId = new Map(decisions.filter((d) => d.observationId).map((d) => [d.observationId!, d]));
+  const seen = new Set<string>();
   for (const claim of claims ?? []) {
+    if (seen.has(claim.observationId)) errors.push(`duplicate observation ID: ${claim.observationId}`);
+    seen.add(claim.observationId);
     const decision = byId.get(claim.observationId);
     if (!decision) errors.push(`unknown observation ID: ${claim.observationId}`);
     else if (decision.obligation !== claim.obligation || decision.validity !== claim.validity) errors.push(`body claim disagrees for ${claim.observationId}`);
     if (body && !body.includes(claim.observationId)) errors.push(`body omits observation ID: ${claim.observationId}`);
   }
+  for (const decision of decisions) if (decision.observationId && !seen.has(decision.observationId)) errors.push(`body omits observation ID: ${decision.observationId}`);
   return errors;
+}
+
+export function parseBodyClaims(body: string): readonly BodyClaim[] {
+  const claims: BodyClaim[] = [];
+  for (const match of body.matchAll(/<!--\s*pr-readiness:\s*(\{[^\n]+\})\s*-->/g)) {
+    const parsed: unknown = JSON.parse(match[1]);
+    if (!parsed || typeof parsed !== "object") throw new Error("malformed readiness body claim");
+    const claim = parsed as Partial<BodyClaim>;
+    if (typeof claim.observationId !== "string" || typeof claim.obligation !== "string" || typeof claim.validity !== "string") throw new Error("malformed readiness body claim");
+    claims.push(claim as BodyClaim);
+  }
+  return claims;
 }

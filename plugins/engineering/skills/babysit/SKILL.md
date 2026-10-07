@@ -49,7 +49,7 @@ Inside patina-mode, the **Babysit** playbook ([`../patina-mode/playbooks/babysit
 - Don't tweak a test's expected values just to get a pass. Only change an assertion when the behaviour genuinely changed and the assertion was pinned to the old behaviour.
 - Never skip hooks (`--no-verify`).
 - Never bypass a failing check by marking it as not required.
-- `gh pr ready` only when all checks are green and no unresolved review comments remain.
+- Route readiness publication through `pr-readiness publish`; it performs the final head check and is idempotent for an already-ready PR.
 
 ## Cross-refs
 

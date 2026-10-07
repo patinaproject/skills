@@ -43,7 +43,10 @@ export class MemoryPacketStore implements PacketStore {
   get(key: string): ReadinessPacket | undefined { return this.packets.get(key); }
   putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket {
     const existing = this.packets.get(key);
-    if (existing) return existing;
+    if (existing) {
+      if (existing.digest !== packet.digest) throw new Error(`packet digest collision for ${key}`);
+      return existing;
+    }
     this.packets.set(key, packet);
     return packet;
   }

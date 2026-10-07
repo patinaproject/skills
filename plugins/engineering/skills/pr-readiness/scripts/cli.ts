@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import type { BodyClaim, Observation } from "./domain.ts";
-import { evaluateReadiness } from "./evaluator.ts";
+import { evaluateReadiness, parseBodyClaims } from "./evaluator.ts";
 import { candidateFromPullRequest, type Forge, MemoryPacketStore, type PacketStore, type PullRequestState } from "./adapters.ts";
 
 export interface ReadinessDependencies { readonly forge: Forge; readonly store: PacketStore; readonly observations?: (pr: PullRequestState) => readonly Observation[]; readonly bodyClaims?: (pr: PullRequestState) => readonly BodyClaim[]; }
@@ -21,9 +21,14 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     const number = Number(required(argv, "--pr"));
     if (!Number.isInteger(number) || number < 1) throw new Error("--pr requires a positive integer");
     const initial = deps.forge.readPullRequest(repository, number);
+    if (command === "publish" && !initial.isDraft) {
+      process.stdout.write(`PR #${number} is already ready at ${initial.head}\n`);
+      return 0;
+    }
     const observations = deps.observations?.(initial) ?? loadObservations();
-    const bodyClaims = deps.bodyClaims?.(initial);
-    const report = evaluateReadiness({ candidate: candidateFromPullRequest(initial), observations, bodyClaims, body: value(argv, "--body") });
+    const body = value(argv, "--body");
+    const bodyClaims = deps.bodyClaims?.(initial) ?? (body ? parseBodyClaims(body) : undefined);
+    const report = evaluateReadiness({ candidate: candidateFromPullRequest(initial), observations, bodyClaims, body });
     if (command === "check") {
       process.stdout.write(JSON.stringify(report) + "\n");
       return report.ready ? 0 : 1;
