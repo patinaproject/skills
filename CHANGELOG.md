@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.66.0](https://github.com/patinaproject/skills/compare/v2.65.0...v2.66.0) (2026-10-07)
+
+
+### Features
+
+* [#583](https://github.com/patinaproject/skills/issues/583) install Engineering SessionStart hook ([#585](https://github.com/patinaproject/skills/issues/585)) ([1e61b63](https://github.com/patinaproject/skills/commit/1e61b63ae31e89edb509c0ab2e9e6c33f704b927))
+
 ## [2.65.0](https://github.com/patinaproject/skills/compare/v2.64.0...v2.65.0) (2026-10-07)
 
 
