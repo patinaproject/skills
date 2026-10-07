@@ -1,5 +1,5 @@
-import { evaluateReadiness } from "../../../../pr-readiness/scripts/evaluator.ts";
-import type { CandidateIdentity, Observation } from "../../../../pr-readiness/scripts/domain.ts";
+import { evaluateReadiness } from "../../../pr-readiness/scripts/evaluator.ts";
+import type { CandidateIdentity, Observation } from "../../../pr-readiness/scripts/domain.ts";
 import type { ReviewRecord } from "./types.ts";
 
 export interface ReadinessCheck { readonly ok: boolean; readonly errors: readonly string[]; }
