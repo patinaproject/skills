@@ -1,18 +1,8 @@
 #!/usr/bin/env bash
 # install-machinery.sh — install Engineering's repo-level machinery for
-# skills-only consumers, idempotently. Re-running converges on the same state:
-# one managed mandate block per instructions file, the Engineering agent files
-# in place, and multi_agent enabled once. Content outside the managed markers is
-# never touched.
-#
-# Repo side (always): copies the Engineering agents into <repo>/.claude/agents/
-# and upserts the patina-mode mandate block into
-# <repo>/CLAUDE.md. Codex side (--codex): upserts the mandate block into
-# <repo>/AGENTS.md and enables multi_agent in <repo>/.codex/config.toml, so the
-# machinery is committed and shared across contributors rather than written into
-# any one user's global Codex config. Codex loads a repo-scoped .codex/config.toml
-# only for trusted projects. On success, the final output line names the
-# setup-pstack skill that continues configuration.
+# skills-only consumers. Managed files are copied on every run so an existing
+# install converges on the bundled version; unrelated files and hook entries
+# are preserved.
 #
 # Usage:
 #   install-machinery.sh [--repo <dir>] [--instructions <file>]
@@ -27,6 +17,7 @@ SETUP_PSTACK_SKILL="${SKILLS_DIR}/setup-pstack/SKILL.md"
 
 BEGIN_MARKER='<!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->'
 END_MARKER='<!-- END engineering:patina-mode -->'
+SESSION_MATCHER='startup|resume|clear|compact'
 
 repo=""
 instructions=""
@@ -62,20 +53,43 @@ fi
 [ -n "$codex_config" ] || codex_config="${repo}/.codex/config.toml"
 [ -n "$codex_agents" ] || codex_agents="${repo}/AGENTS.md"
 
+command -v jq >/dev/null || fail "jq is required to update .claude/settings.json"
 require_file "$SETUP_PSTACK_SKILL"
 require_file "${SKILLS_DIR}/patina-mode/references/codex-tools.md"
 require_file "${ASSETS_DIR}/mandate.md"
+require_file "${ASSETS_DIR}/hooks/session-start.sh"
+require_file "${ASSETS_DIR}/hooks/session-start-context.md"
 
-# Rewrite a file through its own path so a symlinked instructions file (for
-# example a CLAUDE.md pointing at AGENTS.md) keeps pointing where it did.
+# Rewrite through the destination path so a symlink such as CLAUDE.md ->
+# AGENTS.md keeps pointing at its original target.
 write_in_place() {
   local dest="$1" src="$2"
   cat "$src" > "$dest"
   rm -f "$src"
 }
 
-# Upsert the managed block carrying PAYLOAD into FILE. Collapses any prior
-# managed blocks into a single fresh one; appends when none exists.
+# Remove every complete managed mandate block and leave all other instructions
+# byte-for-byte intact. An unclosed marker is preserved rather than swallowing
+# content beneath it.
+remove_managed_blocks() {
+  local file="$1" tmp
+  [ -f "$file" ] || return 0
+  grep -qF "$BEGIN_MARKER" "$file" || return 0
+  grep -qF "$END_MARKER" "$file" || return 0
+  tmp="$(mktemp)"
+  awk -v b="$BEGIN_MARKER" -v e="$END_MARKER" '
+    function flush(   i) { for (i = 1; i <= nbuf; i++) print buf[i]; nbuf = 0 }
+    $0 == b { flush(); inblock = 1; buf[++nbuf] = $0; next }
+    inblock && $0 == e { inblock = 0; nbuf = 0; next }
+    inblock { buf[++nbuf] = $0; next }
+    { print }
+    END { flush() }
+  ' "$file" > "$tmp" || { rm -f "$tmp"; return 0; }
+  write_in_place "$file" "$tmp"
+}
+
+# Upsert the managed Codex block. This is retained for --codex because Codex
+# has no project SessionStart hook and reads AGENTS.md directly.
 upsert_block() {
   local file="$1" payload="$2"
   mkdir -p "$(dirname "$file")"
@@ -83,12 +97,6 @@ upsert_block() {
   blockfile="$(mktemp)"
   { printf '%s\n' "$BEGIN_MARKER"; cat "$payload"; printf '%s\n' "$END_MARKER"; } > "$blockfile"
 
-  # Replace only when a well-formed BEGIN..END pair exists; otherwise append.
-  # The awk buffers each candidate region and only substitutes the fresh block
-  # for a region that actually closes with END, flushing an unclosed BEGIN
-  # verbatim. A hand-corrupted block (a BEGIN whose END was deleted) therefore
-  # never swallows the content beneath it; the mandate body itself carries no
-  # markers, so a real managed block is always well-formed.
   if [ -f "$file" ] && grep -qF "$BEGIN_MARKER" "$file" && grep -qF "$END_MARKER" "$file"; then
     tmp="$(mktemp)"
     awk -v b="$BEGIN_MARKER" -v e="$END_MARKER" -v bf="$blockfile" '
@@ -96,7 +104,7 @@ upsert_block() {
       $0 == b { flush(); inblock = 1; buf[++nbuf] = $0; next }
       inblock && $0 == e {
         inblock = 0; nbuf = 0
-        if (!emitted) { while ((getline l < bf) > 0) print l; emitted = 1 }
+        if (!emitted) { while ((getline line < bf) > 0) print line; emitted = 1 }
         next
       }
       inblock { buf[++nbuf] = $0; next }
@@ -111,8 +119,8 @@ upsert_block() {
   rm -f "$blockfile"
 }
 
-# Ensure [features] multi_agent = true exactly once, leaving other sections and
-# any multi_agent key outside [features] untouched.
+# Ensure [features] multi_agent = true exactly once, preserving all unrelated
+# TOML sections and keys.
 enable_multi_agent() {
   local config="$1" tmp
   mkdir -p "$(dirname "$config")"
@@ -122,9 +130,7 @@ enable_multi_agent() {
   fi
   tmp="$(mktemp)"
   awk '
-    /^\[features\][ \t]*$/ {
-      have_features = 1; in_features = 1; print; next
-    }
+    /^\[features\][ \t]*$/ { have_features = 1; in_features = 1; print; next }
     /^\[/ {
       if (in_features && !set) { print "multi_agent = true"; set = 1 }
       in_features = 0; print; next
@@ -144,17 +150,57 @@ enable_multi_agent() {
   write_in_place "$config" "$tmp"
 }
 
+install_managed_file() {
+  local source="$1" destination="$2"
+  mkdir -p "$(dirname "$destination")"
+  cp "$source" "$destination"
+  echo "installed: ${destination}"
+}
+
+upsert_claude_session_hook() {
+  local settings="${repo}/.claude/settings.json"
+  local command='"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh" claude'
+  mkdir -p "$(dirname "$settings")"
+  if [ ! -f "$settings" ]; then
+    jq -n --arg matcher "$SESSION_MATCHER" --arg command "$command" \
+      '{hooks:{SessionStart:[{matcher:$matcher,hooks:[{type:"command",command:$command}]}]}}' > "$settings"
+    return
+  fi
+  local tmp
+  tmp="$(mktemp)"
+  jq --arg matcher "$SESSION_MATCHER" --arg command "$command" '
+    def managed_command:
+      (.type? == "command") and
+      (((.command? // "") | contains(".claude/hooks/session-start.sh")) or
+       ((.command? // "") | contains("plugins/engineering/hooks/session-start.sh")));
+    .hooks = (.hooks // {}) |
+    .hooks.SessionStart = [
+      (.hooks.SessionStart // [])[] as $entry |
+      [($entry.hooks // [])[] | select(managed_command | not)] as $kept |
+      if ($kept | length) > 0 then $entry | .hooks = $kept
+      elif (($entry.hooks // []) | length) == 0 then $entry
+      else empty end
+    ] + [{matcher:$matcher,hooks:[{type:"command",command:$command}]}]
+  ' "$settings" > "$tmp"
+  write_in_place "$settings" "$tmp"
+}
+
 agents_dir="${repo}/.claude/agents"
-mkdir -p "$agents_dir"
-agent_assets=("${ASSETS_DIR}"/agents/*.md)
-[ -e "${agent_assets[0]}" ] || fail "missing required file: ${ASSETS_DIR}/agents/*.md. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering."
-for agent_asset in "${agent_assets[@]}"; do
-  agent_name="$(basename "$agent_asset")"
-  cp "$agent_asset" "${agents_dir}/${agent_name}"
-  echo "installed: ${agents_dir}/${agent_name}"
+for agent_asset in "${ASSETS_DIR}"/agents/*.md; do
+  [ -f "$agent_asset" ] || fail "missing required file: ${ASSETS_DIR}/agents/*.md. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering."
+  install_managed_file "$agent_asset" "${agents_dir}/$(basename "$agent_asset")"
 done
-upsert_block "$instructions" "${ASSETS_DIR}/mandate.md"
-echo "mandate block upserted: ${instructions}"
+install_managed_file "${ASSETS_DIR}/hooks/session-start.sh" "${repo}/.claude/hooks/session-start.sh"
+chmod +x "${repo}/.claude/hooks/session-start.sh"
+sed 's/engineering://g' "${ASSETS_DIR}/hooks/session-start-context.md" > "${repo}/.claude/hooks/session-start-context.md"
+
+# Claude receives the mandate from the project hook. Remove legacy managed
+# blocks so an old install cannot inject it a second time. The --codex path
+# restores the block in AGENTS.md after this cleanup for Codex sessions.
+if [ "$do_codex" -ne 1 ] || ! [ "$instructions" -ef "$codex_agents" ]; then
+  remove_managed_blocks "$instructions"
+fi
+upsert_claude_session_hook
 
 if [ "$do_codex" -eq 1 ]; then
   upsert_block "$codex_agents" "${ASSETS_DIR}/mandate.md"

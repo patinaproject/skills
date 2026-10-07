@@ -28,6 +28,10 @@ snapshot_files() {
 # canonical plugin sources or a skills-only consumer gets a stale mandate.
 diff -q plugins/engineering/hooks/session-start-context.md "$SKILL/assets/mandate.md" >/dev/null \
   || fail "assets/mandate.md drifted from hooks/session-start-context.md"
+for hook in plugins/engineering/hooks/session-start.sh plugins/engineering/hooks/session-start-context.md; do
+  diff -q "$hook" "$SKILL/assets/hooks/$(basename "$hook")" >/dev/null \
+    || fail "bundled hook drifted from $hook"
+done
 for agent in plugins/engineering/agents/*.md; do
   asset="$SKILL/assets/agents/$(basename "$agent")"
   [ -f "$asset" ] || fail "missing setup-engineering asset: $asset"
@@ -43,10 +47,15 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 REPO="$TMP/repo"
 CODEX="$TMP/codex"
-mkdir -p "$REPO"
+mkdir -p "$REPO/.claude/agents"
+printf 'stale agent payload\n' > "$REPO/.claude/agents/patina-agent.md"
 
 # Pre-existing unrelated content that must survive every run.
-printf '# Project rules\n\nKeep my house style.\n' > "$REPO/CLAUDE.md"
+printf '# Project rules\n\nKeep my house style.\n\n%s\nold mandate\n%s\n' \
+  '<!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->' \
+  '<!-- END engineering:patina-mode -->' > "$REPO/CLAUDE.md"
+mkdir -p "$REPO/.claude"
+printf '%s\n' '{"hooks":{"SessionStart":[{"matcher":"startup","hooks":[{"type":"command","command":"echo unrelated"}]},{"matcher":"startup|resume|clear|compact","hooks":[{"type":"command","command":"\"$CLAUDE_PROJECT_DIR/plugins/engineering/hooks/session-start.sh\" claude"}]}]}}' > "$REPO/.claude/settings.json"
 mkdir -p "$CODEX"
 printf '[features]\nother = true\nmulti_agent = false\n\n[sandbox]\nmode = "read"\n' > "$CODEX/config.toml"
 printf '# My Codex rules\n\nUnrelated line.\n' > "$CODEX/AGENTS.md"
@@ -78,11 +87,16 @@ for asset in "$SKILL"/assets/agents/*.md; do
     || fail "$(basename "$asset") not installed correctly"
 done
 
-# Exactly one managed block per instructions file, unrelated content intact.
-[ "$(count "$BEGIN" "$REPO/CLAUDE.md")" -eq 1 ] || fail "repo CLAUDE.md has $(count "$BEGIN" "$REPO/CLAUDE.md") mandate blocks, expected 1"
-[ "$(count "$END" "$REPO/CLAUDE.md")" -eq 1 ] || fail "repo CLAUDE.md END marker count wrong"
+# Claude uses the hook; Codex retains its managed instructions block.
+[ "$(count "$BEGIN" "$REPO/CLAUDE.md")" -eq 0 ] || fail "repo CLAUDE.md still has a mandate block"
 grep -qF "Keep my house style." "$REPO/CLAUDE.md" || fail "repo CLAUDE.md lost unrelated content"
-grep -qF "engineering:patina-mode" "$REPO/CLAUDE.md" || fail "repo CLAUDE.md missing mandate body"
+[ "$(jq -r '[.hooks.SessionStart[] | select(.matcher == "startup|resume|clear|compact") | .hooks[] | select(.command | contains(".claude/hooks/session-start.sh"))] | length' "$REPO/.claude/settings.json")" -eq 1 ] || fail "settings.json must register exactly one Engineering SessionStart hook"
+[ "$(jq -r '[.hooks.SessionStart[] | .hooks[]? | select(.command == "echo unrelated")] | length' "$REPO/.claude/settings.json")" -eq 1 ] || fail "existing SessionStart hook was not preserved"
+[ -x "$REPO/.claude/hooks/session-start.sh" ] || fail "installed session hook is not executable"
+hook_output="$(CLAUDE_PROJECT_DIR="$REPO" HOME="$TMP/no-sheet" "$REPO/.claude/hooks/session-start.sh" claude)"
+expected_hook_output="$(sed 's/engineering://g' plugins/engineering/hooks/session-start-context.md)"
+[ "$hook_output" = "$expected_hook_output" ] || fail "skills-only hook output drifted from the transformed context"
+
 
 [ "$(count "$BEGIN" "$CODEX/AGENTS.md")" -eq 1 ] || fail "Codex AGENTS.md has $(count "$BEGIN" "$CODEX/AGENTS.md") mandate blocks, expected 1"
 grep -qF "Unrelated line." "$CODEX/AGENTS.md" || fail "Codex AGENTS.md lost unrelated content"
@@ -105,25 +119,24 @@ ABSENT="$TMP/created.toml"
 bash "$SCRIPT" --repo "$REPO" --codex --codex-config "$ABSENT" --codex-agents "$TMP/ab-agents.md" >/dev/null
 [ "$(grep -c '^multi_agent = true$' "$ABSENT")" -eq 1 ] || fail "absent config not created with multi_agent"
 
-# Appends a block when the instructions file does not exist yet.
+# A fresh Claude install uses a hook without creating an instructions file.
 FRESH="$TMP/fresh"
 mkdir -p "$FRESH"
 bash "$SCRIPT" --repo "$FRESH" >/dev/null
-[ "$(count "$BEGIN" "$FRESH/CLAUDE.md")" -eq 1 ] || fail "fresh repo CLAUDE.md missing single mandate block"
+[ ! -e "$FRESH/CLAUDE.md" ] || fail "fresh Claude install created instructions unnecessarily"
 
 # A hand-corrupted block (lone BEGIN, END deleted) must never swallow the content
-# beneath it, on the first run or any run after. Exactly one closed block ends up
-# installed; a harmless orphan BEGIN comment may remain.
+# beneath it, on the first run or any run after.
 CORRUPT="$TMP/corrupt"
 mkdir -p "$CORRUPT"
 FULL_BEGIN="$BEGIN (managed by setup-engineering; re-running overwrites this block) -->"
 printf '%s\ndangling half-block\nSENTINEL trailing content\n' "$FULL_BEGIN" > "$CORRUPT/CLAUDE.md"
 bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
 grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on first run"
-[ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 1 ] || fail "corrupted repo did not gain exactly one closed block"
+[ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 0 ] || fail "corrupted repo gained a partial mandate block"
 bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
 grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on second run"
-[ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 1 ] || fail "second run did not converge on one closed block"
+[ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 0 ] || fail "second run changed a partial mandate block"
 
 # --codex with no explicit paths writes repo-scoped targets, and must never reach
 # for the user's global Codex config. A sentinel HOME/CODEX_HOME proves the
@@ -143,6 +156,24 @@ HOME="$SENTINEL_HOME" CODEX_HOME="$SENTINEL_HOME/.codex" bash "$SCRIPT" --repo "
   || fail "--codex mutated the user global ~/.codex/config.toml"
 [ ! -e "$SENTINEL_HOME/.codex/AGENTS.md" ] \
   || fail "--codex created a global ~/.codex/AGENTS.md"
+
+# The runtime override disables the installed hook without changing files.
+OFF_HOME="$TMP/off-home"
+mkdir -p "$OFF_HOME/.claude"
+printf 'session hook: off\n' > "$OFF_HOME/.claude/pstack-models.md"
+off_output="$(CLAUDE_PROJECT_DIR="$REPO" HOME="$OFF_HOME" "$REPO/.claude/hooks/session-start.sh" claude)"
+[ -z "$off_output" ] || fail "session hook: off still injected the mandate"
+
+# A CLAUDE.md -> AGENTS.md layout keeps one Codex block and suppresses the
+# duplicate Claude hook output.
+SYMLINK_REPO="$TMP/symlink-repo"
+mkdir -p "$SYMLINK_REPO"
+printf '# Shared rules\n' > "$SYMLINK_REPO/AGENTS.md"
+ln -s AGENTS.md "$SYMLINK_REPO/CLAUDE.md"
+bash "$SCRIPT" --repo "$SYMLINK_REPO" --codex >/dev/null
+[ "$(count "$BEGIN" "$SYMLINK_REPO/AGENTS.md")" -eq 1 ] || fail "symlink layout did not retain one AGENTS.md mandate"
+symlink_output="$(env -u CLAUDE_PROJECT_DIR HOME="$TMP/no-sheet" "$SYMLINK_REPO/.claude/hooks/session-start.sh" claude)"
+[ -z "$symlink_output" ] || fail "symlink layout injected a duplicate Claude mandate"
 
 MISSING="$TMP/missing"
 mkdir -p "$MISSING/skills"
