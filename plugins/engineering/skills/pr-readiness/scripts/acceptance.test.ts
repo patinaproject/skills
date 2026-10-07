@@ -23,6 +23,11 @@ describe("readiness acceptance matrix", () => {
     const report = evaluateReadiness({ candidate, observations: [old], rules, expectedExecution: { behavior: { executableArtifact: "bin-b", target: "linux", runtime: "node", environment: "ci", fixtures: "f", scope: "all", freshness: "2026-01-01", artifactDigest: sha256("b") } } });
     expect(report.decisions[0]?.validity).toBe("rerun-required");
   });
+  it("invalidates test evidence when the base identity changes", () => {
+    const old = observation("tests", { ...candidate, baseSha: "old-base", mergeBase: "old-merge" });
+    const report = evaluateReadiness({ candidate, observations: [old], rules: [{ obligation: "tests", producer: "producer", requireReceipt: true, applies: () => true }] });
+    expect(report.decisions[0]?.validity).toBe("rerun-required");
+  });
   it("stores immutable packets and rejects replacement", () => {
     const root = mkdtempSync(join(tmpdir(), "readiness-store-")); const store = new FilePacketStore(root);
     const report = evaluateReadiness({ candidate, observations: [observation("behavior")], rules }); expect(report.packet).toBeDefined();

@@ -71,7 +71,7 @@ function equivalent(obligation: Obligation, current: CandidateIdentity, captured
   }
   if (obligation === "hygiene") return current.diffDigest === captured.diffDigest && current.policyDigest === captured.policyDigest && contextMatches(o, expected);
   if (obligation === "tests" || obligation === "lint") {
-    return current.diffDigest === captured.diffDigest && o.inputDigest === (expected?.inputDigest ?? o.inputDigest) &&
+    return current.diffDigest === captured.diffDigest && current.baseSha === captured.baseSha && current.mergeBase === captured.mergeBase && o.inputDigest === (expected?.inputDigest ?? o.inputDigest) &&
       artifactIdentity(o) === (expected?.artifactDigest ?? artifactIdentity(o)) && contextMatches(o, expected);
   }
   // Runtime evidence may be reused only when all executable/runtime dimensions match.
