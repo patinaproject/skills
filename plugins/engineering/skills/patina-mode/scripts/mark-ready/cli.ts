@@ -66,8 +66,8 @@ function adapter(name: "gh" | "origin"): ForgeAdapter {
     name,
     readPullRequest: (number, repository) =>
       readForge(name, number, repository),
-    markReady: (number, repository) =>
-      markReadyIfCurrent(name, repository ?? "", number, readForge(name, number, repository).head),
+    markReady: (number, repository, expectedHead) =>
+      markReadyIfCurrent(name, repository ?? "", number, expectedHead ?? readForge(name, number, repository).head),
   };
 }
 
@@ -159,9 +159,9 @@ export function run(
     const candidate = { repository: current.repository, pullRequest: current.number, base: "unknown", mergeBase: "unknown", head: current.head, patchId: current.head, diffDigest: current.head, requirementsDigest: "legacy", policyDigest: "legacy" };
     const observations = reviewRecordObservations(record, candidate);
     const readinessForge = {
-      readPullRequest: () => ({ ...candidate, number: current.number, isDraft: current.isDraft, body: `${recordText}${observations.map((o) => `\n<!-- pr-readiness: ${JSON.stringify({ observationId: o.id, obligation: o.obligation, validity: "observed-current" })} -->`).join("")}` }),
+      readPullRequest: () => ({ ...candidate, number: current.number, isDraft: current.isDraft, body: `${recordText}\n## Evidence\n${observations.map((o) => `<!-- pr-readiness: ${JSON.stringify({ observationId: o.id, obligation: o.obligation, validity: "observed-current" })} -->`).join("\n")}` }),
       openPullRequest: () => ({ ...candidate, number: current.number, isDraft: current.isDraft }),
-      markReady: () => forge.markReady(pr, repository),
+      markReady: (_repository: string, _number: number, expectedHead: string) => forge.markReady(pr, repository, expectedHead),
     };
     const result = operation(["publish", "--repo", current.repository, "--pr", String(pr), "--takeover", "true"], { forge: readinessForge, store: new MemoryPacketStore(), observations: () => observations, rules: compatibilityRules() });
     if (result === 0) process.stdout.write(`Local code review passed for PR #${pr} at ${current.head}. ${record.dismissedFindings} dismissed finding(s).\n`);

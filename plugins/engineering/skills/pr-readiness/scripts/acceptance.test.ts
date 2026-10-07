@@ -7,7 +7,7 @@ import { FilePacketStore } from "./adapters.ts";
 import { sha256, type CandidateIdentity, type Observation } from "./domain.ts";
 
 const candidate: CandidateIdentity = { repository: "o/r", pullRequest: 7, base: "main", baseSha: "b", baseRef: "main", mergeBase: "m", head: "h", patchId: "p", diffDigest: "d", requirementsDigest: "rq", policyDigest: "po", reviewContextDigest: "rv" };
-const observation = (obligation: Observation["obligation"], patch = candidate, extra: Partial<Observation> = {}): Observation => ({ id: `${obligation}-${patch.head}`, obligation, candidate: patch, inputDigest: "in", scope: "runtime", artifactRefs: ["artifact"], producerVersion: "v", capturedAt: "2026-01-01T00:00:00Z", verdict: "pass", receipt: { producer: "producer", observationId: `${obligation}-${patch.head}`, candidateHead: patch.head, digest: "receipt", issuedAt: "2026-01-01T00:00:00Z" }, ...extra });
+const observation = (obligation: Observation["obligation"], patch = candidate, extra: Partial<Observation> = {}): Observation => ({ id: `${obligation}-${patch.head}`, obligation, candidate: patch, inputDigest: "in", scope: "runtime", artifactRefs: ["artifact"], producerVersion: "v", capturedAt: "2026-01-01T00:00:00Z", verdict: "pass", ...(obligation === "behavior" ? { executableArtifact: "bin", target: "linux", runtime: "node", environment: "ci", fixtures: "fixtures", freshness: "now" } : {}), receipt: { producer: "producer", observationId: `${obligation}-${patch.head}`, candidateHead: patch.head, digest: "receipt", issuedAt: "2026-01-01T00:00:00Z" }, ...extra });
 const rules = [{ obligation: "behavior" as const, producer: "producer", requireReceipt: true, applies: () => true }];
 
 describe("readiness acceptance matrix", () => {

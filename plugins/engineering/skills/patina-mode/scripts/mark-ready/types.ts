@@ -24,5 +24,5 @@ export interface ReviewRecord {
 export interface ForgeAdapter {
   readonly name: "gh" | "origin";
   readPullRequest(number: number, repository?: string): PullRequestHead;
-  markReady(number: number, repository?: string): void;
+  markReady(number: number, repository?: string, expectedHead?: string): void;
 }

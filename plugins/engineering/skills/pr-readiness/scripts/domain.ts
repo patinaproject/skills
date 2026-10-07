@@ -16,6 +16,7 @@ export interface CandidateIdentity {
   readonly head: string;
   readonly patchId: string;
   readonly diffDigest: string;
+  readonly behaviorApplicable?: boolean;
   readonly requirementsDigest: string;
   readonly policyDigest: string;
   readonly reviewContextDigest?: string;

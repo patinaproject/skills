@@ -170,6 +170,11 @@ You may use one of these, you may use several, it is unlikely you will use all o
 
 Concrete evidence that the change works. Show a before and after.
 
+Readiness evidence belongs under this heading. For each accepted observation,
+include its machine-readable claim in the section:
+`<!-- pr-readiness: {"observationId":"...","obligation":"...","validity":"observed-current"} -->`.
+Use the validity returned by `pr-readiness check`; do not invent IDs or labels.
+
 Screenshots are S-tier - when the environment is set up for it and the change is visual.
 
 Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.

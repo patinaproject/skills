@@ -23,7 +23,7 @@ export const DEFAULT_RULES: readonly ObligationRule[] = [
   { obligation: "hygiene", producer: "deslop/no-comments", requireReceipt: true, applies: () => true },
   { obligation: "tests", producer: "test", requireReceipt: true, applies: () => true },
   { obligation: "lint", producer: "lint", requireReceipt: true, applies: () => true },
-  { obligation: "behavior", producer: "runtime-verification", requireReceipt: true, applies: (candidate) => candidate.diffDigest !== sha256({ files: [] }) },
+  { obligation: "behavior", producer: "runtime-verification", requireReceipt: true, applies: (candidate) => candidate.behaviorApplicable !== false },
 ];
 const ACCEPTED: readonly string[] = ["observed-current", "valid-by-equivalence", "not-applicable"];
 
@@ -33,6 +33,7 @@ function validCandidate(value: unknown): value is CandidateIdentity {
   return typeof c.repository === "string" && Number.isInteger(c.pullRequest) && (c.pullRequest ?? 0) > 0 &&
     typeof c.base === "string" && typeof c.mergeBase === "string" && typeof c.head === "string" &&
     typeof c.patchId === "string" && typeof c.diffDigest === "string" && typeof c.requirementsDigest === "string" && typeof c.policyDigest === "string" &&
+    (c.behaviorApplicable === undefined || typeof c.behaviorApplicable === "boolean") &&
     (c.baseSha === undefined || typeof c.baseSha === "string") && (c.baseRef === undefined || typeof c.baseRef === "string") &&
     (c.reviewContextDigest === undefined || typeof c.reviewContextDigest === "string");
 }
@@ -46,7 +47,7 @@ function validObservation(value: unknown): value is Observation {
     (!o.receipt || (typeof o.receipt === "object" && o.receipt.observationId === o.id && typeof o.receipt.producer === "string" && o.receipt.candidateHead === o.candidate.head && typeof o.receipt.digest === "string"));
 }
 function equalCandidate(a: CandidateIdentity, b: CandidateIdentity): boolean {
-  return ["repository", "pullRequest", "base", "baseSha", "baseRef", "mergeBase", "head", "patchId", "diffDigest", "requirementsDigest", "policyDigest", "reviewContextDigest"]
+  return ["repository", "pullRequest", "base", "baseSha", "baseRef", "mergeBase", "head", "patchId", "diffDigest", "behaviorApplicable", "requirementsDigest", "policyDigest", "reviewContextDigest"]
     .every((k) => (a as unknown as Record<string, unknown>)[k] === (b as unknown as Record<string, unknown>)[k]);
 }
 function expectedFor(input: EvaluationInput, obligation: Obligation): ExecutionContext | undefined {
@@ -59,6 +60,9 @@ function contextMatches(observation: Observation, expected: ExecutionContext | u
 }
 function artifactIdentity(o: Observation): string {
   return o.artifactDigest ?? (o.artifactRefs.length ? sha256(o.artifactRefs) : "");
+}
+function completeBehaviorContext(o: Observation): boolean {
+  return [o.executableArtifact, o.target, o.runtime, o.environment, o.fixtures, o.scope, o.freshness].every((value) => typeof value === "string" && value.length > 0);
 }
 function equivalent(obligation: Obligation, current: CandidateIdentity, captured: CandidateIdentity, o: Observation, expected?: ExecutionContext): boolean {
   if (obligation === "standards" || obligation === "spec") {
@@ -115,7 +119,7 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
     if (observation.expiresAt && Date.parse(observation.expiresAt) <= now) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation expired`, capturedHead: observation.candidate.head }); continue; }
     const expected = expectedFor(input, rule.obligation);
     if (!contextMatches(observation, expected)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} execution inputs changed`, capturedHead: observation.candidate.head }); continue; }
-    if (equalCandidate(input.candidate, observation.candidate)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "observed-current", reason: "observation matches current candidate", capturedHead: observation.candidate.head }); continue; }
+    if (equalCandidate(input.candidate, observation.candidate) && (rule.obligation !== "behavior" || completeBehaviorContext(observation))) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "observed-current", reason: "observation matches current candidate", capturedHead: observation.candidate.head }); continue; }
     if (equivalent(rule.obligation, input.candidate, observation.candidate, observation, expected)) decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "valid-by-equivalence", reason: "producer equivalence contract permits reuse", capturedHead: observation.candidate.head });
     else decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation does not describe current candidate`, capturedHead: observation.candidate.head });
   }
@@ -129,6 +133,9 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
 function validateBodyClaims(body: string | undefined, claims: readonly BodyClaim[] | undefined, decisions: readonly ValidityDecision[]): string[] {
   if (body === undefined && claims === undefined) return [];
   const errors: string[] = [];
+  const evidenceStart = body?.search(/^## Evidence\s*$/im) ?? -1;
+  const evidenceEnd = evidenceStart < 0 ? -1 : body!.slice(evidenceStart + 1).search(/^##\s+/m);
+  if (body !== undefined && decisions.some((decision) => decision.observationId) && evidenceStart < 0) errors.push("body is missing an Evidence section");
   const byId = new Map(decisions.filter((d) => d.observationId).map((d) => [d.observationId!, d]));
   const seen = new Set<string>();
   for (const claim of claims ?? []) {
@@ -138,7 +145,7 @@ function validateBodyClaims(body: string | undefined, claims: readonly BodyClaim
     const decision = byId.get(claim.observationId);
     if (!decision) errors.push(`unknown observation ID: ${claim.observationId}`);
     else if (decision.obligation !== claim.obligation || decision.validity !== claim.validity) errors.push(`body claim disagrees for ${claim.observationId}`);
-    if (body !== undefined && !body.includes(claim.observationId)) errors.push(`body omits observation ID: ${claim.observationId}`);
+    if (body !== undefined && (!body.includes(claim.observationId) || evidenceStart < 0 || (evidenceEnd >= 0 && body.indexOf(claim.observationId) > evidenceStart + evidenceEnd + 1))) errors.push(`body omits observation ID from Evidence section: ${claim.observationId}`);
   }
   for (const decision of decisions) if (decision.observationId && !seen.has(decision.observationId)) errors.push(`body omits observation ID: ${decision.observationId}`);
   return errors;

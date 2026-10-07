@@ -3,7 +3,7 @@ import { evaluateReadiness } from "./evaluator.ts";
 import { freezePacket, sha256, type CandidateIdentity, type Observation } from "./domain.ts";
 
 const candidate: CandidateIdentity = { repository: "o/r", pullRequest: 1, base: "main", mergeBase: "m", head: "h", patchId: "p", diffDigest: "d", requirementsDigest: "req", policyDigest: "pol" };
-const observation = (obligation: Observation["obligation"], id = obligation): Observation => ({ id, obligation, candidate, inputDigest: "input", scope: "scope", artifactRefs: [], producerVersion: "1", capturedAt: new Date().toISOString(), verdict: "pass" });
+const observation = (obligation: Observation["obligation"], id = obligation): Observation => ({ id, obligation, candidate, inputDigest: "input", scope: "scope", artifactRefs: [], producerVersion: "1", capturedAt: new Date().toISOString(), verdict: "pass", ...(obligation === "behavior" ? { executableArtifact: "bin", target: "linux", runtime: "node", environment: "ci", fixtures: "fixtures", freshness: "now" } : {}) });
 const rules = ["standards", "spec", "hygiene", "tests", "lint", "behavior"].map((obligation) => ({ obligation: obligation as Observation["obligation"], producer: "test", applies: () => true }));
 
 describe("pr-readiness evaluator", () => {
@@ -18,6 +18,10 @@ describe("pr-readiness evaluator", () => {
     const report = evaluateReadiness({ candidate, observations: [], rules: [{ obligation: "behavior", producer: "runtime", applies: () => false }] });
     expect(report.decisions[0]).toMatchObject({ validity: "not-applicable" });
     expect(report.ready).toBe(true);
+  });
+  it("records behavior as not applicable for documentation-only candidates", () => {
+    const report = evaluateReadiness({ candidate: { ...candidate, behaviorApplicable: false }, observations: [], rules: [{ obligation: "behavior", producer: "runtime", applies: (value) => value.behaviorApplicable !== false }] });
+    expect(report.decisions.find((decision) => decision.obligation === "behavior")).toMatchObject({ validity: "not-applicable" });
   });
   it("rejects stale runtime evidence", () => {
     const stale = { ...observation("behavior"), candidate: { ...candidate, head: "old" } };

@@ -13,7 +13,7 @@ export interface Forge {
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
 
 export function candidateFromPullRequest(pr: PullRequestState): CandidateIdentity {
-  return { repository: pr.repository, pullRequest: pr.pullRequest || pr.number, base: pr.base, baseSha: pr.baseSha, baseRef: pr.baseRef, mergeBase: pr.mergeBase, head: pr.head, patchId: pr.patchId, diffDigest: pr.diffDigest, requirementsDigest: pr.requirementsDigest, policyDigest: pr.policyDigest, reviewContextDigest: pr.reviewContextDigest };
+  return { repository: pr.repository, pullRequest: pr.pullRequest || pr.number, base: pr.base, baseSha: pr.baseSha, baseRef: pr.baseRef, mergeBase: pr.mergeBase, head: pr.head, patchId: pr.patchId, diffDigest: pr.diffDigest, behaviorApplicable: pr.behaviorApplicable, requirementsDigest: pr.requirementsDigest, policyDigest: pr.policyDigest, reviewContextDigest: pr.reviewContextDigest };
 }
 
 function jsonOutput(command: string, args: readonly string[]): Record<string, unknown> { const output = execFileSync(command, [...args], { encoding: "utf8" }); const parsed: unknown = JSON.parse(output); if (!parsed || typeof parsed !== "object") throw new Error("forge returned invalid JSON"); return parsed as Record<string, unknown>; }
@@ -31,7 +31,9 @@ export class GhForge implements Forge {
     const baseRef = typeof row.baseRefName === "string" ? row.baseRefName : "";
     const diff = remoteDiff(this.command, repository, number);
     const mergeBase = baseSha && head ? (() => { try { return git("git", ["merge-base", baseSha, head]); } catch { return baseSha; } })() : baseSha;
-    return { repository, number, pullRequest: number, base: baseSha || baseRef, baseSha, baseRef, mergeBase, head, patchId: derivePatchId(diff), diffDigest: sha256(diff), requirementsDigest: sha256({ repository, baseRef }), policyDigest: sha256({ workflow: "pr-readiness", policy: "v1" }), reviewContextDigest: sha256({ repository, number, body: typeof row.body === "string" ? row.body : "" }), isDraft: row.isDraft === true, body: typeof row.body === "string" ? row.body : "", headRef: typeof row.headRefName === "string" ? row.headRefName : undefined };
+    const changedPaths = [...diff.matchAll(/^diff --git a\/(.+?) b\/(.+)$/gm)].map((match) => `${match[1]} ${match[2]}`);
+    const behaviorApplicable = changedPaths.length === 0 || changedPaths.some((path) => !/(^|\/)(docs?|documentation)\/|\.md$|\.mdx$|\.txt$/i.test(path));
+    return { repository, number, pullRequest: number, base: baseSha || baseRef, baseSha, baseRef, mergeBase, head, patchId: derivePatchId(diff), diffDigest: sha256(diff), behaviorApplicable, requirementsDigest: sha256({ repository, baseRef, baseSha }), policyDigest: sha256({ workflow: "pr-readiness", policy: "v2" }), reviewContextDigest: sha256({ repository, number, body: typeof row.body === "string" ? row.body : "" }), isDraft: row.isDraft === true, body: typeof row.body === "string" ? row.body : "", headRef: typeof row.headRefName === "string" ? row.headRefName : undefined };
   }
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState { const args = ["pr", "create", "--repo", input.repository, "--base", input.base, "--head", input.head, ...(input.draft === false ? [] : ["--draft"])]; const url = execFileSync(this.command, args, { encoding: "utf8" }).trim(); const number = Number(url.match(/(\d+)\s*$/)?.[1] ?? 0); if (!number) throw new Error("forge did not return a pull request number"); return this.readPullRequest(input.repository, number); }
   markReady(repository: string, number: number, expectedHead: string): void { markReadyIfCurrent(this.command, repository, number, expectedHead); }
@@ -41,7 +43,7 @@ export class OriginForge extends GhForge { constructor() { super("origin"); } }
 export function markReadyIfCurrent(command: "gh" | "origin", repository: string, number: number, expectedHead: string): void {
   const args = ["pr", "view", String(number), "--json", "headRefOid,isDraft"]; if (repository) args.push("--repo", repository);
   const current = jsonOutput(command, args); if (current.headRefOid !== expectedHead) throw new Error(`head race: assessed ${expectedHead}, remote is ${String(current.headRefOid)}`); if (current.isDraft !== true) return;
-  const readyArgs = ["pr", "re" + "ady", String(number)]; if (repository) readyArgs.push("--repo", repository); execFileSync(command, readyArgs, { stdio: "inherit" });
+  const readyArgs = ["pr", "ready", String(number)]; if (repository) readyArgs.push("--repo", repository); execFileSync(command, readyArgs, { stdio: "inherit" });
 }
 
 export class MemoryPacketStore implements PacketStore {
