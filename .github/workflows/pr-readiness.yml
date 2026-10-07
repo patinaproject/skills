@@ -1,7 +1,7 @@
 name: PR readiness
 
 on:
-  # Evaluate with the base branch workflow so pull-request code cannot decide readiness.
+  # Base-branch code evaluates untrusted PR evidence.
   pull_request_target:
     types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
   push:
@@ -9,10 +9,26 @@ on:
   repository_dispatch:
     types: [pr-readiness-receipt]
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number whose evidence bundle is being ingested
+        required: true
+        type: string
+      evidence_bundle:
+        description: Immutable Actions artifact name containing observations.json
+        required: true
+        type: string
+      takeover:
+        description: Explicit human takeover for publishing a draft
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
+  statuses: write
+  actions: read
 
 jobs:
   readiness:
@@ -23,10 +39,47 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
-      - name: Evaluate readiness from trusted base code
+      # oven-sh/setup-bun@v2.0.2
+      - uses: 735343b667d3e6f658f44d0eca948eb6282f2b76
+        with:
+          bun-version: latest
+      - name: Install trusted evaluator dependencies
+        run: bun install --cwd plugins/engineering/skills/patina-mode/scripts --frozen-lockfile
+      - name: Download immutable evidence bundle
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.evidence_bundle != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUNDLE: ${{ inputs.evidence_bundle }}
+        run: gh run download --repo "$GITHUB_REPOSITORY" --name "$BUNDLE" --dir .patina/evidence
+      - name: Build forge observations from trusted remote state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number || github.event.client_payload.pr_number }}
         run: |
-          echo "PR readiness evaluator loaded from trusted base: $GITHUB_SHA"
-          test -x plugins/engineering/skills/pr-readiness/scripts/pr-readiness
-          if [ -n "${{ github.event.pull_request.number || '' }}" ]; then
-            echo "A missing or stale packet must fail the required PR readiness check."
-          fi
+          set -euo pipefail
+          mkdir -p .patina/evidence
+          test -n "$PR_NUMBER"
+          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json number,body,isDraft,baseRefName,baseRefOid,headRefName,headRefOid > .patina/pr.json
+          if [ ! -f .patina/evidence/observations.json ]; then printf '[]\n' > .patina/observations.json; else cp .patina/evidence/observations.json .patina/observations.json; fi
+      - name: Evaluate current candidate and publish required status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PATINA_READINESS_AUTOMATION: 'true'
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number || github.event.client_payload.pr_number }}
+        run: |
+          set -euo pipefail
+          # The evaluator derives candidate identity from forge metadata and git patch data.
+          set +e
+          bun plugins/engineering/skills/pr-readiness/scripts/pr-readiness check --repo "$GITHUB_REPOSITORY" --pr "$PR_NUMBER" --observations .patina/observations.json > .patina/report.json
+          rc=$?
+          set -e
+          cat .patina/report.json
+          test "$rc" -eq 0
+      - name: Upload immutable readiness packet
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pr-readiness-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .patina/report.json
+          if-no-files-found: error
+          retention-days: 90
