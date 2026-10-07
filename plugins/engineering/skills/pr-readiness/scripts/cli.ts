@@ -26,7 +26,7 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     let bodyClaims: readonly BodyClaim[] | undefined;
     try { bodyClaims = deps.bodyClaims?.(initial) ?? (body === undefined ? undefined : parseBodyClaims(body)); } catch (error) { throw new Error(error instanceof Error ? error.message : String(error)); }
     const report = evaluateReadiness({ candidate: candidateFromPullRequest(initial), observations, bodyClaims, body, now: value(argv, "--now"), rules: deps.rules });
-    if (command === "check") { deps.forge.publishStatus?.(repository, initial.head, report.ready ? "success" : "failure", report.ready ? "ready" : reportError(report)); process.stdout.write(JSON.stringify(report) + "\n"); return report.ready ? 0 : 1; }
+    if (command === "check") { process.stdout.write(JSON.stringify(report) + "\n"); return report.ready ? 0 : 1; }
     // A ready PR is still evaluated, so stale evidence cannot be hidden by an earlier transition.
     if (!report.ready || !report.packet) throw new Error(reportError(report));
     if (initial.isDraft && value(argv, "--takeover") !== "true" && process.env.PATINA_READINESS_AUTOMATION !== "true") throw new Error("publishing a draft requires --takeover=true");
