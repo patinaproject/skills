@@ -18,5 +18,10 @@ export function checkReadiness(record: ReviewRecord, pullRequestHead: string, is
   const candidate: CandidateIdentity = { repository: "legacy", pullRequest: 1, base: "unknown", mergeBase: "unknown", head: pullRequestHead, patchId: pullRequestHead, diffDigest: pullRequestHead, requirementsDigest: "legacy", policyDigest: "legacy" };
   const report = evaluateReadiness({ candidate, observations: reviewRecordObservations(record, "legacy", 1, pullRequestHead), rules: [{ obligation: "standards", producer: "mark-ready", applies: () => true }, { obligation: "spec", producer: "mark-ready", applies: () => true }] });
   if (!report.ready) errors.push(...report.decisions.filter((d) => !["observed-current", "valid-by-equivalence", "not-applicable"].includes(d.validity)).map((d) => d.reason));
+  for (const finding of record.findings) {
+    const resolution = record.resolutions.find((line) => line.startsWith(`${finding.id}:`));
+    if (!resolution) errors.push(`finding ${finding.id} has no resolution`);
+    if (finding.kind === "hard" && resolution && /dismissed:/i.test(resolution)) errors.push(`hard finding was dismissed: ${finding.id}`);
+  }
   return { ok: errors.length === 0, errors };
 }
