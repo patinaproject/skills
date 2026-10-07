@@ -1,8 +1,10 @@
 import { accessSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
+import { MemoryPacketStore, markReadyIfCurrent } from "../../../pr-readiness/scripts/adapters.ts";
+import { operation } from "../../../pr-readiness/scripts/cli.ts";
 import type { ForgeAdapter, PullRequestHead, ReviewRecord } from "./types.ts";
-import { checkReadiness } from "./state.ts";
+import { compatibilityRules, reviewRecordObservations } from "./state.ts";
 
 function getReviewRoot(): string {
   return (
@@ -64,18 +66,8 @@ function adapter(name: "gh" | "origin"): ForgeAdapter {
     name,
     readPullRequest: (number, repository) =>
       readForge(name, number, repository),
-    markReady: (number, repository) => {
-      execFileSync(
-        name,
-        [
-          "pr",
-          "ready",
-          String(number),
-          ...(repository ? ["--repo", repository] : []),
-        ],
-        { stdio: "inherit" }
-      );
-    },
+    markReady: (number, repository, expectedHead) =>
+      markReadyIfCurrent(name, repository ?? "", number, expectedHead ?? readForge(name, number, repository).head),
   };
 }
 
@@ -156,41 +148,23 @@ export function run(
     const repository = repoIndex >= 0 ? argv[repoIndex + 1] : undefined;
     const recordIndex = argv.indexOf("--record");
     const explicitRecord = recordIndex >= 0 ? argv[recordIndex + 1] : undefined;
-    if (recordIndex >= 0 && (!explicitRecord || explicitRecord.startsWith("--")))
-      throw new Error("--record requires a file path or -");
-    const forge =
-      forgeOverride ??
-      adapter(process.env.PATINA_FORGE === "origin" ? "origin" : "gh");
+    if (recordIndex >= 0 && (!explicitRecord || explicitRecord.startsWith("--"))) throw new Error("--record requires a file path or -");
+    const forge = forgeOverride ?? adapter(process.env.PATINA_FORGE === "origin" ? "origin" : "gh");
     const current = forge.readPullRequest(pr, repository);
-    const path =
-      explicitRecord ??
-      join(
-        getReviewRoot(),
-        current.repository,
-        current.branch,
-        `${current.head}.md`
-      );
-    if (path !== "-") {
-      try {
-        accessSync(path);
-      } catch {
-        throw new Error(
-          `no local review exists for current head ${current.head}: ${path}`
-        );
-      }
-    }
-    const record = parseRecord(path, readRecord(path, readStdin));
-    const check = checkReadiness(record, current.head, current.isDraft);
-    if (!check.ok) throw new Error(check.errors.join("; "));
-    forge.markReady(pr, repository);
-    process.stdout.write(
-      `Local code review passed for PR #${pr} at ${current.head}. ${record.dismissedFindings} dismissed finding(s).\n`
-    );
-    return 0;
-  } catch (error) {
-    process.stderr.write(
-      `mark-ready: ${error instanceof Error ? error.message : String(error)}\n`
-    );
-    return 1;
-  }
+    const path = explicitRecord ?? join(getReviewRoot(), current.repository, current.branch, `${current.head}.md`);
+    if (path !== "-") { try { accessSync(path); } catch { throw new Error(`no local review exists for current head ${current.head}: ${path}`); } }
+    const recordText = readRecord(path, readStdin);
+    const record = parseRecord(path, recordText);
+    if (record.head !== current.head) throw new Error(`review head ${record.head} does not match current head ${current.head}`);
+    const candidate = { repository: current.repository, pullRequest: current.number, base: "unknown", mergeBase: "unknown", head: current.head, patchId: current.head, diffDigest: current.head, requirementsDigest: "legacy", policyDigest: "legacy" };
+    const observations = reviewRecordObservations(record, candidate);
+    const readinessForge = {
+      readPullRequest: () => ({ ...candidate, number: current.number, isDraft: current.isDraft, body: `${recordText}\n## Evidence\n${observations.map((o) => `<!-- pr-readiness: ${JSON.stringify({ observationId: o.id, obligation: o.obligation, validity: "observed-current" })} -->`).join("\n")}` }),
+      openPullRequest: () => ({ ...candidate, number: current.number, isDraft: current.isDraft }),
+      markReady: (_repository: string, _number: number, expectedHead: string) => forge.markReady(pr, repository, expectedHead),
+    };
+    const result = operation(["publish", "--repo", current.repository, "--pr", String(pr), "--takeover", "true"], { forge: readinessForge, store: new MemoryPacketStore(), observations: () => observations, rules: compatibilityRules() });
+    if (result === 0) process.stdout.write(`Local code review passed for PR #${pr} at ${current.head}. ${record.dismissedFindings} dismissed finding(s).\n`);
+    return result;
+  } catch (error) { process.stderr.write(`mark-ready: ${error instanceof Error ? error.message : String(error)}\n`); return 1; }
 }

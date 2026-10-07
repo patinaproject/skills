@@ -51,6 +51,17 @@ run_closing_check() {
 }
 
 assert_file "$WORKFLOW"
+assert_file ".github/workflows/pr-readiness.yml"
+assert_match "name: PR readiness" ".github/workflows/pr-readiness.yml"
+assert_match "pull_request_target:" ".github/workflows/pr-readiness.yml"
+assert_match "ready_for_review" ".github/workflows/pr-readiness.yml"
+assert_match "repository_dispatch:" ".github/workflows/pr-readiness.yml"
+
+if rg -n '"pr",[[:space:]]*"ready"|gh pr ready|origin pr ready' plugins/engineering/skills \
+  --glob '*.ts' --glob '*.mjs' --glob '*.sh' --glob '*.md' \
+  --glob '!**/pr-readiness/scripts/adapters.ts' --glob '!**/patina-mode/playbooks/opening-a-pr.md' >/dev/null 2>&1; then
+  fail "direct forge ready transition found outside pr-readiness adapters"
+fi
 
 node --input-type=commonjs <<'NODE'
 const fs = require('node:fs')

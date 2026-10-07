@@ -14,7 +14,7 @@ Three rules carry the rest.
 
 - **Coordinator (this chat).** Frames, authors briefs, drains the inbox, owns the human report, makes judgment calls. It never authors or edits code: conflicted merges, restacks, and code changes are always tasks. Mechanically landing a verified unit (fast-forward or clean cherry-pick of a worker's commit, then push) is bookkeeping the coordinator may do itself on repos where local git is cheap; queueing finished work behind an idle stacker is how a deadline harvests nothing. The loop is agentic end to end. Agents are spawned, resumed, and drained only through the `Agent` tool. State reads and writes go through the `orch` CLI at drain points, one command in and one line out. The CLI never spawns, waits, or wakes anything.
 - **Sub-coordinator.** Durable, one per track, and only when the program exceeds what one coordinator's drains can manage. A track the coordinator can drain itself needs no middle layer: each nested layer re-pays a full orientation preamble, and a blocking sub-coordinator hides its children while the parent idles. Owns its track's units and boards, authors its workers' briefs, spawns its own workers and verifiers where the runtime lets a subagent spawn one; where it does not, it owns its track's units directly with the same review separation. Rolls up aggregates at wave boundaries; never forwards raw child reports. Cap in-flight children at what one drain can process, roughly ten, as a rolling window; never as blocking batches, which cost the slowest child of every batch.
-- **Worker / verifier.** Background subagents (`run_in_background: true`). Claude Code has no remote worker environment, so isolation is a worktree or branch per writer, not a separate machine. Runtime verification goes through the repository's `patinaproject-verify` skill for UIs or `run` for CLIs and TUIs. PR publication always goes through [`opening-a-pr`](opening-a-pr.md): the worker leaves the PR draft until `/deslop`, `/no-comments`, `code-review`, finding resolution, and `mark-ready` complete. A subagent never sees this chat, so its brief inlines what it needs or points at repo and store paths. Prefer fewer, broader workers; one writer per worktree or branch (principle-separate-before-serializing-shared-state). Run a unit's verifier on a different model family from its worker.
+- **Worker / verifier.** Background subagents (`run_in_background: true`). Claude Code has no remote worker environment, so isolation is a worktree or branch per writer, not a separate machine. Runtime verification goes through the repository's `patinaproject-verify` skill for UIs or `run` for CLIs and TUIs. PR publication always goes through [`opening-a-pr`](opening-a-pr.md): the worker publishes through `pr-readiness publish` after `/deslop`, `/no-comments`, `code-review`, and its observations complete. A subagent never sees this chat, so its brief inlines what it needs or points at repo and store paths. Prefer fewer, broader workers; one writer per worktree or branch (principle-separate-before-serializing-shared-state). Run a unit's verifier on a different model family from its worker.
 
 Depth stays at coordinator, track, worker. Author the track decomposition per project (build, landing, and verification are common cuts, not a required shape); hard-coded swarm trees were tried and parked as too rigid.
 
@@ -48,7 +48,7 @@ FORBIDDEN    no gt, no rebase, no force-push, no fixes outside scope, plus unit-
 REPORT       status, branch, head SHA, PRs, verdict, what you actually ran, deviations,
              suggested follow-ups, and applicable verification context
 PUBLICATION  opening-a-pr gate: draft PR, `/deslop`, `/no-comments`, `code-review`,
-             resolve every finding on the current head, then `mark-ready`
+             resolve every finding on the current head, then run `pr-readiness publish`
 STANDING     <preferences.md pasted verbatim>
 ```
 
@@ -104,7 +104,7 @@ A unit is not done until its output is externalized the moment it lands, never b
 Every unit that publishes a PR follows [`opening-a-pr`](opening-a-pr.md) before it
 can report a ready PR. The worker creates a draft, runs `/deslop`, `/no-comments`,
 and `code-review` in that order, resolves every finding against the current head,
-and invokes `scripts/mark-ready/mark-ready` as the only draft-to-ready transition.
+and invokes `pr-readiness publish` as the only ready transition.
 The completion report includes the current head SHA and the resolved code-review
 record. A worker cannot report a ready PR while that record is missing or belongs
 to an older head; return the unit to repair when the head changes.

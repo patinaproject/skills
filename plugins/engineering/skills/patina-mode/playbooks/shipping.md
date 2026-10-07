@@ -1,6 +1,6 @@
 ### Shipping
 
-**You own what lands. Verify each PR independently, land only the verified run from the root, then keep your hands off the queue. A PR is eligible for shipping only after `scripts/mark-ready/mark-ready` has recorded the ordered `/deslop`, `/no-comments`, and `code-review` results and moved it out of draft. A requirement change invalidates the old review and any Shipping verdict. Record its source on the GitHub issue, return the PR to draft, mark the review superseded, refresh the body evidence, and rerun the gate before verifying or landing.**
+**You own what lands. Verify each PR independently, land only the verified run from the root, then keep your hands off the queue. A PR is eligible for shipping only after `pr-readiness publish` has recorded the ordered `/deslop`, `/no-comments`, and `code-review` observations and passed the required readiness check. A requirement change invalidates affected observations. Record its source on the GitHub issue, refresh the body evidence, and rerun the evaluator before verifying or landing.**
 
 This is the half after `playbooks/babysit.md`.
 

@@ -23,9 +23,10 @@ that belong to a changed line; on Claude, use the Markdown finding alone.
 
 The review record is separate evidence for readiness. Preserve the reviewed
 head SHA, both axis results, finding IDs, dispositions, and `Status: resolved`
-in the record. Pass that record to `mark-ready` through its explicit
-`--record <path>` or `--record -` interface; UI comments are presentation
-metadata and never replace the record.
+in the record. Emit that record as the producer-bound observation consumed by
+`pr-readiness publish`; the temporary `mark-ready` wrapper accepts the same
+record through its explicit `--record <path>` or `--record -` interface. UI
+comments are presentation metadata and never replace the record.
 
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
 
