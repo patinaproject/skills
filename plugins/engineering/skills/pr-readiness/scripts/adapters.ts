@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, renameSync, openSync, closeSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { mkdirSync, readFileSync, openSync, closeSync, writeFileSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { sha256, verifyPacket, type CandidateIdentity, type ReadinessPacket } from "./domain.ts";
 
@@ -55,7 +55,20 @@ export class FilePacketStore implements PacketStore {
   constructor(root = process.env.PATINA_READINESS_STORE ?? ".patina/readiness") { this.root = resolve(root); mkdirSync(this.root, { recursive: true }); }
   private path(key: string): string { return join(this.root, `${sha256(key)}.json`); }
   get(key: string): ReadinessPacket | undefined { const path = this.path(key); if (!existsSync(path)) return undefined; const parsed: unknown = JSON.parse(readFileSync(path, "utf8")); if (!verifyPacket(parsed)) throw new Error(`immutable packet has invalid digest: ${path}`); return freezeRead(parsed); }
-  putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket { if (!verifyPacket(packet)) throw new Error("cannot store packet with invalid digest"); const path = this.path(key); if (existsSync(path)) { const existing = this.get(key)!; if (existing.digest !== packet.digest) throw new Error(`packet digest collision for ${key}`); return existing; } const temp = `${path}.${process.pid}.${Date.now()}.tmp`; writeFileSync(temp, JSON.stringify(packet) + "\n", { flag: "wx" }); try { renameSync(temp, path); } catch { if (existsSync(path)) { const existing = this.get(key)!; if (existing.digest !== packet.digest) throw new Error(`packet digest collision for ${key}`); return existing; } throw new Error("unable to commit immutable packet"); } return freezeRead(packet); }
+  putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket {
+    if (!verifyPacket(packet)) throw new Error("cannot store packet with invalid digest");
+    const path = this.path(key);
+    try {
+      const fd = openSync(path, "wx");
+      try { writeFileSync(fd, JSON.stringify(packet) + "\n"); } finally { closeSync(fd); }
+      return freezeRead(packet);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      const existing = this.get(key)!;
+      if (existing.digest !== packet.digest) throw new Error(`packet digest collision for ${key}`);
+      return existing;
+    }
+  }
 }
 function freezeRead(packet: ReadinessPacket): ReadinessPacket {
   const copy = JSON.parse(JSON.stringify(packet)) as ReadinessPacket;
