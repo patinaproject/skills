@@ -129,12 +129,24 @@ for skill_dir in plugins/engineering/skills/*; do
   assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
 done
 
-for instructions_file in CLAUDE.md AGENTS.md; do
-  begin_count="$(grep -cF '<!-- BEGIN engineering:patina-mode' "$instructions_file" || true)"
-  end_count="$(grep -cF '<!-- END engineering:patina-mode -->' "$instructions_file" || true)"
-  [ "$begin_count" -eq 1 ] || fail "$instructions_file has $begin_count patina-mode mandate starts, expected 1"
-  [ "$end_count" -eq 1 ] || fail "$instructions_file has $end_count patina-mode mandate ends, expected 1"
-done
+begin_count="$(grep -cF '<!-- BEGIN engineering:patina-mode' AGENTS.md || true)"
+end_count="$(grep -cF '<!-- END engineering:patina-mode -->' AGENTS.md || true)"
+[ "$begin_count" -eq 1 ] || fail "AGENTS.md has $begin_count patina-mode mandate starts, expected 1"
+[ "$end_count" -eq 1 ] || fail "AGENTS.md has $end_count patina-mode mandate ends, expected 1"
+[ "$(grep -cF '<!-- BEGIN engineering:patina-mode' CLAUDE.md || true)" -eq 0 ] \
+  || fail "CLAUDE.md still contains the managed patina-mode mandate"
+[ "$(jq -r '[.hooks.SessionStart[] | select(.matcher == "startup|resume|clear|compact") | .hooks[] | select(.command | contains("plugins/engineering/hooks/session-start.sh"))] | length' .claude/settings.json)" -eq 1 ] \
+  || fail ".claude/settings.json must register exactly one Engineering SessionStart hook"
+
+hook_tmp="$(mktemp -d)"
+mkdir -p "$hook_tmp/config"
+hook_output="$(CLAUDE_CONFIG_DIR="$hook_tmp/config" CLAUDE_PLUGIN_ROOT="$PWD/plugins/engineering" plugins/engineering/hooks/session-start.sh claude)"
+[ "$hook_output" = "$(cat plugins/engineering/hooks/session-start-context.md)" ] \
+  || fail "Engineering SessionStart hook did not emit the live context"
+printf 'session hook: off\n' > "$hook_tmp/config/pstack-models.md"
+[ -z "$(CLAUDE_CONFIG_DIR="$hook_tmp/config" CLAUDE_PLUGIN_ROOT="$PWD/plugins/engineering" plugins/engineering/hooks/session-start.sh claude)" ] \
+  || fail "Engineering SessionStart hook ignored session hook: off"
+rm -rf "$hook_tmp"
 
 for canonical_agent in plugins/engineering/agents/*.md; do
   installed_agent=".claude/agents/$(basename "$canonical_agent")"
