@@ -34,6 +34,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/hooks/session-start.sh": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local hook integration for shared Claude and Codex setup.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/automate-me/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
@@ -44,6 +51,20 @@
   "plugins/engineering/skills/babysit/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/code-review/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this local Engineering code-review workflow over the synced upstream source.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/create-verification-skill/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this local verification-skill workflow for the project marketplace.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -107,6 +128,13 @@
   "plugins/engineering/skills/make-pr-easy-to-review/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/maintain-verification-skill/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this local verification-skill maintenance workflow for the project marketplace.",
     "upstream": {
       "status": "not-proposed"
     }
