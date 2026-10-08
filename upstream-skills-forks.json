@@ -223,6 +223,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/skills/patina-mode/references/pi-tools.md": {
+    "kind": "policy",
+    "reason": "Patina maintains this Codex and Pi runtime adaptation alongside the synced routing skill.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/patina-mode/scripts/orch/orch.test.ts": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
