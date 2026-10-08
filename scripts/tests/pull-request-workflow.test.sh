@@ -51,11 +51,9 @@ run_closing_check() {
 }
 
 assert_file "$WORKFLOW"
-assert_file ".github/workflows/pr-readiness.yml"
-assert_match "name: PR readiness" ".github/workflows/pr-readiness.yml"
-assert_match "pull_request_target:" ".github/workflows/pr-readiness.yml"
-assert_match "ready_for_review" ".github/workflows/pr-readiness.yml"
-assert_match "repository_dispatch:" ".github/workflows/pr-readiness.yml"
+if test -e ".github/workflows/pr-readiness.yml"; then
+  fail "PR readiness must not be registered as a CI workflow"
+fi
 
 if rg -n '"pr",[[:space:]]*"ready"|gh pr ready|origin pr ready' plugins/engineering/skills \
   --glob '*.ts' --glob '*.mjs' --glob '*.sh' --glob '*.md' \
