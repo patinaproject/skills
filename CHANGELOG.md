@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.66.1](https://github.com/patinaproject/skills/compare/v2.66.0...v2.66.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* [#553](https://github.com/patinaproject/skills/issues/553) declare existing Engineering sync forks ([#589](https://github.com/patinaproject/skills/issues/589)) ([8c2b076](https://github.com/patinaproject/skills/commit/8c2b076fb16724fd23c46f1b7e1fd505959fbbdc))
+
 ## [2.66.0](https://github.com/patinaproject/skills/compare/v2.65.0...v2.66.0) (2026-10-07)
 
 
