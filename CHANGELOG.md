@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.68.0](https://github.com/patinaproject/skills/compare/v2.67.1...v2.68.0) (2026-10-12)
+
+
+### Features
+
+* [#601](https://github.com/patinaproject/skills/issues/601) rename poteto-help to patina-help ([#602](https://github.com/patinaproject/skills/issues/602)) ([f03bcb4](https://github.com/patinaproject/skills/commit/f03bcb44a46eb9e53e869b000b2249c5f6952df3))
+
 ## [2.67.1](https://github.com/patinaproject/skills/compare/v2.67.0...v2.67.1) (2026-10-12)
 
 
