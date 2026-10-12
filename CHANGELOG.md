@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.66.2](https://github.com/patinaproject/skills/compare/v2.66.1...v2.66.2) (2026-10-12)
+
+
+### Bug Fixes
+
+* [#592](https://github.com/patinaproject/skills/issues/592) scope the stale-fork check to the synced sources ([#593](https://github.com/patinaproject/skills/issues/593)) ([42e0896](https://github.com/patinaproject/skills/commit/42e08964ac8e92e41e7713ee7a01c134ddf3faba))
+
 ## [2.66.1](https://github.com/patinaproject/skills/compare/v2.66.0...v2.66.1) (2026-10-08)
 
 
