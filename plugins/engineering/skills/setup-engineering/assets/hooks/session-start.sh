@@ -20,8 +20,6 @@ if [ -z "$hook_root" ]; then
   hook_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 fi
 
-# Same decoding as setup-pstack/scripts/read-sheet.sh, inline because a
-# project-level installation ships this script without the skill.
 read_sheet() {
   [ -f "$1" ] && [ -r "$1" ] || return 1
   if [ "$(od -An -tx1 -N2 "$1" | tr -d ' ')" = fffe ]; then
@@ -32,7 +30,6 @@ read_sheet() {
   printf '%s\n' "$text" | sed -e "1s/^$(printf '\357\273\277')//" -e "s/$(printf '\r')\$//"
 }
 
-# A sheet that cannot be decoded counts as missing, so injection stays on.
 found=0
 if normalized=$(read_sheet "$sheet"); then
   found=1
@@ -43,9 +40,6 @@ if printf '%s\n' "$normalized" | grep -qx 'session hook: off'; then
   exit 0
 fi
 
-# GitHub Copilot parses stdout as one JSON object. Its sheet sits outside
-# Copilot's path sandbox, so the hook checks the sheet and adds its role lines
-# to the mandate, and the agent never reads the file.
 if [ "$1" = copilot ]; then
   printf '%s\n' "$normalized" | LC_ALL=C awk -v found="$found" -v hooks="${COPILOT_PLUGIN_ROOT}/hooks" \
     -f "${COPILOT_PLUGIN_ROOT}/hooks/json.awk" \
