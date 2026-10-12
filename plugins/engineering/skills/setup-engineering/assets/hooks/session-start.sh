@@ -5,8 +5,9 @@ set -eu
 case "${1:-}" in
   claude) sheet="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/pstack-models.md" ;;
   codex) sheet="${CODEX_HOME:-$HOME/.codex}/pstack-models.md" ;;
+  copilot) sheet="${COPILOT_HOME:-$HOME/.copilot}/pstack-models.md" ;;
   *)
-    echo "session-start.sh: unknown runtime '${1:-}' (expected claude or codex)" >&2
+    echo "session-start.sh: unknown runtime '${1:-}' (expected claude, codex, or copilot)" >&2
     exit 2
     ;;
 esac
@@ -19,8 +20,31 @@ if [ -z "$hook_root" ]; then
   hook_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 fi
 
-bom=$(printf '\357\273\277')
-if [ -f "$sheet" ] && [ -r "$sheet" ] && sed "1s/^$bom//" "$sheet" | tr -d '\r' | grep -qx 'session hook: off'; then
+read_sheet() {
+  [ -f "$1" ] && [ -r "$1" ] || return 1
+  if [ "$(od -An -tx1 -N2 "$1" | tr -d ' ')" = fffe ]; then
+    text=$(iconv -f UTF-16LE -t UTF-8 "$1") || return 1
+  else
+    text=$(cat "$1")
+  fi
+  printf '%s\n' "$text" | sed -e "1s/^$(printf '\357\273\277')//" -e "s/$(printf '\r')\$//"
+}
+
+found=0
+if normalized=$(read_sheet "$sheet"); then
+  found=1
+else
+  normalized=
+fi
+if printf '%s\n' "$normalized" | grep -qx 'session hook: off'; then
+  exit 0
+fi
+
+if [ "$1" = copilot ]; then
+  printf '%s\n' "$normalized" | LC_ALL=C awk -v found="$found" -v hooks="${COPILOT_PLUGIN_ROOT}/hooks" \
+    -f "${COPILOT_PLUGIN_ROOT}/hooks/json.awk" \
+    -f "${COPILOT_PLUGIN_ROOT}/skills/setup-pstack/scripts/sheet.awk" \
+    -f "${COPILOT_PLUGIN_ROOT}/hooks/copilot-context.awk"
   exit 0
 fi
 
