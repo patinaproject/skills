@@ -51,7 +51,7 @@ export function registerPathSkills(pi: ExtensionAPI, settings: Settings): void {
     const skill = skills.find((s) => !noted.has(s.name) && s.globs.some((g) => matchesGlob(rel, g)));
     if (!skill) return;
     noted.add(skill.name);
-    const note = `pstack: ${rel} matches the ${skill.name} skill's paths. Load that skill now (read ${skill.file}) and follow it while you work on this file.`;
+    const note = `engineering: ${rel} matches the ${skill.name} skill's paths. Load that skill now (read ${skill.file}) and follow it while you work on this file.`;
     return {
       content: [...event.content, { type: "text", text: note }],
       structuredContent: event.structuredContent,

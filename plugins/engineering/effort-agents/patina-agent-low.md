@@ -1,6 +1,6 @@
 ---
 name: patina-agent-low
-description: Runs `pstack:patina-agent` at low reasoning effort. Dispatched in place of `pstack:patina-agent` when a pstack role's override names `@low`. The caller passes the model.
+description: Runs `engineering:patina-agent` at low reasoning effort. Dispatched in place of `engineering:patina-agent` when a pstack role's override names `@low`. The caller passes the model.
 effort: low
 ---
 

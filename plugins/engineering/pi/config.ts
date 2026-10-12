@@ -152,7 +152,7 @@ function parseAgentFile(type: string, text: string, efforts: string[]): AgentDef
   return { body, model: fields.get("model") || undefined, effort };
 }
 
-// Claude Code registers each plugin agent file as pstack:<file name>, beside
+// Claude Code registers each plugin agent file as engineering:<file name>, beside
 // the built-in general-purpose type, which has no agent file.
 export function loadAgentTypes(settings: Pick<Settings, "pluginRoot" | "modelsFile">): Map<string, AgentDefinition> {
   const { efforts } = readModels(settings.modelsFile);
@@ -161,7 +161,7 @@ export function loadAgentTypes(settings: Pick<Settings, "pluginRoot" | "modelsFi
     const full = join(settings.pluginRoot, dir);
     if (!existsSync(full)) continue;
     for (const file of readdirSync(full).filter((f) => f.endsWith(".md")).sort()) {
-      const type = `pstack:${basename(file, ".md")}`;
+      const type = `engineering:${basename(file, ".md")}`;
       types.set(type, parseAgentFile(type, readFileSync(join(full, file), "utf8"), efforts));
     }
   }

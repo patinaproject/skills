@@ -139,13 +139,6 @@
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/no-comments/SKILL.md": {
-    "kind": "policy",
-    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
-    "upstream": {
-      "status": "not-proposed"
-    }
-  },
   "plugins/engineering/skills/patina-mode/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",

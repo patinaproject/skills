@@ -91,7 +91,7 @@ Close calls:
 - `/recall` rebuilds context across recent chats. Resuming one specific chat or branch is the Session pickup playbook.
 - `/figure-it-out` designs one rigorous run. The Orchestrate playbook runs a program that spans days and many PRs. The Autonomous run playbook drives one task to a finish condition.
 
-Not in pstack:
+Not in engineering:
 
 - The Cursor driver skills have no port. The driver policy in patina-mode's Non-negotiables names the Claude Code equivalents, the `run` skill and a project `verify` skill.
 - `/loop` is a Claude Code bundled skill, and the **plugin-dev:skill-development** skill is Claude Code's skill-authoring guidance.

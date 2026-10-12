@@ -12,7 +12,7 @@ const agentParams = Type.Object(
     subagent_type: Type.Optional(
       Type.String({
         description:
-          "Agent definition to run: general-purpose (default), pstack:patina-agent, pstack:comment-sicko, pstack:patina-agent-<level>, or pstack:effort-<level>.",
+          "Agent definition to run: general-purpose (default), engineering:patina-agent, engineering:comment-sicko, engineering:patina-agent-<level>, or engineering:effort-<level>.",
       }),
     ),
     model: Type.Optional(
