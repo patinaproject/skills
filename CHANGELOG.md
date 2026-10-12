@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.69.0](https://github.com/patinaproject/skills/compare/v2.68.0...v2.69.0) (2026-10-12)
+
+
+### Features
+
+* [#603](https://github.com/patinaproject/skills/issues/603) namespace agent and skill references as engineering: ([#606](https://github.com/patinaproject/skills/issues/606)) ([27fe30d](https://github.com/patinaproject/skills/commit/27fe30dbd51fce9db27f0929491753094d2d663d))
+
 ## [2.68.0](https://github.com/patinaproject/skills/compare/v2.67.1...v2.68.0) (2026-10-12)
 
 
