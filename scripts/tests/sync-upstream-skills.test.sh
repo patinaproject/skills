@@ -67,6 +67,28 @@ git -C "$upstream" add -A
 git -C "$upstream" -c user.name=test -c user.email=test@example.com commit -q -m v2
 v2="$(git -C "$upstream" rev-parse HEAD)"
 head_before="$(git -C "$consumer" rev-parse HEAD)"
+assert_untouched() {
+  test "$(git -C "$consumer" rev-parse HEAD)" = "$head_before" || fail "$1: HEAD moved"
+  test -z "$(git -C "$consumer" status --porcelain)" || fail "$1: index or working tree changed"
+  test "$(jq -r '.sources[0].pin' "$consumer/upstream-skills.json")" = "$v1" || fail "$1: manifest pin changed"
+}
+# Upstream is at v2 here, so a real sync would visibly change the consumer.
+for bad in --dryrun --dry_run --force -x; do
+  if (cd "$consumer" && node sync.mjs "$bad" 2>"$work/err"); then fail "unknown argument $bad should be refused"; fi
+  grep -q "unknown argument: $bad" "$work/err" || fail "unknown argument $bad not named"
+  assert_untouched "unknown argument $bad"
+done
+(cd "$consumer" && node sync.mjs fixture --dryrun 2>"$work/err") && fail 'unknown flag after a source name should be refused'
+grep -q 'unknown argument: --dryrun' "$work/err" || fail 'unknown flag after a source name not named'
+assert_untouched 'unknown flag after a source name'
+(cd "$consumer" && node sync.mjs fixture other --dry-run 2>"$work/err") && fail 'two source names should be refused'
+grep -q 'unexpected extra source name: other' "$work/err" || fail 'second source name not named'
+assert_untouched 'two source names'
+for help in --help -h; do
+  (cd "$consumer" && node sync.mjs "$help" >"$work/out" 2>"$work/err") || fail "$help should exit 0"
+  grep -q '^usage: ' "$work/out" || fail "$help did not print usage"
+  assert_untouched "$help"
+done
 (cd "$consumer" && node sync.mjs) || fail 'clean update should apply'
 grep -q shared-v2 "$consumer/plugins/engineering/skills/patina-mode/SKILL.md" || fail 'updated skill missing'
 grep -q other-v2 "$consumer/plugins/engineering/other.md" || fail 'updated subtree file missing'
