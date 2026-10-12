@@ -5,7 +5,7 @@
       "name": "pstack",
       "repo": "https://github.com/michael-denyer/pstack-claude.git",
       "ref": "main",
-      "pin": "ad396c23e5f3515a008f0b2c1e5316798e3dab0d",
+      "pin": "1bfdab4219d41c4d0bb28d1e7832de6128373611",
       "transforms": {
         "rename": {
           "poteto-mode": "patina-mode",
