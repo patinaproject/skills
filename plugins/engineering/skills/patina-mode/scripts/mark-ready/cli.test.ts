@@ -44,6 +44,15 @@ describe("local review record", () => {
     expect(checkReadiness(fixed, "abc123", true).ok).toBe(true);
   });
 
+  it("reads a section that runs to the end of the record", () => {
+    const record = parseRecord(
+      "review.md",
+      "Head: abc123\n## Standards\n- Finding S1 (soft): first\n## Spec\n- Finding P1 (smell): first\n- Finding P2 (hard): last"
+    );
+    expect(record.findings.map((finding) => finding.id)).toEqual(["S1", "P1", "P2"]);
+    expect(record.blockingFindings).toBe(1);
+  });
+
   it("keeps a hard finding blocking when someone dismisses it", () => {
     const record = parseRecord(
       "review.md",
