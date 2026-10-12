@@ -28,7 +28,18 @@
           "kind": "subtree",
           "source": "plugins/pstack",
           "destination": "plugins/engineering",
-          "exclude": []
+          "exclude": [
+            ".github/plugin/plugin.json",
+            "hooks/copilot-context.awk",
+            "hooks/copilot-hooks.json",
+            "hooks/json.awk",
+            "hooks/pre-tool-use.awk",
+            "hooks/pre-tool-use.sh",
+            "hooks/script-contracts.awk",
+            "hooks/session-start-copilot-setup.md",
+            "hooks/session-start-copilot-sheet.md",
+            "hooks/session-start-copilot.md"
+          ]
         }
       ],
       "transformsHash": "66a6b957f9b9986f3c85ac2bb6de5e19a265760ac98b00216a146389d8693138"
