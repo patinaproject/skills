@@ -3,7 +3,7 @@ name: patina-help
 description: Guides users through pstack setup, /patina-mode, and picking the skill, playbook, or principle for a task. Type /patina-help with a question.
 ---
 
-# Poteto help
+# Patina help
 
 Answer the user's question about pstack, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a pstack run spends real tokens, so let them send the prompt.
 

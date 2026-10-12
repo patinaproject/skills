@@ -10,7 +10,10 @@
         "rename": {
           "poteto-mode": "patina-mode",
           "poteto-agent": "patina-agent",
-          "poteto-help": "patina-help"
+          "poteto-help": "patina-help",
+          "Poteto mode": "Patina mode",
+          "Poteto subagent": "Patina subagent",
+          "Poteto help": "Patina help"
         },
         "denylist": [
           "poteto-mode",
@@ -26,7 +29,7 @@
           "exclude": []
         }
       ],
-      "transformsHash": "6c276d34b877977f00f26f25675e2e20ba9b203edf91dd24ac4eff1bb23a704f"
+      "transformsHash": "5aaceb97918a2e70e62d8b0f21334ac8b67b8ffa62e6f81dcf8ca79cfda47a50"
     },
     {
       "name": "mattpocock",
