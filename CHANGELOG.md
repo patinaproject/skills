@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.67.1](https://github.com/patinaproject/skills/compare/v2.67.0...v2.67.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* [#597](https://github.com/patinaproject/skills/issues/597) read every line of each review-record section ([#598](https://github.com/patinaproject/skills/issues/598)) ([ae5edb5](https://github.com/patinaproject/skills/commit/ae5edb5133d723ee3776b071c90d771a6c3df181))
+
 ## [2.67.0](https://github.com/patinaproject/skills/compare/v2.66.2...v2.67.0) (2026-10-12)
 
 
