@@ -110,10 +110,20 @@ function localFile(pathname) {
   return {data: fs.readFileSync(absolute), mode: fs.statSync(absolute).mode & 0o111 ? 0o100755 : 0o100644};
 }
 function sameFile(a, b) { return Boolean(a && b && a.mode === b.mode && a.data.equals(b.data)); }
+// A subtree destination can contain another source's skill destination, so the longest prefix owns the path.
+function owner(pathname) {
+  let best = {name: null, length: -1};
+  for (const source of manifest.sources) for (const {destination} of source.targets) {
+    if ((pathname === destination || pathname.startsWith(`${destination}/`)) && destination.length > best.length) best = {name: source.name, length: destination.length};
+  }
+  return best.name;
+}
 function validateForks() {
+  const unowned = Object.keys(forks).filter(pathname => !owner(pathname));
+  if (unowned.length) fail(`forks outside every source destination:\n${unowned.map(p => `  ${p}`).join('\n')}`);
   const differences = new Set();
   for (const {base} of sourceData.values()) for (const [pathname, item] of base) if (!sameFile(localFile(pathname), {data: fs.readFileSync(item.file), mode: item.mode})) differences.add(pathname);
-  const stale = Object.keys(forks).filter(pathname => !differences.has(pathname)), undeclared = [...differences].filter(pathname => !forks[pathname]);
+  const stale = Object.keys(forks).filter(pathname => sourceData.has(owner(pathname)) && !differences.has(pathname)), undeclared = [...differences].filter(pathname => !forks[pathname]);
   if (undeclared.length || stale.length) {
     if (undeclared.length) console.error(`sync-upstream-skills: undeclared forks:\n${undeclared.map(p => `  ${p}`).join('\n')}`);
     if (stale.length) console.error(`sync-upstream-skills: stale forks:\n${stale.map(p => `  ${p}`).join('\n')}`);
