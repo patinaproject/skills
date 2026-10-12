@@ -9,11 +9,13 @@
       "transforms": {
         "rename": {
           "poteto-mode": "patina-mode",
-          "poteto-agent": "patina-agent"
+          "poteto-agent": "patina-agent",
+          "poteto-help": "patina-help"
         },
         "denylist": [
           "poteto-mode",
-          "poteto-agent"
+          "poteto-agent",
+          "poteto-help"
         ]
       },
       "targets": [
@@ -24,7 +26,7 @@
           "exclude": []
         }
       ],
-      "transformsHash": "9f5f9bc8ac4aa6e08032a0b4503d31b205b97e7a9506307fac09eb936085db1e"
+      "transformsHash": "6c276d34b877977f00f26f25675e2e20ba9b203edf91dd24ac4eff1bb23a704f"
     },
     {
       "name": "mattpocock",

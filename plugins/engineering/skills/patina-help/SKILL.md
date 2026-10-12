@@ -1,6 +1,6 @@
 ---
-name: poteto-help
-description: Guides users through pstack setup, /patina-mode, and picking the skill, playbook, or principle for a task. Type /poteto-help with a question.
+name: patina-help
+description: Guides users through pstack setup, /patina-mode, and picking the skill, playbook, or principle for a task. Type /patina-help with a question.
 ---
 
 # Poteto help
@@ -78,7 +78,7 @@ The default answer is `/patina-mode`, which runs most of the others when its ste
 | Turn their own working habits into a personal mode skill | [`/automate-me`](../automate-me/SKILL.md) |
 | Turn what a finished task taught into skill edits | [`/reflect`](../reflect/SKILL.md) |
 | Stop agents from repeating the same mistakes in this repo | [`/correct`](../correct/SKILL.md) |
-| Find their way around pstack | `/poteto-help` |
+| Find their way around pstack | `/patina-help` |
 
 If a skill directory next to this one is missing from the table, read its frontmatter and route by its description. The `principle-*` directories are covered under principles below.
 
