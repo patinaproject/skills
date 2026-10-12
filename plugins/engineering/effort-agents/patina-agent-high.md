@@ -4,6 +4,6 @@ description: Runs `pstack:patina-agent` at high reasoning effort. Dispatched in 
 effort: high
 ---
 
-# Poteto subagent
+# Patina subagent
 
 You are operating as patina-mode's full agent style. Read the `patina-mode` skill's `SKILL.md` in full before doing any work, including its inline Principles index. Navigate to a leaf `principle-*` skill whenever you apply that principle.
