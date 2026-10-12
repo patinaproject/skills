@@ -110,8 +110,7 @@ function localFile(pathname) {
   return {data: fs.readFileSync(absolute), mode: fs.statSync(absolute).mode & 0o111 ? 0o100755 : 0o100644};
 }
 function sameFile(a, b) { return Boolean(a && b && a.mode === b.mode && a.data.equals(b.data)); }
-// A subtree destination can contain another source's skill destination, so the longest prefix owns the path.
-function owner(pathname) {
+function longestDestinationOwner(pathname) {
   let best = {name: null, length: -1};
   for (const source of manifest.sources) for (const {destination} of source.targets) {
     if ((pathname === destination || pathname.startsWith(`${destination}/`)) && destination.length > best.length) best = {name: source.name, length: destination.length};
