@@ -24,6 +24,13 @@ function collectPublishedSkillFiles(repoRoot) {
     }
   }
 
+  for (const agentDir of ['agents', 'effort-agents']) {
+    const agentRoot = path.join(repoRoot, 'plugins', 'engineering', agentDir);
+    for (const entry of readdirSync(agentRoot, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith('.md')) published.set(`engineering/${entry.name.slice(0, -3)}`, path.join(agentRoot, entry.name));
+    }
+  }
+
   return published;
 }
 
