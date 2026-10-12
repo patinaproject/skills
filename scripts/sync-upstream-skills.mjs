@@ -118,11 +118,11 @@ function longestDestinationOwner(pathname) {
   return best.name;
 }
 function validateForks() {
-  const unowned = Object.keys(forks).filter(pathname => !owner(pathname));
+  const unowned = Object.keys(forks).filter(pathname => !longestDestinationOwner(pathname));
   if (unowned.length) fail(`forks outside every source destination:\n${unowned.map(p => `  ${p}`).join('\n')}`);
   const differences = new Set();
   for (const {base} of sourceData.values()) for (const [pathname, item] of base) if (!sameFile(localFile(pathname), {data: fs.readFileSync(item.file), mode: item.mode})) differences.add(pathname);
-  const stale = Object.keys(forks).filter(pathname => sourceData.has(owner(pathname)) && !differences.has(pathname)), undeclared = [...differences].filter(pathname => !forks[pathname]);
+  const stale = Object.keys(forks).filter(pathname => sourceData.has(longestDestinationOwner(pathname)) && !differences.has(pathname)), undeclared = [...differences].filter(pathname => !forks[pathname]);
   if (undeclared.length || stale.length) {
     if (undeclared.length) console.error(`sync-upstream-skills: undeclared forks:\n${undeclared.map(p => `  ${p}`).join('\n')}`);
     if (stale.length) console.error(`sync-upstream-skills: stale forks:\n${stale.map(p => `  ${p}`).join('\n')}`);
