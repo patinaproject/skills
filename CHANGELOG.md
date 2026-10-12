@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.67.0](https://github.com/patinaproject/skills/compare/v2.66.2...v2.67.0) (2026-10-12)
+
+
+### Features
+
+* [#591](https://github.com/patinaproject/skills/issues/591) sync the Engineering plugin with pstack-claude 1bfdab4 ([#594](https://github.com/patinaproject/skills/issues/594)) ([ca261cd](https://github.com/patinaproject/skills/commit/ca261cd662ba0954a08ad790be1aef53991ac816))
+
 ## [2.66.2](https://github.com/patinaproject/skills/compare/v2.66.1...v2.66.2) (2026-10-12)
 
 
