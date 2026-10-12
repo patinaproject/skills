@@ -335,13 +335,6 @@
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-sequence-verifiable-units/SKILL.md": {
-    "kind": "policy",
-    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
-    "upstream": {
-      "status": "not-proposed"
-    }
-  },
   "plugins/engineering/skills/principle-subtract-before-you-add/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
