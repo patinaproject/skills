@@ -28,6 +28,22 @@ describe("local review record", () => {
     );
   });
 
+  it("reads every finding and resolution line in each section", () => {
+    const record = (resolution: string) =>
+      parseRecord(
+        "review.md",
+        `Head: abc123\n## Standards\n- Finding S1 (soft): first\n- Finding S2 (hard): second\n## Spec\n- Finding P1 (smell): first\n- Finding P2 (hard): second\n### Resolution\nS1: Dismissed: style only\nP1: Dismissed: smell only\n${resolution}Status: resolved\n`
+      );
+    const open = record("P2: Fixed in def456\n");
+    expect(open.findings.map((finding) => finding.id)).toEqual(["S1", "S2", "P1", "P2"]);
+    expect(open.blockingFindings).toBe(1);
+    expect(checkReadiness(open, "abc123", true).ok).toBe(false);
+    const fixed = record("S2: Fixed in def456\nP2: Fixed in def456\n");
+    expect(fixed.blockingFindings).toBe(0);
+    expect(fixed.dismissedFindings).toBe(2);
+    expect(checkReadiness(fixed, "abc123", true).ok).toBe(true);
+  });
+
   it("keeps a hard finding blocking when someone dismisses it", () => {
     const record = parseRecord(
       "review.md",
