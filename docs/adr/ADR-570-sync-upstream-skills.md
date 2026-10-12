@@ -31,8 +31,11 @@ stops until the transform change is committed on its own at the current pin.
 
 Every file under a synced destination that differs from its transformed
 upstream needs an entry in the forks registry with its kind, reason, and
-upstream status. CI runs a dry-run sync at the pin and fails on undeclared or
-stale forks and on conflict markers under synced paths.
+upstream status. A fork belongs to the source whose destination is the longest
+prefix of its path, and a fork outside every destination fails the sync. A sync
+of one source checks only that source's forks for staleness. CI runs a dry-run
+sync of every source at the pin and fails on undeclared or stale forks and on
+conflict markers under synced paths.
 
 A skill fetched by the sync is never listed in `skills-lock.json`; the lock is
 only for skills this repository uses locally. A contract test enforces the
