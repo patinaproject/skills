@@ -17,5 +17,19 @@
     "principles",
     "subagents",
     "unslop"
+  ],
+  "agents": [
+    "./agents/comment-sicko.md",
+    "./agents/patina-agent.md",
+    "./effort-agents/effort-high.md",
+    "./effort-agents/effort-low.md",
+    "./effort-agents/effort-max.md",
+    "./effort-agents/effort-medium.md",
+    "./effort-agents/effort-xhigh.md",
+    "./effort-agents/patina-agent-high.md",
+    "./effort-agents/patina-agent-low.md",
+    "./effort-agents/patina-agent-max.md",
+    "./effort-agents/patina-agent-medium.md",
+    "./effort-agents/patina-agent-xhigh.md"
   ]
 }

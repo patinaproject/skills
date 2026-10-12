@@ -7,6 +7,8 @@ description: "Sketch types, signatures, and module structure before code, then s
 
 On Codex, read the [platform mapping](../patina-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
 
+On GitHub Copilot, read the [platform mapping](../patina-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
+
 Design before implementing. Sketch types, function signatures, class shapes, and module boundaries with `not implemented` bodies and pseudocode. Synthesize across multiple model perspectives, then fill in code against the chosen sketch. If implementation proves the sketch wrong, throw it out and redesign.
 
 ## Start
@@ -91,7 +93,7 @@ The caller's usage is written first and the type sketch derived from it. One fil
 
 Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.
 
-- architect runners: `opus`, `fable`, `sonnet`
+- architect runners: `opus`, `fable`, `sonnet`, `haiku`
 
 ## Reasoning effort
 

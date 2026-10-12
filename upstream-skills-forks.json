@@ -36,7 +36,7 @@
   },
   "plugins/engineering/hooks/session-start.sh": {
     "kind": "policy",
-    "reason": "Patina maintains this deliberate local hook integration for shared Claude and Codex setup.",
+    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet inline instead of calling setup-pstack/scripts/read-sheet.sh, and skips injection when CLAUDE.md already carries the mandate.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -329,13 +329,6 @@
     }
   },
   "plugins/engineering/skills/principle-separate-before-serializing-shared-state/SKILL.md": {
-    "kind": "policy",
-    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
-    "upstream": {
-      "status": "not-proposed"
-    }
-  },
-  "plugins/engineering/skills/principle-sequence-verifiable-units/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
     "upstream": {

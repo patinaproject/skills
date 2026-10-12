@@ -7,6 +7,8 @@ description: "Spawn N parallel candidates at the same task, pick a base, graft t
 
 On Codex, read the [platform mapping](../patina-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
 
+On GitHub Copilot, read the [platform mapping](../patina-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
+
 Fan out N parallel attempts at the same task. Read every candidate end to end. Pick the strongest as the base. Graft the best ideas from the others into it. Verify the synthesized result.
 
 ## Start
@@ -75,8 +77,8 @@ One synthesized artifact. One short synthesis note alongside, naming the base, t
 
 Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.
 
-- arena runners: `opus`, `fable`, `sonnet`
-- arena cross-judge pool: `opus`, `fable`, `sonnet`
+- arena runners: `opus`, `fable`, `sonnet`, `haiku`
+- arena cross-judge pool: `opus`, `fable`, `sonnet`, `haiku`
 
 ## Reasoning effort
 

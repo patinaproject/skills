@@ -22,22 +22,25 @@ type Ui = ExtensionContext["ui"];
 // undefined means the user dismissed the dialog.
 async function ask(ui: Ui, q: Question, signal: AbortSignal | undefined): Promise<string | undefined> {
   const title = q.header ? `${q.header}: ${q.question}` : q.question;
-  const shown = (o: Question["options"][number]) => (o.description ? `${o.label} - ${o.description}` : o.label);
-  const labels = new Map(q.options.map((o) => [shown(o), o.label]));
+  // Pi returns the displayed string, so number choices to distinguish them
+  // from controls and from other choices with the same rendered text.
+  const labels = new Map(q.options.map((o, i) => [`${i + 1}. ${o.label}${o.description ? ` - ${o.description}` : ""}`, o.label]));
   // The label of a listed pick, or what the user types for OTHER.
   const answer = (pick: string) => (pick === OTHER ? ui.input(title, "Your answer", { signal }) : labels.get(pick));
   if (!q.multiSelect) {
     const pick = await ui.select(title, [...labels.keys(), OTHER], { signal });
     return pick === undefined ? undefined : answer(pick);
   }
+  const picked = new Set<string>();
   const chosen: string[] = [];
   for (;;) {
-    const remaining = [...labels].filter(([, label]) => !chosen.includes(label)).map(([text]) => text);
+    const remaining = [...labels.keys()].filter((text) => !picked.has(text));
     const pick = await ui.select(`${title} (one at a time; ${DONE} when finished)`, [...remaining, OTHER, DONE], { signal });
     if (pick === undefined) return undefined;
     if (pick === DONE) return chosen.join(", ");
     const text = await answer(pick);
     if (text === undefined) return undefined;
+    picked.add(pick);
     chosen.push(text);
   }
 }
@@ -63,18 +66,21 @@ export function registerAsk(pi: ExtensionAPI, oneShot: OneShot): void {
       const answers: { question: string; answer: string }[] = [];
       for (const q of params.questions) {
         const answer = await ask(ctx.ui, q, signal);
-        if (answer === undefined) {
-          return {
-            content: [{ type: "text", text: "The user dismissed the question without answering." }],
-            details: { answers, dismissed: true },
-          };
-        }
+        if (answer === undefined) break;
         answers.push({ question: q.question, answer });
       }
+      const dismissed = answers.length < params.questions.length;
       const text = answers.map((a) => `"${a.question}"="${a.answer}"`).join(", ");
+      // Pi sends content to the model; details alone cannot preserve earlier answers.
+      const answered = answers.length ? `User has answered your questions: ${text}. ` : "";
+      const status = !dismissed
+        ? "You can now continue with the user's answers in mind."
+        : answers.length
+          ? "The user dismissed the remaining questions without answering."
+          : "The user dismissed the question without answering.";
       return {
-        content: [{ type: "text", text: `User has answered your questions: ${text}. You can now continue with the user's answers in mind.` }],
-        details: { answers, dismissed: false },
+        content: [{ type: "text", text: answered + status }],
+        details: { answers, dismissed },
       };
     },
   });
