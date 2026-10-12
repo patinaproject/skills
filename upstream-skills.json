@@ -13,12 +13,14 @@
           "poteto-help": "patina-help",
           "Poteto mode": "Patina mode",
           "Poteto subagent": "Patina subagent",
-          "Poteto help": "Patina help"
+          "Poteto help": "Patina help",
+          "pstack:": "engineering:"
         },
         "denylist": [
           "poteto-mode",
           "poteto-agent",
-          "poteto-help"
+          "poteto-help",
+          "pstack:"
         ]
       },
       "targets": [
@@ -29,7 +31,7 @@
           "exclude": []
         }
       ],
-      "transformsHash": "5aaceb97918a2e70e62d8b0f21334ac8b67b8ffa62e6f81dcf8ca79cfda47a50"
+      "transformsHash": "66a6b957f9b9986f3c85ac2bb6de5e19a265760ac98b00216a146389d8693138"
     },
     {
       "name": "mattpocock",
