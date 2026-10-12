@@ -48,10 +48,19 @@ git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -m
 (cd "$consumer" && node sync.mjs fixture --dry-run) || fail 'single-source dry run should ignore another source fork'
 printf 'extra-v1\n' > "$consumer/plugins/engineering/skills/extra/SKILL.md"
 git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -am revert-extra
-if (cd "$consumer" && node sync.mjs other --dry-run 2>/dev/null); then fail 'stale fork in the selected source should fail'; fi
-if (cd "$consumer" && node sync.mjs --dry-run 2>/dev/null); then fail 'stale fork should fail a full dry run'; fi
+if (cd "$consumer" && node sync.mjs other --dry-run 2>"$work/err"); then fail 'stale fork in the selected source should fail'; fi
+grep -q 'stale forks:' "$work/err" || fail 'selected-source stale fork not reported as stale'
+if (cd "$consumer" && node sync.mjs --dry-run 2>"$work/err"); then fail 'stale fork should fail a full dry run'; fi
+grep -q 'stale forks:' "$work/err" || fail 'full-run stale fork not reported as stale'
 printf 'extra-patina\n' > "$consumer/plugins/engineering/skills/extra/SKILL.md"
 git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -am restore-extra
+node - "$consumer/upstream-skills-forks.json" <<'NODE'
+const fs=require('fs'); const p=process.argv[2]; const j=JSON.parse(fs.readFileSync(p,'utf8')); j['docs/outside.md']={kind:'policy',reason:'fixture unowned fork',upstream:{status:'not-proposed'}}; fs.writeFileSync(p,JSON.stringify(j)+'\n');
+NODE
+git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -am unowned-fork
+if (cd "$consumer" && node sync.mjs fixture --dry-run 2>"$work/err"); then fail 'a fork outside every destination should fail'; fi
+grep -q 'forks outside every source destination' "$work/err" || fail 'unowned fork not reported'
+git -C "$consumer" reset -q --hard HEAD~1
 perl -0pi -e 's/shared-v1/shared-v2/' "$upstream/plugins/pstack/skills/poteto-mode/SKILL.md"
 printf 'other-v2\n' > "$upstream/plugins/pstack/other.md"
 git -C "$upstream" add -A
