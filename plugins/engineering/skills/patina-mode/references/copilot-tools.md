@@ -1,5 +1,7 @@
 # GitHub Copilot tool mapping for pstack
 
+The Engineering plugin does not ship the GitHub Copilot runtime: no Copilot manifest, `SessionStart` hook, or `PreToolUse` hook. Sections below that describe those hooks apply to upstream pstack's Copilot plugin, not to Engineering.
+
 pstack skills are written in Claude Code tool language (the `Skill` tool, the `Agent` tool, `AskUserQuestion`, Claude model names, `~/.claude/` paths). On GitHub Copilot the skills are the same files; only the tool names, model IDs, and paths resolve differently. Read this when a pstack skill names a Claude tool, a driver or bundled skill, a Claude model, or a Claude Code path. It covers both the Copilot CLI and the Copilot app, which load the same plugin. This file is Copilot-specific; other runtimes use their own equivalents.
 
 ## Tool actions
@@ -110,7 +112,7 @@ Affected skill entry points point here. Most skills need only the tables above. 
 | Skill | On GitHub Copilot |
 |-------|-------------------|
 | `interrogate` | Each reviewer is a `task` call: `subagent_type` becomes `agent_type`, `readonly: true` becomes a read-only agent type (see Subagent policy), and `model` comes from the sheet. Keep the panel's vendors distinct. |
-| `setup-pstack` | The skill's Other runtimes table names the Copilot sheet path and how it loads. Its [Copilot setup questions](../../setup-pstack/copilot.md) list models from the `task` tool's `model` enum and ask one `ask_user` question per tier and panel slot, grouped by vendor, with no recommended model; a first question lets a plan with one model, or anyone who wants no per-role choices, run every role on the session's model. The role rows are identical; the `session hook` line also controls the Copilot hook. |
+| `setup-pstack` | The skill's Other runtimes table names the Copilot sheet path and how it loads. Its [Copilot setup questions](../../setup-pstack/copilot.md) list models from the `task` tool's `model` enum and ask one `ask_user` question per tier and panel slot, grouped by vendor, with no recommended model; a first question lets a plan with one model, or anyone who wants no per-role choices, run every role on the session's model. The role rows are identical; Engineering ships no Copilot hook, so the `session hook` line has no effect on Copilot. |
 | `architect` | The runner panel goes through the **arena** skill: one `task` per runner, each with a model from the sheet's `architect runners` line. |
 | `how` | The explorers and the explainer are `task` calls with the sheet's `how` role models; critics use a read-only agent type (see Subagent policy). |
 | `arena` | Runners and the cross-judge pool come from the sheet's panel lines; pick the cross-judge from a different vendor than the candidate it grades. |
@@ -132,7 +134,7 @@ Affected skill entry points point here. Most skills need only the tables above. 
 
 ## Instructions file
 
-Where a pstack skill says "your instructions file" or `CLAUDE.md`, on Copilot that is `AGENTS.md` or `.github/copilot-instructions.md` in the repository, and `~/.copilot/copilot-instructions.md` for every repository. Copilot also reads a repository's `CLAUDE.md`. Copilot does not expand `@~/` includes in user-level instructions, so the plugin hook injects the model sheet's role lines instead, as Model names above describes.
+Where a pstack skill says "your instructions file" or `CLAUDE.md`, on Copilot that is `AGENTS.md` or `.github/copilot-instructions.md` in the repository, and `~/.copilot/copilot-instructions.md` for every repository. Copilot also reads a repository's `CLAUDE.md`. Copilot does not expand `@~/` includes in user-level instructions, and Engineering ships no Copilot hook, so read the model sheet with `view`, as Model names above describes for a skills-only install.
 
 ## Skill locations
 
