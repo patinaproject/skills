@@ -26,8 +26,6 @@ snapshot_files() {
 
 # Vendoring carries the skill's assets, so they must stay byte-identical to the
 # canonical plugin sources or a skills-only consumer gets a stale mandate.
-diff -q plugins/engineering/hooks/session-start-context.md "$SKILL/assets/mandate.md" >/dev/null \
-  || fail "assets/mandate.md drifted from hooks/session-start-context.md"
 for hook in plugins/engineering/hooks/session-start.sh plugins/engineering/hooks/session-start-context.md; do
   diff -q "$hook" "$SKILL/assets/hooks/$(basename "$hook")" >/dev/null \
     || fail "bundled hook drifted from $hook"
@@ -50,7 +48,8 @@ CODEX="$TMP/codex"
 mkdir -p "$REPO/.claude/agents"
 printf 'stale agent payload\n' > "$REPO/.claude/agents/patina-agent.md"
 
-# Pre-existing unrelated content that must survive every run.
+# Pre-existing unrelated content that must survive every run. The old installer
+# wrote a managed mandate block to CLAUDE.md and, with --codex, to AGENTS.md.
 printf '# Project rules\n\nKeep my house style.\n\n%s\nold mandate\n%s\n' \
   '<!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->' \
   '<!-- END engineering:patina-mode -->' > "$REPO/CLAUDE.md"
@@ -58,7 +57,9 @@ mkdir -p "$REPO/.claude"
 printf '%s\n' '{"hooks":{"SessionStart":[{"matcher":"startup","hooks":[{"type":"command","command":"echo unrelated"}]},{"matcher":"startup|resume|clear|compact","hooks":[{"type":"command","command":"\"$CLAUDE_PROJECT_DIR/plugins/engineering/hooks/session-start.sh\" claude"}]}]}}' > "$REPO/.claude/settings.json"
 mkdir -p "$CODEX"
 printf '[features]\nother = true\nmulti_agent = false\n\n[sandbox]\nmode = "read"\n' > "$CODEX/config.toml"
-printf '# My Codex rules\n\nUnrelated line.\n' > "$CODEX/AGENTS.md"
+printf '# My Codex rules\n\nUnrelated line.\n\n%s\nold mandate\n%s\n' \
+  '<!-- BEGIN engineering:patina-mode (managed by setup-engineering; re-running overwrites this block) -->' \
+  '<!-- END engineering:patina-mode -->' > "$CODEX/AGENTS.md"
 
 run_install() {
   bash "$SCRIPT" --repo "$REPO" --codex \
@@ -87,7 +88,7 @@ for asset in "$SKILL"/assets/agents/*.md; do
     || fail "$(basename "$asset") not installed correctly"
 done
 
-# Claude uses the hook; Codex retains its managed instructions block.
+# Claude and Codex use their hooks; no instructions file keeps a managed block.
 [ "$(count "$BEGIN" "$REPO/CLAUDE.md")" -eq 0 ] || fail "repo CLAUDE.md still has a mandate block"
 grep -qF "Keep my house style." "$REPO/CLAUDE.md" || fail "repo CLAUDE.md lost unrelated content"
 [ "$(jq -r '[.hooks.SessionStart[] | select(.matcher == "startup|resume|clear|compact") | .hooks[] | select(.command | contains(".claude/hooks/session-start.sh"))] | length' "$REPO/.claude/settings.json")" -eq 1 ] || fail "settings.json must register exactly one Engineering SessionStart hook"
@@ -98,7 +99,8 @@ expected_hook_output="$(sed 's/engineering://g' plugins/engineering/hooks/sessio
 [ "$hook_output" = "$expected_hook_output" ] || fail "skills-only hook output drifted from the transformed context"
 
 
-[ "$(count "$BEGIN" "$CODEX/AGENTS.md")" -eq 1 ] || fail "Codex AGENTS.md has $(count "$BEGIN" "$CODEX/AGENTS.md") mandate blocks, expected 1"
+[ "$(count "$BEGIN" "$CODEX/AGENTS.md")" -eq 0 ] || fail "Codex AGENTS.md kept a legacy mandate block"
+[ "$(count "$END" "$CODEX/AGENTS.md")" -eq 0 ] || fail "Codex AGENTS.md kept a legacy mandate end marker"
 grep -qF "Unrelated line." "$CODEX/AGENTS.md" || fail "Codex AGENTS.md lost unrelated content"
 
 # multi_agent flipped to true exactly once, sibling keys and sections intact.
@@ -150,8 +152,8 @@ HOME="$SENTINEL_HOME" CODEX_HOME="$SENTINEL_HOME/.codex" bash "$SCRIPT" --repo "
 HOME="$SENTINEL_HOME" CODEX_HOME="$SENTINEL_HOME/.codex" bash "$SCRIPT" --repo "$CODEXREPO" --codex >/dev/null
 [ "$(grep -c '^multi_agent = true$' "$CODEXREPO/.codex/config.toml" 2>/dev/null || echo 0)" -eq 1 ] \
   || fail "--codex did not write repo-scoped .codex/config.toml with multi_agent"
-[ "$(count "$BEGIN" "$CODEXREPO/AGENTS.md")" -eq 1 ] \
-  || fail "--codex did not upsert a single mandate block into repo AGENTS.md"
+[ ! -e "$CODEXREPO/AGENTS.md" ] \
+  || fail "--codex created a repo AGENTS.md"
 [ "$(cat "$SENTINEL_HOME/.codex/config.toml")" = "PRE-EXISTING GLOBAL" ] \
   || fail "--codex mutated the user global ~/.codex/config.toml"
 [ ! -e "$SENTINEL_HOME/.codex/AGENTS.md" ] \
@@ -164,16 +166,18 @@ printf 'session hook: off\n' > "$OFF_HOME/.claude/pstack-models.md"
 off_output="$(CLAUDE_PROJECT_DIR="$REPO" HOME="$OFF_HOME" "$REPO/.claude/hooks/session-start.sh" claude)"
 [ -z "$off_output" ] || fail "session hook: off still injected the mandate"
 
-# A CLAUDE.md -> AGENTS.md layout keeps one Codex block and suppresses the
-# duplicate Claude hook output.
+# A CLAUDE.md -> AGENTS.md layout from an older install loses its one shared
+# block, and the symlink survives the rewrite.
 SYMLINK_REPO="$TMP/symlink-repo"
 mkdir -p "$SYMLINK_REPO"
-printf '# Shared rules\n' > "$SYMLINK_REPO/AGENTS.md"
+printf '# Shared rules\n\n%s\nold mandate\n%s\n' "$FULL_BEGIN" "$END" > "$SYMLINK_REPO/AGENTS.md"
 ln -s AGENTS.md "$SYMLINK_REPO/CLAUDE.md"
 bash "$SCRIPT" --repo "$SYMLINK_REPO" --codex >/dev/null
-[ "$(count "$BEGIN" "$SYMLINK_REPO/AGENTS.md")" -eq 1 ] || fail "symlink layout did not retain one AGENTS.md mandate"
+[ -L "$SYMLINK_REPO/CLAUDE.md" ] || fail "symlink layout lost the CLAUDE.md symlink"
+[ "$(count "$BEGIN" "$SYMLINK_REPO/AGENTS.md")" -eq 0 ] || fail "symlink layout kept a mandate block"
+grep -qF "# Shared rules" "$SYMLINK_REPO/AGENTS.md" || fail "symlink layout lost unrelated content"
 symlink_output="$(env -u CLAUDE_PROJECT_DIR HOME="$TMP/no-sheet" "$SYMLINK_REPO/.claude/hooks/session-start.sh" claude)"
-[ -z "$symlink_output" ] || fail "symlink layout injected a duplicate Claude mandate"
+[ "$symlink_output" = "$expected_hook_output" ] || fail "symlink layout did not fall back to the Claude hook mandate"
 
 MISSING="$TMP/missing"
 mkdir -p "$MISSING/skills"

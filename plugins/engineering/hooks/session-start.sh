@@ -34,9 +34,10 @@ if printf '%s\n' "$normalized" | grep -qx 'session hook: off'; then
   exit 0
 fi
 
-# A CLAUDE.md symlink to AGENTS.md is shared by Claude and Codex. When Codex
-# setup owns the mandate in that shared file, Claude already receives it from
-# the instructions file; avoid injecting a second copy through the hook.
+# A repository that carries the managed mandate block in CLAUDE.md already
+# delivers it to Claude; avoid injecting a second copy through the hook.
+# setup-engineering removes the block it once wrote, so this guards a block that
+# someone restored or copied by hand.
 if [ "$1" = claude ]; then
   project_dir="${CLAUDE_PROJECT_DIR:-}"
   case "$hook_root" in
