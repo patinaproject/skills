@@ -211,7 +211,7 @@
   },
   "plugins/engineering/skills/patina-mode/references/codex-tools.md": {
     "kind": "policy",
-    "reason": "Codex-specific mapping for Engineering: base-directory script paths, issue-routes, patinaproject-verify, engineering: addressing, the code-review presentation section, and the Codex routing mandate delivered by setup-engineering instead of a plugin hook.",
+    "reason": "Codex-specific mapping for Engineering: base-directory script paths, issue-routes, patinaproject-verify, engineering: addressing, and the code-review presentation section.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -372,7 +372,7 @@
   },
   "plugins/engineering/skills/setup-pstack/SKILL.md": {
     "kind": "policy",
-    "reason": "Engineering delivers the Codex mandate through setup-engineering's AGENTS.md block and ships no Codex or Copilot plugin hook, so the session-hook text, the sheet header, and the runtime table say the hook exists only on Claude Code (and the Pi extension).",
+    "reason": "Patina excludes the GitHub Copilot runtime, so the Copilot runtime-table row and the session-hook applicability sentence name no Copilot plugin hook.",
     "upstream": {
       "status": "not-proposed"
     }

@@ -53,9 +53,11 @@ Skills name Claude defaults (a single-role default for code/prose/judgment plus 
 
 `/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs.
 
-## Session routing mandate
+## Session routing hook
 
-Codex has no `SessionStart` hook in the Engineering plugin, because its Codex manifest declares no `hooks` entry. [`setup-engineering --codex`](../../setup-engineering/SKILL.md#codex) delivers the routing mandate as a managed block in the repository's `AGENTS.md`. Without that block, request `patina-mode` explicitly or add a standing instruction to `AGENTS.md`. The `session hook` line in the `pstack-models.md` sheet controls the Claude Code hook only.
+The native pstack plugin bundles the same `SessionStart` routing instruction as the Claude Code plugin, through `session-start.sh` on macOS and Linux and `session-start.ps1` on Windows. Codex runs the hook on startup, resume, clear, and compact after the user trusts the hook through `/hooks`. The hook reads `session hook` from the Codex sheet, at the path in [setup-pstack's runtime table](../../setup-pstack/SKILL.md#other-runtimes); `session hook: off` disables injection.
+
+A skills-only installation does not include plugin hooks. Request `patina-mode` explicitly or add a standing instruction to `AGENTS.md` in that case.
 
 ## Driver and bundled skills pstack references
 
