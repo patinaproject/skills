@@ -140,6 +140,19 @@ bash "$SCRIPT" --repo "$CORRUPT" >/dev/null
 grep -qF "SENTINEL trailing content" "$CORRUPT/CLAUDE.md" || fail "corrupted block swallowed content on second run"
 [ "$(count "$END" "$CORRUPT/CLAUDE.md")" -eq 0 ] || fail "second run changed a partial mandate block"
 
+# Markers out of order leave the file untouched, so the installer must not
+# report a removal it did not make.
+REVERSED="$TMP/reversed"
+mkdir -p "$REVERSED"
+printf '%s
+between
+%s
+' "$END" "$FULL_BEGIN" > "$REVERSED/CLAUDE.md"
+cp "$REVERSED/CLAUDE.md" "$TMP/reversed-before.md"
+reversed_output="$(bash "$SCRIPT" --repo "$REVERSED")"
+cmp -s "$REVERSED/CLAUDE.md" "$TMP/reversed-before.md" || fail "reversed markers changed CLAUDE.md"
+case "$reversed_output" in *"mandate block removed"*) fail "installer reported a removal it did not make" ;; esac
+
 # --codex with no explicit paths writes repo-scoped targets, and must never reach
 # for the user's global Codex config. A sentinel HOME/CODEX_HOME proves the
 # negative: the pre-seeded global config stays untouched and no global AGENTS.md

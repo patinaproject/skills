@@ -87,6 +87,7 @@ remove_managed_blocks() {
     { print }
     END { flush() }
   ' "$file" > "$tmp" || { rm -f "$tmp"; return 0; }
+  if cmp -s "$file" "$tmp"; then rm -f "$tmp"; return 0; fi
   write_in_place "$file" "$tmp"
   echo "mandate block removed: ${file}"
 }
