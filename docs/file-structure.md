@@ -22,6 +22,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/pr-readiness/`: centralized PR evidence evaluator and publication command
+- `plugins/engineering/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/skills/retro/`: Coding-session retrospective workflow
 - `plugins/engineering/skills/to-spec/`: Issue spec drafting and publication workflow
@@ -86,6 +87,7 @@ Skills owned by this repository:
 | `triage` | `plugins/engineering/skills/triage/` | Issue and pull-request triage workflow |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
+| `pr-review-assistant` | `plugins/engineering/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
 installed via the vercel-labs CLI and is not owned by this repository. Install
