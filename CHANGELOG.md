@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.71.0](https://github.com/patinaproject/skills/compare/v2.70.0...v2.71.0) (2026-10-13)
+
+
+### Features
+
+* [#617](https://github.com/patinaproject/skills/issues/617) add pr-review-assistant skill ([#618](https://github.com/patinaproject/skills/issues/618)) ([21125de](https://github.com/patinaproject/skills/commit/21125ded48ce27089ebba37179c127e78989fdcf))
+
 ## [2.70.0](https://github.com/patinaproject/skills/compare/v2.69.0...v2.70.0) (2026-10-13)
 
 
