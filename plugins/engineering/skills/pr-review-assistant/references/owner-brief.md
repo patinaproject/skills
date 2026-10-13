@@ -8,7 +8,7 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 ## 1. Learn the change
 
-From a clone of the PR's repository, fetch the head and check it out in a worktree in your scratchpad: `git fetch origin +pull/<n>/head:pr-<n>`, then `git worktree add <scratchpad>/pr-<n> pr-<n>`. The `+` lets a later fetch replace a force-pushed head. Follow the method of the `engineering:teach` skill ([teach](../../teach/SKILL.md)) on yourself, and read the code directly, because you cannot start subagents. Read:
+From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `engineering:teach` skill ([teach](../../teach/SKILL.md)) on yourself, and read the code directly, because you cannot start subagents. Read:
 
 - the full diff, and enough of the surrounding code to know what each part is, how it works, and why it exists;
 - the PR description and the linked Linear issue;
@@ -52,7 +52,7 @@ Follow the Artifact tool's design guidance. Layout and visuals are your call. Th
 - the to-do list, with checkboxes that keep their state in `localStorage`. Wrap each storage call in `try`/`catch`;
 - the evidence ledger, and a short "Not looked at" list.
 
-For visuals, read the `show-me` skill's `SKILL.md` ([humanlayer/skills](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md), which this repository does not bundle) and pick the smallest view that makes the point. Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills) rule: show only the views that changed.
+For visuals, read the `show-me` skill's `SKILL.md` ([humanlayer/skills](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md), which this repository does not bundle) and pick the smallest view that makes the point. Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed.
 
 Write for limited attention. Lead with what matters, and cut every sentence that does not help the reviewer decide or comment. Each claim carries a `file:line` or a source link. When you cannot point to a source for a claim, move the claim to "Not looked at".
 
