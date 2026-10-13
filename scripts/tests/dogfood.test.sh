@@ -21,6 +21,7 @@ ROOT_SKILLS=(
   grill-system-design
   review-system-design
   writing-for-pstack
+  gmail-inbox-triage
 )
 FAIL_COUNT=0
 
