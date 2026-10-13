@@ -187,6 +187,16 @@ It does not own implementation, replies, thread resolution, or review state.
 See [./plugins/engineering/skills/gather-evidence/](./plugins/engineering/skills/gather-evidence/)
 for the skill contract.
 
+### pr-review-assistant
+
+`pr-review-assistant` pair-reviews someone else's pull request. It presents the
+PR as an artifact (intent, hard-to-reverse changes, changed names and flows,
+blast radius) plus a to-do list of comments for the reviewer, who stays the
+judge. It writes nothing to GitHub or Linear until the reviewer asks.
+
+See [./plugins/engineering/skills/pr-review-assistant/](./plugins/engineering/skills/pr-review-assistant/)
+for the skill contract.
+
 ### running-mobile-simulators
 
 Concurrent workspaces can see the same Android emulators, iOS simulators, and
@@ -222,6 +232,7 @@ README and skill contract.
 | [writing-for-pstack](./skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [gmail-inbox-triage](./skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
+| [pr-review-assistant](./plugins/engineering/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
@@ -282,6 +293,7 @@ plugins/engineering/
     move-branch-here/
     principle-offensive-programming/
     gather-evidence/
+    pr-review-assistant/
     running-mobile-simulators/
 .agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror

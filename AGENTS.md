@@ -20,6 +20,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
+- `plugins/engineering/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
@@ -286,6 +287,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | pr | `plugins/engineering/skills/pr/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
+| pr-review-assistant | `plugins/engineering/skills/pr-review-assistant/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
 | retro | `plugins/engineering/skills/retro/` |
 | to-spec | `plugins/engineering/skills/to-spec/` |
