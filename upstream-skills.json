@@ -81,6 +81,24 @@
         }
       ],
       "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
+    },
+    {
+      "name": "humanlayer",
+      "repo": "https://github.com/humanlayer/skills.git",
+      "ref": "main",
+      "pin": "653b6411c1f70c275a18e37673b042ff99f67ceb",
+      "transforms": {
+        "rename": {},
+        "denylist": []
+      },
+      "targets": [
+        {
+          "kind": "skill",
+          "source": "plugins/show-me/skills/show-me",
+          "destination": "plugins/team/skills/show-me"
+        }
+      ],
+      "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
     }
   ]
 }
