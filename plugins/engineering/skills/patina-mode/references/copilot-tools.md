@@ -1,5 +1,7 @@
 # GitHub Copilot tool mapping for pstack
 
+The Engineering plugin does not ship the GitHub Copilot runtime: no Copilot manifest, `SessionStart` hook, or `PreToolUse` hook. Sections below that describe those hooks apply to upstream pstack's Copilot plugin, not to Engineering.
+
 pstack skills are written in Claude Code tool language (the `Skill` tool, the `Agent` tool, `AskUserQuestion`, Claude model names, `~/.claude/` paths). On GitHub Copilot the skills are the same files; only the tool names, model IDs, and paths resolve differently. Read this when a pstack skill names a Claude tool, a driver or bundled skill, a Claude model, or a Claude Code path. It covers both the Copilot CLI and the Copilot app, which load the same plugin. This file is Copilot-specific; other runtimes use their own equivalents.
 
 ## Tool actions

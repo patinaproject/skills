@@ -211,7 +211,14 @@
   },
   "plugins/engineering/skills/patina-mode/references/codex-tools.md": {
     "kind": "policy",
-    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "reason": "Codex-specific mapping for Engineering: base-directory script paths, issue-routes, patinaproject-verify, engineering: addressing, the code-review presentation section, and the Codex routing mandate delivered by setup-engineering instead of a plugin hook.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/references/copilot-tools.md": {
+    "kind": "policy",
+    "reason": "Patina excludes the GitHub Copilot runtime from the sync, so a note states that the Copilot hook sections describe upstream pstack, not Engineering.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -359,6 +366,20 @@
   "plugins/engineering/skills/reflect/references/tooling-reviewer.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/setup-pstack/SKILL.md": {
+    "kind": "policy",
+    "reason": "Engineering delivers the Codex mandate through setup-engineering's AGENTS.md block and ships no Codex or Copilot plugin hook, so the session-hook and sheet-loading text says so for Codex and Copilot.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/setup-pstack/copilot.md": {
+    "kind": "policy",
+    "reason": "Patina excludes the GitHub Copilot runtime from the sync, so a note states that the Copilot hook sections describe upstream pstack, not Engineering.",
     "upstream": {
       "status": "not-proposed"
     }
