@@ -134,7 +134,7 @@ Affected skill entry points point here. Most skills need only the tables above. 
 
 ## Instructions file
 
-Where a pstack skill says "your instructions file" or `CLAUDE.md`, on Copilot that is `AGENTS.md` or `.github/copilot-instructions.md` in the repository, and `~/.copilot/copilot-instructions.md` for every repository. Copilot also reads a repository's `CLAUDE.md`. Copilot does not expand `@~/` includes in user-level instructions, so the plugin hook injects the model sheet's role lines instead, as Model names above describes.
+Where a pstack skill says "your instructions file" or `CLAUDE.md`, on Copilot that is `AGENTS.md` or `.github/copilot-instructions.md` in the repository, and `~/.copilot/copilot-instructions.md` for every repository. Copilot also reads a repository's `CLAUDE.md`. Copilot does not expand `@~/` includes in user-level instructions, and Engineering ships no Copilot hook, so read the model sheet with `view`, as Model names above describes for a skills-only install.
 
 ## Skill locations
 
