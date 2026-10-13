@@ -74,14 +74,17 @@ assert_untouched() {
 }
 # Upstream is at v2 here, so a real sync would visibly change the consumer.
 for bad in --dryrun --dry_run --force -x; do
-  if (cd "$consumer" && node sync.mjs "$bad" 2>"$work/err"); then fail "unknown argument $bad should be refused"; fi
+  status=0; (cd "$consumer" && node sync.mjs "$bad" 2>"$work/err") || status=$?
+  test "$status" -eq 2 || fail "unknown argument $bad should exit 2, got $status"
   grep -q "unknown argument: $bad" "$work/err" || fail "unknown argument $bad not named"
   assert_untouched "unknown argument $bad"
 done
-(cd "$consumer" && node sync.mjs fixture --dryrun 2>"$work/err") && fail 'unknown flag after a source name should be refused'
+status=0; (cd "$consumer" && node sync.mjs fixture --dryrun 2>"$work/err") || status=$?
+test "$status" -eq 2 || fail "unknown flag after a source name should exit 2, got $status"
 grep -q 'unknown argument: --dryrun' "$work/err" || fail 'unknown flag after a source name not named'
 assert_untouched 'unknown flag after a source name'
-(cd "$consumer" && node sync.mjs fixture other --dry-run 2>"$work/err") && fail 'two source names should be refused'
+status=0; (cd "$consumer" && node sync.mjs fixture other --dry-run 2>"$work/err") || status=$?
+test "$status" -eq 2 || fail "two source names should exit 2, got $status"
 grep -q 'unexpected extra source name: other' "$work/err" || fail 'second source name not named'
 assert_untouched 'two source names'
 for help in --help -h; do
