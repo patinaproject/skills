@@ -3,6 +3,7 @@ set -euo pipefail
 
 expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/update-branch","./skills/install-skills","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/writing-for-pstack","./skills/gmail-inbox-triage"]'
 expected_engineering_skills='["architect","arena","automate-me","babysit","benchmark-checklist","blast-radius","bro","code-review","correct","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-help","patina-mode","pr","pr-readiness","pr-review-assistant","principle-attack-the-premise","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-explain-the-number","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-test-behavior-not-implementation","principle-type-system-discipline","recall","reflect","retro","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","to-spec","to-tickets","triage","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
+expected_team_skills='["show-me"]'
 expected_engineering_agents='["comment-sicko","patina-agent"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback|develop|develop-with-workflow|ready-pr|finish-pr|merge-pr|polish|fix|orchestrate|codex-pr-feedback-loop|prompting-fable|offensive-programming|move-branch-here|running-mobile-simulators|working-on-issue|write-changelog|new-branch|writing-for-patina-mode|grill-to-spec|team:to-issue|to-issue'
 
@@ -29,9 +30,18 @@ p_name=$(jq -r '.name' .claude-plugin/plugin.json)
 mp_names=$(jq -c '[.plugins[].name]' .claude-plugin/marketplace.json)
 test "$m_name" = "patinaproject-skills"
 test "$p_name" = "patinaproject-skills"
-test "$mp_names" = '["patinaproject-skills","engineering"]'
+test "$mp_names" = '["patinaproject-skills","engineering","team"]'
 test "$(jq -r '.plugins[] | select(.name == "engineering") | .source' .claude-plugin/marketplace.json)" = './plugins/engineering'
-test -f plugins/engineering/.claude-plugin/plugin.json
+test "$(jq -r '.plugins[] | select(.name == "team") | .source' .claude-plugin/marketplace.json)" = './plugins/team'
+test -f plugins/team/.claude-plugin/plugin.json
+test "$(jq -r '.name' plugins/team/.claude-plugin/plugin.json)" = 'team'
+test "$(jq -c '.dependencies // []' plugins/team/.claude-plugin/plugin.json)" = '[]'
+test ! -e plugins/team/agents
+test ! -e plugins/team/hooks
+team_skills="$(find plugins/team/skills -mindepth 2 -maxdepth 2 -name SKILL.md -print | sed 's#plugins/team/skills/##; s#/SKILL.md##' | sort | jq -Rsc 'split("\n") | map(select(length > 0))')"
+test "$team_skills" = "$expected_team_skills"
+test "$(jq -r '.sources[] | select(.name == "humanlayer") | .targets[0].destination' upstream-skills.json)" = 'plugins/team/skills/show-me'
+test -z "$(jq -r '.skills["show-me"] // empty' skills-lock.json)"
 test "$(jq -r '.name' plugins/engineering/.claude-plugin/plugin.json)" = 'engineering'
 test "$(jq -c '.dependencies // []' plugins/engineering/.claude-plugin/plugin.json)" = '[]'
 test -f plugins/engineering/agents/patina-agent.md
@@ -63,9 +73,12 @@ cp_name=$(jq -r '.name' .codex-plugin/plugin.json)
 cmp_names=$(jq -c '[.plugins[].name]' .agents/plugins/marketplace.json)
 test "$cm_name" = "patinaproject-skills"
 test "$cp_name" = "patinaproject-skills"
-test "$cmp_names" = '["patinaproject-skills","engineering"]'
+test "$cmp_names" = '["patinaproject-skills","engineering","team"]'
 test "$(jq -r '.plugins[] | select(.name == "engineering") | .source.path' .agents/plugins/marketplace.json)" = './plugins/engineering'
 test -f plugins/engineering/.codex-plugin/plugin.json
+test "$(jq -r '.plugins[] | select(.name == "team") | .source.path' .agents/plugins/marketplace.json)" = './plugins/team'
+test "$(jq -r '.name' plugins/team/.codex-plugin/plugin.json)" = 'team'
+test "$(jq -r '.skills' plugins/team/.codex-plugin/plugin.json)" = './skills/'
 test "$(jq -r '.name' plugins/engineering/.codex-plugin/plugin.json)" = 'engineering'
 test "$(jq -r '.skills' plugins/engineering/.codex-plugin/plugin.json)" = './skills/'
 # Assert Codex skill paths are flat and resolve
@@ -137,7 +150,7 @@ for agent_file in plugins/engineering/agents/*.md; do
 done
 
 test -f plugins/engineering/LICENSE.pstack
-test "$(jq -r '.sources | length' upstream-skills.json)" = '2'
+test "$(jq -r '.sources | length' upstream-skills.json)" = '3'
 test "$(jq -r '.sources[] | select(.name == "pstack") | .repo' upstream-skills.json)" = 'https://github.com/michael-denyer/pstack-claude.git'
 test "$(jq -r '.sources[] | select(.name == "pstack") | .transforms.rename["poteto-mode"]' upstream-skills.json)" = 'patina-mode'
 test "$(jq -r '.sources[] | select(.name == "mattpocock") | .targets[] | select(.destination | endswith("code-review")) | .source' upstream-skills.json)" = 'skills/engineering/code-review'
@@ -280,6 +293,12 @@ engineering_claude_version=$(jq -r '.version' plugins/engineering/.claude-plugin
 engineering_codex_version=$(jq -r '.version' plugins/engineering/.codex-plugin/plugin.json)
 if [ "$claude_version" != "$codex_version" ]; then
   echo "FAIL: Claude metadata.version ($claude_version) != Codex plugin.json version ($codex_version)" >&2
+  exit 1
+fi
+team_claude_version=$(jq -r '.version' plugins/team/.claude-plugin/plugin.json)
+team_codex_version=$(jq -r '.version' plugins/team/.codex-plugin/plugin.json)
+if [ "$claude_version" != "$team_claude_version" ] || [ "$claude_version" != "$team_codex_version" ]; then
+  echo "FAIL: Team plugin versions do not match marketplace version $claude_version" >&2
   exit 1
 fi
 if [ "$claude_version" != "$engineering_claude_version" ] || [ "$claude_version" != "$engineering_codex_version" ]; then

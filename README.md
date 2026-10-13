@@ -24,6 +24,7 @@ Claude Code:
 ```text
 /plugin marketplace add patinaproject/skills
 /plugin install engineering@patinaproject-skills
+/plugin install team@patinaproject-skills
 ```
 
 Install the Patina Project Skills plugin separately for its repository
@@ -38,6 +39,7 @@ Codex:
 ```text
 /marketplace add patinaproject/skills
 /install engineering
+/install team
 ```
 
 Install the Patina Project Skills plugin separately for its repository
@@ -295,6 +297,11 @@ plugins/engineering/
     gather-evidence/
     pr-review-assistant/
     running-mobile-simulators/
+plugins/team/
+  .claude-plugin/plugin.json
+  .codex-plugin/plugin.json
+  skills/
+    show-me/
 .agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror
 .claude-plugin/

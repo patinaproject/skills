@@ -130,6 +130,11 @@ for skill_dir in plugins/engineering/skills/*; do
   assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
 done
 
+for skill_dir in plugins/team/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
+done
+
 begin_count="$(grep -cF '<!-- BEGIN engineering:patina-mode' AGENTS.md || true)"
 end_count="$(grep -cF '<!-- END engineering:patina-mode -->' AGENTS.md || true)"
 [ "$begin_count" -eq 0 ] || fail "AGENTS.md still contains $begin_count managed patina-mode mandate starts; the Engineering plugin hooks deliver the mandate"

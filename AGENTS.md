@@ -26,6 +26,9 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
 - `plugins/engineering/skills/triage/`: upstream issue and PR triage workflow
 - `plugins/engineering/skills/retro/`: upstream coding-session retrospective workflow
+- `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
+- `plugins/team/.claude-plugin/plugin.json`: Claude Team plugin manifest
+- `plugins/team/.codex-plugin/plugin.json`: Codex Team plugin manifest
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest

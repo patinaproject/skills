@@ -29,6 +29,9 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/to-spec/`: Issue spec drafting and publication workflow
 - `plugins/engineering/skills/to-tickets/`: Tracer-bullet ticket breakdown workflow
 - `plugins/engineering/skills/triage/`: Issue and pull-request triage workflow
+- `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
+- `plugins/team/.claude-plugin/plugin.json`: Claude Team plugin manifest
+- `plugins/team/.codex-plugin/plugin.json`: Codex Team plugin manifest
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
 - `plugins/engineering/hooks/`: Engineering session-start integration
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
@@ -87,6 +90,7 @@ Skills owned by this repository:
 | `to-spec` | `plugins/engineering/skills/to-spec/` | Issue spec drafting and publication workflow |
 | `to-tickets` | `plugins/engineering/skills/to-tickets/` | Tracer-bullet ticket breakdown workflow |
 | `triage` | `plugins/engineering/skills/triage/` | Issue and pull-request triage workflow |
+| `show-me` | `plugins/team/skills/show-me/` | Visual explanation of the current topic (upstream mirror from humanlayer) |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
 | `pr-review-assistant` | `plugins/engineering/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
@@ -114,6 +118,8 @@ directory.
 | `.claude/skills/<name>` | `../../skills/<name>` | `120000` |
 | `.agents/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
 | `.claude/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
+| `.agents/skills/<team-name>` | `../../plugins/team/skills/<name>` | `120000` |
+| `.claude/skills/<team-name>` | `../../plugins/team/skills/<name>` | `120000` |
 
 Vendored third-party skills (recorded in `skills-lock.json`) are committed as
 real directories under `.agents/skills/<name>`, with `.claude/skills/<name>`

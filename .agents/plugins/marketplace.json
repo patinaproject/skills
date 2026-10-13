@@ -29,6 +29,19 @@
       },
       "category": "Developer Tools",
       "description": "Patina Project's owned engineering workflows, forked from pstack."
+    },
+    {
+      "name": "team",
+      "source": {
+        "source": "local",
+        "path": "./plugins/team"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity",
+      "description": "Patina Project's human-invoked team skills for planning, review, specs, and visual explanation."
     }
   ]
 }

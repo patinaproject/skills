@@ -1,0 +1,31 @@
+{
+  "name": "team",
+  "version": "2.71.0",
+  "description": "Patina Project's human-invoked team skills for planning, review, specs, and visual explanation.",
+  "author": {
+    "name": "Patina Project"
+  },
+  "homepage": "https://github.com/patinaproject/skills",
+  "repository": "https://github.com/patinaproject/skills",
+  "license": "MIT",
+  "keywords": [
+    "team",
+    "planning",
+    "review",
+    "specs",
+    "visual"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Team",
+    "shortDescription": "Human-invoked planning, review, spec, and visual explanation skills",
+    "longDescription": "Team collects Patina Project skills that a person invokes directly for planning, review, specs, and visual explanation.",
+    "developerName": "Patina Project",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://github.com/patinaproject/skills"
+  }
+}

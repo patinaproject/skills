@@ -19,11 +19,12 @@
     // on every re-vendor, so they are never linted here.
     ".agents/skills/**",
     ".claude/skills/**",
-    // These four Engineering entries are exact mirrors of upstream payloads.
+    // These synced entries are exact mirrors of upstream payloads.
     "plugins/engineering/skills/to-spec/**",
     "plugins/engineering/skills/to-tickets/**",
     "plugins/engineering/skills/triage/**",
     "plugins/engineering/skills/retro/**",
-    "plugins/engineering/skills/code-review/**"
+    "plugins/engineering/skills/code-review/**",
+    "plugins/team/skills/show-me/**"
   ]
 }
