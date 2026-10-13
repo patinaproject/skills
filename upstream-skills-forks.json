@@ -372,14 +372,14 @@
   },
   "plugins/engineering/skills/setup-pstack/SKILL.md": {
     "kind": "policy",
-    "reason": "Engineering delivers the Codex mandate through setup-engineering's AGENTS.md block and ships no Codex or Copilot plugin hook, so the session-hook and sheet-loading text says so for Codex and Copilot.",
+    "reason": "Engineering delivers the Codex mandate through setup-engineering's AGENTS.md block and ships no Codex or Copilot plugin hook, so the session-hook text, the sheet header, and the runtime table say the hook exists only on Claude Code (and the Pi extension).",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/setup-pstack/copilot.md": {
     "kind": "policy",
-    "reason": "Patina excludes the GitHub Copilot runtime from the sync, so a note states that the Copilot hook sections describe upstream pstack, not Engineering.",
+    "reason": "Patina excludes the GitHub Copilot runtime from the sync, so Copilot setup reads the sheet with view and states that the session hook line has no effect, instead of relying on a plugin hook.",
     "upstream": {
       "status": "not-proposed"
     }

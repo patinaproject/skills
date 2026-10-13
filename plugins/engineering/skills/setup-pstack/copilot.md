@@ -1,7 +1,5 @@
 # Setup pstack on GitHub Copilot
 
-The Engineering plugin does not ship the GitHub Copilot runtime: no Copilot manifest, `SessionStart` hook, or `PreToolUse` hook. Sections below that describe those hooks apply to upstream pstack's Copilot plugin, not to Engineering.
-
 On GitHub Copilot this file replaces the model, effort, and hook questions in steps 1, 3, and 4 of [setup-pstack](SKILL.md), the sheet header in step 6, and step 7. Steps 2, 5, 8, and 9 still apply. pstack ships no Copilot model defaults, so every model in the sheet comes from the user's answers. Never pick a model the user has not chosen, and never write the Claude Code names in [Models](SKILL.md#models) or step 6's values into a Copilot sheet.
 
 Run setup on a model at least as strong as gpt-5.4-mini or a Sonnet-class Claude model. On a Haiku-class model, setup picked models the user never chose in about half of the smoke runs.
@@ -18,7 +16,7 @@ Copilot's `ask_user` takes one question per call with a fixed choice list. That 
 
 ## Current state
 
-On Copilot, step 2's saved values are the role lines the plugin hook put in context. When the context says this Copilot home has no pstack model sheet yet, or that the sheet is invalid, there are none. Read the sheet only when none of these is in context, as in a skills-only install. Do not test for the sheet or its directory with `bash`. Each such command touches a path outside the workspace and asks for access. `${COPILOT_HOME:-~/.copilot}` exists whenever Copilot runs, so do not create it.
+On Copilot, Engineering ships no plugin hook, so step 2's saved values come from reading the sheet with `view`. Do not test for the sheet or its directory with `bash`. Each such command touches a path outside the workspace and asks for access. `${COPILOT_HOME:-~/.copilot}` exists whenever Copilot runs, so do not create it.
 
 ## Sheet header
 
@@ -27,7 +25,7 @@ A Copilot sheet uses step 6's role lines and settings under this header in place
 ```markdown
 # pstack model configuration
 
-Per-role model choices for pstack skills on GitHub Copilot, written by setup-pstack. Every role keeps its line; rerun setup-pstack to change one. A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `task` call omits `model`); an alias entry in a panel list still counts toward that panel's fan-out. A model may carry a reasoning effort, as in `gpt-5.5 @xhigh` (levels: low, medium, high, xhigh, max), which the `task` call passes as `reasoning_effort`. `default effort` sets the level for a value without one; `session` keeps the parent session's effort. `session hook: off` stops the SessionStart hook from injecting the patina-mode mandate; any other value, or no line, leaves it on. `panel vendors: any` records that the user kept a panel whose models come from one vendor.
+Per-role model choices for pstack skills on GitHub Copilot, written by setup-pstack. Every role keeps its line; rerun setup-pstack to change one. A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `task` call omits `model`); an alias entry in a panel list still counts toward that panel's fan-out. A model may carry a reasoning effort, as in `gpt-5.5 @xhigh` (levels: low, medium, high, xhigh, max), which the `task` call passes as `reasoning_effort`. `default effort` sets the level for a value without one; `session` keeps the parent session's effort. Engineering ships no Copilot SessionStart hook, so `session hook` has no effect on Copilot. `panel vendors: any` records that the user kept a panel whose models come from one vendor.
 ```
 
 ## Detect models
@@ -75,13 +73,13 @@ The panel from questions 3 through 5 writes every panel role, in slot order. On 
 
 Validate as step 5 describes. Copilot's file tools expand neither `~` nor variables, so print the sheet's absolute path with `echo "${COPILOT_HOME:-$HOME/.copilot}/pstack-models.md"` in `bash`, and write the whole sheet to exactly that path in one tool call, so the write asks for path access at most once.
 
-Then run `sh <this skill's directory>/scripts/check-sheet.sh` through `bash`, with the directory's absolute path and no arguments. It checks the Copilot sheet as the plugin hook does at session start: every role has a line, every entry is `inherit-parent`, `auto`, or a model ID with an optional `@<level>`, and each panel names models from two vendors unless the sheet has `panel vendors: any`. It prints `sheet ok`, or `sheet invalid:` and each problem. On `sheet invalid`, fix those lines and write the whole sheet again, then rerun the check. The plugin hook approves the check without a prompt.
+Then run `sh <this skill's directory>/scripts/check-sheet.sh` through `bash`, with the directory's absolute path and no arguments. It checks the Copilot sheet: every role has a line, every entry is `inherit-parent`, `auto`, or a model ID with an optional `@<level>`, and each panel names models from two vendors unless the sheet has `panel vendors: any`. It prints `sheet ok`, or `sheet invalid:` and each problem. On `sheet invalid`, fix those lines and write the whole sheet again, then rerun the check.
 
-For the rest of this session, use the values you just wrote; do not read the sheet back. Later sessions get them from the plugin hook and do not ask again.
+For the rest of this session, use the values you just wrote; do not read the sheet back. Later sessions read the sheet with `view` and do not ask again.
 
 ## Wire it in
 
-Add no include line: Copilot does not expand `@~/` paths in user instructions, and the plugin hook injects the sheet's role lines at session start. If the hook is on but this session's context lacks the routing mandate (the block that opens `You have pstack.`), another hook or a skills-only install has displaced it. Offer to append this standing instruction to `~/.copilot/copilot-instructions.md` instead:
+Add no include line: Copilot does not expand `@~/` paths in user instructions, and Engineering ships no Copilot hook to inject the mandate. Offer to append this standing instruction to `~/.copilot/copilot-instructions.md` instead:
 
 ```text
 engineering: for a task that touches more than one file, changes a signature other files call, involves a design choice, or is a bug with an unknown cause or a performance issue, load the patina-mode skill and follow it. Resolve Claude tool and model names through patina-mode's references/copilot-tools.md; role models are in ~/.copilot/pstack-models.md.

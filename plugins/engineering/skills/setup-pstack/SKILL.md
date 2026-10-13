@@ -56,7 +56,7 @@ Write the current runtime's sheet with the shape below. Overwrite the whole file
 ```markdown
 # pstack model configuration
 
-Per-role model overrides for pstack skills. Each pstack SKILL.md names its defaults in a Models section; the values here override those defaults. Delete a line to fall back to the skill default. A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `Agent` call omits `model`); an alias entry in a panel list still counts toward that panel's fan-out. A model may carry a reasoning effort, as in `opus @xhigh` (levels: low, medium, high, xhigh, max); the role then runs through the pstack effort agent of that level, each entry of a panel list on its own. `default effort` sets the level for a value without one; `session` keeps the parent session's effort. `session hook: off` stops the Claude Code or Codex SessionStart hook, or the pstack Pi extension, from injecting the patina-mode mandate; any other value, or no line, leaves it on.
+Per-role model overrides for pstack skills. Each pstack SKILL.md names its defaults in a Models section; the values here override those defaults. Delete a line to fall back to the skill default. A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `Agent` call omits `model`); an alias entry in a panel list still counts toward that panel's fan-out. A model may carry a reasoning effort, as in `opus @xhigh` (levels: low, medium, high, xhigh, max); the role then runs through the pstack effort agent of that level, each entry of a panel list on its own. `default effort` sets the level for a value without one; `session` keeps the parent session's effort. `session hook: off` stops the Claude Code SessionStart hook, or the pstack Pi extension, from injecting the patina-mode mandate; any other value, or no line, leaves it on.
 
 feature, refactoring: opus
 bug-fix: fable
@@ -96,14 +96,14 @@ Check whether the project has a way to drive the real app for proof (a project `
 
 ## Other runtimes
 
-The role lines are the same everywhere. What differs is the sheet path, how the runtime loads it, and how you list models. Detect models with the runtime's own tool and never write a slug you have not seen listed. A runtime whose subagent call has no model parameter still gets the sheet, as the record of the user's choice, and applies it where it can. The `session hook` line applies to the Claude Code, Codex, and GitHub Copilot plugins and to the pstack Pi extension.
+The role lines are the same everywhere. What differs is the sheet path, how the runtime loads it, and how you list models. Detect models with the runtime's own tool and never write a slug you have not seen listed. A runtime whose subagent call has no model parameter still gets the sheet, as the record of the user's choice, and applies it where it can. The `session hook` line applies to the Claude Code plugin and the pstack Pi extension.
 
 | Runtime | Sheet | Load | List models | Status |
 | --- | --- | --- | --- | --- |
 | Claude Code | `<config>/pstack-models.md` | `@<config>/pstack-models.md` in `<config>/CLAUDE.md` | the `Agent` tool's model parameter | verified live |
-| Codex | `<codex-home>/pstack-models.md` | model rows: paste into `<codex-home>/AGENTS.md`; hook setting: none, `setup-engineering` manages the `AGENTS.md` mandate | your configured Codex models, see [codex-tools.md](../patina-mode/references/codex-tools.md#model-names) | hook contract tested; discovery verified |
+| Codex | `<codex-home>/pstack-models.md` | model rows: paste into `<codex-home>/AGENTS.md`; hook setting: none, `setup-engineering` manages the `AGENTS.md` mandate | your configured Codex models, see [codex-tools.md](../patina-mode/references/codex-tools.md#model-names) | discovery verified |
 | Pi | `pstack-models.md` in the Pi agent directory, `$PI_CODING_AGENT_DIR` or `~/.pi/agent` | read by the pstack Pi extension, model rows and hook setting both; no include line | `pi --list-models`, see [pi-tools.md](../patina-mode/references/pi-tools.md#model-names) and its `setup-pstack` note | extension contract tested offline; live results in the repository's `docs/pi-equivalence.md` |
-| GitHub Copilot (CLI and app) | `${COPILOT_HOME:-~/.copilot}/pstack-models.md` | Engineering ships no Copilot plugin or hook, so read it with `view` | the `task` tool's `model` enum, see [copilot-tools.md](../patina-mode/references/copilot-tools.md#model-names) | hook contract tested; CLI install smoke-tested |
+| GitHub Copilot (CLI and app) | `${COPILOT_HOME:-~/.copilot}/pstack-models.md` | Engineering ships no Copilot plugin or hook, so read it with `view` | the `task` tool's `model` enum, see [copilot-tools.md](../patina-mode/references/copilot-tools.md#model-names) | skills-only under Engineering |
 | opencode | `~/.config/opencode/pstack-models.md` | add the path to the `instructions` array in `opencode.json` | the `models` slash command in the session | from published docs, no live session |
 | Gemini CLI | `~/.gemini/pstack-models.md` | `@~/.gemini/pstack-models.md` in `~/.gemini/GEMINI.md` | the `model` slash command in the session | from published docs, no live session |
 | Prime Agent | no documented sheet path; Prime's configuration chooses models | | | no live session |
