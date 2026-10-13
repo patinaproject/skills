@@ -18,6 +18,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
+- `skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
@@ -278,6 +279,7 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | grill-system-design | `skills/grill-system-design/` |
 | review-system-design | `skills/review-system-design/` |
 | writing-for-pstack | `skills/writing-for-pstack/` |
+| gmail-inbox-triage | `skills/gmail-inbox-triage/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |
 | move-session-here | `plugins/engineering/skills/move-session-here/` |

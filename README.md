@@ -167,6 +167,16 @@ from a draft.
 See [./skills/writing-for-pstack/](./skills/writing-for-pstack/) for
 the skill contract.
 
+### gmail-inbox-triage
+
+`gmail-inbox-triage` sorts every Gmail inbox thread into `Urgent`, `Needs reply
+soon`, `Waiting`, or `FYI`, applies that label, and archives `Waiting` and
+`FYI`. Its only writes are the four bucket labels and removing `INBOX`, and a
+second run converges on the same state.
+
+See [./skills/gmail-inbox-triage/](./skills/gmail-inbox-triage/) for the skill
+contract.
+
 ### gather-evidence
 
 Human change requests and QA findings need direct evidence from the current
@@ -210,6 +220,7 @@ README and skill contract.
 | [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to an issue |
 | [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [writing-for-pstack](./skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
+| [gmail-inbox-triage](./skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
@@ -256,6 +267,7 @@ skills/
   grill-system-design/
   review-system-design/
   writing-for-pstack/
+  gmail-inbox-triage/
 plugins/engineering/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json
