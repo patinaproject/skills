@@ -131,8 +131,8 @@ done
 
 begin_count="$(grep -cF '<!-- BEGIN engineering:patina-mode' AGENTS.md || true)"
 end_count="$(grep -cF '<!-- END engineering:patina-mode -->' AGENTS.md || true)"
-[ "$begin_count" -eq 1 ] || fail "AGENTS.md has $begin_count patina-mode mandate starts, expected 1"
-[ "$end_count" -eq 1 ] || fail "AGENTS.md has $end_count patina-mode mandate ends, expected 1"
+[ "$begin_count" -eq 0 ] || fail "AGENTS.md still contains $begin_count managed patina-mode mandate starts; the Engineering plugin hooks deliver the mandate"
+[ "$end_count" -eq 0 ] || fail "AGENTS.md still contains $end_count managed patina-mode mandate ends; the Engineering plugin hooks deliver the mandate"
 [ "$(grep -cF '<!-- BEGIN engineering:patina-mode' CLAUDE.md || true)" -eq 0 ] \
   || fail "CLAUDE.md still contains the managed patina-mode mandate"
 [ "$(jq -r '[.hooks.SessionStart[] | select(.matcher == "startup|resume|clear|compact") | .hooks[] | select(.command | contains("plugins/engineering/hooks/session-start.sh"))] | length' .claude/settings.json)" -eq 1 ] \
