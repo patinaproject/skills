@@ -78,6 +78,61 @@
           "kind": "skill",
           "source": "skills/engineering/code-review",
           "destination": "plugins/engineering/skills/code-review"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/grill-me",
+          "destination": "plugins/team/skills/grill-me"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/handoff",
+          "destination": "plugins/team/skills/handoff"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/wait-what",
+          "destination": "plugins/team/skills/wait-what"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/to-questionnaire",
+          "destination": "plugins/team/skills/to-questionnaire"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/teach",
+          "destination": "plugins/team/skills/teach"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/grilling",
+          "destination": "plugins/team/skills/grilling"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/ask-matt",
+          "destination": "plugins/team/skills/ask-matt"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/improve-codebase-architecture",
+          "destination": "plugins/team/skills/improve-codebase-architecture"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/setup-matt-pocock-skills",
+          "destination": "plugins/team/skills/setup-matt-pocock-skills"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/domain-modeling",
+          "destination": "plugins/team/skills/domain-modeling"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/codebase-design",
+          "destination": "plugins/team/skills/codebase-design"
         }
       ],
       "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"

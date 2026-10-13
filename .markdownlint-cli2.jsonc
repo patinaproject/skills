@@ -25,6 +25,6 @@
     "plugins/engineering/skills/triage/**",
     "plugins/engineering/skills/retro/**",
     "plugins/engineering/skills/code-review/**",
-    "plugins/team/skills/show-me/**"
+    "plugins/team/skills/**"
   ]
 }

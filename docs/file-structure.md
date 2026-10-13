@@ -30,6 +30,17 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/to-tickets/`: Tracer-bullet ticket breakdown workflow
 - `plugins/engineering/skills/triage/`: Issue and pull-request triage workflow
 - `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
+- `plugins/team/skills/ask-matt/`: upstream mirror (mattpocock)
+- `plugins/team/skills/codebase-design/`: upstream mirror (mattpocock)
+- `plugins/team/skills/domain-modeling/`: upstream mirror (mattpocock)
+- `plugins/team/skills/grill-me/`: upstream mirror (mattpocock)
+- `plugins/team/skills/grilling/`: upstream mirror (mattpocock)
+- `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
+- `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
+- `plugins/team/skills/setup-matt-pocock-skills/`: upstream mirror (mattpocock)
+- `plugins/team/skills/teach/`: upstream mirror (mattpocock)
+- `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
+- `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
 - `plugins/team/.claude-plugin/plugin.json`: Claude Team plugin manifest
 - `plugins/team/.codex-plugin/plugin.json`: Codex Team plugin manifest
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
@@ -91,6 +102,17 @@ Skills owned by this repository:
 | `to-tickets` | `plugins/engineering/skills/to-tickets/` | Tracer-bullet ticket breakdown workflow |
 | `triage` | `plugins/engineering/skills/triage/` | Issue and pull-request triage workflow |
 | `show-me` | `plugins/team/skills/show-me/` | Visual explanation of the current topic (upstream mirror from humanlayer) |
+| `ask-matt` | `plugins/team/skills/ask-matt/` | Upstream mattpocock mirror in the Team plugin |
+| `codebase-design` | `plugins/team/skills/codebase-design/` | Upstream mattpocock mirror in the Team plugin |
+| `domain-modeling` | `plugins/team/skills/domain-modeling/` | Upstream mattpocock mirror in the Team plugin |
+| `grill-me` | `plugins/team/skills/grill-me/` | Upstream mattpocock mirror in the Team plugin |
+| `grilling` | `plugins/team/skills/grilling/` | Upstream mattpocock mirror in the Team plugin |
+| `handoff` | `plugins/team/skills/handoff/` | Upstream mattpocock mirror in the Team plugin |
+| `improve-codebase-architecture` | `plugins/team/skills/improve-codebase-architecture/` | Upstream mattpocock mirror in the Team plugin |
+| `setup-matt-pocock-skills` | `plugins/team/skills/setup-matt-pocock-skills/` | Upstream mattpocock mirror in the Team plugin |
+| `teach` | `plugins/team/skills/teach/` | Upstream mattpocock mirror in the Team plugin |
+| `to-questionnaire` | `plugins/team/skills/to-questionnaire/` | Upstream mattpocock mirror in the Team plugin |
+| `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
 | `pr-review-assistant` | `plugins/engineering/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
@@ -120,6 +142,10 @@ directory.
 | `.claude/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
 | `.agents/skills/<team-name>` | `../../plugins/team/skills/<name>` | `120000` |
 | `.claude/skills/<team-name>` | `../../plugins/team/skills/<name>` | `120000` |
+
+Exception: `teach` ships in both Engineering and Team. The flat overlays
+(`.agents/skills/teach`, `.claude/skills/teach`) point at the Engineering copy;
+the Team copy is reached as `team:teach`.
 
 Vendored third-party skills (recorded in `skills-lock.json`) are committed as
 real directories under `.agents/skills/<name>`, with `.claude/skills/<name>`

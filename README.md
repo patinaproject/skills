@@ -302,6 +302,17 @@ plugins/team/
   .codex-plugin/plugin.json
   skills/
     show-me/
+    ask-matt/
+    codebase-design/
+    domain-modeling/
+    grill-me/
+    grilling/
+    handoff/
+    improve-codebase-architecture/
+    setup-matt-pocock-skills/
+    teach/
+    to-questionnaire/
+    wait-what/
 .agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror
 .claude-plugin/
