@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.70.0](https://github.com/patinaproject/skills/compare/v2.69.0...v2.70.0) (2026-10-13)
+
+
+### Features
+
+* [#604](https://github.com/patinaproject/skills/issues/604) exclude the GitHub Copilot runtime from the Engineering plugin ([#607](https://github.com/patinaproject/skills/issues/607)) ([562bf8a](https://github.com/patinaproject/skills/commit/562bf8ab1c826657b301e2a56038e5312c36fd77))
+* [#611](https://github.com/patinaproject/skills/issues/611) register the Codex session hook as upstream does ([#612](https://github.com/patinaproject/skills/issues/612)) ([66825a9](https://github.com/patinaproject/skills/commit/66825a9eb323e6692283413368f7a944300db6ba))
+* [#615](https://github.com/patinaproject/skills/issues/615) add the gmail-inbox-triage skill ([#616](https://github.com/patinaproject/skills/issues/616)) ([e541d48](https://github.com/patinaproject/skills/commit/e541d486fb01c9ad1825c1384bcce210becfd936))
+
+
+### Bug Fixes
+
+* [#608](https://github.com/patinaproject/skills/issues/608) refuse unknown arguments in sync-upstream-skills ([#610](https://github.com/patinaproject/skills/issues/610)) ([1a53aa0](https://github.com/patinaproject/skills/commit/1a53aa00ab074aa19288cbc4e053a2ba36b6a066))
+
 ## [2.69.0](https://github.com/patinaproject/skills/compare/v2.68.0...v2.69.0) (2026-10-12)
 
 

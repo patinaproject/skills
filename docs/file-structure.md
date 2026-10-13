@@ -18,6 +18,7 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `skills/grill-system-design/`: focused system design grilling skill
 - `skills/review-system-design/`: contract dependency review skill
 - `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
+- `skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
@@ -79,6 +80,7 @@ Skills owned by this repository:
 | `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `skills/review-system-design/` | Contract dependency review |
 | `writing-for-pstack` | `skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
+| `gmail-inbox-triage` | `skills/gmail-inbox-triage/` | Gmail inbox triage into four labeled buckets |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `retro` | `plugins/engineering/skills/retro/` | Coding-session retrospective workflow |
