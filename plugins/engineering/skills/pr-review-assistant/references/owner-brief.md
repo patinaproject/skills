@@ -8,12 +8,12 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 ## 1. Learn the change
 
-Fetch the head into a worktree in your scratchpad: `git fetch origin pull/<n>/head:pr-<n>`. Follow the method of the `engineering:teach` skill ([teach](../../teach/SKILL.md)) on yourself, and read the code directly, because you cannot start subagents. Read:
+From a clone of the PR's repository, fetch the head and check it out in a worktree in your scratchpad: `git fetch origin +pull/<n>/head:pr-<n>`, then `git worktree add <scratchpad>/pr-<n> pr-<n>`. The `+` lets a later fetch replace a force-pushed head. Follow the method of the `engineering:teach` skill ([teach](../../teach/SKILL.md)) on yourself, and read the code directly, because you cannot start subagents. Read:
 
 - the full diff, and enough of the surrounding code to know what each part is, how it works, and why it exists;
 - the PR description and the linked Linear issue;
 - the ADRs in `docs/adr/` for the areas the PR touches, and the `CONTEXT.md` entries for the terms it uses;
-- the unresolved human review threads (`get_diff_threads`). Skip bot threads.
+- the unresolved human review threads (`get_diff_threads`, or the `reviewThreads` field from `gh api graphql` when the Linear tools are unavailable). Skip bot threads and agent-authored threads, whose comments start with `**Agent:**`.
 
 Done when you can write a 30-second summary in three bullets, and you can trace each bullet to a `file:line`.
 

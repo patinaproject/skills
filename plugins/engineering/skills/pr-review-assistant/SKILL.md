@@ -28,7 +28,7 @@ Link a pull request by its Linear review page (the `appUrl` from `get_diff`), ne
 
 ## Steps
 
-1. **Resolve the PR.** The argument is a Linear review URL, a GitHub PR URL, or a `PAT-N` issue. Pass it to the Linear `get_diff` tool. Done when you hold the `appUrl`, the GitHub URL, the head SHA, the base SHA, the changed-line count, and the linked issue.
+1. **Resolve the PR.** The argument is a Linear review URL, a GitHub PR URL, or a `PAT-N` issue. Pass it to the Linear `get_diff` tool. Done when you hold the `appUrl`, the GitHub URL, the head SHA, the base SHA, the changed-line count, and the linked issue. When the Linear tools are unavailable, or the PR has no Linear review page, read the same facts with `gh pr view <url> --json url,headRefOid,baseRefOid,additions,deletions,closingIssuesReferences`, and link the GitHub URL in place of the `appUrl`.
 2. **Route a repeat.** If this conversation already has an owner for this PR, send the new head SHA to that owner with `SendMessage`, then go to step 6.
 3. **Gather facts for a large PR.** When the PR changes more than about 800 lines, dispatch three `sonnet` agents in parallel first: one for hard-to-reverse changes, one for names, contracts, and flows, and one for blast radius. Give each the lens definition from the owner brief. Each returns facts with `file:line`, and no judgments. Skip this step for a smaller PR.
 4. **Dispatch the owner.** Start one `opus` agent in the background. Its prompt is the owner brief, filled in with the PR facts from step 1, any facts from step 3, and an output path for the HTML in your scratchpad. Send the start line while it works. Done when the owner returns its result block.
@@ -38,4 +38,5 @@ Link a pull request by its Linear review page (the `appUrl` from `get_diff`), ne
 ## Boundaries
 
 - Write nothing to Linear or GitHub (no comments, drafts, reviews, or resolutions) until the reviewer asks for it in chat.
-- When the reviewer asks you to post, the comments are the reviewer's own words from the to-do list. Post them as the reviewer, then confirm in one line.
+- When the reviewer asks you to post, the comments are the reviewer's own words from the to-do list. Post them as the reviewer, follow the repository's rules for agent-posted comments (for example, a required `**Agent:**` prefix), then confirm in one line.
+- Never resolve, dismiss, or re-request review on a thread you did not open. Leave thread state to its author and the reviewer. When the repository defines a review-thread workflow with gates, such as `patinaproject-review-thread-actions`, use it and stop where a gate fails.
