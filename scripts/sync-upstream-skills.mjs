@@ -5,13 +5,27 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync, spawnSync} from 'node:child_process';
 
+const usage = 'usage: sync-upstream-skills.mjs [source-name] [--dry-run]';
+function fail(message, code = 2) { console.error(`sync-upstream-skills: ${message}`); process.exit(code); }
+// Parse argv once, before any git, fetch, or file write: an ignored flag such as --dryrun would otherwise run a real sync.
+function parseArgs(argv) {
+  const parsed = {sourceName: undefined, dryRun: false};
+  for (const arg of argv) {
+    if (arg === '--help' || arg === '-h') { console.log(usage); process.exit(0); }
+    if (arg === '--dry-run') parsed.dryRun = true;
+    else if (arg.startsWith('-')) fail(`unknown argument: ${arg}\n${usage}`);
+    else if (parsed.sourceName !== undefined) fail(`unexpected extra source name: ${arg}\n${usage}`);
+    else parsed.sourceName = arg;
+  }
+  return parsed;
+}
+const {sourceName, dryRun} = parseArgs(process.argv.slice(2));
+
 const root = execFileSync('git', ['rev-parse', '--show-toplevel'], {encoding: 'utf8'}).trim();
 const manifestPath = path.join(root, 'upstream-skills.json');
 const forksPath = path.join(root, 'upstream-skills-forks.json');
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 const forks = JSON.parse(fs.readFileSync(forksPath, 'utf8'));
-const sourceName = process.argv.slice(2).find(arg => !arg.startsWith('-'));
-const dryRun = process.argv.includes('--dry-run');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-upstream-skills-'));
 
 function git(args, options = {}) {
@@ -23,7 +37,6 @@ function git(args, options = {}) {
   }).trim();
 }
 function gitTry(args, options = {}) { try { return {ok: true, value: git(args, options)}; } catch (error) { return {ok: false, error}; } }
-function fail(message, code = 2) { console.error(`sync-upstream-skills: ${message}`); process.exit(code); }
 function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
