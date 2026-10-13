@@ -57,8 +57,8 @@ The Engineering plugin's Codex `SessionStart` hook, registered in
 to trust plugin hooks through `/hooks` before it runs them. This installer
 writes no mandate block to `AGENTS.md`, so Codex never receives the mandate
 twice. A skills-only Codex install carries no plugin hook, so there the user
-requests `patina-mode` explicitly. Codex has no subagent registry, so delegates route through the
-spawn-prompt convention in the patina-mode `references/codex-tools.md` (dispatch
+requests `patina-mode` explicitly. Codex has no subagent registry, so delegates
+route through the spawn-prompt convention in the patina-mode `references/codex-tools.md` (dispatch
 a `spawn_agent` told to read the `patina-mode` skill, or
 `agents/comment-sicko.md`, first). Subagent dispatch also needs the
 `multi_agent` feature. Add `--codex` to enable it:

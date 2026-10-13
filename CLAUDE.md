@@ -5,5 +5,3 @@
 - When you add Claude-specific teammates, prefer project subagents under `.claude/agents/`.
 - When you need Claude-specific enforcement for teammate creation or completion, prefer project hooks in `.claude/settings.json`.
 - Never write tests that assert on the prose content of documentation files; test code behavior and machine-consumed contracts only (see `AGENTS.md` → Testing Guidelines and `docs/adr/ADR-224-no-tests-on-documentation-content.md`).
-
-<!-- setup-engineering normally manages the Patina mandate in this file. This repo runs the Engineering SessionStart hook from .claude/settings.json instead; rerunning setup-engineering will restore the managed block here until the installer learns to install the hook. -->

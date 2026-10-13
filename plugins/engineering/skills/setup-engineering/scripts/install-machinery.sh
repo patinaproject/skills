@@ -5,11 +5,11 @@
 # are preserved.
 #
 # Usage:
-#   install-machinery.sh [--repo <dir>] [--instructions <file>]
-#                        [--codex] [--codex-config <file>] [--codex-agents <file>]
+#   install-machinery.sh [--repo <dir>] [--instructions <file>] [--codex-agents <file>]
+#                        [--codex] [--codex-config <file>]
 #
 # --codex-agents names the Codex AGENTS.md whose legacy managed mandate block the
-# installer removes. The Codex plugin hook delivers the mandate.
+# installer removes on every run. The Codex plugin hook delivers the mandate.
 
 set -euo pipefail
 
@@ -88,6 +88,7 @@ remove_managed_blocks() {
     END { flush() }
   ' "$file" > "$tmp" || { rm -f "$tmp"; return 0; }
   write_in_place "$file" "$tmp"
+  echo "mandate block removed: ${file}"
 }
 
 # Ensure [features] multi_agent = true exactly once, preserving all unrelated
