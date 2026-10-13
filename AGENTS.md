@@ -217,7 +217,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   contract, and that the bundled payloads match their canonical plugin sources
 - Run `bash scripts/tests/sync-upstream-skills.test.sh` after changing
   `scripts/sync-upstream-skills.mjs`; it exercises the manifest, fork registry,
-  dry-run, idempotence, and three-way merge contracts.
+  dry-run, idempotence, three-way merge, and argument-refusal contracts.
 
 ## Pull request labels
 
