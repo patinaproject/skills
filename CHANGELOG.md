@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/patinaproject/skills/compare/v3.1.0...v3.2.0) (2026-10-14)
+
+
+### Features
+
+* [#630](https://github.com/patinaproject/skills/issues/630) add draft-user-follow-ups skill ([#631](https://github.com/patinaproject/skills/issues/631)) ([e8e637c](https://github.com/patinaproject/skills/commit/e8e637ca34ea5f5e190cb42961b11f6ab070c169))
+
 ## [3.1.0](https://github.com/patinaproject/skills/compare/v3.0.0...v3.1.0) (2026-10-14)
 
 
