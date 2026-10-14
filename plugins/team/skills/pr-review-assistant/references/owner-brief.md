@@ -8,7 +8,7 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 ## 1. Learn the change
 
-From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `engineering:teach` skill ([teach](../../teach/SKILL.md)) on yourself, and read the code directly, because you cannot start subagents. Read:
+From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `engineering:teach` skill on yourself, and read the code directly, because you cannot start subagents. Read:
 
 - the full diff, and enough of the surrounding code to know what each part is, how it works, and why it exists;
 - the PR description and the linked Linear issue;
