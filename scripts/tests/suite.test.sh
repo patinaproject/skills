@@ -82,9 +82,9 @@ run_cli_all_skill_canary() {
     set -e
     cd "$tmpdir"
     if command -v timeout >/dev/null 2>&1; then
-      timeout 60 env npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/skills/install-skills" --skill '*' --agent '*' --yes
+      timeout 60 env npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/team/skills/install-skills" --skill '*' --agent '*' --yes
     else
-      npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/skills/install-skills" --skill '*' --agent '*' --yes
+      npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/team/skills/install-skills" --skill '*' --agent '*' --yes
     fi
     test -f .agents/skills/install-skills/SKILL.md
   )
