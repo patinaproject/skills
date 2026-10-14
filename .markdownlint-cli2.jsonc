@@ -23,6 +23,7 @@
     "plugins/team/skills/ask-matt/**",
     "plugins/team/skills/code-review/**",
     "plugins/team/skills/codebase-design/**",
+    "plugins/team/skills/design-control-loop/**",
     "plugins/team/skills/diagnosing-bugs/**",
     "plugins/team/skills/domain-modeling/**",
     "plugins/team/skills/grill-me/**",

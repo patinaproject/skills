@@ -32,6 +32,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/to-tickets/`: Tracer-bullet ticket breakdown workflow
 - `plugins/team/skills/triage/`: Issue and pull-request triage workflow
 - `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
+- `plugins/team/skills/design-control-loop/`: upstream design-control-loop mirror from humanlayer (agentic control loop design)
 - `plugins/team/skills/ask-matt/`: upstream mirror (mattpocock)
 - `plugins/team/skills/codebase-design/`: upstream mirror (mattpocock)
 - `plugins/team/skills/domain-modeling/`: upstream mirror (mattpocock)
@@ -112,6 +113,7 @@ Skills owned by this repository:
 | `to-tickets` | `plugins/team/skills/to-tickets/` | Tracer-bullet ticket breakdown workflow |
 | `triage` | `plugins/team/skills/triage/` | Issue and pull-request triage workflow |
 | `show-me` | `plugins/team/skills/show-me/` | Visual explanation of the current topic (upstream mirror from humanlayer) |
+| `design-control-loop` | `plugins/team/skills/design-control-loop/` | Interview-driven agentic control loop design (upstream mirror from humanlayer) |
 | `ask-matt` | `plugins/team/skills/ask-matt/` | Upstream mattpocock mirror in the Team plugin |
 | `codebase-design` | `plugins/team/skills/codebase-design/` | Upstream mattpocock mirror in the Team plugin |
 | `domain-modeling` | `plugins/team/skills/domain-modeling/` | Upstream mattpocock mirror in the Team plugin |

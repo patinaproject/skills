@@ -203,6 +203,11 @@
           "kind": "skill",
           "source": "plugins/show-me/skills/show-me",
           "destination": "plugins/team/skills/show-me"
+        },
+        {
+          "kind": "skill",
+          "source": "plugins/design-control-loop/skills/design-control-loop",
+          "destination": "plugins/team/skills/design-control-loop"
         }
       ],
       "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
