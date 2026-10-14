@@ -222,6 +222,7 @@ README and skill contract.
 | [design-by-contract](./plugins/team/skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
 | [grill-system-design](./plugins/team/skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to an issue |
+| [grill-to-spec](./plugins/team/skills/grill-to-spec/) | Grill a design in a planning worktree and hand doc changes to `to-spec` as proposals |
 | [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [gmail-inbox-triage](./plugins/team/skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
@@ -288,6 +289,7 @@ plugins/team/
     update-branch/
     design-by-contract/
     grill-system-design/
+    grill-to-spec/
     review-system-design/
     writing-for-pstack/
     gmail-inbox-triage/

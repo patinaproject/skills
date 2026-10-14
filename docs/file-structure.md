@@ -19,6 +19,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/grill-system-design/`: focused system design grilling skill
 - `plugins/team/skills/review-system-design/`: contract dependency review skill
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
+- `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
 - `plugins/team/skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
@@ -114,6 +115,7 @@ Skills owned by this repository:
 | `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
+| `grill-to-spec` | `plugins/team/skills/grill-to-spec/` | User-invoked grilling that keeps the tree unchanged and hands doc changes to `to-spec` |
 | `pr-review-assistant` | `plugins/team/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
