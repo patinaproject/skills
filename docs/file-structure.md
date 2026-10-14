@@ -41,16 +41,14 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
 - `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
 - `plugins/team/skills/setup-matt-pocock-skills/`: upstream mirror (mattpocock)
-- `plugins/team/skills/teach/`: upstream mirror (mattpocock)
+- `plugins/team/skills/tutor/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
-- `plugins/team/skills/code-review/`: upstream mirror (mattpocock)
 - `plugins/team/skills/diagnosing-bugs/`: upstream mirror (mattpocock)
 - `plugins/team/skills/implement/`: upstream mirror (mattpocock)
 - `plugins/team/skills/implement-spec/`: upstream mirror (mattpocock)
 - `plugins/team/skills/prototype/`: upstream mirror (mattpocock)
 - `plugins/team/skills/research/`: upstream mirror (mattpocock)
-- `plugins/team/skills/tdd/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wayfinder/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wizard/`: upstream mirror (mattpocock)
 - `plugins/team/skills/writing-for-agents/`: upstream mirror (mattpocock)
@@ -122,16 +120,14 @@ Skills owned by this repository:
 | `handoff` | `plugins/team/skills/handoff/` | Upstream mattpocock mirror in the Team plugin |
 | `improve-codebase-architecture` | `plugins/team/skills/improve-codebase-architecture/` | Upstream mattpocock mirror in the Team plugin |
 | `setup-matt-pocock-skills` | `plugins/team/skills/setup-matt-pocock-skills/` | Upstream mattpocock mirror in the Team plugin |
-| `teach` | `plugins/team/skills/teach/` | Upstream mattpocock mirror in the Team plugin |
+| `tutor` | `plugins/team/skills/tutor/` | Upstream mattpocock `teach` mirror, renamed so skill names stay unique across plugins |
 | `to-questionnaire` | `plugins/team/skills/to-questionnaire/` | Upstream mattpocock mirror in the Team plugin |
 | `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |
-| `code-review` | `plugins/team/skills/code-review/` | Upstream mattpocock mirror in the Team plugin |
 | `diagnosing-bugs` | `plugins/team/skills/diagnosing-bugs/` | Upstream mattpocock mirror in the Team plugin |
 | `implement` | `plugins/team/skills/implement/` | Upstream mattpocock mirror in the Team plugin |
 | `implement-spec` | `plugins/team/skills/implement-spec/` | Upstream mattpocock mirror in the Team plugin |
 | `prototype` | `plugins/team/skills/prototype/` | Upstream mattpocock mirror in the Team plugin |
 | `research` | `plugins/team/skills/research/` | Upstream mattpocock mirror in the Team plugin |
-| `tdd` | `plugins/team/skills/tdd/` | Upstream mattpocock mirror in the Team plugin |
 | `wayfinder` | `plugins/team/skills/wayfinder/` | Upstream mattpocock mirror in the Team plugin |
 | `wizard` | `plugins/team/skills/wizard/` | Upstream mattpocock mirror in the Team plugin |
 | `writing-for-agents` | `plugins/team/skills/writing-for-agents/` | Upstream mattpocock mirror in the Team plugin |

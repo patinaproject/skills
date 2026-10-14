@@ -104,7 +104,7 @@
         {
           "kind": "skill",
           "source": "skills/productivity/teach",
-          "destination": "plugins/team/skills/teach"
+          "destination": "plugins/team/skills/tutor"
         },
         {
           "kind": "skill",
@@ -175,16 +175,6 @@
           "kind": "skill",
           "source": "skills/productivity/writing-for-agents",
           "destination": "plugins/team/skills/writing-for-agents"
-        },
-        {
-          "kind": "skill",
-          "source": "skills/engineering/tdd",
-          "destination": "plugins/team/skills/tdd"
-        },
-        {
-          "kind": "skill",
-          "source": "skills/engineering/code-review",
-          "destination": "plugins/team/skills/code-review"
         }
       ],
       "transformsHash": "8d4a3cbe10fe8da085d6391fb307501c05da704f067529647f9058bd448de870"

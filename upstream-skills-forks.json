@@ -467,5 +467,19 @@
     "upstream": {
       "status": "not-proposed"
     }
+  },
+  "plugins/team/skills/ask-matt/SKILL.md": {
+    "kind": "policy",
+    "reason": "The index points at the renamed tutor skill instead of /teach, which now resolves to the Engineering teach.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/tutor/SKILL.md": {
+    "kind": "policy",
+    "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
+    "upstream": {
+      "status": "not-proposed"
+    }
   }
 }
