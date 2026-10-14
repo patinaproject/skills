@@ -1,0 +1,5 @@
+interface:
+  display_name: "Grill to Spec"
+  short_description: "Grill a design and publish doc changes as spec proposals"
+policy:
+  allow_implicit_invocation: false
