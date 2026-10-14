@@ -35,14 +35,14 @@ test "$(jq -r '.name' plugins/team/.claude-plugin/plugin.json)" = 'team'
 test "$(jq -c '.dependencies // []' plugins/team/.claude-plugin/plugin.json)" = '[]'
 test ! -e plugins/team/agents
 test ! -e plugins/team/hooks
-team_skills="$(find plugins/team/skills -mindepth 2 -maxdepth 2 -name SKILL.md -print | sed 's#plugins/team/skills/##; s#/SKILL.md##' | sort | jq -Rsc 'split("\n") | map(select(length > 0))')"
-test "$team_skills" = "$expected_team_skills"
 duplicate_skill_names="$(find plugins/*/skills -mindepth 1 -maxdepth 1 -type d -print | sed 's#.*/##' | sort | uniq -d)"
 if [ -n "$duplicate_skill_names" ]; then
   echo "FAIL: skill directory names must be unique across plugins/*/skills; the monorepo Skills Sync installs every plugin into one flat namespace. Duplicates:" >&2
   echo "$duplicate_skill_names" >&2
   exit 1
 fi
+team_skills="$(find plugins/team/skills -mindepth 2 -maxdepth 2 -name SKILL.md -print | sed 's#plugins/team/skills/##; s#/SKILL.md##' | sort | jq -Rsc 'split("\n") | map(select(length > 0))')"
+test "$team_skills" = "$expected_team_skills"
 test "$(jq -r '.sources[] | select(.name == "humanlayer") | .targets[0].destination' upstream-skills.json)" = 'plugins/team/skills/show-me'
 test -z "$(jq -r '.skills["show-me"] // empty' skills-lock.json)"
 test "$(jq -r '.name' plugins/engineering/.claude-plugin/plugin.json)" = 'engineering'
