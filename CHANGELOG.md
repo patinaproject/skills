@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.1.0](https://github.com/patinaproject/skills/compare/v3.0.0...v3.1.0) (2026-10-14)
+
+
+### Features
+
+* [#623](https://github.com/patinaproject/skills/issues/623) rename gmail-inbox-triage to email-inbox-triage ([#624](https://github.com/patinaproject/skills/issues/624)) ([e180926](https://github.com/patinaproject/skills/commit/e1809266c134a843151cd766590bdebf21a54bb5))
+* [#626](https://github.com/patinaproject/skills/issues/626) ship design-control-loop in the team plugin ([#627](https://github.com/patinaproject/skills/issues/627)) ([85a482e](https://github.com/patinaproject/skills/commit/85a482e47d2b746a5f7ca4a2bae57e8874952394))
+
+
+### Bug Fixes
+
+* [#628](https://github.com/patinaproject/skills/issues/628) keep skill names unique across plugins ([#629](https://github.com/patinaproject/skills/issues/629)) ([4c2eaa6](https://github.com/patinaproject/skills/commit/4c2eaa6117b5f4bfca3ae53569449f1789624a36))
+
 ## [3.0.0](https://github.com/patinaproject/skills/compare/v2.71.0...v3.0.0) (2026-10-14)
 
 
