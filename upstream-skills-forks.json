@@ -475,6 +475,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/team/skills/design-control-loop/references/workflow-template.yml": {
+    "kind": "policy",
+    "reason": "Patina pins the template's GitHub Actions to commit SHAs, because the patinaproject monorepo's Semgrep scan rejects mutable action tags in vendored skills.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/team/skills/tutor/SKILL.md": {
     "kind": "policy",
     "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
