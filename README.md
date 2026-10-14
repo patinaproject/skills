@@ -103,7 +103,7 @@ See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skil
 
 ### Writing specs and issues
 
-The Engineering plugin exposes the upstream `/to-spec` workflow and
+The Team plugin exposes the upstream `/to-spec` workflow and
 uses the adapter for claiming, labels, lifecycle, relationships, and closure.
 Skills that need issue mechanics follow
 [`docs/issue-tracker.md`](./docs/issue-tracker.md), the sole adapter that
@@ -196,7 +196,7 @@ PR as an artifact (intent, hard-to-reverse changes, changed names and flows,
 blast radius) plus a to-do list of comments for the reviewer, who stays the
 judge. It writes nothing to GitHub or Linear until the reviewer asks.
 
-See [./plugins/engineering/skills/pr-review-assistant/](./plugins/engineering/skills/pr-review-assistant/)
+See [./plugins/team/skills/pr-review-assistant/](./plugins/team/skills/pr-review-assistant/)
 for the skill contract.
 
 ### running-mobile-simulators
@@ -234,7 +234,7 @@ README and skill contract.
 | [writing-for-pstack](./skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [gmail-inbox-triage](./skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
-| [pr-review-assistant](./plugins/engineering/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
+| [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 

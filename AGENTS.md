@@ -7,8 +7,8 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/scaffold-repository/`: scaffold-repository skill
 - `skills/using-github/`: using-github skill
 - `skills/update-branch/`: local branch update skill
-- `plugins/engineering/skills/to-spec/`: upstream to-spec mirror
-- `plugins/engineering/skills/to-tickets/`: upstream to-tickets mirror
+- `plugins/team/skills/to-spec/`: upstream to-spec mirror
+- `plugins/team/skills/to-tickets/`: upstream to-tickets mirror
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
@@ -20,12 +20,12 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
-- `plugins/engineering/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
+- `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
-- `plugins/engineering/skills/triage/`: upstream issue and PR triage workflow
-- `plugins/engineering/skills/retro/`: upstream coding-session retrospective workflow
+- `plugins/team/skills/triage/`: upstream issue and PR triage workflow
+- `plugins/team/skills/retro/`: upstream coding-session retrospective workflow
 - `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
 - `plugins/team/skills/ask-matt/`: upstream mirror (mattpocock)
 - `plugins/team/skills/codebase-design/`: upstream mirror (mattpocock)
@@ -76,7 +76,7 @@ Tracker operations are defined in the sole adapter. The real file is
 `docs/agents/issue-tracker.md`; `docs/issue-tracker.md` is a compatibility
 symlink to it, so either path reaches the same adapter.
 Follow it directly for claiming, labels, lifecycle, relationships, and closure;
-the Engineering plugin owns the `to-spec` skill. Use it for issue filing and
+the Team plugin owns the `to-spec` skill. Use it for issue filing and
 editing. `docs/issue-publishing.md` governs issue body framing, and the adapter
 owns readiness and priority.
 
@@ -301,12 +301,12 @@ This repo owns skills in the root plugin and the Engineering plugin:
 | principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
 | pr | `plugins/engineering/skills/pr/` |
 | gather-evidence | `plugins/engineering/skills/gather-evidence/` |
-| pr-review-assistant | `plugins/engineering/skills/pr-review-assistant/` |
+| pr-review-assistant | `plugins/team/skills/pr-review-assistant/` |
 | running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
-| retro | `plugins/engineering/skills/retro/` |
-| to-spec | `plugins/engineering/skills/to-spec/` |
-| to-tickets | `plugins/engineering/skills/to-tickets/` |
-| triage | `plugins/engineering/skills/triage/` |
+| retro | `plugins/team/skills/retro/` |
+| to-spec | `plugins/team/skills/to-spec/` |
+| to-tickets | `plugins/team/skills/to-tickets/` |
+| triage | `plugins/team/skills/triage/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.

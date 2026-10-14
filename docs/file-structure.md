@@ -3,6 +3,7 @@
 This repository is the marketplace surface for Patina Project plugins and
 related install documentation. General skills live under `skills/<name>/`.
 Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
+Team plugin skills live under `plugins/team/skills/<name>/`.
 
 ## Top level
 
@@ -23,12 +24,12 @@ Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
 - `plugins/engineering/skills/pr-readiness/`: centralized PR evidence evaluator and publication command
-- `plugins/engineering/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
+- `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
-- `plugins/engineering/skills/retro/`: Coding-session retrospective workflow
-- `plugins/engineering/skills/to-spec/`: Issue spec drafting and publication workflow
-- `plugins/engineering/skills/to-tickets/`: Tracer-bullet ticket breakdown workflow
-- `plugins/engineering/skills/triage/`: Issue and pull-request triage workflow
+- `plugins/team/skills/retro/`: Coding-session retrospective workflow
+- `plugins/team/skills/to-spec/`: Issue spec drafting and publication workflow
+- `plugins/team/skills/to-tickets/`: Tracer-bullet ticket breakdown workflow
+- `plugins/team/skills/triage/`: Issue and pull-request triage workflow
 - `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
 - `plugins/team/skills/ask-matt/`: upstream mirror (mattpocock)
 - `plugins/team/skills/codebase-design/`: upstream mirror (mattpocock)
@@ -97,10 +98,10 @@ Skills owned by this repository:
 | `gmail-inbox-triage` | `skills/gmail-inbox-triage/` | Gmail inbox triage into four labeled buckets |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
-| `retro` | `plugins/engineering/skills/retro/` | Coding-session retrospective workflow |
-| `to-spec` | `plugins/engineering/skills/to-spec/` | Issue spec drafting and publication workflow |
-| `to-tickets` | `plugins/engineering/skills/to-tickets/` | Tracer-bullet ticket breakdown workflow |
-| `triage` | `plugins/engineering/skills/triage/` | Issue and pull-request triage workflow |
+| `retro` | `plugins/team/skills/retro/` | Coding-session retrospective workflow |
+| `to-spec` | `plugins/team/skills/to-spec/` | Issue spec drafting and publication workflow |
+| `to-tickets` | `plugins/team/skills/to-tickets/` | Tracer-bullet ticket breakdown workflow |
+| `triage` | `plugins/team/skills/triage/` | Issue and pull-request triage workflow |
 | `show-me` | `plugins/team/skills/show-me/` | Visual explanation of the current topic (upstream mirror from humanlayer) |
 | `ask-matt` | `plugins/team/skills/ask-matt/` | Upstream mattpocock mirror in the Team plugin |
 | `codebase-design` | `plugins/team/skills/codebase-design/` | Upstream mattpocock mirror in the Team plugin |
@@ -115,7 +116,7 @@ Skills owned by this repository:
 | `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
-| `pr-review-assistant` | `plugins/engineering/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
+| `pr-review-assistant` | `plugins/team/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
 installed via the vercel-labs CLI and is not owned by this repository. Install

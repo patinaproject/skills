@@ -57,22 +57,22 @@
         {
           "kind": "skill",
           "source": "skills/engineering/to-spec",
-          "destination": "plugins/engineering/skills/to-spec"
+          "destination": "plugins/team/skills/to-spec"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/to-tickets",
-          "destination": "plugins/engineering/skills/to-tickets"
+          "destination": "plugins/team/skills/to-tickets"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/triage",
-          "destination": "plugins/engineering/skills/triage"
+          "destination": "plugins/team/skills/triage"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/retro",
-          "destination": "plugins/engineering/skills/retro"
+          "destination": "plugins/team/skills/retro"
         },
         {
           "kind": "skill",

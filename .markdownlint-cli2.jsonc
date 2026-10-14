@@ -19,12 +19,24 @@
     // on every re-vendor, so they are never linted here.
     ".agents/skills/**",
     ".claude/skills/**",
-    // These synced entries are exact mirrors of upstream payloads.
-    "plugins/engineering/skills/to-spec/**",
-    "plugins/engineering/skills/to-tickets/**",
-    "plugins/engineering/skills/triage/**",
-    "plugins/engineering/skills/retro/**",
+    // These synced entries are exact mirrors of upstream payloads. Patina-owned
+    // Team skills are not listed, so they are linted.
     "plugins/engineering/skills/code-review/**",
-    "plugins/team/skills/**"
+    "plugins/team/skills/ask-matt/**",
+    "plugins/team/skills/codebase-design/**",
+    "plugins/team/skills/domain-modeling/**",
+    "plugins/team/skills/grill-me/**",
+    "plugins/team/skills/grilling/**",
+    "plugins/team/skills/handoff/**",
+    "plugins/team/skills/improve-codebase-architecture/**",
+    "plugins/team/skills/retro/**",
+    "plugins/team/skills/setup-matt-pocock-skills/**",
+    "plugins/team/skills/show-me/**",
+    "plugins/team/skills/teach/**",
+    "plugins/team/skills/to-questionnaire/**",
+    "plugins/team/skills/to-spec/**",
+    "plugins/team/skills/to-tickets/**",
+    "plugins/team/skills/triage/**",
+    "plugins/team/skills/wait-what/**"
   ]
 }

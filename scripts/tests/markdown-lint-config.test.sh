@@ -128,9 +128,10 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-for upstream_skill in to-spec to-tickets triage retro code-review; do
-  upstream_file="plugins/engineering/skills/$upstream_skill/SKILL.md"
-  assert_ignored "$upstream_file" "upstream Engineering mirror $upstream_skill"
+assert_ignored "plugins/engineering/skills/code-review/SKILL.md" "upstream Engineering mirror code-review"
+for upstream_skill in to-spec to-tickets triage retro; do
+  upstream_file="plugins/team/skills/$upstream_skill/SKILL.md"
+  assert_ignored "$upstream_file" "upstream Team mirror $upstream_skill"
 done
 
 engineering_output="$(pnpm exec markdownlint-cli2 "plugins/engineering/**/*.md" 2>&1)" || {
