@@ -1,6 +1,6 @@
 ---
 name: grill-to-spec
-description: Grill a design with docs in a disposable worktree, then hand the settled ADR and glossary changes to /to-spec as proposals instead of writing them to the tree.
+description: Grill a design with team:grilling and team:domain-modeling, holding every ADR and glossary change in the conversation and leaving the working tree unchanged, then hand them to /team:to-spec as proposals. Use when a design needs grilling before it is specified and its documentation changes should reach the implementing branch through the spec.
 disable-model-invocation: true
 ---
 
@@ -65,14 +65,19 @@ records, as a report. The operator can still overrule it.
    `Shared understanding confirmed.` The second is exactly
    ``Run `/team:to-spec` to publish the design with complete file-ready ADR and glossary proposals from this conversation.``
 
-`team:to-spec` is user-invoked, so the operator runs it. Its own process still
-applies.
+`team:to-spec` is user-invoked, so the operator runs it, and it follows its own
+process with one exception, scoped to this handoff. `to-spec` says not to
+include specific file paths or code snippets. The `## Proposed documentation
+changes` section below is exempt from that rule, because it must carry the
+destination paths and file-ready contents. Every other section of the spec keeps
+the rule.
 
 ## When `/team:to-spec` runs here
 
 Add a `## Proposed documentation changes` section after `Further Notes` in the
 published spec. This section is the one place the spec carries file paths and
-file contents. For each held item:
+file contents, the exception to `to-spec`'s no-paths rule noted above. For
+each held item:
 
 - **Glossary term or ADR.** The destination path, then the complete file-ready
   text in a fenced block: the whole new file, or the whole amended file. Use the
