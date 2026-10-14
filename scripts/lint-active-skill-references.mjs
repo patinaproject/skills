@@ -1,26 +1,15 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-function readJson(file) {
-  return JSON.parse(readFileSync(file, 'utf8'));
-}
-
 function collectPublishedSkillFiles(repoRoot) {
   const published = new Map();
-  const manifest = readJson(path.join(repoRoot, '.claude-plugin', 'plugin.json'));
-
-  for (const skillPath of manifest.skills) {
-    const match = /^\.\/skills\/([a-z][a-z0-9]*(?:-[a-z0-9]+)*)$/.exec(skillPath);
-    if (!match) continue;
-    const file = path.join(repoRoot, skillPath, 'SKILL.md');
-    if (existsSync(file)) published.set(`patinaproject-skills/${match[1]}`, file);
-  }
-
-  const engineeringRoot = path.join(repoRoot, 'plugins', 'engineering', 'skills');
-  for (const entry of readdirSync(engineeringRoot, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      published.set(`engineering/${entry.name}`, path.join(engineeringRoot, entry.name, 'SKILL.md'));
+  for (const plugin of ['engineering', 'team']) {
+    const skillsRoot = path.join(repoRoot, 'plugins', plugin, 'skills');
+    for (const entry of readdirSync(skillsRoot, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        published.set(`${plugin}/${entry.name}`, path.join(skillsRoot, entry.name, 'SKILL.md'));
+      }
     }
   }
 
@@ -45,7 +34,7 @@ function findExecutableSkillReferences(contents, published) {
   const references = [];
   for (const snippet of executableSnippets(contents)) {
     if (!/\bsubagent_type\s*:/i.test(snippet)) {
-      for (const match of snippet.matchAll(/\b(?:engineering|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
+      for (const match of snippet.matchAll(/\b(?:engineering|team):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
         const reference = match[0];
         references.push({ reference, target: `${reference.split(':', 1)[0]}/${match[1]}` });
       }

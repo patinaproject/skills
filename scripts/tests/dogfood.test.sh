@@ -12,17 +12,6 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-ROOT_SKILLS=(
-  scaffold-repository
-  install-skills
-  using-github
-  update-branch
-  design-by-contract
-  grill-system-design
-  review-system-design
-  writing-for-pstack
-  gmail-inbox-triage
-)
 FAIL_COUNT=0
 
 fail() {
@@ -120,10 +109,6 @@ assert_skill_overlay() {
 
   echo "OK: $name"
 }
-
-for name in "${ROOT_SKILLS[@]}"; do
-  assert_skill_overlay "$name" "skills/$name"
-done
 
 for skill_dir in plugins/engineering/skills/*; do
   [ -d "$skill_dir" ] || continue

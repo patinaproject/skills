@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_marketplace_skills='["./skills/scaffold-repository","./skills/using-github","./skills/update-branch","./skills/install-skills","./skills/design-by-contract","./skills/grill-system-design","./skills/review-system-design","./skills/writing-for-pstack","./skills/gmail-inbox-triage"]'
 expected_engineering_skills='["architect","arena","automate-me","babysit","benchmark-checklist","blast-radius","bro","code-review","correct","create-verification-skill","deslop","figure-it-out","fix-ci","fix-merge-conflicts","gather-evidence","get-pr-comments","how","interrogate","maintain-verification-skill","make-pr-easy-to-review","move-branch-here","move-session-here","no-comments","patina-help","patina-mode","pr","pr-readiness","principle-attack-the-premise","principle-boundary-discipline","principle-build-the-lever","principle-encode-lessons-in-structure","principle-exhaust-the-design-space","principle-experience-first","principle-explain-the-number","principle-fix-root-causes","principle-foundational-thinking","principle-guard-the-context-window","principle-laziness-protocol","principle-make-operations-idempotent","principle-migrate-callers-then-delete-legacy-apis","principle-minimize-reader-load","principle-model-the-domain","principle-never-block-on-the-human","principle-offensive-programming","principle-outcome-oriented-execution","principle-prove-it-works","principle-redesign-from-first-principles","principle-separate-before-serializing-shared-state","principle-sequence-verifiable-units","principle-subtract-before-you-add","principle-test-behavior-not-implementation","principle-type-system-discipline","recall","reflect","running-mobile-simulators","setup-engineering","setup-pstack","show-me-your-work","swarm","tdd","teach","technical-writing","thermo-nuclear-code-quality-review","typescript-best-practices","unslop","what-did-i-get-done","why","working-on-issues"]'
-expected_team_skills='["ask-matt","codebase-design","domain-modeling","grill-me","grilling","handoff","improve-codebase-architecture","pr-review-assistant","retro","setup-matt-pocock-skills","show-me","teach","to-questionnaire","to-spec","to-tickets","triage","wait-what"]'
+expected_team_skills='["ask-matt","codebase-design","design-by-contract","domain-modeling","gmail-inbox-triage","grill-me","grill-system-design","grilling","handoff","improve-codebase-architecture","install-skills","pr-review-assistant","retro","review-system-design","scaffold-repository","setup-matt-pocock-skills","show-me","teach","to-questionnaire","to-spec","to-tickets","triage","update-branch","using-github","wait-what","writing-for-pstack"]'
 expected_engineering_agents='["comment-sicko","patina-agent"]'
 retired_marketplace_skills='write-docs|new-issue|edit-issue|review-action|office-hours|plan-ceo-review|superteam|superteam-non-interactive|email-triage|review-branch|improve-branch-architecture|harden-branch|polish-branch|working-on-github-issue|write-release-changelog|resolve-qa-feedback|develop|develop-with-workflow|ready-pr|finish-pr|merge-pr|polish|fix|orchestrate|codex-pr-feedback-loop|prompting-fable|offensive-programming|move-branch-here|running-mobile-simulators|working-on-issue|write-changelog|new-branch|writing-for-patina-mode|grill-to-spec|team:to-issue|to-issue'
+retired_plugins='patinaproject-skills'
 
 read_frontmatter_field() {
   local file="$1"
@@ -24,13 +24,10 @@ read_frontmatter_field() {
 
 # Validate the Claude Code marketplace catalog.
 test -f .claude-plugin/marketplace.json
-test -f .claude-plugin/plugin.json
 m_name=$(jq -r '.name' .claude-plugin/marketplace.json)
-p_name=$(jq -r '.name' .claude-plugin/plugin.json)
 mp_names=$(jq -c '[.plugins[].name]' .claude-plugin/marketplace.json)
 test "$m_name" = "patinaproject-skills"
-test "$p_name" = "patinaproject-skills"
-test "$mp_names" = '["patinaproject-skills","engineering","team"]'
+test "$mp_names" = '["engineering","team"]'
 test "$(jq -r '.plugins[] | select(.name == "engineering") | .source' .claude-plugin/marketplace.json)" = './plugins/engineering'
 test "$(jq -r '.plugins[] | select(.name == "team") | .source' .claude-plugin/marketplace.json)" = './plugins/team'
 test -f plugins/team/.claude-plugin/plugin.json
@@ -46,19 +43,20 @@ test "$(jq -r '.name' plugins/engineering/.claude-plugin/plugin.json)" = 'engine
 test "$(jq -c '.dependencies // []' plugins/engineering/.claude-plugin/plugin.json)" = '[]'
 test -f plugins/engineering/agents/patina-agent.md
 test -f plugins/engineering/hooks/hooks.json
-for path in $(jq -r '.skills[]' .claude-plugin/plugin.json); do
-  if ! echo "$path" | grep -qE '^\./skills/[a-z-]+$'; then
-    echo "FAIL: Claude plugin.json skill path '$path' does not match flat form './skills/<name>'" >&2
+# The root patinaproject-skills plugin is retired: its skills ship in `team`.
+test ! -e .claude-plugin/plugin.json
+test ! -e .codex-plugin/plugin.json
+test ! -e skills
+for retired_plugin in $retired_plugins; do
+  if jq -e --arg name "$retired_plugin" '.plugins[] | select(.name == $name)' .claude-plugin/marketplace.json .agents/plugins/marketplace.json >/dev/null; then
+    echo "FAIL: retired plugin $retired_plugin must not appear in a marketplace catalog" >&2
     exit 1
   fi
-  test -f "${path#./}/SKILL.md"
 done
-if jq -r '.skills[]' .claude-plugin/plugin.json | grep -q 'find-skills'; then
-  echo "FAIL: find-skills must not appear in .claude-plugin/plugin.json skills[] (it is third-party)" >&2
-  exit 1
-fi
-if jq -r '.skills[]' .claude-plugin/plugin.json | grep -Eq "$retired_marketplace_skills"; then
-  echo "FAIL: retired skills must not appear in .claude-plugin/plugin.json skills[]" >&2
+
+# The retired-skills guard covers the skills shipped by the Team plugin.
+if printf '%s\n' "$team_skills" | jq -r '.[]' | grep -Eqx "$retired_marketplace_skills"; then
+  echo "FAIL: retired skills must not appear in the Team plugin" >&2
   exit 1
 fi
 
@@ -67,13 +65,10 @@ fi
 # .codex-plugin/plugin.json (parallel to .claude-plugin/plugin.json), but the
 # marketplace catalog lives at .agents/plugins/marketplace.json (NOT .codex-plugin/).
 test -f .agents/plugins/marketplace.json
-test -f .codex-plugin/plugin.json
 cm_name=$(jq -r '.name' .agents/plugins/marketplace.json)
-cp_name=$(jq -r '.name' .codex-plugin/plugin.json)
 cmp_names=$(jq -c '[.plugins[].name]' .agents/plugins/marketplace.json)
 test "$cm_name" = "patinaproject-skills"
-test "$cp_name" = "patinaproject-skills"
-test "$cmp_names" = '["patinaproject-skills","engineering","team"]'
+test "$cmp_names" = '["engineering","team"]'
 test "$(jq -r '.plugins[] | select(.name == "engineering") | .source.path' .agents/plugins/marketplace.json)" = './plugins/engineering'
 test -f plugins/engineering/.codex-plugin/plugin.json
 test "$(jq -r '.plugins[] | select(.name == "team") | .source.path' .agents/plugins/marketplace.json)" = './plugins/team'
@@ -81,39 +76,6 @@ test "$(jq -r '.name' plugins/team/.codex-plugin/plugin.json)" = 'team'
 test "$(jq -r '.skills' plugins/team/.codex-plugin/plugin.json)" = './skills/'
 test "$(jq -r '.name' plugins/engineering/.codex-plugin/plugin.json)" = 'engineering'
 test "$(jq -r '.skills' plugins/engineering/.codex-plugin/plugin.json)" = './skills/'
-# Assert Codex skill paths are flat and resolve
-for path in $(jq -r '.skills[]' .codex-plugin/plugin.json); do
-  if ! echo "$path" | grep -qE '^\./skills/[a-z-]+$'; then
-    echo "FAIL: Codex plugin.json skill path '$path' does not match flat form './skills/<name>'" >&2
-    exit 1
-  fi
-  test -f "${path#./}/SKILL.md"
-done
-if jq -r '.skills[]' .codex-plugin/plugin.json | grep -q 'find-skills'; then
-  echo "FAIL: find-skills must not appear in .codex-plugin/plugin.json skills[] (it is third-party)" >&2
-  exit 1
-fi
-if jq -r '.skills[]' .codex-plugin/plugin.json | grep -Eq "$retired_marketplace_skills"; then
-  echo "FAIL: retired skills must not appear in .codex-plugin/plugin.json skills[]" >&2
-  exit 1
-fi
-
-# Assert Claude and Codex plugin.json skills[] arrays match (same plugin, two hosts).
-claude_skills=$(jq -c '.skills' .claude-plugin/plugin.json)
-codex_skills=$(jq -c '.skills' .codex-plugin/plugin.json)
-if [ "$claude_skills" != "$codex_skills" ]; then
-  echo "FAIL: Claude and Codex plugin.json skills[] arrays diverged" >&2
-  echo "  Claude: $claude_skills" >&2
-  echo "  Codex:  $codex_skills" >&2
-  exit 1
-fi
-if [ "$claude_skills" != "$expected_marketplace_skills" ]; then
-  echo "FAIL: marketplace skills[] did not match expected shipped catalog" >&2
-  echo "  Expected: $expected_marketplace_skills" >&2
-  echo "  Actual:   $claude_skills" >&2
-  exit 1
-fi
-
 engineering_skills="$({
   find plugins/engineering/skills -mindepth 2 -maxdepth 2 -name SKILL.md -print
 } | sed 's#plugins/engineering/skills/##; s#/SKILL.md##' | sort | jq -Rsc 'split("\n") | map(select(length > 0))')"
@@ -285,16 +247,11 @@ fi
 # Assert the two version fields stay in lockstep. Each host stores the
 # marketplace version in a different file per its own schema:
 #   Claude: .claude-plugin/marketplace.json metadata.version
-#   Codex:  .codex-plugin/plugin.json version
+#   Plugins: each plugin's .claude-plugin/plugin.json and .codex-plugin/plugin.json
 # release-please bumps both via extra-files; this check catches manual drift.
 claude_version=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
-codex_version=$(jq -r '.version' .codex-plugin/plugin.json)
 engineering_claude_version=$(jq -r '.version' plugins/engineering/.claude-plugin/plugin.json)
 engineering_codex_version=$(jq -r '.version' plugins/engineering/.codex-plugin/plugin.json)
-if [ "$claude_version" != "$codex_version" ]; then
-  echo "FAIL: Claude metadata.version ($claude_version) != Codex plugin.json version ($codex_version)" >&2
-  exit 1
-fi
 team_claude_version=$(jq -r '.version' plugins/team/.claude-plugin/plugin.json)
 team_codex_version=$(jq -r '.version' plugins/team/.codex-plugin/plugin.json)
 if [ "$claude_version" != "$team_claude_version" ] || [ "$claude_version" != "$team_codex_version" ]; then

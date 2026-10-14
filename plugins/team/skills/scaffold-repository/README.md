@@ -30,12 +30,12 @@ Install this skill with:
 npx skills@latest add patinaproject/skills --skill scaffold-repository
 ```
 
-Or install the `patinaproject-skills` plugin through the host marketplace:
+Or install the `team` plugin through the host marketplace:
 
 - Claude Code: `/plugin marketplace add patinaproject/skills`, then
-  `/plugin install patinaproject-skills@patinaproject-skills`
+  `/plugin install team@patinaproject-skills`
 - Codex: `/marketplace add patinaproject/skills`, then
-  `/install patinaproject-skills`
+  `/install team`
 
 The repository root `README.md` contains the full installation guide.
 

@@ -47,8 +47,8 @@ run_cli_canary() {
   fi
 }
 
-run_cli_canary ./skills/scaffold-repository
-run_cli_canary ./skills/install-skills
+run_cli_canary ./plugins/team/skills/scaffold-repository
+run_cli_canary ./plugins/team/skills/install-skills
 
 run_cli_install_canary() {
   local repo_root tmpdir status

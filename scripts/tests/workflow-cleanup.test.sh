@@ -35,8 +35,6 @@ assert_match() {
 ACTIVE_CONFIG_PATHS=(
   .claude/settings.json
   .claude-plugin/marketplace.json
-  .claude-plugin/plugin.json
-  .codex-plugin/plugin.json
   .agents/plugins/marketplace.json
 )
 REMOVED_SKILL_PATHS=(
@@ -67,8 +65,7 @@ assert_no_match "docs/superpowers/(specs|plans)" "${ACTIVE_CONFIG_PATHS[@]}"
 assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superteam@patinaproject-skills|<use-superteam>" \
   .claude/settings.json
 assert_no_match "review-action|office-hours|plan-ceo-review|superteam-non-interactive|skills/superteam" \
-  .claude-plugin/marketplace.json .claude-plugin/plugin.json \
-  .codex-plugin/plugin.json .agents/plugins/marketplace.json
+  .claude-plugin/marketplace.json .agents/plugins/marketplace.json
 assert_no_match "skills:restore|skills:refresh" \
   .claude/settings.json
 

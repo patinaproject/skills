@@ -14,11 +14,6 @@
         },
         {
           "type": "json",
-          "path": ".codex-plugin/plugin.json",
-          "jsonpath": "$.version"
-        },
-        {
-          "type": "json",
           "path": "plugins/engineering/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
         },

@@ -1,25 +1,25 @@
 # Repository File Structure
 
 This repository is the marketplace surface for Patina Project plugins and
-related install documentation. General skills live under `skills/<name>/`.
+related install documentation.
 Engineering plugin skills live under `plugins/engineering/skills/<name>/`.
 Team plugin skills live under `plugins/team/skills/<name>/`.
 
 ## Top level
 
-- `skills/scaffold-repository/`: scaffold-repository skill
-- `skills/using-github/`: using-github skill
-- `skills/update-branch/`: local branch update skill
+- `plugins/team/skills/scaffold-repository/`: scaffold-repository skill
+- `plugins/team/skills/using-github/`: using-github skill
+- `plugins/team/skills/update-branch/`: local branch update skill
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
-- `skills/install-skills/`: project-local skills CLI installation skill
-- `skills/design-by-contract/`: consequential system contract design overlay
+- `plugins/team/skills/install-skills/`: project-local skills CLI installation skill
+- `plugins/team/skills/design-by-contract/`: consequential system contract design overlay
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
-- `skills/grill-system-design/`: focused system design grilling skill
-- `skills/review-system-design/`: contract dependency review skill
-- `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
-- `skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
+- `plugins/team/skills/grill-system-design/`: focused system design grilling skill
+- `plugins/team/skills/review-system-design/`: contract dependency review skill
+- `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
+- `plugins/team/skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
@@ -49,14 +49,12 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
 - `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
 - `.agents/skills/<name>/`: committed overlay; repo-owned skills are symlinks
-  into their owning plugin or `skills/`, vendored third-party skills are real
+  into their owning plugin, vendored third-party skills are real
   directories
 - `.claude/skills/<name>/`: committed overlay; repo-owned skills symlink into
-  their owning plugin or `skills/`, vendored third-party skills symlink into
+  their owning plugin, vendored third-party skills symlink into
   `../../.agents/skills/<name>`
 - `.claude-plugin/marketplace.json`: Claude marketplace catalog
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing skill paths
-- `.codex-plugin/plugin.json`: Codex plugin manifest listing skill paths
 - `.agents/plugins/marketplace.json`: Codex marketplace catalog
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `.codex/config.toml`: Codex hosted Linear MCP registration for private-repo
@@ -83,19 +81,19 @@ Skills owned by this repository:
 
 | Skill | Canonical path | Description |
 | --- | --- | --- |
-| `scaffold-repository` | `skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
-| `using-github` | `skills/using-github/` | GitHub workflow skill |
-| `update-branch` | `skills/update-branch/` | Local branch update workflow |
+| `scaffold-repository` | `plugins/team/skills/scaffold-repository/` | Scaffold or realign a repo to the Patina Project baseline |
+| `using-github` | `plugins/team/skills/using-github/` | GitHub workflow skill |
+| `update-branch` | `plugins/team/skills/update-branch/` | Local branch update workflow |
 | `working-on-issues` | `plugins/engineering/skills/working-on-issues/` | Resolve the live tracker, align the issue branch and worktree, and mark work started |
 | `move-branch-here` | `plugins/engineering/skills/move-branch-here/` | Model-directed worktree branch handover workflow |
 | `move-session-here` | `plugins/engineering/skills/move-session-here/` | Claude Code and Codex session transcript handover workflow |
-| `install-skills` | `skills/install-skills/` | Project-local skills CLI installation workflow |
-| `design-by-contract` | `skills/design-by-contract/` | Consequential system contract design overlay |
+| `install-skills` | `plugins/team/skills/install-skills/` | Project-local skills CLI installation workflow |
+| `design-by-contract` | `plugins/team/skills/design-by-contract/` | Consequential system contract design overlay |
 | `principle-offensive-programming` | `plugins/engineering/skills/principle-offensive-programming/` | Defensive-code classification principle |
-| `grill-system-design` | `skills/grill-system-design/` | Focused system design grilling |
-| `review-system-design` | `skills/review-system-design/` | Contract dependency review |
-| `writing-for-pstack` | `skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
-| `gmail-inbox-triage` | `skills/gmail-inbox-triage/` | Gmail inbox triage into four labeled buckets |
+| `grill-system-design` | `plugins/team/skills/grill-system-design/` | Focused system design grilling |
+| `review-system-design` | `plugins/team/skills/review-system-design/` | Contract dependency review |
+| `writing-for-pstack` | `plugins/team/skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
+| `gmail-inbox-triage` | `plugins/team/skills/gmail-inbox-triage/` | Gmail inbox triage into four labeled buckets |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `retro` | `plugins/team/skills/retro/` | Coding-session retrospective workflow |
@@ -132,13 +130,10 @@ The agent runtime discovers skills through two committed overlay directories.
 Both repo-owned and vendored third-party skills are committed, so they load
 immediately in a fresh clone or worktree with no install step.
 
-Repo-owned skills appear as one-hop symlinks to either `skills/` or their plugin
-directory.
+Repo-owned skills appear as one-hop symlinks into their plugin directory.
 
 | Overlay path | Symlink target | Mode |
 | --- | --- | --- |
-| `.agents/skills/<name>` | `../../skills/<name>` | `120000` |
-| `.claude/skills/<name>` | `../../skills/<name>` | `120000` |
 | `.agents/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
 | `.claude/skills/<engineering-name>` | `../../plugins/engineering/skills/<name>` | `120000` |
 | `.agents/skills/<team-name>` | `../../plugins/team/skills/<name>` | `120000` |

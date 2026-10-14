@@ -11,11 +11,6 @@
   },
   "plugins": [
     {
-      "name": "patinaproject-skills",
-      "description": "Skills used by the Patina Project team",
-      "source": "./"
-    },
-    {
       "name": "engineering",
       "description": "Patina Project's owned engineering workflows, forked from pstack",
       "source": "./plugins/engineering"

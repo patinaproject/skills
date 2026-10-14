@@ -4,21 +4,21 @@
 
 This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
-- `skills/scaffold-repository/`: scaffold-repository skill
-- `skills/using-github/`: using-github skill
-- `skills/update-branch/`: local branch update skill
+- `plugins/team/skills/scaffold-repository/`: scaffold-repository skill
+- `plugins/team/skills/using-github/`: using-github skill
+- `plugins/team/skills/update-branch/`: local branch update skill
 - `plugins/team/skills/to-spec/`: upstream to-spec mirror
 - `plugins/team/skills/to-tickets/`: upstream to-tickets mirror
 - `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
 - `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
 - `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
-- `skills/install-skills/`: project-local skills CLI installation skill
-- `skills/design-by-contract/`: consequential system contract design overlay
+- `plugins/team/skills/install-skills/`: project-local skills CLI installation skill
+- `plugins/team/skills/design-by-contract/`: consequential system contract design overlay
 - `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
-- `skills/grill-system-design/`: focused system design grilling skill
-- `skills/review-system-design/`: contract dependency review skill
-- `skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
-- `skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
+- `plugins/team/skills/grill-system-design/`: focused system design grilling skill
+- `plugins/team/skills/review-system-design/`: contract dependency review skill
+- `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
+- `plugins/team/skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
@@ -45,13 +45,12 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
 - `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
-  into their owning plugin or `skills/`; vendored third-party skills are real
+  into their owning plugin; vendored third-party skills are real
   directories restored by `pnpm skills:install`. All entries are tracked.
 - `.claude/skills/<name>/`: committed Claude Code overlay. Repo-owned skills
-  symlink into their owning plugin or `skills/`; vendored third-party skills are
+  symlink into their owning plugin; vendored third-party skills are
   relative symlinks into `../../.agents/skills/<name>`. All entries are tracked.
-- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth for `patinaproject-skills` and `engineering`
-- `.claude-plugin/plugin.json`: Claude plugin manifest listing skill paths
+- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth for the `engineering` and `team` plugins
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `docs/`: contributor docs such as `docs/file-structure.md` and
   `docs/release-flow.md`
@@ -163,7 +162,7 @@ the vendored `domain-modeling` payload; see
 
 ## Working on skills
 
-When creating or editing any skill under `skills/`, first use the third-party
+When creating or editing any skill under `plugins/*/skills/`, first use the third-party
 `writing-for-agents` skill (the successor to `writing-great-skills`) as a
 structure and progressive-disclosure review. It helps check trigger
 descriptions, concise `SKILL.md` shape, leading-word terminology, and when to
@@ -171,8 +170,8 @@ split reference material out of the main skill file.
 
 ### Referring to shared repository docs
 
-A skill under `skills/<name>/` sits two levels below this repository's root, but
-three levels below a consumer repo's root once vendored into `.agents/skills/`
+A skill under `plugins/<plugin>/skills/<name>/` sits four levels below this
+repository's root, but three levels below a consumer repo's root once vendored into `.agents/skills/`
 or `.claude/skills/`. A relative link to a repo-root doc therefore resolves in
 exactly one of those layouts and is broken in the other — `../../AGENTS.md`
 becomes `.claude/AGENTS.md`, which does not exist.
@@ -184,7 +183,7 @@ skill, so a path is the honest reference and a link is a layout assumption.
 
 Relative links between sibling skills are fine and should stay links: skills
 remain siblings in both layouts, so `../../design-by-contract/references/...` from
-`skills/using-github/workflows/` resolves either way. Links to files bundled inside
+`plugins/team/skills/using-github/workflows/` resolves either way. Links to files bundled inside
 the same skill (`./audit-checklist.md`) are likewise unaffected.
 
 If `writing-for-agents` is not installed in the local agent environment, install
@@ -215,7 +214,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/move-session-here.test.sh` after changing
   `plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs`.
 - Run `bash scripts/tests/update-branch.test.sh` after changing
-  `skills/update-branch/**`.
+  `plugins/team/skills/update-branch/**`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing
@@ -225,7 +224,7 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/pull-request-workflow.test.sh` after changing `.github/workflows/pull-request.yml`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
 - Run `bash scripts/tests/scaffold-baseline-manifest.test.sh` after changing
-  `skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`
+  `plugins/team/skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
 - Run `bash scripts/tests/setup-engineering-machinery.test.sh` after changing
   `plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh` or
@@ -282,19 +281,19 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns skills in the root plugin and the Engineering plugin:
+This repo owns skills in the Engineering and Team plugins:
 
 | Skill | Path |
 | --- | --- |
-| scaffold-repository | `skills/scaffold-repository/` |
-| using-github | `skills/using-github/` |
-| update-branch | `skills/update-branch/` |
-| install-skills | `skills/install-skills/` |
-| design-by-contract | `skills/design-by-contract/` |
-| grill-system-design | `skills/grill-system-design/` |
-| review-system-design | `skills/review-system-design/` |
-| writing-for-pstack | `skills/writing-for-pstack/` |
-| gmail-inbox-triage | `skills/gmail-inbox-triage/` |
+| scaffold-repository | `plugins/team/skills/scaffold-repository/` |
+| using-github | `plugins/team/skills/using-github/` |
+| update-branch | `plugins/team/skills/update-branch/` |
+| install-skills | `plugins/team/skills/install-skills/` |
+| design-by-contract | `plugins/team/skills/design-by-contract/` |
+| grill-system-design | `plugins/team/skills/grill-system-design/` |
+| review-system-design | `plugins/team/skills/review-system-design/` |
+| writing-for-pstack | `plugins/team/skills/writing-for-pstack/` |
+| gmail-inbox-triage | `plugins/team/skills/gmail-inbox-triage/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |
 | move-session-here | `plugins/engineering/skills/move-session-here/` |

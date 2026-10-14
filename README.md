@@ -27,12 +27,11 @@ Claude Code:
 /plugin install team@patinaproject-skills
 ```
 
-Install the Patina Project Skills plugin separately for its repository
-scaffolding, GitHub, install, and system-design skills:
+The `team` plugin carries the human-invoked skills: repository scaffolding,
+GitHub, install, system-design, spec, triage, and review skills.
 
-```text
-/plugin install patinaproject-skills@patinaproject-skills
-```
+> **Migration:** the `patinaproject-skills` plugin is retired. Its skills now
+> ship in `team`. Uninstall `patinaproject-skills` and install `team` instead.
 
 Codex:
 
@@ -40,13 +39,6 @@ Codex:
 /marketplace add patinaproject/skills
 /install engineering
 /install team
-```
-
-Install the Patina Project Skills plugin separately for its repository
-scaffolding, GitHub, install, and system-design skills:
-
-```text
-/install patinaproject-skills
 ```
 
 > **Security note:** For environments where you want to prevent install scripts
@@ -70,7 +62,7 @@ GitHub forge work — repository and pull-request operations — is repetitive a
 convention-sensitive. `using-github` keeps those forge mechanics consistent;
 tracker operations are deliberately delegated to `docs/issue-tracker.md`.
 
-See [./skills/using-github/](./skills/using-github/) for the full README and
+See [./plugins/team/skills/using-github/](./plugins/team/skills/using-github/) for the full README and
 skill contract.
 
 ### update-branch
@@ -80,7 +72,7 @@ default target when no pull request exists. It keeps remote branch updates
 opt-in, routes merge conflicts through the conflict workflow, and reports the
 exact local and remote state.
 
-See [./skills/update-branch/](./skills/update-branch/) for the skill contract.
+See [./plugins/team/skills/update-branch/](./plugins/team/skills/update-branch/) for the skill contract.
 
 ### install-skills
 
@@ -90,7 +82,7 @@ operator's global agent environment. `install-skills` gives agents a canonical
 install selected skills project-locally for all supported agent targets, and
 verify the resulting lockfile and overlay changes.
 
-See [./skills/install-skills/](./skills/install-skills/) for the skill contract.
+See [./plugins/team/skills/install-skills/](./plugins/team/skills/install-skills/) for the skill contract.
 
 ### working-on-issues
 
@@ -126,7 +118,7 @@ what each contract requires, ensures, and maintains. It compares changes and
 alternatives through precise clauses, with tables or Mermaid diagrams when a
 visual explanation materially improves clarity.
 
-See [./skills/design-by-contract/](./skills/design-by-contract/) for the skill
+See [./plugins/team/skills/design-by-contract/](./plugins/team/skills/design-by-contract/) for the skill
 contract.
 
 ### principle-offensive-programming
@@ -147,7 +139,7 @@ System design grilling should focus on choices that deserve durable context.
 hands a settled design to `to-spec`, and limits questions to hard-to-reverse,
 surprising trade-offs.
 
-See [./skills/grill-system-design/](./skills/grill-system-design/) for the skill
+See [./plugins/team/skills/grill-system-design/](./plugins/team/skills/grill-system-design/) for the skill
 contract.
 
 ### review-system-design
@@ -156,7 +148,7 @@ System design review needs an implementation-focused map of the contracts that
 changed. `review-system-design` presents those contracts in dependency-ordered
 rounds for a human reviewer.
 
-See [./skills/review-system-design/](./skills/review-system-design/) for the
+See [./plugins/team/skills/review-system-design/](./plugins/team/skills/review-system-design/) for the
 skill contract.
 
 ### writing-for-pstack
@@ -166,7 +158,7 @@ operator prompt. It selects one current `patina-mode` playbook, keeps the facts
 that only the operator can supply, and names the owner of each rule removed
 from a draft.
 
-See [./skills/writing-for-pstack/](./skills/writing-for-pstack/) for
+See [./plugins/team/skills/writing-for-pstack/](./plugins/team/skills/writing-for-pstack/) for
 the skill contract.
 
 ### gmail-inbox-triage
@@ -176,7 +168,7 @@ soon`, `Waiting`, or `FYI`, applies that label, and archives `Waiting` and
 `FYI`. Its only writes are the four bucket labels and removing `INBOX`, and a
 second run converges on the same state.
 
-See [./skills/gmail-inbox-triage/](./skills/gmail-inbox-triage/) for the skill
+See [./plugins/team/skills/gmail-inbox-triage/](./plugins/team/skills/gmail-inbox-triage/) for the skill
 contract.
 
 ### gather-evidence
@@ -215,33 +207,33 @@ Teams spend disproportionate time on repo plumbing - commit conventions,
 markdown linting, PR templates, and Husky hooks. `scaffold-repository` emits the
 full Patina Project baseline and keeps it aligned on rerun.
 
-See [./skills/scaffold-repository/](./skills/scaffold-repository/) for the full
+See [./plugins/team/skills/scaffold-repository/](./plugins/team/skills/scaffold-repository/) for the full
 README and skill contract.
 
 ## Skills
 
 | Skill | Description |
 |---|---|
-| [using-github](./skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
-| [update-branch](./skills/update-branch/) | Merge a branch target locally with explicit remote-update opt-in |
+| [using-github](./plugins/team/skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
+| [update-branch](./plugins/team/skills/update-branch/) | Merge a branch target locally with explicit remote-update opt-in |
 | [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
 | [move-branch-here](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree |
-| [install-skills](./skills/install-skills/) | Project-local skills CLI installation workflow |
-| [design-by-contract](./skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
+| [install-skills](./plugins/team/skills/install-skills/) | Project-local skills CLI installation workflow |
+| [design-by-contract](./plugins/team/skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
 | [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
-| [grill-system-design](./skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to an issue |
-| [review-system-design](./skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [writing-for-pstack](./skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
-| [gmail-inbox-triage](./skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
+| [grill-system-design](./plugins/team/skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to an issue |
+| [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
+| [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
+| [gmail-inbox-triage](./plugins/team/skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
-| [scaffold-repository](./skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
+| [scaffold-repository](./plugins/team/skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
 
 The test suite proves the in-repo skills and workflow contracts are wired correctly. Run
-it after any change to `skills/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
+it after any change to `plugins/`, `scripts/`, `.agents/skills/`, or `.claude/skills/`.
 
 For the full local verification suite, run:
 
@@ -252,8 +244,8 @@ pnpm test
 ### Check a - CLI resolves skills from local paths
 
 ```sh
-npx skills@latest add ./skills/scaffold-repository --list
-npx skills@latest add ./skills/install-skills --list
+npx skills@latest add ./plugins/team/skills/scaffold-repository --list
+npx skills@latest add ./plugins/team/skills/install-skills --list
 ```
 
 ### Check b - scaffold-repository cleanup contract
@@ -271,16 +263,6 @@ bash scripts/tests/dogfood.test.sh
 ## Repository layout
 
 ```text
-skills/
-  scaffold-repository/
-  install-skills/
-  using-github/
-  update-branch/
-  design-by-contract/
-  grill-system-design/
-  review-system-design/
-  writing-for-pstack/
-  gmail-inbox-triage/
 plugins/engineering/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json
@@ -295,12 +277,25 @@ plugins/engineering/
     move-branch-here/
     principle-offensive-programming/
     gather-evidence/
-    pr-review-assistant/
     running-mobile-simulators/
 plugins/team/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json
   skills/
+    scaffold-repository/
+    install-skills/
+    using-github/
+    update-branch/
+    design-by-contract/
+    grill-system-design/
+    review-system-design/
+    writing-for-pstack/
+    gmail-inbox-triage/
+    to-spec/
+    to-tickets/
+    triage/
+    retro/
+    pr-review-assistant/
     show-me/
     ask-matt/
     codebase-design/
@@ -317,7 +312,6 @@ plugins/team/
 .claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror
 .claude-plugin/
   marketplace.json                   Claude marketplace catalog
-  plugin.json                        Claude plugin manifest
 scripts/                             Maintenance and verification scripts
 release-please-config.json           Release-please configuration
 .release-please-manifest.json        Version manifest

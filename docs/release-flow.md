@@ -3,12 +3,12 @@
 The Patina Project skills repo releases via `release-please` with a single root package
 (`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-General skills live at `skills/<name>/`. Engineering skills live at
-`plugins/engineering/skills/<name>/`. Both Patina plugins are versioned together
+Engineering skills live at `plugins/engineering/skills/<name>/` and Team skills
+at `plugins/team/skills/<name>/`. Both Patina plugins are versioned together
 as one marketplace release. On each release,
 `release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json` via the
 `extra-files` block in `release-please-config.json`. `find-skills` is no longer part of
-`patinaproject-skills`; install it separately from `vercel-labs/skills` (see root README).
+the marketplace plugins; install it separately from `vercel-labs/skills` (see root README).
 
 ## Install via vercel-labs skills CLI
 
@@ -49,8 +49,8 @@ The command reads `upstream-skills.json`, applies each source's pinned commit
 with a regenerated three-way merge base, and stages the new pin and content.
 Run `pnpm sync-upstream-skills --dry-run` in CI to validate the forks registry.
 
-1. A contributor opens a PR against `main` with changes under `skills/<name>/`
-   or `plugins/<plugin>/skills/<name>/`. The PR merges via squash merge.
+1. A contributor opens a PR against `main` with changes under
+   `plugins/<plugin>/skills/<name>/`. The PR merges via squash merge.
 2. `release-please` (`.github/workflows/release-please.yml`) runs on every push to `main`
    and maintains a standing Release PR for the root package. When a Release PR is merged,
    release-please:
