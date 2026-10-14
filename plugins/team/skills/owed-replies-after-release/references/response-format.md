@@ -1,7 +1,7 @@
 # Response format
 
-Write the run's final response in this shape. Leave out a section that has no
-rows, and keep the footer.
+Write the run's final response in this shape. "Ready to send" lists the
+proven replies. Leave out a section that has no rows, and keep the footer.
 
 ```markdown
 # Owed replies after release: <window start> to <window end>
@@ -32,8 +32,9 @@ rows, and keep the footer.
 - Sources searched: <each touchpoint with its search and the count it returned>
 - Dropped as answered: <person, touchpoint, and the link to the later operator message>
 - Dropped as no action: <person, touchpoint, and why>
+- Dropped by standing correction: <person, touchpoint, and the correction>
 - Config keys missing: <optional keys that turned off part of the method>
-- Count: <ready> ready + <blocked> blocked + <dropped> dropped = <people in the owed-reply list>
+- Count: <proven> proven + <blocked> blocked + <dropped> dropped = <candidates>
 ```
 
 The response gives a person's name and touchpoint. It holds no customer email

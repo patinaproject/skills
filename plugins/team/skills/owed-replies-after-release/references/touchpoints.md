@@ -1,12 +1,11 @@
 # Touchpoints
 
-Search all three touchpoints on every run. A touchpoint that the session tools
-cannot reach stops the run at step 1 of the skill.
+Search all three touchpoints on every run. Each search runs from now back
+through the configured `lookback`.
 
 ## Email inbox
 
-Two searches, both from the start of the window back to the configured
-lookback. The default lookback is 30 days.
+Two searches.
 
 - **Awaiting a reply.** Inbound threads where the last message is from a
   customer. Exclude newsletters, receipts, and automated notifications. Include
@@ -21,9 +20,9 @@ The reply location is the thread link.
 
 ## Feedback tool: support conversations
 
-Open and recently closed conversations where the last message is from the
-customer, or where an operator message promised a follow-up and no later
-operator message exists. The reply location is the conversation link.
+Open conversations, and conversations closed within the `lookback`, in two
+cases. The last message is from the customer. Or an operator message promised
+a follow-up and no later operator message exists. The reply location is the conversation link.
 
 ## Feedback tool: posts
 
@@ -45,8 +44,12 @@ leave the status change to the operator.
 
 Join candidates on email address first, then on the feedback-tool account
 linked to that address. When the two cannot be joined with confidence, keep
-them separate and mark the join as inferred in the report.
+them separate and mark the join as inferred in the response.
 
 For each person, read every thread on every touchpoint, sent mail included.
-The reply is **answered** when an operator message after the owed message
-exists anywhere, on any touchpoint.
+
+## Answered
+
+A candidate is **answered** when an operator message after the owed message
+exists on any touchpoint, in any thread with that person. This is the one
+definition of answered. The skill drops answered candidates.

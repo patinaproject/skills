@@ -18,21 +18,22 @@ customer support.
 - **Controller.** The three proof checks for each owed reply.
 - **Actuator.** Email drafts inside the customer's thread, and reply text for
   the feedback tool.
-- **Human on the loop.** The operator reads the report, sends each reply, and
+- **Human on the loop.** The operator reads the response, sends each reply, and
   records standing corrections in the consumer's memory file.
 
 A reply is **owed** when the person's last message waits for an operator
 answer, or when the operator promised a follow-up and wrote nothing after the
-promise.
+promise. [`references/touchpoints.md`](references/touchpoints.md) defines when
+an owed reply is **answered**.
 
 ## Scope
 
-The run reads everything and writes two things: email drafts, and one
-run-log line in the consumer's memory file. Every other surface ends the run
-exactly as it started. Messages stay unsent. The
-feedback tool keeps its posts, comments, statuses, and conversations. The
-tracker keeps its issues, and production keeps its data. Feedback-tool replies
-go into the report as text for the operator to paste.
+The run reads everything. It writes email drafts and, when the consumer
+configures a state file, one line in that file. Every other surface ends the
+run exactly as it started. Messages stay unsent. The feedback tool keeps its
+posts, comments, statuses, and conversations. The tracker keeps its issues,
+production keeps its data, and the memory file keeps its text. Feedback-tool
+replies go into the response as text for the operator to paste.
 
 ## Run
 
@@ -40,7 +41,8 @@ go into the report as text for the operator to paste.
 
 Read [`references/consumer-contract.md`](references/consumer-contract.md), then
 read the consuming repository's config, support voice doc, and memory file at
-the paths that contract names.
+the paths that contract names. Hold the memory file's standing corrections for
+the steps where each one acts.
 
 Map each configured tool onto the session's tools: mail search, thread read,
 and draft creation for email; conversation and post reads for the feedback
@@ -53,10 +55,10 @@ customer data, and name each missing key or operation.
 
 ### 2. Set the window
 
-The window starts at the end of the previous run and ends now. Take the
-previous run's end from the memory file. When the memory file has none, start
-the window at the beginning of the previous business day. On a Monday, that
-start is the previous Friday, so the window covers the weekend.
+The window ends now. It starts at the previous run's end, read from the state
+file. With no state file or no entry in it, the window starts at the beginning
+of the previous business day. On a Monday, that start is the previous Friday,
+so the window covers the weekend.
 
 List the production releases and deploys in the window from the configured
 production branch and deploy workflow. Record each deploy's commit, time, and
@@ -67,19 +69,19 @@ production deploys in it, each with commit, time, and result. An empty list is
 a valid result. Owed replies can still exist from earlier releases, so
 continue.
 
-### 3. Build the owed-reply list
+### 3. Build the candidate list
 
 Read [`references/touchpoints.md`](references/touchpoints.md) and search all
 three touchpoints: the email inbox, the feedback tool's support conversations,
-and the feedback tool's posts.
+and the feedback tool's posts. Apply the standing corrections that change what
+counts as owed, such as an added promise phrase.
 
-Merge candidates by person. For each person, search every thread they have on
-every touchpoint, sent mail included, before you call a reply owed. A later
-operator message on any thread means the reply is already answered.
+Merge candidates by person, and read every thread each person has on every
+touchpoint, sent mail included. Mark each candidate **answered** or **owed**.
 
-Completion criterion: each touchpoint has a searched-and-counted result, and
-each person in the list has an owed reason, a touchpoint, a reply location
-link, and the full set of threads you searched for them.
+Completion criterion: each touchpoint has a searched-and-counted result. Each
+candidate has a touchpoint, a reply location link, the full set of threads
+read, and a mark of answered or owed with its reason.
 
 ### 4. Prove each owed reply
 
@@ -87,16 +89,16 @@ Read [`references/proof-checks.md`](references/proof-checks.md). Map each owed
 reply to the tracker issues and pull requests it depends on. Run the three
 checks in order: **shipped**, **data**, and **works for this customer**.
 
-Classify each owed reply:
+Classify each candidate:
 
 - **Proven** when all three checks pass.
 - **Blocked** on the first failing check, with the evidence and the action that
   clears it.
-- **Dropped** when the person has no action to take, or when step 3 found the
-  reply already answered. Apply the memory file's standing corrections here.
+- **Dropped** when it is answered, when the person has no action to take, or
+  when a standing correction drops it.
 
-Completion criterion: every owed reply is proven, blocked, or dropped, and
-every check result carries a link and a label of **measured** or **inferred**.
+Completion criterion: every candidate is proven, blocked, or dropped, and every
+check result carries a link and a label of **measured** or **inferred**.
 
 ### 5. Draft the proven replies
 
@@ -113,12 +115,13 @@ changed and what they can do now, in their terms.
 Completion criterion: every proven reply has a draft link or reply text, and a
 reply location link. Blocked replies have no draft.
 
-### 6. Report
+### 6. Respond
 
 Write the response with
-[`references/response-format.md`](references/response-format.md). Record this
-run's window end in the memory file's run log, so the next run starts there.
+[`references/response-format.md`](references/response-format.md). When the
+consumer configures a state file, append this run's window end to it.
 
-Completion criterion: the response accounts for every person from step 3 as
-ready, blocked, or dropped. The count of ready, blocked, and dropped equals the
-count of people in the owed-reply list.
+Completion criterion: the response accounts for every candidate as proven,
+blocked, or dropped, and the count of proven, blocked, and dropped equals the
+count of candidates. When a state file is configured, it holds this run's
+window end.
