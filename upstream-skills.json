@@ -50,34 +50,159 @@
       "ref": "main",
       "pin": "7a030a8b0dcaa601bb0dda9aaf174affb3d61145",
       "transforms": {
-        "rename": {},
+        "rename": {
+          "grill-with-docs": "grill-to-spec"
+        },
         "denylist": []
       },
       "targets": [
         {
           "kind": "skill",
           "source": "skills/engineering/to-spec",
-          "destination": "plugins/engineering/skills/to-spec"
+          "destination": "plugins/team/skills/to-spec"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/to-tickets",
-          "destination": "plugins/engineering/skills/to-tickets"
+          "destination": "plugins/team/skills/to-tickets"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/triage",
-          "destination": "plugins/engineering/skills/triage"
+          "destination": "plugins/team/skills/triage"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/retro",
-          "destination": "plugins/engineering/skills/retro"
+          "destination": "plugins/team/skills/retro"
         },
         {
           "kind": "skill",
           "source": "skills/engineering/code-review",
           "destination": "plugins/engineering/skills/code-review"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/grill-me",
+          "destination": "plugins/team/skills/grill-me"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/handoff",
+          "destination": "plugins/team/skills/handoff"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/wait-what",
+          "destination": "plugins/team/skills/wait-what"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/to-questionnaire",
+          "destination": "plugins/team/skills/to-questionnaire"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/teach",
+          "destination": "plugins/team/skills/teach"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/grilling",
+          "destination": "plugins/team/skills/grilling"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/ask-matt",
+          "destination": "plugins/team/skills/ask-matt"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/improve-codebase-architecture",
+          "destination": "plugins/team/skills/improve-codebase-architecture"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/setup-matt-pocock-skills",
+          "destination": "plugins/team/skills/setup-matt-pocock-skills"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/domain-modeling",
+          "destination": "plugins/team/skills/domain-modeling"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/codebase-design",
+          "destination": "plugins/team/skills/codebase-design"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/implement",
+          "destination": "plugins/team/skills/implement"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/implement-spec",
+          "destination": "plugins/team/skills/implement-spec"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/prototype",
+          "destination": "plugins/team/skills/prototype"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/research",
+          "destination": "plugins/team/skills/research"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/wayfinder",
+          "destination": "plugins/team/skills/wayfinder"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/wizard",
+          "destination": "plugins/team/skills/wizard"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/diagnosing-bugs",
+          "destination": "plugins/team/skills/diagnosing-bugs"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/writing-for-agents",
+          "destination": "plugins/team/skills/writing-for-agents"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/tdd",
+          "destination": "plugins/team/skills/tdd"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/code-review",
+          "destination": "plugins/team/skills/code-review"
+        }
+      ],
+      "transformsHash": "8d4a3cbe10fe8da085d6391fb307501c05da704f067529647f9058bd448de870"
+    },
+    {
+      "name": "humanlayer",
+      "repo": "https://github.com/humanlayer/skills.git",
+      "ref": "main",
+      "pin": "653b6411c1f70c275a18e37673b042ff99f67ceb",
+      "transforms": {
+        "rename": {},
+        "denylist": []
+      },
+      "targets": [
+        {
+          "kind": "skill",
+          "source": "plugins/show-me/skills/show-me",
+          "destination": "plugins/team/skills/show-me"
         }
       ],
       "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"

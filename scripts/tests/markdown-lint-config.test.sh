@@ -94,9 +94,6 @@ CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
 #    third-party markdown written against their own upstream config, so without
 #    the exclusion the first vendoring run breaks lint:md, markdown CI, and
 #    pre-commit at once.
-#
-#    The sample must come from an overlay: this repo's own `skills/**` is
-#    deliberately linted, so a file from there would assert the opposite.
 EXCLUDED_SAMPLE=""
 for overlay_root in "${OVERLAY_ROOTS[@]}"; do
   overlay_file="$(find_overlay_md "$overlay_root")" || continue
@@ -117,7 +114,7 @@ fi
 
 # 3. The other half of the contract: this repo's own authored skills are
 # first-party markdown written against this config, so they must be linted.
-first_party="$(find skills -name '*.md' -type f -print -quit)"
+first_party="$(find plugins/team/skills/using-github -name '*.md' -type f -print -quit)"
 if [ -n "$first_party" ]; then
   first_party_output="$(pnpm exec markdownlint-cli2 "$first_party" 2>&1)" || {
     printf '%s\n' "$first_party_output" >&2
@@ -128,9 +125,10 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-for upstream_skill in to-spec to-tickets triage retro code-review; do
-  upstream_file="plugins/engineering/skills/$upstream_skill/SKILL.md"
-  assert_ignored "$upstream_file" "upstream Engineering mirror $upstream_skill"
+assert_ignored "plugins/engineering/skills/code-review/SKILL.md" "upstream Engineering mirror code-review"
+for upstream_skill in to-spec to-tickets triage retro; do
+  upstream_file="plugins/team/skills/$upstream_skill/SKILL.md"
+  assert_ignored "$upstream_file" "upstream Team mirror $upstream_skill"
 done
 
 engineering_output="$(pnpm exec markdownlint-cli2 "plugins/engineering/**/*.md" 2>&1)" || {

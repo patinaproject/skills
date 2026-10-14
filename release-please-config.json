@@ -14,17 +14,22 @@
         },
         {
           "type": "json",
-          "path": ".codex-plugin/plugin.json",
-          "jsonpath": "$.version"
-        },
-        {
-          "type": "json",
           "path": "plugins/engineering/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
         },
         {
           "type": "json",
           "path": "plugins/engineering/.codex-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "plugins/team/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "plugins/team/.codex-plugin/plugin.json",
           "jsonpath": "$.version"
         }
       ]

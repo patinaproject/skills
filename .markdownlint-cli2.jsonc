@@ -19,11 +19,32 @@
     // on every re-vendor, so they are never linted here.
     ".agents/skills/**",
     ".claude/skills/**",
-    // These four Engineering entries are exact mirrors of upstream payloads.
-    "plugins/engineering/skills/to-spec/**",
-    "plugins/engineering/skills/to-tickets/**",
-    "plugins/engineering/skills/triage/**",
-    "plugins/engineering/skills/retro/**",
-    "plugins/engineering/skills/code-review/**"
+    "plugins/engineering/skills/code-review/**",
+    "plugins/team/skills/ask-matt/**",
+    "plugins/team/skills/code-review/**",
+    "plugins/team/skills/codebase-design/**",
+    "plugins/team/skills/diagnosing-bugs/**",
+    "plugins/team/skills/domain-modeling/**",
+    "plugins/team/skills/grill-me/**",
+    "plugins/team/skills/grilling/**",
+    "plugins/team/skills/handoff/**",
+    "plugins/team/skills/implement-spec/**",
+    "plugins/team/skills/implement/**",
+    "plugins/team/skills/improve-codebase-architecture/**",
+    "plugins/team/skills/prototype/**",
+    "plugins/team/skills/research/**",
+    "plugins/team/skills/retro/**",
+    "plugins/team/skills/setup-matt-pocock-skills/**",
+    "plugins/team/skills/show-me/**",
+    "plugins/team/skills/tdd/**",
+    "plugins/team/skills/teach/**",
+    "plugins/team/skills/to-questionnaire/**",
+    "plugins/team/skills/to-spec/**",
+    "plugins/team/skills/to-tickets/**",
+    "plugins/team/skills/triage/**",
+    "plugins/team/skills/wait-what/**",
+    "plugins/team/skills/wayfinder/**",
+    "plugins/team/skills/wizard/**",
+    "plugins/team/skills/writing-for-agents/**"
   ]
 }
