@@ -117,13 +117,18 @@ done
 
 for skill_dir in plugins/team/skills/*; do
   [ -d "$skill_dir" ] || continue
-  if [ "$(basename "$skill_dir")" = "teach" ]; then
-    [ "$(_realpath .agents/skills/teach)" = "$(_realpath plugins/engineering/skills/teach)" ] \
-      || fail ".agents/skills/teach must keep pointing at the Engineering teach"
-    [ "$(_realpath .claude/skills/teach)" = "$(_realpath plugins/engineering/skills/teach)" ] \
-      || fail ".claude/skills/teach must keep pointing at the Engineering teach"
-    continue
-  fi
+  case "$(basename "$skill_dir")" in
+    teach|tdd|code-review)
+      # Engineering ships a skill of the same name, and the overlay names are
+      # shared, so the overlay stays on the Engineering skill.
+      name="$(basename "$skill_dir")"
+      [ "$(_realpath ".agents/skills/$name")" = "$(_realpath "plugins/engineering/skills/$name")" ] \
+        || fail ".agents/skills/$name must keep pointing at the Engineering $name"
+      [ "$(_realpath ".claude/skills/$name")" = "$(_realpath "plugins/engineering/skills/$name")" ] \
+        || fail ".claude/skills/$name must keep pointing at the Engineering $name"
+      continue
+      ;;
+  esac
   assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
 done
 

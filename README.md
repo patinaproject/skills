@@ -310,6 +310,16 @@ plugins/team/
     teach/
     to-questionnaire/
     wait-what/
+    code-review/
+    diagnosing-bugs/
+    implement/
+    implement-spec/
+    prototype/
+    research/
+    tdd/
+    wayfinder/
+    wizard/
+    writing-for-agents/
 .agents/skills/<name>/               Committed overlay: symlinks to an owned skill or vendored dirs
 .claude/skills/<name>/               Committed overlay: symlinks to an owned skill or .agents mirror
 .claude-plugin/

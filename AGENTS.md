@@ -39,6 +39,16 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/teach/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
+- `plugins/team/skills/code-review/`: upstream mirror (mattpocock)
+- `plugins/team/skills/diagnosing-bugs/`: upstream mirror (mattpocock)
+- `plugins/team/skills/implement/`: upstream mirror (mattpocock)
+- `plugins/team/skills/implement-spec/`: upstream mirror (mattpocock)
+- `plugins/team/skills/prototype/`: upstream mirror (mattpocock)
+- `plugins/team/skills/research/`: upstream mirror (mattpocock)
+- `plugins/team/skills/tdd/`: upstream mirror (mattpocock)
+- `plugins/team/skills/wayfinder/`: upstream mirror (mattpocock)
+- `plugins/team/skills/wizard/`: upstream mirror (mattpocock)
+- `plugins/team/skills/writing-for-agents/`: upstream mirror (mattpocock)
 - `plugins/team/.claude-plugin/plugin.json`: Claude Team plugin manifest
 - `plugins/team/.codex-plugin/plugin.json`: Codex Team plugin manifest
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent

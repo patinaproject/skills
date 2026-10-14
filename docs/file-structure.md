@@ -43,6 +43,16 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/teach/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
+- `plugins/team/skills/code-review/`: upstream mirror (mattpocock)
+- `plugins/team/skills/diagnosing-bugs/`: upstream mirror (mattpocock)
+- `plugins/team/skills/implement/`: upstream mirror (mattpocock)
+- `plugins/team/skills/implement-spec/`: upstream mirror (mattpocock)
+- `plugins/team/skills/prototype/`: upstream mirror (mattpocock)
+- `plugins/team/skills/research/`: upstream mirror (mattpocock)
+- `plugins/team/skills/tdd/`: upstream mirror (mattpocock)
+- `plugins/team/skills/wayfinder/`: upstream mirror (mattpocock)
+- `plugins/team/skills/wizard/`: upstream mirror (mattpocock)
+- `plugins/team/skills/writing-for-agents/`: upstream mirror (mattpocock)
 - `plugins/team/.claude-plugin/plugin.json`: Claude Team plugin manifest
 - `plugins/team/.codex-plugin/plugin.json`: Codex Team plugin manifest
 - `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
@@ -113,6 +123,16 @@ Skills owned by this repository:
 | `teach` | `plugins/team/skills/teach/` | Upstream mattpocock mirror in the Team plugin |
 | `to-questionnaire` | `plugins/team/skills/to-questionnaire/` | Upstream mattpocock mirror in the Team plugin |
 | `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |
+| `code-review` | `plugins/team/skills/code-review/` | Upstream mattpocock mirror in the Team plugin |
+| `diagnosing-bugs` | `plugins/team/skills/diagnosing-bugs/` | Upstream mattpocock mirror in the Team plugin |
+| `implement` | `plugins/team/skills/implement/` | Upstream mattpocock mirror in the Team plugin |
+| `implement-spec` | `plugins/team/skills/implement-spec/` | Upstream mattpocock mirror in the Team plugin |
+| `prototype` | `plugins/team/skills/prototype/` | Upstream mattpocock mirror in the Team plugin |
+| `research` | `plugins/team/skills/research/` | Upstream mattpocock mirror in the Team plugin |
+| `tdd` | `plugins/team/skills/tdd/` | Upstream mattpocock mirror in the Team plugin |
+| `wayfinder` | `plugins/team/skills/wayfinder/` | Upstream mattpocock mirror in the Team plugin |
+| `wizard` | `plugins/team/skills/wizard/` | Upstream mattpocock mirror in the Team plugin |
+| `writing-for-agents` | `plugins/team/skills/writing-for-agents/` | Upstream mattpocock mirror in the Team plugin |
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
 | `grill-to-spec` | `plugins/team/skills/grill-to-spec/` | User-invoked grilling that keeps the tree unchanged and hands doc changes to `to-spec` |

@@ -50,7 +50,9 @@
       "ref": "main",
       "pin": "7a030a8b0dcaa601bb0dda9aaf174affb3d61145",
       "transforms": {
-        "rename": {},
+        "rename": {
+          "grill-with-docs": "grill-to-spec"
+        },
         "denylist": []
       },
       "targets": [
@@ -133,9 +135,59 @@
           "kind": "skill",
           "source": "skills/engineering/codebase-design",
           "destination": "plugins/team/skills/codebase-design"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/implement",
+          "destination": "plugins/team/skills/implement"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/implement-spec",
+          "destination": "plugins/team/skills/implement-spec"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/prototype",
+          "destination": "plugins/team/skills/prototype"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/research",
+          "destination": "plugins/team/skills/research"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/wayfinder",
+          "destination": "plugins/team/skills/wayfinder"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/wizard",
+          "destination": "plugins/team/skills/wizard"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/diagnosing-bugs",
+          "destination": "plugins/team/skills/diagnosing-bugs"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/productivity/writing-for-agents",
+          "destination": "plugins/team/skills/writing-for-agents"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/tdd",
+          "destination": "plugins/team/skills/tdd"
+        },
+        {
+          "kind": "skill",
+          "source": "skills/engineering/code-review",
+          "destination": "plugins/team/skills/code-review"
         }
       ],
-      "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
+      "transformsHash": "8d4a3cbe10fe8da085d6391fb307501c05da704f067529647f9058bd448de870"
     },
     {
       "name": "humanlayer",
