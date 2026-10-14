@@ -19,7 +19,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/review-system-design/`: contract dependency review skill
 - `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
-- `plugins/team/skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
+- `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
@@ -304,7 +304,7 @@ This repo owns skills in the Engineering and Team plugins:
 | grill-system-design | `plugins/team/skills/grill-system-design/` |
 | review-system-design | `plugins/team/skills/review-system-design/` |
 | writing-for-pstack | `plugins/team/skills/writing-for-pstack/` |
-| gmail-inbox-triage | `plugins/team/skills/gmail-inbox-triage/` |
+| email-inbox-triage | `plugins/team/skills/email-inbox-triage/` |
 | grill-to-spec | `plugins/team/skills/grill-to-spec/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |

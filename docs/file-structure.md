@@ -20,7 +20,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/review-system-design/`: contract dependency review skill
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
-- `plugins/team/skills/gmail-inbox-triage/`: Gmail inbox triage into four labeled buckets
+- `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
@@ -104,7 +104,7 @@ Skills owned by this repository:
 | `grill-system-design` | `plugins/team/skills/grill-system-design/` | Focused system design grilling |
 | `review-system-design` | `plugins/team/skills/review-system-design/` | Contract dependency review |
 | `writing-for-pstack` | `plugins/team/skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
-| `gmail-inbox-triage` | `plugins/team/skills/gmail-inbox-triage/` | Gmail inbox triage into four labeled buckets |
+| `email-inbox-triage` | `plugins/team/skills/email-inbox-triage/` | Provider-agnostic email inbox triage into four tagged buckets |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `retro` | `plugins/team/skills/retro/` | Coding-session retrospective workflow |
