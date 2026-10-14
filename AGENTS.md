@@ -28,6 +28,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/triage/`: upstream issue and PR triage workflow
 - `plugins/team/skills/retro/`: upstream coding-session retrospective workflow
 - `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
+- `plugins/team/skills/design-control-loop/`: upstream design-control-loop mirror from humanlayer (agentic control loop design)
 - `plugins/team/skills/ask-matt/`: upstream mirror (mattpocock)
 - `plugins/team/skills/codebase-design/`: upstream mirror (mattpocock)
 - `plugins/team/skills/domain-modeling/`: upstream mirror (mattpocock)

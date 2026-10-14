@@ -300,6 +300,7 @@ plugins/team/
     retro/
     pr-review-assistant/
     show-me/
+    design-control-loop/
     ask-matt/
     codebase-design/
     domain-modeling/
