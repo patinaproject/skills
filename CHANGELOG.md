@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/patinaproject/skills/compare/v2.71.0...v3.0.0) (2026-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* the patinaproject-skills plugin is retired. Its skills (scaffold-repository, using-github, update-branch, install-skills, design-by-contract, grill-system-design, review-system-design, writing-for-pstack, gmail-inbox-triage) now ship in the team plugin. Replace patinaproject-skills@patinaproject-skills with team@patinaproject-skills.
+
+### Features
+
+* [#620](https://github.com/patinaproject/skills/issues/620) split human-invoked skills into a team plugin ([#621](https://github.com/patinaproject/skills/issues/621)) ([8e9f52f](https://github.com/patinaproject/skills/commit/8e9f52f873c18c63d10b657831ac186f919674f9))
+
 ## [2.71.0](https://github.com/patinaproject/skills/compare/v2.70.0...v2.71.0) (2026-10-13)
 
 
