@@ -161,14 +161,15 @@ from a draft.
 See [./plugins/team/skills/writing-for-pstack/](./plugins/team/skills/writing-for-pstack/) for
 the skill contract.
 
-### gmail-inbox-triage
+### email-inbox-triage
 
-`gmail-inbox-triage` sorts every Gmail inbox thread into `Urgent`, `Needs reply
-soon`, `Waiting`, or `FYI`, applies that label, and archives `Waiting` and
-`FYI`. Its only writes are the four bucket labels and removing `INBOX`, and a
-second run converges on the same state.
+`email-inbox-triage` sorts every inbox thread into `Urgent`, `Needs reply
+soon`, `Waiting`, or `FYI`, tags it with that bucket, and archives `Waiting`
+and `FYI`. It works with Gmail labels, Outlook categories, or any mail tools
+that can list, tag, and archive. Its only writes are the four bucket tags and
+archiving, and a second run converges on the same state.
 
-See [./plugins/team/skills/gmail-inbox-triage/](./plugins/team/skills/gmail-inbox-triage/) for the skill
+See [./plugins/team/skills/email-inbox-triage/](./plugins/team/skills/email-inbox-triage/) for the skill
 contract.
 
 ### gather-evidence
@@ -225,7 +226,7 @@ README and skill contract.
 | [grill-to-spec](./plugins/team/skills/grill-to-spec/) | Grill a design in a planning worktree and hand doc changes to `to-spec` as proposals |
 | [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
-| [gmail-inbox-triage](./plugins/team/skills/gmail-inbox-triage/) | Label and archive Gmail inbox threads into four triage buckets |
+| [email-inbox-triage](./plugins/team/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
@@ -292,7 +293,7 @@ plugins/team/
     grill-to-spec/
     review-system-design/
     writing-for-pstack/
-    gmail-inbox-triage/
+    email-inbox-triage/
     to-spec/
     to-tickets/
     triage/

@@ -1,0 +1,3 @@
+# Credits
+
+Ted Mader ([@tlmader](https://github.com/tlmader)) wrote this skill as `gmail-inbox-triage`. Before its port, the skill was distributed through the claude.ai `anthropic-skills` skill sync. Ted Mader contributes it to this repository under the repository's [MIT license](https://github.com/patinaproject/skills/blob/main/LICENSE). The provenance is recorded in [patinaproject/skills#615](https://github.com/patinaproject/skills/issues/615). [patinaproject/skills#623](https://github.com/patinaproject/skills/issues/623) renamed it to `email-inbox-triage` and rewrote it to work with any mail provider.
