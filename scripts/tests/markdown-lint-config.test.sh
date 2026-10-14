@@ -94,9 +94,6 @@ CLI2_BIN="$REPO_ROOT/node_modules/.bin/markdownlint-cli2"
 #    third-party markdown written against their own upstream config, so without
 #    the exclusion the first vendoring run breaks lint:md, markdown CI, and
 #    pre-commit at once.
-#
-#    The sample must come from an overlay: this repo's own
-#    Patina-owned Team skills are deliberately linted, so a file from there would assert the opposite.
 EXCLUDED_SAMPLE=""
 for overlay_root in "${OVERLAY_ROOTS[@]}"; do
   overlay_file="$(find_overlay_md "$overlay_root")" || continue

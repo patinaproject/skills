@@ -115,8 +115,6 @@ for skill_dir in plugins/engineering/skills/*; do
   assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
 done
 
-# The flat overlays hold one skill per name. `teach` exists in both Engineering
-# (pstack) and Team (mattpocock); the overlays deliberately point at Engineering's.
 for skill_dir in plugins/team/skills/*; do
   [ -d "$skill_dir" ] || continue
   if [ "$(basename "$skill_dir")" = "teach" ]; then

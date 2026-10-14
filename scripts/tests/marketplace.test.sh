@@ -43,7 +43,6 @@ test "$(jq -r '.name' plugins/engineering/.claude-plugin/plugin.json)" = 'engine
 test "$(jq -c '.dependencies // []' plugins/engineering/.claude-plugin/plugin.json)" = '[]'
 test -f plugins/engineering/agents/patina-agent.md
 test -f plugins/engineering/hooks/hooks.json
-# The root patinaproject-skills plugin is retired: its skills ship in `team`.
 test ! -e .claude-plugin/plugin.json
 test ! -e .codex-plugin/plugin.json
 test ! -e skills
@@ -54,7 +53,6 @@ for retired_plugin in $retired_plugins; do
   fi
 done
 
-# The retired-skills guard covers the skills shipped by the Team plugin.
 if printf '%s\n' "$team_skills" | jq -r '.[]' | grep -Eqx "$retired_marketplace_skills"; then
   echo "FAIL: retired skills must not appear in the Team plugin" >&2
   exit 1
@@ -244,11 +242,6 @@ if [ -e .agents/skills/resolving-merge-conflicts ] ||
   exit 1
 fi
 
-# Assert the two version fields stay in lockstep. Each host stores the
-# marketplace version in a different file per its own schema:
-#   Claude: .claude-plugin/marketplace.json metadata.version
-#   Plugins: each plugin's .claude-plugin/plugin.json and .codex-plugin/plugin.json
-# release-please bumps both via extra-files; this check catches manual drift.
 claude_version=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
 engineering_claude_version=$(jq -r '.version' plugins/engineering/.claude-plugin/plugin.json)
 engineering_codex_version=$(jq -r '.version' plugins/engineering/.codex-plugin/plugin.json)

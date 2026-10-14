@@ -19,8 +19,6 @@
     // on every re-vendor, so they are never linted here.
     ".agents/skills/**",
     ".claude/skills/**",
-    // These synced entries are exact mirrors of upstream payloads. Patina-owned
-    // Team skills are not listed, so they are linted.
     "plugins/engineering/skills/code-review/**",
     "plugins/team/skills/ask-matt/**",
     "plugins/team/skills/codebase-design/**",
