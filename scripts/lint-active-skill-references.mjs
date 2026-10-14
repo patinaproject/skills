@@ -30,18 +30,18 @@ function executableSnippets(contents) {
   ];
 }
 
-function findExecutableSkillReferences(contents, published) {
+function findExecutableSkillReferences(contents, plugin) {
   const references = [];
   for (const snippet of executableSnippets(contents)) {
     if (!/\bsubagent_type\s*:/i.test(snippet)) {
-      for (const match of snippet.matchAll(/\b(?:engineering|team):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
+      for (const match of snippet.matchAll(/\b(?:engineering|team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
         const reference = match[0];
         references.push({ reference, target: `${reference.split(':', 1)[0]}/${match[1]}` });
       }
 
       for (const match of snippet.matchAll(/\.\.\/[a-z][a-z0-9]*(?:-[a-z0-9]+)*\/scripts\/[^\s`]+/g)) {
         const reference = match[0];
-        references.push({ reference, target: `engineering/${reference.split('/')[1]}` });
+        references.push({ reference, target: `${plugin}/${reference.split('/')[1]}` });
       }
     }
 
@@ -55,7 +55,8 @@ function main(repoRoot = process.cwd()) {
   for (const filePath of [...published.values()].sort()) {
     const file = path.relative(repoRoot, filePath);
     const contents = readFileSync(filePath, 'utf8');
-    for (const { reference, target } of findExecutableSkillReferences(contents, published)) {
+    const plugin = file.split(path.sep)[1];
+    for (const { reference, target } of findExecutableSkillReferences(contents, plugin)) {
       if (!published.has(target)) {
         errors.push(`FAIL: executable skill reference is unavailable: ${reference} in ${file}`);
       }
