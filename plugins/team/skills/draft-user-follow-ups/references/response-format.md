@@ -4,7 +4,7 @@ Write the run's final response in this shape. "Ready to send" lists the
 proven replies. Leave out a section that has no rows, and keep the footer.
 
 ```markdown
-# Owed replies after release: <window start> to <window end>
+# Draft user follow-ups: <window start> to <window end>
 
 ## Ready to send
 

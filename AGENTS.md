@@ -20,7 +20,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
-- `plugins/team/skills/owed-replies-after-release/`: post-release support loop that drafts proven replies to owed customers
+- `plugins/team/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
@@ -305,7 +305,7 @@ This repo owns skills in the Engineering and Team plugins:
 | review-system-design | `plugins/team/skills/review-system-design/` |
 | writing-for-pstack | `plugins/team/skills/writing-for-pstack/` |
 | email-inbox-triage | `plugins/team/skills/email-inbox-triage/` |
-| owed-replies-after-release | `plugins/team/skills/owed-replies-after-release/` |
+| draft-user-follow-ups | `plugins/team/skills/draft-user-follow-ups/` |
 | grill-to-spec | `plugins/team/skills/grill-to-spec/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
 | move-branch-here | `plugins/engineering/skills/move-branch-here/` |

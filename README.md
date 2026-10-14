@@ -172,16 +172,16 @@ archiving, and a second run converges on the same state.
 See [./plugins/team/skills/email-inbox-triage/](./plugins/team/skills/email-inbox-triage/) for the skill
 contract.
 
-### owed-replies-after-release
+### draft-user-follow-ups
 
-`owed-replies-after-release` runs a support control loop after a production
+`draft-user-follow-ups` runs a support control loop after a production
 release. It finds every customer owed a reply across the email inbox and a
 feedback tool, proves the fix shipped, ran its data steps, and works for that
 customer, then drafts the reply inside the customer's thread. Each owed reply
 ends as ready to send or blocked on a named check. It writes email drafts only,
 and reads repository-specific facts from a consumer config.
 
-See [./plugins/team/skills/owed-replies-after-release/](./plugins/team/skills/owed-replies-after-release/)
+See [./plugins/team/skills/draft-user-follow-ups/](./plugins/team/skills/draft-user-follow-ups/)
 for the skill contract.
 
 ### gather-evidence
@@ -239,7 +239,7 @@ README and skill contract.
 | [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [email-inbox-triage](./plugins/team/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
-| [owed-replies-after-release](./plugins/team/skills/owed-replies-after-release/) | Draft proven replies to every customer owed one after a production release |
+| [draft-user-follow-ups](./plugins/team/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
@@ -307,7 +307,7 @@ plugins/team/
     review-system-design/
     writing-for-pstack/
     email-inbox-triage/
-    owed-replies-after-release/
+    draft-user-follow-ups/
     to-spec/
     to-tickets/
     triage/

@@ -1,9 +1,9 @@
 ---
-name: owed-replies-after-release
-description: Find every customer owed a reply after a production release, prove the fix reached them, and draft the reply in place. Use the morning after a release, or when the operator asks who is owed a reply now that something shipped. Writes drafts only.
+name: draft-user-follow-ups
+description: Draft follow-ups to users after a production release. Find every customer owed a reply, prove the fix reached them, and draft the reply in place for a person to send. Use the morning after a release, or when the operator asks who is owed a reply now that something shipped. Writes drafts only.
 ---
 
-# Owed Replies After Release
+# Draft User Follow-ups
 
 This skill is a control loop, in the sense of the sibling
 [`design-control-loop`](../design-control-loop/SKILL.md) skill, applied to

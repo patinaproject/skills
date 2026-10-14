@@ -9,10 +9,10 @@ The consuming repository names one config file in its `AGENTS.md` or
 `CLAUDE.md`, for example:
 
 ```text
-Owed replies after release: config at .github/agent-memory/owed-replies.config.md
+Draft user follow-ups: config at .github/agent-memory/draft-user-follow-ups.config.md
 ```
 
-When no such line exists, read `.github/agent-memory/owed-replies.config.md`.
+When no such line exists, read `.github/agent-memory/draft-user-follow-ups.config.md`.
 When neither exists, stop and tell the operator to create the config from the
 template below.
 
@@ -24,8 +24,8 @@ name tools and places. A value never holds a credential.
 | Key | Required | Meaning | Example |
 | --- | --- | --- | --- |
 | `support_voice` | yes | Path to the support voice doc. The doc gives greeting, sign-off, tone, and phrasing. | `docs/SUPPORT_VOICE.md` |
-| `memory_file` | yes | Path to the memory file of standing corrections. | `.github/agent-memory/owed-replies.md` |
-| `state_file` | no | Path to the file that holds each run's window end. Keep it out of version control. | `.github/agent-memory/owed-replies.state` |
+| `memory_file` | yes | Path to the memory file of standing corrections. | `.github/agent-memory/draft-user-follow-ups.md` |
+| `state_file` | no | Path to the file that holds each run's window end. Keep it out of version control. | `.github/agent-memory/draft-user-follow-ups.state` |
 | `operator_addresses` | yes | Email addresses and feedback-tool accounts that count as the operator. A message from one of these is an operator message. | the support address, each team member's account |
 | `email_tool` | yes | The mail provider the session reaches. | Gmail, Outlook |
 | `feedback_tool` | yes | The feedback tool for support conversations and posts. | Canny, Featurebase, Intercom |
@@ -65,7 +65,7 @@ Standing corrections from the operator. Use the `design-control-loop` memory
 template as the base. The skill reads this file and leaves it unchanged.
 
 ```markdown
-# Agent Memory: Owed replies after release
+# Agent Memory: Draft user follow-ups
 
 ## Guidance
 
@@ -82,11 +82,11 @@ for each run and reads the last line as the next window start.
 ## Config template
 
 ```markdown
-# Owed replies after release: config
+# Draft user follow-ups: config
 
 support_voice: docs/SUPPORT_VOICE.md
-memory_file: .github/agent-memory/owed-replies.md
-state_file: .github/agent-memory/owed-replies.state
+memory_file: .github/agent-memory/draft-user-follow-ups.md
+state_file: .github/agent-memory/draft-user-follow-ups.state
 operator_addresses: <addresses and accounts>
 email_tool: <provider>
 feedback_tool: <tool>
