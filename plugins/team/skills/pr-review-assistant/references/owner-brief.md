@@ -10,12 +10,13 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 Every `file:line` you write is a link: on the artifact (summary, ranked items, flows, blast-radius map, to-do list, evidence ledger), in the return block, and in follow-up answers. Pick the first form that applies:
 
-1. **Linear diff line link.** Linear documents no per-line URL for a review page, only the whole-PR `appUrl` and `#comment-<id>` anchors. Skip this step until Linear documents one. Never guess a format.
-2. **GitHub PR diff line link**, when the line is inside a diff hunk at the reviewed head: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`. Hash the repository-relative path with `printf %s <path> | shasum -a 256`. A deleted line uses `L<base line>` in place of `R<line>`. Context lines inside a hunk count as inside.
-3. **GitHub blob link pinned to the head SHA**, for a line outside every hunk: `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>#L<line>`. The `files#diff` anchor does not reach a line outside the diff.
-4. **Plain text**, only for a path with no URL, such as a file under `node_modules` or a generated file the repository does not track.
+1. **GitHub PR diff line link**, when the line is inside a diff hunk at the reviewed head: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`. Hash the repository-relative path with `printf %s <path> | shasum -a 256`. A deleted line uses `L<base line>` in place of `R<line>`. Context lines inside a hunk count as inside.
+2. **GitHub blob link pinned to the head SHA**, for a line outside every hunk: `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>#L<line>`. The `files#diff` anchor does not reach a line outside the diff.
+3. **Plain text**, only for a path with no GitHub URL, such as a file under `node_modules`.
 
-Read the hunk ranges from `git diff <base>...<head>` in your worktree. On a new head, rebuild every link against the new head SHA and its hunks.
+Linear documents no per-line URL for a review page, only the whole-PR `appUrl` and `#comment-<id>` anchors. Use the forms above until it documents one, and never guess a Linear line format.
+
+Read the hunk ranges from `gh pr diff <n>`, the diff GitHub renders. On a new head, rebuild every link against the new head SHA and its hunks.
 
 ## 1. Learn the change
 
