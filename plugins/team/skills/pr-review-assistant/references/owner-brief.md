@@ -42,6 +42,8 @@ Each to-do item has:
 - a GitHub line link: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`;
 - a comment ready to copy, written in the reviewer's voice as a question or a request to the author, in plain English. A decide item gets two versions, one for each ruling.
 
+Give every to-do item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
+
 ## 5. Write the artifact
 
 Follow the Artifact tool's design guidance. Layout and visuals are your call. The page must hold:
@@ -50,11 +52,21 @@ Follow the Artifact tool's design guidance. Layout and visuals are your call. Th
 - "In 30 seconds": three bullets;
 - the ranked items;
 - the to-do list, with checkboxes that keep their state in `localStorage`. Wrap each storage call in `try`/`catch`;
+- for each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", the to-do list shows only the chosen ruling's comment, and the other option collapses. Selecting another option changes the ruling, and "Clear" removes it;
 - the evidence ledger, and a short "Not looked at" list.
 
 For visuals, read the `show-me` skill's `SKILL.md` ([humanlayer/skills](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md), which this repository does not bundle) and pick the smallest view that makes the point. Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed.
 
 Write for limited attention. Lead with what matters, and cut every sentence that does not help the reviewer decide or comment. Each claim carries a `file:line` or a source link. When you cannot point to a source for a claim, move the claim to "Not looked at".
+
+### Keep rulings in the artifact database
+
+`localStorage` is one browser's memory, and the coordinator cannot read it. Keep a decide item's selection in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's `window.claude.*` code. The coordinator declares the capability when it publishes.
+
+- One document per selected item, in the collection `rulings`, with the item's `id` as the document id and `{ruling: "<ruling id>"}` as its data. "Clear" deletes the document. An item with no document is undecided.
+- The page reads the collection on load and shows each selection from it, so a selection survives a reload and every viewer sees the same one.
+- Never write, reset, or delete a `rulings` document from the agent side when you republish. A republish keeps the documents.
+- A document whose item `id` is no longer on the page, or whose ruling `id` the item no longer has, is stale. Show it in a collapsed "Stale selections" list with the item `id` and ruling, and leave it in the database.
 
 ## 6. Return
 
