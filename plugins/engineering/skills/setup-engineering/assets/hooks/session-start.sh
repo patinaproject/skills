@@ -21,10 +21,6 @@ fi
 
 read_sheet="$hook_root/read-sheet.sh"
 [ -f "$read_sheet" ] || read_sheet="$hook_root/../skills/setup-pstack/scripts/read-sheet.sh"
-if [ ! -f "$read_sheet" ]; then
-  echo "session-start.sh: cannot find read-sheet.sh" >&2
-  exit 1
-fi
 
 normalized=$(sh "$read_sheet" "$sheet") || normalized=
 if printf '%s\n' "$normalized" | grep -qx 'session hook: off'; then

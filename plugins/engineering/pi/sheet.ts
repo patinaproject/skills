@@ -10,7 +10,7 @@ export interface Sheet {
 export function decodeSheet(bytes: Uint8Array): string {
   // Windows PowerShell 5.1's `>` writes UTF-16 LE with a byte-order mark.
   const encoding = bytes[0] === 0xff && bytes[1] === 0xfe ? "utf16le" : "utf8";
-  return Buffer.from(bytes).toString(encoding).replace(/^﻿/, "").replace(/\r$/gm, "");
+  return Buffer.from(bytes).toString(encoding).replace(/^\uFEFF/, "").replace(/\r$/gm, "");
 }
 
 function parseSheet(text: string): Sheet {

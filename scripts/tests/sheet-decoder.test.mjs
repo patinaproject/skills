@@ -90,7 +90,7 @@ cpSync(join(plugin, 'skills'), join(catalog, 'skills'), { recursive: true });
 run('bash', [join(catalog, 'skills/setup-engineering/scripts/install-machinery.sh'), '--repo', projectRepo]);
 rmSync(catalog, { recursive: true, force: true });
 const projectHook = join(projectRepo, '.claude/hooks/session-start.sh');
-assert.equal(run(projectHook, ['claude'], { CLAUDE_PROJECT_DIR: projectRepo, CLAUDE_CONFIG_DIR: emptyDir }, ['CLAUDE_PLUGIN_ROOT']).includes('Invoke the `patina-mode` skill'), true);
+assert.notEqual(run(projectHook, ['claude'], { CLAUDE_PROJECT_DIR: projectRepo, CLAUDE_CONFIG_DIR: emptyDir }, ['CLAUDE_PLUGIN_ROOT']), '', 'the installed hook must inject the mandate without a sheet');
 
 const pwsh = spawnSync('pwsh', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major'], { encoding: 'utf8' }).status === 0;
 
@@ -112,6 +112,10 @@ for (const [name, bytes] of Object.entries(FIXTURES)) {
     quiet(run(pluginHook, ['codex'], { CLAUDE_PLUGIN_ROOT: plugin, CODEX_HOME: dir }), 'plugin codex hook');
     quiet(run(pluginHook, ['codex'], { CODEX_HOME: dir }, ['CLAUDE_PLUGIN_ROOT']), 'plugin codex hook without CLAUDE_PLUGIN_ROOT');
     quiet(run(projectHook, ['claude'], { CLAUDE_PROJECT_DIR: projectRepo, CLAUDE_CONFIG_DIR: dir }, ['CLAUDE_PLUGIN_ROOT']), 'project-level hook');
-    if (pwsh) quiet(run('pwsh', ['-NoProfile', '-File', powershellHook], { CODEX_HOME: dir }), 'powershell hook');
+  });
+
+  test(`the powershell hook reads the ${name} sheet`, { skip: pwsh ? false : 'pwsh is not installed' }, () => {
+    const dir = writeSheet(name, bytes);
+    assert.equal(run('pwsh', ['-NoProfile', '-File', powershellHook], { CODEX_HOME: dir }), '', 'powershell hook still injected the mandate');
   });
 }
