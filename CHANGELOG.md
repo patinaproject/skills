@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/patinaproject/skills/compare/v3.2.1...v3.3.0) (2026-10-15)
+
+
+### Features
+
+* [#634](https://github.com/patinaproject/skills/issues/634) link every file:line reference in pr-review-assistant ([#639](https://github.com/patinaproject/skills/issues/639)) ([4ce0ee7](https://github.com/patinaproject/skills/commit/4ce0ee7613a5e2cc4f7ea851903718587faa5a17))
+
 ## [3.2.1](https://github.com/patinaproject/skills/compare/v3.2.0...v3.2.1) (2026-10-15)
 
 
