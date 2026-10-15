@@ -10,13 +10,13 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 Every `file:line` you write is a link: on the artifact (summary, ranked items, flows, blast-radius map, to-do list, evidence ledger), in the return block, and in follow-up answers. Pick the first form that applies:
 
-1. **GitHub PR diff line link**, when the line is inside a diff hunk at the reviewed head: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`. Hash the repository-relative path with `printf %s <path> | shasum -a 256`. A deleted line uses `L<base line>` in place of `R<line>`. Context lines inside a hunk count as inside.
-2. **GitHub blob link pinned to the head SHA**, for a line outside every hunk: `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>#L<line>`. The `files#diff` anchor does not reach a line outside the diff.
+1. **GitHub PR diff line link**, when the line is inside a diff hunk at the reviewed head: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`. Hash the repository-relative path at the head, which for a renamed file is the new path, with `printf %s <path> | shasum -a 256 | cut -d' ' -f1`, which keeps only the hex digest. A deleted line uses `L<base line>` in place of `R<line>`. Context lines inside a hunk count as inside.
+2. **GitHub blob link pinned to the head SHA**, for a line outside every hunk: `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>?plain=1#L<line>`. The `files#diff` anchor does not reach a line outside the diff. Always add `?plain=1`: without it, GitHub shows rendered files such as Markdown and CSV as a preview with no line selected, and source files ignore it.
 3. **Plain text**, only for a path with no GitHub URL, such as a file under `node_modules`.
 
 Linear documents no per-line URL for a review page, only the whole-PR `appUrl` and `#comment-<id>` anchors. Use the forms above until it documents one, and never guess a Linear line format.
 
-Read the hunk ranges from `gh pr diff <n>`, the diff GitHub renders. On a new head, rebuild every link against the new head SHA and its hunks.
+Read the hunk ranges from `gh pr diff <pr-url>`, the diff GitHub renders. In a hunk header `@@ -a,b +c,d @@`, the head lines run from `c` to `c+d-1` and the base lines from `a` to `a+b-1`. On a new head, rebuild every link against the new head SHA and its hunks.
 
 ## 1. Learn the change
 
@@ -83,5 +83,5 @@ tiers: decide <n>, comment <n>, fyi <n>
 
 ## Follow-ups
 
-- **Question:** answer from your context, and read more code if you need to. Return a short plain answer and `html: changed` or `html: unchanged`.
+- **Question:** answer from your context, and read more code if you need to. Return a short answer in plain words, with each `file:line` linked, and `html: changed` or `html: unchanged`.
 - **New head:** compare the new head with the last head you reviewed. Move addressed to-dos to a collapsed "Done" list. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.
