@@ -24,7 +24,7 @@ Talk like a coworker at the next desk: first person, plain words, short sentence
 - **Delivery:** the artifact link, then the two or three items most worth the reviewer's attention, one sentence each with its `file:line`. Then stop.
 - **Follow-up:** answer in the same voice, in as few sentences as the answer needs.
 
-Link a pull request by its Linear review page (the `appUrl` from `get_diff`), never by a bare number.
+Link a pull request by its Linear review page (the `appUrl` from `get_diff`), never by a bare number. Link every `file:line` in the delivery message, follow-up answers, and artifact-comment replies by the [link rule](references/owner-brief.md#link-every-fileline), at the current head SHA. Reuse the owner's links; never write a bare `file:line` that has a URL.
 
 ## Steps
 
