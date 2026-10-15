@@ -1,6 +1,6 @@
 import {
-  type BodyClaim, type CandidateIdentity, type ExecutionContext, type Obligation, type ObligationRule,
-  type Observation, type Provenance, type CheckProvenance, type ReadinessPacket, type ValidityDecision, freezePacket, isObligation, sha256,
+  type BodyClaim, type CandidateIdentity, type Obligation, type ObligationRule,
+  type Observation, type Provenance, type CheckProvenance, type ReadinessPacket, type Validity, type ValidityDecision, freezePacket, isObligation, provenanceUrls, sha256,
 } from "./domain.ts";
 
 export interface EvaluationInput {
@@ -10,14 +10,10 @@ export interface EvaluationInput {
   readonly now?: string;
   readonly body?: string;
   readonly rules: readonly ObligationRule[];
-  /** Expected producer inputs are supplied by the trusted evaluator, never by PR code. */
-  readonly expectedExecution?: Readonly<Partial<Record<Obligation, ExecutionContext>>>;
-  /** Legacy spelling accepted for callers migrating to expectedExecution. */
-  readonly executionInputs?: Readonly<Partial<Record<Obligation, string | ExecutionContext>>>;
 }
 export interface EvaluationReport { readonly ready: boolean; readonly decisions: readonly ValidityDecision[]; readonly bodyErrors: readonly string[]; readonly packet?: ReadinessPacket; }
 
-export const ACCEPTED: readonly string[] = ["observed-current", "valid-by-equivalence", "not-applicable"];
+export const ACCEPTED: readonly Validity[] = ["observed-current", "valid-by-equivalence", "not-applicable"];
 
 function validCandidate(value: unknown): value is CandidateIdentity {
   if (!value || typeof value !== "object") return false;
@@ -49,36 +45,14 @@ function equalCandidate(a: CandidateIdentity, b: CandidateIdentity): boolean {
   return ["repository", "pullRequest", "base", "baseSha", "baseRef", "mergeBase", "head", "patchId", "diffDigest", "behaviorApplicable", "requirementsDigest", "policyDigest", "reviewContextDigest"]
     .every((k) => (a as unknown as Record<string, unknown>)[k] === (b as unknown as Record<string, unknown>)[k]);
 }
-function expectedFor(input: EvaluationInput, obligation: Obligation): ExecutionContext | undefined {
-  const value = input.expectedExecution?.[obligation] ?? input.executionInputs?.[obligation];
-  return typeof value === "string" ? { inputDigest: value } : value;
-}
-function contextMatches(observation: Observation, expected: ExecutionContext | undefined): boolean {
-  if (!expected) return true;
-  return Object.entries(expected).every(([key, value]) => value === undefined || (observation as unknown as Record<string, unknown>)[key] === value);
-}
-function artifactIdentity(o: Observation): string {
-  return o.artifactDigest ?? (o.artifactRefs.length ? sha256(o.artifactRefs) : "");
-}
-function equivalent(obligation: Obligation, current: CandidateIdentity, captured: CandidateIdentity, o: Observation, expected?: ExecutionContext): boolean {
+function equivalent(obligation: Obligation, current: CandidateIdentity, captured: CandidateIdentity, o: Observation): boolean {
   if (obligation === "standards" || obligation === "spec") {
     return current.patchId === captured.patchId && current.requirementsDigest === captured.requirementsDigest && current.policyDigest === captured.policyDigest &&
-      (current.reviewContextDigest ?? o.reviewContextDigest) === (captured.reviewContextDigest ?? o.reviewContextDigest) && contextMatches(o, expected);
+      (current.reviewContextDigest ?? o.reviewContextDigest) === (captured.reviewContextDigest ?? o.reviewContextDigest);
   }
-  if (obligation === "hygiene") return current.diffDigest === captured.diffDigest && current.policyDigest === captured.policyDigest && contextMatches(o, expected);
+  if (obligation === "hygiene") return current.diffDigest === captured.diffDigest && current.policyDigest === captured.policyDigest;
   if (obligation === "tests" || obligation === "lint") {
-    return current.diffDigest === captured.diffDigest && current.baseSha === captured.baseSha && current.mergeBase === captured.mergeBase && o.inputDigest === (expected?.inputDigest ?? o.inputDigest) &&
-      artifactIdentity(o) === (expected?.artifactDigest ?? artifactIdentity(o)) && contextMatches(o, expected);
-  }
-  // Runtime evidence may be reused only when all executable/runtime dimensions match.
-  if (obligation === "behavior") {
-    const keys: readonly (keyof ExecutionContext)[] = ["executableArtifact", "target", "runtime", "environment", "fixtures", "scope", "freshness"];
-    return keys.every((key) => {
-      const expectedValue = expected?.[key];
-      const capturedValue = o[key];
-      return expectedValue !== undefined && capturedValue === expectedValue;
-    }) && (expected?.artifactDigest === undefined || artifactIdentity(o) === expected.artifactDigest) &&
-      (expected?.inputDigest === undefined || o.inputDigest === expected.inputDigest);
+    return current.diffDigest === captured.diffDigest && current.baseSha === captured.baseSha && current.mergeBase === captured.mergeBase;
   }
   return false;
 }
@@ -113,16 +87,14 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
     if (observation.provenance.kind !== rule.spec.producer) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation was not produced by ${rule.spec.producer}`, capturedHead: observation.candidate.head }); continue; }
     if (observation.verdict !== "pass") { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation failed`, capturedHead: observation.candidate.head }); continue; }
     if (observation.expiresAt && Date.parse(observation.expiresAt) <= now) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation expired`, capturedHead: observation.candidate.head }); continue; }
-    const expected = expectedFor(input, rule.obligation);
-    if (!contextMatches(observation, expected)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} execution inputs changed`, capturedHead: observation.candidate.head }); continue; }
     if (equalCandidate(input.candidate, observation.candidate)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "observed-current", reason: "observation matches current candidate", capturedHead: observation.candidate.head }); continue; }
-    if (equivalent(rule.obligation, input.candidate, observation.candidate, observation, expected)) decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "valid-by-equivalence", reason: "producer equivalence contract permits reuse", capturedHead: observation.candidate.head });
+    if (equivalent(rule.obligation, input.candidate, observation.candidate, observation)) decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "valid-by-equivalence", reason: "producer equivalence contract permits reuse", capturedHead: observation.candidate.head });
     else decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation does not describe current candidate`, capturedHead: observation.candidate.head });
   }
   bodyErrors.push(...validateBodyClaims(input.body, input.bodyClaims, decisions));
   const ready = bodyErrors.length === 0 && decisions.every((d) => ACCEPTED.includes(d.validity));
   if (!ready) return { ready, decisions, bodyErrors };
-  const packet = freezePacket({ version: 1, candidate: input.candidate, observationIds: decisions.flatMap((d) => d.observationId ? [d.observationId] : []), decisions, requirementsDigest: input.candidate.requirementsDigest, policyDigest: input.candidate.policyDigest, bodyDigest: sha256(input.body ?? ""), provenanceRefs: observations.flatMap((o) => o.provenance.kind === "approval" ? [o.provenance.url] : o.provenance.checks.map((c) => c.url)), artifactRefs: observations.flatMap((o) => o.artifactRefs), generatedAt: new Date(now).toISOString() });
+  const packet = freezePacket({ version: 1, candidate: input.candidate, observationIds: decisions.flatMap((d) => d.observationId ? [d.observationId] : []), decisions, requirementsDigest: input.candidate.requirementsDigest, policyDigest: input.candidate.policyDigest, bodyDigest: sha256(input.body ?? ""), provenanceRefs: observations.flatMap((o) => provenanceUrls(o.provenance)), artifactRefs: observations.flatMap((o) => o.artifactRefs), generatedAt: new Date(now).toISOString() });
   return { ready, decisions, bodyErrors, packet };
 }
 

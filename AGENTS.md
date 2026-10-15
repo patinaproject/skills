@@ -232,7 +232,9 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `.markdownlint-cli2.jsonc`, `.markdownlint.jsonc`, `.lintstagedrc.js`, or the
   `lint:md` script; it asserts the markdown exclusion mechanism behaviorally
 - Run `bash scripts/tests/marketplace.test.sh` to confirm the `.claude-plugin/` catalog is valid
-- Run `bash scripts/tests/pull-request-workflow.test.sh` after changing `.github/workflows/pull-request.yml`
+- Run `bash scripts/tests/pull-request-workflow.test.sh` after changing
+  `.github/workflows/pull-request.yml`, `.github/workflows/pr-readiness*.yml`, or
+  `.github/pr-readiness.json`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
 - Run `bash scripts/tests/scaffold-baseline-manifest.test.sh` after changing
   `plugins/team/skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`

@@ -11,7 +11,7 @@ export interface Forge {
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState;
   markReady(repository: string, number: number, expectedHead: string): void;
   readPolicy(repository: string, baseSha: string): string | undefined;
-  readEvidence(repository: string, number: number, head: string): ForgeEvidence & { readonly author: string };
+  readEvidence(repository: string, number: number, head: string): ForgeEvidence;
   publishStatus(repository: string, head: string, state: "success" | "failure", description: string, targetUrl?: string): void;
 }
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
@@ -46,7 +46,7 @@ export function parseCheckRun(value: unknown): CheckRunFact {
     detailsUrl: field(value, "details_url", isNullableString, "check run") ?? "", htmlUrl: field(value, "html_url", isString, "check run"), completedAt,
   };
 }
-export function parseReview(value: unknown): ReviewFact {
+export function parseReview(value: unknown): Omit<ReviewFact, "permission"> {
   if (!isObject(value)) throw new Error("forge returned a malformed review");
   const user = field(value, "user", isObject, "review");
   const state = field(value, "state", isString, "review");
@@ -54,9 +54,10 @@ export function parseReview(value: unknown): ReviewFact {
   if (state !== "PENDING" && submittedAt === null) throw new Error("forge returned a submitted review without submitted_at");
   return {
     id: field(value, "id", isId, "review"), login: field(user, "login", isString, "review"), userType: field(user, "type", isString, "review"),
-    permission: "none", state, commitId: field(value, "commit_id", isString, "review"), submittedAt, htmlUrl: field(value, "html_url", isString, "review"),
+    state, commitId: field(value, "commit_id", isString, "review"), submittedAt, htmlUrl: field(value, "html_url", isString, "review"),
   };
 }
+const notFound = (error: unknown): boolean => /HTTP 404/.test(String((error as { stderr?: unknown }).stderr ?? ""));
 function git(command: string, args: readonly string[]): string { return execFileSync(command, [...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim(); }
 function remoteDiff(command: string, repository: string, number: number): string { try { return execFileSync(command, ["pr", "diff", String(number), "--repo", repository, "--patch"], { encoding: "utf8" }); } catch { return ""; } }
 function derivePatchId(diff: string): string { if (!diff) return sha256(""); try { const result = execFileSync("git", ["patch-id", "--stable"], { input: diff, encoding: "utf8" }).trim(); return result.split(/\s+/)[0] || sha256(diff); } catch { return sha256(diff); } }
@@ -83,14 +84,14 @@ export class GhForge implements Forge {
     try {
       output = execFileSync(this.command, ["api", `repos/${repository}/contents/${POLICY_PATH}?ref=${baseSha}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
     } catch (error) {
-      if (/HTTP 404/.test(String((error as { stderr?: unknown }).stderr ?? ""))) return undefined;
+      if (notFound(error)) return undefined;
       throw error;
     }
     const file: unknown = JSON.parse(output);
     if (!file || typeof file !== "object" || (file as { encoding?: unknown }).encoding !== "base64" || typeof (file as { content?: unknown }).content !== "string") throw new Error(`forge returned an unreadable ${POLICY_PATH}`);
     return Buffer.from((file as { content: string }).content, "base64").toString("utf8");
   }
-  readEvidence(repository: string, number: number, head: string): ForgeEvidence & { readonly author: string } {
+  readEvidence(repository: string, number: number, head: string): ForgeEvidence {
     const checkRuns = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/commits/${head}/check-runs?per_page=100`, "--jq", ".check_runs[]"]).map(parseCheckRun);
     const parsed = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/pulls/${number}/reviews?per_page=100`, "--jq", ".[]"]).map(parseReview);
     // REST names an App author "<slug>[bot]" as reviews do; `gh pr view --json author` would say "app/<slug>".
@@ -99,14 +100,14 @@ export class GhForge implements Forge {
     const permissions = new Map<string, string>();
     for (const review of parsed) if (review.userType === "User" && review.login !== author && !permissions.has(review.login)) permissions.set(review.login, this.permissionOf(repository, review.login));
     const reviews = parsed.map((review) => ({ ...review, permission: permissions.get(review.login) ?? "none" }));
-    return { checkRuns, reviews, author };
+    return { author, checkRuns, reviews };
   }
   private permissionOf(repository: string, login: string): string {
     try {
       const output = execFileSync(this.command, ["api", `repos/${repository}/collaborators/${login}/permission`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
       return field(JSON.parse(output) as Record<string, unknown>, "permission", isString, "collaborator permission");
     } catch (error) {
-      if (/HTTP 404/.test(String((error as { stderr?: unknown }).stderr ?? ""))) return "none";
+      if (notFound(error)) return "none";
       throw error;
     }
   }

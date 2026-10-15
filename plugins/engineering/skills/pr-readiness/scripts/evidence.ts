@@ -1,4 +1,4 @@
-import { OBLIGATIONS, sha256, type CandidateIdentity, type CheckProvenance, type Obligation, type Observation, type Provenance, type ReadinessPolicy } from "./domain.ts";
+import { EVALUATOR_VERSION, OBLIGATIONS, provenanceUrls, sha256, type CandidateIdentity, type CheckProvenance, type Obligation, type Observation, type Provenance, type ReadinessPolicy } from "./domain.ts";
 
 export const ACTIONS_APP = "github-actions";
 export interface CheckRunFact {
@@ -22,24 +22,29 @@ export interface ReviewFact {
   readonly submittedAt: string | null;
   readonly htmlUrl: string;
 }
-export interface ForgeEvidence { readonly checkRuns: readonly CheckRunFact[]; readonly reviews: readonly ReviewFact[]; }
-export interface Derivation { readonly observations: Observation[]; readonly notes: Partial<Record<Obligation, string>>; }
+export interface ForgeEvidence { readonly author: string; readonly checkRuns: readonly CheckRunFact[]; readonly reviews: readonly ReviewFact[]; }
+export interface Derivation { readonly observations: Observation[]; readonly notes: Partial<Record<Obligation, string>>; readonly failedRunIds: Partial<Record<Obligation, readonly number[]>>; }
 
 const WRITERS: readonly string[] = ["admin", "write"];
 const DECISIVE: readonly string[] = ["APPROVED", "CHANGES_REQUESTED"];
 type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly note?: string } | { readonly note: string };
 
-export function deriveObservations(candidate: CandidateIdentity, policy: ReadinessPolicy, evidence: ForgeEvidence, author: string): Derivation {
+export function deriveObservations(candidate: CandidateIdentity, policy: ReadinessPolicy, evidence: ForgeEvidence): Derivation {
   const observations: Observation[] = [];
   const notes: Partial<Record<Obligation, string>> = {};
-  const approval = approvalOutcome(candidate, evidence.reviews, author);
+  const failedRunIds: Partial<Record<Obligation, readonly number[]>> = {};
+  const approval = approvalOutcome(candidate, evidence.reviews, evidence.author);
   for (const obligation of OBLIGATIONS) {
     const spec = policy.obligations[obligation];
     const outcome = spec.producer === "approval" ? approval : checksOutcome(spec.checks, evidence.checkRuns);
     if (outcome.note) notes[obligation] = outcome.note;
-    if ("verdict" in outcome) observations.push(observation(candidate, obligation, outcome));
+    if (!("verdict" in outcome)) continue;
+    observations.push(observation(candidate, obligation, outcome));
+    if (outcome.verdict === "fail" && outcome.provenance.kind === "checks") {
+      failedRunIds[obligation] = [...new Set(outcome.provenance.checks.filter((check) => check.conclusion !== "success" && check.runId !== undefined).map((check) => check.runId!))];
+    }
   }
-  return { observations, notes };
+  return { observations, notes, failedRunIds };
 }
 
 function checksOutcome(names: readonly string[], runs: readonly CheckRunFact[]): Outcome {
@@ -105,8 +110,8 @@ function observation(candidate: CandidateIdentity, obligation: Obligation, outco
     candidate,
     inputDigest: sha256(provenance),
     scope,
-    artifactRefs: provenance.kind === "checks" ? provenance.checks.map((check) => check.url) : [provenance.url],
-    producerVersion: "pr-readiness/3",
+    artifactRefs: provenanceUrls(provenance),
+    producerVersion: EVALUATOR_VERSION,
     capturedAt: outcome.capturedAt,
     verdict: outcome.verdict,
     provenance,

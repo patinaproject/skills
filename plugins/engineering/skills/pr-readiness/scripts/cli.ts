@@ -16,18 +16,16 @@ function assess(forge: Forge, repository: string, number: number, bodyOverride: 
   const pr = forge.readPullRequest(repository, number);
   const policy = parsePolicy(forge.readPolicy(repository, pr.baseSha ?? ""));
   const candidate = candidateFromPullRequest(pr, policy.digest);
-  const { author, ...evidence } = forge.readEvidence(repository, number, candidate.head);
-  const { observations, notes } = deriveObservations(candidate, policy, evidence, author);
+  const evidence = forge.readEvidence(repository, number, candidate.head);
+  const { observations, notes, failedRunIds } = deriveObservations(candidate, policy, evidence);
   const body = bodyOverride ?? pr.body;
   const bodyClaims = body === undefined ? undefined : parseBodyClaims(body);
   const evaluated = evaluateReadiness({ candidate, observations, bodyClaims, body, now, rules: rulesFromPolicy(policy) });
   const decisions = evaluated.decisions.map((decision): ValidityDecision => {
     if (ACCEPTED.includes(decision.validity)) return decision;
     const spec = policy.obligations[decision.obligation];
-    const failed = observations.find((o) => o.obligation === decision.obligation && o.verdict === "fail");
-    const failedRunIds = failed?.provenance.kind === "checks" ? failed.provenance.checks.filter((c) => c.conclusion !== "success" && c.runId !== undefined).map((c) => c.runId!) : [];
     const note = notes[decision.obligation];
-    return { ...decision, reason: note ? `${decision.reason}: ${note}` : decision.reason, produce: produceCommand(spec, { repository, pullRequest: number, head: candidate.head, author, failedRunIds: [...new Set(failedRunIds)] }) };
+    return { ...decision, reason: note ? `${decision.reason}: ${note}` : decision.reason, produce: produceCommand(spec, { repository, pullRequest: number, head: candidate.head, author: evidence.author, failedRunIds: failedRunIds[decision.obligation] }) };
   });
   return { pr, candidate, policy, report: { ...evaluated, decisions } };
 }

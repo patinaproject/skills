@@ -1,4 +1,4 @@
-import { OBLIGATIONS, isObligation, sha256, type Obligation, type ObligationRule, type ProducerSpec, type ReadinessPolicy } from "./domain.ts";
+import { EVALUATOR_VERSION, OBLIGATIONS, isObligation, sha256, type Obligation, type ObligationRule, type ProducerSpec, type ReadinessPolicy } from "./domain.ts";
 
 export const POLICY_PATH = ".github/pr-readiness.json";
 const APPROVAL: ProducerSpec = { producer: "approval" };
@@ -18,7 +18,7 @@ export function parsePolicy(raw: string | undefined): ReadinessPolicy {
       obligations[key] = parseSpec(key, spec);
     }
   }
-  return { version: 1, obligations, digest: sha256({ evaluator: "pr-readiness/3", raw: raw ?? null }) };
+  return { version: 1, obligations, digest: sha256({ evaluator: EVALUATOR_VERSION, raw: raw ?? null }) };
 }
 
 function parseSpec(obligation: Obligation, value: unknown): ProducerSpec {

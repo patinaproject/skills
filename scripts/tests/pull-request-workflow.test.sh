@@ -56,6 +56,38 @@ assert_file "$READINESS_WORKFLOW"
 if [ -f "$READINESS_WORKFLOW" ]; then
   assert_match '^  pull_request_target:' "$READINESS_WORKFLOW"
   assert_match '^permissions: \{\}$' "$READINESS_WORKFLOW"
+  node --input-type=commonjs - "$READINESS_WORKFLOW" <<'NODE'
+const fs = require('node:fs')
+const path = require('node:path')
+const lines = fs.readFileSync(process.argv[2], 'utf8').split('\n')
+const start = lines.findIndex((line) => /^on:\s*$/.test(line))
+const events = []
+for (const line of lines.slice(start + 1)) {
+  if (/^\S/.test(line)) break
+  const match = line.match(/^  ([a-z_]+):/)
+  if (match) events.push(match[1])
+}
+if (JSON.stringify(events) !== JSON.stringify(['pull_request_target', 'workflow_run'])) {
+  console.error(`FAIL: pr-readiness.yml must trigger only on pull_request_target and workflow_run, found: ${events.join(', ')}`)
+  process.exit(1)
+}
+const unquote = (value) => value.trim().replace(/^(['"])(.*)\1$/, '$2')
+const listed = lines.join('\n').match(/^    workflows:\s*\[(.*)\]\s*$/m)
+if (!listed) {
+  console.error('FAIL: pr-readiness.yml workflow_run.workflows must be an inline list')
+  process.exit(1)
+}
+const names = new Set()
+for (const file of fs.readdirSync('.github/workflows').filter((name) => /\.ya?ml$/.test(name))) {
+  const match = fs.readFileSync(path.join('.github/workflows', file), 'utf8').match(/^name:\s*(.+?)\s*$/m)
+  if (match) names.add(unquote(match[1]))
+}
+const missing = listed[1].split(',').map(unquote).filter((name) => !names.has(name))
+if (missing.length) {
+  console.error(`FAIL: workflow_run.workflows names no workflow: ${missing.join(', ')}`)
+  process.exit(1)
+}
+NODE
   assert_no_match 'schedule:' "$READINESS_WORKFLOW"
   assert_no_match 'repository_dispatch' "$READINESS_WORKFLOW"
   assert_no_match 'download-artifact' "$READINESS_WORKFLOW"
@@ -77,6 +109,14 @@ if (JSON.stringify(owners) !== JSON.stringify(['gate'])) {
   process.exit(1)
 }
 NODE
+fi
+
+RELAY_WORKFLOW=".github/workflows/pr-readiness-review.yml"
+assert_file "$RELAY_WORKFLOW"
+if [ -f "$RELAY_WORKFLOW" ]; then
+  assert_match '^permissions: \{\}$' "$RELAY_WORKFLOW"
+  assert_match '^  pull_request_review:' "$RELAY_WORKFLOW"
+  assert_no_match 'actions/checkout' "$RELAY_WORKFLOW"
 fi
 
 node --input-type=commonjs <<'NODE'
