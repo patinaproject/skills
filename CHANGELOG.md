@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/patinaproject/skills/compare/v3.2.0...v3.2.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* [#632](https://github.com/patinaproject/skills/issues/632) pin action SHAs in the design-control-loop template ([#633](https://github.com/patinaproject/skills/issues/633)) ([8bdfd5b](https://github.com/patinaproject/skills/commit/8bdfd5b9d06f933441cd347682bc698e2abddc10))
+
 ## [3.2.0](https://github.com/patinaproject/skills/compare/v3.1.0...v3.2.0) (2026-10-14)
 
 
