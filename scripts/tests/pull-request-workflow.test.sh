@@ -51,9 +51,49 @@ run_closing_check() {
 }
 
 assert_file "$WORKFLOW"
-if test -e ".github/workflows/pr-readiness.yml"; then
-  fail "PR readiness must not be registered as a CI workflow"
+READINESS_WORKFLOW=".github/workflows/pr-readiness.yml"
+assert_file "$READINESS_WORKFLOW"
+if [ -f "$READINESS_WORKFLOW" ]; then
+  assert_match '^  pull_request_target:' "$READINESS_WORKFLOW"
+  assert_match '^permissions: \{\}$' "$READINESS_WORKFLOW"
+  assert_no_match 'schedule:' "$READINESS_WORKFLOW"
+  assert_no_match 'repository_dispatch' "$READINESS_WORKFLOW"
+  assert_no_match 'download-artifact' "$READINESS_WORKFLOW"
+  assert_no_match '^\s*ref:.*(pull_request\.head|head\.sha|head\.ref|head_sha)' "$READINESS_WORKFLOW"
+  node --input-type=commonjs - "$READINESS_WORKFLOW" <<'NODE'
+const fs = require('node:fs')
+const lines = fs.readFileSync(process.argv[2], 'utf8').split('\n')
+const owners = []
+let job = null
+let inJobs = false
+lines.forEach((line) => {
+  if (/^\S/.test(line)) { inJobs = /^jobs:\s*$/.test(line); job = null }
+  const jobMatch = inJobs && line.match(/^  ([A-Za-z0-9_-]+):\s*$/)
+  if (jobMatch) job = jobMatch[1]
+  if (/^\s*statuses:\s*write\b/.test(line)) owners.push(job ?? 'workflow')
+})
+if (JSON.stringify(owners) !== JSON.stringify(['gate'])) {
+  console.error(`FAIL: statuses: write must appear only under jobs.gate, found under: ${owners.join(', ') || 'nothing'}`)
+  process.exit(1)
+}
+NODE
 fi
+
+node --input-type=commonjs <<'NODE'
+const fs = require('node:fs')
+const path = require('node:path')
+const policy = JSON.parse(fs.readFileSync('.github/pr-readiness.json', 'utf8'))
+const jobNames = new Set()
+for (const file of fs.readdirSync('.github/workflows').filter((name) => /\.ya?ml$/.test(name))) {
+  for (const match of fs.readFileSync(path.join('.github/workflows', file), 'utf8').matchAll(/^    name:\s*(.+?)\s*$/gm)) jobNames.add(match[1].replace(/^(['"])(.*)\1$/, '$2'))
+}
+const stray = Object.entries(policy.obligations).flatMap(([obligation, spec]) =>
+  (spec.checks ?? []).filter((check) => !jobNames.has(check)).map((check) => `${obligation}: "${check}"`))
+if (stray.length) {
+  console.error(`FAIL: .github/pr-readiness.json names checks no workflow job produces: ${stray.join(', ')}`)
+  process.exit(1)
+}
+NODE
 
 if rg -n '"pr",[[:space:]]*"ready"|gh pr ready|origin pr ready' plugins/engineering/skills \
   --glob '*.ts' --glob '*.mjs' --glob '*.sh' --glob '*.md' \
@@ -67,8 +107,10 @@ const path = require('node:path')
 
 const workflowDirectory = '.github/workflows'
 const requiredContexts = [
+  'Check diff hygiene',
   'Lint Actions workflows',
   'Lint Markdown',
+  'Unit tests',
   'Validate pull request',
   'Verify skill overlay',
 ]
