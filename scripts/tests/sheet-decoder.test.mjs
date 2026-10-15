@@ -47,8 +47,6 @@ const FIXTURES = {
   'utf16le bom lf': Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(lf, 'utf16le')]),
 };
 
-// A leftover CR or BOM becomes part of a key or value, so it fails the
-// comparison instead of being skipped.
 function roleMap(text) {
   const map = {};
   for (const line of text.split('\n')) {
@@ -85,7 +83,6 @@ mkdirSync(emptyDir);
 const mandate = run(pluginHook, ['claude'], { CLAUDE_PLUGIN_ROOT: plugin, CLAUDE_CONFIG_DIR: emptyDir });
 assert.notEqual(mandate, '', 'a missing sheet must leave the mandate on');
 
-// Install into a repo, then delete the catalog: the hook may use only what the installer copied.
 const projectRepo = join(scratch, 'project');
 const catalog = join(scratch, 'catalog');
 mkdirSync(catalog);

@@ -7,10 +7,6 @@ export interface Sheet {
   piModels: Map<string, string>;
 }
 
-// The Pi copy of skills/setup-pstack/scripts/read-sheet.sh. Pi also runs on
-// Windows, where no sh exists, so scripts/tests/sheet-decoder.test.mjs holds
-// both decoders to the same fixtures. Keep this file free of package imports so
-// that test can load it with Node alone.
 export function decodeSheet(bytes: Uint8Array): string {
   // Windows PowerShell 5.1's `>` writes UTF-16 LE with a byte-order mark.
   const encoding = bytes[0] === 0xff && bytes[1] === 0xfe ? "utf16le" : "utf8";
@@ -36,7 +32,6 @@ export function readSheet(agentDir: string): Sheet | undefined {
   try {
     bytes = readFileSync(join(agentDir, "pstack-models.md"));
   } catch {
-    // An absent or unreadable sheet leaves the defaults in place, as the session hooks do.
     return undefined;
   }
   return parseSheet(decodeSheet(bytes));

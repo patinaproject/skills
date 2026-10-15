@@ -19,8 +19,6 @@ if [ -z "$hook_root" ]; then
   hook_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 fi
 
-# The plugin keeps the decoder in the setup-pstack skill. A project-level
-# install copies it beside this hook.
 read_sheet="$hook_root/read-sheet.sh"
 [ -f "$read_sheet" ] || read_sheet="$hook_root/../skills/setup-pstack/scripts/read-sheet.sh"
 if [ ! -f "$read_sheet" ]; then
