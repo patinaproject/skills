@@ -14,4 +14,4 @@ jobs:
       - name: Announce pull request
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: echo "Review event on pull request #$PR_NUMBER"
+        run: echo "Review event on pull request $PR_NUMBER"
