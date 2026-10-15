@@ -21,8 +21,8 @@ This file is the coordinator. A PR owner subagent does the work in [references/o
 Talk like a coworker at the next desk: first person, plain words, short sentences. Keep tool calls and progress out of the chat.
 
 - **Start:** one line, such as "Pulling apart the env-declaration PR. Back in a few minutes."
-- **Delivery:** the artifact link, then the two or three items most worth the reviewer's attention, one sentence each with its `file:line`. Then stop.
-- **Follow-up:** answer in the same voice, in as few sentences as the answer needs.
+- **Delivery:** the artifact link, then the two or three items most worth the reviewer's attention, one sentence each with its linked `file:line` from the owner's return block. Then stop.
+- **Follow-up:** answer in chat or in the artifact-comment thread, in the same voice and in as few sentences as the answer needs. Keep each `file:line` linked as the owner's answer links it, by the [link rule](references/owner-brief.md#link-every-fileline).
 
 Link a pull request by its Linear review page (the `appUrl` from `get_diff`), never by a bare number.
 
