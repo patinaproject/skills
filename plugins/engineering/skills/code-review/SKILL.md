@@ -21,13 +21,14 @@ The presentation layer may add runtime metadata, but it does not change the
 finding set. On Codex, follow the platform translation for actionable findings
 that belong to a changed line; on Claude, use the Markdown finding alone.
 
-Emit the verdict as a GitHub review at the reviewed head. Run
-`gh pr review <N> --approve` when both axes pass with no open finding, and
-`gh pr review <N> --request-changes` with the report otherwise. Readiness
-counts the review only when the reviewer is a maintainer who is not the PR
-author, and GitHub refuses an author's approval of its own PR. An author that
-runs code-review on its own PR is doing a pre-flight, and that run produces no
-readiness evidence.
+Post the verdict as a GitHub review at the reviewed head only when the
+reviewer is not the PR author. Run `gh pr review <N> --approve` when both axes
+pass with no open finding, and `gh pr review <N> --request-changes` with the
+report otherwise. Readiness counts the review only when the reviewer is a
+`User` with write or admin permission who is not the PR author. An author that
+runs code-review on its own PR fixes or reports the findings and posts no
+review, because GitHub rejects both an approval and a change request on one's
+own PR.
 
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
 

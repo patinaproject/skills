@@ -25,7 +25,7 @@ export function checkRun(name: string, extra: Partial<CheckRunFact> & { runId?: 
   return { id, name, appSlug: "github-actions", status: "completed", conclusion: "success", checkSuiteId: 1, detailsUrl: `https://github.com/o/r/actions/runs/${runId}/job/${id}`, htmlUrl: `https://github.com/o/r/runs/${id}`, completedAt: "2026-10-01T00:00:00Z", ...extra };
 }
 export function review(extra: Partial<ReviewFact> = {}): ReviewFact {
-  return { id: 77, login: "ted", userType: "User", association: "MEMBER", state: "APPROVED", commitId: HEAD, submittedAt: "2026-10-01T01:00:00Z", htmlUrl: "https://github.com/o/r/pull/7#pullrequestreview-77", ...extra };
+  return { id: 77, login: "ted", userType: "User", permission: "write", state: "APPROVED", commitId: HEAD, submittedAt: "2026-10-01T01:00:00Z", htmlUrl: "https://github.com/o/r/pull/7#pullrequestreview-77", ...extra };
 }
 export const evidenceBody = (head = HEAD): string => [
   "## Why", "", "Close the self-approval path.", "", "## Evidence", "",

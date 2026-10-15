@@ -21,7 +21,7 @@ pr-readiness gate --repo OWNER/REPO --pr NUMBER
 | Producer | Evidence the evaluator reads | Who can author it |
 | --- | --- | --- |
 | `checks` | Check runs on the head from the `github-actions` app with the names the policy lists. The newest run in each check suite counts, so a successful re-run replaces a failure. | A GitHub Actions workflow job |
-| `approval` | The latest review at the head from each reviewer who is a `User`, an owner, member, or collaborator, and not the PR author. A change request fails the obligation. | A maintainer other than the author |
+| `approval` | The latest review at the head from each reviewer who is a `User` with write or admin permission on the repository and not the PR author. A change request fails the obligation. | A `User` with write or admin permission who is not the PR author |
 
 One approval satisfies every obligation that names `approval`. Observation IDs are `<obligation>@<head>`, so the PR body's `## Evidence` claims can name them.
 

@@ -54,8 +54,8 @@ describe("acceptance: self-approval is closed", () => {
   const ignored: [string, Parameters<typeof review>[0], string][] = [
     ["the PR author", { login: AUTHOR, userType: "Bot" }, `review by PR author @${AUTHOR} ignored`],
     ["a bot", { login: "renovate[bot]", userType: "Bot" }, "review by Bot @renovate[bot] ignored"],
-    ["a non-member", { association: "NONE" }, "review by non-maintainer @ted (NONE) ignored"],
-    ["a contributor", { association: "CONTRIBUTOR" }, "review by non-maintainer @ted (CONTRIBUTOR) ignored"],
+    ["a reader", { permission: "read" }, "review by @ted without write access (read) ignored"],
+    ["a user with no access", { permission: "none" }, "review by @ted without write access (none) ignored"],
     ["an older commit", { commitId: "c".repeat(40) }, "review by @ted on older commit cccccccccccc ignored"],
   ];
   for (const [who, fields, note] of ignored) {

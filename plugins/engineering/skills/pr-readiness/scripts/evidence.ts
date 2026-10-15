@@ -16,7 +16,7 @@ export interface ReviewFact {
   readonly id: number;
   readonly login: string;
   readonly userType: string;
-  readonly association: string;
+  readonly permission: string;
   readonly state: string;
   readonly commitId: string;
   readonly submittedAt: string | null;
@@ -25,7 +25,7 @@ export interface ReviewFact {
 export interface ForgeEvidence { readonly checkRuns: readonly CheckRunFact[]; readonly reviews: readonly ReviewFact[]; }
 export interface Derivation { readonly observations: Observation[]; readonly notes: Partial<Record<Obligation, string>>; }
 
-const MAINTAINERS: readonly string[] = ["OWNER", "MEMBER", "COLLABORATOR"];
+const WRITERS: readonly string[] = ["admin", "write"];
 const DECISIVE: readonly string[] = ["APPROVED", "CHANGES_REQUESTED"];
 type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly note?: string } | { readonly note: string };
 
@@ -78,7 +78,7 @@ function approvalOutcome(candidate: CandidateIdentity, reviews: readonly ReviewF
     if (!DECISIVE.includes(review.state)) continue;
     const reason = review.login === author ? `review by PR author @${review.login} ignored`
       : review.userType !== "User" ? `review by ${review.userType} @${review.login} ignored`
-      : !MAINTAINERS.includes(review.association) ? `review by non-maintainer @${review.login} (${review.association}) ignored`
+      : !WRITERS.includes(review.permission) ? `review by @${review.login} without write access (${review.permission}) ignored`
       : review.commitId !== candidate.head ? `review by @${review.login} on older commit ${review.commitId.slice(0, 12)} ignored`
       : undefined;
     if (reason) { ignored.push(reason); continue; }

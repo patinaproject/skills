@@ -55,7 +55,7 @@ export function parseReview(value: unknown): ReviewFact {
   if (state !== "PENDING" && submittedAt === null) throw new Error("forge returned a submitted review without submitted_at");
   return {
     id: field(value, "id", isId, "review"), login: field(user, "login", isString, "review"), userType: field(user, "type", isString, "review"),
-    association: field(value, "author_association", isString, "review"), state, commitId: field(value, "commit_id", isString, "review"), submittedAt, htmlUrl: field(value, "html_url", isString, "review"),
+    permission: "none", state, commitId: field(value, "commit_id", isString, "review"), submittedAt, htmlUrl: field(value, "html_url", isString, "review"),
   };
 }
 function git(command: string, args: readonly string[]): string { return execFileSync(command, [...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim(); }
@@ -93,11 +93,23 @@ export class GhForge implements Forge {
   }
   readEvidence(repository: string, number: number, head: string): ForgeEvidence & { readonly author: string } {
     const checkRuns = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/commits/${head}/check-runs?per_page=100`, "--jq", ".check_runs[]"]).map(parseCheckRun);
-    const reviews = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/pulls/${number}/reviews?per_page=100`, "--jq", ".[]"]).map(parseReview);
+    const parsed = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/pulls/${number}/reviews?per_page=100`, "--jq", ".[]"]).map(parseReview);
     // REST names an App author "<slug>[bot]" as reviews do; `gh pr view --json author` would say "app/<slug>".
     const author = (jsonOutput(this.command, ["api", `repos/${repository}/pulls/${number}`]).user as { login?: unknown } | null)?.login;
     if (typeof author !== "string" || !author) throw new Error("forge returned a pull request without an author");
+    const permissions = new Map<string, string>();
+    for (const review of parsed) if (review.userType === "User" && review.login !== author && !permissions.has(review.login)) permissions.set(review.login, this.permissionOf(repository, review.login));
+    const reviews = parsed.map((review) => ({ ...review, permission: permissions.get(review.login) ?? "none" }));
     return { checkRuns, reviews, author };
+  }
+  private permissionOf(repository: string, login: string): string {
+    try {
+      const output = execFileSync(this.command, ["api", `repos/${repository}/collaborators/${login}/permission`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+      return field(JSON.parse(output) as Record<string, unknown>, "permission", isString, "collaborator permission");
+    } catch (error) {
+      if (/HTTP 404/.test(String((error as { stderr?: unknown }).stderr ?? ""))) return "none";
+      throw error;
+    }
   }
   publishStatus(repository: string, head: string, state: "success" | "failure", description: string, targetUrl?: string): void { execFileSync(this.command, ["api", `repos/${repository}/statuses/${head}`, "-f", `state=${state}`, "-f", "context=PR readiness", "-f", `description=${description.slice(0, 140)}`, ...(targetUrl ? ["-f", `target_url=${targetUrl}`] : [])], { stdio: "inherit" }); }
 }
