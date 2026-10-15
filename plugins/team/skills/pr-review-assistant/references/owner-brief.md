@@ -42,7 +42,7 @@ Each to-do item has:
 - a GitHub line link: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`;
 - a comment ready to copy, written in the reviewer's voice as a question or a request to the author, in plain English. A decide item gets two versions, one for each ruling.
 
-Give every to-do item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
+Give every to-do item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
 
 ## 5. Write the artifact
 
