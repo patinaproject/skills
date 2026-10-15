@@ -29,7 +29,8 @@ function parseSpec(obligation: Obligation, value: unknown): ProducerSpec {
   if (!Array.isArray(checks) || checks.length === 0 || !checks.every((name) => typeof name === "string" && name.length > 0)) {
     throw new Error(`${POLICY_PATH} ${obligation} checks must be a non-empty list of check names`);
   }
-  return { producer: "checks", checks };
+  if (spec.allowSkipped !== undefined && typeof spec.allowSkipped !== "boolean") throw new Error(`${POLICY_PATH} ${obligation} allowSkipped must be a boolean`);
+  return spec.allowSkipped ? { producer: "checks", checks, allowSkipped: true } : { producer: "checks", checks };
 }
 
 export function rulesFromPolicy(policy: ReadinessPolicy): ObligationRule[] {
@@ -44,7 +45,7 @@ export interface ProduceContext { readonly repository: string; readonly pullRequ
 
 export function produceCommand(spec: ProducerSpec, ctx: ProduceContext): string {
   if (spec.producer === "approval") {
-    return `a maintainer other than @${ctx.author} runs code-review at ${ctx.head.slice(0, 12)} and approves: gh pr review ${ctx.pullRequest} --repo ${ctx.repository} --approve`;
+    return `a maintainer other than @${ctx.author} reviews ${ctx.head.slice(0, 12)} and approves it: gh api repos/${ctx.repository}/pulls/${ctx.pullRequest}/reviews -f commit_id=${ctx.head} -f event=APPROVE`;
   }
   const names = spec.checks.map((name) => `"${name}"`).join(", ");
   const reruns = (ctx.failedRunIds ?? []).map((runId) => `gh run rerun ${runId} --failed --repo ${ctx.repository}`);

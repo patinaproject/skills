@@ -25,9 +25,9 @@ export interface CheckProvenance { readonly name: string; readonly checkRunId: n
 export type Provenance =
   | { readonly kind: "checks"; readonly checks: readonly CheckProvenance[] }
   | { readonly kind: "approval"; readonly reviewer: string; readonly reviewId: number; readonly url: string };
-export const EVALUATOR_VERSION = "pr-readiness/3";
+export const EVALUATOR_VERSION = "pr-readiness/4";
 export function provenanceUrls(provenance: Provenance): string[] { return provenance.kind === "approval" ? [provenance.url] : provenance.checks.map((check) => check.url); }
-export type ProducerSpec = { readonly producer: "checks"; readonly checks: readonly string[] } | { readonly producer: "approval" };
+export type ProducerSpec = { readonly producer: "checks"; readonly checks: readonly string[]; readonly allowSkipped?: boolean } | { readonly producer: "approval" };
 export interface ReadinessPolicy { readonly version: 1; readonly obligations: Readonly<Record<Obligation, ProducerSpec>>; readonly digest: string; }
 export interface Observation {
   readonly id: string;
@@ -43,7 +43,6 @@ export interface Observation {
   readonly reviewContextDigest?: string;
   readonly provenance: Provenance;
 }
-export interface BodyClaim { readonly observationId: string; readonly obligation: Obligation; readonly validity: Validity; }
 export interface ValidityDecision { readonly obligation: Obligation; readonly observationId?: string; readonly validity: Validity; readonly reason: string; readonly capturedHead?: string; readonly produce?: string; }
 export interface ObligationRule { readonly obligation: Obligation; readonly applies: (candidate: CandidateIdentity) => boolean; readonly spec: ProducerSpec; }
 export interface ReadinessPacket {

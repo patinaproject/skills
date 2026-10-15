@@ -1,5 +1,5 @@
 import type { CandidateIdentity, ReadinessPolicy, ValidityDecision } from "./domain.ts";
-import { ACCEPTED, evaluateReadiness, parseBodyClaims, type EvaluationReport } from "./evaluator.ts";
+import { ACCEPTED, evaluateReadiness, type EvaluationReport } from "./evaluator.ts";
 import { deriveObservations } from "./evidence.ts";
 import { parsePolicy, produceCommand, rulesFromPolicy } from "./policy.ts";
 import { GhForge, FilePacketStore, candidateFromPullRequest, packetKey, type Forge, type PacketStore, type PullRequestState } from "./adapters.ts";
@@ -10,17 +10,16 @@ interface Assessment { readonly pr: PullRequestState; readonly candidate: Candid
 function value(argv: readonly string[], name: string): string | undefined { const i = argv.indexOf(name); return i >= 0 && i + 1 < argv.length ? argv[i + 1] : undefined; }
 function required(argv: readonly string[], name: string): string { const result = value(argv, name); if (!result || result.startsWith("--")) throw new Error(`${name} is required`); return result; }
 const unmet = (report: EvaluationReport): readonly ValidityDecision[] => report.decisions.filter((d) => !ACCEPTED.includes(d.validity));
-function reportError(report: EvaluationReport): string { return [...unmet(report).map((d) => d.reason), ...report.bodyErrors].join("; ") || "readiness failed"; }
+function reportError(report: EvaluationReport): string { return [...unmet(report).map((d) => d.reason), ...report.errors].join("; ") || "readiness failed"; }
 
 function assess(forge: Forge, repository: string, number: number, bodyOverride: string | undefined, now: string | undefined): Assessment {
   const pr = forge.readPullRequest(repository, number);
-  const policy = parsePolicy(forge.readPolicy(repository, pr.baseSha ?? ""));
+  const policy = parsePolicy(forge.readPolicy(repository));
   const candidate = candidateFromPullRequest(pr, policy.digest);
   const evidence = forge.readEvidence(repository, number, candidate.head);
-  const { observations, notes, failedRunIds } = deriveObservations(candidate, policy, evidence);
-  const body = bodyOverride ?? pr.body;
-  const bodyClaims = body === undefined ? undefined : parseBodyClaims(body);
-  const evaluated = evaluateReadiness({ candidate, observations, bodyClaims, body, now, rules: rulesFromPolicy(policy) });
+  const { observations, notApplicable, notes, failedRunIds } = deriveObservations(candidate, policy, evidence);
+  const rules = rulesFromPolicy(policy).map((rule) => notApplicable.includes(rule.obligation) ? { ...rule, applies: () => false } : rule);
+  const evaluated = evaluateReadiness({ candidate, observations, body: bodyOverride ?? pr.body, now, rules });
   const decisions = evaluated.decisions.map((decision): ValidityDecision => {
     if (ACCEPTED.includes(decision.validity)) return decision;
     const spec = policy.obligations[decision.obligation];
@@ -32,7 +31,7 @@ function assess(forge: Forge, repository: string, number: number, bodyOverride: 
 
 export function operation(argv: readonly string[], deps: ReadinessDependencies): number {
   try {
-    const command = argv[0]; if (!command || !["open", "check", "publish", "gate"].includes(command)) throw new Error("usage: pr-readiness open|check|publish|gate");
+    const command = argv[0]; if (!command || !["open", "check", "publish"].includes(command)) throw new Error("usage: pr-readiness open|check|publish");
     const repository = required(argv, "--repo");
     if (command === "open") { const mode = value(argv, "--mode"); if (mode !== undefined && mode !== "draft" && mode !== "ready") throw new Error("--mode must be draft or ready"); const draft = mode ? mode === "draft" : value(argv, "--draft") !== "false"; const state = deps.forge.openPullRequest({ repository, base: required(argv, "--base"), head: required(argv, "--head"), draft }); process.stdout.write(JSON.stringify(state) + "\n"); return 0; }
     const number = Number(required(argv, "--pr")); if (!Number.isInteger(number) || number < 1) throw new Error("--pr requires a positive integer");
@@ -42,15 +41,8 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     if (command === "check") {
       process.stdout.write(JSON.stringify(report) + "\n");
       for (const d of unmet(report)) process.stderr.write(`${d.obligation}: ${d.reason} -> ${d.produce}\n`);
-      for (const error of report.bodyErrors) process.stderr.write(`body: ${error}\n`);
+      for (const error of report.errors) process.stderr.write(`error: ${error}\n`);
       return report.ready ? 0 : 1;
-    }
-    if (command === "gate") {
-      const missing = [...unmet(report).map((d) => d.obligation), ...(report.bodyErrors.length ? ["body evidence"] : [])];
-      const description = report.ready ? "ready" : `missing: ${missing.join(", ")}`.slice(0, 140);
-      deps.forge.publishStatus(repository, initial.candidate.head, report.ready ? "success" : "failure", description, value(argv, "--target-url"));
-      process.stdout.write(JSON.stringify(report) + "\n");
-      return 0;
     }
     if (initial.pr.body === undefined && value(argv, "--body") === undefined) throw new Error("pull request body is required for readiness publication");
     // A ready PR is still evaluated, so stale evidence cannot be hidden by an earlier transition.

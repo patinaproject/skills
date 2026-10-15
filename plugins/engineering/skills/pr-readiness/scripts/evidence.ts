@@ -22,32 +22,34 @@ export interface ReviewFact {
   readonly submittedAt: string | null;
   readonly htmlUrl: string;
 }
-export interface ForgeEvidence { readonly author: string; readonly checkRuns: readonly CheckRunFact[]; readonly reviews: readonly ReviewFact[]; }
-export interface Derivation { readonly observations: Observation[]; readonly notes: Partial<Record<Obligation, string>>; readonly failedRunIds: Partial<Record<Obligation, readonly number[]>>; }
+export type ReviewDecision = "APPROVED" | "CHANGES_REQUESTED" | "REVIEW_REQUIRED" | "none";
+export interface ForgeEvidence { readonly author: string; readonly reviewDecision: ReviewDecision; readonly checkRuns: readonly CheckRunFact[]; readonly reviews: readonly ReviewFact[]; }
+export interface Derivation { readonly observations: Observation[]; readonly notApplicable: Obligation[]; readonly notes: Partial<Record<Obligation, string>>; readonly failedRunIds: Partial<Record<Obligation, readonly number[]>>; }
 
 const WRITERS: readonly string[] = ["admin", "write"];
-const DECISIVE: readonly string[] = ["APPROVED", "CHANGES_REQUESTED"];
-type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly note?: string } | { readonly note: string };
+const DECISIVE: readonly string[] = ["APPROVED", "CHANGES_REQUESTED", "DISMISSED"];
+type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly note?: string } | { readonly note: string; readonly skipped?: true };
 
 export function deriveObservations(candidate: CandidateIdentity, policy: ReadinessPolicy, evidence: ForgeEvidence): Derivation {
   const observations: Observation[] = [];
   const notes: Partial<Record<Obligation, string>> = {};
   const failedRunIds: Partial<Record<Obligation, readonly number[]>> = {};
-  const approval = approvalOutcome(candidate, evidence.reviews, evidence.author);
+  const notApplicable: Obligation[] = [];
+  const approval = approvalOutcome(candidate, evidence);
   for (const obligation of OBLIGATIONS) {
     const spec = policy.obligations[obligation];
-    const outcome = spec.producer === "approval" ? approval : checksOutcome(spec.checks, evidence.checkRuns);
+    const outcome = spec.producer === "approval" ? approval : checksOutcome(spec.checks, spec.allowSkipped === true, evidence.checkRuns);
     if (outcome.note) notes[obligation] = outcome.note;
-    if (!("verdict" in outcome)) continue;
+    if (!("verdict" in outcome)) { if (outcome.skipped) notApplicable.push(obligation); continue; }
     observations.push(observation(candidate, obligation, outcome));
     if (outcome.verdict === "fail" && outcome.provenance.kind === "checks") {
       failedRunIds[obligation] = [...new Set(outcome.provenance.checks.filter((check) => check.conclusion !== "success" && check.runId !== undefined).map((check) => check.runId!))];
     }
   }
-  return { observations, notes, failedRunIds };
+  return { observations, notApplicable, notes, failedRunIds };
 }
 
-function checksOutcome(names: readonly string[], runs: readonly CheckRunFact[]): Outcome {
+function checksOutcome(names: readonly string[], allowSkipped: boolean, runs: readonly CheckRunFact[]): Outcome {
   const kept = new Map<string, CheckRunFact[]>();
   for (const name of names) {
     const newestPerSuite = new Map<number, CheckRunFact>();
@@ -64,6 +66,7 @@ function checksOutcome(names: readonly string[], runs: readonly CheckRunFact[]):
     return { note: [missing.length ? `no GitHub Actions run of ${quote(missing)}` : "", pending.length ? `${quote(pending)} still running` : ""].filter(Boolean).join("; ") };
   }
   const all = names.flatMap((name) => kept.get(name)!);
+  if (allowSkipped && all.every((run) => run.conclusion === "skipped")) return { note: `${quote(names)} skipped`, skipped: true };
   const failing = all.filter((run) => run.conclusion !== "success");
   const checks: CheckProvenance[] = all.map((run) => ({ name: run.name, checkRunId: run.id, runId: runIdFrom(run.detailsUrl), conclusion: run.conclusion ?? "none", url: run.htmlUrl }));
   const capturedAt = all.map((run) => run.completedAt!).sort().at(-1)!;
@@ -75,31 +78,33 @@ function checksOutcome(names: readonly string[], runs: readonly CheckRunFact[]):
   };
 }
 
-function approvalOutcome(candidate: CandidateIdentity, reviews: readonly ReviewFact[], author: string): Outcome {
+function approvalOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence): Outcome {
   const ignored: string[] = [];
   const latest = new Map<string, ReviewFact>();
-  for (const review of reviews) {
+  for (const review of evidence.reviews) {
     if (!DECISIVE.includes(review.state)) continue;
-    const reason = review.login === author ? `review by PR author @${review.login} ignored`
+    const reason = review.login === evidence.author ? `review by PR author @${review.login} ignored`
       : review.userType !== "User" ? `review by ${review.userType} @${review.login} ignored`
       : !WRITERS.includes(review.permission) ? `review by @${review.login} without write access (${review.permission}) ignored`
-      : review.commitId !== candidate.head ? `review by @${review.login} on older commit ${review.commitId.slice(0, 12)} ignored`
       : undefined;
     if (reason) { ignored.push(reason); continue; }
     const current = latest.get(review.login);
     if (!current || review.id > current.id) latest.set(review.login, review);
   }
-  const decisive = [...latest.values()].sort((a, b) => a.id - b.id);
-  const chosen = decisive.find((review) => review.state === "CHANGES_REQUESTED") ?? decisive.find((review) => review.state === "APPROVED");
-  if (!chosen) return { note: [`no maintainer approval at ${candidate.head.slice(0, 12)}`, ...ignored].join("; ") };
-  const verdict = chosen.state === "APPROVED" ? "pass" : "fail";
-  return {
-    verdict,
-    provenance: { kind: "approval", reviewer: chosen.login, reviewId: chosen.id, url: chosen.htmlUrl },
-    capturedAt: chosen.submittedAt!,
-    note: verdict === "fail" ? `@${chosen.login} requested changes` : undefined,
-  };
+  const standing = [...latest.values()].sort((a, b) => a.id - b.id);
+  const blocking = standing.find((review) => review.state === "CHANGES_REQUESTED");
+  if (blocking) return { verdict: "fail", provenance: approvalProvenance(blocking), capturedAt: blocking.submittedAt!, note: `@${blocking.login} requested changes` };
+  const approvals = standing.filter((review) => review.state === "APPROVED");
+  for (const stale of approvals) if (stale.commitId !== candidate.head) ignored.push(`review by @${stale.login} on older commit ${stale.commitId.slice(0, 12)} ignored`);
+  const approved = approvals.find((review) => review.commitId === candidate.head);
+  if (!approved) return { note: [`no maintainer approval at ${candidate.head.slice(0, 12)}`, ...ignored].join("; ") };
+  if (evidence.reviewDecision !== "APPROVED") {
+    return { note: evidence.reviewDecision === "none" ? "GitHub computes no review decision, so the ruleset requires no approving review" : `GitHub review decision is ${evidence.reviewDecision}, not APPROVED` };
+  }
+  return { verdict: "pass", provenance: approvalProvenance(approved), capturedAt: approved.submittedAt! };
 }
+
+function approvalProvenance(review: ReviewFact): Provenance { return { kind: "approval", reviewer: review.login, reviewId: review.id, url: review.htmlUrl }; }
 
 function observation(candidate: CandidateIdentity, obligation: Obligation, outcome: Extract<Outcome, { verdict: unknown }>): Observation {
   const { provenance } = outcome;

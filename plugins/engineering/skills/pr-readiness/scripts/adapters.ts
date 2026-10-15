@@ -3,16 +3,15 @@ import { mkdirSync, readFileSync, openSync, closeSync, writeFileSync, existsSync
 import { join, resolve } from "node:path";
 import { sha256, verifyPacket, type CandidateIdentity, type ReadinessPacket } from "./domain.ts";
 import { POLICY_PATH } from "./policy.ts";
-import type { CheckRunFact, ForgeEvidence, ReviewFact } from "./evidence.ts";
+import type { CheckRunFact, ForgeEvidence, ReviewDecision, ReviewFact } from "./evidence.ts";
 
 export interface PullRequestState extends Omit<CandidateIdentity, "policyDigest"> { readonly number: number; readonly isDraft: boolean; readonly body?: string; readonly baseRef?: string; readonly headRef?: string; }
 export interface Forge {
   readPullRequest(repository: string, number: number): PullRequestState;
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState;
   markReady(repository: string, number: number, expectedHead: string): void;
-  readPolicy(repository: string, baseSha: string): string | undefined;
+  readPolicy(repository: string): string | undefined;
   readEvidence(repository: string, number: number, head: string): ForgeEvidence;
-  publishStatus(repository: string, head: string, state: "success" | "failure", description: string, targetUrl?: string): void;
 }
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
 
@@ -57,6 +56,12 @@ export function parseReview(value: unknown): Omit<ReviewFact, "permission"> {
     state, commitId: field(value, "commit_id", isString, "review"), submittedAt, htmlUrl: field(value, "html_url", isString, "review"),
   };
 }
+const REVIEW_DECISIONS: readonly string[] = ["APPROVED", "CHANGES_REQUESTED", "REVIEW_REQUIRED"];
+export function parseReviewDecision(value: unknown): ReviewDecision {
+  if (value === "" || value === null) return "none";
+  if (typeof value === "string" && REVIEW_DECISIONS.includes(value)) return value as ReviewDecision;
+  throw new Error(`forge returned an unknown review decision: ${String(value)}`);
+}
 const notFound = (error: unknown): boolean => /HTTP 404/.test(String((error as { stderr?: unknown }).stderr ?? ""));
 function git(command: string, args: readonly string[]): string { return execFileSync(command, [...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim(); }
 function remoteDiff(command: string, repository: string, number: number): string { try { return execFileSync(command, ["pr", "diff", String(number), "--repo", repository, "--patch"], { encoding: "utf8" }); } catch { return ""; } }
@@ -78,11 +83,10 @@ export class GhForge implements Forge {
   }
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState { const args = ["pr", "create", "--repo", input.repository, "--base", input.base, "--head", input.head, ...(input.draft === false ? [] : ["--draft"])]; const url = execFileSync(this.command, args, { encoding: "utf8" }).trim(); const number = Number(url.match(/(\d+)\s*$/)?.[1] ?? 0); if (!number) throw new Error("forge did not return a pull request number"); return this.readPullRequest(input.repository, number); }
   markReady(repository: string, number: number, expectedHead: string): void { markReadyIfCurrent(this.command, repository, number, expectedHead); }
-  readPolicy(repository: string, baseSha: string): string | undefined {
-    if (!baseSha) throw new Error("cannot read the readiness policy without a base SHA");
+  readPolicy(repository: string): string | undefined {
     let output: string;
     try {
-      output = execFileSync(this.command, ["api", `repos/${repository}/contents/${POLICY_PATH}?ref=${baseSha}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+      output = execFileSync(this.command, ["api", `repos/${repository}/contents/${POLICY_PATH}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
     } catch (error) {
       if (notFound(error)) return undefined;
       throw error;
@@ -100,7 +104,8 @@ export class GhForge implements Forge {
     const permissions = new Map<string, string>();
     for (const review of parsed) if (review.userType === "User" && review.login !== author && !permissions.has(review.login)) permissions.set(review.login, this.permissionOf(repository, review.login));
     const reviews = parsed.map((review) => ({ ...review, permission: permissions.get(review.login) ?? "none" }));
-    return { author, checkRuns, reviews };
+    const reviewDecision = parseReviewDecision(jsonOutput(this.command, ["pr", "view", String(number), "--repo", repository, "--json", "reviewDecision"]).reviewDecision);
+    return { author, reviewDecision, checkRuns, reviews };
   }
   private permissionOf(repository: string, login: string): string {
     try {
@@ -111,7 +116,6 @@ export class GhForge implements Forge {
       throw error;
     }
   }
-  publishStatus(repository: string, head: string, state: "success" | "failure", description: string, targetUrl?: string): void { execFileSync(this.command, ["api", `repos/${repository}/statuses/${head}`, "-f", `state=${state}`, "-f", "context=PR readiness", "-f", `description=${description.slice(0, 140)}`, ...(targetUrl ? ["-f", `target_url=${targetUrl}`] : [])], { stdio: "inherit" }); }
 }
 export class OriginForge extends GhForge { constructor() { super("origin"); } }
 export function markReadyIfCurrent(command: "gh" | "origin", repository: string, number: number, expectedHead: string): void {

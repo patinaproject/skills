@@ -11,6 +11,7 @@ bash scripts/tests/markdown-lint-config.test.sh
 bash scripts/tests/marketplace.test.sh
 bash scripts/tests/update-branch.test.sh
 bash scripts/tests/pull-request-workflow.test.sh
+bash scripts/tests/diff-hygiene.test.sh
 bash scripts/tests/release-please-workflow.test.sh
 node scripts/tests/skills-release-dispatch.test.mjs
 bash scripts/tests/running-mobile-simulators.test.sh

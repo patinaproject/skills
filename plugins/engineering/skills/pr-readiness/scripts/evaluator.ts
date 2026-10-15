@@ -1,17 +1,16 @@
 import {
-  type BodyClaim, type CandidateIdentity, type Obligation, type ObligationRule,
+  type CandidateIdentity, type Obligation, type ObligationRule,
   type Observation, type Provenance, type CheckProvenance, type ReadinessPacket, type Validity, type ValidityDecision, freezePacket, isObligation, provenanceUrls, sha256,
 } from "./domain.ts";
 
 export interface EvaluationInput {
   readonly candidate: CandidateIdentity;
   readonly observations: readonly Observation[];
-  readonly bodyClaims?: readonly BodyClaim[];
   readonly now?: string;
   readonly body?: string;
   readonly rules: readonly ObligationRule[];
 }
-export interface EvaluationReport { readonly ready: boolean; readonly decisions: readonly ValidityDecision[]; readonly bodyErrors: readonly string[]; readonly packet?: ReadinessPacket; }
+export interface EvaluationReport { readonly ready: boolean; readonly decisions: readonly ValidityDecision[]; readonly errors: readonly string[]; readonly packet?: ReadinessPacket; }
 
 export const ACCEPTED: readonly Validity[] = ["observed-current", "valid-by-equivalence", "not-applicable"];
 
@@ -60,22 +59,22 @@ function equivalent(obligation: Obligation, current: CandidateIdentity, captured
 export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
   const rules = input.rules;
   const now = Date.parse(input.now ?? new Date().toISOString());
-  if (!Number.isFinite(now)) return { ready: false, decisions: [], bodyErrors: ["invalid evaluator time"] };
-  const bodyErrors: string[] = [];
-  if (!validCandidate(input.candidate)) bodyErrors.push("malformed candidate identity");
+  if (!Number.isFinite(now)) return { ready: false, decisions: [], errors: ["invalid evaluator time"] };
+  const errors: string[] = [];
+  if (!validCandidate(input.candidate)) errors.push("malformed candidate identity");
   const seen = new Set<string>();
   const observations = input.observations ?? [];
   for (const observation of observations) {
-    if (!validObservation(observation)) { bodyErrors.push("malformed observation"); continue; }
-    if (seen.has(observation.id)) bodyErrors.push(`duplicate observation ID: ${observation.id}`);
+    if (!validObservation(observation)) { errors.push("malformed observation"); continue; }
+    if (seen.has(observation.id)) errors.push(`duplicate observation ID: ${observation.id}`);
     seen.add(observation.id);
   }
   const ruleObligations = new Set<Obligation>();
   for (const rule of rules) {
-    if (ruleObligations.has(rule.obligation)) bodyErrors.push(`duplicate obligation rule: ${rule.obligation}`);
+    if (ruleObligations.has(rule.obligation)) errors.push(`duplicate obligation rule: ${rule.obligation}`);
     ruleObligations.add(rule.obligation);
   }
-  for (const observation of observations) if (validObservation(observation) && !ruleObligations.has(observation.obligation)) bodyErrors.push(`unknown obligation: ${observation.obligation}`);
+  for (const observation of observations) if (validObservation(observation) && !ruleObligations.has(observation.obligation)) errors.push(`unknown obligation: ${observation.obligation}`);
   const decisions: ValidityDecision[] = [];
   for (const rule of rules) {
     if (!rule.applies(input.candidate)) { decisions.push({ obligation: rule.obligation, validity: "not-applicable", reason: `change does not require ${rule.obligation} evidence` }); continue; }
@@ -91,42 +90,8 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
     if (equivalent(rule.obligation, input.candidate, observation.candidate, observation)) decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "valid-by-equivalence", reason: "producer equivalence contract permits reuse", capturedHead: observation.candidate.head });
     else decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation does not describe current candidate`, capturedHead: observation.candidate.head });
   }
-  bodyErrors.push(...validateBodyClaims(input.body, input.bodyClaims, decisions));
-  const ready = bodyErrors.length === 0 && decisions.every((d) => ACCEPTED.includes(d.validity));
-  if (!ready) return { ready, decisions, bodyErrors };
+  const ready = errors.length === 0 && decisions.every((d) => ACCEPTED.includes(d.validity));
+  if (!ready) return { ready, decisions, errors };
   const packet = freezePacket({ version: 1, candidate: input.candidate, observationIds: decisions.flatMap((d) => d.observationId ? [d.observationId] : []), decisions, requirementsDigest: input.candidate.requirementsDigest, policyDigest: input.candidate.policyDigest, bodyDigest: sha256(input.body ?? ""), provenanceRefs: observations.flatMap((o) => provenanceUrls(o.provenance)), artifactRefs: observations.flatMap((o) => o.artifactRefs), generatedAt: new Date(now).toISOString() });
-  return { ready, decisions, bodyErrors, packet };
-}
-
-function validateBodyClaims(body: string | undefined, claims: readonly BodyClaim[] | undefined, decisions: readonly ValidityDecision[]): string[] {
-  if (body === undefined && claims === undefined) return [];
-  const errors: string[] = [];
-  const evidenceStart = body?.search(/^## Evidence\s*$/im) ?? -1;
-  const evidenceEnd = evidenceStart < 0 ? -1 : body!.slice(evidenceStart + 1).search(/^##\s+/m);
-  if (body !== undefined && decisions.some((decision) => decision.observationId) && evidenceStart < 0) errors.push("body is missing an Evidence section");
-  const byId = new Map(decisions.filter((d) => d.observationId).map((d) => [d.observationId!, d]));
-  const seen = new Set<string>();
-  for (const claim of claims ?? []) {
-    if (!claim || typeof claim.observationId !== "string" || !isObligation(claim.obligation) || typeof claim.validity !== "string") { errors.push("malformed body claim"); continue; }
-    if (seen.has(claim.observationId)) errors.push(`duplicate observation ID: ${claim.observationId}`);
-    seen.add(claim.observationId);
-    const decision = byId.get(claim.observationId);
-    if (!decision) errors.push(`unknown observation ID: ${claim.observationId}`);
-    else if (decision.obligation !== claim.obligation || decision.validity !== claim.validity) errors.push(`body claim disagrees for ${claim.observationId}`);
-    if (body !== undefined && (!body.includes(claim.observationId) || evidenceStart < 0 || (evidenceEnd >= 0 && body.indexOf(claim.observationId) > evidenceStart + evidenceEnd + 1))) errors.push(`body omits observation ID from Evidence section: ${claim.observationId}`);
-  }
-  for (const decision of decisions) if (decision.observationId && !seen.has(decision.observationId)) errors.push(`body omits observation ID: ${decision.observationId}`);
-  return errors;
-}
-export function parseBodyClaims(body: string): readonly BodyClaim[] {
-  const claims: BodyClaim[] = [];
-  for (const match of body.matchAll(/<!--\s*pr-readiness:\s*(\{[^\n]+\})\s*-->/g)) {
-    let parsed: unknown;
-    try { parsed = JSON.parse(match[1]!); } catch { throw new Error("malformed readiness body claim"); }
-    if (!parsed || typeof parsed !== "object") throw new Error("malformed readiness body claim");
-    const claim = parsed as Partial<BodyClaim>;
-    if (typeof claim.observationId !== "string" || !isObligation(claim.obligation) || typeof claim.validity !== "string") throw new Error("malformed readiness body claim");
-    claims.push(claim as BodyClaim);
-  }
-  return claims;
+  return { ready, decisions, errors, packet };
 }

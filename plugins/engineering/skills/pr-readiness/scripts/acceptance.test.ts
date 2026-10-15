@@ -12,7 +12,7 @@ function check(options: FakeForgeOptions): { code: number; stderr: string; decis
   const parsed = JSON.parse(result.stdout) as EvaluationReport;
   return { code: result.code, stderr: result.stderr, decision: (obligation) => parsed.decisions.find((d) => d.obligation === obligation)! };
 }
-const APPROVE = `a maintainer other than @${AUTHOR} runs code-review at 0123456789ab and approves: gh pr review 7 --repo o/r --approve`;
+const APPROVE = `a maintainer other than @${AUTHOR} reviews 0123456789ab and approves it: gh api repos/o/r/pulls/7/reviews -f commit_id=${HEAD} -f event=APPROVE`;
 
 describe("acceptance: forge-attributed evidence", () => {
   it("publishes a candidate whose checks and maintainer approval are on the head", () => {
@@ -23,7 +23,6 @@ describe("acceptance: forge-attributed evidence", () => {
     expect(forge.markReadyCalls).toEqual([HEAD]);
     expect(store.packets.size).toBe(1);
     expect([...store.packets.values()][0]!.observationIds).toEqual(["standards", "spec", "hygiene", "tests", "lint", "behavior"].map((o) => `${o}@${HEAD}`));
-    expect(forge.statusCalls).toEqual([]);
   });
 
   it("names the producer of a missing check", () => {
@@ -32,7 +31,6 @@ describe("acceptance: forge-attributed evidence", () => {
     expect(result.decision("tests")).toMatchObject({ validity: "rerun-required", reason: 'missing tests observation: no GitHub Actions run of "Unit tests"', produce: 'push the head so CI runs "Unit tests"' });
     expect(result.stderr).toBe([
       'tests: missing tests observation: no GitHub Actions run of "Unit tests" -> push the head so CI runs "Unit tests"',
-      `body: unknown observation ID: tests@${HEAD}`,
       "",
     ].join("\n"));
   });
@@ -112,3 +110,64 @@ describe("acceptance: packet store", () => {
   });
 });
 function fakeForgeBody(): string { return fakeForge().readPullRequest("o/r", 7).body!; }
+
+describe("acceptance: GitHub-native authority", () => {
+  it("keeps an older change request from an eligible reviewer after another reviewer approves the head", () => {
+    const result = check({ reviews: [review({ id: 1, state: "CHANGES_REQUESTED", commitId: "c".repeat(40) }), review({ id: 2, login: "hill" })] });
+    expect(result.code).toBe(1);
+    expect(result.decision("standards")).toMatchObject({ validity: "invalid", reason: "standards observation failed: @ted requested changes" });
+  });
+
+  it("ignores a human author's approval of their own PR", () => {
+    const result = check({ author: "tlmader", reviews: [review({ login: "tlmader", permission: "admin" })] });
+    expect(result.code).toBe(1);
+    expect(result.decision("standards")).toMatchObject({ validity: "rerun-required", reason: "missing standards observation: no maintainer approval at 0123456789ab; review by PR author @tlmader ignored" });
+  });
+
+  it("requires GitHub's own review decision to be APPROVED", () => {
+    const result = check({ reviewDecision: "REVIEW_REQUIRED" });
+    expect(result.code).toBe(1);
+    expect(result.decision("standards")).toMatchObject({ validity: "rerun-required", reason: "missing standards observation: GitHub review decision is REVIEW_REQUIRED, not APPROVED" });
+  });
+
+  it("fails closed when the repository requires no approving review", () => {
+    const result = check({ reviewDecision: "none" });
+    expect(result.code).toBe(1);
+    expect(result.decision("spec")).toMatchObject({ validity: "rerun-required", reason: "missing spec observation: GitHub computes no review decision, so the ruleset requires no approving review" });
+  });
+
+  it("no longer posts a readiness status", () => {
+    const result = invoke(["gate", "--repo", "o/r", "--pr", "7"], fakeForge());
+    expect(result.code).toBe(1);
+    expect(result.stderr).toBe("pr-readiness: usage: pr-readiness open|check|publish\n");
+  });
+
+  it("treats policy-allowed skipped checks as not applicable", () => {
+    const skipped = ["Validate pull request", "Check diff hygiene"].map((name) => checkRun(name, { conclusion: "skipped" }));
+    const result = check({ checkRuns: [...CHECK_NAMES.filter((name) => !name.startsWith("Validate") && !name.startsWith("Check")).map((name) => checkRun(name)), ...skipped] });
+    expect(result.code).toBe(0);
+    expect(result.decision("hygiene")).toMatchObject({ validity: "not-applicable" });
+  });
+
+  it("fails a policy-allowed check that skipped while its sibling ran", () => {
+    const result = check({ checkRuns: [...CHECK_NAMES.filter((name) => name !== "Check diff hygiene").map((name) => checkRun(name)), checkRun("Check diff hygiene", { conclusion: "skipped" })] });
+    expect(result.decision("hygiene")).toMatchObject({ validity: "invalid", reason: 'hygiene observation failed: failing: "Check diff hygiene" (skipped)' });
+  });
+
+  it("still fails a skipped check the policy does not allow to skip", () => {
+    const result = check({ checkRuns: [...CHECK_NAMES.filter((name) => name !== "Unit tests").map((name) => checkRun(name)), checkRun("Unit tests", { conclusion: "skipped" })] });
+    expect(result.decision("tests")).toMatchObject({ validity: "invalid", reason: 'tests observation failed: failing: "Unit tests" (skipped)' });
+  });
+
+  it("reads the policy from the default branch, not the PR's base tip", () => {
+    const loose = JSON.stringify({ version: 1, obligations: { tests: { producer: "checks", checks: ["Lint Markdown"] } } });
+    const result = check({ basePolicy: loose, checkRuns: CHECK_NAMES.filter((name) => name !== "Unit tests").map((name) => checkRun(name)) });
+    expect(result.decision("tests")).toMatchObject({ validity: "rerun-required", reason: 'missing tests observation: no GitHub Actions run of "Unit tests"' });
+  });
+
+  it("needs no per-head claims in the PR body", () => {
+    const result = check({ body: "## Why\n\nClose the self-approval path." });
+    expect(result.stderr).toBe("");
+    expect(result.code).toBe(0);
+  });
+});

@@ -29,7 +29,7 @@ describe("pr-readiness evaluator", () => {
   it("rejects an observation without provenance as malformed", () => {
     const { provenance: _, ...bare } = observation("standards");
     const report = evaluateReadiness({ candidate, observations: [bare as Observation], rules: [rule("standards")] });
-    expect(report.bodyErrors).toEqual(["malformed observation"]);
+    expect(report.errors).toEqual(["malformed observation"]);
     expect(report.ready).toBe(false);
   });
   it("records behavior as not applicable for documentation-only candidates", () => {
@@ -51,14 +51,14 @@ describe("pr-readiness policy", () => {
   it("requires approval for every obligation when the base has no policy file", () => {
     const policy = parsePolicy(undefined);
     expect(policy.obligations).toEqual({ standards: { producer: "approval" }, spec: { producer: "approval" }, hygiene: { producer: "approval" }, tests: { producer: "approval" }, lint: { producer: "approval" }, behavior: { producer: "approval" } });
-    expect(policy.digest).toBe(sha256({ evaluator: "pr-readiness/3", raw: null }));
+    expect(policy.digest).toBe(sha256({ evaluator: "pr-readiness/4", raw: null }));
   });
   it("defaults an undeclared obligation to approval", () => {
     const raw = JSON.stringify({ version: 1, obligations: { tests: { producer: "checks", checks: ["Unit tests"] } } });
     const policy = parsePolicy(raw);
     expect(policy.obligations.tests).toEqual({ producer: "checks", checks: ["Unit tests"] });
     expect(policy.obligations.lint).toEqual({ producer: "approval" });
-    expect(policy.digest).toBe(sha256({ evaluator: "pr-readiness/3", raw }));
+    expect(policy.digest).toBe(sha256({ evaluator: "pr-readiness/4", raw }));
   });
   const rejected: [string, unknown, string][] = [
     ["a wrong version", { version: 2, obligations: {} }, ".github/pr-readiness.json version must be 1"],
@@ -66,12 +66,13 @@ describe("pr-readiness policy", () => {
     ["an unknown producer", { version: 1, obligations: { tests: { producer: "artifact" } } }, ".github/pr-readiness.json tests names unknown producer: artifact"],
     ["empty checks", { version: 1, obligations: { tests: { producer: "checks", checks: [] } } }, ".github/pr-readiness.json tests checks must be a non-empty list of check names"],
     ["a non-string check", { version: 1, obligations: { tests: { producer: "checks", checks: [3] } } }, ".github/pr-readiness.json tests checks must be a non-empty list of check names"],
+    ["a non-boolean allowSkipped", { version: 1, obligations: { hygiene: { producer: "checks", checks: ["Check diff hygiene"], allowSkipped: "yes" } } }, ".github/pr-readiness.json hygiene allowSkipped must be a boolean"],
   ];
   for (const [what, file, message] of rejected) it(`rejects ${what}`, () => { expect(() => parsePolicy(JSON.stringify(file))).toThrow(message); });
 
   it("derives produce commands from the spec", () => {
     const ctx = { repository: "o/r", pullRequest: 7, head: "0123456789abcdef", author: "bot" };
-    expect(produceCommand({ producer: "approval" }, ctx)).toBe("a maintainer other than @bot runs code-review at 0123456789ab and approves: gh pr review 7 --repo o/r --approve");
+    expect(produceCommand({ producer: "approval" }, ctx)).toBe("a maintainer other than @bot reviews 0123456789ab and approves it: gh api repos/o/r/pulls/7/reviews -f commit_id=0123456789abcdef -f event=APPROVE");
     expect(produceCommand({ producer: "checks", checks: ["Lint Actions workflows", "Lint Markdown"] }, ctx)).toBe('push the head so CI runs "Lint Actions workflows", "Lint Markdown"');
     expect(produceCommand({ producer: "checks", checks: ["Unit tests"] }, { ...ctx, failedRunIds: [41, 42] })).toBe('push the head so CI runs "Unit tests", or rerun it: gh run rerun 41 --failed --repo o/r && gh run rerun 42 --failed --repo o/r');
   });

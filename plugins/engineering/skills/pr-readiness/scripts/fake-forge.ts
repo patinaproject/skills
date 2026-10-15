@@ -1,7 +1,6 @@
 import { MemoryPacketStore, type Forge, type PacketStore, type PullRequestState } from "./adapters.ts";
 import { operation } from "./cli.ts";
-import type { CheckRunFact, ReviewFact } from "./evidence.ts";
-import { OBLIGATIONS } from "./domain.ts";
+import type { CheckRunFact, ReviewDecision, ReviewFact } from "./evidence.ts";
 
 export const HEAD = "0123456789abcdef0123456789abcdef01234567";
 export const AUTHOR = "patinaproject-goodyear[bot]";
@@ -10,7 +9,7 @@ export const POLICY = JSON.stringify({
   obligations: {
     standards: { producer: "approval" },
     spec: { producer: "approval" },
-    hygiene: { producer: "checks", checks: ["Validate pull request", "Check diff hygiene"] },
+    hygiene: { producer: "checks", checks: ["Validate pull request", "Check diff hygiene"], allowSkipped: true },
     tests: { producer: "checks", checks: ["Unit tests"] },
     lint: { producer: "checks", checks: ["Lint Actions workflows", "Lint Markdown"] },
     behavior: { producer: "checks", checks: ["Verify skill overlay"] },
@@ -27,10 +26,7 @@ export function checkRun(name: string, extra: Partial<CheckRunFact> & { runId?: 
 export function review(extra: Partial<ReviewFact> = {}): ReviewFact {
   return { id: 77, login: "ted", userType: "User", permission: "write", state: "APPROVED", commitId: HEAD, submittedAt: "2026-10-01T01:00:00Z", htmlUrl: "https://github.com/o/r/pull/7#pullrequestreview-77", ...extra };
 }
-export const evidenceBody = (head = HEAD): string => [
-  "## Why", "", "Close the self-approval path.", "", "## Evidence", "",
-  ...OBLIGATIONS.map((obligation) => `<!-- pr-readiness: ${JSON.stringify({ observationId: `${obligation}@${head}`, obligation, validity: "observed-current" })} -->`),
-].join("\n");
+export const BODY = "## Why\n\nClose the self-approval path.\n\n## Evidence\n\nCI and a maintainer approval at the head.";
 
 export interface FakeForgeOptions {
   readonly isDraft?: boolean;
@@ -39,10 +35,12 @@ export interface FakeForgeOptions {
   readonly checkRuns?: readonly CheckRunFact[];
   readonly reviews?: readonly ReviewFact[];
   readonly heads?: readonly string[];
+  readonly author?: string;
+  readonly reviewDecision?: ReviewDecision;
+  readonly basePolicy?: string;
 }
 export interface FakeForge extends Forge {
   readonly markReadyCalls: string[];
-  readonly statusCalls: { head: string; state: string; description: string; targetUrl?: string }[];
 }
 export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const heads = options.heads ?? [HEAD];
@@ -50,19 +48,16 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const pr = (): PullRequestState => ({
     repository: "o/r", number: 7, pullRequest: 7, base: "b".repeat(40), baseSha: "b".repeat(40), baseRef: "main", mergeBase: "b".repeat(40),
     head: heads[Math.min(reads++, heads.length - 1)]!, patchId: "p", diffDigest: "d", behaviorApplicable: true, requirementsDigest: "rq", reviewContextDigest: "rv", isDraft: options.isDraft ?? true,
-    body: options.body ?? evidenceBody(),
+    body: options.body ?? BODY,
   });
   const markReadyCalls: string[] = [];
-  const statusCalls: FakeForge["statusCalls"] = [];
   return {
     markReadyCalls,
-    statusCalls,
     readPullRequest: pr,
     openPullRequest: pr,
     markReady: (_repository, _number, head) => { markReadyCalls.push(head); },
-    readPolicy: () => ("policy" in options ? options.policy : POLICY),
-    readEvidence: () => ({ checkRuns: options.checkRuns ?? CHECK_NAMES.map((name) => checkRun(name)), reviews: options.reviews ?? [review()], author: AUTHOR }),
-    publishStatus: (_repository, head, state, description, targetUrl) => { statusCalls.push({ head, state, description, targetUrl }); },
+    readPolicy: (_repository: string, baseRef?: string) => (baseRef !== undefined && "basePolicy" in options ? options.basePolicy : "policy" in options ? options.policy : POLICY),
+    readEvidence: () => ({ checkRuns: options.checkRuns ?? CHECK_NAMES.map((name) => checkRun(name)), reviews: options.reviews ?? [review()], author: options.author ?? AUTHOR, reviewDecision: options.reviewDecision ?? "APPROVED" }),
   };
 }
 
