@@ -30,7 +30,8 @@ skill catalog.
 
 What it materializes from `assets/`:
 
-- The **Engineering hook** and its context (from `assets/hooks/`) into the
+- The **Engineering hook** and its context (from `assets/hooks/`), plus the
+  `setup-pstack` sheet decoder the hook runs, into the
   repo's `.claude/hooks/`. The skills-only context uses bare skill names, while
   the plugin source keeps its `engineering:` namespace.
 - The **Engineering agents** (from `assets/agents/`) into the repo's
