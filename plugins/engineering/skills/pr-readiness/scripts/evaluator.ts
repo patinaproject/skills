@@ -1,6 +1,6 @@
 import {
   type BodyClaim, type CandidateIdentity, type ExecutionContext, type Obligation, type ObligationRule,
-  type Observation, type ReadinessPacket, type ValidityDecision, freezePacket, isObligation, sha256,
+  type Observation, type Provenance, type CheckProvenance, type ReadinessPacket, type ValidityDecision, freezePacket, isObligation, sha256,
 } from "./domain.ts";
 
 export interface EvaluationInput {
@@ -9,7 +9,7 @@ export interface EvaluationInput {
   readonly bodyClaims?: readonly BodyClaim[];
   readonly now?: string;
   readonly body?: string;
-  readonly rules?: readonly ObligationRule[];
+  readonly rules: readonly ObligationRule[];
   /** Expected producer inputs are supplied by the trusted evaluator, never by PR code. */
   readonly expectedExecution?: Readonly<Partial<Record<Obligation, ExecutionContext>>>;
   /** Legacy spelling accepted for callers migrating to expectedExecution. */
@@ -17,15 +17,7 @@ export interface EvaluationInput {
 }
 export interface EvaluationReport { readonly ready: boolean; readonly decisions: readonly ValidityDecision[]; readonly bodyErrors: readonly string[]; readonly packet?: ReadinessPacket; }
 
-export const DEFAULT_RULES: readonly ObligationRule[] = [
-  { obligation: "standards", producer: "code-review", requireReceipt: true, applies: () => true },
-  { obligation: "spec", producer: "code-review", requireReceipt: true, applies: () => true },
-  { obligation: "hygiene", producer: "deslop/no-comments", requireReceipt: true, applies: () => true },
-  { obligation: "tests", producer: "test", requireReceipt: true, applies: () => true },
-  { obligation: "lint", producer: "lint", requireReceipt: true, applies: () => true },
-  { obligation: "behavior", producer: "runtime-verification", requireReceipt: true, applies: (candidate) => candidate.behaviorApplicable !== false },
-];
-const ACCEPTED: readonly string[] = ["observed-current", "valid-by-equivalence", "not-applicable"];
+export const ACCEPTED: readonly string[] = ["observed-current", "valid-by-equivalence", "not-applicable"];
 
 function validCandidate(value: unknown): value is CandidateIdentity {
   if (!value || typeof value !== "object") return false;
@@ -44,7 +36,14 @@ function validObservation(value: unknown): value is Observation {
     typeof o.inputDigest === "string" && typeof o.scope === "string" && Array.isArray(o.artifactRefs) && o.artifactRefs.every((r) => typeof r === "string") &&
     typeof o.producerVersion === "string" && Number.isFinite(Date.parse(o.capturedAt ?? "")) &&
     (o.expiresAt === undefined || Number.isFinite(Date.parse(o.expiresAt))) && (o.verdict === "pass" || o.verdict === "fail") &&
-    (!o.receipt || (typeof o.receipt === "object" && o.receipt.observationId === o.id && typeof o.receipt.producer === "string" && o.receipt.candidateHead === o.candidate.head && typeof o.receipt.digest === "string"));
+    validProvenance(o.provenance);
+}
+function validProvenance(value: unknown): value is Provenance {
+  if (!value || typeof value !== "object") return false;
+  const p = value as Partial<Record<string, unknown>>;
+  if (p.kind === "approval") return typeof p.reviewer === "string" && Number.isInteger(p.reviewId) && typeof p.url === "string";
+  return p.kind === "checks" && Array.isArray(p.checks) && p.checks.length > 0 && p.checks.every((c: Partial<CheckProvenance>) =>
+    !!c && typeof c.name === "string" && Number.isInteger(c.checkRunId) && (c.runId === undefined || Number.isInteger(c.runId)) && typeof c.conclusion === "string" && typeof c.url === "string");
 }
 function equalCandidate(a: CandidateIdentity, b: CandidateIdentity): boolean {
   return ["repository", "pullRequest", "base", "baseSha", "baseRef", "mergeBase", "head", "patchId", "diffDigest", "behaviorApplicable", "requirementsDigest", "policyDigest", "reviewContextDigest"]
@@ -88,7 +87,7 @@ function equivalent(obligation: Obligation, current: CandidateIdentity, captured
 }
 
 export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
-  const rules = input.rules ?? DEFAULT_RULES;
+  const rules = input.rules;
   const now = Date.parse(input.now ?? new Date().toISOString());
   if (!Number.isFinite(now)) return { ready: false, decisions: [], bodyErrors: ["invalid evaluator time"] };
   const bodyErrors: string[] = [];
@@ -114,7 +113,7 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
     if (candidates.length > 1) { decisions.push({ obligation: rule.obligation, validity: "invalid", reason: `duplicate ${rule.obligation} observations` }); continue; }
     const observation = candidates[0]!;
     if (observation.candidate.repository !== input.candidate.repository || observation.candidate.pullRequest !== input.candidate.pullRequest) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation belongs to another pull request`, capturedHead: observation.candidate.head }); continue; }
-    if (rule.requireReceipt && (!observation.receipt || observation.receipt.producer !== rule.producer || observation.receipt.observationId !== observation.id)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation has no producer-bound receipt`, capturedHead: observation.candidate.head }); continue; }
+    if (observation.provenance.kind !== rule.spec.producer) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation was not produced by ${rule.spec.producer}`, capturedHead: observation.candidate.head }); continue; }
     if (observation.verdict !== "pass") { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "invalid", reason: `${rule.obligation} observation failed`, capturedHead: observation.candidate.head }); continue; }
     if (observation.expiresAt && Date.parse(observation.expiresAt) <= now) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation expired`, capturedHead: observation.candidate.head }); continue; }
     const expected = expectedFor(input, rule.obligation);
@@ -126,7 +125,7 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
   bodyErrors.push(...validateBodyClaims(input.body, input.bodyClaims, decisions));
   const ready = bodyErrors.length === 0 && decisions.every((d) => ACCEPTED.includes(d.validity));
   if (!ready) return { ready, decisions, bodyErrors };
-  const packet = freezePacket({ version: 1, candidate: input.candidate, observationIds: decisions.flatMap((d) => d.observationId ? [d.observationId] : []), decisions, requirementsDigest: input.candidate.requirementsDigest, policyDigest: input.candidate.policyDigest, bodyDigest: sha256(input.body ?? ""), receiptRefs: decisions.flatMap((d) => d.observationId ? [`receipt:${d.observationId}`] : []), artifactRefs: observations.flatMap((o) => o.artifactRefs), generatedAt: new Date(now).toISOString() });
+  const packet = freezePacket({ version: 1, candidate: input.candidate, observationIds: decisions.flatMap((d) => d.observationId ? [d.observationId] : []), decisions, requirementsDigest: input.candidate.requirementsDigest, policyDigest: input.candidate.policyDigest, bodyDigest: sha256(input.body ?? ""), provenanceRefs: observations.flatMap((o) => o.provenance.kind === "approval" ? [o.provenance.url] : o.provenance.checks.map((c) => c.url)), artifactRefs: observations.flatMap((o) => o.artifactRefs), generatedAt: new Date(now).toISOString() });
   return { ready, decisions, bodyErrors, packet };
 }
 

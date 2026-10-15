@@ -176,7 +176,6 @@ test -f upstream-skills.json
 
 engineering_executables="$(find plugins/engineering -type f -perm -111 -not -path '*/node_modules/*' -print | sort)"
 expected_engineering_executables="$(printf '%s\n' \
-  plugins/engineering/skills/patina-mode/scripts/mark-ready/mark-ready \
   plugins/engineering/skills/pr-readiness/scripts/pr-readiness \
   plugins/engineering/hooks/session-start.sh \
   plugins/engineering/skills/patina-mode/scripts/orch/orch.ts \
