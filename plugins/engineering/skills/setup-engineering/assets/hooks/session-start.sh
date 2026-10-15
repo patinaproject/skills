@@ -22,7 +22,12 @@ fi
 read_sheet="$hook_root/read-sheet.sh"
 [ -f "$read_sheet" ] || read_sheet="$hook_root/../skills/setup-pstack/scripts/read-sheet.sh"
 
-normalized=$(sh "$read_sheet" "$sheet") || normalized=
+if [ ! -f "$read_sheet" ]; then
+  echo "session-start.sh: missing $read_sheet; the session hook setting is ignored. Rerun the setup-engineering install machinery to restore it." >&2
+  normalized=
+else
+  normalized=$(sh "$read_sheet" "$sheet") || normalized=
+fi
 if printf '%s\n' "$normalized" | grep -qx 'session hook: off'; then
   exit 0
 fi

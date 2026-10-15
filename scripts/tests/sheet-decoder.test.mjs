@@ -119,3 +119,36 @@ for (const [name, bytes] of Object.entries(FIXTURES)) {
     assert.equal(run('pwsh', ['-NoProfile', '-File', powershellHook], { CODEX_HOME: dir }), '', 'powershell hook still injected the mandate');
   });
 }
+
+const CARRIAGE_RETURNS = {
+  'two carriage returns before a newline': { bytes: utf8('session hook: off\r\r\nx\n'), off: false },
+  'a carriage return without a trailing newline': { bytes: utf8('session hook: off\r'), off: true },
+};
+
+for (const [name, { bytes, off }] of Object.entries(CARRIAGE_RETURNS)) {
+  test(`every decoder agrees on session hook for ${name}`, () => {
+    const dir = writeSheet(name, bytes);
+    const file = join(dir, 'pstack-models.md');
+
+    const shellOff = run('sh', [readSheetSh, file]).split('\n').includes('session hook: off');
+    assert.equal(shellOff, off, 'read-sheet.sh');
+    assert.equal(decodeSheet(bytes).split('\n').includes('session hook: off'), off, 'pi decodeSheet');
+    assert.equal(readSheet(dir).hookOff, off, 'pi hookOff');
+
+    const hookOutput = run(pluginHook, ['claude'], { CLAUDE_PLUGIN_ROOT: plugin, CLAUDE_CONFIG_DIR: dir });
+    assert.equal(hookOutput === '', off, 'plugin hook');
+  });
+}
+
+test('a hook without its decoder names the missing file and keeps the mandate on', () => {
+  const lonely = join(scratch, 'lonely-hook');
+  mkdirSync(lonely);
+  cpSync(pluginHook, join(lonely, 'session-start.sh'));
+  cpSync(join(plugin, 'hooks/session-start-context.md'), join(lonely, 'session-start-context.md'));
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: emptyDir };
+  delete env.CLAUDE_PLUGIN_ROOT;
+  const result = spawnSync('sh', [join(lonely, 'session-start.sh'), 'claude'], { encoding: 'utf8', env });
+  assert.equal(result.status, 0);
+  assert.notEqual(result.stdout, '');
+  assert.match(result.stderr, /missing .*read-sheet\.sh.*setup-engineering/);
+});
