@@ -61,6 +61,13 @@ git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -a
 if (cd "$consumer" && node sync.mjs fixture --dry-run 2>"$work/err"); then fail 'a fork outside every destination should fail'; fi
 grep -q 'forks outside every source destination' "$work/err" || fail 'unowned fork not reported'
 git -C "$consumer" reset -q --hard HEAD~1
+node - "$consumer/upstream-skills-forks.json" <<'NODE'
+const fs=require('fs'); const p=process.argv[2]; const j=JSON.parse(fs.readFileSync(p,'utf8')); j['plugins/engineering/skills/extra/SKILL.md'].reason='Patina maintains this deliberate local policy or integration adaptation.'; fs.writeFileSync(p,JSON.stringify(j)+'\n');
+NODE
+git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -am generic-reason
+if (cd "$consumer" && node sync.mjs fixture --dry-run 2>"$work/err"); then fail 'a generic fork reason should fail'; fi
+grep -q 'forks without a specific reason' "$work/err" || fail 'generic fork reason not reported'
+git -C "$consumer" reset -q --hard HEAD~1
 perl -0pi -e 's/shared-v1/shared-v2/' "$upstream/plugins/pstack/skills/poteto-mode/SKILL.md"
 printf 'other-v2\n' > "$upstream/plugins/pstack/other.md"
 git -C "$upstream" add -A

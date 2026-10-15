@@ -133,6 +133,8 @@ function longestDestinationOwner(pathname) {
 function validateForks() {
   const unowned = Object.keys(forks).filter(pathname => !longestDestinationOwner(pathname));
   if (unowned.length) fail(`forks outside every source destination:\n${unowned.map(p => `  ${p}`).join('\n')}`);
+  const generic = Object.entries(forks).filter(([, fork]) => typeof fork.reason !== 'string' || /^Patina maintains this\b/.test(fork.reason.trim()));
+  if (generic.length) fail(`forks without a specific reason; name what the edit changes and why:\n${generic.map(([pathname]) => `  ${pathname}`).join('\n')}`);
   const differences = new Set();
   for (const {base} of sourceData.values()) for (const [pathname, item] of base) if (!sameFile(localFile(pathname), {data: fs.readFileSync(item.file), mode: item.mode})) differences.add(pathname);
   const stale = Object.keys(forks).filter(pathname => sourceData.has(longestDestinationOwner(pathname)) && !differences.has(pathname)), undeclared = [...differences].filter(pathname => !forks[pathname]);
