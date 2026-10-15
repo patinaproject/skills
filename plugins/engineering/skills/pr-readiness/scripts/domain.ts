@@ -33,7 +33,6 @@ export interface ExecutionContext {
   readonly freshness?: string;
 }
 export interface CheckProvenance { readonly name: string; readonly checkRunId: number; readonly runId?: number; readonly conclusion: string; readonly url: string; }
-/** Who authored the evidence, as GitHub attributes it. Never supplied by the PR author. */
 export type Provenance =
   | { readonly kind: "checks"; readonly checks: readonly CheckProvenance[] }
   | { readonly kind: "approval"; readonly reviewer: string; readonly reviewId: number; readonly url: string };

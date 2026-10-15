@@ -60,9 +60,6 @@ function contextMatches(observation: Observation, expected: ExecutionContext | u
 function artifactIdentity(o: Observation): string {
   return o.artifactDigest ?? (o.artifactRefs.length ? sha256(o.artifactRefs) : "");
 }
-function completeBehaviorContext(o: Observation): boolean {
-  return [o.executableArtifact, o.target, o.runtime, o.environment, o.fixtures, o.scope, o.freshness].every((value) => typeof value === "string" && value.length > 0);
-}
 function equivalent(obligation: Obligation, current: CandidateIdentity, captured: CandidateIdentity, o: Observation, expected?: ExecutionContext): boolean {
   if (obligation === "standards" || obligation === "spec") {
     return current.patchId === captured.patchId && current.requirementsDigest === captured.requirementsDigest && current.policyDigest === captured.policyDigest &&
@@ -118,7 +115,7 @@ export function evaluateReadiness(input: EvaluationInput): EvaluationReport {
     if (observation.expiresAt && Date.parse(observation.expiresAt) <= now) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation expired`, capturedHead: observation.candidate.head }); continue; }
     const expected = expectedFor(input, rule.obligation);
     if (!contextMatches(observation, expected)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} execution inputs changed`, capturedHead: observation.candidate.head }); continue; }
-    if (equalCandidate(input.candidate, observation.candidate) && (rule.obligation !== "behavior" || completeBehaviorContext(observation))) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "observed-current", reason: "observation matches current candidate", capturedHead: observation.candidate.head }); continue; }
+    if (equalCandidate(input.candidate, observation.candidate)) { decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "observed-current", reason: "observation matches current candidate", capturedHead: observation.candidate.head }); continue; }
     if (equivalent(rule.obligation, input.candidate, observation.candidate, observation, expected)) decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "valid-by-equivalence", reason: "producer equivalence contract permits reuse", capturedHead: observation.candidate.head });
     else decisions.push({ obligation: rule.obligation, observationId: observation.id, validity: "rerun-required", reason: `${rule.obligation} observation does not describe current candidate`, capturedHead: observation.candidate.head });
   }

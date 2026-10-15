@@ -3,7 +3,6 @@ import { OBLIGATIONS, isObligation, sha256, type Obligation, type ObligationRule
 export const POLICY_PATH = ".github/pr-readiness.json";
 const APPROVAL: ProducerSpec = { producer: "approval" };
 
-/** `raw` is the policy file at the base SHA; a repository without one requires approval for every obligation. */
 export function parsePolicy(raw: string | undefined): ReadinessPolicy {
   const obligations = Object.fromEntries(OBLIGATIONS.map((obligation) => [obligation, APPROVAL])) as Record<Obligation, ProducerSpec>;
   if (raw !== undefined) {

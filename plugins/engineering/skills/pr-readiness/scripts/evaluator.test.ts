@@ -7,7 +7,7 @@ const candidate: CandidateIdentity = { repository: "o/r", pullRequest: 1, base: 
 const approval = { kind: "approval", reviewer: "ted", reviewId: 9, url: "https://github.com/o/r/pull/1#pullrequestreview-9" } as const;
 const observation = (obligation: Observation["obligation"], extra: Partial<Observation> = {}): Observation => ({
   id: `${obligation}@h`, obligation, candidate, inputDigest: "input", scope: "scope", artifactRefs: [], producerVersion: "1", capturedAt: "2026-10-01T00:00:00Z", verdict: "pass", provenance: approval,
-  executableArtifact: "review 9", target: "o/r", runtime: "github-review", environment: "ted", fixtures: "h", freshness: "2026-10-01T00:00:00Z", ...extra,
+  ...extra,
 });
 const rule = (obligation: Observation["obligation"], applies = true): ObligationRule => ({ obligation, spec: { producer: "approval" }, applies: () => applies });
 

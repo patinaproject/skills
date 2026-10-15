@@ -38,7 +38,6 @@ export interface FakeForgeOptions {
   readonly policy?: string;
   readonly checkRuns?: readonly CheckRunFact[];
   readonly reviews?: readonly ReviewFact[];
-  /** Heads returned by successive readPullRequest calls; the last one repeats. */
   readonly heads?: readonly string[];
 }
 export interface FakeForge extends Forge {
@@ -67,7 +66,6 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   };
 }
 
-/** Runs one CLI command against the fake forge and captures what it writes. */
 export function invoke(argv: readonly string[], forge: Forge, store: PacketStore = new MemoryPacketStore()): { code: number; stdout: string; stderr: string } {
   const out = process.stdout.write.bind(process.stdout); const err = process.stderr.write.bind(process.stderr);
   let stdout = ""; let stderr = "";

@@ -5,7 +5,6 @@ import { sha256, verifyPacket, type CandidateIdentity, type ReadinessPacket } fr
 import { POLICY_PATH } from "./policy.ts";
 import type { CheckRunFact, ForgeEvidence, ReviewFact } from "./evidence.ts";
 
-/** The policy digest is not part of the pull request; it comes from the policy file read at the base SHA. */
 export interface PullRequestState extends Omit<CandidateIdentity, "policyDigest"> { readonly number: number; readonly isDraft: boolean; readonly body?: string; readonly baseRef?: string; readonly headRef?: string; }
 export interface Forge {
   readPullRequest(repository: string, number: number): PullRequestState;

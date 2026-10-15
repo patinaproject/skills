@@ -12,7 +12,6 @@ function required(argv: readonly string[], name: string): string { const result 
 const unmet = (report: EvaluationReport): readonly ValidityDecision[] => report.decisions.filter((d) => !ACCEPTED.includes(d.validity));
 function reportError(report: EvaluationReport): string { return [...unmet(report).map((d) => d.reason), ...report.bodyErrors].join("; ") || "readiness failed"; }
 
-/** The one readiness evaluation every command shares: forge facts in, policy from the base SHA, no file-supplied observations. */
 function assess(forge: Forge, repository: string, number: number, bodyOverride: string | undefined, now: string | undefined): Assessment {
   const pr = forge.readPullRequest(repository, number);
   const policy = parsePolicy(forge.readPolicy(repository, pr.baseSha ?? ""));

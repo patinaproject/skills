@@ -29,7 +29,6 @@ const WRITERS: readonly string[] = ["admin", "write"];
 const DECISIVE: readonly string[] = ["APPROVED", "CHANGES_REQUESTED"];
 type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly note?: string } | { readonly note: string };
 
-/** Observations come only from GitHub-attributed objects: Actions check runs and maintainer reviews. */
 export function deriveObservations(candidate: CandidateIdentity, policy: ReadinessPolicy, evidence: ForgeEvidence, author: string): Derivation {
   const observations: Observation[] = [];
   const notes: Partial<Record<Obligation, string>> = {};
@@ -111,13 +110,6 @@ function observation(candidate: CandidateIdentity, obligation: Obligation, outco
     capturedAt: outcome.capturedAt,
     verdict: outcome.verdict,
     provenance,
-    // The behavior rule requires a complete execution context; these name the forge facts honestly.
-    executableArtifact: scope,
-    target: candidate.repository,
-    runtime: provenance.kind === "checks" ? "github-actions" : "github-review",
-    environment: provenance.kind === "checks" ? ACTIONS_APP : provenance.reviewer,
-    fixtures: candidate.head,
-    freshness: outcome.capturedAt,
   };
 }
 
