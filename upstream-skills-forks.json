@@ -43,7 +43,7 @@
   },
   "plugins/engineering/skills/automate-me/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank line markdownlint MD032 requires before a list and drops one trailing blank line; the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list and drops the trailing blank line that MD012 flags; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -92,7 +92,7 @@
   },
   "plugins/engineering/skills/how/references/explainer-prompt.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD022 requires after each `###` heading; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -113,7 +113,7 @@
   },
   "plugins/engineering/skills/interrogate/references/lead-judgment.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -127,7 +127,7 @@
   },
   "plugins/engineering/skills/make-pr-easy-to-review/SKILL.md": {
     "kind": "policy",
-    "reason": "Defers PR body structure to the `pr` skill, renames the Reviewer Guidance heading to match, and puts review details that do not fit that contract in a separate PR comment.",
+    "reason": "Defers PR body structure to the `pr` skill, renames the Reviewer Guidance heading to \"Add reviewer guidance\", and puts review details that do not fit that contract in a separate PR comment. Also removes the TL;DR bullet and changes \"test coverage\" to \"Record executed tests and their results\".",
     "upstream": {
       "status": "not-proposed"
     }
@@ -141,7 +141,7 @@
   },
   "plugins/engineering/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the Patina routing layer to the synced router: the issue-handoff gate, project verification through `patinaproject-verify`, grounding reuse, Repair from evidence, `pr` and `gather-evidence` routing, the `engineering:` skill-name rule, base-directory script paths, and the Codex `multi_agent` requirement.",
+    "reason": "Adds the Patina routing layer to the synced router: the issue-handoff gate, `patinaproject-verify`, grounding reuse, Repair from evidence, `pr` and `gather-evidence` routing, the `engineering:` skill-name rule, base-directory script paths, the Codex `multi_agent` requirement, and github-stacks, mobile-simulator and fix-ci triggers. Changes behaviour: the reply no longer names principles (they go to the private task record), the Architect trigger narrows to consequential ownership or interface choices, and an Offensive Programming principle is added. Rebrands the description, and converts bold principle-group labels to `###` headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -155,7 +155,7 @@
   },
   "plugins/engineering/skills/patina-mode/playbooks/autopilot-stack.md": {
     "kind": "policy",
-    "reason": "Replaces \"open ready, never draft\" with the caller-selected mode and the `pr-readiness publish` sequence, keeps verifier verdicts in a PR comment instead of the body, and resolves the playbook path from the skill base directory.",
+    "reason": "Replaces \"ready PR opened before self-proof\" and \"open ready, never draft\" with the caller-selected mode and the `pr-readiness publish` sequence, keeps verifier verdicts in a PR comment instead of the body, and resolves the playbook path from the skill base directory.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -176,21 +176,21 @@
   },
   "plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md": {
     "kind": "policy",
-    "reason": "Replaces upstream's PR title, body, and readiness rules with the repository-owned title format, the `engineering:pr` body contract, the GitHub-native stack reference, and the caller-selected creation mode with ordered `/deslop`, `/no-comments`, `code-review`, and `pr-readiness publish`.",
+    "reason": "Replaces upstream's PR title, body, and readiness rules with the repository-owned title format, the `engineering:pr` body contract, the GitHub-native stack reference, and the caller-selected creation mode with ordered `/deslop`, `/no-comments`, `code-review`, and `pr-readiness publish`. Also adds fork-repo handling (`--repo \"$base_repo\"` on every `gh pr` command and a `gh api` call for fork PRs) and a `head_url` fetch for reusing a branch across worktrees.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/patina-mode/playbooks/orchestrate.md": {
     "kind": "policy",
-    "reason": "Adds a PR publication section and PUBLICATION brief field that route every publishing unit through `opening-a-pr`, adds the verification-block and verifier-direction rules, names `patinaproject-verify` and `run` as drivers, and labels a bare fence `text`.",
+    "reason": "Adds a PR publication section and PUBLICATION brief field that route every publishing unit through `opening-a-pr`, adds the verification-block and verifier-direction rules, names `patinaproject-verify` and `run` as drivers, and labels a bare fence `text`. Also rewords the dependency paragraph: a verifier reads the worker report, or gets the verification context in its brief when it cannot read the store.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/patina-mode/playbooks/session-pickup.md": {
     "kind": "policy",
-    "reason": "Adds the issue-handoff step through `scripts/issue-routes/session-pickup.ts`, the `move-session-here` route for session handoffs, and a bound on which local transcripts to read; later steps renumber.",
+    "reason": "Adds the issue-handoff step through `scripts/issue-routes/session-pickup.ts` and the `move-session-here` route for session handoffs, renumbering later steps. Also rewords the transcript fallback: it drops upstream's cwd-derived recipe (`~/.claude/projects/<encoded-cwd>/*.jsonl`) and now covers only an explicit local transcript path inside the named workspace's Claude Code directory.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -232,7 +232,7 @@
   },
   "plugins/engineering/skills/patina-mode/scripts/orch/orch.test.ts": {
     "kind": "policy",
-    "reason": "Changes the fixture branch name from `poteto/u1` to `patina/u1`, so the denylisted upstream name `poteto` does not remain in shipped text.",
+    "reason": "Renames the fixture branch from `poteto/u1` to `patina/u1` in the two assertions that use it, so the fixture uses Patina's name; the test logic is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -246,28 +246,28 @@
   },
   "plugins/engineering/skills/principle-attack-the-premise/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-boundary-discipline/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-encode-lessons-in-structure/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-exhaust-the-design-space/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -281,91 +281,91 @@
   },
   "plugins/engineering/skills/principle-guard-the-context-window/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-make-operations-idempotent/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-minimize-reader-load/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-never-block-on-the-human/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-outcome-oriented-execution/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-prove-it-works/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-separate-before-serializing-shared-state/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/principle-subtract-before-you-add/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/reflect/references/divergent-reviewer.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/reflect/references/judgment-reviewer.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/reflect/references/synthesizer.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/reflect/references/tooling-reviewer.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -393,21 +393,21 @@
   },
   "plugins/engineering/skills/unslop/SKILL.md": {
     "kind": "policy",
-    "reason": "Wraps the numbered example in markdownlint-disable and enable comments for MD029, and adds the blank lines around them.",
+    "reason": "Wraps the whole \"Patterns to detect and fix\" catalogue (from `### Content` through rule 33, numbered with deliberate gaps as stable ids) in markdownlint-disable and enable comments for MD029, with the blank lines around them.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/why/SKILL.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/why/references/epistemics.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -421,14 +421,14 @@
   },
   "plugins/engineering/skills/why/references/sources/code-archaeology.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/why/references/sources/databricks.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -442,14 +442,14 @@
   },
   "plugins/engineering/skills/why/references/sources/linear.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/engineering/skills/why/references/sources/notion.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -463,7 +463,7 @@
   },
   "plugins/engineering/skills/why/references/sources/slack.md": {
     "kind": "policy",
-    "reason": "Adds the blank lines that markdownlint MD032 requires before lists (and MD022 around headings); the wording is unchanged.",
+    "reason": "Adds the blank line that markdownlint MD032 requires before a list; the wording is unchanged.",
     "upstream": {
       "status": "not-proposed"
     }
