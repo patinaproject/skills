@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/patinaproject/skills/compare/v3.5.0...v3.5.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* [#662](https://github.com/patinaproject/skills/issues/662) drop the undocumented metadata.repository from the marketplace manifest ([#663](https://github.com/patinaproject/skills/issues/663)) ([cfc708b](https://github.com/patinaproject/skills/commit/cfc708b34b781a8eca7b43b5e430ca41cb89801a))
+
 ## [3.5.0](https://github.com/patinaproject/skills/compare/v3.4.0...v3.5.0) (2026-10-16)
 
 
