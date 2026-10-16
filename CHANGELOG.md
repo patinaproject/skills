@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/patinaproject/skills/compare/v3.3.0...v3.4.0) (2026-10-16)
+
+
+### Features
+
+* [#657](https://github.com/patinaproject/skills/issues/657) hand pr-review-assistant visuals to the bundled show-me skill ([#658](https://github.com/patinaproject/skills/issues/658)) ([c30837b](https://github.com/patinaproject/skills/commit/c30837b4df1dec7640e17794d8993bd72a230b07))
+
 ## [3.3.0](https://github.com/patinaproject/skills/compare/v3.2.1...v3.3.0) (2026-10-15)
 
 
