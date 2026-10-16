@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/patinaproject/skills/compare/v3.4.0...v3.5.0) (2026-10-16)
+
+
+### Features
+
+* [#654](https://github.com/patinaproject/skills/issues/654) save Linear issue artifacts as Documents ([#656](https://github.com/patinaproject/skills/issues/656)) ([4293a1d](https://github.com/patinaproject/skills/commit/4293a1d2ef3a73aadbe871fd6ad761ab0a6d96b6))
+
 ## [3.4.0](https://github.com/patinaproject/skills/compare/v3.3.0...v3.4.0) (2026-10-16)
 
 
