@@ -34,7 +34,7 @@ function findExecutableSkillReferences(contents, plugin) {
   const references = [];
   for (const snippet of executableSnippets(contents)) {
     if (!/\bsubagent_type\s*:/i.test(snippet)) {
-      for (const match of snippet.matchAll(/\b(?:engineering|team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
+      for (const match of snippet.matchAll(/\b(?:engineering|team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?![a-z0-9<-])/g)) {
         const reference = match[0];
         references.push({ reference, target: `${reference.split(':', 1)[0]}/${match[1]}` });
       }
@@ -55,6 +55,11 @@ function collectMirrorDirs(repoRoot) {
     .flatMap((source) => source.targets)
     .filter((target) => target.kind === 'skill')
     .map((target) => path.join(repoRoot, target.destination));
+}
+
+function collectActiveSkillMarkdown(repoRoot, plugin, mirrors) {
+  return collectMarkdownFiles(path.join(repoRoot, 'plugins', plugin, 'skills'))
+    .filter((filePath) => !mirrors.some((mirror) => filePath.startsWith(mirror + path.sep)));
 }
 
 function collectMarkdownFiles(dir) {
@@ -88,8 +93,7 @@ function lintRelativeLinks(repoRoot) {
   const errors = [];
   for (const plugin of ['engineering', 'team']) {
     const pluginRoot = path.join(repoRoot, 'plugins', plugin);
-    for (const filePath of collectMarkdownFiles(path.join(pluginRoot, 'skills'))) {
-      if (mirrors.some((mirror) => filePath.startsWith(mirror + path.sep))) continue;
+    for (const filePath of collectActiveSkillMarkdown(repoRoot, plugin, mirrors)) {
       const file = path.relative(repoRoot, filePath);
       const raw = readFileSync(filePath, 'utf8').split('\n');
       const prose = stripCode(raw.join('\n')).split('\n');
@@ -121,7 +125,10 @@ function lintRelativeLinks(repoRoot) {
 function main(repoRoot = process.cwd()) {
   const published = collectPublishedSkillFiles(repoRoot);
   const errors = lintRelativeLinks(repoRoot);
-  for (const filePath of [...published.values()].sort()) {
+  const mirrors = collectMirrorDirs(repoRoot);
+  const activeMarkdown = ['engineering', 'team'].flatMap((plugin) => collectActiveSkillMarkdown(repoRoot, plugin, mirrors));
+  const lintTargets = [...new Set([...published.values(), ...activeMarkdown])].sort();
+  for (const filePath of lintTargets) {
     const file = path.relative(repoRoot, filePath);
     const contents = readFileSync(filePath, 'utf8');
     const plugin = file.split(path.sep)[1];
@@ -137,7 +144,7 @@ function main(repoRoot = process.cwd()) {
     process.exitCode = 1;
     return;
   }
-  console.info(`OK: ${published.size} active skill files contain only published executable references and in-plugin links`);
+  console.info(`OK: ${lintTargets.length} active skill files contain only published executable references and in-plugin links`);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
