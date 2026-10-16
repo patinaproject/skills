@@ -28,6 +28,9 @@ m_name=$(jq -r '.name' .claude-plugin/marketplace.json)
 mp_names=$(jq -c '[.plugins[].name]' .claude-plugin/marketplace.json)
 test "$m_name" = "patinaproject-skills"
 test "$mp_names" = '["engineering","team"]'
+# Claude Code documents only these metadata keys; the desktop app can reject the
+# manifest for any other, while the CLI only warns.
+test "$(jq -c '(.metadata // {}) | keys - ["description","pluginRoot","version"]' .claude-plugin/marketplace.json)" = '[]'
 test "$(jq -r '.plugins[] | select(.name == "engineering") | .source' .claude-plugin/marketplace.json)" = './plugins/engineering'
 test "$(jq -r '.plugins[] | select(.name == "team") | .source' .claude-plugin/marketplace.json)" = './plugins/team'
 test -f plugins/team/.claude-plugin/plugin.json
