@@ -137,6 +137,9 @@ documentation-capture skill. This
 uses `CONTEXT.md` as the local glossary filename and supersedes the inline glossary-update capture instruction in
 the vendored `domain-modeling` payload; see
 [docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
+In a Linear-tracked repository, the proposed ADR body goes in a Document on the
+issue instead, as the tracker adapter's **Issue artifacts** section describes
+([ADR-654](docs/adr/ADR-654-linear-issue-documents.md)).
 
 ## Build, Test, and Development Commands
 

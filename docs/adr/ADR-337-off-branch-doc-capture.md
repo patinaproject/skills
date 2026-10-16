@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Accepted. Amended by
+[ADR-654](ADR-654-linear-issue-documents.md) for Linear-tracked repositories.
 
 ## Context
 
