@@ -2,6 +2,16 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const BUILT_IN_AGENTS = new Set(['general-purpose', 'Explore', 'Plan']);
+const MANDATE = path.join('plugins', 'engineering', 'hooks', 'session-start-context.md');
+
+function collectEngineeringAgents(repoRoot) {
+  return ['agents', 'effort-agents'].flatMap((agentDir) =>
+    readdirSync(path.join(repoRoot, 'plugins', 'engineering', agentDir))
+      .filter((name) => name.endsWith('.md'))
+      .map((name) => name.slice(0, -3)));
+}
+
 function collectPublishedSkillFiles(repoRoot) {
   const published = new Map();
   for (const plugin of ['engineering', 'team']) {
@@ -47,6 +57,34 @@ function findExecutableSkillReferences(contents, plugin) {
 
   }
   return references;
+}
+
+function placeholderPattern(name) {
+  return new RegExp(`^${name.split(/<[a-z]+>/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[a-z]+')}$`);
+}
+
+function findAgentDispatchErrors(contents, agents, file) {
+  const errors = [];
+  for (const snippet of executableSnippets(contents)) {
+    for (const [, name] of snippet.matchAll(/\b(?:subagent_type|agent_type)\s*:\s*"([^"]+)"/g)) {
+      const namespaced = name.match(/^(?:engineering|pstack):(.+)$/);
+      if (namespaced) {
+        errors.push(`FAIL: agent dispatch uses a namespaced name: ${name} in ${file}; use ${namespaced[1]}`);
+        continue;
+      }
+      if (name.includes(':') || BUILT_IN_AGENTS.has(name)) continue;
+      const pattern = placeholderPattern(name);
+      if (!agents.some((agent) => pattern.test(agent))) errors.push(`FAIL: agent dispatch names an unavailable agent: ${name} in ${file}`);
+    }
+  }
+  return errors;
+}
+
+function findMandateErrors(repoRoot) {
+  const contents = readFileSync(path.join(repoRoot, MANDATE), 'utf8');
+  return [...contents.matchAll(/`([a-z][a-z0-9]*(?:-[a-z0-9]+)*)`/g)]
+    .filter(([, name]) => !existsSync(path.join(repoRoot, 'plugins', 'engineering', 'skills', name, 'SKILL.md')))
+    .map(([, name]) => `FAIL: session-start mandate names an unavailable skill: ${name} in ${MANDATE}`);
 }
 
 function collectMirrorDirs(repoRoot) {
@@ -124,7 +162,8 @@ function lintRelativeLinks(repoRoot) {
 
 function main(repoRoot = process.cwd()) {
   const published = collectPublishedSkillFiles(repoRoot);
-  const errors = lintRelativeLinks(repoRoot);
+  const agents = collectEngineeringAgents(repoRoot);
+  const errors = [...lintRelativeLinks(repoRoot), ...findMandateErrors(repoRoot)];
   const mirrors = collectMirrorDirs(repoRoot);
   const activeMarkdown = ['engineering', 'team'].flatMap((plugin) => collectActiveSkillMarkdown(repoRoot, plugin, mirrors));
   const lintTargets = [...new Set([...published.values(), ...activeMarkdown])].sort();
@@ -132,6 +171,7 @@ function main(repoRoot = process.cwd()) {
     const file = path.relative(repoRoot, filePath);
     const contents = readFileSync(filePath, 'utf8');
     const plugin = file.split(path.sep)[1];
+    errors.push(...findAgentDispatchErrors(contents, agents, file));
     for (const { reference, target } of findExecutableSkillReferences(contents, plugin)) {
       if (!published.has(target)) {
         errors.push(`FAIL: executable skill reference is unavailable: ${reference} in ${file}`);
