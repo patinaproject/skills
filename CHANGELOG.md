@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/patinaproject/skills/compare/v3.5.1...v3.6.0) (2026-10-17)
+
+
+### Features
+
+* [#666](https://github.com/patinaproject/skills/issues/666) enforce a readiness check before triage applies a ready role ([#667](https://github.com/patinaproject/skills/issues/667)) ([0182f4f](https://github.com/patinaproject/skills/commit/0182f4f83c1150a38459415c1f39f0caffd19f1b))
+
 ## [3.5.1](https://github.com/patinaproject/skills/compare/v3.5.0...v3.5.1) (2026-10-16)
 
 
