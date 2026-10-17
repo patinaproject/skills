@@ -12,6 +12,7 @@ Every item must hold:
 4. **Acceptance criteria and scope boundaries.** Concrete, independently verifiable acceptance criteria are written, and so is what is out of scope.
 5. **No open questions.** The triage notes list nothing still needed.
 6. **Reason it can't be delegated.** For `ready-for-human` only: the notes say why an agent can't do it.
+7. **Decisions approved.** Every design or naming decision the brief depends on that is hard to reverse, surprising without context, and the result of a real trade-off is listed in the triage notes, with the person who approved it. An agent's recommended answer counts only once a person accepts it. A decision that fails any of the three criteria needs no approval, and "none needed" is a valid result.
 
 ## Record it
 
@@ -26,6 +27,16 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 - [ ] Acceptance criteria and scope boundaries: out-of-scope list missing
 - [ ] No open questions: 1 open
 - [x] Reason it can't be delegated: n/a (ready-for-agent)
+- [ ] Decisions approved: 1 approved by @person, 1 awaiting approval
+```
+
+List each qualifying decision under the checklist with its answer and who approved it, or mark it awaiting approval:
+
+```markdown
+**Decisions:**
+
+- Name the role `ready-for-human`, not `needs-human`: approved by @person
+- Store briefs as issue Documents, not comments: awaiting approval
 ```
 
 Write the triage notes and the agent brief through the issue-tracker config's issue-artifact operation. When it defines none, post each as a comment.
@@ -33,4 +44,4 @@ Write the triage notes and the agent brief through the issue-tracker config's is
 ## Outcome
 
 - **Every item holds:** write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) from what the checklist established, then apply the role.
-- **An item fails:** do not apply the role. Close each gap you can yourself: reproduce the bug, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes. If only the reporter can answer them, apply `needs-info`; otherwise leave `needs-triage`.
+- **An item fails:** do not apply the role. Close each gap you can yourself: reproduce the bug, search the codebase, read `.out-of-scope/`. Never close a "Decisions approved" gap yourself. Ask each unapproved decision as a grilling question with your recommended answer, and the item fails until a person answers it. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes. If only the reporter can answer them, apply `needs-info`; otherwise leave `needs-triage`.
