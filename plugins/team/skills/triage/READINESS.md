@@ -35,7 +35,7 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 - [ ] Decisions approved: 1 awaiting approval
 ```
 
-List each qualifying decision under the checklist with its answer and who approved it, or mark it awaiting approval. When a person answers, move the decision from "still needed" to this list:
+List each qualifying decision under the checklist with its answer and who approved it, or mark it awaiting approval. Record a qualifying decision only here, never under "still needed":
 
 ```markdown
 **Decisions:**
