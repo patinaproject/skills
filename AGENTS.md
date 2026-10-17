@@ -229,6 +229,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs`.
 - Run `bash scripts/tests/update-branch.test.sh` after changing
   `plugins/team/skills/update-branch/**`.
+- Run `node scripts/tests/triage-check-issue-state.test.mjs` after changing
+  `plugins/team/skills/triage/scripts/check-issue-state.mjs`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing
