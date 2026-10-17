@@ -59,6 +59,11 @@ In upstream triage guidance, interpret "GitHub issue" as the canonical tracker
 issue and route example commands through this adapter. Pull requests remain
 forge objects.
 
+Before each triage write, the `triage` skill's `check-issue-state.mjs` script
+re-reads the issue's open state and state label: through `gh` for GitHub, and
+through Linear's GraphQL API with `LINEAR_API_KEY` for Linear. A Linear triage
+session therefore needs that key even when it uses the connected Linear tools.
+
 ## Public repositories: GitHub Issues
 
 Prefer connected GitHub tools in interactive sessions. Use `gh` when a

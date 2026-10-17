@@ -23,6 +23,7 @@ bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/setup-engineering-machinery.test.sh
 bash scripts/tests/sync-upstream-skills.test.sh
+node scripts/tests/triage-check-issue-state.test.mjs
 
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.

@@ -482,6 +482,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/team/skills/triage/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/team/skills/tutor/SKILL.md": {
     "kind": "policy",
     "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
