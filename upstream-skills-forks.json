@@ -482,6 +482,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/team/skills/triage/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina gates ready-for-agent and ready-for-human on the readiness check in READINESS.md, including when the maintainer asks for the role directly.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/team/skills/tutor/SKILL.md": {
     "kind": "policy",
     "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
