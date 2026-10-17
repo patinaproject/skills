@@ -4,6 +4,8 @@ set -euo pipefail
 bash scripts/tests/dogfood.test.sh
 node scripts/lint-active-skill-references.mjs
 bash scripts/tests/lint-active-skill-references.test.sh
+node scripts/lint-readiness-parity.mjs
+bash scripts/tests/lint-readiness-parity.test.sh
 bash scripts/tests/esm-tooling.test.sh
 pnpm exec commitlint --version >/dev/null
 bash scripts/tests/issue-reference-contract.test.sh
