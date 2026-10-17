@@ -33,6 +33,7 @@ function parseArgs(argv) {
     else fail(`unexpected argument: ${arg}\n${usage}`);
   }
   if (!args.ref || !args.state) fail(usage);
+  if (!args.stateLabels.length) fail("--state-labels needs at least one label");
   if (args.state !== "none" && !args.stateLabels.some((label) => label.toLowerCase() === args.state.toLowerCase())) fail(`--state ${args.state} is not one of the state labels: ${args.stateLabels.join(", ")}`);
   return args;
 }

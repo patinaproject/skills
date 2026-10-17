@@ -100,6 +100,7 @@ try {
 
   assert.equal((await check(['acme/app#3', '--state', 'triaged'])).code, 1, 'an unknown state label is refused');
   assert.equal((await check(['acme/app#3'])).code, 1, 'the expected state is required');
+  assert.equal((await check(['acme/app#3', '--state', 'none', '--state-labels', ''])).code, 1, 'an empty state label list is refused');
   assert.equal((await check(['issue-3', '--state', 'none'])).code, 1, 'an unrecognized reference is refused');
 } finally {
   linear.close();
