@@ -79,7 +79,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 5. **Apply the outcome:**
    - `ready-for-agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the role.
    - `ready-for-human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
-   - `needs-info`: post triage notes (template below).
+   - `needs-info`: write triage notes (template below).
    - For `wontfix`, close the issue, with the comment depending on *why*:
      - **Already implemented**: the change already exists in the codebase. Point to where it lives; do **not** write to `.out-of-scope/` (that KB is for *rejected* requests, not built ones).
      - **Rejected (bug)**: give a polite explanation, then close.
@@ -90,7 +90,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 If the maintainer says "move #42 to needs-triage", trust them and apply the role directly. Confirm what you're about to do (role changes, comment, close), then act. Skip grilling.
 
-A move to `ready-for-agent` or `ready-for-human` still runs the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief and apply the role. When it fails, grill only about the gaps, and apply the role once they close.
+A move to `ready-for-agent` or `ready-for-human` still runs the readiness check ([READINESS.md](READINESS.md)) and follows its outcome.
 
 ## Needs-info template
 
@@ -109,8 +109,7 @@ A move to `ready-for-agent` or `ready-for-human` still runs the readiness check 
 
 **Readiness check:**
 
-- [x] Category: bug
-- [ ] Claim verified: insufficient detail to reproduce
+<the checklist from READINESS.md, every item marked>
 ```
 
 Capture everything resolved during grilling under "established so far" so the work isn't lost. Questions must be specific and actionable, not "please provide more info".

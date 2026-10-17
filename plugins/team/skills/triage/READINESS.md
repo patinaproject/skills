@@ -11,7 +11,7 @@ Every item must hold:
 3. **Out of scope checked.** `.out-of-scope/*.md` was read, and any match is named and addressed. "None match" is a valid result.
 4. **Acceptance criteria and scope boundaries.** Concrete, independently verifiable acceptance criteria are written, and so is what is out of scope.
 5. **No open questions.** The triage notes list nothing still needed.
-6. **Reason it can't be delegated.** For `ready-for-human` only: the notes say why an agent can't do it, such as a judgment call, external access, a design decision, or manual testing.
+6. **Reason it can't be delegated.** For `ready-for-human` only: the notes say why an agent can't do it.
 
 ## Record it
 
@@ -28,7 +28,7 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 - [x] Reason it can't be delegated: n/a (ready-for-agent)
 ```
 
-Write the triage notes and the agent brief where the issue-tracker config says triage artifacts go. Without such a rule, post each as a comment.
+Write the triage notes and the agent brief through the issue-tracker config's issue-artifact operation. When it defines none, post each as a comment.
 
 ## Outcome
 
