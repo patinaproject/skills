@@ -484,7 +484,7 @@
   },
   "plugins/team/skills/triage/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read.",
+    "reason": "Patina gates ready-for-agent and ready-for-human on the readiness check in READINESS.md, including when the maintainer asks for the role directly. Patina also re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read.",
     "upstream": {
       "status": "not-proposed"
     }
