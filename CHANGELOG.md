@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.0](https://github.com/patinaproject/skills/compare/v3.7.0...v3.8.0) (2026-10-17)
+
+
+### Features
+
+* [#675](https://github.com/patinaproject/skills/issues/675) add an unattended triage playbook to patina-mode ([#676](https://github.com/patinaproject/skills/issues/676)) ([1c6e34d](https://github.com/patinaproject/skills/commit/1c6e34deb62e1e11dfa7155c9a2224595f346db8))
+
 ## [3.7.0](https://github.com/patinaproject/skills/compare/v3.6.0...v3.7.0) (2026-10-17)
 
 
