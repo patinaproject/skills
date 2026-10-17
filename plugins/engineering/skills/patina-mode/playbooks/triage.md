@@ -21,7 +21,7 @@ Reach the tracker only through the repository's issue-tracker adapter, and only 
 12. **Run the readiness check** in [`../references/readiness.md`](../references/readiness.md). Step 13 replaces its interactive outcome and grilling. Record the checklist and a Decision log in the triage notes. The log has one entry per decision you settled: what, why, the evidence, and the result.
 13. **End the run.** Write the triage notes and the agent brief through the adapter's issue-artifact operation. Then end with exactly one outcome:
     - **Every item holds.** Apply the category role and the ready role.
-    - **An item fails.** Apply no ready role. Ask one round of questions, each with a recommended answer. Ask only for a decision that meets all three ADR criteria, a fact only the reporter has, or a scope choice with more than one reasonable answer. Never ask for a fact you could look up. Apply `needs-info` when only the reporter can answer, and leave `needs-triage` otherwise.
+    - **An item fails.** Apply the category role and no ready role. Ask one round of questions, each with a recommended answer. Ask only for a decision that meets all three ADR criteria, a fact only the reporter has, or a scope choice with more than one reasonable answer. Never ask for a fact you could look up. Apply `needs-info` when only the reporter can answer, and leave `needs-triage` otherwise.
 
 Apply only category and state roles. Recommend `wontfix` in the notes rather than applying it. Model roles follow patina-mode's Models section: `how` explorers, `why` investigators, and the `interrogate` panel take their own roles, and reproduction takes the bug-fix role. No progress narration reaches the tracker.
 
