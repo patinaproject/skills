@@ -31,12 +31,14 @@ skill catalog.
 What it materializes from `assets/`:
 
 - The **Engineering hook** and its context (from `assets/hooks/`) into the
-  repo's `.claude/hooks/`. The skills-only context uses bare skill names, while
-  the plugin source keeps its `engineering:` namespace.
+  repo's `.claude/hooks/`. The context names skills by their bare names.
 - The **Engineering agents** (from `assets/agents/`) into the repo's
-  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves and
-  no-comments can reach `comment-sicko`. Model choice per role comes from the
-  `setup-pstack` sheet at runtime, not from an agent definition.
+  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves, the effort
+  agents `patina-agent-<level>` and `effort-<level>` resolve, and no-comments
+  can reach `comment-sicko`. The agents keep their bare names, so the same
+  names resolve when Engineering is also installed as a plugin. Model choice
+  per role comes from the `setup-pstack` sheet at runtime, not from an agent
+  definition.
 - One `SessionStart` entry matching `startup|resume|clear|compact` in
   `.claude/settings.json`; existing hooks remain in place.
 

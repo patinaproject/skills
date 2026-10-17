@@ -30,15 +30,16 @@ for hook in plugins/engineering/hooks/session-start.sh plugins/engineering/hooks
   diff -q "$hook" "$SKILL/assets/hooks/$(basename "$hook")" >/dev/null \
     || fail "bundled hook drifted from $hook"
 done
-for agent in plugins/engineering/agents/*.md; do
+for agent in plugins/engineering/agents/*.md plugins/engineering/effort-agents/*.md; do
   asset="$SKILL/assets/agents/$(basename "$agent")"
   [ -f "$asset" ] || fail "missing setup-engineering asset: $asset"
   diff -q "$agent" "$asset" >/dev/null \
     || fail "$asset drifted from $agent"
 done
 for asset in "$SKILL"/assets/agents/*.md; do
-  canonical="plugins/engineering/agents/$(basename "$asset")"
-  [ -f "$canonical" ] || fail "$asset has no canonical source at $canonical"
+  name="$(basename "$asset")"
+  [ -f "plugins/engineering/agents/$name" ] || [ -f "plugins/engineering/effort-agents/$name" ] \
+    || fail "$asset has no canonical source in plugins/engineering/agents or effort-agents"
 done
 
 TMP="$(mktemp -d)"
@@ -95,8 +96,8 @@ grep -qF "Keep my house style." "$REPO/CLAUDE.md" || fail "repo CLAUDE.md lost u
 [ "$(jq -r '[.hooks.SessionStart[] | .hooks[]? | select(.command == "echo unrelated")] | length' "$REPO/.claude/settings.json")" -eq 1 ] || fail "existing SessionStart hook was not preserved"
 [ -x "$REPO/.claude/hooks/session-start.sh" ] || fail "installed session hook is not executable"
 hook_output="$(CLAUDE_PROJECT_DIR="$REPO" HOME="$TMP/no-sheet" "$REPO/.claude/hooks/session-start.sh" claude)"
-expected_hook_output="$(sed 's/engineering://g' plugins/engineering/hooks/session-start-context.md)"
-[ "$hook_output" = "$expected_hook_output" ] || fail "skills-only hook output drifted from the transformed context"
+expected_hook_output="$(cat plugins/engineering/hooks/session-start-context.md)"
+[ "$hook_output" = "$expected_hook_output" ] || fail "skills-only hook output drifted from the plugin context"
 
 
 [ "$(count "$BEGIN" "$CODEX/AGENTS.md")" -eq 0 ] || fail "Codex AGENTS.md kept a legacy mandate block"

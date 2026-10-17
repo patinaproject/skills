@@ -139,9 +139,10 @@ printf 'session hook: off\n' > "$hook_tmp/config/pstack-models.md"
   || fail "Engineering SessionStart hook ignored session hook: off"
 rm -rf "$hook_tmp"
 
-for canonical_agent in plugins/engineering/agents/*.md; do
+for canonical_agent in plugins/engineering/agents/*.md plugins/engineering/effort-agents/*.md; do
   installed_agent=".claude/agents/$(basename "$canonical_agent")"
   [ -f "$installed_agent" ] || fail "$installed_agent missing"
+  cmp -s "$canonical_agent" "$installed_agent" || fail "$installed_agent drifted from $canonical_agent"
 done
 
 multi_agent_count="$(awk '
