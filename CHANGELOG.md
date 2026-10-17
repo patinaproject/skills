@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0](https://github.com/patinaproject/skills/compare/v3.6.0...v3.7.0) (2026-10-17)
+
+
+### Features
+
+* [#672](https://github.com/patinaproject/skills/issues/672) require approval of hard-to-reverse triage decisions ([#673](https://github.com/patinaproject/skills/issues/673)) ([a8b7a1e](https://github.com/patinaproject/skills/commit/a8b7a1e482816d06c7f85e4b18dc8da1ee5f9b57))
+
 ## [3.6.0](https://github.com/patinaproject/skills/compare/v3.5.1...v3.6.0) (2026-10-17)
 
 
