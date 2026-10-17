@@ -223,6 +223,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/skills/patina-mode/references/licenses/NOTICE.md": {
+    "kind": "policy",
+    "reason": "Patina credits the Benny triage-issue-reports skill that its triage playbook adapts.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/patina-mode/references/pi-tools.md": {
     "kind": "policy",
     "reason": "Patina maintains this Codex and Pi runtime adaptation alongside the synced routing skill.",
