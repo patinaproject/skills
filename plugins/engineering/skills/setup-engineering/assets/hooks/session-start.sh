@@ -19,17 +19,15 @@ if [ -z "$hook_root" ]; then
   hook_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 fi
 
-read_sheet() {
-  [ -f "$1" ] && [ -r "$1" ] || return 1
-  if [ "$(od -An -tx1 -N2 "$1" | tr -d ' ')" = fffe ]; then
-    text=$(iconv -f UTF-16LE -t UTF-8 "$1") || return 1
-  else
-    text=$(cat "$1")
-  fi
-  printf '%s\n' "$text" | sed -e "1s/^$(printf '\357\273\277')//" -e "s/$(printf '\r')\$//"
-}
+read_sheet="$hook_root/read-sheet.sh"
+[ -f "$read_sheet" ] || read_sheet="$hook_root/../skills/setup-pstack/scripts/read-sheet.sh"
 
-normalized=$(read_sheet "$sheet") || normalized=
+if [ ! -f "$read_sheet" ]; then
+  echo "session-start.sh: missing $read_sheet; the session hook setting is ignored. Rerun the setup-engineering install machinery to restore it." >&2
+  normalized=
+else
+  normalized=$(sh "$read_sheet" "$sheet") || normalized=
+fi
 if printf '%s\n' "$normalized" | grep -qx 'session hook: off'; then
   exit 0
 fi

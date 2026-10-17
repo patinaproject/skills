@@ -59,6 +59,7 @@ fi
 command -v jq >/dev/null || fail "jq is required to update .claude/settings.json"
 require_file "$SETUP_PSTACK_SKILL"
 require_file "${SKILLS_DIR}/patina-mode/references/codex-tools.md"
+require_file "${SKILLS_DIR}/setup-pstack/scripts/read-sheet.sh"
 require_file "${ASSETS_DIR}/hooks/session-start.sh"
 require_file "${ASSETS_DIR}/hooks/session-start-context.md"
 
@@ -165,6 +166,7 @@ for agent_asset in "${ASSETS_DIR}"/agents/*.md; do
 done
 install_managed_file "${ASSETS_DIR}/hooks/session-start.sh" "${repo}/.claude/hooks/session-start.sh"
 chmod +x "${repo}/.claude/hooks/session-start.sh"
+install_managed_file "${SKILLS_DIR}/setup-pstack/scripts/read-sheet.sh" "${repo}/.claude/hooks/read-sheet.sh"
 sed 's/engineering://g' "${ASSETS_DIR}/hooks/session-start-context.md" > "${repo}/.claude/hooks/session-start-context.md"
 
 # Claude receives the mandate from the project hook and Codex from the plugin

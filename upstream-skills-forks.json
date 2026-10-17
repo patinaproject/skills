@@ -36,7 +36,28 @@
   },
   "plugins/engineering/hooks/session-start.sh": {
     "kind": "policy",
-    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet inline instead of calling setup-pstack/scripts/read-sheet.sh, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet by running the read-sheet.sh that the installer copied beside it (the plugin uses setup-pstack/scripts/read-sheet.sh) instead of an inline copy, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/agents.ts": {
+    "kind": "policy",
+    "reason": "It imports readSheet from pi/sheet.ts after the sheet decoder moved out of config.ts.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/config.ts": {
+    "kind": "policy",
+    "reason": "The sheet decoder moved to pi/sheet.ts so a Node test can load it without typebox, and this file keeps only the Settings and model resolution that need the extension's packages.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/prompt.ts": {
+    "kind": "policy",
+    "reason": "It imports readSheet from pi/sheet.ts after the sheet decoder moved out of config.ts.",
     "upstream": {
       "status": "not-proposed"
     }
