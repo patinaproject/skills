@@ -4,8 +4,8 @@
 set -eu
 sheet=$1
 [ -f "$sheet" ] && [ -r "$sheet" ] || exit 1
-head=$(od -An -tx1 -N2 "$sheet" | tr -d ' ')
-if [ "$head" = fffe ] || [ "${head#??}" = 00 ]; then
+lead=$(od -An -tx1 -N2 "$sheet" | tr -d ' ')
+if [ "$lead" = fffe ] || [ "${lead#??}" = 00 ]; then
   text=$(iconv -f UTF-16LE -t UTF-8 "$sheet")
 elif iconv -f UTF-8 -t UTF-8 "$sheet" >/dev/null 2>&1; then
   text=$(cat "$sheet")

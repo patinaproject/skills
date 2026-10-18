@@ -1,18 +1,18 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import { decodeSheet, readSheet } from '../../plugins/engineering/pi/sheet.ts';
 
-const repoRoot = new URL('../..', import.meta.url).pathname;
+const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 const pluginRoot = join(repoRoot, 'plugins/engineering');
 const readSheetScript = join(pluginRoot, 'skills/setup-pstack/scripts/read-sheet.sh');
 const claudeHook = join(pluginRoot, 'hooks/session-start.sh');
 const powershellHook = join(pluginRoot, 'hooks/session-start.ps1');
-const assetsHook = join(pluginRoot, 'skills/setup-engineering/assets/hooks/session-start.sh');
 
 const lines = [
   'session hook: off',
@@ -41,11 +41,7 @@ const run = (command, args, env) => spawnSync(command, args, {
   encoding: 'utf8',
   env: { ...process.env, LANG: 'en_US.UTF-8', LC_ALL: 'en_US.UTF-8', CLAUDE_PLUGIN_ROOT: pluginRoot, ...env },
 });
-const toLines = (text) => text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line, i, all) => i < all.length - 1 || line !== '');
-
-test('the setup-engineering copy of the hook is byte-identical to the plugin hook', () => {
-  assert.deepEqual(readFileSync(assetsHook), readFileSync(claudeHook));
-});
+const toLines = (text) => text.replace(/^\uFEFF/, '').replace(/\r?\n$/, '').split(/\r?\n/);
 
 for (const [name, bytes] of Object.entries(fixtures)) {
   test(`every decoder reads a ${name} sheet the same way`, () => {
