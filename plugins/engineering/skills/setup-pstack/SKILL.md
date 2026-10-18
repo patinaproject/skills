@@ -92,7 +92,7 @@ Tell the user where the override was written, how its model rows load, and wheth
 
 ### 9. Offer a verification skill (optional)
 
-Check whether the project has a way to drive the real app for proof (a project `patinaproject-verify` skill in any project skill directory, such as `.claude/skills/patinaproject-verify/`, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with /create-verification-skill." On yes, invoke [`/create-verification-skill`](../create-verification-skill/SKILL.md). On no, move on without pushing.
+Check whether the project has a way to drive the real app for proof (a `patinaproject-verify` skill in any project skill directory, at the root or in a monorepo package, such as `.claude/skills/patinaproject-verify/`, or a `verify` skill from an older `/create-verification-skill`, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with /create-verification-skill." On yes, invoke [`/create-verification-skill`](../create-verification-skill/SKILL.md). On no, move on without pushing.
 
 ## Other runtimes
 
