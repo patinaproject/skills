@@ -22,17 +22,20 @@ export function parseSheet(text: string): Sheet {
 }
 
 export function decodeSheet(bytes: Uint8Array): string {
-  // Windows PowerShell 5.1's `>` writes UTF-16 LE with a byte-order mark.
-  return Buffer.from(bytes).toString(bytes[0] === 0xff && bytes[1] === 0xfe ? "utf16le" : "utf8");
+  if ((bytes[0] === 0xff && bytes[1] === 0xfe) || bytes[1] === 0x00) {
+    return new TextDecoder("utf-16le", { fatal: true }).decode(bytes);
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return Buffer.from(bytes).toString("latin1");
+  }
 }
 
 export function readSheet(agentDir: string): Sheet | undefined {
-  let bytes: Buffer;
   try {
-    bytes = readFileSync(join(agentDir, "pstack-models.md"));
+    return parseSheet(decodeSheet(readFileSync(join(agentDir, "pstack-models.md"))));
   } catch {
-    // An absent or unreadable sheet leaves the defaults in place, as the session hooks do.
     return undefined;
   }
-  return parseSheet(decodeSheet(bytes));
 }
