@@ -2,7 +2,8 @@
 
 Triage gives every triaged issue exactly one priority: the highest lane whose
 condition holds. Judge only evidence in the issue: its body, comments, and
-linked reports. Labels, the reporter, and effort never count. Replace this
+linked reports. Evidence you cannot read does not count; name it as unread.
+Labels, the reporter, and effort never count. Replace this
 section to change the rubric; triage reads no other.
 
 - **Urgent:** work to triage and ship before all other open work. At least one

@@ -257,7 +257,8 @@ dependency with the native blocked-by relationship.
 
 Triage gives every triaged issue exactly one priority: the highest lane whose
 condition holds. Judge only evidence in the issue: its body, comments, and
-linked reports. Labels, the reporter, and effort never count. See
+linked reports. Evidence you cannot read does not count; name it as unread.
+Labels, the reporter, and effort never count. See
 [ADR-692](../adr/ADR-692-triage-assigns-priority.md).
 
 - **Urgent:** work to triage and ship before all other open work. At least one
@@ -279,8 +280,10 @@ linked reports. Labels, the reporter, and effort never count. See
 
 A confident duplicate gets no priority. Write priority to Linear's priority
 field with `save_issue`: `1` Urgent, `2` High, `3` Medium, `4` Low. Never encode
-it as a label. For a public repository, write it on the Linear copy, the Linear
-issue whose GitHub attachment links the GitHub issue. When no Linear copy
+it as a label. For a public repository, write it on the Linear copy: the Linear
+issue whose GitHub attachment URL equals the GitHub issue URL. `list_issues`
+returns no attachments, so confirm each candidate with `get_issue` and
+`fields: ["attachments", "priority"]`. A title match alone is not a match. When no Linear copy
 exists, the triage notes' `Priority:` line is the only record; name the gap in
 the reply.
 
