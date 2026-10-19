@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.1](https://github.com/patinaproject/skills/compare/v3.9.0...v3.9.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#665](https://github.com/patinaproject/skills/issues/665) use bare Engineering skill and agent names ([#670](https://github.com/patinaproject/skills/issues/670)) ([841df6d](https://github.com/patinaproject/skills/commit/841df6dd1fa1a5abe6b72985c92d929c5304dbed))
+
 ## [3.9.0](https://github.com/patinaproject/skills/compare/v3.8.2...v3.9.0) (2026-10-19)
 
 
