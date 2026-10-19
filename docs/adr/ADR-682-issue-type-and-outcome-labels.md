@@ -14,7 +14,7 @@ Every issue carries exactly one **Type**: Feature, Bug, Refactor, Tools, Task or
 
 The Type set depends on the repository. `patinaproject/patinaproject` uses the six Types above. `patinaproject/skills` uses one Type, Skills, and `patinaproject/factory` uses one Type, Factory, because every issue in those repositories is the same kind of work, and Linear needs the label to tell the repositories apart. Each Type names how triage verifies the claim: reproduction, a redundancy check, confirming that a one-off action is not already done, or confirming that no existing design covers it.
 
-An issue may carry at most one **Theme**: Legal, Security, User blockers, Performance & stability, Deliverability & reliability, Revenue, User enablers or Support. When two apply, the earlier in that order wins.
+An issue may carry at most one **Theme**. When two apply, the one listed first in the tracker adapter's **Labels** section wins.
 
 Type, Theme, triage state and Wayfinder kind are each a Linear label group, so only one label from each applies. GitHub carries the same strings without groups.
 

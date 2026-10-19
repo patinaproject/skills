@@ -55,14 +55,14 @@ first.
 
 | Label | Definition |
 | --- | --- |
-| `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
 | `Security` | Reduces security risk or meets a security requirement. |
-| `User blockers` | Removes friction or a missing step that stops users from finishing what they came to do. A failure users hit in Production is `Performance & stability`. |
-| `Performance & stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or keeps the product fast. |
-| `Deliverability & reliability` | Makes building, testing, and shipping our software and agents faster, safer, or more reliable. |
-| `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
-| `User enablers` | Lets users do something they could not do before. |
+| `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
 | `Support` | Helps users get help, or reduces support load. |
+| `Performance & stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or keeps the product fast. |
+| `User blockers` | Removes friction or a missing step that stops users from finishing what they came to do. A failure users hit in Production is `Performance & stability`. |
+| `User enablers` | Lets users do something they could not do before. |
+| `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
+| `Deliverability & reliability` | Makes building, testing, and shipping our software and agents faster, safer, or more reliable. |
 <!-- label-vocabulary:end -->
 
 **Triage**, exactly one per triaged issue:
