@@ -87,6 +87,13 @@ function findMandateErrors(repoRoot) {
     .map(([, name]) => `FAIL: session-start mandate names an unavailable skill: ${name} in ${MANDATE}`);
 }
 
+// A prefixed name resolves only in a plugin install; an Agent Skills install
+// registers bare names.
+function findPluginPrefixErrors(contents, file) {
+  return [...contents.matchAll(/(?<![\w-])(\/?)(?:team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
+    .map(([reference, slash, skill]) => `FAIL: skill reference carries a plugin prefix: ${reference} in ${file}; use ${slash}${skill}`);
+}
+
 function collectMirrorDirs(repoRoot) {
   const manifest = JSON.parse(readFileSync(path.join(repoRoot, 'upstream-skills.json'), 'utf8'));
   return manifest.sources
@@ -166,6 +173,9 @@ function main(repoRoot = process.cwd()) {
   const errors = [...lintRelativeLinks(repoRoot), ...findMandateErrors(repoRoot)];
   const mirrors = collectMirrorDirs(repoRoot);
   const activeMarkdown = ['engineering', 'team'].flatMap((plugin) => collectActiveSkillMarkdown(repoRoot, plugin, mirrors));
+  for (const filePath of activeMarkdown) {
+    errors.push(...findPluginPrefixErrors(readFileSync(filePath, 'utf8'), path.relative(repoRoot, filePath)));
+  }
   const lintTargets = [...new Set([...published.values(), ...activeMarkdown])].sort();
   for (const filePath of lintTargets) {
     const file = path.relative(repoRoot, filePath);

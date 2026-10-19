@@ -1,5 +1,40 @@
 # Changelog
 
+## [3.8.2](https://github.com/patinaproject/skills/compare/v3.8.1...v3.8.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#687](https://github.com/patinaproject/skills/issues/687) run the T3 handoff test with an upstream sqlite3 on macOS ([#688](https://github.com/patinaproject/skills/issues/688)) ([72863b5](https://github.com/patinaproject/skills/commit/72863b569ff9f87becf0bb4fa86de727bbf13361))
+
+## [3.8.1](https://github.com/patinaproject/skills/compare/v3.8.0...v3.8.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#683](https://github.com/patinaproject/skills/issues/683) refer to Team skills by bare name ([#684](https://github.com/patinaproject/skills/issues/684)) ([398a89d](https://github.com/patinaproject/skills/commit/398a89def5026cb6cebddae2ab46bf469c3bb99f))
+
+## [3.8.0](https://github.com/patinaproject/skills/compare/v3.7.0...v3.8.0) (2026-10-17)
+
+
+### Features
+
+* [#675](https://github.com/patinaproject/skills/issues/675) add an unattended triage playbook to patina-mode ([#676](https://github.com/patinaproject/skills/issues/676)) ([1c6e34d](https://github.com/patinaproject/skills/commit/1c6e34deb62e1e11dfa7155c9a2224595f346db8))
+
+## [3.7.0](https://github.com/patinaproject/skills/compare/v3.6.0...v3.7.0) (2026-10-17)
+
+
+### Features
+
+* [#672](https://github.com/patinaproject/skills/issues/672) require approval of hard-to-reverse triage decisions ([#673](https://github.com/patinaproject/skills/issues/673)) ([a8b7a1e](https://github.com/patinaproject/skills/commit/a8b7a1e482816d06c7f85e4b18dc8da1ee5f9b57))
+
+## [3.6.0](https://github.com/patinaproject/skills/compare/v3.5.1...v3.6.0) (2026-10-17)
+
+
+### Features
+
+* [#666](https://github.com/patinaproject/skills/issues/666) enforce a readiness check before triage applies a ready role ([#667](https://github.com/patinaproject/skills/issues/667)) ([0182f4f](https://github.com/patinaproject/skills/commit/0182f4f83c1150a38459415c1f39f0caffd19f1b))
+
 ## [3.5.1](https://github.com/patinaproject/skills/compare/v3.5.0...v3.5.1) (2026-10-16)
 
 
