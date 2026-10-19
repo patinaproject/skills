@@ -48,6 +48,6 @@ Write the triage notes and the agent brief through the issue-tracker config's is
 
 ## Outcome
 
-- **Every item holds:** write the agent brief from what the checklist established, then apply the label.
+- **Every item holds:** write the agent brief from what the checklist established, then apply the label. For a `Task`, the brief names the action to take and how to confirm it is done, not code changes.
 - **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the Bug, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes. If only the reporter can answer them, apply `Needs info`; otherwise leave `Needs triage`.
 - **"Decisions approved" fails:** follow the bullet above, but never close this gap yourself. Ask each unapproved decision as a grilling question with your recommended answer. The item fails until a person answers it.
