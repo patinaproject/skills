@@ -51,9 +51,12 @@
       "pin": "7a030a8b0dcaa601bb0dda9aaf174affb3d61145",
       "transforms": {
         "rename": {
-          "grill-with-docs": "grill-to-spec"
+          "grill-with-docs": "grill-to-spec",
+          "setup-matt-pocock-skills": "setup-team-skills"
         },
-        "denylist": []
+        "denylist": [
+          "setup-matt-pocock-skills"
+        ]
       },
       "targets": [
         {
@@ -124,7 +127,7 @@
         {
           "kind": "skill",
           "source": "skills/engineering/setup-matt-pocock-skills",
-          "destination": "plugins/team/skills/setup-matt-pocock-skills"
+          "destination": "plugins/team/skills/setup-team-skills"
         },
         {
           "kind": "skill",
@@ -177,7 +180,7 @@
           "destination": "plugins/team/skills/writing-for-agents"
         }
       ],
-      "transformsHash": "8d4a3cbe10fe8da085d6391fb307501c05da704f067529647f9058bd448de870"
+      "transformsHash": "5c96a7d2fa993e70a8d84d0314194c748020ee5307a989e2119268ab249d0b2d"
     },
     {
       "name": "humanlayer",

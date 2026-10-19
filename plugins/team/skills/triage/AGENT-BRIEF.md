@@ -41,13 +41,13 @@ State what is out of scope. This prevents the agent from gold-plating or making 
 ```markdown
 ## Agent Brief
 
-**Type:** Feature / Bug / Refactor / Tools / Task
-**Goal:** one Goal label, or none
+**Type:** one label from the repository's Type set
+**Outcome:** one Outcome label, or none
 **Summary:** one-line description of what needs to happen
 
 **Current behavior:**
-Describe what happens now. For a Bug, this is the broken behavior.
-For every other Type, this is the status quo the change builds on.
+Describe what happens now. For a report of something broken, this is the broken behavior.
+Otherwise, this is the status quo the change builds on.
 
 **Desired behavior:**
 Describe what should happen after the agent's work is complete.
@@ -111,7 +111,7 @@ and append "..." to indicate truncation.
 ## Agent Brief
 
 **Type:** Tools
-**Goal:** Delivery and stability
+**Outcome:** Delivery and stability
 **Summary:** Add `.out-of-scope/` directory support for tracking rejected feature requests
 
 **Current behavior:**
@@ -144,7 +144,7 @@ checked for matches.
 **Out of scope:**
 - Automated matching (human confirms the match)
 - Reopening previously rejected features
-- Rejected Bugs (every other rejected Type goes to `.out-of-scope/`)
+- Rejected reports of something broken (every other rejection goes to `.out-of-scope/`)
 ```
 
 ### Good agent brief (PR)

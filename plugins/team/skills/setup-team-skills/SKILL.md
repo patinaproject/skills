@@ -1,15 +1,15 @@
 ---
-name: setup-matt-pocock-skills
+name: setup-team-skills
 description: "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
 
-# Setup Matt Pocock's Skills
+# Set Up Team Skills
 
 Scaffold the per-repo configuration that the engineering skills assume:
 
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
-- **Triage labels**: the Type, Goal, and Triage label vocabulary
+- **Labels**: the Type, Outcome, and Triage label vocabulary, written into the issue tracker config
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
@@ -50,7 +50,7 @@ Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templ
 
 **Section B: Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
 
-If it is installed, write the vocabulary in [triage-labels.md](./triage-labels.md) as-is, without asking. `triage` applies those exact strings, so there is no mapping to configure.
+If it is installed, add [triage-labels.md](./triage-labels.md) as-is, without asking, as the `## Labels` section of `docs/agents/issue-tracker.md`. That section is the only place the repo defines its Type and Outcome labels; other skills and docs point to it. `triage` applies those exact strings, so there is no mapping to configure. Write no separate `docs/agents/triage-labels.md`, and when one exists, fold it into the section and delete it.
 
 **Section C: Domain docs.** Default to **single-context** (one `GLOSSARY.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
 
@@ -61,7 +61,7 @@ Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSS
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
+- The contents of `docs/agents/issue-tracker.md` (with its `## Labels` section only when `triage` is installed) and `docs/agents/domain.md`
 
 Let them edit before writing.
 
@@ -88,21 +88,21 @@ The block:
 
 ### Triage labels
 
-[one-line summary of the label vocabulary]. See `docs/agents/triage-labels.md`.
+[one-line summary of the label vocabulary]. See `docs/agents/issue-tracker.md` → **Labels**.
 
 ### Domain docs
 
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
 ```
 
-Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
+Include the `### Triage labels` sub-block, and the `## Labels` section, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
 
 Then write the docs files using the seed templates in this skill folder as a starting point:
 
 - [issue-tracker-github.md](./issue-tracker-github.md): GitHub issue tracker
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
-- [triage-labels.md](./triage-labels.md): label vocabulary (only if `triage` is installed)
+- [triage-labels.md](./triage-labels.md): the `## Labels` section of `docs/agents/issue-tracker.md` (only if `triage` is installed)
 - [domain.md](./domain.md): domain doc consumer rules + layout
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.

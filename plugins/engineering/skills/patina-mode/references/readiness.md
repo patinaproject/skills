@@ -6,8 +6,8 @@ The readiness check is the only way to apply `Ready for agent` or `Ready for hum
 
 Every item must hold:
 
-1. **Type.** Exactly one Type label is set: `Feature`, `Bug`, `Refactor`, `Tools`, or `Task`. A Goal label is set when the evidence supports one; a missing Goal never fails this item.
-2. **Claim verified.** For a `Bug`, or `Tools` work that reports something broken, it is reproduced and the code path is named. For any other `Feature`, `Refactor`, or `Tools` request, the redundancy check confirms it is not already built and records where you looked. For a `Task`, the action is confirmed not already done. For a PR, the diff does what it claims.
+1. **Type.** Exactly one Type label from the repository's Type set is set. An Outcome label is set when the evidence supports one; a missing Outcome never fails this item. The issue-tracker config's **Labels** section defines both.
+2. **Claim verified.** The claim is verified the way the Type's row in the issue-tracker config says: a reproduction names the code path, a redundancy check confirms it is not already built and records where you looked, and a one-off action is confirmed not already done. For a PR, the diff does what it claims.
 3. **Out of scope checked.** `.out-of-scope/*.md` was read, and any match is named and addressed. "None match" is a valid result.
 4. **Acceptance criteria and scope boundaries.** Concrete, independently verifiable acceptance criteria are written, and so is what is out of scope.
 5. **No open questions.** The triage notes list nothing still needed.
@@ -26,7 +26,7 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 ```markdown
 **Readiness check:**
 
-- [x] Type: Tools; Goal: Delivery and stability
+- [x] Type: Tools; Outcome: Delivery and stability
 - [x] Claim verified: not built; searched the `SkillConfig` loader and the scheduler
 - [x] Out of scope checked: no match
 - [ ] Acceptance criteria and scope boundaries: out-of-scope list missing
@@ -48,6 +48,6 @@ Write the triage notes and the agent brief through the issue-tracker config's is
 
 ## Outcome
 
-- **Every item holds:** write the agent brief from what the checklist established, then apply the label. For a `Task`, the brief names the action to take and how to confirm it is done, not code changes.
-- **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the Bug, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes. If only the reporter can answer them, apply `Needs info`; otherwise leave `Needs triage`.
+- **Every item holds:** write the agent brief from what the checklist established, then apply the label. When the Type needs no repository change, such as `Task`, the brief names the action to take and how to confirm it is done, not code changes.
+- **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the report, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes. If only the reporter can answer them, apply `Needs info`; otherwise leave `Needs triage`.
 - **"Decisions approved" fails:** follow the bullet above, but never close this gap yourself. Ask each unapproved decision as a grilling question with your recommended answer. The item fails until a person answers it.

@@ -27,34 +27,59 @@ outside the synced thread remain private.
 
 ## Labels
 
-Issue labels are the classification vocabulary. Skills name them by these exact
-strings. See
-[ADR-682](../adr/ADR-682-issue-type-and-goal-labels.md).
+Issue labels are the classification vocabulary, and this section is their
+only definition. Skills, templates, and other docs name the groups and point
+here rather than listing Type or Outcome labels themselves. Apply labels by
+these exact strings. See
+[ADR-682](../adr/ADR-682-issue-type-and-outcome-labels.md).
 
 ### Label groups
 
 An issue carries at most one label from each group. Linear enforces this with
 label groups. GitHub has no label groups, so apply the same rule by hand there.
 
+<!-- label-vocabulary:start -->
 **Type** says what kind of work the issue is. Every triaged issue carries
-exactly one. A Type predicts the commit type of the pull request that closes
-the issue.
+exactly one, chosen from its repository's Type set:
 
-| Label | Commit types | Definition |
-| --- | --- | --- |
-| `Feature` | `feat`, `perf` | Changes what the product does, or how fast or light it does it, as users observe in Production. |
-| `Bug` | `fix` | Makes the product do what it was already supposed to do, including fixing a performance regression. |
-| `Refactor` | `refactor` | Changes product source in a way no user can observe. |
-| `Tools` | `chore`, `ci`, `test`, `docs`, `style` | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. Never product behavior. |
-| `Task` | none | Needs no repository change: a one-off action on data, accounts, settings, or vendors. |
+| Repository | Type set |
+| --- | --- |
+| `patinaproject/skills` | `Skills` |
+| `patinaproject/factory` | `Factory` |
+| `patinaproject/patinaproject`, and any repository not listed | `Feature`, `Bug`, `Refactor`, `Tools`, `Task` |
+
+Each Type says how triage verifies the issue's claim and which commit types
+the closing pull request uses.
+
+| Label | Commit types | Verify the claim by | Definition |
+| --- | --- | --- | --- |
+| `Feature` | `feat`, `perf` | redundancy check | Changes what the product does, or how fast or light it does it, as users observe in Production. |
+| `Bug` | `fix` | reproduction | Makes the product do what it was already supposed to do, including fixing a performance regression. |
+| `Refactor` | `refactor` | redundancy check | Changes product source in a way no user can observe. |
+| `Tools` | `chore`, `ci`, `test`, `docs`, `style` | reproduction when it reports something broken, otherwise redundancy check | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. Never product behavior. |
+| `Task` | none | confirming the action is not already done | Needs no repository change: a one-off action on data, accounts, settings, or vendors. |
+| `Skills` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/skills`: skills, plugins, their tooling, and their docs. |
+| `Factory` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/factory`. |
+
+- **Reproduction:** reproduce the report from the reporter's steps and name the
+  code path.
+- **Redundancy check:** search the codebase for an existing implementation and
+  record where you looked.
+- **Confirming the action is not already done:** check the system the action
+  touches.
 
 Product is what a Production deploy delivers to users, including
 infrastructure on a user's request path. Internal tooling, CI, skills, agent
 workflows, and repository structure are never product, so broken tooling is
 `Tools`, not `Bug`.
 
-**Goal** says why the work matters. An issue carries at most one. When two fit,
-take the one listed first.
+Linear holds every Type above in one Type group. A public repository's issue
+reaches Linear with its GitHub Type label, so the `Skills` and `Factory` labels
+mark which repository the work belongs to.
+
+**Outcome** says why the work matters. An issue carries at most one, and a
+missing Outcome never blocks readiness. When two fit, take the one listed
+first.
 
 | Label | Definition |
 | --- | --- |
@@ -64,9 +89,10 @@ take the one listed first.
 | `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
 | `Support` | Helps users get help, or reduces support load. |
 | `Tech debt` | Lowers the cost or risk of maintaining what already exists. |
+<!-- label-vocabulary:end -->
 
 **Triage** says what triage decided. Every triaged issue carries exactly one.
-A transition replaces it and preserves the Type and Goal.
+A transition replaces it and preserves the Type and Outcome.
 
 | Label | Meaning | GitHub | Linear |
 | --- | --- | --- | --- |
@@ -210,7 +236,7 @@ readiness, use the adapter to:
 1. apply the provider's ready state — leave a GitHub issue open, or move a
    Linear issue to `Todo`;
 2. write the `Ready for agent` or `Ready for human` label, replacing the
-   previous Triage label and preserving the Type and Goal; and
+   previous Triage label and preserving the Type and Outcome; and
 3. set the planning fields together when the work belongs to a named effort —
    a GitHub milestone, or a Linear project and project milestone.
 

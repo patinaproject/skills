@@ -37,7 +37,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/grilling/`: upstream mirror (mattpocock)
 - `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
 - `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
-- `plugins/team/skills/setup-matt-pocock-skills/`: upstream mirror (mattpocock)
+- `plugins/team/skills/setup-team-skills/`: upstream mattpocock `setup-matt-pocock-skills` mirror, renamed and forked for Patina label setup
 - `plugins/team/skills/tutor/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
@@ -105,8 +105,9 @@ handoff gate instead of moving it implicitly.
 
 ### Triage labels
 
-Issue labels (Type, Goal, and Triage groups) and the Sentence case rule for
-label names live in the tracker adapter. See `docs/issue-tracker.md` → **Labels**.
+Issue labels (Type, Outcome, and Triage groups, including each repository's
+Type set) and the Sentence case rule for label names live only in the tracker
+adapter. See `docs/issue-tracker.md` → **Labels**.
 
 ### Domain docs
 
@@ -117,7 +118,7 @@ This is a single-context repository; domain docs are optional and created lazily
 Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
 single source of truth for ADR naming in this repository. It supersedes the
 sequential `0001`-increment guidance still embedded in the vendored shared
-skills (`domain-modeling`, `setup-matt-pocock-skills`): name every ADR after its
+skills (`domain-modeling`, `setup-team-skills`): name every ADR after its
 originating GitHub issue (`ADR-N-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 

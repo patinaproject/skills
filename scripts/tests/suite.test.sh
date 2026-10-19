@@ -6,6 +6,8 @@ node scripts/lint-active-skill-references.mjs
 bash scripts/tests/lint-active-skill-references.test.sh
 node scripts/lint-readiness-parity.mjs
 bash scripts/tests/lint-readiness-parity.test.sh
+node scripts/lint-label-vocabulary-parity.mjs
+bash scripts/tests/lint-label-vocabulary-parity.test.sh
 bash scripts/tests/esm-tooling.test.sh
 pnpm exec commitlint --version >/dev/null
 bash scripts/tests/issue-reference-contract.test.sh
