@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.0](https://github.com/patinaproject/skills/compare/v3.9.1...v3.10.0) (2026-10-19)
+
+
+### Features
+
+* [#694](https://github.com/patinaproject/skills/issues/694) rename Outcome to Theme and refine the Themes ([#696](https://github.com/patinaproject/skills/issues/696)) ([7ab6b1e](https://github.com/patinaproject/skills/commit/7ab6b1ec5d4b470c432c871e14d3563d561bd3ff))
+
 ## [3.9.1](https://github.com/patinaproject/skills/compare/v3.9.0...v3.9.1) (2026-10-19)
 
 
