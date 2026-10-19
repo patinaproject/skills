@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.1](https://github.com/patinaproject/skills/compare/v3.8.0...v3.8.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#683](https://github.com/patinaproject/skills/issues/683) refer to Team skills by bare name ([#684](https://github.com/patinaproject/skills/issues/684)) ([398a89d](https://github.com/patinaproject/skills/commit/398a89def5026cb6cebddae2ab46bf469c3bb99f))
+
 ## [3.8.0](https://github.com/patinaproject/skills/compare/v3.7.0...v3.8.0) (2026-10-17)
 
 

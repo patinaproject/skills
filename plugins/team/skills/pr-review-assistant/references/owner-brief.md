@@ -64,7 +64,7 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 - the to-do list, with checkboxes that keep their state in `localStorage`. Wrap each storage call in `try`/`catch`;
 - the evidence ledger, and a short "Not looked at" list.
 
-For each visual, follow the bundled `team:show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
+For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
 
 Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed. Give an item one visual only when a shape explains it faster than words, and place it next to the text it supports. Link every `file:line` in a visual or its caption by the link rule.
 
