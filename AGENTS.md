@@ -105,7 +105,7 @@ handoff gate instead of moving it implicitly.
 
 ### Triage labels
 
-Issue labels (Type, Outcome, and Triage groups, including each repository's
+Issue labels (Type, Theme, and Triage groups, including each repository's
 Type set) and the Sentence case rule for label names live only in the tracker
 adapter. See `docs/issue-tracker.md` → **Labels**.
 

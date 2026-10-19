@@ -1,4 +1,4 @@
-# ADR-682: Issues are classified by a Type and an optional Outcome, named in Sentence case
+# ADR-682: Issues are classified by a Type and an optional Theme, named in Sentence case
 
 ## Status
 
@@ -14,13 +14,13 @@ Every issue carries exactly one **Type**: Feature, Bug, Refactor, Tools, Task or
 
 The Type set depends on the repository. `patinaproject/patinaproject` uses the six Types above. `patinaproject/skills` uses one Type, Skills, and `patinaproject/factory` uses one Type, Factory, because every issue in those repositories is the same kind of work, and Linear needs the label to tell the repositories apart. Each Type names how triage verifies the claim: reproduction, a redundancy check, or confirming that a one-off action is not already done.
 
-An issue may carry at most one **Outcome**: Legal, Security, Performance & stability, Deliverability & reliability, Revenue, Support or Tech debt. When two apply, the earlier in that order wins.
+An issue may carry at most one **Theme**: Legal, Security, User blockers, Performance & stability, Deliverability & reliability, Revenue, User enablers, Support or Tech debt. When two apply, the earlier in that order wins.
 
-Type, Outcome, triage state and Wayfinder kind are each a Linear label group, so only one label from each applies. GitHub carries the same strings without groups.
+Type, Theme, triage state and Wayfinder kind are each a Linear label group, so only one label from each applies. GitHub carries the same strings without groups.
 
 Every label is in Sentence case: capitalize the first word only, keep proper nouns and acronyms, and capitalize the word after a `Prefix:`. The exception is release-please's `autorelease: pending` and `autorelease: tagged`.
 
-Skills name labels by these exact strings. The adapter no longer maps role IDs to labels. The tracker adapter, `docs/agents/issue-tracker.md`, is the only place that defines the Type and Outcome labels. Skills and other docs point to it rather than listing them, and `setup-team-skills` writes the vocabulary into a consumer's adapter.
+Skills name labels by these exact strings. The adapter no longer maps role IDs to labels. The tracker adapter, `docs/agents/issue-tracker.md`, is the only place that defines the Type and Theme labels. Skills and other docs point to it rather than listing them, and `setup-team-skills` writes the vocabulary into a consumer's adapter.
 
 ## Alternatives considered
 

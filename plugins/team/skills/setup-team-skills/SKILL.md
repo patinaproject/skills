@@ -9,7 +9,7 @@ disable-model-invocation: true
 Scaffold the per-repo configuration that the engineering skills assume:
 
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
-- **Labels**: the Type, Outcome, and Triage label vocabulary, written into the issue tracker config
+- **Labels**: the Type, Theme, and Triage label vocabulary, written into the issue tracker config
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
@@ -50,7 +50,7 @@ Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templ
 
 **Section B: Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you), since an uninstalled skill needs no labels.
 
-If it is installed, add [triage-labels.md](./triage-labels.md) as-is, without asking, as the `## Labels` section of `docs/agents/issue-tracker.md`. That section is the only place the repo defines its Type and Outcome labels; other skills and docs point to it. `triage` applies those exact strings, so there is no mapping to configure. Write no separate `docs/agents/triage-labels.md`, and when one exists, fold it into the section and delete it.
+If it is installed, add [triage-labels.md](./triage-labels.md) as-is, without asking, as the `## Labels` section of `docs/agents/issue-tracker.md`. That section is the only place the repo defines its Type and Theme labels; other skills and docs point to it. `triage` applies those exact strings, so there is no mapping to configure. Write no separate `docs/agents/triage-labels.md`, and when one exists, fold it into the section and delete it.
 
 **Section C: Domain docs.** Default to **single-context** (one `GLOSSARY.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
 

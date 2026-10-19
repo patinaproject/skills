@@ -6,7 +6,7 @@ The readiness check is the only way to apply `Ready for agent` or `Ready for hum
 
 Every item must hold:
 
-1. **Type.** Exactly one Type label from the repository's Type set is set. An Outcome label is set when the evidence supports one; a missing Outcome never fails this item. The issue-tracker config's **Labels** section defines both.
+1. **Type.** Exactly one Type label from the repository's Type set is set. A Theme label is set when the evidence supports one; a missing Theme never fails this item. The issue-tracker config's **Labels** section defines both.
 2. **Claim verified.** The claim is verified the way the Type's row in the issue-tracker config says: a reproduction names the code path, a redundancy check confirms it is not already built and records where you looked, and a one-off action is confirmed not already done. For a PR, the diff does what it claims.
 3. **Out of scope checked.** `.out-of-scope/*.md` was read, and any match is named and addressed. "None match" is a valid result.
 4. **Acceptance criteria and scope boundaries.** Concrete, independently verifiable acceptance criteria are written, and so is what is out of scope.
@@ -26,7 +26,7 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 ```markdown
 **Readiness check:**
 
-- [x] Type: Tools; Outcome: Deliverability & reliability
+- [x] Type: Tools; Theme: Deliverability & reliability
 - [x] Claim verified: not built; searched the `SkillConfig` loader and the scheduler
 - [x] Out of scope checked: no match
 - [ ] Acceptance criteria and scope boundaries: out-of-scope list missing

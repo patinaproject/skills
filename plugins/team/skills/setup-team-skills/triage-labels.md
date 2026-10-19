@@ -1,7 +1,7 @@
 ## Labels
 
 The `triage` skill applies these labels by their exact strings. This section is
-the only definition of the Type and Outcome labels; other skills and docs point
+the only definition of the Type and Theme labels; other skills and docs point
 here. Every label uses Sentence case: capitalize the first word only, keep
 proper nouns and acronyms, and capitalize the word after a `Prefix:`.
 
@@ -49,17 +49,19 @@ Linear holds every Type above in one Type group. A public repository's issue
 reaches Linear with its GitHub Type label, so the `Skills` and `Factory` labels
 mark which repository the work belongs to.
 
-**Outcome** says why the work matters. An issue carries at most one, and a
-missing Outcome never blocks readiness. When two fit, take the one listed
+**Theme** says why the work matters. An issue carries at most one, and a
+missing Theme never blocks readiness. When two fit, take the one listed
 first.
 
 | Label | Definition |
 | --- | --- |
 | `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
 | `Security` | Reduces security risk or meets a security requirement. |
+| `User blockers` | Removes something that stops users from finishing what they came to do. |
 | `Performance & stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or keeps the product fast. |
 | `Deliverability & reliability` | Makes building, testing, and shipping our software and agents faster, safer, or more reliable. |
 | `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
+| `User enablers` | Lets users do something they could not do before. |
 | `Support` | Helps users get help, or reduces support load. |
 | `Tech debt` | Lowers the cost or risk of maintaining what already exists. |
 <!-- label-vocabulary:end -->

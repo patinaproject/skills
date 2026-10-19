@@ -42,7 +42,7 @@ State what is out of scope. This prevents the agent from gold-plating or making 
 ## Agent Brief
 
 **Type:** one label from the repository's Type set
-**Outcome:** one Outcome label, or none
+**Theme:** one Theme label, or none
 **Summary:** one-line description of what needs to happen
 
 **Current behavior:**
@@ -111,7 +111,7 @@ and append "..." to indicate truncation.
 ## Agent Brief
 
 **Type:** Tools
-**Outcome:** Deliverability & reliability
+**Theme:** Deliverability & reliability
 **Summary:** Add `.out-of-scope/` directory support for tracking rejected feature requests
 
 **Current behavior:**
