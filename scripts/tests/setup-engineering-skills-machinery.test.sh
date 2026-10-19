@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# setup-engineering-machinery.test.sh — behavioral guard for the machinery
-# installer that setup-engineering runs. Asserts the bundled payloads stay
+# setup-engineering-skills-machinery.test.sh — behavioral guard for the machinery
+# installer that setup-engineering-skills runs. Asserts the bundled payloads stay
 # byte-identical to their canonical plugin sources, and that install-machinery.sh
 # is idempotent and never clobbers unrelated content. Documentation prose is not
 # asserted (see docs/adr/ADR-224-no-tests-on-documentation-content.md).
@@ -10,7 +10,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-SKILL="plugins/engineering/skills/setup-engineering"
+SKILL="plugins/engineering/skills/setup-engineering-skills"
 SCRIPT="$SKILL/scripts/install-machinery.sh"
 FAIL=0
 
@@ -32,7 +32,7 @@ for hook in plugins/engineering/hooks/session-start.sh plugins/engineering/hooks
 done
 for agent in plugins/engineering/agents/*.md plugins/engineering/effort-agents/*.md; do
   asset="$SKILL/assets/agents/$(basename "$agent")"
-  [ -f "$asset" ] || fail "missing setup-engineering asset: $asset"
+  [ -f "$asset" ] || fail "missing setup-engineering-skills asset: $asset"
   diff -q "$agent" "$asset" >/dev/null \
     || fail "$asset drifted from $agent"
 done
@@ -195,9 +195,9 @@ symlink_output="$(env -u CLAUDE_PROJECT_DIR HOME="$TMP/no-sheet" "$SYMLINK_REPO/
 
 MISSING="$TMP/missing"
 mkdir -p "$MISSING/skills"
-cp -R "$SKILL" "$MISSING/skills/setup-engineering"
+cp -R "$SKILL" "$MISSING/skills/setup-engineering-skills"
 set +e
-missing_output="$(bash "$MISSING/skills/setup-engineering/scripts/install-machinery.sh" --repo "$TMP/missing-repo" 2>&1)"
+missing_output="$(bash "$MISSING/skills/setup-engineering-skills/scripts/install-machinery.sh" --repo "$TMP/missing-repo" 2>&1)"
 missing_status=$?
 set -e
 [ "$missing_status" -ne 0 ] || fail "installer succeeded without sibling setup-pstack"
@@ -212,11 +212,11 @@ printf '%s\n' "$missing_output" | grep -qF "Install the full Engineering skill c
 
 MISSING_REF="$TMP/missing-ref"
 mkdir -p "$MISSING_REF/skills"
-cp -R "$SKILL" "$MISSING_REF/skills/setup-engineering"
+cp -R "$SKILL" "$MISSING_REF/skills/setup-engineering-skills"
 cp -R plugins/engineering/skills/setup-pstack "$MISSING_REF/skills/setup-pstack"
 mkdir -p "$MISSING_REF/skills/patina-mode/references"
 set +e
-missing_ref_output="$(bash "$MISSING_REF/skills/setup-engineering/scripts/install-machinery.sh" --repo "$TMP/missing-ref-repo" 2>&1)"
+missing_ref_output="$(bash "$MISSING_REF/skills/setup-engineering-skills/scripts/install-machinery.sh" --repo "$TMP/missing-ref-repo" 2>&1)"
 missing_ref_status=$?
 set -e
 [ "$missing_ref_status" -ne 0 ] || fail "installer succeeded without patina-mode references"
@@ -230,5 +230,5 @@ if [ "$FAIL" -gt 0 ]; then
   echo "FAIL: $FAIL assertion(s) failed" >&2
   exit 1
 fi
-echo "OK: setup-engineering machinery installer idempotent and non-clobbering"
+echo "OK: setup-engineering-skills machinery installer idempotent and non-clobbering"
 exit 0

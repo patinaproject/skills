@@ -1,10 +1,10 @@
 ---
-name: setup-engineering
-description: Install Engineering's repo-level machinery and configure model routing for skills-only consumers. Use for /setup-engineering or setting Engineering up in a repository.
+name: setup-engineering-skills
+description: Install Engineering's repo-level machinery and configure model routing for skills-only consumers. Use for /setup-engineering-skills or setting Engineering up in a repository.
 menu-description: install machinery and configure model routing
 ---
 
-# Setup Engineering
+# Set Up Engineering Skills
 
 Engineering ships as a full plugin (hook, subagents) and also as a vendored
 skill catalog. Vendoring carries the skills but not the hook or the agents, so a
@@ -96,6 +96,6 @@ confirmation, and writes.
 Tell the user what the machinery install wrote: the session hook, the
 Engineering agents, any legacy mandate block it removed, and on Codex the
 `multi_agent` flag. Relay `setup-pstack`'s
-final report. Report setup-engineering complete only when `setup-pstack`
+final report. Report setup-engineering-skills complete only when `setup-pstack`
 succeeds. Otherwise, report it incomplete and include the reason
 `setup-pstack` reported when it stopped.
