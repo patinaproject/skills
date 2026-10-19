@@ -29,7 +29,7 @@ outside the synced thread remain private.
 
 Issue labels are the classification vocabulary, and this section is their
 only definition. Skills, templates, and other docs name the groups and point
-here rather than listing Type or Outcome labels themselves. Apply labels by
+here rather than listing Type or Theme labels themselves. Apply labels by
 these exact strings. See
 [ADR-682](../adr/ADR-682-issue-type-and-outcome-labels.md).
 
@@ -46,7 +46,7 @@ exactly one, chosen from its repository's Type set:
 | --- | --- |
 | `patinaproject/skills` | `Skills` |
 | `patinaproject/factory` | `Factory` |
-| `patinaproject/patinaproject`, and any repository not listed | `Feature`, `Bug`, `Refactor`, `Tools`, `Task` |
+| `patinaproject/patinaproject`, and any repository not listed | `Feature`, `Bug`, `Refactor`, `Tools`, `Task`, `Design` |
 
 Each Type says how triage verifies the issue's claim and which commit types
 the closing pull request uses.
@@ -58,6 +58,7 @@ the closing pull request uses.
 | `Refactor` | `refactor` | redundancy check | Changes product source in a way no user can observe. |
 | `Tools` | `chore`, `ci`, `test`, `docs`, `style` | reproduction when it reports something broken, otherwise redundancy check | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. Never product behavior. |
 | `Task` | none | confirming the action is not already done | Needs no repository change: a one-off action on data, accounts, settings, or vendors. |
+| `Design` | none | confirming no existing design covers it | Produces a product or UX design, such as flows, mockups, or a prototype, for later work to build. |
 | `Skills` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/skills`: skills, plugins, their tooling, and their docs. |
 | `Factory` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/factory`. |
 
@@ -67,6 +68,8 @@ the closing pull request uses.
   record where you looked.
 - **Confirming the action is not already done:** check the system the action
   touches.
+- **Confirming no existing design covers it:** search the design files and
+  earlier design issues for the same flow or screen.
 
 Product is what a Production deploy delivers to users, including
 infrastructure on a user's request path. Internal tooling, CI, skills, agent
@@ -77,22 +80,24 @@ Linear holds every Type above in one Type group. A public repository's issue
 reaches Linear with its GitHub Type label, so the `Skills` and `Factory` labels
 mark which repository the work belongs to.
 
-**Outcome** says why the work matters. An issue carries at most one, and a
-missing Outcome never blocks readiness. When two fit, take the one listed
+**Theme** says why the work matters. An issue carries at most one, and a
+missing Theme never blocks readiness. When two fit, take the one listed
 first.
 
 | Label | Definition |
 | --- | --- |
 | `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
 | `Security` | Reduces security risk or meets a security requirement. |
-| `Delivery and stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or makes building, testing, and shipping our software and agents faster or safer. |
+| `User blockers` | Removes friction or a missing step that stops users from finishing what they came to do. A failure users hit in Production is `Performance & stability`. |
+| `Performance & stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or keeps the product fast. |
+| `Deliverability & reliability` | Makes building, testing, and shipping our software and agents faster, safer, or more reliable. |
 | `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
+| `User enablers` | Lets users do something they could not do before. |
 | `Support` | Helps users get help, or reduces support load. |
-| `Tech debt` | Lowers the cost or risk of maintaining what already exists. |
 <!-- label-vocabulary:end -->
 
 **Triage** says what triage decided. Every triaged issue carries exactly one.
-A transition replaces it and preserves the Type and Outcome.
+A transition replaces it and preserves the Type and Theme.
 
 | Label | Meaning | GitHub | Linear |
 | --- | --- | --- | --- |
@@ -236,7 +241,7 @@ readiness, use the adapter to:
 1. apply the provider's ready state — leave a GitHub issue open, or move a
    Linear issue to `Todo`;
 2. write the `Ready for agent` or `Ready for human` label, replacing the
-   previous Triage label and preserving the Type and Outcome; and
+   previous Triage label and preserving the Type and Theme; and
 3. set the planning fields together when the work belongs to a named effort —
    a GitHub milestone, or a Linear project and project milestone.
 

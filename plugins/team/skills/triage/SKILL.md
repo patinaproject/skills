@@ -1,6 +1,6 @@
 ---
 name: triage
-description: Move issues and external PRs through a state machine of triage labels, classify Type and Outcome, verify, grill if needed, and write agent-ready briefs.
+description: Move issues and external PRs through a state machine of triage labels, classify Type and Theme, verify, grill if needed, and write agent-ready briefs.
 disable-model-invocation: true
 ---
 
@@ -28,7 +28,7 @@ Apply labels by these exact strings. The **Labels** section of the issue-tracker
 
 One **Type**, required, from the repository's Type set. The Type's row says how to verify the claim.
 
-At most one **Outcome**, the first in the config's order that fits.
+At most one **Theme**, the first in the config's order that fits.
 
 One **Triage** label:
 
@@ -40,7 +40,7 @@ One **Triage** label:
 
 For a PR, the same Triage labels read against the attached code: `Ready for agent` means a brief is attached and an agent should take the next step on the diff; `Ready for human` means it's ready for a human to merge.
 
-Every triaged issue should carry exactly one Type and one Triage label, and at most one Outcome. If Triage labels conflict, flag it and ask the maintainer before doing anything else.
+Every triaged issue should carry exactly one Type and one Triage label, and at most one Theme. If Triage labels conflict, flag it and ask the maintainer before doing anything else.
 
 State transitions: an unlabeled issue normally goes to `Needs triage` first; from there it moves to `Needs info`, `Ready for agent`, `Ready for human`, or `Won't fix`. `Needs info` returns to `Needs triage` once the reporter replies. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
 
@@ -69,7 +69,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 1. **Gather context.** Read the full issue or PR (body, comments, labels, author, dates; for a PR, the diff too). Parse any prior triage notes so you don't re-ask resolved questions. Explore the codebase using the project's domain glossary, respecting ADRs in the area. Run two checks against the codebase: (a) **redundancy**: search for an existing implementation of the requested behavior by domain concept (not just the request's wording), and report where you looked. If found, it's an already-implemented `Won't fix` (step 5). (b) **prior rejection**: read `.out-of-scope/*.md` and surface any that resembles this request.
 
-2. **Recommend.** Tell the maintainer your Type, Outcome, and Triage label recommendation with reasoning, plus a brief codebase summary relevant to the request (including whether it's already implemented). Wait for direction.
+2. **Recommend.** Tell the maintainer your Type, Theme, and Triage label recommendation with reasoning, plus a brief codebase summary relevant to the request (including whether it's already implemented). Wait for direction.
 
 3. **Verify the claim.** Before any grilling, check that the claim holds up. Verify it the way the Type's row in the issue-tracker config says: reproduce a report of something broken from the reporter's steps, or confirm a one-off action has not already been done. For a PR, confirm the diff does what it claims: check it out, run the relevant tests or commands. Report what happened: confirmed (with code path), failed, or insufficient detail (a strong `Needs info` signal). A confirmed verification makes a much stronger agent brief.
 
