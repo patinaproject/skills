@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.0](https://github.com/patinaproject/skills/compare/v3.8.2...v3.9.0) (2026-10-19)
+
+
+### Features
+
+* [#682](https://github.com/patinaproject/skills/issues/682) classify issues by Type and Outcome with Sentence case labels ([#685](https://github.com/patinaproject/skills/issues/685)) ([0f27413](https://github.com/patinaproject/skills/commit/0f2741352612108f2c05530fe43297fbddc34243))
+
 ## [3.8.2](https://github.com/patinaproject/skills/compare/v3.8.1...v3.8.2) (2026-10-19)
 
 
