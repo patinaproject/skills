@@ -14,4 +14,4 @@ Both triage paths assign priority on every outcome that leaves the issue open, e
 
 ## Consequences
 
-"No priority" means not yet triaged. Without a rubric section, triage keeps the older rule and asks for a `setup-team-skills` re-run. Inflated Urgent values are visible and easy to correct, because each one names its trigger. A bulk backfill writes only after a maintainer approves its table. Extends [ADR-675](ADR-675-automated-triage-playbook.md) and builds on [ADR-682](ADR-682-issue-type-and-outcome-labels.md).
+"No priority" means not yet triaged. Without a rubric section, triage keeps the older rule and asks for a `setup-team-skills` re-run. Inflated Urgent values are visible and easy to correct, because each one names its trigger. A bulk backfill writes only after a maintainer approves its table. For a public repository, triage notes and the agent brief, which carry the priority record, live as Documents on the Linear copy rather than as GitHub comments, amending [ADR-654](ADR-654-linear-issue-documents.md). Extends [ADR-675](ADR-675-automated-triage-playbook.md) and builds on [ADR-682](ADR-682-issue-type-and-outcome-labels.md).

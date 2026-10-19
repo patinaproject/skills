@@ -343,8 +343,11 @@ an agent brief, research, or a proposed ADR. Where it lives depends on the
 provider. See
 [ADR-654](../adr/ADR-654-linear-issue-documents.md).
 
-- **Public repository:** post each artifact as a GitHub issue comment, as the
-  producing skill describes. Nothing below applies.
+- **Public repository:** save triage notes and the agent brief as Linear
+  Documents attached to the Linear copy, as below. Post on GitHub only when a
+  human must act there. When the Linear copy is archived or missing, post them
+  as GitHub comments instead and name the gap. Post research and proposed ADRs
+  on the GitHub issue, as the producing skill describes.
 - **Private repository:** save each artifact as a Linear Document attached to
   the issue. Post a comment only when a human must act.
 
