@@ -1,10 +1,10 @@
 ---
-name: setup-engineering
-description: Install Engineering's repo-level machinery and configure model routing for skills-only consumers. Use for /setup-engineering or setting Engineering up in a repository.
+name: setup-engineering-skills
+description: Install Engineering's repo-level machinery and configure model routing for skills-only consumers. Use for /setup-engineering-skills or setting Engineering up in a repository.
 menu-description: install machinery and configure model routing
 ---
 
-# Setup Engineering
+# Set Up Engineering Skills
 
 Engineering ships as a full plugin (hook, subagents) and also as a vendored
 skill catalog. Vendoring carries the skills but not the hook or the agents, so a
@@ -31,12 +31,14 @@ skill catalog.
 What it materializes from `assets/`:
 
 - The **Engineering hook** and its context (from `assets/hooks/`) into the
-  repo's `.claude/hooks/`. The skills-only context uses bare skill names, while
-  the plugin source keeps its `engineering:` namespace.
+  repo's `.claude/hooks/`. The context names skills by their bare names.
 - The **Engineering agents** (from `assets/agents/`) into the repo's
-  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves and
-  no-comments can reach `comment-sicko`. Model choice per role comes from the
-  `setup-pstack` sheet at runtime, not from an agent definition.
+  `.claude/agents/`, so `subagent_type: "patina-agent"` resolves, the effort
+  agents `patina-agent-<level>` and `effort-<level>` resolve, and no-comments
+  can reach `comment-sicko`. The agents keep their bare names, so the same
+  names resolve when Engineering is also installed as a plugin. Model choice
+  per role comes from the `setup-pstack` sheet at runtime, not from an agent
+  definition.
 - One `SessionStart` entry matching `startup|resume|clear|compact` in
   `.claude/settings.json`; existing hooks remain in place.
 
@@ -94,6 +96,6 @@ confirmation, and writes.
 Tell the user what the machinery install wrote: the session hook, the
 Engineering agents, any legacy mandate block it removed, and on Codex the
 `multi_agent` flag. Relay `setup-pstack`'s
-final report. Report setup-engineering complete only when `setup-pstack`
+final report. Report setup-engineering-skills complete only when `setup-pstack`
 succeeds. Otherwise, report it incomplete and include the reason
 `setup-pstack` reported when it stopped.
