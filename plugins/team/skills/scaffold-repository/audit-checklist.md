@@ -104,7 +104,7 @@ repository records the choice in
 | `docs/agents/issue-tracker.md` | yes | Is the real and only tracker-specific instruction file. It selects GitHub for public repositories and Linear for private repositories. It contains `## Pull requests as a triage surface`, `## When a skill says "publish to the issue tracker"`, `## When a skill says "fetch the relevant ticket"`, `## Issue artifacts`, and `## Wayfinding operations`. The `triage` and `wayfinder` skills depend on those headings. Copy `## Issue artifacts` from the `patinaproject/skills` adapter. A private repository whose adapter lacks it is `stale`. |
 | `docs/issue-tracker.md` | yes | Is a relative symlink to `agents/issue-tracker.md`. Two real copies are `divergent`. |
 | `docs/agents/domain.md` | yes | Tells agents when domain documentation is useful. It is a settings file used by `setup-matt-pocock-skills`, not the domain documentation itself. |
-| `docs/agents/triage-labels.md` | when `triage` is installed | Maps the triage roles to this repository's labels. It may point to the issue-tracker instructions instead of repeating them. |
+| `docs/agents/triage-labels.md` | when `triage` is installed | Lists the Type, Goal, and Triage labels that `triage` applies. It may point to the issue-tracker instructions instead of repeating them. |
 | `docs/issue-publishing.md` | yes | Contains issue-writing rules that work with either tracker. |
 
 ## 4. Claude Code settings

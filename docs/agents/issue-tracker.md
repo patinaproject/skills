@@ -45,7 +45,7 @@ the issue.
 | `Feature` | `feat`, `perf` | Changes what the product does, or how fast or light it does it, as users observe in Production. |
 | `Bug` | `fix` | Makes the product do what it was already supposed to do, including fixing a performance regression. |
 | `Refactor` | `refactor` | Changes product source in a way no user can observe. |
-| `Tools` | `chore`, `ci`, `test`, `docs`, `style` | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. |
+| `Tools` | `chore`, `ci`, `test`, `docs`, `style` | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. Never product behavior. |
 | `Task` | none | Needs no repository change: a one-off action on data, accounts, settings, or vendors. |
 
 Product is what a Production deploy delivers to users, including
@@ -60,8 +60,8 @@ take the one listed first.
 | --- | --- |
 | `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
 | `Security` | Reduces security risk or meets a security requirement. |
-| `Delivery and stability` | Reduces failures users hit in Production, or makes building, testing, and shipping our software and agents faster or safer. |
-| `Revenue` | Acquisition, discoverability, onboarding, conversion, subscriptions, and pricing. |
+| `Delivery and stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or makes building, testing, and shipping our software and agents faster or safer. |
+| `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
 | `Support` | Helps users get help, or reduces support load. |
 | `Tech debt` | Lowers the cost or risk of maintaining what already exists. |
 

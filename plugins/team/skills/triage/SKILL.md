@@ -24,15 +24,9 @@ Every comment or issue posted to the issue tracker during triage **must** start 
 
 ## Labels
 
-Apply labels by these exact strings. The issue-tracker config defines each one; if it has no label vocabulary, tell the user to run `/setup-matt-pocock-skills`.
+Apply labels by these exact strings. The repository's triage label vocabulary (`docs/agents/triage-labels.md`) defines each one; if it has none, tell the user to run `/setup-matt-pocock-skills`.
 
-One **Type**, required:
-
-- `Feature`: changes what the product does, or how fast or light it does it, as users observe it
-- `Bug`: makes the product do what it was already supposed to do
-- `Refactor`: changes product source in a way no user can observe
-- `Tools`: changes project files only: tooling, CI, skills, agent workflows, tests, docs
-- `Task`: needs no repository change; a one-off action on data, accounts, settings, or vendors
+One **Type**, required: `Feature`, `Bug`, `Refactor`, `Tools`, or `Task`.
 
 At most one **Goal**, the first that fits: `Legal`, `Security`, `Delivery and stability`, `Revenue`, `Support`, `Tech debt`.
 
@@ -97,7 +91,7 @@ If the maintainer says "move #42 to Needs triage", trust them and apply the labe
 
 A move to `Ready for agent` or `Ready for human` still runs the readiness check ([READINESS.md](READINESS.md)) and follows its outcome.
 
-## Needs-info template
+## Needs info template
 
 ```markdown
 ## Triage Notes

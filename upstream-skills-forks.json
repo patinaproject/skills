@@ -533,7 +533,7 @@
   },
   "plugins/team/skills/triage/agents/openai.yaml": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Goal instead of the upstream bug and enhancement roles (ADR-682).",
+    "reason": "Patina describes triage in terms of labels rather than upstream roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -547,14 +547,14 @@
   },
   "plugins/team/skills/setup-matt-pocock-skills/issue-tracker-github.md": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Goal instead of the upstream bug and enhancement roles (ADR-682).",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/team/skills/setup-matt-pocock-skills/issue-tracker-gitlab.md": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Goal instead of the upstream bug and enhancement roles (ADR-682).",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -568,7 +568,14 @@
   },
   "plugins/team/skills/wayfinder/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Goal instead of the upstream bug and enhancement roles (ADR-682).",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-matt-pocock-skills/issue-tracker-local.md": {
+    "kind": "policy",
+    "reason": "Patina describes triage in terms of labels rather than upstream roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
