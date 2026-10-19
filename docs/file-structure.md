@@ -41,7 +41,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/grilling/`: upstream mirror (mattpocock)
 - `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
 - `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
-- `plugins/team/skills/setup-matt-pocock-skills/`: upstream mirror (mattpocock)
+- `plugins/team/skills/setup-team-skills/`: upstream mattpocock `setup-matt-pocock-skills` mirror, renamed and forked for Patina label setup
 - `plugins/team/skills/tutor/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
@@ -121,7 +121,7 @@ Skills owned by this repository:
 | `grilling` | `plugins/team/skills/grilling/` | Upstream mattpocock mirror in the Team plugin |
 | `handoff` | `plugins/team/skills/handoff/` | Upstream mattpocock mirror in the Team plugin |
 | `improve-codebase-architecture` | `plugins/team/skills/improve-codebase-architecture/` | Upstream mattpocock mirror in the Team plugin |
-| `setup-matt-pocock-skills` | `plugins/team/skills/setup-matt-pocock-skills/` | Upstream mattpocock mirror in the Team plugin |
+| `setup-team-skills` | `plugins/team/skills/setup-team-skills/` | Upstream mattpocock `setup-matt-pocock-skills` mirror, renamed so the Team plugin owns repository setup |
 | `tutor` | `plugins/team/skills/tutor/` | Upstream mattpocock `teach` mirror, renamed so skill names stay unique across plugins |
 | `to-questionnaire` | `plugins/team/skills/to-questionnaire/` | Upstream mattpocock mirror in the Team plugin |
 | `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |
