@@ -52,6 +52,8 @@ Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templ
 
 If it is installed, add [triage-labels.md](./triage-labels.md) as-is, without asking, as the `## Labels` section of `docs/agents/issue-tracker.md`. That section is the only place the repo defines its Type and Theme labels; other skills and docs point to it. `triage` applies those exact strings, so there is no mapping to configure. Write no separate `docs/agents/triage-labels.md`, and when one exists, fold it into the section and delete it.
 
+Also add [priority-rubric.md](./priority-rubric.md) as-is, without asking, as the `## Priority rubric` section of `docs/agents/issue-tracker.md`. `triage` assigns priority from that section. When the section already exists, leave it unchanged.
+
 **Section C: Domain docs.** Default to **single-context** (one `GLOSSARY.md` + `docs/adr/` at the repo root). This fits almost every repo; write it without asking.
 
 Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
@@ -61,7 +63,7 @@ Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSS
 Show the user a draft of:
 
 - The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md` (with its `## Labels` section only when `triage` is installed) and `docs/agents/domain.md`
+- The contents of `docs/agents/issue-tracker.md` (with its `## Labels` and `## Priority rubric` sections only when `triage` is installed) and `docs/agents/domain.md`
 
 Let them edit before writing.
 
@@ -103,10 +105,11 @@ Then write the docs files using the seed templates in this skill folder as a sta
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md): GitLab issue tracker
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md): the `## Labels` section of `docs/agents/issue-tracker.md` (only if `triage` is installed)
+- [priority-rubric.md](./priority-rubric.md): the `## Priority rubric` section of `docs/agents/issue-tracker.md` (only if `triage` is installed)
 - [domain.md](./domain.md): domain doc consumer rules + layout
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
+Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers, restart from scratch, or add a missing `## Priority rubric` section.
