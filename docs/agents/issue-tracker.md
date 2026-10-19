@@ -94,7 +94,6 @@ first.
 | `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
 | `User enablers` | Lets users do something they could not do before. |
 | `Support` | Helps users get help, or reduces support load. |
-| `Tech debt` | Lowers the cost or risk of maintaining what already exists. |
 <!-- label-vocabulary:end -->
 
 **Triage** says what triage decided. Every triaged issue carries exactly one.
