@@ -35,7 +35,7 @@ fail() {
 
 require_file() {
   local path="$1"
-  [ -f "$path" ] || fail "missing required file: $path. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering."
+  [ -f "$path" ] || fail "missing required file: $path. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering-skills."
 }
 
 while [ $# -gt 0 ]; do
@@ -160,7 +160,7 @@ upsert_claude_session_hook() {
 
 agents_dir="${repo}/.claude/agents"
 for agent_asset in "${ASSETS_DIR}"/agents/*.md; do
-  [ -f "$agent_asset" ] || fail "missing required file: ${ASSETS_DIR}/agents/*.md. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering."
+  [ -f "$agent_asset" ] || fail "missing required file: ${ASSETS_DIR}/agents/*.md. Install the full Engineering skill catalog, including setup-pstack and patina-mode references, then rerun setup-engineering-skills."
   install_managed_file "$agent_asset" "${agents_dir}/$(basename "$agent_asset")"
 done
 install_managed_file "${ASSETS_DIR}/hooks/session-start.sh" "${repo}/.claude/hooks/session-start.sh"
