@@ -18,9 +18,18 @@ printf 'Follow `engineering:alpha` and pass `engineering:effort-<level>`.\n' >"$
 output="$(cd "$root" && node "$lint")"
 test "$output" = 'OK: 4 active skill files contain only published executable references and in-plugin links'
 
-printf 'Follow `team:gamma`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
+printf 'Follow `engineering:gamma`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
 if output="$(cd "$root" && node "$lint" 2>&1)"; then
   echo "FAIL: an unpublished reference in a skill reference file must fail the lint" >&2
   exit 1
 fi
-test "$output" = 'FAIL: executable skill reference is unavailable: team:gamma in plugins/team/skills/beta/references/brief.md'
+test "$output" = 'FAIL: executable skill reference is unavailable: engineering:gamma in plugins/team/skills/beta/references/brief.md'
+
+printf 'Follow `engineering:alpha`.\n' >"$root/plugins/team/skills/beta/references/brief.md"
+printf 'Load team:beta, then run `/team:beta`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
+if output="$(cd "$root" && node "$lint" 2>&1)"; then
+  echo "FAIL: a plugin-prefixed Team reference must fail the lint" >&2
+  exit 1
+fi
+test "$output" = 'FAIL: skill reference carries a plugin prefix: /team:beta in plugins/team/skills/beta/references/brief.md; use /beta
+FAIL: skill reference carries a plugin prefix: team:beta in plugins/team/skills/beta/references/brief.md; use beta'
