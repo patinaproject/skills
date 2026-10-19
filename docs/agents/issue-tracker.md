@@ -280,12 +280,11 @@ Labels, the reporter, and effort never count. See
 
 A confident duplicate gets no priority. Write priority to Linear's priority
 field with `save_issue`: `1` Urgent, `2` High, `3` Medium, `4` Low. Never encode
-it as a label. For a public repository, write it on the Linear copy: the Linear
+it as a label. For a public repository, write it on the synced Linear issue: the Linear
 issue whose GitHub attachment URL equals the GitHub issue URL. `list_issues`
 returns no attachments, so confirm each candidate with `get_issue` and
-`fields: ["attachments", "priority"]`. A title match alone is not a match. When no Linear copy
-exists, the triage notes' `Priority:` line is the only record; name the gap in
-the reply.
+`fields: ["attachments", "priority"]`. A title match alone is not a match. When no synced Linear
+issue exists, write no priority and name the gap in the reply.
 
 ## Tracker-agnostic operations
 
@@ -344,9 +343,10 @@ provider. See
 [ADR-654](../adr/ADR-654-linear-issue-documents.md).
 
 - **Public repository:** save triage notes and the agent brief as Linear
-  Documents attached to the Linear copy, as below. Post on GitHub only when a
-  human must act there. When the Linear copy is archived or missing, post them
-  as GitHub comments instead and name the gap. Post research and proposed ADRs
+  Documents attached to the synced Linear issue, as below. Post on GitHub only
+  when a human must act there. When the synced Linear issue is archived or
+  missing, write nothing and name the gap in the reply; never move the
+  artifact to GitHub. Post research and proposed ADRs
   on the GitHub issue, as the producing skill describes.
 - **Private repository:** save each artifact as a Linear Document attached to
   the issue. Post a comment only when a human must act.
