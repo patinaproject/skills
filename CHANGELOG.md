@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.2](https://github.com/patinaproject/skills/compare/v3.8.1...v3.8.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#687](https://github.com/patinaproject/skills/issues/687) run the T3 handoff test with an upstream sqlite3 on macOS ([#688](https://github.com/patinaproject/skills/issues/688)) ([72863b5](https://github.com/patinaproject/skills/commit/72863b569ff9f87becf0bb4fa86de727bbf13361))
+
 ## [3.8.1](https://github.com/patinaproject/skills/compare/v3.8.0...v3.8.1) (2026-10-19)
 
 
