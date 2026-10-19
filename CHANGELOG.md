@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.0](https://github.com/patinaproject/skills/compare/v3.11.0...v3.12.0) (2026-10-19)
+
+
+### Features
+
+* [#692](https://github.com/patinaproject/skills/issues/692) assign a priority on every triage pass from the priority rubric ([#701](https://github.com/patinaproject/skills/issues/701)) ([a4d6a88](https://github.com/patinaproject/skills/commit/a4d6a8812d98370588933dd713301aedc8ba6f67))
+
 ## [3.11.0](https://github.com/patinaproject/skills/compare/v3.10.0...v3.11.0) (2026-10-19)
 
 
