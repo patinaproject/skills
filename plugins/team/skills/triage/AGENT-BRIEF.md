@@ -111,7 +111,7 @@ and append "..." to indicate truncation.
 ## Agent Brief
 
 **Type:** Tools
-**Outcome:** Delivery and stability
+**Outcome:** Deliverability & reliability
 **Summary:** Add `.out-of-scope/` directory support for tracking rejected feature requests
 
 **Current behavior:**

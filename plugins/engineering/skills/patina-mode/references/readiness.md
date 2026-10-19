@@ -26,7 +26,7 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 ```markdown
 **Readiness check:**
 
-- [x] Type: Tools; Outcome: Delivery and stability
+- [x] Type: Tools; Outcome: Deliverability & reliability
 - [x] Claim verified: not built; searched the `SkillConfig` loader and the scheduler
 - [x] Out of scope checked: no match
 - [ ] Acceptance criteria and scope boundaries: out-of-scope list missing

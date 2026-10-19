@@ -46,7 +46,7 @@ exactly one, chosen from its repository's Type set:
 | --- | --- |
 | `patinaproject/skills` | `Skills` |
 | `patinaproject/factory` | `Factory` |
-| `patinaproject/patinaproject`, and any repository not listed | `Feature`, `Bug`, `Refactor`, `Tools`, `Task` |
+| `patinaproject/patinaproject`, and any repository not listed | `Feature`, `Bug`, `Refactor`, `Tools`, `Task`, `Design` |
 
 Each Type says how triage verifies the issue's claim and which commit types
 the closing pull request uses.
@@ -58,6 +58,7 @@ the closing pull request uses.
 | `Refactor` | `refactor` | redundancy check | Changes product source in a way no user can observe. |
 | `Tools` | `chore`, `ci`, `test`, `docs`, `style` | reproduction when it reports something broken, otherwise redundancy check | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. Never product behavior. |
 | `Task` | none | confirming the action is not already done | Needs no repository change: a one-off action on data, accounts, settings, or vendors. |
+| `Design` | none | confirming no existing design covers it | Produces a product or UX design, such as flows, mockups, or a prototype, for later work to build. |
 | `Skills` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/skills`: skills, plugins, their tooling, and their docs. |
 | `Factory` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/factory`. |
 
@@ -67,6 +68,8 @@ the closing pull request uses.
   record where you looked.
 - **Confirming the action is not already done:** check the system the action
   touches.
+- **Confirming no existing design covers it:** search the design files and
+  earlier design issues for the same flow or screen.
 
 Product is what a Production deploy delivers to users, including
 infrastructure on a user's request path. Internal tooling, CI, skills, agent
@@ -85,7 +88,8 @@ first.
 | --- | --- |
 | `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
 | `Security` | Reduces security risk or meets a security requirement. |
-| `Delivery and stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or makes building, testing, and shipping our software and agents faster or safer. |
+| `Performance & stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or keeps the product fast. |
+| `Deliverability & reliability` | Makes building, testing, and shipping our software and agents faster, safer, or more reliable. |
 | `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
 | `Support` | Helps users get help, or reduces support load. |
 | `Tech debt` | Lowers the cost or risk of maintaining what already exists. |
