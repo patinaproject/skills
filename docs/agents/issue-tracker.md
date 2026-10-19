@@ -20,7 +20,9 @@ state, labels, relationships, milestones, and closure. Linear receives new
 issues through one-way GitHub-to-Linear intake for team visibility. Linear's
 native sync still propagates updates to synced properties in both directions.
 Do not edit or close the Linear copy; close public work on GitHub, and treat any
-disagreement in favor of GitHub.
+disagreement in favor of GitHub. The one exception is a Linear-only field that
+GitHub cannot represent, such as priority: set it on the Linear copy as
+**Priority rubric** describes.
 
 The sync creates a comment thread whose replies publish to GitHub. Comments
 outside the synced thread remain private.
@@ -245,14 +247,42 @@ readiness, use the adapter to:
 3. set the planning fields together when the work belongs to a named effort —
    a GitHub milestone, or a Linear project and project milestone.
 
-Triage sets the highest priority only when the evidence shows a live,
-user-impacting fault. In every other case the priority stays unset until a
-person chooses it. Record priority in the provider's priority field where it has
-one, such as Linear's; never encode it as a label.
+Triage sets priority from the **Priority rubric** below.
 
 Releases describe what shipped, so the release pipeline owns them and readiness
 leaves them alone. A blocked issue may still become ready — record its
 dependency with the native blocked-by relationship.
+
+## Priority rubric
+
+Triage gives every triaged issue exactly one priority: the highest lane whose
+condition holds. Judge only evidence in the issue: its body, comments, and
+linked reports. Labels, the reporter, and effort never count. See
+[ADR-692](../adr/ADR-692-triage-assigns-priority.md).
+
+- **Urgent:** work to triage and ship before all other open work. At least one
+  trigger holds, and the triage notes name it and cite its evidence:
+  1. A fault harms users now with no workaround: data loss, an outage, a
+     security exposure, or a broken core flow.
+  2. A legal or regulatory deadline applies.
+  3. A release gate is blocked.
+  4. Someone should stop work in progress for this. The notes say what would
+     be interrupted and why waiting costs more.
+
+  An issue where a trigger holds is never High.
+- **High:** no Urgent trigger holds, and either the issue links a customer's
+  own report (a Featurebase post or a support conversation), or a linked
+  Sentry issue shows many affected users or events. None of these is a label.
+- **Medium:** a confirmed bug or a valuable enhancement with limited reach.
+- **Low:** waiting costs users nothing visible, such as maintenance-only work,
+  dependency bumps, cosmetic polish, and routine follow-ups.
+
+A confident duplicate gets no priority. Write priority to Linear's priority
+field with `save_issue`: `1` Urgent, `2` High, `3` Medium, `4` Low. Never encode
+it as a label. For a public repository, write it on the Linear copy, the Linear
+issue whose GitHub attachment links the GitHub issue. When no Linear copy
+exists, the triage notes' `Priority:` line is the only record; name the gap in
+the reply.
 
 ## Tracker-agnostic operations
 

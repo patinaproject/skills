@@ -69,13 +69,13 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 1. **Gather context.** Read the full issue or PR (body, comments, labels, author, dates; for a PR, the diff too). Parse any prior triage notes so you don't re-ask resolved questions. Explore the codebase using the project's domain glossary, respecting ADRs in the area. Run two checks against the codebase: (a) **redundancy**: search for an existing implementation of the requested behavior by domain concept (not just the request's wording), and report where you looked. If found, it's an already-implemented `Won't fix` (step 5). (b) **prior rejection**: read `.out-of-scope/*.md` and surface any that resembles this request.
 
-2. **Recommend.** Tell the maintainer your Type, Theme, and Triage label recommendation with reasoning, plus a brief codebase summary relevant to the request (including whether it's already implemented). Wait for direction.
+2. **Recommend.** Tell the maintainer your Type, Theme, Triage label, and priority recommendation with reasoning, plus a brief codebase summary relevant to the request (including whether it's already implemented). Wait for direction.
 
 3. **Verify the claim.** Before any grilling, check that the claim holds up. Verify it the way the Type's row in the issue-tracker config says: reproduce a report of something broken from the reporter's steps, or confirm a one-off action has not already been done. For a PR, confirm the diff does what it claims: check it out, run the relevant tests or commands. Report what happened: confirmed (with code path), failed, or insufficient detail (a strong `Needs info` signal). A confirmed verification makes a much stronger agent brief.
 
 4. **Grill (if needed).** If the request needs fleshing out, or the readiness check ([READINESS.md](READINESS.md)) has gaps you can't close yourself, call the Skill tool twice, for "grilling" and "domain-modeling", and grill it into shape a round of questions at a time, sharpening domain terms and updating `GLOSSARY.md`/ADRs inline as decisions land.
 
-5. **Apply the outcome:**
+5. **Apply the outcome.** Set the priority the maintainer accepted or chose, unless the outcome closes the issue. See **Priority** below. Then:
    - `Ready for agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the label.
    - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
    - `Needs info`: write triage notes (template below).
@@ -84,6 +84,10 @@ Show counts and a one-line summary per item. Let the maintainer pick.
      - **Rejected report of something broken**: give a polite explanation, then close.
      - **Any other rejection**: write to `.out-of-scope/`, link to it from a comment, then close ([OUT-OF-SCOPE.md](OUT-OF-SCOPE.md)).
    - `Needs triage`: apply the label. Optional comment if there's partial progress.
+
+## Priority
+
+Recommend the priority that the `## Priority rubric` section of the issue tracker config gives. A set priority that the latest `Priority: <value>, set by triage` line in the triage notes does not match was chosen by a person: show it and recommend keeping it. A priority the maintainer accepts or chooses is theirs and needs no record. A priority is never a readiness item. When the config has no rubric section, recommend Urgent only for a live fault affecting users, otherwise leave priority unset, and ask the maintainer to re-run `setup-team-skills` to configure priority.
 
 ## Quick state override
 
