@@ -41,6 +41,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/pi/config.ts": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/automate-me/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",

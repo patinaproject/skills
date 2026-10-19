@@ -165,7 +165,7 @@ for agent_asset in "${ASSETS_DIR}"/agents/*.md; do
 done
 install_managed_file "${ASSETS_DIR}/hooks/session-start.sh" "${repo}/.claude/hooks/session-start.sh"
 chmod +x "${repo}/.claude/hooks/session-start.sh"
-sed 's/engineering://g' "${ASSETS_DIR}/hooks/session-start-context.md" > "${repo}/.claude/hooks/session-start-context.md"
+install_managed_file "${ASSETS_DIR}/hooks/session-start-context.md" "${repo}/.claude/hooks/session-start-context.md"
 
 # Claude receives the mandate from the project hook and Codex from the plugin
 # hook, so no instructions file carries it. Remove managed blocks that an

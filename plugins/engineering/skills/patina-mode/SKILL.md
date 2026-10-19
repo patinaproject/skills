@@ -26,12 +26,11 @@ skills and playbooks named here. Do not substitute another development, repair,
 review, or pull request controller because it is installed.
 
 Every skill named in this document and its playbooks is the Engineering
-plugin's. On Claude Code, invoke it as `engineering:<name>` rather than the bare
-name. Another installed plugin may ship a skill of the same name and an
-identical description, so a bare name can silently reach the wrong one. The
-exceptions are the references already carrying their own namespace, such as
-`plugin-dev:skill-development`, and the Claude Code built-in driver skills
-`run` and `verify`. On Codex, see
+plugin's. Invoke it by its bare name, such as `patina-mode`. An Agent Skills
+install registers bare names only, so a `plugin:skill` name for an Engineering
+skill does not resolve there. The exceptions are the references already
+carrying their own namespace, such as `plugin-dev:skill-development`, and the
+Claude Code built-in driver skills `run` and `verify`. On Codex, see
 [`references/codex-tools.md`](references/codex-tools.md).
 
 Every `scripts/...` and `playbooks/...` path in this document, its playbooks,
@@ -190,7 +189,7 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 ## Subagents
 
-**Use `subagent_type: "engineering:patina-agent"` for any subagent you spawn inside a playbook step** (code-writing delegates, ad-hoc helpers). Plugin agents register under the plugin namespace. The bare name `patina-agent` errors. `/patina-mode` and `patina-agent` route through the same wrapper. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own `subagent_type` for diverse-model review. Respect what the skill prescribes, don't override to `patina-agent`.
+**Use `subagent_type: "patina-agent"` for any subagent you spawn inside a playbook step** (code-writing delegates, ad-hoc helpers). `setup-engineering` installs the Engineering agents under their bare names, so the name resolves in a plugin install and in an Agent Skills install. `/patina-mode` and `patina-agent` route through the same wrapper. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own `subagent_type` for diverse-model review. Respect what the skill prescribes, don't override to `patina-agent`.
 
 **Defaults for every `Agent` call.** `run_in_background: true`, full tool access (do not pick a subagent_type that strips MCP), file pointers not inlined context, explicit model per role (configurable via `/setup-pstack`. Role defaults in [Models](#models), with "judgment and prose" covering prose and judgment). Code delegates tier by difficulty. The hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms) go to your strongest-judgment model (default in [Models](#models)), whether the task needs judgment on vague intent or is a precisely specified sequence of steps to execute to the letter. Trivial mechanical edits go to your fast code model. Everything else uses the single-role default. Multi-model panels run the configured panel for diversity, with defaults enumerated in each panel skill's Models section (`arena`, `architect`, `interrogate`). Per-role `/setup-pstack` lines override these defaults and the model choices in the routed skills (`how`, `why`, `arena`, `swarm`, `architect`, `interrogate`, `reflect`). A role with no line keeps its default, and a role line of `inherit-parent` or `auto` runs that role on the parent session's model (omit `model` on the `Agent` call).
 
@@ -264,4 +263,4 @@ Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `too
 
 ## Reasoning effort
 
-A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. Levels on Claude Code: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. `engineering:patina-agent` becomes `subagent_type: "engineering:patina-agent-<level>"`. `general-purpose`, or no `subagent_type`, becomes `subagent_type: "engineering:effort-<level>"`. The effort agents set only `effort`, so the model you pass still decides the model. On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions.
+A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. Levels on Claude Code: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. `patina-agent` becomes `subagent_type: "patina-agent-<level>"`. `general-purpose`, or no `subagent_type`, becomes `subagent_type: "effort-<level>"`. The effort agents set only `effort`, so the model you pass still decides the model. On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions.
