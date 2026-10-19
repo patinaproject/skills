@@ -13,7 +13,7 @@ printf -- '---\nname: alpha\n---\n' >"$root/plugins/engineering/skills/alpha/SKI
 printf -- '---\nname: beta\n---\n' >"$root/plugins/team/skills/beta/SKILL.md"
 printf -- '---\nname: mirror\n---\n' >"$root/plugins/team/skills/mirror/SKILL.md"
 printf 'Use `team:missing` here.\n' >"$root/plugins/team/skills/mirror/references/upstream.md"
-printf 'Follow `engineering:alpha` and pass `engineering:effort-<level>`.\n' >"$root/plugins/team/skills/beta/references/brief.md"
+printf 'Follow the `alpha` skill, then `Skill("alpha")`, run `Skill("verify")`, and pass `effort-<level>`.\n' >"$root/plugins/team/skills/beta/references/brief.md"
 printf -- '---\nname: patina-agent\n---\n' >"$root/plugins/engineering/agents/patina-agent.md"
 printf -- '---\nname: effort-low\n---\n' >"$root/plugins/engineering/effort-agents/effort-low.md"
 printf 'Spawn `subagent_type: "patina-agent"`, `subagent_type: "effort-<level>"`, or `subagent_type: "general-purpose"`.\n' >"$root/plugins/engineering/skills/alpha/brief.md"
@@ -35,20 +35,31 @@ printf 'Spawn `subagent_type: "patina-agnet"`.\n' >>"$root/plugins/engineering/s
 expect_failure 'a bare agent name with no agent file' 'FAIL: agent dispatch names an unavailable agent: patina-agnet in plugins/engineering/skills/alpha/brief.md'
 cp "$root/brief.bak" "$root/plugins/engineering/skills/alpha/brief.md"
 printf 'Spawn `subagent_type: "engineering:patina-agent"`.\n' >>"$root/plugins/engineering/skills/alpha/brief.md"
-expect_failure 'a namespaced Engineering agent' 'FAIL: agent dispatch uses a namespaced name: engineering:patina-agent in plugins/engineering/skills/alpha/brief.md; use patina-agent'
+expect_failure 'a namespaced Engineering agent' 'FAIL: agent dispatch uses a namespaced name: engineering:patina-agent in plugins/engineering/skills/alpha/brief.md; use patina-agent
+FAIL: skill reference carries a plugin prefix: engineering:patina-agent in plugins/engineering/skills/alpha/brief.md; use patina-agent'
 cp "$root/brief.bak" "$root/plugins/engineering/skills/alpha/brief.md"
 printf 'Invoke the `omega` skill.\n' >"$root/plugins/engineering/hooks/session-start-context.md"
 expect_failure 'a mandate naming a missing skill' 'FAIL: session-start mandate names an unavailable skill: omega in plugins/engineering/hooks/session-start-context.md'
 printf 'Invoke the `alpha` skill.\n' >"$root/plugins/engineering/hooks/session-start-context.md"
 
-printf 'Follow `engineering:gamma`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
-if output="$(cd "$root" && node "$lint" 2>&1)"; then
-  echo "FAIL: an unpublished reference in a skill reference file must fail the lint" >&2
-  exit 1
-fi
-test "$output" = 'FAIL: executable skill reference is unavailable: engineering:gamma in plugins/team/skills/beta/references/brief.md'
+brief="$root/plugins/team/skills/beta/references/brief.md"
+cp "$brief" "$root/brief.bak"
+printf 'Invoke the `gamma` skill.\n' >>"$brief"
+expect_failure 'a backticked bare name with no published skill' 'FAIL: bare skill reference names no published skill: gamma in plugins/team/skills/beta/references/brief.md'
+cp "$root/brief.bak" "$brief"
+printf 'Then `Skill("gamma")`.\n' >>"$brief"
+expect_failure 'a Skill() call with no published skill' 'FAIL: bare skill reference names no published skill: gamma in plugins/team/skills/beta/references/brief.md'
+cp "$root/brief.bak" "$brief"
+printf 'Run `Skill("plugin-dev:skill-development")` and the `loop` skill.\n' >>"$brief"
+test "$(cd "$root" && node "$lint")" = 'OK: 7 active skill files contain only published executable references and in-plugin links'
+cp "$root/brief.bak" "$brief"
+for prefixed in 'engineering:alpha' 'pstack:alpha'; do
+  printf 'Follow `%s`.\n' "$prefixed" >>"$brief"
+  expect_failure "a $prefixed reference" "FAIL: skill reference carries a plugin prefix: $prefixed in plugins/team/skills/beta/references/brief.md; use alpha"
+  cp "$root/brief.bak" "$brief"
+done
 
-printf 'Follow `engineering:alpha`.\n' >"$root/plugins/team/skills/beta/references/brief.md"
+printf 'Follow `alpha`.\n' >"$root/plugins/team/skills/beta/references/brief.md"
 printf 'Load team:beta or patinaproject-skills:beta, then run `/team:beta`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
 if output="$(cd "$root" && node "$lint" 2>&1)"; then
   echo "FAIL: a plugin-prefixed Team reference must fail the lint" >&2

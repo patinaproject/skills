@@ -322,7 +322,7 @@ plugins/team/
     grilling/
     handoff/
     improve-codebase-architecture/
-    setup-matt-pocock-skills/
+    setup-team-skills/
     teach/
     to-questionnaire/
     wait-what/

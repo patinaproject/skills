@@ -498,7 +498,7 @@
   },
   "plugins/team/skills/triage/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina gates ready-for-agent and ready-for-human on the readiness check in READINESS.md, including when the maintainer asks for the role directly.",
+    "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Outcome, and Triage labels instead of the upstream roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -506,6 +506,90 @@
   "plugins/team/skills/tutor/SKILL.md": {
     "kind": "policy",
     "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/to-spec/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Outcome instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/to-tickets/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Outcome instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/AGENT-BRIEF.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Outcome instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/OUT-OF-SCOPE.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Outcome instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/agents/openai.yaml": {
+    "kind": "policy",
+    "reason": "Patina describes triage in terms of labels rather than upstream roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina writes the Type, Outcome, and Triage label vocabulary into the issue tracker config as its only definition, instead of a separate triage-labels.md mapped from upstream roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/issue-tracker-github.md": {
+    "kind": "policy",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/issue-tracker-gitlab.md": {
+    "kind": "policy",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/triage-labels.md": {
+    "kind": "policy",
+    "reason": "Patina seeds the Labels section of the issue tracker config with its per-repository Type sets and Outcome labels, kept identical to docs/agents/issue-tracker.md by lint-label-vocabulary-parity (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/wayfinder/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/issue-tracker-local.md": {
+    "kind": "policy",
+    "reason": "Patina keeps label strings in the issue tracker config's Labels section and describes triage in terms of labels rather than upstream roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/agents/openai.yaml": {
+    "kind": "policy",
+    "reason": "Patina names the skill setup-team-skills, so the display name drops the upstream author (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }

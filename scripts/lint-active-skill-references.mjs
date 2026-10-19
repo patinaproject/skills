@@ -3,6 +3,19 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const BUILT_IN_AGENTS = new Set(['general-purpose', 'Explore', 'Plan']);
+// Bare skill names that no plugin here publishes. Add an entry only with its reason.
+const UNPUBLISHED_SKILLS = new Map([
+  ['run', 'Claude Code built-in driver skill'],
+  ['verify', 'Claude Code built-in driver skill'],
+  ['loop', 'Claude Code built-in pacing skill'],
+  ['patinaproject-verify', 'repository-local skill that each consuming repo ships'],
+  ['orchestrate', 'GitHub Copilot app skill named in copilot-tools.md'],
+  ['pr-stack', 'GitHub Copilot app skill named in copilot-tools.md'],
+  ['writing-skills', 'Codex platform skill named in codex-tools.md'],
+  ['anthropic-skills', 'claude.ai skill sync named as provenance in a CREDITS file'],
+  ['triage-issue-reports', 'upstream Benny skill named as attribution in NOTICE.md'],
+  ['postinstall', 'npm script that the scaffold audit says must be absent, not a skill'],
+]);
 const MANDATE = path.join('plugins', 'engineering', 'hooks', 'session-start-context.md');
 
 function collectEngineeringAgents(repoRoot) {
@@ -59,6 +72,23 @@ function findExecutableSkillReferences(contents, plugin) {
   return references;
 }
 
+function collectPublishedSkillNames(published) {
+  return new Set([...published.entries()].filter(([, file]) => file.endsWith('SKILL.md')).map(([key]) => key.split('/')[1]));
+}
+
+// A bare name has to resolve to a published skill in either plugin. Only the
+// executable forms are checked: Skill("name") and a backticked name directly
+// followed by the word skill.
+function findBareSkillErrors(contents, skillNames, file) {
+  const names = [
+    ...[...contents.matchAll(/\bSkill\(\s*["']([^"'\n]+)["']/g)].map((match) => match[1]),
+    ...[...contents.matchAll(/`([a-z][a-z0-9]*(?:-[a-z0-9]+)*)` skill\b/g)].map((match) => match[1]),
+  ];
+  return names
+    .filter((name) => !name.includes(':') && !name.includes('<') && !UNPUBLISHED_SKILLS.has(name) && !skillNames.has(name))
+    .map((name) => `FAIL: bare skill reference names no published skill: ${name} in ${file}`);
+}
+
 function placeholderPattern(name) {
   return new RegExp(`^${name.split(/<[a-z]+>/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[a-z]+')}$`);
 }
@@ -90,7 +120,7 @@ function findMandateErrors(repoRoot) {
 // A prefixed name resolves only in a plugin install; an Agent Skills install
 // registers bare names.
 function findPluginPrefixErrors(contents, file) {
-  return [...contents.matchAll(/(?<![\w-])(\/?)(?:team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
+  return [...contents.matchAll(/(?<![\w-])(\/?)(?:team|patinaproject-skills|engineering|pstack):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
     .map(([reference, slash, skill]) => `FAIL: skill reference carries a plugin prefix: ${reference} in ${file}; use ${slash}${skill}`);
 }
 
@@ -176,12 +206,14 @@ function main(repoRoot = process.cwd()) {
   for (const filePath of activeMarkdown) {
     errors.push(...findPluginPrefixErrors(readFileSync(filePath, 'utf8'), path.relative(repoRoot, filePath)));
   }
+  const skillNames = collectPublishedSkillNames(published);
   const lintTargets = [...new Set([...published.values(), ...activeMarkdown])].sort();
   for (const filePath of lintTargets) {
     const file = path.relative(repoRoot, filePath);
     const contents = readFileSync(filePath, 'utf8');
     const plugin = file.split(path.sep)[1];
     errors.push(...findAgentDispatchErrors(contents, agents, file));
+    errors.push(...findBareSkillErrors(contents, skillNames, file));
     for (const { reference, target } of findExecutableSkillReferences(contents, plugin)) {
       if (!published.has(target)) {
         errors.push(`FAIL: executable skill reference is unavailable: ${reference} in ${file}`);
