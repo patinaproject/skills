@@ -41,9 +41,19 @@ printf 'Invoke the `omega` skill.\n' >"$root/plugins/engineering/hooks/session-s
 expect_failure 'a mandate naming a missing skill' 'FAIL: session-start mandate names an unavailable skill: omega in plugins/engineering/hooks/session-start-context.md'
 printf 'Invoke the `alpha` skill.\n' >"$root/plugins/engineering/hooks/session-start-context.md"
 
-printf 'Follow `team:gamma`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
+printf 'Follow `engineering:gamma`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
 if output="$(cd "$root" && node "$lint" 2>&1)"; then
   echo "FAIL: an unpublished reference in a skill reference file must fail the lint" >&2
   exit 1
 fi
-test "$output" = 'FAIL: executable skill reference is unavailable: team:gamma in plugins/team/skills/beta/references/brief.md'
+test "$output" = 'FAIL: executable skill reference is unavailable: engineering:gamma in plugins/team/skills/beta/references/brief.md'
+
+printf 'Follow `engineering:alpha`.\n' >"$root/plugins/team/skills/beta/references/brief.md"
+printf 'Load team:beta or patinaproject-skills:beta, then run `/team:beta`.\n' >>"$root/plugins/team/skills/beta/references/brief.md"
+if output="$(cd "$root" && node "$lint" 2>&1)"; then
+  echo "FAIL: a plugin-prefixed Team reference must fail the lint" >&2
+  exit 1
+fi
+test "$output" = 'FAIL: skill reference carries a plugin prefix: /team:beta in plugins/team/skills/beta/references/brief.md; use /beta
+FAIL: skill reference carries a plugin prefix: patinaproject-skills:beta in plugins/team/skills/beta/references/brief.md; use beta
+FAIL: skill reference carries a plugin prefix: team:beta in plugins/team/skills/beta/references/brief.md; use beta'

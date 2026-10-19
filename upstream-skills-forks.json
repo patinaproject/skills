@@ -230,6 +230,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/skills/patina-mode/references/licenses/NOTICE.md": {
+    "kind": "policy",
+    "reason": "Patina credits the Benny triage-issue-reports skill that its triage playbook adapts.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/patina-mode/references/pi-tools.md": {
     "kind": "policy",
     "reason": "Patina maintains this Codex and Pi runtime adaptation alongside the synced routing skill.",
@@ -485,6 +492,13 @@
   "plugins/team/skills/design-control-loop/references/workflow-template.yml": {
     "kind": "policy",
     "reason": "Patina pins the template's GitHub Actions to commit SHAs, because the patinaproject monorepo's Semgrep scan rejects mutable action tags in vendored skills.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina gates ready-for-agent and ready-for-human on the readiness check in READINESS.md, including when the maintainer asks for the role directly.",
     "upstream": {
       "status": "not-proposed"
     }
