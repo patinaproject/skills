@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/patinaproject/skills/compare/v3.10.0...v3.11.0) (2026-10-19)
+
+
+### Features
+
+* [#698](https://github.com/patinaproject/skills/issues/698) reorder the Themes by cost of delay ([#699](https://github.com/patinaproject/skills/issues/699)) ([6e2edab](https://github.com/patinaproject/skills/commit/6e2edabc1de73ed9be596be20d63ff4f197f6ab7))
+
 ## [3.10.0](https://github.com/patinaproject/skills/compare/v3.9.1...v3.10.0) (2026-10-19)
 
 
