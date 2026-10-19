@@ -105,8 +105,8 @@ handoff gate instead of moving it implicitly.
 
 ### Triage labels
 
-Triage roles map through the tracker adapter and the repository's configured
-labels. See `docs/issue-tracker.md`.
+Issue labels (Type, Goal, and Triage groups) and the Sentence case rule for
+label names live in the tracker adapter. See `docs/issue-tracker.md` → **Labels**.
 
 ### Domain docs
 

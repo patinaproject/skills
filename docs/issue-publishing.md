@@ -25,7 +25,10 @@ Acceptance criteria use Given / When / Then and describe observable behavior.
 
 - **Title:** short and outcome-oriented, with no identifier prefix or trailing
   period.
-- **Labels:** load the live inventory and never invent one.
+- **Labels:** load the live inventory and never invent one. Apply exactly one
+  Type and at most one Goal from the adapter's
+  [label groups](issue-tracker.md#label-groups). A new label follows the
+  adapter's [label names](issue-tracker.md#label-names) rule.
 - **Assignee:** blank unless the filer is taking the work or assignment was
   explicitly confirmed.
 - **Lifecycle:** new work enters the adapter's triage state unless it is
