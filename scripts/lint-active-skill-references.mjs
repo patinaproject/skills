@@ -52,7 +52,7 @@ function findExecutableSkillReferences(contents, plugin) {
 // A prefixed name resolves only in a plugin install; an Agent Skills install
 // registers bare names.
 function findPluginPrefixErrors(contents, file) {
-  return [...contents.matchAll(/(\/?)\bteam:([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
+  return [...contents.matchAll(/(?<![\w-])(\/?)(?:team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
     .map(([reference, slash, skill]) => `FAIL: skill reference carries a plugin prefix: ${reference} in ${file}; use ${slash}${skill}`);
 }
 
