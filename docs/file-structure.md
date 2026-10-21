@@ -21,6 +21,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
 - `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
+- `plugins/team/skills/cloud-storage-organizer/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
 - `plugins/team/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
@@ -105,6 +106,7 @@ Skills owned by this repository:
 | `review-system-design` | `plugins/team/skills/review-system-design/` | Contract dependency review |
 | `writing-for-pstack` | `plugins/team/skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
 | `email-inbox-triage` | `plugins/team/skills/email-inbox-triage/` | Provider-agnostic email inbox triage into four tagged buckets |
+| `cloud-storage-organizer` | `plugins/team/skills/cloud-storage-organizer/` | Storage-agnostic loop that files loose files by learned rules |
 | `draft-user-follow-ups` | `plugins/team/skills/draft-user-follow-ups/` | Post-release support loop that drafts proven replies to owed customers |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |

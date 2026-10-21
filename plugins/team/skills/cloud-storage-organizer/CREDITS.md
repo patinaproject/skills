@@ -1,0 +1,3 @@
+# Credits
+
+Ted Mader ([@tlmader](https://github.com/tlmader)) wrote `organize-google-drive` in [tlmader/skills](https://github.com/tlmader/skills), whose learned rulebook, trial-to-confirmed rule ranks, held questions, and sharing-boundary guard this skill adapts. [patinaproject/skills#706](https://github.com/patinaproject/skills/issues/706) made it storage-agnostic and moved its memory into editable documents in an `Agents/Cloud storage organizer` folder. Ted Mader contributes it to this repository under the repository's [MIT license](https://github.com/patinaproject/skills/blob/main/LICENSE).
