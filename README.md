@@ -163,14 +163,37 @@ the skill contract.
 
 ### email-inbox-triage
 
-`email-inbox-triage` sorts every inbox thread into `Urgent`, `Needs reply
-soon`, `Waiting`, or `FYI`, tags it with that bucket, and archives `Waiting`
-and `FYI`. It works with Gmail labels, Outlook categories, or any mail tools
-that can list, tag, and archive. Its only writes are the four bucket tags and
-archiving, and a second run converges on the same state.
+`email-inbox-triage` sorts every inbox thread into `Urgent`, `Action`,
+`Waiting`, or `FYI`, tags it with that bucket, and archives `Waiting` and
+`FYI`. It works with any mail tools that can list, tag, and archive, and any
+storage tools that can read and append to a document in place. It reads
+triage preferences from an `Agents/Email inbox triage` folder in the user's
+cloud storage: a `Rules` document the user edits and a `Learned` document the
+skill appends to. When the user pulls an archived thread back into the inbox,
+or names a thread that should have had another bucket, it appends a learned
+rule, so it can run on a schedule as a feedback loop. Its
+only writes are the four bucket tags, archiving or un-archiving a thread to
+match its bucket, and appends to `Learned`, and
+a second run converges on the same state.
 
 See [./plugins/team/skills/email-inbox-triage/](./plugins/team/skills/email-inbox-triage/) for the skill
 contract.
+
+### cloud-storage-organization
+
+`cloud-storage-organization` files loose files in the storage root and in the
+user's inbox folders by moving, renaming, and trashing them under rules it
+learns from how the user already organizes files. It keeps its rules,
+questions, and a record of its moves in editable documents in an
+`Agents/Cloud storage organization` folder, edits them in place, and learns from
+every file the user moves back, so it can run on a schedule as a feedback
+loop. New rules act on a few files per run until three runs pass without a
+correction, and a move that would change who can see a file waits for the
+user's yes. It works with any storage tools that can list, move, rename,
+trash, and edit a document in place.
+
+See [./plugins/team/skills/cloud-storage-organization/](./plugins/team/skills/cloud-storage-organization/)
+for the skill contract.
 
 ### draft-user-follow-ups
 
@@ -239,6 +262,7 @@ README and skill contract.
 | [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [email-inbox-triage](./plugins/team/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
+| [cloud-storage-organization](./plugins/team/skills/cloud-storage-organization/) | File loose files in any cloud storage by rules learned from your corrections |
 | [draft-user-follow-ups](./plugins/team/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
@@ -307,6 +331,7 @@ plugins/team/
     review-system-design/
     writing-for-pstack/
     email-inbox-triage/
+    cloud-storage-organization/
     draft-user-follow-ups/
     to-spec/
     to-tickets/
@@ -322,7 +347,7 @@ plugins/team/
     grilling/
     handoff/
     improve-codebase-architecture/
-    setup-matt-pocock-skills/
+    setup-team-skills/
     teach/
     to-questionnaire/
     wait-what/

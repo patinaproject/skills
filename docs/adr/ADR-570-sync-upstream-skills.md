@@ -25,9 +25,10 @@ manifest edit.
 
 Each run regenerates the merge base from the pinned commit and applies upstream
 changes since the pin with `git cherry-pick --no-commit`. Overlaps with local
-edits become real index conflicts. Transforms are limited to renames and a
-denylist. If a source's transforms hash changed since the last sync, the sync
-stops until the transform change is committed on its own at the current pin.
+edits become real index conflicts. Transforms are limited to renames, a
+denylist, and the namespace `unprefix` that ADR-665 adds. If a source's
+transforms hash changed since the last sync, the sync stops until the
+transform change is committed on its own at the current pin.
 
 Every file under a synced destination that differs from its transformed
 upstream needs an entry in the forks registry with its kind, reason, and

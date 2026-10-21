@@ -21,10 +21,13 @@ fi
 
 read_sheet() {
   [ -f "$1" ] && [ -r "$1" ] || return 1
-  if [ "$(od -An -tx1 -N2 "$1" | tr -d ' ')" = fffe ]; then
+  lead=$(od -An -tx1 -N2 "$1" | tr -d ' ')
+  if [ "$lead" = fffe ] || [ "${lead#??}" = 00 ]; then
     text=$(iconv -f UTF-16LE -t UTF-8 "$1") || return 1
-  else
+  elif iconv -f UTF-8 -t UTF-8 "$1" >/dev/null 2>&1; then
     text=$(cat "$1")
+  else
+    text=$(iconv -f ISO-8859-1 -t UTF-8 "$1") || return 1
   fi
   printf '%s\n' "$text" | sed -e "1s/^$(printf '\357\273\277')//" -e "s/$(printf '\r')\$//"
 }
@@ -36,7 +39,7 @@ fi
 
 # A repository that carries the managed mandate block in CLAUDE.md already
 # delivers it to Claude; avoid injecting a second copy through the hook.
-# setup-engineering removes the block it once wrote, so this guards a block that
+# setup-engineering-skills removes the block it once wrote, so this guards a block that
 # someone restored or copied by hand.
 if [ "$1" = claude ]; then
   project_dir="${CLAUDE_PROJECT_DIR:-}"
