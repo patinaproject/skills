@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.17.0](https://github.com/patinaproject/skills/compare/v3.16.7...v3.17.0) (2026-10-21)
+
+
+### Features
+
+* [#637](https://github.com/patinaproject/skills/issues/637) let the reviewer select a ruling for each decide item ([#646](https://github.com/patinaproject/skills/issues/646)) ([9c6614d](https://github.com/patinaproject/skills/commit/9c6614d3edab38fb21c39267f0452072f016fa4a))
+
 ## [3.16.7](https://github.com/patinaproject/skills/compare/v3.16.6...v3.16.7) (2026-10-21)
 
 
