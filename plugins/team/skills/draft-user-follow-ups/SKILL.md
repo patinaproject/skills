@@ -105,15 +105,30 @@ check result carries a link and a label of **measured** or **inferred**.
 Write each reply in the consumer's support voice. Tell the customer what
 changed and what they can do now, in their terms.
 
+Every reply about a shipped feature or fix, on every touchpoint, contains this
+sentence exactly, with the release version that the **shipped** check recorded
+for this reply:
+
+```text
+This was fixed in the v<version> update! Close and reopen the app to get the fix.
+```
+
+Take the version from this run's **shipped** check only. A version in an
+earlier reply, a thread, or the memory file names an older release. The
+support voice shapes the rest of the reply and leaves this sentence as written.
+
 - **Email.** Create a draft as a reply inside the customer's existing thread.
   When the thread came from a feedback-tool relay sender, address the draft to
   the real customer, whose address the relayed message carries. Record the
   draft link.
 - **Feedback tool.** Write the reply text and the link to the post or
-  conversation where the operator will paste it.
+  conversation where the operator will paste it. This covers a support
+  conversation message and a post comment.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
-reply location link. Blocked replies have no draft.
+reply location link. Every proven reply about a shipped feature or fix
+contains the release sentence with its own recorded version. Blocked replies
+have no draft.
 
 ### 6. Respond
 
