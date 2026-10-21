@@ -6,9 +6,21 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 **Inputs:** the Linear review link, the GitHub PR URL, the head SHA, the base SHA, the linked issue, an HTML output path, and optional lens facts from fact-gathering agents.
 
+## Link every `file:line`
+
+Every `file:line` you write is a link: on the artifact (summary, ranked items, flows, blast-radius map, to-do list, evidence ledger), in the return block, and in follow-up answers. Pick the first form that applies:
+
+1. **GitHub PR diff line link**, when the line is inside a diff hunk at the reviewed head: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`. Hash the repository-relative path at the head, which for a renamed file is the new path, with `printf %s <path> | shasum -a 256 | cut -d' ' -f1`, which keeps only the hex digest. A deleted line uses `L<base line>` in place of `R<line>`. Context lines inside a hunk count as inside.
+2. **GitHub blob link pinned to the head SHA**, for a line outside every hunk: `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>?plain=1#L<line>`. The `files#diff` anchor does not reach a line outside the diff. Always add `?plain=1`: without it, GitHub shows rendered files such as Markdown and CSV as a preview with no line selected, and source files ignore it.
+3. **Plain text**, only for a path with no GitHub URL, such as a file under `node_modules`.
+
+Linear documents no per-line URL for a review page, only the whole-PR `appUrl` and `#comment-<id>` anchors. Use the forms above until it documents one, and never guess a Linear line format.
+
+Read the hunk ranges from `gh pr diff <pr-url>`, the diff GitHub renders. In a hunk header `@@ -a,b +c,d @@`, the head lines run from `c` to `c+d-1` and the base lines from `a` to `a+b-1`. On a new head, rebuild every link against the new head SHA and its hunks.
+
 ## 1. Learn the change
 
-From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `engineering:teach` skill on yourself, and read the code directly, because you cannot start subagents. Read:
+From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `teach` skill on yourself, and read the code directly, because you cannot start subagents. Read:
 
 - the full diff, and enough of the surrounding code to know what each part is, how it works, and why it exists;
 - the PR description and the linked Linear issue;
@@ -39,14 +51,14 @@ Each to-do item has:
 
 - its tier: decide, comment, or FYI;
 - a one-line reason that links to the summary bullet it supports;
-- a GitHub line link: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`;
+- its `file:line`, linked by the link rule;
 - a comment ready to copy, written in the reviewer's voice as a question or a request to the author, in plain English. A decide item gets two versions, one for each ruling.
 
 Give every to-do item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
 
 ## 5. Write the artifact
 
-Follow the Artifact tool's design guidance. Layout and visuals are your call. The page must hold:
+Follow the Artifact tool's design guidance for the page, including its theme tokens, dark mode, and phone width. The page must hold:
 
 - a header with the Linear review link, the head SHA, and the blast-radius label;
 - "In 30 seconds": three bullets;
@@ -55,7 +67,9 @@ Follow the Artifact tool's design guidance. Layout and visuals are your call. Th
 - for each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", the to-do list shows only the chosen ruling's comment, and the other option collapses. Selecting another option changes the ruling, and "Clear" removes it;
 - the evidence ledger, and a short "Not looked at" list.
 
-For visuals, read the `show-me` skill's `SKILL.md` ([humanlayer/skills](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md), which this repository does not bundle) and pick the smallest view that makes the point. Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed.
+For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
+
+Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed. Give an item one visual only when a shape explains it faster than words, and place it next to the text it supports. Link every `file:line` in a visual or its caption by the link rule.
 
 Write for limited attention. Lead with what matters, and cut every sentence that does not help the reviewer decide or comment. Each claim carries a `file:line` or a source link. When you cannot point to a source for a claim, move the claim to "Not looked at".
 
@@ -76,12 +90,12 @@ Return only this block:
 html: <path>
 head: <sha>
 attention:
-- <one sentence> (<file:line>)
+- <one sentence> ([<file:line>](<link>))
 - ...up to 3
 tiers: decide <n>, comment <n>, fyi <n>
 ```
 
 ## Follow-ups
 
-- **Question:** answer from your context, and read more code if you need to. Return a short plain answer and `html: changed` or `html: unchanged`.
+- **Question:** answer from your context, and read more code if you need to. Return a short answer in plain words, with each `file:line` linked, and `html: changed` or `html: unchanged`.
 - **New head:** compare the new head with the last head you reviewed. Move addressed to-dos to a collapsed "Done" list. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.

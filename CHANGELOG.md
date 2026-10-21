@@ -1,5 +1,145 @@
 # Changelog
 
+## [3.16.0](https://github.com/patinaproject/skills/compare/v3.15.1...v3.16.0) (2026-10-21)
+
+
+### Features
+
+* [#722](https://github.com/patinaproject/skills/issues/722) rename cloud-storage-organizer to cloud-storage-organization ([#723](https://github.com/patinaproject/skills/issues/723)) ([5ffa292](https://github.com/patinaproject/skills/commit/5ffa292ef16af729776fb62cfffd8ace7a7d63d1))
+
+## [3.15.1](https://github.com/patinaproject/skills/compare/v3.15.0...v3.15.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#716](https://github.com/patinaproject/skills/issues/716) keep organizer memory lines out of headings ([#718](https://github.com/patinaproject/skills/issues/718)) ([437fb2b](https://github.com/patinaproject/skills/commit/437fb2bba27a29b325c06423e49eddfc0099b0b9))
+
+## [3.15.0](https://github.com/patinaproject/skills/compare/v3.14.1...v3.15.0) (2026-10-21)
+
+
+### Features
+
+* [#707](https://github.com/patinaproject/skills/issues/707) store email-inbox-triage memory as a folder ([#710](https://github.com/patinaproject/skills/issues/710)) ([24f099c](https://github.com/patinaproject/skills/commit/24f099ce4b8188795f4eda4288f417b2bff81b3b))
+
+## [3.14.1](https://github.com/patinaproject/skills/compare/v3.14.0...v3.14.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#711](https://github.com/patinaproject/skills/issues/711) rename cloud-storage-organizer Placements to Changes ([#712](https://github.com/patinaproject/skills/issues/712)) ([7c3f770](https://github.com/patinaproject/skills/commit/7c3f770e17478ef4591c419be9b5e88b723c58fa))
+
+## [3.14.0](https://github.com/patinaproject/skills/compare/v3.13.0...v3.14.0) (2026-10-21)
+
+
+### Features
+
+* [#706](https://github.com/patinaproject/skills/issues/706) add cloud-storage-organizer filing loop ([#708](https://github.com/patinaproject/skills/issues/708)) ([5c63f38](https://github.com/patinaproject/skills/commit/5c63f38dac1e3bc4387c510bf91ba462b9017b5e))
+
+## [3.13.0](https://github.com/patinaproject/skills/compare/v3.12.0...v3.13.0) (2026-10-21)
+
+
+### Features
+
+* [#703](https://github.com/patinaproject/skills/issues/703) learn email triage rules from inbox corrections ([#704](https://github.com/patinaproject/skills/issues/704)) ([e32117e](https://github.com/patinaproject/skills/commit/e32117ebba26f6e654f6454cd3f1a51ca8e992d6))
+
+## [3.12.0](https://github.com/patinaproject/skills/compare/v3.11.0...v3.12.0) (2026-10-19)
+
+
+### Features
+
+* [#692](https://github.com/patinaproject/skills/issues/692) assign a priority on every triage pass from the priority rubric ([#701](https://github.com/patinaproject/skills/issues/701)) ([a4d6a88](https://github.com/patinaproject/skills/commit/a4d6a8812d98370588933dd713301aedc8ba6f67))
+
+## [3.11.0](https://github.com/patinaproject/skills/compare/v3.10.0...v3.11.0) (2026-10-19)
+
+
+### Features
+
+* [#698](https://github.com/patinaproject/skills/issues/698) reorder the Themes by cost of delay ([#699](https://github.com/patinaproject/skills/issues/699)) ([6e2edab](https://github.com/patinaproject/skills/commit/6e2edabc1de73ed9be596be20d63ff4f197f6ab7))
+
+## [3.10.0](https://github.com/patinaproject/skills/compare/v3.9.1...v3.10.0) (2026-10-19)
+
+
+### Features
+
+* [#694](https://github.com/patinaproject/skills/issues/694) rename Outcome to Theme and refine the Themes ([#696](https://github.com/patinaproject/skills/issues/696)) ([7ab6b1e](https://github.com/patinaproject/skills/commit/7ab6b1ec5d4b470c432c871e14d3563d561bd3ff))
+
+## [3.9.1](https://github.com/patinaproject/skills/compare/v3.9.0...v3.9.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#665](https://github.com/patinaproject/skills/issues/665) use bare Engineering skill and agent names ([#670](https://github.com/patinaproject/skills/issues/670)) ([841df6d](https://github.com/patinaproject/skills/commit/841df6dd1fa1a5abe6b72985c92d929c5304dbed))
+
+## [3.9.0](https://github.com/patinaproject/skills/compare/v3.8.2...v3.9.0) (2026-10-19)
+
+
+### Features
+
+* [#682](https://github.com/patinaproject/skills/issues/682) classify issues by Type and Outcome with Sentence case labels ([#685](https://github.com/patinaproject/skills/issues/685)) ([0f27413](https://github.com/patinaproject/skills/commit/0f2741352612108f2c05530fe43297fbddc34243))
+
+## [3.8.2](https://github.com/patinaproject/skills/compare/v3.8.1...v3.8.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#687](https://github.com/patinaproject/skills/issues/687) run the T3 handoff test with an upstream sqlite3 on macOS ([#688](https://github.com/patinaproject/skills/issues/688)) ([72863b5](https://github.com/patinaproject/skills/commit/72863b569ff9f87becf0bb4fa86de727bbf13361))
+
+## [3.8.1](https://github.com/patinaproject/skills/compare/v3.8.0...v3.8.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* [#683](https://github.com/patinaproject/skills/issues/683) refer to Team skills by bare name ([#684](https://github.com/patinaproject/skills/issues/684)) ([398a89d](https://github.com/patinaproject/skills/commit/398a89def5026cb6cebddae2ab46bf469c3bb99f))
+
+## [3.8.0](https://github.com/patinaproject/skills/compare/v3.7.0...v3.8.0) (2026-10-17)
+
+
+### Features
+
+* [#675](https://github.com/patinaproject/skills/issues/675) add an unattended triage playbook to patina-mode ([#676](https://github.com/patinaproject/skills/issues/676)) ([1c6e34d](https://github.com/patinaproject/skills/commit/1c6e34deb62e1e11dfa7155c9a2224595f346db8))
+
+## [3.7.0](https://github.com/patinaproject/skills/compare/v3.6.0...v3.7.0) (2026-10-17)
+
+
+### Features
+
+* [#672](https://github.com/patinaproject/skills/issues/672) require approval of hard-to-reverse triage decisions ([#673](https://github.com/patinaproject/skills/issues/673)) ([a8b7a1e](https://github.com/patinaproject/skills/commit/a8b7a1e482816d06c7f85e4b18dc8da1ee5f9b57))
+
+## [3.6.0](https://github.com/patinaproject/skills/compare/v3.5.1...v3.6.0) (2026-10-17)
+
+
+### Features
+
+* [#666](https://github.com/patinaproject/skills/issues/666) enforce a readiness check before triage applies a ready role ([#667](https://github.com/patinaproject/skills/issues/667)) ([0182f4f](https://github.com/patinaproject/skills/commit/0182f4f83c1150a38459415c1f39f0caffd19f1b))
+
+## [3.5.1](https://github.com/patinaproject/skills/compare/v3.5.0...v3.5.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* [#662](https://github.com/patinaproject/skills/issues/662) drop the undocumented metadata.repository from the marketplace manifest ([#663](https://github.com/patinaproject/skills/issues/663)) ([cfc708b](https://github.com/patinaproject/skills/commit/cfc708b34b781a8eca7b43b5e430ca41cb89801a))
+
+## [3.5.0](https://github.com/patinaproject/skills/compare/v3.4.0...v3.5.0) (2026-10-16)
+
+
+### Features
+
+* [#654](https://github.com/patinaproject/skills/issues/654) save Linear issue artifacts as Documents ([#656](https://github.com/patinaproject/skills/issues/656)) ([4293a1d](https://github.com/patinaproject/skills/commit/4293a1d2ef3a73aadbe871fd6ad761ab0a6d96b6))
+
+## [3.4.0](https://github.com/patinaproject/skills/compare/v3.3.0...v3.4.0) (2026-10-16)
+
+
+### Features
+
+* [#657](https://github.com/patinaproject/skills/issues/657) hand pr-review-assistant visuals to the bundled show-me skill ([#658](https://github.com/patinaproject/skills/issues/658)) ([c30837b](https://github.com/patinaproject/skills/commit/c30837b4df1dec7640e17794d8993bd72a230b07))
+
+## [3.3.0](https://github.com/patinaproject/skills/compare/v3.2.1...v3.3.0) (2026-10-15)
+
+
+### Features
+
+* [#634](https://github.com/patinaproject/skills/issues/634) link every file:line reference in pr-review-assistant ([#639](https://github.com/patinaproject/skills/issues/639)) ([4ce0ee7](https://github.com/patinaproject/skills/commit/4ce0ee7613a5e2cc4f7ea851903718587faa5a17))
+
 ## [3.2.1](https://github.com/patinaproject/skills/compare/v3.2.0...v3.2.1) (2026-10-15)
 
 

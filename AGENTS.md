@@ -20,6 +20,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
+- `plugins/team/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
 - `plugins/team/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
@@ -37,7 +38,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/team/skills/grilling/`: upstream mirror (mattpocock)
 - `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
 - `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
-- `plugins/team/skills/setup-matt-pocock-skills/`: upstream mirror (mattpocock)
+- `plugins/team/skills/setup-team-skills/`: upstream mattpocock `setup-matt-pocock-skills` mirror, renamed and forked for Patina label setup
 - `plugins/team/skills/tutor/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
@@ -105,8 +106,9 @@ handoff gate instead of moving it implicitly.
 
 ### Triage labels
 
-Triage roles map through the tracker adapter and the repository's configured
-labels. See `docs/issue-tracker.md`.
+Issue labels (Type, Theme, and Triage groups, including each repository's
+Type set) and the Sentence case rule for label names live only in the tracker
+adapter. See `docs/issue-tracker.md` → **Labels**.
 
 ### Domain docs
 
@@ -117,7 +119,7 @@ This is a single-context repository; domain docs are optional and created lazily
 Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
 single source of truth for ADR naming in this repository. It supersedes the
 sequential `0001`-increment guidance still embedded in the vendored shared
-skills (`domain-modeling`, `setup-matt-pocock-skills`): name every ADR after its
+skills (`domain-modeling`, `setup-team-skills`): name every ADR after its
 originating GitHub issue (`ADR-N-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 
@@ -137,6 +139,9 @@ documentation-capture skill. This
 uses `CONTEXT.md` as the local glossary filename and supersedes the inline glossary-update capture instruction in
 the vendored `domain-modeling` payload; see
 [docs/adr/ADR-337-off-branch-doc-capture.md](docs/adr/ADR-337-off-branch-doc-capture.md).
+In a Linear-tracked repository, the proposed ADR body goes in a Document on the
+issue instead, as the tracker adapter's **Issue artifacts** section describes
+([ADR-654](docs/adr/ADR-654-linear-issue-documents.md)).
 
 ## Build, Test, and Development Commands
 
@@ -237,8 +242,8 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/scaffold-baseline-manifest.test.sh` after changing
   `plugins/team/skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
-- Run `bash scripts/tests/setup-engineering-machinery.test.sh` after changing
-  `plugins/engineering/skills/setup-engineering/scripts/install-machinery.sh` or
+- Run `bash scripts/tests/setup-engineering-skills-machinery.test.sh` after changing
+  `plugins/engineering/skills/setup-engineering-skills/scripts/install-machinery.sh` or
   its bundled `assets/`; it asserts installer idempotency, the no-clobber
   contract, and that the bundled payloads match their canonical plugin sources
 - Run `bash scripts/tests/sync-upstream-skills.test.sh` after changing
@@ -305,6 +310,7 @@ This repo owns skills in the Engineering and Team plugins:
 | review-system-design | `plugins/team/skills/review-system-design/` |
 | writing-for-pstack | `plugins/team/skills/writing-for-pstack/` |
 | email-inbox-triage | `plugins/team/skills/email-inbox-triage/` |
+| cloud-storage-organization | `plugins/team/skills/cloud-storage-organization/` |
 | draft-user-follow-ups | `plugins/team/skills/draft-user-follow-ups/` |
 | grill-to-spec | `plugins/team/skills/grill-to-spec/` |
 | working-on-issues | `plugins/engineering/skills/working-on-issues/` |
