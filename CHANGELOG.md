@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.3](https://github.com/patinaproject/skills/compare/v3.16.2...v3.16.3) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#650](https://github.com/patinaproject/skills/issues/650) decode every model sheet with one encoding rule ([#680](https://github.com/patinaproject/skills/issues/680)) ([3786c2e](https://github.com/patinaproject/skills/commit/3786c2e93351b35768aa924876a6d56b3e216e8c))
+
 ## [3.16.2](https://github.com/patinaproject/skills/compare/v3.16.1...v3.16.2) (2026-10-21)
 
 
