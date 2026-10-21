@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.14.0](https://github.com/patinaproject/skills/compare/v3.13.0...v3.14.0) (2026-10-21)
+
+
+### Features
+
+* [#706](https://github.com/patinaproject/skills/issues/706) add cloud-storage-organizer filing loop ([#708](https://github.com/patinaproject/skills/issues/708)) ([5c63f38](https://github.com/patinaproject/skills/commit/5c63f38dac1e3bc4387c510bf91ba462b9017b5e))
+
 ## [3.13.0](https://github.com/patinaproject/skills/compare/v3.12.0...v3.13.0) (2026-10-21)
 
 
