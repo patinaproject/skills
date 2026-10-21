@@ -286,6 +286,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/skills/patina-mode/scripts/orch/store.ts": {
+    "kind": "policy",
+    "reason": "Patina strips terminal escapes with its own pattern instead of stripVTControlCharacters, because bun's version leaves colon-separated colour codes such as ESC[38:5:2m behind and breaks the gt log parsers.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/patina-mode/scripts/package.json": {
     "kind": "policy",
     "reason": "Patina renames the package to @patinaproject/patina-mode-tools, adds the issue-handoff, mark-ready, and pr-readiness suites to test and typecheck, and pins bun-types and typescript to exact versions instead of latest.",
