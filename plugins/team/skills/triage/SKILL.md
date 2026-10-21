@@ -44,6 +44,20 @@ Every triaged issue should carry exactly one Type and one Triage label, and at m
 
 State transitions: an unlabeled issue normally goes to `Needs triage` first; from there it moves to `Needs info`, `Ready for agent`, `Ready for human`, or `Won't fix`. `Needs info` returns to `Needs triage` once the reporter replies. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
 
+## Check live state before each write
+
+A triage pass reads issues once, and they can close or change Triage label before you write. Before each write to an issue or PR (a label change, a priority change, a comment, an issue artifact, or a close), re-read it with the script bundled in this skill's directory:
+
+```sh
+node <skill-directory>/scripts/check-issue-state.mjs <issue> --state "<Triage label you read, or none>"
+```
+
+Resolve `<skill-directory>` to this skill's installed directory. `<issue>` is the tracker reference: `#42` for the current repository, `OWNER/REPO#42`, a GitHub URL, a Linear identifier, or a Linear URL. A Linear read needs `LINEAR_API_KEY`. The script knows the five Triage labels above; when the issue-tracker config names different strings, pass them with `--state-labels`. After your own label change, the expected Triage label is the one you just applied. A close is always the issue's last write, so post a `Won't fix` comment before you close.
+
+- Exit 0: write as planned.
+- Exit 2: make no write to that issue. Report the line the script printed, which names the issue as closed or gives its new Triage label, and move on.
+- Exit 1: the state could not be read. Make no write, and report the error.
+
 ## Invocation
 
 The maintainer invokes `/triage` and describes what they want in natural language. Interpret the request and act. Examples:
@@ -75,7 +89,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 4. **Grill (if needed).** If the request needs fleshing out, or the readiness check ([READINESS.md](READINESS.md)) has gaps you can't close yourself, call the Skill tool twice, for "grilling" and "domain-modeling", and grill it into shape a round of questions at a time, sharpening domain terms and updating `GLOSSARY.md`/ADRs inline as decisions land.
 
-5. **Apply the outcome.** Set the priority the maintainer accepted or chose, unless the outcome closes the issue. See **Priority** below. Then:
+5. **Apply the outcome**, running the live-state check before each write, the priority write included. Set the priority the maintainer accepted or chose, unless the outcome closes the issue. See **Priority** below. Then:
    - `Ready for agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the label.
    - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
    - `Needs info`: write triage notes (template below).
@@ -91,7 +105,7 @@ Recommend the priority that the `## Priority rubric` section of the issue tracke
 
 ## Quick state override
 
-If the maintainer says "move #42 to Needs triage", trust them and apply the label directly. Confirm what you're about to do (label changes, comment, close), then act. Skip grilling.
+If the maintainer says "move #42 to Needs triage", trust them and apply the label directly. Confirm what you're about to do (label changes, comment, close), then act. Skip grilling, but not the live-state check.
 
 A move to `Ready for agent` or `Ready for human` still runs the readiness check ([READINESS.md](READINESS.md)) and follows its outcome.
 

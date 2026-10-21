@@ -1,7 +1,7 @@
 {
   "name": "team",
   "displayName": "Team",
-  "version": "3.16.7",
+  "version": "3.18.0",
   "description": "Patina Project's human-invoked team skills for planning, review, specs, and visual explanation.",
   "author": {
     "name": "Patina Project"

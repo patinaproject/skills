@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.18.0](https://github.com/patinaproject/skills/compare/v3.17.0...v3.18.0) (2026-10-21)
+
+
+### Features
+
+* [#668](https://github.com/patinaproject/skills/issues/668) re-read an issue's live state before each triage write ([#669](https://github.com/patinaproject/skills/issues/669)) ([17209f6](https://github.com/patinaproject/skills/commit/17209f6614c5e808847b4dc47e2fdbb5175d3afa))
+
+## [3.17.0](https://github.com/patinaproject/skills/compare/v3.16.7...v3.17.0) (2026-10-21)
+
+
+### Features
+
+* [#637](https://github.com/patinaproject/skills/issues/637) let the reviewer select a ruling for each decide item ([#646](https://github.com/patinaproject/skills/issues/646)) ([9c6614d](https://github.com/patinaproject/skills/commit/9c6614d3edab38fb21c39267f0452072f016fa4a))
+
 ## [3.16.7](https://github.com/patinaproject/skills/compare/v3.16.6...v3.16.7) (2026-10-21)
 
 

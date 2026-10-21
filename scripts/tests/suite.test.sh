@@ -28,6 +28,7 @@ bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/setup-engineering-skills-machinery.test.sh
 node scripts/tests/sheet-encodings.test.mjs
 bash scripts/tests/sync-upstream-skills.test.sh
+node scripts/tests/triage-check-issue-state.test.mjs
 
 # CLI compatibility canaries: representative network-backed samples that prove
 # local skill paths are accepted by the current marketplace install protocol.
