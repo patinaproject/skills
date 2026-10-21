@@ -5,18 +5,18 @@
 //
 // <issue> is #N or OWNER/REPO#N or a GitHub issue or pull request URL (read
 // with gh), or a Linear identifier such as PAT-12 or a Linear issue URL (read
-// with LINEAR_API_KEY). --state names the state label the pass read; `none`
-// means the issue had no state label. --state-labels lists the tracker's state
-// label strings, defaulting to the canonical role names.
+// with LINEAR_API_KEY). --state names the Triage label the pass read; `none`
+// means the issue had no Triage label. --state-labels lists the tracker's
+// Triage label strings, defaulting to the team skills' Triage labels.
 //
 // Exit 0 and print `proceed: ...` when the issue is open and its only state
 // label is the expected one. Exit 2 and print `skip: ...` when it closed or its
-// state label changed. Exit 1 when the state cannot be read; make no write.
+// Triage label changed. Exit 1 when the state cannot be read; make no write.
 import { spawnSync } from "node:child_process";
 import process from "node:process";
 
 const usage = "usage: check-issue-state.mjs <issue> --state <label|none> [--state-labels a,b,...]";
-const defaultStateLabels = ["needs-triage", "needs-info", "ready-for-agent", "ready-for-human", "wontfix"];
+const defaultStateLabels = ["Needs triage", "Needs info", "Ready for agent", "Ready for human", "Won't fix"];
 
 function fail(message) {
   console.error(`check-issue-state: ${message}`);
@@ -34,7 +34,7 @@ function parseArgs(argv) {
   }
   if (!args.ref || !args.state) fail(usage);
   if (!args.stateLabels.length) fail("--state-labels needs at least one label");
-  if (args.state !== "none" && !args.stateLabels.some((label) => label.toLowerCase() === args.state.toLowerCase())) fail(`--state ${args.state} is not one of the state labels: ${args.stateLabels.join(", ")}`);
+  if (args.state !== "none" && !args.stateLabels.some((label) => label.toLowerCase() === args.state.toLowerCase())) fail(`--state ${args.state} is not one of the Triage labels: ${args.stateLabels.join(", ")}`);
   return args;
 }
 
@@ -84,7 +84,7 @@ if (!live.open) {
   process.exit(2);
 }
 if (current.map((label) => label.toLowerCase()).join() !== expected.join()) {
-  console.log(`skip: ${args.ref} state label is now ${describe(current)}, not ${args.state}`);
+  console.log(`skip: ${args.ref} Triage label is now ${describe(current)}, not ${args.state}`);
   process.exit(2);
 }
-console.log(`proceed: ${args.ref} is open with ${args.state === "none" ? "no state label" : `state label ${args.state}`}`);
+console.log(`proceed: ${args.ref} is open with ${args.state === "none" ? "no Triage label" : `Triage label ${args.state}`}`);

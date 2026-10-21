@@ -9,11 +9,11 @@ const script = resolve('plugins/team/skills/triage/scripts/check-issue-state.mjs
 const fixtures = await mkdtemp(join(tmpdir(), 'check-issue-state-'));
 
 const githubIssues = {
-  'repos/acme/app/issues/1': { state: 'closed', labels: [{ name: 'needs-triage' }, { name: 'bug' }] },
-  'repos/acme/app/issues/2': { state: 'open', labels: [{ name: 'ready-for-agent' }, { name: 'bug' }] },
-  'repos/acme/app/issues/3': { state: 'open', labels: [{ name: 'needs-triage' }, { name: 'enhancement' }] },
+  'repos/acme/app/issues/1': { state: 'closed', labels: [{ name: 'Needs triage' }, { name: 'bug' }] },
+  'repos/acme/app/issues/2': { state: 'open', labels: [{ name: 'Ready for agent' }, { name: 'bug' }] },
+  'repos/acme/app/issues/3': { state: 'open', labels: [{ name: 'Needs triage' }, { name: 'enhancement' }] },
   'repos/acme/app/issues/4': { state: 'open', labels: [{ name: 'bug' }] },
-  'repos/acme/app/issues/5': { state: 'open', labels: [{ name: 'Needs-Triage' }, { name: 'needs-info' }] },
+  'repos/acme/app/issues/5': { state: 'open', labels: [{ name: 'needs triage' }, { name: 'Needs info' }] },
 };
 await writeFile(
   join(fixtures, 'gh'),
@@ -27,9 +27,9 @@ console.log(JSON.stringify(issue));
 await chmod(join(fixtures, 'gh'), 0o755);
 
 const linearIssues = {
-  'PAT-1': { state: { type: 'completed' }, labels: { nodes: [{ name: 'needs-triage' }] } },
-  'PAT-2': { state: { type: 'triage' }, labels: { nodes: [{ name: 'needs-info' }] } },
-  'PAT-3': { state: { type: 'triage' }, labels: { nodes: [{ name: 'Needs Triage' }, { name: 'Bug' }] } },
+  'PAT-1': { state: { type: 'completed' }, labels: { nodes: [{ name: 'Needs triage' }] } },
+  'PAT-2': { state: { type: 'triage' }, labels: { nodes: [{ name: 'Needs info' }] } },
+  'PAT-3': { state: { type: 'triage' }, labels: { nodes: [{ name: 'triage:new' }, { name: 'Bug' }] } },
 };
 const linearAuth = [];
 const linear = createServer((request, response) => {
@@ -64,43 +64,43 @@ function check(args, env = {}) {
 }
 
 try {
-  assert.deepEqual(await check(['acme/app#1', '--state', 'needs-triage']), {
+  assert.deepEqual(await check(['acme/app#1', '--state', 'Needs triage']), {
     code: 2, stdout: 'skip: acme/app#1 is closed', stderr: '',
   });
-  assert.deepEqual(await check(['https://github.com/acme/app/pull/2', '--state', 'needs-triage']), {
-    code: 2, stdout: 'skip: https://github.com/acme/app/pull/2 state label is now ready-for-agent, not needs-triage', stderr: '',
+  assert.deepEqual(await check(['https://github.com/acme/app/pull/2', '--state', 'Needs triage']), {
+    code: 2, stdout: 'skip: https://github.com/acme/app/pull/2 Triage label is now Ready for agent, not Needs triage', stderr: '',
   });
-  assert.deepEqual(await check(['acme/app#3', '--state', 'needs-triage']), {
-    code: 0, stdout: 'proceed: acme/app#3 is open with state label needs-triage', stderr: '',
+  assert.deepEqual(await check(['acme/app#3', '--state', 'Needs triage']), {
+    code: 0, stdout: 'proceed: acme/app#3 is open with Triage label Needs triage', stderr: '',
   });
   assert.deepEqual(await check(['acme/app#4', '--state', 'none']), {
-    code: 0, stdout: 'proceed: acme/app#4 is open with no state label', stderr: '',
+    code: 0, stdout: 'proceed: acme/app#4 is open with no Triage label', stderr: '',
   });
   assert.deepEqual(await check(['acme/app#3', '--state', 'none']), {
-    code: 2, stdout: 'skip: acme/app#3 state label is now needs-triage, not none', stderr: '',
+    code: 2, stdout: 'skip: acme/app#3 Triage label is now Needs triage, not none', stderr: '',
   });
-  assert.deepEqual(await check(['acme/app#5', '--state', 'needs-triage']), {
-    code: 2, stdout: 'skip: acme/app#5 state label is now Needs-Triage, needs-info, not needs-triage', stderr: '',
+  assert.deepEqual(await check(['acme/app#5', '--state', 'Needs triage']), {
+    code: 2, stdout: 'skip: acme/app#5 Triage label is now needs triage, Needs info, not Needs triage', stderr: '',
   });
   assert.equal((await check(['acme/app#9', '--state', 'none'])).code, 1, 'an unreadable issue blocks the write');
 
-  assert.deepEqual(await check(['PAT-1', '--state', 'needs-triage']), {
+  assert.deepEqual(await check(['PAT-1', '--state', 'Needs triage']), {
     code: 2, stdout: 'skip: PAT-1 is closed', stderr: '',
   });
-  assert.deepEqual(await check(['https://linear.app/acme/issue/PAT-2/some-title', '--state', 'needs-triage']), {
-    code: 2, stdout: 'skip: https://linear.app/acme/issue/PAT-2/some-title state label is now needs-info, not needs-triage', stderr: '',
+  assert.deepEqual(await check(['https://linear.app/acme/issue/PAT-2/some-title', '--state', 'Needs triage']), {
+    code: 2, stdout: 'skip: https://linear.app/acme/issue/PAT-2/some-title Triage label is now Needs info, not Needs triage', stderr: '',
   });
   assert.deepEqual(
-    await check(['PAT-3', '--state', 'needs triage', '--state-labels', 'Needs Triage,Needs Info,Ready for Agent'], { LINEAR_API_KEY: 'lin_api_personal' }),
-    { code: 0, stdout: 'proceed: PAT-3 is open with state label needs triage', stderr: '' },
+    await check(['PAT-3', '--state', 'triage:new', '--state-labels', 'triage:new,triage:ready'], { LINEAR_API_KEY: 'lin_api_personal' }),
+    { code: 0, stdout: 'proceed: PAT-3 is open with Triage label triage:new', stderr: '' },
   );
   assert.deepEqual(linearAuth, ['Bearer oauth-token', 'Bearer oauth-token', 'lin_api_personal']);
   assert.equal((await check(['PAT-9', '--state', 'none'])).code, 1, 'a missing Linear issue blocks the write');
   assert.equal((await check(['PAT-2', '--state', 'none'], { LINEAR_API_KEY: '' })).code, 1, 'a missing key blocks the write');
 
-  assert.equal((await check(['acme/app#3', '--state', 'triaged'])).code, 1, 'an unknown state label is refused');
+  assert.equal((await check(['acme/app#3', '--state', 'triaged'])).code, 1, 'an unknown Triage label is refused');
   assert.equal((await check(['acme/app#3'])).code, 1, 'the expected state is required');
-  assert.equal((await check(['acme/app#3', '--state', 'none', '--state-labels', ''])).code, 1, 'an empty state label list is refused');
+  assert.equal((await check(['acme/app#3', '--state', 'none', '--state-labels', ''])).code, 1, 'an empty Triage label list is refused');
   assert.equal((await check(['issue-3', '--state', 'none'])).code, 1, 'an unrecognized reference is refused');
 } finally {
   linear.close();
