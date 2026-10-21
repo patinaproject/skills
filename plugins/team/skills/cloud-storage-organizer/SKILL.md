@@ -40,6 +40,8 @@ Map these operations onto whatever storage tools this session has, whichever pro
 
 Never write memory by creating a new document and trashing the old one. A tool that changes only a file's name, location, or other metadata cannot edit memory in place.
 
+Add each memory line as its own paragraph directly after the last line of its section, and give it the document's normal text style. In a native document, text inserted at the end of a heading takes the heading's style, so a line added to a section that holds only its heading would merge into that heading or become one. Insert a paragraph break first, then set the new paragraphs to normal text in the same write, and read the section back after writing to confirm its heading is still the only heading in it.
+
 If the tools cannot list, inspect, move, rename, and read memory, stop before any write and name the missing operation. Without **Trash**, hold every trash action as a question. Without **Edit memory in place**, run the sweep as a dry run: take no file action, and put the rules, questions, and changes the run would have written in the report.
 
 ### Sharing boundaries
@@ -94,14 +96,13 @@ A survey moves, renames, and trashes nothing. Finish with the report.
 
    Delete each converted or retired question, then move queued questions up into open slots, oldest first.
 
-5. **Sweep loose files.** For each loose file, newest modified first:
-   - It already sits where and as its latest Changes line puts it: skip it.
-   - A `[confirmed]` rule matches: apply it.
-   - A `[trial n/3]` rule matches: apply it to at most three files per rule per run. Files over the cap wait for the next run.
-   - A trash action under a `[trial n/3]` rule, or a move that crosses a boundary: hold the file and queue a question.
-   - No rule matches, or rules of the same rank disagree: hold the file and queue a question naming it and your best guess.
+5. **Sweep loose files.** List every loose file, and give each one, newest modified first, exactly one outcome:
+   - **Unchanged:** it already sits where and as its latest Changes line puts it.
+   - **Acted:** a `[confirmed]` rule matches, or a `[trial n/3]` rule matches and has acted on fewer than three files this run. Apply the rule.
+   - **Waiting:** a `[trial n/3]` rule matches but has already acted on three files this run. It waits for the next run.
+   - **Held:** a trash action under a `[trial n/3]` rule, a move that crosses a boundary, no matching rule, or rules of the same rank that disagree. Leave the file in place.
 
-   Group files that share a best guess into one question, and never queue a second question about the same file. Create a folder only when a rule or an answer names it. Move a folder only when a rule or an answer names that folder. Write one Changes line per action, with this run's start time. If more than 200 files are loose, stop after 200 and report the rest as unprocessed.
+   Every held file needs a question. A held file already named in an open or queued question keeps it. For the rest, write questions naming the files and your best guess, grouping files that share a best guess into one question, and add them under `## Queued` once the five open slots are full. The queue has no limit, so no held file goes unasked, but never write a second question about the same file. Create a folder only when a rule or an answer names it. Move a folder only when a rule or an answer names that folder. Write one Changes line per action, with this run's start time. If more than 200 files are loose, give outcomes to the newest 200 and count the rest as unprocessed.
 
 6. **Write memory in place.** Read each changed document again just before writing it, because the user may have edited it during the run, and edit only the lines this run changed. Send each write with the revision from that fresh read; a revision mismatch means the user edited mid-write, so read again and retry once. Write `Changes` right after the sweep's actions, so a failure later in the run still leaves a record of what moved. Delete Changes lines older than 30 days unless the file still sits loose, because those lines keep it from being swept twice. If a write still fails, report what it would have written.
 
@@ -116,9 +117,9 @@ The only actions are creating folders, moving, renaming, and trashing files, and
 The report is the run's final message, so an unattended run leaves it in its run history. It sends no message and writes no file beyond the memory documents. Close the run with:
 
 - The storage and account organized, and where the memory folder lives.
-- Counts moved, renamed, trashed, held, and unchanged, plus unprocessed when the 200-file cap was reached.
+- Counts that **reconcile**: the number of loose files, then acted (split into moved, renamed, and trashed), held, waiting, unchanged, and unprocessed. Acted + held + waiting + unchanged + unprocessed equals the number of loose files. Show the arithmetic.
 - Corrections learned, each with the rule demoted and the rule learned, and any rule promoted or confirmed.
-- Every open question, numbered as in `Questions`, so the user can answer in chat. An answer given in chat after the report is converted per step 4 and written right away.
+- Every open question, numbered as in `Questions`, so the user can answer in chat, and how many questions are queued behind them. An answer given in chat after the report is converted per step 4 and written right away.
 - Every file that could not be inspected, moved, renamed, or trashed, with the error.
 
 A run that took no action and asked nothing new says so in one line.
