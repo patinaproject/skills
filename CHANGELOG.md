@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.15.1](https://github.com/patinaproject/skills/compare/v3.15.0...v3.15.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#716](https://github.com/patinaproject/skills/issues/716) keep organizer memory lines out of headings ([#718](https://github.com/patinaproject/skills/issues/718)) ([437fb2b](https://github.com/patinaproject/skills/commit/437fb2bba27a29b325c06423e49eddfc0099b0b9))
+
 ## [3.15.0](https://github.com/patinaproject/skills/compare/v3.14.1...v3.15.0) (2026-10-21)
 
 
