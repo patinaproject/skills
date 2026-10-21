@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.1](https://github.com/patinaproject/skills/compare/v3.16.0...v3.16.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#660](https://github.com/patinaproject/skills/issues/660) leave the reviewer's artifact comment threads open ([#679](https://github.com/patinaproject/skills/issues/679)) ([0e7dc8a](https://github.com/patinaproject/skills/commit/0e7dc8a56618f1c1d71ee87af18fb96abc8262c9))
+
 ## [3.16.0](https://github.com/patinaproject/skills/compare/v3.15.1...v3.16.0) (2026-10-21)
 
 
