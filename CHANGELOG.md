@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.18.1](https://github.com/patinaproject/skills/compare/v3.18.0...v3.18.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#596](https://github.com/patinaproject/skills/issues/596) state a specific reason for each upstream fork ([#734](https://github.com/patinaproject/skills/issues/734)) ([a4cf3ea](https://github.com/patinaproject/skills/commit/a4cf3ea44f4d54709eec80a1012bf53bbcad6879))
+
 ## [3.18.0](https://github.com/patinaproject/skills/compare/v3.17.0...v3.18.0) (2026-10-21)
 
 
