@@ -22,7 +22,7 @@ Memory is three editable documents in the folder `Agents/Cloud storage organizer
 | `Rules` | `## Learned` | the skill | One rule per line, marked `[trial n/3]` or `[confirmed]`, each with its evidence. The user may edit, confirm, move into Rules, or delete any line, and a deleted rule stays deleted unless new evidence re-learns it. |
 | `Questions` | `## Open` | both | At most five numbered questions, each with the skill's best guess. The user answers on the question's `Answer:` line. |
 | `Questions` | `## Queued` | the skill | Further questions, oldest first, waiting for an open slot. |
-| `Placements` | `## Placements` | the skill | One line per action this skill took: run time, file ID, rule, from folder, to folder or `TRASH`, old name, new name. It is the record that lets a run see what the user changed back. |
+| `Changes` | `## Changes` | the skill | One line per action this skill took: run time, file ID, rule, from folder, to folder or `TRASH`, old name, new name. It is the record that lets a run see what the user changed back. |
 
 ### Map the storage
 
@@ -40,7 +40,7 @@ Map these operations onto whatever storage tools this session has, whichever pro
 
 Never write memory by creating a new document and trashing the old one. A tool that changes only a file's name, location, or other metadata cannot edit memory in place.
 
-If the tools cannot list, inspect, move, rename, and read memory, stop before any write and name the missing operation. Without **Trash**, hold every trash action as a question. Without **Edit memory in place**, run the sweep as a dry run: take no file action, and put the rules, questions, and placements the run would have written in the report.
+If the tools cannot list, inspect, move, rename, and read memory, stop before any write and name the missing operation. Without **Trash**, hold every trash action as a question. Without **Edit memory in place**, run the sweep as a dry run: take no file action, and put the rules, questions, and changes the run would have written in the report.
 
 ### Sharing boundaries
 
@@ -60,13 +60,15 @@ Two rules of the same rank that send one file to different places hold the file 
 
 ## First run
 
-When the memory folder or any of its documents is missing, create what is missing from the templates. If `Placements` did not exist before this run, the run is a **survey**:
+`Changes` was once named `Placements`. If a `Placements` document exists and `Changes` does not, rename it to `Changes` in place, and read a `## Placements` heading as `## Changes`, so its record and the user's earlier corrections carry over.
+
+When the memory folder or any of its documents is missing, create what is missing from the templates. If `Changes` did not exist before this run, the run is a **survey**:
 
 - List the root and each top-level folder, with a sample of the files in each, and note naming habits, file types, and what sits loose in the root.
 - Find every boundary at any depth.
 - Write what you observe as `[trial 0/3]` Learned lines, each naming its evidence, for example `PDFs named "Invoice …" → Finance/Invoices (evidence: 14 of 15 invoices already there)`.
 - Add up to five questions about the largest groups of loose files the trial rules leave unplaced.
-- Write a `## Placements` heading with no rows.
+- Write a `## Changes` heading with no rows.
 
 A survey moves, renames, and trashes nothing. Finish with the report.
 
@@ -74,15 +76,15 @@ A survey moves, renames, and trashes nothing. Finish with the report.
 
 1. **Load memory.** Find the memory folder per **Map the storage**, creating whatever is missing, and read all three documents with their revisions. If this is a survey, do **First run** instead of the steps below.
 
-2. **Learn from corrections.** For every Placements line, **Inspect** the file by its ID, listing whole folders instead where many lines name one folder. Compare its current parent, name, and trash state with the line.
+2. **Learn from corrections.** For every Changes line, **Inspect** the file by its ID, listing whole folders instead where many lines name one folder. Compare its current parent, name, and trash state with the line.
    - A **correction** undoes what a rule did: a moved file now outside the folder the rule chose and its subfolders, a renamed file whose name the user changed back or replaced, or a trashed file now outside the trash.
-   - For each correction, demote the rule that caused it to `[trial 0/3]`, even if it was `[confirmed]`. Write the narrowest rule that explains where the user put the file, as a new `[trial 0/3]` Learned line, unless a Rules or Learned line already explains it. Replace the Placements line's destination and name with where the user put the file, and mark it `reversed`.
+   - For each correction, demote the rule that caused it to `[trial 0/3]`, even if it was `[confirmed]`. Write the narrowest rule that explains where the user put the file, as a new `[trial 0/3]` Learned line, unless a Rules or Learned line already explains it. Replace the Changes line's destination and name with where the user put the file, and mark it `reversed`.
    - A file the user filed deeper inside the rule's folder refines the rule instead: add the refined rule at `[trial 0/3]` and keep the original rule's rank.
-   - A file that no longer exists, because the trash was emptied, teaches nothing. A later Placements line for the same file replaces an earlier one, so the skill's own moves never count as corrections.
+   - A file that no longer exists, because the trash was emptied, teaches nothing. A later Changes line for the same file replaces an earlier one, so the skill's own moves never count as corrections.
 
-   Done when every Placements line has been checked.
+   Done when every Changes line has been checked.
 
-3. **Promote trial rules.** A `[trial n/3]` rule advances one step when it has Placements lines from the most recent earlier run and none of its lines is `reversed`. It advances at most one step per run, and at `3/3` it becomes `[confirmed]`. A rule therefore needs three runs that each act without a correction to be confirmed.
+3. **Promote trial rules.** A `[trial n/3]` rule advances one step when it has Changes lines from the most recent earlier run and none of its lines is `reversed`. It advances at most one step per run, and at `3/3` it becomes `[confirmed]`. A rule therefore needs three runs that each act without a correction to be confirmed.
 
 4. **Convert answers.** Read every `Answer:` line the user filled in, in the `Questions` document or in this session.
    - An answer that names a rule becomes a `[confirmed]` Learned line, and the files the question named are filed by it this run.
@@ -93,15 +95,15 @@ A survey moves, renames, and trashes nothing. Finish with the report.
    Delete each converted or retired question, then move queued questions up into open slots, oldest first.
 
 5. **Sweep loose files.** For each loose file, newest modified first:
-   - It already sits where and as its latest Placements line puts it: skip it.
+   - It already sits where and as its latest Changes line puts it: skip it.
    - A `[confirmed]` rule matches: apply it.
    - A `[trial n/3]` rule matches: apply it to at most three files per rule per run. Files over the cap wait for the next run.
    - A trash action under a `[trial n/3]` rule, or a move that crosses a boundary: hold the file and queue a question.
    - No rule matches, or rules of the same rank disagree: hold the file and queue a question naming it and your best guess.
 
-   Group files that share a best guess into one question, and never queue a second question about the same file. Create a folder only when a rule or an answer names it. Move a folder only when a rule or an answer names that folder. Write one Placements line per action, with this run's start time. If more than 200 files are loose, stop after 200 and report the rest as unprocessed.
+   Group files that share a best guess into one question, and never queue a second question about the same file. Create a folder only when a rule or an answer names it. Move a folder only when a rule or an answer names that folder. Write one Changes line per action, with this run's start time. If more than 200 files are loose, stop after 200 and report the rest as unprocessed.
 
-6. **Write memory in place.** Read each changed document again just before writing it, because the user may have edited it during the run, and edit only the lines this run changed. Send each write with the revision from that fresh read; a revision mismatch means the user edited mid-write, so read again and retry once. Write `Placements` right after the sweep's actions, so a failure later in the run still leaves a record of what moved. Delete Placements lines older than 30 days unless the file still sits loose, because those lines keep it from being swept twice. If a write still fails, report what it would have written.
+6. **Write memory in place.** Read each changed document again just before writing it, because the user may have edited it during the run, and edit only the lines this run changed. Send each write with the revision from that fresh read; a revision mismatch means the user edited mid-write, so read again and retry once. Write `Changes` right after the sweep's actions, so a failure later in the run still leaves a record of what moved. Delete Changes lines older than 30 days unless the file still sits loose, because those lines keep it from being swept twice. If a write still fails, report what it would have written.
 
 7. **Report**, per **Report** below.
 

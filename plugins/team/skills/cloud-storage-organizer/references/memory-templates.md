@@ -59,17 +59,17 @@ A question names its files, its best guess, and an empty answer line. Keep each 
    - Answer:
 ```
 
-## Placements
+## Changes
 
 ```markdown
-# Cloud storage organizer placements
+# Cloud storage organizer changes
 
 Managed by cloud-storage-organizer. Do not edit. Lines older than 30 days are removed.
 
-## Placements
+## Changes
 ```
 
-A Placements line records one action. Separate fields with ` | `, and mark a line the user undid with `reversed` at the end:
+Each line in Changes records one action. Separate fields with ` | `, and mark a line the user undid with `reversed` at the end:
 
 ```markdown
 - 2026-10-21T00:05Z | 1AbC… | PDFs named "Invoice …" | / → Finance/Invoices | Invoice 0412.pdf → Invoice 0412.pdf
