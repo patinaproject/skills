@@ -8,6 +8,7 @@ const UNPUBLISHED_SKILLS = new Map([
   ['run', 'Claude Code built-in driver skill'],
   ['verify', 'Claude Code built-in driver skill'],
   ['loop', 'Claude Code built-in pacing skill'],
+  ['artifact-capabilities', 'claude.ai built-in skill for Artifact runtime capabilities'],
   ['patinaproject-verify', 'repository-local skill that each consuming repo ships'],
   ['orchestrate', 'GitHub Copilot app skill named in copilot-tools.md'],
   ['pr-stack', 'GitHub Copilot app skill named in copilot-tools.md'],
