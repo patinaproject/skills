@@ -45,6 +45,6 @@ jobs:
           if [ -n "$issue_number" ]; then
             gh issue edit "$issue_number" --body-file "$body_file"
           else
-            gh issue create --title "$title" --body-file "$body_file" --label enhancement
+            gh issue create --title "$title" --body-file "$body_file" --label Skills --label "Needs triage"
           fi
           exit 1

@@ -20,47 +20,127 @@ state, labels, relationships, milestones, and closure. Linear receives new
 issues through one-way GitHub-to-Linear intake for team visibility. Linear's
 native sync still propagates updates to synced properties in both directions.
 Do not edit or close the Linear copy; close public work on GitHub, and treat any
-disagreement in favor of GitHub.
+disagreement in favor of GitHub. The one exception is a Linear-only field that
+GitHub cannot represent, such as priority: set it on the Linear copy as
+**Priority rubric** describes.
 
 The sync creates a comment thread whose replies publish to GitHub. Comments
 outside the synced thread remain private.
 
-## Triage roles
+## Labels
 
-The vendored `triage` skill uses seven stable roles. That set is the whole
-vocabulary; a repository works within it rather than adding a role of its own.
-Translate every role through this adapter rather than assuming it is a label or
-a lifecycle state.
+Issue labels are the classification vocabulary, and this section is their
+only definition. Skills, templates, and other docs name the groups and point
+here rather than listing Type or Theme labels themselves. Apply labels by
+these exact strings. See
+[ADR-682](../adr/ADR-682-issue-type-and-outcome-labels.md).
 
-Roles sit on two independent axes. A triaged issue carries exactly one
-**category** role and exactly one **state** role. A transition replaces the
-state role and preserves the category role.
+### Label groups
 
-| Role | Axis | Meaning | GitHub | Linear |
-| --- | --- | --- | --- | --- |
-| `bug` | category | Something is broken | label | label |
-| `enhancement` | category | New feature or improvement | label | label |
-| `needs-triage` | state | Maintainer evaluation is required | label, issue open | label, Triage |
-| `needs-info` | state | Waiting for information | label, issue open | label |
-| `ready-for-agent` | state | Ready for an implementation agent | label, issue open | label, `Todo` |
-| `ready-for-human` | state | Requires human implementation | label, issue open | label, `Todo` |
-| `wontfix` | state | Deliberately declined | label, issue closed | label, Canceled |
+An issue carries at most one label from each group. Linear enforces this with
+label groups. GitHub has no label groups, so apply the same rule by hand there.
 
-`wontfix` is terminal: it accompanies closure rather than sitting on open work.
-`ready-for-agent` and `ready-for-human` are both written; each is applied
+<!-- label-vocabulary:start -->
+**Type** says what kind of work the issue is. Every triaged issue carries
+exactly one, chosen from its repository's Type set:
+
+| Repository | Type set |
+| --- | --- |
+| `patinaproject/skills` | `Skills` |
+| `patinaproject/factory` | `Factory` |
+| `patinaproject/patinaproject`, and any repository not listed | `Feature`, `Bug`, `Refactor`, `Tools`, `Task`, `Design` |
+
+Each Type says how triage verifies the issue's claim and which commit types
+the closing pull request uses.
+
+| Label | Commit types | Verify the claim by | Definition |
+| --- | --- | --- | --- |
+| `Feature` | `feat`, `perf` | redundancy check | Changes what the product does, or how fast or light it does it, as users observe in Production. |
+| `Bug` | `fix` | reproduction | Makes the product do what it was already supposed to do, including fixing a performance regression. |
+| `Refactor` | `refactor` | redundancy check | Changes product source in a way no user can observe. |
+| `Tools` | `chore`, `ci`, `test`, `docs`, `style` | reproduction when it reports something broken, otherwise redundancy check | Changes project files only: tooling, CI, skills, agent workflows, tests, docs. Never product behavior. |
+| `Task` | none | confirming the action is not already done | Needs no repository change: a one-off action on data, accounts, settings, or vendors. |
+| `Design` | none | confirming no existing design covers it | Produces a product or UX design, such as flows, mockups, or a prototype, for later work to build. |
+| `Skills` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/skills`: skills, plugins, their tooling, and their docs. |
+| `Factory` | any | reproduction when it reports something broken, otherwise redundancy check | Any work in `patinaproject/factory`. |
+
+- **Reproduction:** reproduce the report from the reporter's steps and name the
+  code path.
+- **Redundancy check:** search the codebase for an existing implementation and
+  record where you looked.
+- **Confirming the action is not already done:** check the system the action
+  touches.
+- **Confirming no existing design covers it:** search the design files and
+  earlier design issues for the same flow or screen.
+
+Product is what a Production deploy delivers to users, including
+infrastructure on a user's request path. Internal tooling, CI, skills, agent
+workflows, and repository structure are never product, so broken tooling is
+`Tools`, not `Bug`.
+
+Linear holds every Type above in one Type group. A public repository's issue
+reaches Linear with its GitHub Type label, so the `Skills` and `Factory` labels
+mark which repository the work belongs to.
+
+**Theme** says why the work matters. An issue carries at most one, and a
+missing Theme never blocks readiness. When two fit, take the one listed
+first.
+
+| Label | Definition |
+| --- | --- |
+| `Support` | Helps users get help, or reduces support load. |
+| `Security` | Reduces security risk or meets a security requirement. |
+| `Legal` | Meets a legal, privacy, or compliance obligation, or reduces legal risk. |
+| `Performance & stability` | Reduces failures users hit in Production (crashes, errors, outages, data loss, flaky behavior), or keeps the product fast. |
+| `User blockers` | Removes friction or a missing step that stops users from finishing what they came to do. A failure users hit in Production is `Performance & stability`. |
+| `User enablers` | Lets users do something they could not do before. |
+| `Revenue` | Acquisition, discoverability (SEO), onboarding, conversion, subscriptions, and pricing. |
+| `Deliverability & reliability` | Makes building, testing, and shipping our software and agents faster, safer, or more reliable. |
+<!-- label-vocabulary:end -->
+
+**Triage** says what triage decided. Every triaged issue carries exactly one.
+A transition replaces it and preserves the Type and Theme.
+
+| Label | Meaning | GitHub | Linear |
+| --- | --- | --- | --- |
+| `Needs triage` | Maintainer evaluation is required | label, issue open | label, Triage |
+| `Needs info` | Waiting for information | label, issue open | label |
+| `Ready for agent` | Ready for an implementation agent | label, issue open | label, `Todo` |
+| `Ready for human` | Requires human implementation | label, issue open | label, `Todo` |
+| `Won't fix` | Deliberately declined | label, issue closed | label, Canceled |
+
+**Wayfinder** marks a Wayfinder map or ticket: `Wayfinder: Map`,
+`Wayfinder: Research`, `Wayfinder: Grilling`, `Wayfinder: Task`, and
+`Wayfinder: Prototype`. See **Wayfinding operations** below.
+
+`Won't fix` is terminal: it accompanies closure rather than sitting on open
+work. `Ready for agent` and `Ready for human` are both written; each is applied
 directly rather than read from the other's absence.
 
-A status and a role are different axes. The status says where the issue sits;
-the role says what triage decided. An issue that stays in the triage state while
-carrying a role is normal: triage has finished and a person has not yet accepted
-it. A person owns every triage-facing status change.
+A status and a Triage label are different axes. The status says where the issue
+sits; the label says what triage decided. An issue that stays in the triage
+state while carrying a Triage label is normal: triage has finished and a person
+has not yet accepted it. A person owns every triage-facing status change.
+
+### Label names
+
+Every label uses Sentence case. Capitalize the first word only, and keep proper
+nouns and acronyms as they are normally written (`SEO`, `iOS`, `E2E`,
+`Sentry`). After a `Prefix:`, capitalize the next word too. The only exceptions
+are release-please's `autorelease: pending` and `autorelease: tagged`, which
+keep their exact names because release-please matches them. Never create a
+label that breaks this rule, and give every label a non-empty description.
+
+Labels outside the groups can stack: blockers such as `Needs design` and
+`Blocked`, platforms such as `iOS`, and integrations such as `Sentry`. Load the
+live inventory before applying one, and never invent a label.
 
 In upstream triage guidance, interpret "GitHub issue" as the canonical tracker
 issue and route example commands through this adapter. Pull requests remain
 forge objects.
 
 Before each triage write, the `triage` skill's `check-issue-state.mjs` script
-re-reads the issue's open state and state label: through `gh` for GitHub, and
+re-reads the issue's open state and Triage label: through `gh` for GitHub, and
 through Linear's GraphQL API with `LINEAR_API_KEY` for Linear. A Linear triage
 session therefore needs that key even when it uses the connected Linear tools.
 
@@ -90,11 +170,11 @@ relationships before mutation. Follow pagination for exhaustive reads.
 
 ### Public lifecycle
 
-GitHub issues carry the roles above as repository labels, alongside open/closed
-state. New public issues receive `needs-triage` unless they are already ready. A
-ready issue stays open and carries `ready-for-agent` or `ready-for-human`. Close
-duplicates with the duplicate reason and native relationship when available;
-close deliberate non-work with `wontfix` and a rationale.
+GitHub issues carry the labels above alongside open/closed state. New public
+issues receive `Needs triage` unless they are already ready. A ready issue stays
+open and carries `Ready for agent` or `Ready for human`. Close duplicates with
+the duplicate reason and native relationship when available; close deliberate
+non-work with `Won't fix` and a rationale.
 
 ### Public branch name
 
@@ -144,9 +224,9 @@ Personal API keys are passed directly in `Authorization`; OAuth tokens use
 
 ### Private lifecycle
 
-New work enters Triage. The roles above carry their Linear states, and duplicate
-work uses Duplicate plus `duplicateOf`. Record a `wontfix` rationale on the
-issue.
+New work enters Triage. The Triage labels above carry their Linear states, and
+duplicate work uses Duplicate plus `duplicateOf`. Record a `Won't fix` rationale
+on the issue.
 
 Start work by self-assigning only when unassigned, then moving the issue to
 `In Progress` when it is not already started or completed. Resolve work with
@@ -167,21 +247,49 @@ readiness, use the adapter to:
 
 1. apply the provider's ready state — leave a GitHub issue open, or move a
    Linear issue to `Todo`;
-2. write the state label for the `ready-for-agent` or `ready-for-human` role,
-   replacing the previous state role and preserving the category role. Resolve
-   the live label name from the provider's inventory, since a role name and its
-   label string can differ; and
+2. write the `Ready for agent` or `Ready for human` label, replacing the
+   previous Triage label and preserving the Type and Theme; and
 3. set the planning fields together when the work belongs to a named effort —
    a GitHub milestone, or a Linear project and project milestone.
 
-Triage sets the highest priority only when the evidence shows a live,
-user-impacting fault. In every other case the priority stays unset until a
-person chooses it. Record priority in the provider's priority field where it has
-one, such as Linear's; never encode it as a label.
+Triage sets priority from the **Priority rubric** below.
 
 Releases describe what shipped, so the release pipeline owns them and readiness
 leaves them alone. A blocked issue may still become ready — record its
 dependency with the native blocked-by relationship.
+
+## Priority rubric
+
+Triage gives every triaged issue exactly one priority: the highest lane whose
+condition holds. Judge only evidence in the issue: its body, comments, and
+linked reports. Evidence you cannot read does not count; name it as unread.
+Labels, the reporter, and effort never count. See
+[ADR-692](../adr/ADR-692-triage-assigns-priority.md).
+
+- **Urgent:** work to triage and ship before all other open work. At least one
+  trigger holds, and the triage notes name it and cite its evidence:
+  1. A fault harms users now with no workaround: data loss, an outage, a
+     security exposure, or a broken core flow.
+  2. A legal or regulatory deadline applies.
+  3. A release gate is blocked.
+  4. Someone should stop work in progress for this. The notes say what would
+     be interrupted and why waiting costs more.
+
+  An issue where a trigger holds is never High.
+- **High:** no Urgent trigger holds, and either the issue links a customer's
+  own report (a Featurebase post or a support conversation), or a linked
+  Sentry issue shows many affected users or events. None of these is a label.
+- **Medium:** a confirmed bug or a valuable enhancement with limited reach.
+- **Low:** waiting costs users nothing visible, such as maintenance-only work,
+  dependency bumps, cosmetic polish, and routine follow-ups.
+
+A confident duplicate gets no priority. Write priority to Linear's priority
+field with `save_issue`: `1` Urgent, `2` High, `3` Medium, `4` Low. Never encode
+it as a label. For a public repository, write it on the synced Linear issue: the Linear
+issue whose GitHub attachment URL equals the GitHub issue URL. `list_issues`
+returns no attachments, so confirm each candidate with `get_issue` and
+`fields: ["attachments", "priority"]`. A title match alone is not a match. When no synced Linear
+issue exists, write no priority and name the gap in the reply.
 
 ## Tracker-agnostic operations
 
@@ -207,10 +315,10 @@ dependency with the native blocked-by relationship.
 pull requests enter the triage queue.
 
 Pull requests are forge objects here, not tracker items. They carry the
-pull-request label set, not the triage roles above, and they are reviewed rather
+pull-request label set, not the issue labels above, and they are reviewed rather
 than triaged. Set this flag to `yes` only if this repository starts treating
-external pull requests as feature requests; the roles and states in the table
-above would then apply to them unchanged.
+external pull requests as feature requests; the issue labels above would then
+apply to them unchanged.
 
 GitHub shares one number space across issues and pull requests, so a bare `#42`
 in a public repository may be either. Resolve it as a pull request first, then
@@ -239,8 +347,12 @@ an agent brief, research, or a proposed ADR. Where it lives depends on the
 provider. See
 [ADR-654](../adr/ADR-654-linear-issue-documents.md).
 
-- **Public repository:** post each artifact as a GitHub issue comment, as the
-  producing skill describes. Nothing below applies.
+- **Public repository:** save triage notes and the agent brief as Linear
+  Documents attached to the synced Linear issue, as below. Post on GitHub only
+  when a human must act there. When the synced Linear issue is archived or
+  missing, write nothing and name the gap in the reply; never move the
+  artifact to GitHub. Post research and proposed ADRs
+  on the GitHub issue, as the producing skill describes.
 - **Private repository:** save each artifact as a Linear Document attached to
   the issue. Post a comment only when a human must act.
 
@@ -279,17 +391,17 @@ line is the time a reader measures against.
 ### Triage on a Linear issue
 
 Triage writes its notes to the `Triage notes` Document and its brief to the
-`Agent brief` Document. A brief for `ready-for-human` uses the same Document.
+`Agent brief` Document. A brief for `Ready for human` uses the same Document.
 Re-running triage updates both in place.
 
 Triage writes a comment only in these cases:
 
-- **`needs-info`:** one short comment that starts with the triage disclaimer,
+- **`Needs info`:** one short comment that starts with the triage disclaimer,
   @-mentions the reporter, and links the `Triage notes` Document. It mentions
   nobody else.
-- **`wontfix`:** the explanation comment posted with the closure.
+- **`Won't fix`:** the explanation comment posted with the closure.
 
-`ready-for-agent`, `ready-for-human`, and `needs-triage` get no comment.
+`Ready for agent`, `Ready for human`, and `Needs triage` get no comment.
 
 "Reporter activity since the last triage notes" means a comment or an edit to
 the issue body by the reporter after the `Last updated:` time of the `Triage
@@ -321,11 +433,11 @@ which is silently wrong on a repository that has a real one.
 
 For a public repository:
 
-- **Map**: one issue labelled `wayfinder:map`, holding the map body.
-  `gh issue create --label wayfinder:map`.
+- **Map**: one issue labelled `Wayfinder: Map`, holding the map body.
+  `gh issue create --label "Wayfinder: Map"`.
 - **Child ticket**: an issue linked to the map through GitHub's native
   sub-issues endpoints (`issues/{number}/sub_issues`), labelled
-  `wayfinder:<type>` (`research`, `prototype`, `grilling`, or `task`), and
+  `Wayfinder: <Type>` (`Research`, `Prototype`, `Grilling`, or `Task`), and
   assigned to the driving developer once claimed.
 - **Blocking**: GitHub's native issue dependencies
   (`issues/{number}/dependencies/*`). A ticket is unblocked when every blocker
@@ -337,7 +449,7 @@ For a public repository:
   to the map's decisions.
 
 For a private repository, use the Linear equivalents from the table above:
-`save_issue` with a `wayfinder:map` label for the map, native `parentId` for
+`save_issue` with a `Wayfinder: Map` label for the map, native `parentId` for
 child tickets, native `blockedBy` for blocking, and `list_issues` filtered to
 the map's open children for the frontier query.
 
