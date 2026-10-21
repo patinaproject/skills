@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.18.0](https://github.com/patinaproject/skills/compare/v3.17.0...v3.18.0) (2026-10-21)
+
+
+### Features
+
+* [#668](https://github.com/patinaproject/skills/issues/668) re-read an issue's live state before each triage write ([#669](https://github.com/patinaproject/skills/issues/669)) ([17209f6](https://github.com/patinaproject/skills/commit/17209f6614c5e808847b4dc47e2fdbb5175d3afa))
+
 ## [3.17.0](https://github.com/patinaproject/skills/compare/v3.16.7...v3.17.0) (2026-10-21)
 
 
