@@ -21,6 +21,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
 - `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
 - `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
+- `plugins/team/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
 - `plugins/team/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
@@ -41,7 +42,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/grilling/`: upstream mirror (mattpocock)
 - `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
 - `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
-- `plugins/team/skills/setup-matt-pocock-skills/`: upstream mirror (mattpocock)
+- `plugins/team/skills/setup-team-skills/`: upstream mattpocock `setup-matt-pocock-skills` mirror, renamed and forked for Patina label setup
 - `plugins/team/skills/tutor/`: upstream mirror (mattpocock)
 - `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
 - `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
@@ -105,6 +106,7 @@ Skills owned by this repository:
 | `review-system-design` | `plugins/team/skills/review-system-design/` | Contract dependency review |
 | `writing-for-pstack` | `plugins/team/skills/writing-for-pstack/` | Operator prompt authoring for `patina-mode` |
 | `email-inbox-triage` | `plugins/team/skills/email-inbox-triage/` | Provider-agnostic email inbox triage into four tagged buckets |
+| `cloud-storage-organization` | `plugins/team/skills/cloud-storage-organization/` | Storage-agnostic loop that files loose files by learned rules |
 | `draft-user-follow-ups` | `plugins/team/skills/draft-user-follow-ups/` | Post-release support loop that drafts proven replies to owed customers |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
@@ -121,7 +123,7 @@ Skills owned by this repository:
 | `grilling` | `plugins/team/skills/grilling/` | Upstream mattpocock mirror in the Team plugin |
 | `handoff` | `plugins/team/skills/handoff/` | Upstream mattpocock mirror in the Team plugin |
 | `improve-codebase-architecture` | `plugins/team/skills/improve-codebase-architecture/` | Upstream mattpocock mirror in the Team plugin |
-| `setup-matt-pocock-skills` | `plugins/team/skills/setup-matt-pocock-skills/` | Upstream mattpocock mirror in the Team plugin |
+| `setup-team-skills` | `plugins/team/skills/setup-team-skills/` | Upstream mattpocock `setup-matt-pocock-skills` mirror, renamed so the Team plugin owns repository setup |
 | `tutor` | `plugins/team/skills/tutor/` | Upstream mattpocock `teach` mirror, renamed so skill names stay unique across plugins |
 | `to-questionnaire` | `plugins/team/skills/to-questionnaire/` | Upstream mattpocock mirror in the Team plugin |
 | `wait-what` | `plugins/team/skills/wait-what/` | Upstream mattpocock mirror in the Team plugin |

@@ -21,7 +21,7 @@ git -C "$consumer" add -A
 git -C "$consumer" -c user.name=test -c user.email=test@example.com commit -q -m base
 cp "$repo_root/scripts/sync-upstream-skills.mjs" "$consumer/sync.mjs"
 cat > "$consumer/upstream-skills.json" <<JSON
-{"version":1,"sources":[{"name":"fixture","repo":"$upstream","ref":"main","pin":"$v1","transformsHash":"41800c48c46fc45fc13c0e19c4ce7cf27b755415326cf55b3bb93ac2f4d7cfa6","transforms":{"rename":{"poteto-mode":"patina-mode"},"denylist":[]},"targets":[{"kind":"subtree","source":"plugins/pstack","destination":"plugins/engineering","exclude":[]}]}]}
+{"version":1,"sources":[{"name":"fixture","repo":"$upstream","ref":"main","pin":"$v1","transformsHash":"5eb5b29f6280c8458bc3ce2178bf3d2198eab030551928b2545b58e4975af006","transforms":{"rename":{"poteto-mode":"patina-mode"},"denylist":[]},"targets":[{"kind":"subtree","source":"plugins/pstack","destination":"plugins/engineering","exclude":[]}]}]}
 JSON
 printf '{}\n' > "$consumer/upstream-skills-forks.json"
 git -C "$consumer" add -A
@@ -38,7 +38,7 @@ printf 'extra-patina\n' > "$consumer/plugins/engineering/skills/extra/SKILL.md"
 node - "$consumer" "$other" "$other_v1" <<'NODE'
 const fs=require('fs'), [dir, repo, pin]=process.argv.slice(2);
 const manifestPath=`${dir}/upstream-skills.json`, manifest=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
-manifest.sources.push({name:'other',repo,ref:'main',pin,transformsHash:'f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84',transforms:{rename:{},denylist:[]},targets:[{kind:'skill',source:'skills/extra',destination:'plugins/engineering/skills/extra'}]});
+manifest.sources.push({name:'other',repo,ref:'main',pin,transformsHash:'dbfde040e780c008c561461a71b60d7da6a4a7d98d89f2af5032fe1ce1497f31',transforms:{rename:{},denylist:[]},targets:[{kind:'skill',source:'skills/extra',destination:'plugins/engineering/skills/extra'}]});
 fs.writeFileSync(manifestPath, JSON.stringify(manifest)+'\n');
 fs.writeFileSync(`${dir}/upstream-skills-forks.json`, JSON.stringify({'plugins/engineering/skills/extra/SKILL.md':{kind:'policy',reason:'fixture other-source policy',upstream:{status:'not-proposed'}}})+'\n');
 NODE
@@ -117,4 +117,38 @@ grep -q shared-upstream "$consumer/plugins/engineering/skills/patina-mode/SKILL.
 git -C "$consumer" reset --merge HEAD >/dev/null
 printf 'dirty\n' >> "$consumer/README.md"
 if (cd "$consumer" && node sync.mjs --dry-run); then fail 'dirty tree should be rejected'; fi
+ns_upstream="$work/ns-upstream"
+ns_consumer="$work/ns-consumer"
+mkdir -p "$ns_upstream/plugins/pstack" "$ns_consumer/plugins/engineering"
+git init -q -b main "$ns_upstream"
+printf 'base\n' > "$ns_upstream/plugins/pstack/README.md"
+git -C "$ns_upstream" add -A
+git -C "$ns_upstream" -c user.name=test -c user.email=test@example.com commit -q -m v1
+ns_v1="$(git -C "$ns_upstream" rev-parse HEAD)"
+printf 'base\n' > "$ns_consumer/plugins/engineering/README.md"
+git init -q -b main "$ns_consumer"
+cp "$repo_root/scripts/sync-upstream-skills.mjs" "$ns_consumer/sync.mjs"
+ns_transforms='{"rename":{"poteto-agent":"patina-agent","pstack: ":"engineering: "},"denylist":["pstack:"],"unprefix":["pstack","engineering"]}'
+ns_hash="$(node -e '
+const crypto=require("crypto"), t=JSON.parse(process.argv[1]);
+const sj=v=>Array.isArray(v)?`[${v.map(sj).join(",")}]`:v&&typeof v==="object"?`{${Object.keys(v).sort().map(k=>`${JSON.stringify(k)}:${sj(v[k])}`).join(",")}}`:JSON.stringify(v);
+console.log(crypto.createHash("sha256").update(sj(t)).digest("hex"));' "$ns_transforms")"
+cat > "$ns_consumer/upstream-skills.json" <<JSON
+{"version":1,"sources":[{"name":"ns","repo":"$ns_upstream","ref":"main","pin":"$ns_v1","transformsHash":"$ns_hash","transforms":$ns_transforms,"targets":[{"kind":"subtree","source":"plugins/pstack","destination":"plugins/engineering","exclude":[]}]}]}
+JSON
+printf '{}\n' > "$ns_consumer/upstream-skills-forks.json"
+git -C "$ns_consumer" add -A
+git -C "$ns_consumer" -c user.name=test -c user.email=test@example.com commit -q -m base
+printf 'Spawn `subagent_type: "pstack:poteto-agent"` or `engineering:comment-sicko` at `pstack:effort-<level>`.\npstack: a prose label\nOver-engineering: kept\n' > "$ns_upstream/plugins/pstack/agents.md"
+git -C "$ns_upstream" add -A
+git -C "$ns_upstream" -c user.name=test -c user.email=test@example.com commit -q -m namespaced
+(cd "$ns_consumer" && node sync.mjs >/dev/null) || fail 'namespaced upstream names should sync'
+test "$(cat "$ns_consumer/plugins/engineering/agents.md")" = "$(printf 'Spawn `subagent_type: "patina-agent"` or `comment-sicko` at `effort-<level>`.\nengineering: a prose label\nOver-engineering: kept')" || fail 'sync did not rewrite namespaced names to bare names'
+git -C "$ns_consumer" add -A
+git -C "$ns_consumer" -c user.name=test -c user.email=test@example.com commit -q -m sync
+printf 'Run `engineering:Comment-sicko`.\n' > "$ns_upstream/plugins/pstack/survivor.md"
+git -C "$ns_upstream" add -A
+git -C "$ns_upstream" -c user.name=test -c user.email=test@example.com commit -q -m survivor
+if (cd "$ns_consumer" && node sync.mjs --dry-run 2>"$work/err"); then fail 'a namespaced name that survives unprefix should fail'; fi
+grep -qF 'namespaced name engineering:Comment-sicko survived unprefix' "$work/err" || fail 'surviving namespaced name not reported'
 echo 'PASS: sync-upstream-skills.test.sh'

@@ -14,13 +14,19 @@
           "Poteto mode": "Patina mode",
           "Poteto subagent": "Patina subagent",
           "Poteto help": "Patina help",
-          "pstack:": "engineering:"
+          "Not in pstack:": "Not in engineering:",
+          "pstack: ": "engineering: ",
+          "`pstack:`": "`engineering:`"
         },
         "denylist": [
           "poteto-mode",
           "poteto-agent",
           "poteto-help",
           "pstack:"
+        ],
+        "unprefix": [
+          "pstack",
+          "engineering"
         ]
       },
       "targets": [
@@ -42,7 +48,7 @@
           ]
         }
       ],
-      "transformsHash": "66a6b957f9b9986f3c85ac2bb6de5e19a265760ac98b00216a146389d8693138"
+      "transformsHash": "c89c47a437ab1205201c017c13b6f9869ecafe2cfd5a60bf034acdcb5949dc22"
     },
     {
       "name": "mattpocock",
@@ -51,9 +57,12 @@
       "pin": "7a030a8b0dcaa601bb0dda9aaf174affb3d61145",
       "transforms": {
         "rename": {
-          "grill-with-docs": "grill-to-spec"
+          "grill-with-docs": "grill-to-spec",
+          "setup-matt-pocock-skills": "setup-team-skills"
         },
-        "denylist": []
+        "denylist": [
+          "setup-matt-pocock-skills"
+        ]
       },
       "targets": [
         {
@@ -124,7 +133,7 @@
         {
           "kind": "skill",
           "source": "skills/engineering/setup-matt-pocock-skills",
-          "destination": "plugins/team/skills/setup-matt-pocock-skills"
+          "destination": "plugins/team/skills/setup-team-skills"
         },
         {
           "kind": "skill",
@@ -177,7 +186,7 @@
           "destination": "plugins/team/skills/writing-for-agents"
         }
       ],
-      "transformsHash": "8d4a3cbe10fe8da085d6391fb307501c05da704f067529647f9058bd448de870"
+      "transformsHash": "86b2e98f1bd22f89ad719c6bbd103c4a5c21e7070b5f359cca5d6c383c258640"
     },
     {
       "name": "humanlayer",
@@ -200,7 +209,7 @@
           "destination": "plugins/team/skills/design-control-loop"
         }
       ],
-      "transformsHash": "f47e57f0b19e8c15dfa9968b4f05a7ffa8ac503bff81904cdae924ec029dde84"
+      "transformsHash": "dbfde040e780c008c561461a71b60d7da6a4a7d98d89f2af5032fe1ce1497f31"
     }
   ]
 }
