@@ -179,6 +179,22 @@ a second run converges on the same state.
 See [./plugins/team/skills/email-inbox-triage/](./plugins/team/skills/email-inbox-triage/) for the skill
 contract.
 
+### cloud-storage-organizer
+
+`cloud-storage-organizer` files loose files in the storage root and in the
+user's inbox folders by moving, renaming, and trashing them under rules it
+learns from how the user already organizes files. It keeps its rules,
+questions, and a record of its moves in editable documents in an
+`Agents/Cloud storage organizer` folder, edits them in place, and learns from
+every file the user moves back, so it can run on a schedule as a feedback
+loop. New rules act on a few files per run until three runs pass without a
+correction, and a move that would change who can see a file waits for the
+user's yes. It works with any storage tools that can list, move, rename,
+trash, and edit a document in place.
+
+See [./plugins/team/skills/cloud-storage-organizer/](./plugins/team/skills/cloud-storage-organizer/)
+for the skill contract.
+
 ### draft-user-follow-ups
 
 `draft-user-follow-ups` runs a support control loop after a production
@@ -246,6 +262,7 @@ README and skill contract.
 | [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
 | [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
 | [email-inbox-triage](./plugins/team/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
+| [cloud-storage-organizer](./plugins/team/skills/cloud-storage-organizer/) | File loose files in any cloud storage by rules learned from your corrections |
 | [draft-user-follow-ups](./plugins/team/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
@@ -314,6 +331,7 @@ plugins/team/
     review-system-design/
     writing-for-pstack/
     email-inbox-triage/
+    cloud-storage-organizer/
     draft-user-follow-ups/
     to-spec/
     to-tickets/
