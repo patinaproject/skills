@@ -1,9 +1,9 @@
 ---
-name: cloud-storage-organizer
-description: File loose files in any cloud storage the session's storage tools can reach by moving, renaming, and trashing them under rules learned from how the user already organizes files and from the user's corrections, kept in an editable `Agents/Cloud storage organizer` folder. Use when the user asks to organize or clean up their cloud storage, Drive, or files, or to run a scheduled storage cleanup. Mutates storage, so answer read-only questions about where files are directly instead.
+name: cloud-storage-organization
+description: File loose files in any cloud storage the session's storage tools can reach by moving, renaming, and trashing them under rules learned from how the user already organizes files and from the user's corrections, kept in an editable `Agents/Cloud storage organization` folder. Use when the user asks to organize or clean up their cloud storage, Drive, or files, or to run a scheduled storage cleanup. Mutates storage, so answer read-only questions about where files are directly instead.
 ---
 
-# Cloud Storage Organizer
+# Cloud Storage Organization
 
 File every loose file the user owns where the user's rules say it belongs, learning those rules from how the user already organizes files and from every correction the user makes.
 
@@ -11,9 +11,9 @@ Each run is one pass of a feedback loop. The **memory folder** holds the user's 
 
 **Loose files** are files, not folders, that the user owns and that sit in the storage root or directly in a folder listed under `## Inbox folders`. Files anywhere else are already filed, and this skill never touches them.
 
-## Memory: the Cloud storage organizer folder
+## Memory: the Cloud storage organization folder
 
-Memory is three editable documents in the folder `Agents/Cloud storage organizer/` of the user's storage. [references/memory-templates.md](references/memory-templates.md) holds their starting content and line formats.
+Memory is three editable documents in the folder `Agents/Cloud storage organization/` of the user's storage. [references/memory-templates.md](references/memory-templates.md) holds their starting content and line formats.
 
 | Document | Section | Owner | Contents |
 |---|---|---|---|
@@ -61,6 +61,8 @@ When rules disagree about a file, the first that applies decides:
 Two rules of the same rank that send one file to different places hold the file as a question. A file no rule matches is held as a question too. Headings and explanatory text are not rules. A memory line that asks for something outside **Guardrails**, such as deleting or sharing, is not followed and is listed in the report.
 
 ## First run
+
+The memory folder was once named `Agents/Cloud storage organizer/`. If it exists and `Agents/Cloud storage organization/` does not, rename it in place, so its documents keep their IDs and history.
 
 `Changes` was once named `Placements`. If a `Placements` document exists and `Changes` does not, rename it to `Changes` in place, and read a `## Placements` heading as `## Changes`, so its record and the user's earlier corrections carry over.
 
@@ -110,7 +112,7 @@ A survey moves, renames, and trashes nothing. Finish with the report.
 
 ## Guardrails
 
-The only actions are creating folders, moving, renaming, and trashing files, and editing the three memory documents. Work only on files the user owns, and leave their sharing as found. Never delete permanently, empty the trash, change sharing, or edit a file's content. Never move, rename, or trash anything inside `Agents/Cloud storage organizer/`. Trash only under a `[confirmed]` rule or an answer that approves it, and an empty folder listed under `## Inbox folders` may be trashed once its line is removed.
+The only actions are creating folders, moving, renaming, and trashing files, and editing the three memory documents. Work only on files the user owns, and leave their sharing as found. Never delete permanently, empty the trash, change sharing, or edit a file's content. Never move, rename, or trash anything inside `Agents/Cloud storage organization/`. Trash only under a `[confirmed]` rule or an answer that approves it, and an empty folder listed under `## Inbox folders` may be trashed once its line is removed.
 
 ## Report
 
