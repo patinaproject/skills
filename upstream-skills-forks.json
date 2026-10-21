@@ -34,9 +34,37 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/hooks/session-start.ps1": {
+    "kind": "policy",
+    "reason": "The Windows hook decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/hooks/session-start.sh": {
     "kind": "policy",
-    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet inline instead of calling setup-pstack/scripts/read-sheet.sh, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet inline (UTF-16LE, UTF-8, or Latin-1) instead of calling setup-pstack/scripts/read-sheet.sh, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/agents.ts": {
+    "kind": "policy",
+    "reason": "Pi reads the model sheet through pi/sheet.ts, which decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/config.ts": {
+    "kind": "policy",
+    "reason": "The sheet reader moved out to pi/sheet.ts, which decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/prompt.ts": {
+    "kind": "policy",
+    "reason": "Pi reads the model sheet through pi/sheet.ts, which decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -71,7 +99,7 @@
   },
   "plugins/engineering/skills/create-verification-skill/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina maintains this local verification-skill workflow for the project marketplace.",
+    "reason": "Patina names the generated skill `patinaproject-verify` after its repository-local prefix, so it does not shadow the bundled `/verify`. Upstream named it `verify` to shadow the bundled one.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -142,6 +170,13 @@
   "plugins/engineering/skills/maintain-verification-skill/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this local verification-skill maintenance workflow for the project marketplace.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-help/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina names its generated verification driver patinaproject-verify, so the verification check counts a patinaproject-verify skill, or a legacy verify skill, as the project driver.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -394,6 +429,13 @@
   "plugins/engineering/skills/setup-pstack/copilot.md": {
     "kind": "policy",
     "reason": "Patina excludes the GitHub Copilot runtime from the sync, so Copilot setup reads the sheet with view and states that the session hook line has no effect, instead of relying on a plugin hook.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/setup-pstack/scripts/read-sheet.sh": {
+    "kind": "policy",
+    "reason": "The shared sheet reader decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
     "upstream": {
       "status": "not-proposed"
     }

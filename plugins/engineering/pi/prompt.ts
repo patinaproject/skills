@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import { readSheet, type Settings } from "./config.ts";
+import type { Settings } from "./config.ts";
+import { readSheet } from "./sheet.ts";
 
 const MANDATE_SECTION = "pstack-session-start";
 const SHEET_SECTION = "pstack-models";
