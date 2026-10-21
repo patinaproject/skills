@@ -37,7 +37,7 @@ Map four operations onto whatever storage tools this session has, whichever prov
 
 | Operation | What the tools must do |
 |---|---|
-| **Find** | Locate the `Agents/Email inbox triage` folder and the `Rules` and `Learned` documents inside it, by name or path. When the folder is absent, also look for a legacy `Email inbox triage` document directly in `Agents`. A folder and a document can share that name, so tell them apart by type. |
+| **Find** | Locate the `Agents/Email inbox triage` folder and the `Rules` and `Learned` documents inside it, by name or path. |
 | **Read** | Return a document's text, plus its revision, version, or ETag when the storage exposes one. |
 | **Create** | Create a folder and an editable document, in the storage's native document format where it has one. |
 | **Append in place** | Add lines to the end of the existing `Learned` document, so it keeps its ID, link, and version history. Guard the write with the revision from **Read** when the tools accept one. |
@@ -46,7 +46,6 @@ Never write memory by creating a new document and trashing the old one. A tool t
 
 - **Found:** read both documents. If a name matches more than once in the folder, use the one modified most recently and report the others by location.
 - **Missing:** create the folder and whichever document is missing from the template, and report what was created.
-- **Legacy document:** before the folder existed, memory was a single `Email inbox triage` document in `Agents` with `## Rules` and `## Learned` sections. When that document exists and the folder does not, create the folder from the template, then copy the list items under each legacy heading below the matching document's preamble. Copy no explanatory text or examples. A legacy section with no list items leaves its document as the template made it. Leave the legacy document untouched, and report that the user can delete it once the folder looks right. Later runs read only the folder.
 - **No Append in place:** triage with the documents as read, and put the `Learned` lines the run would have written in the report for the user to paste in.
 - **No storage tools:** triage with the default buckets and say so at the top of the report.
 
@@ -83,7 +82,7 @@ A thread is one conversation. When the provider lists messages rather than threa
 
 ## Run
 
-1. **Load memory.** Find the folder per **Memory**, creating or migrating it if missing, and read `Rules` and `Learned`.
+1. **Load memory.** Find the folder per **Memory**, creating it if missing, and read `Rules` and `Learned`.
 
 2. **Resolve the tags.** List the existing tags and read the four bucket tags from that live result rather than from any cached ID. `Action` was once named `Needs reply soon`. If that tag exists and `Action` does not, rename it to `Action` in place, so its threads keep their bucket. Where the tools cannot rename a tag, treat `Needs reply soon` as `Action` for the whole run. Read `Needs reply soon` in a Rules or Learned line as `Action` too. Create any other missing bucket tag. If the tools cannot create one, stop and ask the user to create it.
 
@@ -123,7 +122,7 @@ If the inbox exceeds 300 threads, work newest first, stop at 300, and report the
 
 ## Scope
 
-Three write operations are in scope: adding and removing the four bucket tags, archiving and returning to the inbox a thread whose corrected bucket requires it, and memory: creating the folder and its documents when missing, seeding them once from the legacy document, and appending to `Learned` in place. `Rules` and the legacy document are only ever read after creation. The one-time rename of `Needs reply soon` to `Action` counts as maintaining a bucket tag.
+Three write operations are in scope: adding and removing the four bucket tags, archiving and returning to the inbox a thread whose corrected bucket requires it, and memory: creating the folder and its documents when missing, and appending to `Learned` in place. `Rules` is only ever read after creation. The one-time rename of `Needs reply soon` to `Action` counts as maintaining a bucket tag.
 
 Everything else ends the run exactly as it started. That covers message content, read state, drafts, flags and stars, other tags and categories, and the user's subscriptions. No thread leaves the mailbox. Archiving takes a thread out of the inbox and nothing more, so never delete, trash, or report spam.
 
@@ -133,7 +132,7 @@ The report is the run's final message, so an unattended run leaves it in its run
 
 - The provider and account triaged, and where the memory folder lives.
 - Corrections sensed this run, moved or stated, each with the `Learned` line it produced and any older `Learned` line it supersedes, and any memory line left unfollowed because it falls outside **Scope**.
-- Memory created or migrated this run, and any legacy document the user can now delete.
+- Memory created this run.
 - Total threads retrieved, count per bucket, and count left unchanged. These **reconcile**. Bucket counts plus unprocessed equals the total. Show the arithmetic.
 - For every `Urgent` and `Action` thread, the sender, subject, why it landed in that bucket (naming the Rules or Learned line when one decided it), and the likely next action.
 - Every thread that could not be retrieved, classified, tagged, or archived, with the error. If pagination stopped short, name the last page reached.
