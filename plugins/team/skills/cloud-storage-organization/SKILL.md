@@ -67,7 +67,7 @@ Two rules of the same rank that send one file to different places hold the file 
 
 ## First run
 
-When the memory folder or any of its documents is missing, create what is missing from the templates. If `Changes` did not exist before this run, the run is a **survey**:
+When the memory folder or any of its documents is missing, create what is missing from the templates. If neither `Changes` nor `Placements` existed before this run, the run is a **survey**:
 
 - List the root and each top-level folder, with a sample of the files in each, and note naming habits, file types, and what sits loose in the root.
 - Find every boundary at any depth.
