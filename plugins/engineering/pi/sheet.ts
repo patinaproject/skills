@@ -8,9 +8,17 @@ export interface Sheet {
 }
 
 export function decodeSheet(bytes: Uint8Array): string {
-  // Windows PowerShell 5.1's `>` writes UTF-16 LE with a byte-order mark.
-  const encoding = bytes[0] === 0xff && bytes[1] === 0xfe ? "utf16le" : "utf8";
-  return Buffer.from(bytes).toString(encoding).replace(/^\uFEFF/, "").replace(/\r(?=\n|$)/g, "");
+  let text: string;
+  if ((bytes[0] === 0xff && bytes[1] === 0xfe) || bytes[1] === 0x00) {
+    text = new TextDecoder("utf-16le", { fatal: true }).decode(bytes);
+  } else {
+    try {
+      text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    } catch {
+      text = Buffer.from(bytes).toString("latin1");
+    }
+  }
+  return text.replace(/^﻿/, "").replace(/\r(?=\n|$)/g, "");
 }
 
 function parseSheet(text: string): Sheet {
@@ -28,11 +36,9 @@ function parseSheet(text: string): Sheet {
 }
 
 export function readSheet(agentDir: string): Sheet | undefined {
-  let bytes: Buffer;
   try {
-    bytes = readFileSync(join(agentDir, "pstack-models.md"));
+    return parseSheet(decodeSheet(readFileSync(join(agentDir, "pstack-models.md"))));
   } catch {
     return undefined;
   }
-  return parseSheet(decodeSheet(bytes));
 }

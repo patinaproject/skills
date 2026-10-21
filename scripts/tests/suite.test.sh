@@ -3,6 +3,11 @@ set -euo pipefail
 
 bash scripts/tests/dogfood.test.sh
 node scripts/lint-active-skill-references.mjs
+bash scripts/tests/lint-active-skill-references.test.sh
+node scripts/lint-readiness-parity.mjs
+bash scripts/tests/lint-readiness-parity.test.sh
+node scripts/lint-label-vocabulary-parity.mjs
+bash scripts/tests/lint-label-vocabulary-parity.test.sh
 bash scripts/tests/esm-tooling.test.sh
 pnpm exec commitlint --version >/dev/null
 bash scripts/tests/issue-reference-contract.test.sh
@@ -20,7 +25,8 @@ bash scripts/tests/move-session-here.test.sh
 bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
-bash scripts/tests/setup-engineering-machinery.test.sh
+bash scripts/tests/setup-engineering-skills-machinery.test.sh
+node scripts/tests/sheet-encodings.test.mjs
 node scripts/tests/sheet-decoder.test.mjs
 bash scripts/tests/sync-upstream-skills.test.sh
 

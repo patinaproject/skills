@@ -42,7 +42,7 @@ function stableJson(value) {
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
   return JSON.stringify(value);
 }
-function transformHash(transforms) { return crypto.createHash('sha256').update(stableJson({denylist: transforms.denylist ?? [], rename: transforms.rename ?? {}})).digest('hex'); }
+function transformHash(transforms) { return crypto.createHash('sha256').update(stableJson({denylist: transforms.denylist ?? [], rename: transforms.rename ?? {}, unprefix: transforms.unprefix ?? []})).digest('hex'); }
 
 if (git(['ls-files', '-u'])) fail('index already contains unresolved merge conflicts; resolve them first.');
 if (git(['status', '--porcelain'])) fail('working tree not clean; commit or stash first.');
@@ -67,6 +67,7 @@ for (const source of sources) {
   source.transforms ??= {};
   source.transforms.rename ??= {};
   source.transforms.denylist ??= [];
+  source.transforms.unprefix ??= [];
   const expectedHash = transformHash(source.transforms);
   const recordedHash = source.transformsHash ?? source.transformHash;
   if (!recordedHash) fail(`source ${source.name} has no transformsHash; record ${expectedHash} at its pinned commit first.`);
@@ -79,13 +80,16 @@ for (const source of sources) {
 }
 
 function rename(value, rules) { return Object.entries(rules).reduce((result, [from, to]) => result.split(from).join(to), value); }
-function transformTree(sourceDir, destinationDir, rules) {
+const NAME_START = '[a-z<$]', SURVIVOR_START = '[\\w<${]';
+function namespacePattern(namespaces, next) { return namespaces.length ? new RegExp(`\\b(?:${namespaces.join('|')}):(?=${next})`, 'g') : null; }
+function unprefix(value, namespaces) { const pattern = namespacePattern(namespaces, NAME_START); return pattern ? value.replace(pattern, '') : value; }
+function transformTree(sourceDir, destinationDir, transforms) {
   for (const entry of fs.readdirSync(sourceDir, {withFileTypes: true})) {
-    const from = path.join(sourceDir, entry.name), to = path.join(destinationDir, rename(entry.name, rules));
-    if (entry.isDirectory()) { fs.mkdirSync(to, {recursive: true}); transformTree(from, to, rules); continue; }
+    const from = path.join(sourceDir, entry.name), to = path.join(destinationDir, rename(entry.name, transforms.rename));
+    if (entry.isDirectory()) { fs.mkdirSync(to, {recursive: true}); transformTree(from, to, transforms); continue; }
     fs.mkdirSync(path.dirname(to), {recursive: true});
     const data = fs.readFileSync(from);
-    fs.writeFileSync(to, data.includes(0) ? data : Buffer.from(rename(data.toString(), rules)));
+    fs.writeFileSync(to, data.includes(0) ? data : Buffer.from(unprefix(rename(data.toString(), transforms.rename), transforms.unprefix)));
     fs.chmodSync(to, fs.statSync(from).mode);
   }
 }
@@ -112,10 +116,16 @@ for (const {source, tip, base, current} of sourceData.values()) {
   for (const [label, commit, output] of [['base', source.pin, base], ['current', tip, current]]) {
     for (const [index, target] of source.targets.entries()) {
       const raw = path.join(tmp, source.name, label, String(index), 'raw'), transformed = path.join(tmp, source.name, label, String(index), 'transformed');
-      archive(commit, target.source, raw); transformTree(raw, transformed, source.transforms.rename); collect(transformed, target, output);
+      archive(commit, target.source, raw); transformTree(raw, transformed, source.transforms); collect(transformed, target, output);
     }
   }
   for (const token of source.transforms.denylist) for (const [label, snapshot] of [['base', base], ['current', current]]) for (const [pathname, item] of snapshot) if (pathname.includes(token) || fs.readFileSync(item.file).includes(Buffer.from(token))) fail(`denylist token ${token} found in ${source.name} ${label} snapshot at ${pathname}`);
+  const survivor = namespacePattern(source.transforms.unprefix, SURVIVOR_START);
+  if (survivor) for (const [label, snapshot] of [['base', base], ['current', current]]) for (const [pathname, item] of snapshot) {
+    const data = fs.readFileSync(item.file);
+    const text = data.includes(0) ? '' : data.toString(), match = new RegExp(survivor.source).exec(text);
+    if (match) fail(`namespaced name ${text.slice(match.index).match(/^[^\s`'"()[\]]+/)[0]} survived unprefix in ${source.name} ${label} snapshot at ${pathname}`);
+  }
 }
 function localFile(pathname) {
   const absolute = path.join(root, pathname);

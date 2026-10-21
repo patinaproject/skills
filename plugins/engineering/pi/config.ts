@@ -4,7 +4,6 @@ import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type Static, Type } from "typebox";
 import { Value } from "typebox/value";
-
 import type { Sheet } from "./sheet.ts";
 
 const PARENT_MODEL_ALIASES = ["inherit-parent", "auto"];
@@ -122,8 +121,6 @@ function parseAgentFile(type: string, text: string, efforts: string[]): AgentDef
   return { body, model: fields.get("model") || undefined, effort };
 }
 
-// Claude Code registers each plugin agent file as engineering:<file name>, beside
-// the built-in general-purpose type, which has no agent file.
 export function loadAgentTypes(settings: Pick<Settings, "pluginRoot" | "modelsFile">): Map<string, AgentDefinition> {
   const { efforts } = readModels(settings.modelsFile);
   const types = new Map<string, AgentDefinition>([[GENERAL_PURPOSE, { body: "" }]]);
@@ -131,7 +128,7 @@ export function loadAgentTypes(settings: Pick<Settings, "pluginRoot" | "modelsFi
     const full = join(settings.pluginRoot, dir);
     if (!existsSync(full)) continue;
     for (const file of readdirSync(full).filter((f) => f.endsWith(".md")).sort()) {
-      const type = `engineering:${basename(file, ".md")}`;
+      const type = basename(file, ".md");
       types.set(type, parseAgentFile(type, readFileSync(join(full, file), "utf8"), efforts));
     }
   }
