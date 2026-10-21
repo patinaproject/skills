@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.15.0](https://github.com/patinaproject/skills/compare/v3.14.1...v3.15.0) (2026-10-21)
+
+
+### Features
+
+* [#707](https://github.com/patinaproject/skills/issues/707) store email-inbox-triage memory as a folder ([#710](https://github.com/patinaproject/skills/issues/710)) ([24f099c](https://github.com/patinaproject/skills/commit/24f099ce4b8188795f4eda4288f417b2bff81b3b))
+
 ## [3.14.1](https://github.com/patinaproject/skills/compare/v3.14.0...v3.14.1) (2026-10-21)
 
 
