@@ -165,9 +165,10 @@ the skill contract.
 
 `email-inbox-triage` sorts every inbox thread into `Urgent`, `Action`,
 `Waiting`, or `FYI`, tags it with that bucket, and archives `Waiting` and
-`FYI`. It works with Gmail labels, Outlook categories, or any mail tools that
-can list, tag, and archive. It reads triage preferences from an editable
-`Agents/Email inbox triage` document in the user's cloud storage, and when the
+`FYI`. It works with any mail tools that can list, tag, and archive, and any
+storage tools that can read and edit a document in place. It reads triage
+preferences from an editable `Agents/Email inbox triage` document in the
+user's cloud storage, and when the
 user pulls an archived thread back into the inbox it adds a learned rule to
 that document in place, so it can run on a schedule as a feedback loop. Its
 only writes are the four bucket tags, archiving, and that document's Learned

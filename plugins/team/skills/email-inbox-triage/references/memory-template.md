@@ -1,6 +1,6 @@
 # Memory template
 
-Create the missing `Email inbox triage` document in the `Agents` folder with the content below. In Google Drive, create a Google Doc; in OneDrive, a Word document. Keep both `##` headings, which the skill uses to find each section.
+Create the missing `Email inbox triage` document in the `Agents` folder with the content below. Use the storage's native editable document format where it has one. Keep both `##` headings, which the skill uses to find each section.
 
 ```markdown
 # Email inbox triage

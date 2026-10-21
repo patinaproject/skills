@@ -1,6 +1,6 @@
 ---
 name: email-inbox-triage
-description: Tag and archive every inbox thread as Urgent, Action, Waiting, or FYI, in Gmail, Outlook, or any mailbox the session's mail tools can reach, steered by an editable `Agents/Email inbox triage` document in the user's cloud storage that holds their rules and the rules the skill learns from their corrections, so it can run unattended on a schedule. Use when the user asks to triage the inbox or run inbox zero. Mutates the mailbox, so answer read-only questions about what needs attention directly instead.
+description: Tag and archive every inbox thread as Urgent, Action, Waiting, or FYI, in any mailbox the session's mail tools can reach, steered by an editable `Agents/Email inbox triage` document in the user's cloud storage that holds their rules and the rules the skill learns from their corrections, so it can run unattended on a schedule. Use when the user asks to triage the inbox or run inbox zero. Mutates the mailbox, so answer read-only questions about what needs attention directly instead.
 ---
 
 # Email Inbox Triage
@@ -33,16 +33,16 @@ Memory is one editable document, `Email inbox triage`, in the `Agents` folder of
 | `## Rules` | the user | Triage preferences in plain language, one per line, plus an optional `account:` line. The skill never edits this section. |
 | `## Learned` | the skill | One dated rule per line, each learned from a user correction. The user may edit, move into Rules, or delete any line, and a deleted rule stays deleted unless a new correction re-learns it. |
 
-Map four operations onto the storage tools this session has, the same way **Map the provider** maps mail:
+Map four operations onto whatever storage tools this session has, whichever provider they reach:
 
-| Operation | Google Drive | OneDrive / SharePoint | Other storage |
-|---|---|---|---|
-| **Find** | find the `Agents` folder, then the `Email inbox triage` document inside it | resolve the path `/Agents/Email inbox triage` | resolve the path |
-| **Read** | read the document text | read the file content | read the file |
-| **Create** | create the folder and a Google Doc | create the folder and a Word document | create the folder and file |
-| **Edit in place** | the Google Docs connector's `update_doc`: read the document with `read_doc`, then send `insertText` at the end of the Learned section, guarded by `writeControl.requiredRevisionId` from that read | a tool that updates the item's content, guarded by its ETag where offered | a write that keeps the file's identity |
+| Operation | What the tools must do |
+|---|---|
+| **Find** | Locate the `Agents` folder and the `Email inbox triage` document inside it, by name or path. |
+| **Read** | Return the document's text, plus its revision, version, or ETag when the storage exposes one. |
+| **Create** | Create the folder and an editable document, in the storage's native document format where it has one. |
+| **Edit in place** | Insert text at the end of the Learned section of the existing document, so it keeps its ID, link, and version history. Guard the write with the revision from **Read** when the tools accept one. |
 
-Editing in place keeps the document's ID, link, and version history. Never write memory by creating a new document and trashing the old one. A tool that changes only a file's title or other metadata cannot edit in place, and neither can the Google Drive connector's `update_file`.
+Never write memory by creating a new document and trashing the old one. A tool that changes only a file's name, location, or other metadata cannot edit in place.
 
 - **Found:** read it. If the name matches more than once, use the one modified most recently and report the others by location.
 - **Missing:** create the folder or document from the template, and report what was created.
@@ -59,26 +59,26 @@ When sources disagree about a thread, the first that applies decides:
 
 Headings and explanatory text are not rules.
 
-Memory steers classification only. A preference that asks for a write outside **Scope**, such as deleting or forwarding, is not followed and is listed in the report.
+Memory steers classification of new mail only, per step 5. A preference that asks for a write outside **Scope**, such as deleting or forwarding, is not followed and is listed in the report.
 
 The `account:` line names which mailbox to triage when more than one is connected. A run with no one to ask cannot ask, so with several accounts connected and no `account:` line it stops before any write and says so.
 
 ## Map the provider
 
-Before touching mail, map four operations onto the mail tools this session has:
+Before touching mail, map four operations onto whatever mail tools this session has, whichever provider they reach:
 
-| Operation | Gmail | Outlook / Microsoft 365 | Other providers |
-|---|---|---|---|
-| **List the inbox** | search `in:inbox` | list messages in the Inbox folder | list the inbox folder or mailbox |
-| **Read a thread** | get the thread | list messages by `conversationId` across all folders, Sent Items included | the provider's thread view, or `References` / `In-Reply-To` headers |
-| **Tag and untag** | thread label | category | label, keyword, or tag |
-| **Archive** | remove the `INBOX` label | move to the Archive folder | move to the archive folder or mailbox |
+| Operation | What the tools must do |
+|---|---|
+| **List the inbox** | Page through the threads or messages currently in the inbox, with sender, subject, a snippet, and current tags. |
+| **Read a thread** | Return every message in one conversation across all folders, the user's sent messages included. Where the provider has no thread view, group messages by its conversation ID or by `References` and `In-Reply-To` headers. |
+| **Tag and untag** | Add and remove a named label, category, keyword, or tag that stays on the thread or message. |
+| **Archive** | Take a thread out of the inbox without deleting it, by removing an inbox tag or by moving it to the archive folder. |
 
 Use the provider's own names for tags and the archive folder. If more than one mail account is connected, use the account named in Rules, or else ask which one to triage.
 
 If the tools cannot list the inbox, add and remove a tag, and archive, stop before any write and name the missing operation. A folder cannot stand in for a tag, because `Urgent` and `Action` threads stay in the inbox.
 
-A thread is one conversation. When the provider lists messages rather than threads, as Outlook does, group inbox messages by conversation. Every count and limit below is in threads.
+A thread is one conversation. When the provider lists messages rather than threads, group inbox messages by conversation. Every count and limit below is in threads.
 
 ## Run
 
@@ -88,27 +88,31 @@ A thread is one conversation. When the provider lists messages rather than threa
 
 3. **Page the whole inbox.** Request the smallest view that returns sender, subject, snippet or preview, and current tags, at around 50 per page. Follow the provider's paging until no page remains, keeping a running total.
 
-4. **Sense corrections.** The mailbox records what the previous run did, because this skill tags every message in a thread. An inbox thread that carries `Waiting` or `FYI` on every one of its messages was archived by a run and moved back by the user, since a new message arrives without the tag. That is a correction: the user said the thread needs attention.
+4. **Sense corrections.** The mailbox records what the previous run did, because this skill tags every inbox message of each thread it buckets. An inbox thread that carries `Waiting` or `FYI` on every one of its inbox messages was archived by a run and moved back by the user, since a new message arrives without the tag. Judge by inbox messages only, because where tags live on messages, the user's sent replies may never carry the tag. That is a correction: the user said the thread needs attention.
 
    Every other state is triaged afresh and teaches nothing. A thread that came back with a new, untagged message is new mail. A thread carrying two bucket tags, or none, gives no clear signal. An `Urgent` or `Action` thread the user archived was handled.
 
    For each correction, write one Learned line that states the narrowest rule explaining it: the sender address by default, the sender's domain when corrections from two or more addresses on that domain point the same way, and a subject pattern only when the sender also sends mail the user left alone. The rule's bucket is `Action`, or `Urgent` when the thread meets the `Urgent` definition. Replace an older Learned line that the new one contradicts. The corrected thread takes the new rule's bucket and stays in the inbox, which also clears the signal for the next run.
 
-5. **Classify snippet-first.** Sender, subject, and snippet decide most threads. Read the full thread as plain text only when the snippet leaves the bucket genuinely undecidable. The usual case is an active conversation where the surrounding messages change who owes the next reply. Whether the user already replied decides `Waiting`, so the thread read must include the user's sent messages. Where the inbox listing omits sent mail, as Outlook's does, read the thread before tagging it `Urgent` or `Action`. A long thread hanging off a low-signal notification is still low-signal.
+   When a Rules line is what put the thread in `Waiting` or `FYI`, write no Learned line, because Rules outranks Learned and the rule would never apply. Keep the thread in the inbox as `Action` this run anyway, and report the Rules line that conflicts with the user's correction so the user can edit it. The user's move on a thread always wins for that thread.
+
+5. **Keep settled buckets.** A thread whose inbox messages all carry the same single bucket tag, and whose inbox state matches that bucket, keeps it unchanged. That tag came from an earlier run or from the user, and nothing has arrived since, so re-sorting it would only undo the user's own changes. Classify only threads with a new untagged inbox message, no bucket tag, or more than one bucket tag. A new or edited memory line therefore applies to new mail, not to threads already settled.
+
+6. **Classify snippet-first.** Sender, subject, and snippet decide most threads. Read the full thread as plain text only when the snippet leaves the bucket genuinely undecidable. The usual case is an active conversation where the surrounding messages change who owes the next reply. Whether the user already replied decides `Waiting`, so the thread read must include the user's sent messages. Where the inbox listing omits sent mail, read the thread before tagging it `Urgent` or `Action`. A long thread hanging off a low-signal notification is still low-signal.
 
    Every thread gets a bucket, newsletters and automated mail included. Noise is tagged `FYI`, never skipped. Apply **Precedence**, and record which Rules or Learned line decided each thread it decided.
 
-6. **Apply the bucket.** Drive every write from the tags already in hand:
+7. **Apply the bucket.** Drive every write from the tags already in hand:
 
    - Remove whichever of the other three bucket tags the thread carries.
    - Add the selected bucket tag.
    - Archive the thread when the bucket is `Waiting` or `FYI`.
 
-   Combine these into as few calls as the provider allows. In Gmail, archiving rides on the removal call, so a thread takes at most two. Where tags live on messages, as Outlook categories do, apply them to every inbox message in the conversation. Where archiving is a folder move that changes message IDs, tag first and archive last. A thread that already carries the right tag and the right inbox state needs no write. Where tags live on messages, the thread carries the tag only when every inbox message does. Skip it and count it as unchanged.
+   Combine these into as few calls as the provider allows. Where archiving is removing an inbox tag, it can ride on the tag-removal call. Where tags live on messages rather than threads, apply them to every inbox message in the conversation. Where archiving is a folder move that changes message IDs, tag first and archive last. A thread that already carries the right tag and the right inbox state needs no write. Where tags live on messages, the thread carries the tag only when every inbox message does. Skip it and count it as unchanged, along with every thread step 5 kept.
 
-7. **Write Learned in place.** Skip this step when the run learned nothing. Otherwise read the document again just before writing, because the user may have edited it during the run. Edit only the `## Learned` section in place, leaving the rest of the document exactly as the fresh read returned it. Where the storage offers a revision or ETag guard, send the write with the value from that read. A revision mismatch means the user edited mid-write: read again and retry once. If the edit still fails or no tool can edit in place, report the Learned lines instead.
+8. **Write Learned in place.** Skip this step when the run learned nothing. Otherwise read the document again just before writing, because the user may have edited it during the run. Edit only the `## Learned` section in place, leaving the rest of the document exactly as the fresh read returned it. Where the storage offers a revision or ETag guard, send the write with the value from that read. A revision mismatch means the user edited mid-write: read again and retry once. If the edit still fails or no tool can edit in place, report the Learned lines instead.
 
-8. **Reconcile and report**, per **Report** below.
+9. **Reconcile and report**, per **Report** below.
 
 If the inbox exceeds 300 threads, work newest first, stop at 300, and report the remainder as unprocessed.
 
