@@ -46,7 +46,7 @@ Never write memory by creating a new document and trashing the old one. A tool t
 
 - **Found:** read both documents. If a name matches more than once in the folder, use the one modified most recently and report the others by location.
 - **Missing:** create the folder and whichever document is missing from the template, and report what was created.
-- **Legacy document:** before the folder existed, memory was a single `Email inbox triage` document in `Agents` with `## Rules` and `## Learned` sections. When that document exists and the folder does not, create the folder from the template, then copy the lines under each legacy heading below the matching document's preamble. A missing or empty legacy section leaves its document as the template made it. Leave the legacy document untouched, and report that the user can delete it once the folder looks right. Later runs read only the folder.
+- **Legacy document:** before the folder existed, memory was a single `Email inbox triage` document in `Agents` with `## Rules` and `## Learned` sections. When that document exists and the folder does not, create the folder from the template, then copy the list items under each legacy heading below the matching document's preamble. Copy no explanatory text or examples. A legacy section with no list items leaves its document as the template made it. Leave the legacy document untouched, and report that the user can delete it once the folder looks right. Later runs read only the folder.
 - **No Append in place:** triage with the documents as read, and put the `Learned` lines the run would have written in the report for the user to paste in.
 - **No storage tools:** triage with the default buckets and say so at the top of the report.
 
@@ -58,7 +58,7 @@ When sources disagree about a thread, the first that applies decides:
 2. **Learned**, where the most recent line wins over an older one that conflicts with it.
 3. The **Buckets** defaults.
 
-Headings and explanatory text are not rules.
+Only list items are rules. Headings, explanatory text, and quoted examples are not.
 
 Memory steers classification of new mail only, per step 5. A preference that asks for a write outside **Scope**, such as deleting or forwarding, is not followed and is listed in the report.
 

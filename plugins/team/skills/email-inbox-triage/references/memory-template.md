@@ -9,9 +9,10 @@ The user owns this document. The skill reads it and never writes it after creati
 ```markdown
 # Email inbox triage rules
 
-Read on every email-inbox-triage run. Write your preferences here, one per line.
-
-- account: me@example.com
+Read on every email-inbox-triage run. Write your preferences here as list items,
+one per line. Only list items are rules. For example, "account: me@example.com",
+"Anything from my accountant is Action.", or "GitHub notifications are FYI
+unless they mention me directly."
 ```
 
 ## `Learned`
