@@ -15,6 +15,11 @@ Each run is one pass of a feedback loop. The **memory folder** holds the user's 
 
 Memory is three editable documents in the folder `Agents/Cloud storage organization/` of the user's storage. [references/memory-templates.md](references/memory-templates.md) holds their starting content and line formats.
 
+**Earlier names.** Before creating anything, carry memory over from earlier names in place, so each document keeps its ID and history:
+
+- If `Agents/Cloud storage organizer/` exists and `Agents/Cloud storage organization/` does not, rename the folder.
+- If a `Placements` document exists and `Changes` does not, rename it to `Changes`, and read a `## Placements` heading as `## Changes`.
+
 | Document | Section | Owner | Contents |
 |---|---|---|---|
 | `Rules` | `## Rules` | the user | Filing preferences in plain language, one per line. The skill never edits this section. |
@@ -62,10 +67,6 @@ Two rules of the same rank that send one file to different places hold the file 
 
 ## First run
 
-The memory folder was once named `Agents/Cloud storage organizer/`. If it exists and `Agents/Cloud storage organization/` does not, rename it in place, so its documents keep their IDs and history.
-
-`Changes` was once named `Placements`. If a `Placements` document exists and `Changes` does not, rename it to `Changes` in place, and read a `## Placements` heading as `## Changes`, so its record and the user's earlier corrections carry over.
-
 When the memory folder or any of its documents is missing, create what is missing from the templates. If `Changes` did not exist before this run, the run is a **survey**:
 
 - List the root and each top-level folder, with a sample of the files in each, and note naming habits, file types, and what sits loose in the root.
@@ -78,7 +79,7 @@ A survey moves, renames, and trashes nothing. Finish with the report.
 
 ## Run
 
-1. **Load memory.** Find the memory folder per **Map the storage**, creating whatever is missing, and read all three documents with their revisions. If this is a survey, do **First run** instead of the steps below.
+1. **Load memory.** Find the memory folder, first applying **Earlier names**, then creating whatever is missing, and read all three documents with their revisions. If this is a survey, do **First run** instead of the steps below.
 
 2. **Learn from corrections.** For every Changes line, **Inspect** the file by its ID, listing whole folders instead where many lines name one folder. Compare its current parent, name, and trash state with the line.
    - A **correction** undoes what a rule did: a moved file now outside the folder the rule chose and its subfolders, a renamed file whose name the user changed back or replaced, or a trashed file now outside the trash.
