@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.13.0](https://github.com/patinaproject/skills/compare/v3.12.0...v3.13.0) (2026-10-21)
+
+
+### Features
+
+* [#703](https://github.com/patinaproject/skills/issues/703) learn email triage rules from inbox corrections ([#704](https://github.com/patinaproject/skills/issues/704)) ([e32117e](https://github.com/patinaproject/skills/commit/e32117ebba26f6e654f6454cd3f1a51ca8e992d6))
+
 ## [3.12.0](https://github.com/patinaproject/skills/compare/v3.11.0...v3.12.0) (2026-10-19)
 
 
