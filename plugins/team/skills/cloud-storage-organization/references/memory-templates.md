@@ -1,13 +1,13 @@
 # Memory templates
 
-Create each missing document in `Agents/Cloud storage organizer/` with the content below. Use the storage's native editable document format where it has one. Keep every `##` heading, which the skill uses to find each section.
+Create each missing document in `Agents/Cloud storage organization/` with the content below. Use the storage's native editable document format where it has one. Keep every `##` heading, which the skill uses to find each section.
 
 ## Rules
 
 ```markdown
-# Cloud storage organizer rules
+# Cloud storage organization rules
 
-Read on every cloud-storage-organizer run. Write your preferences under Rules
+Read on every cloud-storage-organization run. Write your preferences under Rules
 and list inbox folders under Inbox folders. The skill writes only Learned.
 Edit, confirm, or delete any Learned line.
 
@@ -41,7 +41,7 @@ A Learned line names its rank, the rule, and the evidence:
 ## Questions
 
 ```markdown
-# Cloud storage organizer questions
+# Cloud storage organization questions
 
 Write your answer after "Answer:". The next run acts on it.
 
@@ -62,9 +62,9 @@ A question names its files, its best guess, and an empty answer line. Keep each 
 ## Changes
 
 ```markdown
-# Cloud storage organizer changes
+# Cloud storage organization changes
 
-Managed by cloud-storage-organizer. Do not edit. Lines older than 30 days are removed.
+Managed by cloud-storage-organization. Do not edit. Lines older than 30 days are removed.
 
 ## Changes
 ```

@@ -1,9 +1,9 @@
 ---
-name: cloud-storage-organizer
-description: File loose files in any cloud storage the session's storage tools can reach by moving, renaming, and trashing them under rules learned from how the user already organizes files and from the user's corrections, kept in an editable `Agents/Cloud storage organizer` folder. Use when the user asks to organize or clean up their cloud storage, Drive, or files, or to run a scheduled storage cleanup. Mutates storage, so answer read-only questions about where files are directly instead.
+name: cloud-storage-organization
+description: File loose files in any cloud storage the session's storage tools can reach by moving, renaming, and trashing them under rules learned from how the user already organizes files and from the user's corrections, kept in an editable `Agents/Cloud storage organization` folder. Use when the user asks to organize or clean up their cloud storage, Drive, or files, or to run a scheduled storage cleanup. Mutates storage, so answer read-only questions about where files are directly instead.
 ---
 
-# Cloud Storage Organizer
+# Cloud Storage Organization
 
 File every loose file the user owns where the user's rules say it belongs, learning those rules from how the user already organizes files and from every correction the user makes.
 
@@ -11,9 +11,14 @@ Each run is one pass of a feedback loop. The **memory folder** holds the user's 
 
 **Loose files** are files, not folders, that the user owns and that sit in the storage root or directly in a folder listed under `## Inbox folders`. Files anywhere else are already filed, and this skill never touches them.
 
-## Memory: the Cloud storage organizer folder
+## Memory: the Cloud storage organization folder
 
-Memory is three editable documents in the folder `Agents/Cloud storage organizer/` of the user's storage. [references/memory-templates.md](references/memory-templates.md) holds their starting content and line formats.
+Memory is three editable documents in the folder `Agents/Cloud storage organization/` of the user's storage. [references/memory-templates.md](references/memory-templates.md) holds their starting content and line formats.
+
+**Earlier names.** Before creating anything, carry memory over from earlier names in place, so each document keeps its ID and history:
+
+- If `Agents/Cloud storage organizer/` exists and `Agents/Cloud storage organization/` does not, rename the folder.
+- If a `Placements` document exists and `Changes` does not, rename it to `Changes`, and read a `## Placements` heading as `## Changes`.
 
 | Document | Section | Owner | Contents |
 |---|---|---|---|
@@ -62,9 +67,7 @@ Two rules of the same rank that send one file to different places hold the file 
 
 ## First run
 
-`Changes` was once named `Placements`. If a `Placements` document exists and `Changes` does not, rename it to `Changes` in place, and read a `## Placements` heading as `## Changes`, so its record and the user's earlier corrections carry over.
-
-When the memory folder or any of its documents is missing, create what is missing from the templates. If `Changes` did not exist before this run, the run is a **survey**:
+When the memory folder or any of its documents is missing, create what is missing from the templates. If neither `Changes` nor `Placements` existed before this run, the run is a **survey**:
 
 - List the root and each top-level folder, with a sample of the files in each, and note naming habits, file types, and what sits loose in the root.
 - Find every boundary at any depth.
@@ -76,7 +79,7 @@ A survey moves, renames, and trashes nothing. Finish with the report.
 
 ## Run
 
-1. **Load memory.** Find the memory folder per **Map the storage**, creating whatever is missing, and read all three documents with their revisions. If this is a survey, do **First run** instead of the steps below.
+1. **Load memory.** Find the memory folder, first applying **Earlier names**, then creating whatever is missing, and read all three documents with their revisions. If this is a survey, do **First run** instead of the steps below.
 
 2. **Learn from corrections.** For every Changes line, **Inspect** the file by its ID, listing whole folders instead where many lines name one folder. Compare its current parent, name, and trash state with the line.
    - A **correction** undoes what a rule did: a moved file now outside the folder the rule chose and its subfolders, a renamed file whose name the user changed back or replaced, or a trashed file now outside the trash.
@@ -110,7 +113,7 @@ A survey moves, renames, and trashes nothing. Finish with the report.
 
 ## Guardrails
 
-The only actions are creating folders, moving, renaming, and trashing files, and editing the three memory documents. Work only on files the user owns, and leave their sharing as found. Never delete permanently, empty the trash, change sharing, or edit a file's content. Never move, rename, or trash anything inside `Agents/Cloud storage organizer/`. Trash only under a `[confirmed]` rule or an answer that approves it, and an empty folder listed under `## Inbox folders` may be trashed once its line is removed.
+The only actions are creating folders, moving, renaming, and trashing files, and editing the three memory documents. Work only on files the user owns, and leave their sharing as found. Never delete permanently, empty the trash, change sharing, or edit a file's content. Never move, rename, or trash anything inside `Agents/Cloud storage organization/`. Trash only under a `[confirmed]` rule or an answer that approves it, and an empty folder listed under `## Inbox folders` may be trashed once its line is removed.
 
 ## Report
 
