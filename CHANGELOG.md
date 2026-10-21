@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.0](https://github.com/patinaproject/skills/compare/v3.15.1...v3.16.0) (2026-10-21)
+
+
+### Features
+
+* [#722](https://github.com/patinaproject/skills/issues/722) rename cloud-storage-organizer to cloud-storage-organization ([#723](https://github.com/patinaproject/skills/issues/723)) ([5ffa292](https://github.com/patinaproject/skills/commit/5ffa292ef16af729776fb62cfffd8ace7a7d63d1))
+
 ## [3.15.1](https://github.com/patinaproject/skills/compare/v3.15.0...v3.15.1) (2026-10-21)
 
 
