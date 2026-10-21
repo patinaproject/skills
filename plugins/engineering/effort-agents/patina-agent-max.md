@@ -1,6 +1,6 @@
 ---
 name: patina-agent-max
-description: Runs `engineering:patina-agent` at max reasoning effort. Dispatched in place of `engineering:patina-agent` when a pstack role's override names `@max`. The caller passes the model.
+description: Runs `patina-agent` at max reasoning effort. Dispatched in place of `patina-agent` when a pstack role's override names `@max`. The caller passes the model.
 effort: max
 ---
 

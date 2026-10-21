@@ -34,9 +34,44 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/hooks/session-start.ps1": {
+    "kind": "policy",
+    "reason": "The Windows hook decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/hooks/session-start.sh": {
     "kind": "policy",
-    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet inline instead of calling setup-pstack/scripts/read-sheet.sh, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet inline (UTF-16LE, UTF-8, or Latin-1) instead of calling setup-pstack/scripts/read-sheet.sh, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/agents.ts": {
+    "kind": "policy",
+    "reason": "Pi reads the model sheet through pi/sheet.ts, which decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/config.ts": {
+    "kind": "policy",
+    "reason": "The sheet reader moved out to pi/sheet.ts, which decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/prompt.ts": {
+    "kind": "policy",
+    "reason": "Pi reads the model sheet through pi/sheet.ts, which decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/pi/config.ts": {
+    "kind": "policy",
+    "reason": "Patina maintains this deliberate local policy or integration adaptation.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -64,7 +99,7 @@
   },
   "plugins/engineering/skills/create-verification-skill/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina maintains this local verification-skill workflow for the project marketplace.",
+    "reason": "Patina names the generated skill `patinaproject-verify` after its repository-local prefix, so it does not shadow the bundled `/verify`. Upstream named it `verify` to shadow the bundled one.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -135,6 +170,13 @@
   "plugins/engineering/skills/maintain-verification-skill/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this local verification-skill maintenance workflow for the project marketplace.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-help/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina names its generated verification driver patinaproject-verify, so the verification check counts a patinaproject-verify skill, or a legacy verify skill, as the project driver.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -219,6 +261,13 @@
   "plugins/engineering/skills/patina-mode/references/copilot-tools.md": {
     "kind": "policy",
     "reason": "Patina excludes the GitHub Copilot runtime from the sync, so a note states that the Copilot hook sections describe upstream pstack, not Engineering.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/engineering/skills/patina-mode/references/licenses/NOTICE.md": {
+    "kind": "policy",
+    "reason": "Patina credits the Benny triage-issue-reports skill that its triage playbook adapts.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -384,6 +433,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/engineering/skills/setup-pstack/scripts/read-sheet.sh": {
+    "kind": "policy",
+    "reason": "The shared sheet reader decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/engineering/skills/show-me-your-work/SKILL.md": {
     "kind": "policy",
     "reason": "Patina maintains this deliberate local policy or integration adaptation.",
@@ -482,9 +538,100 @@
       "status": "not-proposed"
     }
   },
+  "plugins/team/skills/triage/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Theme, and Triage labels instead of the upstream roles (ADR-682). It also recommends a priority from the issue tracker config's Priority rubric and records who set it (ADR-692).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/team/skills/tutor/SKILL.md": {
     "kind": "policy",
     "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/to-spec/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/to-tickets/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/AGENT-BRIEF.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/OUT-OF-SCOPE.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/triage/agents/openai.yaml": {
+    "kind": "policy",
+    "reason": "Patina describes triage in terms of labels rather than upstream roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina writes the Type, Theme, and Triage label vocabulary into the issue tracker config as its only definition, instead of a separate triage-labels.md mapped from upstream roles (ADR-682). It also seeds a Priority rubric section that triage assigns priority from (ADR-692).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/issue-tracker-github.md": {
+    "kind": "policy",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/issue-tracker-gitlab.md": {
+    "kind": "policy",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/triage-labels.md": {
+    "kind": "policy",
+    "reason": "Patina seeds the Labels section of the issue tracker config with its per-repository Type sets and Theme labels, kept identical to docs/agents/issue-tracker.md by lint-label-vocabulary-parity (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/wayfinder/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/issue-tracker-local.md": {
+    "kind": "policy",
+    "reason": "Patina keeps label strings in the issue tracker config's Labels section and describes triage in terms of labels rather than upstream roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/team/skills/setup-team-skills/agents/openai.yaml": {
+    "kind": "policy",
+    "reason": "Patina names the skill setup-team-skills, so the display name drops the upstream author (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
