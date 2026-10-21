@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.4](https://github.com/patinaproject/skills/compare/v3.16.3...v3.16.4) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#729](https://github.com/patinaproject/skills/issues/729) drop unsupported icon key from engineering Claude plugin manifest ([#730](https://github.com/patinaproject/skills/issues/730)) ([13a73e9](https://github.com/patinaproject/skills/commit/13a73e9f9418ca4ebc71632bd869d5603415fc71))
+
 ## [3.16.3](https://github.com/patinaproject/skills/compare/v3.16.2...v3.16.3) (2026-10-21)
 
 
