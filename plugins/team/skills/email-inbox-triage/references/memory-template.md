@@ -30,4 +30,5 @@ A Learned line names the date, the rule, and the evidence:
 
 ```markdown
 - 2026-10-21: from `billing@vendor.example` → `Action` (you moved 1 `FYI` thread back to the inbox)
+- 2026-10-21: from `support@vendor.example` → `Action` (you said 1 `FYI` thread, "Re: Question", needed `Action`)
 ```

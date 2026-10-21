@@ -169,9 +169,11 @@ the skill contract.
 storage tools that can read and append to a document in place. It reads
 triage preferences from an `Agents/Email inbox triage` folder in the user's
 cloud storage: a `Rules` document the user edits and a `Learned` document the
-skill appends to. When the user pulls an archived thread back into the inbox
-it appends a learned rule, so it can run on a schedule as a feedback loop. Its
-only writes are the four bucket tags, archiving, and appends to `Learned`, and
+skill appends to. When the user pulls an archived thread back into the inbox,
+or names a thread that should have had another bucket, it appends a learned
+rule, so it can run on a schedule as a feedback loop. Its
+only writes are the four bucket tags, archiving or un-archiving a thread to
+match its bucket, and appends to `Learned`, and
 a second run converges on the same state.
 
 See [./plugins/team/skills/email-inbox-triage/](./plugins/team/skills/email-inbox-triage/) for the skill

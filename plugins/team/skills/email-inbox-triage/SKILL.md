@@ -9,7 +9,7 @@ Sort every thread in the inbox into exactly one of four buckets, mark it with th
 
 The run is **idempotent**. It meets threads already tagged by earlier runs and converges on the same end state, so running it twice in a day is safe. A scheduled routine can run it on any cadence; the cadence belongs to the schedule, not to this skill.
 
-Each run is one pass of a feedback loop. The **Email inbox triage** folder is the loop's memory. Every run reads it first, notices threads the user pulled back into the inbox, records a learned rule for each, and its report suggests more. The user steers by editing its documents. The skill keeps no other state between runs, because the mailbox itself shows what the user corrected.
+Each run is one pass of a feedback loop. The **Email inbox triage** folder is the loop's memory. Every run reads it first, notices threads the user pulled back into the inbox or named as mis-bucketed, records a learned rule for each, and its report suggests more. The user steers by editing its documents. The skill keeps no other state between runs, because the mailbox and the user's request show what the user corrected.
 
 ## Buckets
 
@@ -89,15 +89,18 @@ A thread is one conversation. When the provider lists messages rather than threa
 
 3. **Page the whole inbox.** Request the smallest view that returns sender, subject, snippet or preview, and current tags, at around 50 per page. Follow the provider's paging until no page remains, keeping a running total.
 
-4. **Sense corrections.** The mailbox records what the previous run did, because this skill tags every inbox message of each thread it buckets. An inbox thread that carries `Waiting` or `FYI` on every one of its inbox messages was archived by a run and moved back by the user, since a new message arrives without the tag. Judge by inbox messages only, because where tags live on messages, the user's sent replies may never carry the tag. That is a correction: the user said the thread needs attention.
+4. **Sense corrections.** A correction comes from one of two sources, and both teach the same way.
+
+   - **Moved.** The mailbox records what the previous run did, because this skill tags every inbox message of each thread it buckets. An inbox thread that carries `Waiting` or `FYI` on every one of its inbox messages was archived by a run and moved back by the user, since a new message arrives without the tag. Judge by inbox messages only, because where tags live on messages, the user's sent replies may never carry the tag. The corrected bucket is `Action`, or `Urgent` when the thread meets the `Urgent` definition.
+   - **Stated.** The user's request names a thread, by link, subject, or sender, and the bucket it should have had. Resolve each reference to exactly one thread in any folder, decoding a mail client's web link to the provider's thread ID where the tools need one. A reference that matches no thread or several is reported and teaches nothing. The corrected bucket is the one the user named, whatever the thread's current tag or folder.
 
    Every other state is triaged afresh and teaches nothing. A thread that came back with a new, untagged message is new mail. A thread carrying two bucket tags, or none, gives no clear signal. An `Urgent` or `Action` thread the user archived was handled.
 
-   For each correction, write one Learned line that states the narrowest rule explaining it: the sender address by default, the sender's domain when corrections from two or more addresses on that domain point the same way, and a subject pattern only when the sender also sends mail the user left alone. The rule's bucket is `Action`, or `Urgent` when the thread meets the `Urgent` definition. When an older Learned line contradicts the new one, leave it: the newer line wins per **Precedence**, and the report names the older line so the user can delete it. The corrected thread takes the new rule's bucket and stays in the inbox, which also clears the signal for the next run.
+   For each correction, write one Learned line that states the narrowest rule explaining it: the sender address by default, the sender's domain when corrections from two or more addresses on that domain point the same way, and a subject pattern only when the sender also sends mail the user left alone. The rule's bucket is the corrected bucket. When an older Learned line contradicts the new one, leave it: the newer line wins per **Precedence**, and the report names the older line so the user can delete it. The corrected thread takes the corrected bucket in step 7, including its inbox state, so it settles and gives no signal on the next run.
 
-   When a Rules line is what put the thread in `Waiting` or `FYI`, write no Learned line, because Rules outranks Learned and the rule would never apply. Keep the thread in the inbox as `Action` this run anyway, and report the Rules line that conflicts with the user's correction so the user can edit it. The user's move on a thread always wins for that thread.
+   When a Rules line is what put the thread in its old bucket, write no Learned line, because Rules outranks Learned and the rule would never apply. Give the thread the corrected bucket this run anyway, and report the Rules line that conflicts with the user's correction so the user can edit it. The user's correction always wins for that thread.
 
-5. **Keep settled buckets.** A thread whose inbox messages all carry the same single bucket tag, and whose inbox state matches that bucket, keeps it unchanged. That tag came from an earlier run or from the user, and nothing has arrived since, so re-sorting it would only undo the user's own changes. Classify only threads with a new untagged inbox message, no bucket tag, or more than one bucket tag. A new or edited memory line therefore applies to new mail, not to threads already settled.
+5. **Keep settled buckets.** Apart from a corrected thread, a thread whose inbox messages all carry the same single bucket tag, and whose inbox state matches that bucket, keeps it unchanged. That tag came from an earlier run or from the user, and nothing has arrived since, so re-sorting it would only undo the user's own changes. Classify only threads with a new untagged inbox message, no bucket tag, or more than one bucket tag. A new or edited memory line therefore applies to new mail, not to threads already settled.
 
 6. **Classify snippet-first.** Sender, subject, and snippet decide most threads. Read the full thread as plain text only when the snippet leaves the bucket genuinely undecidable. The usual case is an active conversation where the surrounding messages change who owes the next reply. Whether the user already replied decides `Waiting`, so the thread read must include the user's sent messages. Where the inbox listing omits sent mail, read the thread before tagging it `Urgent` or `Action`. A long thread hanging off a low-signal notification is still low-signal.
 
@@ -108,6 +111,7 @@ A thread is one conversation. When the provider lists messages rather than threa
    - Remove whichever of the other three bucket tags the thread carries.
    - Add the selected bucket tag.
    - Archive the thread when the bucket is `Waiting` or `FYI`.
+   - Return a corrected thread to the inbox when its bucket is `Urgent` or `Action` and it is archived.
 
    Combine these into as few calls as the provider allows. Where archiving is removing an inbox tag, it can ride on the tag-removal call. Where tags live on messages rather than threads, apply them to every inbox message in the conversation. Where archiving is a folder move that changes message IDs, tag first and archive last. A thread that already carries the right tag and the right inbox state needs no write. Where tags live on messages, the thread carries the tag only when every inbox message does. Skip it and count it as unchanged, along with every thread step 5 kept.
 
@@ -119,7 +123,7 @@ If the inbox exceeds 300 threads, work newest first, stop at 300, and report the
 
 ## Scope
 
-Three write operations are in scope: adding and removing the four bucket tags, archiving, and memory: creating the folder and its documents when missing, seeding them once from the legacy document, and appending to `Learned` in place. `Rules` and the legacy document are only ever read after creation. The one-time rename of `Needs reply soon` to `Action` counts as maintaining a bucket tag.
+Three write operations are in scope: adding and removing the four bucket tags, archiving and returning to the inbox a thread whose corrected bucket requires it, and memory: creating the folder and its documents when missing, seeding them once from the legacy document, and appending to `Learned` in place. `Rules` and the legacy document are only ever read after creation. The one-time rename of `Needs reply soon` to `Action` counts as maintaining a bucket tag.
 
 Everything else ends the run exactly as it started. That covers message content, read state, drafts, flags and stars, other tags and categories, and the user's subscriptions. No thread leaves the mailbox. Archiving takes a thread out of the inbox and nothing more, so never delete, trash, or report spam.
 
@@ -128,7 +132,7 @@ Everything else ends the run exactly as it started. That covers message content,
 The report is the run's final message, so an unattended run leaves it in its run history. It sends no mail and writes no file beyond the memory folder. Close the run with:
 
 - The provider and account triaged, and where the memory folder lives.
-- Corrections sensed this run, each with the `Learned` line it produced and any older `Learned` line it supersedes, and any memory line left unfollowed because it falls outside **Scope**.
+- Corrections sensed this run, moved or stated, each with the `Learned` line it produced and any older `Learned` line it supersedes, and any memory line left unfollowed because it falls outside **Scope**.
 - Memory created or migrated this run, and any legacy document the user can now delete.
 - Total threads retrieved, count per bucket, and count left unchanged. These **reconcile**. Bucket counts plus unprocessed equals the total. Show the arithmetic.
 - For every `Urgent` and `Action` thread, the sender, subject, why it landed in that bucket (naming the Rules or Learned line when one decided it), and the likely next action.
