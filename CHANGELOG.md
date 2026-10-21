@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.14.1](https://github.com/patinaproject/skills/compare/v3.14.0...v3.14.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#711](https://github.com/patinaproject/skills/issues/711) rename cloud-storage-organizer Placements to Changes ([#712](https://github.com/patinaproject/skills/issues/712)) ([7c3f770](https://github.com/patinaproject/skills/commit/7c3f770e17478ef4591c419be9b5e88b723c58fa))
+
 ## [3.14.0](https://github.com/patinaproject/skills/compare/v3.13.0...v3.14.0) (2026-10-21)
 
 
