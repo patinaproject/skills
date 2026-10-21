@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.19.0](https://github.com/patinaproject/skills/compare/v3.18.1...v3.19.0) (2026-10-21)
+
+
+### Features
+
+* [#678](https://github.com/patinaproject/skills/issues/678) name the release and restart step in each follow-up reply ([#740](https://github.com/patinaproject/skills/issues/740)) ([d17cdd9](https://github.com/patinaproject/skills/commit/d17cdd90a722183d2f818af115c9ee24d00fb731))
+
+## [3.18.1](https://github.com/patinaproject/skills/compare/v3.18.0...v3.18.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#596](https://github.com/patinaproject/skills/issues/596) state a specific reason for each upstream fork ([#734](https://github.com/patinaproject/skills/issues/734)) ([a4cf3ea](https://github.com/patinaproject/skills/commit/a4cf3ea44f4d54709eec80a1012bf53bbcad6879))
+
 ## [3.18.0](https://github.com/patinaproject/skills/compare/v3.17.0...v3.18.0) (2026-10-21)
 
 
