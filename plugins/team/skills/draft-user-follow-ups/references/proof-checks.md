@@ -24,6 +24,13 @@ All of these hold for every dependency:
   labels that `mobile_delivery` names. An over-the-air update must be published on the production channel. A
   native change must be in a store release that is live, not only submitted.
 
+Record the **release version** of the production deploy that passed this
+check, such as `18.13.0`. Read it from that deploy: its release tag, or for a
+mobile change, the version of the over-the-air update or store release that
+carries the change. When several deploys pass, use the earliest one that
+carries every dependency. When that deploy names no version, the check fails
+with the blocker "no release version on the passing deploy".
+
 ### Data
 
 Every backfill, migration, or data job that the change needs ran in
