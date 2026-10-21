@@ -22,7 +22,8 @@ The skill appends one line per correction to the end of this document. The user 
 ```markdown
 # Email inbox triage learned rules
 
-Added by email-inbox-triage when you move an archived thread back to the inbox.
+Added by email-inbox-triage when you move an archived thread back to the inbox,
+or tell it a thread belonged in another bucket.
 Edit, delete, or move any line into the Rules document.
 ```
 
