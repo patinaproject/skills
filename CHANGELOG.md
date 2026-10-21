@@ -1,5 +1,62 @@
 # Changelog
 
+## [3.17.0](https://github.com/patinaproject/skills/compare/v3.16.7...v3.17.0) (2026-10-21)
+
+
+### Features
+
+* [#637](https://github.com/patinaproject/skills/issues/637) let the reviewer select a ruling for each decide item ([#646](https://github.com/patinaproject/skills/issues/646)) ([9c6614d](https://github.com/patinaproject/skills/commit/9c6614d3edab38fb21c39267f0452072f016fa4a))
+
+## [3.16.7](https://github.com/patinaproject/skills/compare/v3.16.6...v3.16.7) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#652](https://github.com/patinaproject/skills/issues/652) strip colon-separated colour codes in orch under bun ([#653](https://github.com/patinaproject/skills/issues/653)) ([dc8ca11](https://github.com/patinaproject/skills/commit/dc8ca11c0bf5c419d4200918fe42f2a36c11b5ab))
+
+## [3.16.6](https://github.com/patinaproject/skills/compare/v3.16.5...v3.16.6) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#641](https://github.com/patinaproject/skills/issues/641) restore tab separators in the decision-trail example ([#645](https://github.com/patinaproject/skills/issues/645)) ([9a03d1f](https://github.com/patinaproject/skills/commit/9a03d1f936c25d36845516c6a402dd4dcd5800b3))
+* [#728](https://github.com/patinaproject/skills/issues/728) declare the patina-help fork from the verify-driver change ([#732](https://github.com/patinaproject/skills/issues/732)) ([ae2b67b](https://github.com/patinaproject/skills/commit/ae2b67b532030d1c3277f404c592457fe5714342))
+
+## [3.16.5](https://github.com/patinaproject/skills/compare/v3.16.4...v3.16.5) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#643](https://github.com/patinaproject/skills/issues/643) correct the patinaproject-verify naming rationale ([#644](https://github.com/patinaproject/skills/issues/644)) ([a00f6c7](https://github.com/patinaproject/skills/commit/a00f6c786a0c997d39b8df7895e7485330e5b500))
+
+## [3.16.4](https://github.com/patinaproject/skills/compare/v3.16.3...v3.16.4) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#729](https://github.com/patinaproject/skills/issues/729) drop unsupported icon key from engineering Claude plugin manifest ([#730](https://github.com/patinaproject/skills/issues/730)) ([13a73e9](https://github.com/patinaproject/skills/commit/13a73e9f9418ca4ebc71632bd869d5603415fc71))
+
+## [3.16.3](https://github.com/patinaproject/skills/compare/v3.16.2...v3.16.3) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#650](https://github.com/patinaproject/skills/issues/650) decode every model sheet with one encoding rule ([#680](https://github.com/patinaproject/skills/issues/680)) ([3786c2e](https://github.com/patinaproject/skills/commit/3786c2e93351b35768aa924876a6d56b3e216e8c))
+
+## [3.16.2](https://github.com/patinaproject/skills/compare/v3.16.1...v3.16.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#647](https://github.com/patinaproject/skills/issues/647) detect patinaproject-verify as the project verification driver ([#681](https://github.com/patinaproject/skills/issues/681)) ([9b700dc](https://github.com/patinaproject/skills/commit/9b700dcbeec61e145d95fb64f399bfefa412860c))
+
+## [3.16.1](https://github.com/patinaproject/skills/compare/v3.16.0...v3.16.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#660](https://github.com/patinaproject/skills/issues/660) leave the reviewer's artifact comment threads open ([#679](https://github.com/patinaproject/skills/issues/679)) ([0e7dc8a](https://github.com/patinaproject/skills/commit/0e7dc8a56618f1c1d71ee87af18fb96abc8262c9))
+
 ## [3.16.0](https://github.com/patinaproject/skills/compare/v3.15.1...v3.16.0) (2026-10-21)
 
 
