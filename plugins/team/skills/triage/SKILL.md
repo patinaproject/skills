@@ -1,14 +1,14 @@
 ---
 name: triage
-description: Move issues and external PRs through a state machine of triage roles, categorise, verify, grill if needed, and write agent-ready briefs.
+description: Move issues and external PRs through a state machine of triage labels, classify Type and Theme, verify, grill if needed, and write agent-ready briefs.
 disable-model-invocation: true
 ---
 
 # Triage
 
-Move issues on the project issue tracker through a small state machine of triage roles.
+Move issues on the project issue tracker through a small state machine of triage labels.
 
-If this repo treats external pull requests as a request surface (see the issue-tracker config), triage covers them too: **a PR is an issue with attached code**, using the same roles, same states, and same machine, with a few deltas marked "for a PR" below. Resolve a bare `#42` to an issue or PR per the tracker config.
+If this repo treats external pull requests as a request surface (see the issue-tracker config), triage covers them too: **a PR is an issue with attached code**, using the same labels, same states, and same machine, with a few deltas marked "for a PR" below. Resolve a bare `#42` to an issue or PR per the tracker config.
 
 Every comment or issue posted to the issue tracker during triage **must** start with this disclaimer:
 
@@ -20,30 +20,29 @@ Every comment or issue posted to the issue tracker during triage **must** start 
 
 - [AGENT-BRIEF.md](AGENT-BRIEF.md): how to write durable agent briefs
 - [OUT-OF-SCOPE.md](OUT-OF-SCOPE.md): how the `.out-of-scope/` knowledge base works
-- [READINESS.md](READINESS.md): the readiness check that gates `ready-for-agent` and `ready-for-human`
+- [READINESS.md](READINESS.md): the readiness check that gates `Ready for agent` and `Ready for human`
 
-## Roles
+## Labels
 
-Two **category** roles:
+Apply labels by these exact strings. The **Labels** section of the issue-tracker config (`docs/agents/issue-tracker.md`) defines them; if it has none, tell the user to run `/setup-team-skills`.
 
-- `bug`: something is broken
-- `enhancement`: new feature or improvement
+One **Type**, required, from the repository's Type set. The Type's row says how to verify the claim.
 
-Five **state** roles:
+At most one **Theme**, the first in the config's order that fits.
 
-- `needs-triage`: maintainer needs to evaluate
-- `needs-info`: waiting on reporter for more information
-- `ready-for-agent`: fully specified, ready for an AFK agent
-- `ready-for-human`: needs human implementation
-- `wontfix`: will not be actioned
+One **Triage** label:
 
-For a PR, the same states read against the attached code: `ready-for-agent` means a brief is attached and an agent should take the next step on the diff; `ready-for-human` means it's ready for a human to merge.
+- `Needs triage`: maintainer needs to evaluate
+- `Needs info`: waiting on reporter for more information
+- `Ready for agent`: fully specified, ready for an AFK agent
+- `Ready for human`: needs human implementation
+- `Won't fix`: will not be actioned
 
-Every triaged issue should carry exactly one category role and one state role. If state roles conflict, flag it and ask the maintainer before doing anything else.
+For a PR, the same Triage labels read against the attached code: `Ready for agent` means a brief is attached and an agent should take the next step on the diff; `Ready for human` means it's ready for a human to merge.
 
-These are canonical role names. The actual label strings used in the issue tracker may differ. The mapping should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
+Every triaged issue should carry exactly one Type and one Triage label, and at most one Theme. If Triage labels conflict, flag it and ask the maintainer before doing anything else.
 
-State transitions: an unlabeled issue normally goes to `needs-triage` first; from there it moves to `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. `needs-info` returns to `needs-triage` once the reporter replies. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
+State transitions: an unlabeled issue normally goes to `Needs triage` first; from there it moves to `Needs info`, `Ready for agent`, `Ready for human`, or `Won't fix`. `Needs info` returns to `Needs triage` once the reporter replies. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
 
 ## Invocation
 
@@ -51,7 +50,7 @@ The maintainer invokes `/triage` and describes what they want in natural languag
 
 - "Show me anything that needs my attention"
 - "Let's look at #42" (issue or PR)
-- "Move #42 to ready-for-agent"
+- "Move #42 to Ready for agent"
 - "What's ready for agents to pick up?"
 
 ## Show what needs attention
@@ -59,8 +58,8 @@ The maintainer invokes `/triage` and describes what they want in natural languag
 Query the issue tracker and present three buckets, oldest first:
 
 1. **Unlabeled**: never triaged.
-2. **`needs-triage`**: evaluation in progress.
-3. **`needs-info` with reporter activity since the last triage notes**: needs re-evaluation.
+2. **`Needs triage`**: evaluation in progress.
+3. **`Needs info` with reporter activity since the last triage notes**: needs re-evaluation.
 
 When PRs are in scope, include external PRs in these buckets and tag each line `[PR]` or `[issue]`. Discovery surfaces only *external* PRs (the tracker config defines who counts as external), so a collaborator's in-flight PR is not triage work. This filter is discovery-only; an explicitly named PR is always triaged regardless of author.
 
@@ -68,31 +67,35 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 ## Triage a specific issue or PR
 
-1. **Gather context.** Read the full issue or PR (body, comments, labels, author, dates; for a PR, the diff too). Parse any prior triage notes so you don't re-ask resolved questions. Explore the codebase using the project's domain glossary, respecting ADRs in the area. Run two checks against the codebase: (a) **redundancy**: search for an existing implementation of the requested behavior by domain concept (not just the request's wording), and report where you looked. If found, it's an already-implemented `wontfix` (step 5). (b) **prior rejection**: read `.out-of-scope/*.md` and surface any that resembles this request.
+1. **Gather context.** Read the full issue or PR (body, comments, labels, author, dates; for a PR, the diff too). Parse any prior triage notes so you don't re-ask resolved questions. Explore the codebase using the project's domain glossary, respecting ADRs in the area. Run two checks against the codebase: (a) **redundancy**: search for an existing implementation of the requested behavior by domain concept (not just the request's wording), and report where you looked. If found, it's an already-implemented `Won't fix` (step 5). (b) **prior rejection**: read `.out-of-scope/*.md` and surface any that resembles this request.
 
-2. **Recommend.** Tell the maintainer your category and state recommendation with reasoning, plus a brief codebase summary relevant to the request (including whether it's already implemented). Wait for direction.
+2. **Recommend.** Tell the maintainer your Type, Theme, Triage label, and priority recommendation with reasoning, plus a brief codebase summary relevant to the request (including whether it's already implemented). Wait for direction.
 
-3. **Verify the claim.** Before any grilling, check that the claim holds up. For a bug, reproduce it from the reporter's steps. For a PR, confirm the diff does what it claims: check it out, run the relevant tests or commands. Report what happened: confirmed (with code path), failed, or insufficient detail (a strong `needs-info` signal). A confirmed verification makes a much stronger agent brief.
+3. **Verify the claim.** Before any grilling, check that the claim holds up. Verify it the way the Type's row in the issue-tracker config says: reproduce a report of something broken from the reporter's steps, or confirm a one-off action has not already been done. For a PR, confirm the diff does what it claims: check it out, run the relevant tests or commands. Report what happened: confirmed (with code path), failed, or insufficient detail (a strong `Needs info` signal). A confirmed verification makes a much stronger agent brief.
 
 4. **Grill (if needed).** If the request needs fleshing out, or the readiness check ([READINESS.md](READINESS.md)) has gaps you can't close yourself, call the Skill tool twice, for "grilling" and "domain-modeling", and grill it into shape a round of questions at a time, sharpening domain terms and updating `GLOSSARY.md`/ADRs inline as decisions land.
 
-5. **Apply the outcome:**
-   - `ready-for-agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the role.
-   - `ready-for-human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
-   - `needs-info`: write triage notes (template below).
-   - For `wontfix`, close the issue, with the comment depending on *why*:
+5. **Apply the outcome.** Set the priority the maintainer accepted or chose, unless the outcome closes the issue. See **Priority** below. Then:
+   - `Ready for agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the label.
+   - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
+   - `Needs info`: write triage notes (template below).
+   - For `Won't fix`, close the issue, with the comment depending on *why*:
      - **Already implemented**: the change already exists in the codebase. Point to where it lives; do **not** write to `.out-of-scope/` (that KB is for *rejected* requests, not built ones).
-     - **Rejected (bug)**: give a polite explanation, then close.
-     - **Rejected (enhancement)**: write to `.out-of-scope/`, link to it from a comment, then close ([OUT-OF-SCOPE.md](OUT-OF-SCOPE.md)).
-   - `needs-triage`: apply the role. Optional comment if there's partial progress.
+     - **Rejected report of something broken**: give a polite explanation, then close.
+     - **Any other rejection**: write to `.out-of-scope/`, link to it from a comment, then close ([OUT-OF-SCOPE.md](OUT-OF-SCOPE.md)).
+   - `Needs triage`: apply the label. Optional comment if there's partial progress.
+
+## Priority
+
+Recommend the priority that the `## Priority rubric` section of the issue tracker config gives. A set priority that the latest `Priority: <value>, set by triage` line in the triage notes does not match was chosen by a person: show it and recommend keeping it. A priority the maintainer accepts or chooses is theirs and needs no record. A priority is never a readiness item. When the config has no rubric section, recommend Urgent only for a live fault affecting users, otherwise leave priority unset, and ask the maintainer to re-run `setup-team-skills` to configure priority.
 
 ## Quick state override
 
-If the maintainer says "move #42 to needs-triage", trust them and apply the role directly. Confirm what you're about to do (role changes, comment, close), then act. Skip grilling.
+If the maintainer says "move #42 to Needs triage", trust them and apply the label directly. Confirm what you're about to do (label changes, comment, close), then act. Skip grilling.
 
-A move to `ready-for-agent` or `ready-for-human` still runs the readiness check ([READINESS.md](READINESS.md)) and follows its outcome.
+A move to `Ready for agent` or `Ready for human` still runs the readiness check ([READINESS.md](READINESS.md)) and follows its outcome.
 
-## Needs-info template
+## Needs info template
 
 ```markdown
 ## Triage Notes

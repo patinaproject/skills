@@ -28,7 +28,7 @@ in the record. Emit that record as the producer-bound observation consumed by
 record through its explicit `--record <path>` or `--record -` interface. UI
 comments are presentation metadata and never replace the record.
 
-The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
+The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-team-skills`.
 
 ## Process
 
