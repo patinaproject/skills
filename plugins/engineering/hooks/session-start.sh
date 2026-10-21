@@ -39,7 +39,7 @@ fi
 
 # A repository that carries the managed mandate block in CLAUDE.md already
 # delivers it to Claude; avoid injecting a second copy through the hook.
-# setup-engineering removes the block it once wrote, so this guards a block that
+# setup-engineering-skills removes the block it once wrote, so this guards a block that
 # someone restored or copied by hand.
 if [ "$1" = claude ]; then
   project_dir="${CLAUDE_PROJECT_DIR:-}"

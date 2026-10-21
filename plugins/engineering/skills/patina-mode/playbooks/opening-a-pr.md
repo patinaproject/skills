@@ -10,7 +10,7 @@ Invoked at the end of every other playbook.
 
 **Titles.** The project owns the title format, the commit types, and the scopes. Take them from its commit-type definitions, commit tooling configuration, and agent instructions. Keep the subject short and imperative. Name a real symbol when one carries the change. Do not add a trailing period.
 
-**Descriptions.** Invoke **engineering:pr** ([the bundled skill](../../pr/SKILL.md)) whenever you create or rewrite a PR body. It owns the body structure. Preserve the repository's title and issue-closing rules. Use the ticket, current diff, relevant code, and verification evidence as sources.
+**Descriptions.** Invoke **pr** ([the bundled skill](../../pr/SKILL.md)) whenever you create or rewrite a PR body. It owns the body structure. Preserve the repository's title and issue-closing rules. Use the ticket, current diff, relevant code, and verification evidence as sources.
 
 **Forge.** Resolve the forge before the first PR operation and keep that choice for create, edit, view, watch, and merge. GitHub CLI (`gh`) is the default. If `command -v origin` succeeds and Origin can resolve the repository, prefer `origin pr ...`. If Origin is absent or cannot resolve the repository, stay on `gh` and record the fallback. Record the intended PR base repository as canonical `<base-repo>` and validate it through the active forge. Do not infer it from the checkout's default remote. Capture it as a shell variable and pass `--repo "$base_repo"` to every `gh pr` command. When the head repository is a fork, validate its identity and record its owner and repository name as `<fork-owner>` and `<head-name>`. Do not require Graphite (`gt`).
 

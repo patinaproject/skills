@@ -20,7 +20,7 @@ Read the hunk ranges from `gh pr diff <pr-url>`, the diff GitHub renders. In a h
 
 ## 1. Learn the change
 
-From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `engineering:teach` skill on yourself, and read the code directly, because you cannot start subagents. Read:
+From a clone of the PR's repository, fetch the head and check it out detached in a worktree in your scratchpad: `git fetch origin pull/<n>/head`, then `git worktree add --detach <scratchpad>/pr-<n> FETCH_HEAD`. For a new head, run both commands inside that worktree: `git -C <scratchpad>/pr-<n> fetch origin pull/<n>/head`, then `git -C <scratchpad>/pr-<n> checkout --detach FETCH_HEAD`. A detached checkout takes a force-pushed head too. Follow the method of the `teach` skill on yourself, and read the code directly, because you cannot start subagents. Read:
 
 - the full diff, and enough of the surrounding code to know what each part is, how it works, and why it exists;
 - the PR description and the linked Linear issue;
@@ -64,7 +64,7 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 - the to-do list, with checkboxes that keep their state in `localStorage`. Wrap each storage call in `try`/`catch`;
 - the evidence ledger, and a short "Not looked at" list.
 
-For each visual, follow the bundled `team:show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
+For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
 
 Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed. Give an item one visual only when a shape explains it faster than words, and place it next to the text it supports. Link every `file:line` in a visual or its caption by the link rule.
 
