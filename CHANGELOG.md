@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.7](https://github.com/patinaproject/skills/compare/v3.16.6...v3.16.7) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#652](https://github.com/patinaproject/skills/issues/652) strip colon-separated colour codes in orch under bun ([#653](https://github.com/patinaproject/skills/issues/653)) ([dc8ca11](https://github.com/patinaproject/skills/commit/dc8ca11c0bf5c419d4200918fe42f2a36c11b5ab))
+
 ## [3.16.6](https://github.com/patinaproject/skills/compare/v3.16.5...v3.16.6) (2026-10-21)
 
 
