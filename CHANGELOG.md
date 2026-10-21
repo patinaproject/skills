@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.5](https://github.com/patinaproject/skills/compare/v3.16.4...v3.16.5) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#643](https://github.com/patinaproject/skills/issues/643) correct the patinaproject-verify naming rationale ([#644](https://github.com/patinaproject/skills/issues/644)) ([a00f6c7](https://github.com/patinaproject/skills/commit/a00f6c786a0c997d39b8df7895e7485330e5b500))
+
 ## [3.16.4](https://github.com/patinaproject/skills/compare/v3.16.3...v3.16.4) (2026-10-21)
 
 
