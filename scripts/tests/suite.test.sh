@@ -27,6 +27,7 @@ bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/setup-engineering-skills-machinery.test.sh
 node scripts/tests/sheet-encodings.test.mjs
+node scripts/tests/sheet-decoder.test.mjs
 bash scripts/tests/sync-upstream-skills.test.sh
 node scripts/tests/triage-check-issue-state.test.mjs
 

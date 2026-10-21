@@ -30,8 +30,9 @@ skill catalog.
 
 What it materializes from `assets/`:
 
-- The **Engineering hook** and its context (from `assets/hooks/`) into the
-  repo's `.claude/hooks/`. The context names skills by their bare names.
+- The **Engineering hook** and its context (from `assets/hooks/`), plus the
+  `setup-pstack` sheet decoder the hook runs, into the repo's `.claude/hooks/`.
+  The context names skills by their bare names.
 - The **Engineering agents** (from `assets/agents/`) into the repo's
   `.claude/agents/`, so `subagent_type: "patina-agent"` resolves, the effort
   agents `patina-agent-<level>` and `effort-<level>` resolve, and no-comments

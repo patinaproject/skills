@@ -7,8 +7,22 @@ export interface Sheet {
   piModels: Map<string, string>;
 }
 
-export function parseSheet(text: string): Sheet {
-  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/);
+export function decodeSheet(bytes: Uint8Array): string {
+  let text: string;
+  if ((bytes[0] === 0xff && bytes[1] === 0xfe) || bytes[1] === 0x00) {
+    text = new TextDecoder("utf-16le", { fatal: true }).decode(bytes);
+  } else {
+    try {
+      text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    } catch {
+      text = Buffer.from(bytes).toString("latin1");
+    }
+  }
+  return text.replace(/^﻿/, "").replace(/\r(?=\n|$)/g, "");
+}
+
+function parseSheet(text: string): Sheet {
+  const lines = text.split("\n");
   const piModels = new Map<string, string>();
   for (const line of lines) {
     const m = /^pi models:\s*(.*)$/.exec(line.trim());
@@ -18,18 +32,7 @@ export function parseSheet(text: string): Sheet {
       if (alias && id) piModels.set(alias, id);
     }
   }
-  return { text, hookOff: lines.some((l) => l === "session hook: off"), piModels };
-}
-
-export function decodeSheet(bytes: Uint8Array): string {
-  if ((bytes[0] === 0xff && bytes[1] === 0xfe) || bytes[1] === 0x00) {
-    return new TextDecoder("utf-16le", { fatal: true }).decode(bytes);
-  }
-  try {
-    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-  } catch {
-    return Buffer.from(bytes).toString("latin1");
-  }
+  return { text, hookOff: lines.includes("session hook: off"), piModels };
 }
 
 export function readSheet(agentDir: string): Sheet | undefined {

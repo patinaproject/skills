@@ -251,6 +251,10 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `node scripts/tests/sheet-encodings.test.mjs` after changing a model-sheet
   decoder (`read-sheet.sh`, the `session-start` hooks, or `pi/sheet.ts`); it
   asserts that every decoder reads each sheet encoding the same way
+- Run `node scripts/tests/sheet-decoder.test.mjs` after changing
+  `plugins/engineering/pi/sheet.ts`, `setup-pstack/scripts/read-sheet.sh`, or the
+  session-start hooks; it feeds UTF-16LE, BOM, and CRLF sheets through every
+  decoder and compares one literal role map
 - Run `bash scripts/tests/sync-upstream-skills.test.sh` after changing
   `scripts/sync-upstream-skills.mjs`; it exercises the manifest, fork registry,
   dry-run, idempotence, three-way merge, and argument-refusal contracts.
