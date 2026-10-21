@@ -70,6 +70,31 @@ function makeRuntimeDatabase(path, rows, { wal = false, primaryKey = true } = {}
   return database;
 }
 
+// The helper requires an upstream SQLite CLI. Bundled macOS builds cannot open
+// a WAL-mode database read-only when its sidecars are absent, so select the
+// Homebrew build the skill documents when the default sqlite3 lacks that.
+function useUpstreamSqlite() {
+  const probeDirectory = mkdtempSync(join(tmpdir(), 't3-sqlite-probe.'));
+  try {
+    const probe = join(probeDirectory, 'probe.sqlite');
+    makeRuntimeDatabase(probe, [], { wal: true }).close();
+    const readsBareWal = (sqlite) =>
+      spawnSync(sqlite, ['-readonly', probe, 'SELECT 1;']).status === 0;
+    if (readsBareWal('sqlite3')) return;
+    const prefix = spawnSync('brew', ['--prefix', 'sqlite'], { encoding: 'utf8' });
+    const brewBin = prefix.status === 0 ? join(prefix.stdout.trim(), 'bin') : '';
+    assert.ok(
+      brewBin && readsBareWal(join(brewBin, 'sqlite3')),
+      'sqlite3 on PATH cannot read a WAL database without sidecars; install upstream SQLite with `brew install sqlite`.'
+    );
+    process.env.PATH = `${brewBin}:${process.env.PATH}`;
+  } finally {
+    rmSync(probeDirectory, { recursive: true, force: true });
+  }
+}
+
+useUpstreamSqlite();
+
 function fileDigest(path) {
   const descriptor = openSync(path, 'r');
   const hash = createHash('sha256');
