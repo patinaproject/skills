@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.16.7](https://github.com/patinaproject/skills/compare/v3.16.6...v3.16.7) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#652](https://github.com/patinaproject/skills/issues/652) strip colon-separated colour codes in orch under bun ([#653](https://github.com/patinaproject/skills/issues/653)) ([dc8ca11](https://github.com/patinaproject/skills/commit/dc8ca11c0bf5c419d4200918fe42f2a36c11b5ab))
+
+## [3.16.6](https://github.com/patinaproject/skills/compare/v3.16.5...v3.16.6) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#641](https://github.com/patinaproject/skills/issues/641) restore tab separators in the decision-trail example ([#645](https://github.com/patinaproject/skills/issues/645)) ([9a03d1f](https://github.com/patinaproject/skills/commit/9a03d1f936c25d36845516c6a402dd4dcd5800b3))
+* [#728](https://github.com/patinaproject/skills/issues/728) declare the patina-help fork from the verify-driver change ([#732](https://github.com/patinaproject/skills/issues/732)) ([ae2b67b](https://github.com/patinaproject/skills/commit/ae2b67b532030d1c3277f404c592457fe5714342))
+
 ## [3.16.5](https://github.com/patinaproject/skills/compare/v3.16.4...v3.16.5) (2026-10-21)
 
 
