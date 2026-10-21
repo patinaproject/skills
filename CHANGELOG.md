@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.16.2](https://github.com/patinaproject/skills/compare/v3.16.1...v3.16.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* [#647](https://github.com/patinaproject/skills/issues/647) detect patinaproject-verify as the project verification driver ([#681](https://github.com/patinaproject/skills/issues/681)) ([9b700dc](https://github.com/patinaproject/skills/commit/9b700dcbeec61e145d95fb64f399bfefa412860c))
+
 ## [3.16.1](https://github.com/patinaproject/skills/compare/v3.16.0...v3.16.1) (2026-10-21)
 
 
