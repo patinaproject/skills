@@ -99,7 +99,7 @@
   },
   "plugins/engineering/skills/create-verification-skill/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina maintains this local verification-skill workflow for the project marketplace.",
+    "reason": "Patina names the generated skill `patinaproject-verify` after its repository-local prefix, so it does not shadow the bundled `/verify`. Upstream named it `verify` to shadow the bundled one.",
     "upstream": {
       "status": "not-proposed"
     }
