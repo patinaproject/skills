@@ -75,7 +75,7 @@ Write for limited attention. Lead with what matters, and cut every sentence that
 
 ### Keep rulings in the artifact database
 
-`localStorage` is one browser's memory, and the coordinator cannot read it. Keep a decide item's selection in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's `window.claude.*` code. The coordinator declares the capability when it publishes.
+`localStorage` is one browser's memory, and the coordinator cannot read it. Keep a decide item's selection in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's code. The page reaches the store with `const db = await claude.use("db")`, which resolves `null` when the view cannot run it; there is no `window.claude.db`. The coordinator declares the capability when it publishes.
 
 - One document per selected item, in the collection `rulings`, with the item's `id` as the document id and `{ruling: "<ruling id>"}` as its data. "Clear" deletes the document. An item with no document is undecided.
 - The page reads the collection on load and shows each selection from it, so a selection survives a reload and every viewer sees the same one.
