@@ -207,6 +207,17 @@ and reads repository-specific facts from a consumer config.
 See [./plugins/team/skills/draft-user-follow-ups/](./plugins/team/skills/draft-user-follow-ups/)
 for the skill contract.
 
+### linear-inbox-cleanup
+
+`linear-inbox-cleanup` clears a Linear inbox of notifications that need no
+action. It marks as read the ones for completed or canceled issues and merged
+pull requests, status changes, Triage Rule assignments, and comment threads the
+user never joined and was never @-mentioned in. Every other notification stays
+unread. It uses only the Linear MCP tools and changes nothing but read state.
+
+See [./plugins/team/skills/linear-inbox-cleanup/](./plugins/team/skills/linear-inbox-cleanup/)
+for the skill contract.
+
 ### gather-evidence
 
 Human change requests and QA findings need direct evidence from the current
@@ -264,6 +275,7 @@ README and skill contract.
 | [email-inbox-triage](./plugins/team/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
 | [cloud-storage-organization](./plugins/team/skills/cloud-storage-organization/) | File loose files in any cloud storage by rules learned from your corrections |
 | [draft-user-follow-ups](./plugins/team/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
+| [linear-inbox-cleanup](./plugins/team/skills/linear-inbox-cleanup/) | Mark Linear inbox notifications read when they need no action |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
@@ -333,6 +345,7 @@ plugins/team/
     email-inbox-triage/
     cloud-storage-organization/
     draft-user-follow-ups/
+    linear-inbox-cleanup/
     to-spec/
     to-tickets/
     triage/
