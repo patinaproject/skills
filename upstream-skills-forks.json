@@ -176,7 +176,7 @@
   },
   "plugins/engineering/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adapts patina-mode to Engineering: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, and ### Principles headings for markdownlint MD036.",
+    "reason": "Patina adapts patina-mode to Engineering: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, and ### Principles headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
