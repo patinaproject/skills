@@ -42,8 +42,10 @@ as `ENG-123`.
 ## Run
 
 1. **Identify the user.** Call `get_user` with `query: "me"`. Keep the user's
-   `id`, `name`, `handle`, and profile URL
-   (`https://linear.app/<workspace>/profiles/<handle>`). A comment body
+   `id`, `name`, and `handle`. The result has no `handle` field, so read the
+   handle from `displayName`. Build the profile URL
+   `https://linear.app/<workspace>/profiles/<handle>`, taking `<workspace>`
+   from any notification `url`. A comment body
    @-mentions the user when it contains that profile URL, a mention link to
    it, or `@<handle>`. The user's name as plain text, without the profile
    link, is not a mention.
