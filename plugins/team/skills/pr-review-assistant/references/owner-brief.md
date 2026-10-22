@@ -8,7 +8,7 @@ Your job is to **present** the PR to a reviewer who has little time and limited 
 
 ## Link every `file:line`
 
-Every `file:line` you write is a link: on the artifact (summary, ranked items, flows, blast-radius map, to-do list, evidence ledger), in the return block, and in follow-up answers. Pick the first form that applies:
+Every `file:line` you write is a link: on the artifact (summary, ranked items, flows, blast-radius map, evidence ledger), in the return block, and in follow-up answers. Pick the first form that applies:
 
 1. **GitHub PR diff line link**, when the line is inside a diff hunk at the reviewed head: `https://github.com/<owner>/<repo>/pull/<n>/files#diff-<sha256 of path>R<line>`. Hash the repository-relative path at the head, which for a renamed file is the new path, with `printf %s <path> | shasum -a 256 | cut -d' ' -f1`, which keeps only the hex digest. A deleted line uses `L<base line>` in place of `R<line>`. Context lines inside a hunk count as inside.
 2. **GitHub blob link pinned to the head SHA**, for a line outside every hunk: `https://github.com/<owner>/<repo>/blob/<head-sha>/<path>?plain=1#L<line>`. The `files#diff` anchor does not reach a line outside the diff. Always add `?plain=1`: without it, GitHub shows rendered files such as Markdown and CSV as a preview with no line selected, and source files ignore it.
@@ -43,18 +43,20 @@ Use lookups only: read files, search and count with `git grep`, trace calls, and
 
 ## 3. Rank by attention
 
-Put first the items that need the reviewer to decide. In that group, put hard-to-reverse items before others, and larger blast radius before smaller. Then put clear requests to the author. Collapse the FYI items. Include every item that deserves the reviewer's attention, and leave out what does not. Give each item a one-line headline. Keep the detail to three sentences, plus one visual when a shape explains it faster than words.
+Put first the items that need the reviewer to decide. In that group, put hard-to-reverse items before others, and larger blast radius before smaller. Then put clear requests to the author. Collapse the FYI items. Include every item that deserves the reviewer's attention, and leave out what does not. Give each item a one-line headline. Keep the detail to three sentences, plus one visual when a shape explains it faster than words. Each ranked item is the only place that item appears: its explanation and its action sit together, and no separate list repeats it.
 
-## 4. Build the to-do list
+## 4. Give each item its action
 
-Each to-do item has:
+Attach these fields to the ranked item:
 
 - its tier: decide, comment, or FYI;
 - a one-line reason that links to the summary bullet it supports;
 - its `file:line`, linked by the link rule;
 - a comment ready to copy, written in the reviewer's voice as a question or a request to the author, in plain English. A decide item gets two versions, one for each ruling.
 
-Give every to-do item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
+An FYI item has no comment and no control.
+
+Give every ranked item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
 
 ## 5. Write the artifact
 
@@ -62,9 +64,9 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 
 - a header with the Linear review link, the head SHA, and the blast-radius label;
 - "In 30 seconds": three bullets;
-- the ranked items;
-- the to-do list, with checkboxes that keep their state in `localStorage`. Wrap each storage call in `try`/`catch`;
-- for each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", the to-do list shows only the chosen ruling's comment, and the other option collapses. Selecting another option changes the ruling, and "Clear" removes it;
+- the ranked items, each carrying its own action;
+- inside each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", shows only the chosen ruling's comment, and collapses the other option. Selecting another option changes the ruling, and "Clear" removes it;
+- inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. No control is a "done" checkbox, and an FYI item has no control;
 - the evidence ledger, and a short "Not looked at" list.
 
 For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
@@ -73,14 +75,20 @@ Use `diff` blocks for changed shapes. Build a flow with three or more parts as a
 
 Write for limited attention. Lead with what matters, and cut every sentence that does not help the reviewer decide or comment. Each claim carries a `file:line` or a source link. When you cannot point to a source for a claim, move the claim to "Not looked at".
 
-### Keep rulings in the artifact database
+### Keep choices in the artifact database
 
-`localStorage` is one browser's memory, and the coordinator cannot read it. Keep a decide item's selection in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's code. The page reaches the store with `const db = await claude.use("db")`, which resolves `null` when the view cannot run it; there is no `window.claude.db`. The coordinator declares the capability when it publishes.
+`localStorage` is one browser's memory, and the coordinator cannot read it. Keep every reviewer choice in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's code. The page reaches the store with `const db = await claude.use("db")`, which resolves `null` when the view cannot run it; there is no `window.claude.db`. The coordinator declares the capability when it publishes.
 
-- One document per selected item, in the collection `rulings`, with the item's `id` as the document id and `{ruling: "<ruling id>"}` as its data. "Clear" deletes the document. An item with no document is undecided.
-- The page reads the collection on load and shows each selection from it, so a selection survives a reload and every viewer sees the same one.
-- Never write, reset, or delete a `rulings` document from the agent side when you republish. A republish keeps the documents.
-- A document whose item `id` is no longer on the page, or whose ruling `id` the item no longer has, is stale. Show it in a collapsed "Stale selections" list with the item `id` and ruling, and leave it in the database.
+Two collections hold the choices. Each holds one document per choice, and the item's `id` is the document id.
+
+- `rulings`: one document per selected decide item, with `{ruling: "<ruling id>"}` as its data. "Clear" deletes the document. An item with no document is undecided.
+- `applied`: one document per checked comment item, with `{applied: true}` as its data. Unchecking deletes the document. An item with no document is not applied.
+
+Rules for both collections:
+
+- The page reads both collections on load and shows each choice from them, so a choice survives a reload and every viewer sees the same one.
+- Never write, reset, or delete a `rulings` or `applied` document from the agent side when you republish. A republish keeps the documents.
+- A `rulings` document whose item `id` is no longer on the page, or whose ruling `id` the item no longer has, is stale. An `applied` document whose item `id` is no longer on the page is stale. Show every stale document in one collapsed "Stale selections" list with the item `id` and its choice, and leave it in the database.
 
 ## 6. Return
 
@@ -98,4 +106,4 @@ tiers: decide <n>, comment <n>, fyi <n>
 ## Follow-ups
 
 - **Question:** answer from your context, and read more code if you need to. Return a short answer in plain words, with each `file:line` linked, and `html: changed` or `html: unchanged`.
-- **New head:** compare the new head with the last head you reviewed. Move addressed to-dos to a collapsed "Done" list. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.
+- **New head:** compare the new head with the last head you reviewed. Move addressed items to a collapsed "Done" list. It holds addressed items from earlier heads and is not a checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.
