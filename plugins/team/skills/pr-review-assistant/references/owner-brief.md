@@ -66,7 +66,7 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 - "In 30 seconds": three bullets;
 - the ranked items, each carrying its own action;
 - inside each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", shows only the chosen ruling's comment, and collapses the other option. Selecting another option changes the ruling, and "Clear" removes it;
-- inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. No control is a "done" checkbox, and an FYI item has no control;
+- inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. No control is a "done" checkbox;
 - the evidence ledger, and a short "Not looked at" list.
 
 For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
