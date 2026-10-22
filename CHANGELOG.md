@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.23.1](https://github.com/patinaproject/skills/compare/v3.23.0...v3.23.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* [#756](https://github.com/patinaproject/skills/issues/756) route patina-mode code changes to their build playbook ([#757](https://github.com/patinaproject/skills/issues/757)) ([652b5f2](https://github.com/patinaproject/skills/commit/652b5f21a6454e11400e8ad865f8245f313b02a3))
+
 ## [3.23.0](https://github.com/patinaproject/skills/compare/v3.22.0...v3.23.0) (2026-10-22)
 
 
