@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.21.0](https://github.com/patinaproject/skills/compare/v3.20.0...v3.21.0) (2026-10-22)
+
+
+### Features
+
+* [#751](https://github.com/patinaproject/skills/issues/751) put each review action on its item in pr-review-assistant ([#752](https://github.com/patinaproject/skills/issues/752)) ([1cd1f7f](https://github.com/patinaproject/skills/commit/1cd1f7f5d75c5d897940d501af92b703d3911aaa))
+
 ## [3.20.0](https://github.com/patinaproject/skills/compare/v3.19.1...v3.20.0) (2026-10-22)
 
 
