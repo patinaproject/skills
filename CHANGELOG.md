@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.23.0](https://github.com/patinaproject/skills/compare/v3.22.0...v3.23.0) (2026-10-22)
+
+
+### Features
+
+* [#753](https://github.com/patinaproject/skills/issues/753) diagram the contracts a pull request sets in pr-review-assistant ([#758](https://github.com/patinaproject/skills/issues/758)) ([7938d6a](https://github.com/patinaproject/skills/commit/7938d6aa9a74cab1802162508f930a9474b54c1a))
+
 ## [3.22.0](https://github.com/patinaproject/skills/compare/v3.21.0...v3.22.0) (2026-10-22)
 
 
