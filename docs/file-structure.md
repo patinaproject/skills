@@ -140,7 +140,7 @@ Skills owned by this repository:
 | `pr` | `plugins/engineering/skills/pr/` | PR body structure and evidence guidance |
 | `pr-readiness` | `plugins/engineering/skills/pr-readiness/` | Candidate-aware evidence evaluation and the sole ready transition |
 | `grill-to-spec` | `plugins/team/skills/grill-to-spec/` | User-invoked grilling that keeps the tree unchanged and hands doc changes to `to-spec` |
-| `pr-review-assistant` | `plugins/team/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact and a to-do list |
+| `pr-review-assistant` | `plugins/team/skills/pr-review-assistant/` | User-invoked pair review that presents a pull request as an artifact with a comment on each item |
 
 `find-skills` is a third-party vendored skill from `vercel-labs/skills`. It is
 installed via the vercel-labs CLI and is not owned by this repository. Install

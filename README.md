@@ -232,7 +232,7 @@ for the skill contract.
 
 `pr-review-assistant` pair-reviews someone else's pull request. It presents the
 PR as an artifact (intent, hard-to-reverse changes, changed names and flows,
-blast radius) plus a to-do list of comments for the reviewer, who stays the
+blast radius) with a comment to leave on each item. The reviewer stays the
 judge. It writes nothing to GitHub or Linear until the reviewer asks.
 
 See [./plugins/team/skills/pr-review-assistant/](./plugins/team/skills/pr-review-assistant/)
@@ -277,7 +277,7 @@ README and skill contract.
 | [draft-user-follow-ups](./plugins/team/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
 | [linear-inbox-cleanup](./plugins/team/skills/linear-inbox-cleanup/) | Mark Linear inbox notifications read when they need no action |
 | [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
-| [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact and a to-do list |
+| [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact with a comment on each item |
 | [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./plugins/team/skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
