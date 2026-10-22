@@ -31,7 +31,7 @@ then waits for a maintainer. A maintainer who is not the PR author posts
 `event=REQUEST_CHANGES` otherwise. Readiness counts only that maintainer
 review.
 
-The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
+The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-team-skills`.
 
 ## Process
 

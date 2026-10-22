@@ -11,8 +11,16 @@ if (Test-Path -LiteralPath $sheet -PathType Leaf) {
     try {
         $bytes = [System.IO.File]::ReadAllBytes($sheet)
         # Windows PowerShell 5.1's `>` writes UTF-16 LE with a byte-order mark.
-        $encoding = if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) { [System.Text.Encoding]::Unicode } else { [System.Text.UTF8Encoding]::new($false) }
-        $lines = $encoding.GetString($bytes).TrimStart([char]0xFEFF) -split "`n" | ForEach-Object { $_ -replace "`r$", '' }
+        if ($bytes.Length -ge 2 -and (($bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) -or $bytes[1] -eq 0x00)) {
+            $text = [System.Text.UnicodeEncoding]::new($false, $false, $true).GetString($bytes)
+        } else {
+            try {
+                $text = [System.Text.UTF8Encoding]::new($false, $true).GetString($bytes)
+            } catch {
+                $text = [System.Text.Encoding]::GetEncoding(28591).GetString($bytes)
+            }
+        }
+        $lines = $text.TrimStart([char]0xFEFF) -split "`n" | ForEach-Object { $_ -replace "`r$", '' }
         $off = $lines -ccontains 'session hook: off'
     } catch { }
 }

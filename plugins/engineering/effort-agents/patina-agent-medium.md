@@ -1,6 +1,6 @@
 ---
 name: patina-agent-medium
-description: Runs `engineering:patina-agent` at medium reasoning effort. Dispatched in place of `engineering:patina-agent` when a pstack role's override names `@medium`. The caller passes the model.
+description: Runs `patina-agent` at medium reasoning effort. Dispatched in place of `patina-agent` when a pstack role's override names `@medium`. The caller passes the model.
 effort: medium
 ---
 

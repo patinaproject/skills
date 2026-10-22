@@ -1,6 +1,6 @@
 ---
 name: grill-to-spec
-description: Grill a design with team:grilling and team:domain-modeling, holding every ADR and glossary change in the conversation and leaving the working tree unchanged, then hand them to /team:to-spec as proposals. Use when a design needs grilling before it is specified and its documentation changes should reach the implementing branch through the spec.
+description: Grill a design with grilling and domain-modeling, holding every ADR and glossary change in the conversation and leaving the working tree unchanged, then hand them to /to-spec as proposals. Use when a design needs grilling before it is specified and its documentation changes should reach the implementing branch through the spec.
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ proposal on the published spec, which that branch applies verbatim.
 
 ## Hold, never write
 
-Load `team:grilling` and `team:domain-modeling`. Run the grilling rounds, and
+Load `grilling` and `domain-modeling`. Run the grilling rounds, and
 use domain-modeling's discipline inside them: challenge terms against the
 glossary, sharpen fuzzy language, probe scenarios, and cross-check the code.
 
@@ -29,7 +29,7 @@ instead. A held item is one of these:
   reason.
 
 When a later round revises a held item, restate the whole item so the latest
-agreement is unambiguous. Keep proposal text out of chat. `/team:to-spec`
+agreement is unambiguous. Keep proposal text out of chat. `/to-spec`
 writes it.
 
 ## ADR mechanics are yours
@@ -55,7 +55,7 @@ records, as a report. The operator can still overrule it.
    instructions, every ADR authority they name, the ADRs relevant to the
    design, and the existing glossary files. Done when you can name the ADR
    rules that apply and the glossary each likely term belongs to.
-2. Run `team:grilling` until the frontier is empty and the operator confirms a
+2. Run `grilling` until the frontier is empty and the operator confirms a
    shared understanding. Done when every agreed term and decision is a held
    item, with no item left only implied by an answer.
 3. Run `git status --porcelain` again and compare it with step 1. If this
@@ -63,16 +63,16 @@ records, as a report. The operator can still overrule it.
    operator.
 4. End with two paragraphs and nothing else. The first paragraph is exactly
    `Shared understanding confirmed.` The second is exactly
-   ``Run `/team:to-spec` to publish the design with complete file-ready ADR and glossary proposals from this conversation.``
+   ``Run `/to-spec` to publish the design with complete file-ready ADR and glossary proposals from this conversation.``
 
-`team:to-spec` is user-invoked, so the operator runs it, and it follows its own
+`to-spec` is user-invoked, so the operator runs it, and it follows its own
 process with one exception, scoped to this handoff. `to-spec` says not to
 include specific file paths or code snippets. The `## Proposed documentation
 changes` section below is exempt from that rule, because it must carry the
 destination paths and file-ready contents. Every other section of the spec keeps
 the rule.
 
-## When `/team:to-spec` runs here
+## When `/to-spec` runs here
 
 Add a `## Proposed documentation changes` section after `Further Notes` in the
 published spec. This section is the one place the spec carries file paths and
