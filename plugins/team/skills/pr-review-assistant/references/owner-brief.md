@@ -39,6 +39,20 @@ Account for every new or changed exported name, type, route, cache tag, environm
 4. **Blast radius.** Give one label word: `local`, `package`, `cross-package`, `deploys`, `users`, or `data`. Under it, give the measured map: the count of call sites outside the diff, the affected packages and deploy targets, who notices a failure and how fast, and the rollback path.
 5. **Evidence.** List each claim in the PR body. Mark each claim as supported, with what supports it (a CI check and its status, a named test, or output shown), or as unsupported.
 
+### Choose the contracts
+
+Read the installed [`design-by-contract`](../../design-by-contract/SKILL.md) and apply it to lens 3 to pick what the page shows. Keep a contract only when the PR sets it and it is hard to reverse, surprising without explanation, or based on a real trade-off. A PR that sets no such contract gets no contracts section and no contracts diagram.
+
+For each kept contract, record these five fields, each with its `file:line`:
+
+1. the caller and the code that serves it;
+2. what the caller provides;
+3. what the code guarantees;
+4. what must stay true;
+5. what happens when either side breaks the agreement.
+
+When neither the PR nor its linked issue defines a field, write `missing`. Never invent the rule. A `missing` field is something the reviewer can ask the author for.
+
 Use lookups only: read files, search and count with `git grep`, trace calls, and read CI status with `gh pr checks`. Do not run tests, timings, or previews, and do not write anything.
 
 ## 3. Rank by attention
@@ -67,9 +81,12 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 - the ranked items, each carrying its own action;
 - inside each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", shows only the chosen ruling's comment, and collapses the other option. Selecting another option changes the ruling, and "Clear" removes it;
 - inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. There is no separate "done" checkbox;
+- "Contracts this PR sets", after the ranked items, when you kept any contract: a table with one row per contract and one column for each of the five fields above. Link every `file:line` in a cell by the link rule. Show `missing` as written, in its cell. Put a Mermaid diagram directly under the table row it explains only when a sequence, a state change, or a dependency is hard to follow in prose. Give it a caption whose `file:line` references are links;
 - the evidence ledger, and a short "Not looked at" list.
 
-For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
+Draw each contracts diagram as a `<pre class="mermaid">` block. The artifact host renders it, so the page loads no Mermaid library. Keep every label on one line and never write `<br/>`, because the renderer drops it and joins the words.
+
+For each other visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
 
 Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed. Give an item one visual only when a shape explains it faster than words, and place it next to the text it supports. Link every `file:line` in a visual or its caption by the link rule.
 
@@ -106,4 +123,4 @@ tiers: decide <n>, comment <n>, fyi <n>
 ## Follow-ups
 
 - **Question:** answer from your context, and read more code if you need to. Return a short answer in plain words, with each `file:line` linked, and `html: changed` or `html: unchanged`.
-- **New head:** compare the new head with the last head you reviewed. Move addressed items to a collapsed "Done" list. The list holds addressed items from earlier heads. It has no checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.
+- **New head:** compare the new head with the last head you reviewed. Move addressed items to a collapsed "Done" list. The list holds addressed items from earlier heads. It has no checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Update the contracts table and its diagrams where the flow changed, and mark each changed row and diagram with "Changed in `<sha>`". Return the block from section 6.
