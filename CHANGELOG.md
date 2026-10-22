@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.20.0](https://github.com/patinaproject/skills/compare/v3.19.1...v3.20.0) (2026-10-22)
+
+
+### Features
+
+* [#742](https://github.com/patinaproject/skills/issues/742) add linear-inbox-cleanup skill ([#743](https://github.com/patinaproject/skills/issues/743)) ([6728a20](https://github.com/patinaproject/skills/commit/6728a201a23d1c31c0cd2f65ac1fa07b979f5343))
+
 ## [3.19.1](https://github.com/patinaproject/skills/compare/v3.19.0...v3.19.1) (2026-10-22)
 
 
