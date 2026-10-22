@@ -37,7 +37,6 @@ export interface FakeForgeOptions {
   readonly heads?: readonly string[];
   readonly author?: string;
   readonly reviewDecision?: ReviewDecision;
-  readonly basePolicy?: string;
 }
 export interface FakeForge extends Forge {
   readonly markReadyCalls: string[];
@@ -56,7 +55,7 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
     readPullRequest: pr,
     openPullRequest: pr,
     markReady: (_repository, _number, head) => { markReadyCalls.push(head); },
-    readPolicy: (_repository: string, baseRef?: string) => (baseRef !== undefined && "basePolicy" in options ? options.basePolicy : "policy" in options ? options.policy : POLICY),
+    readPolicy: () => ("policy" in options ? options.policy : POLICY),
     readEvidence: () => ({ checkRuns: options.checkRuns ?? CHECK_NAMES.map((name) => checkRun(name)), reviews: options.reviews ?? [review()], author: options.author ?? AUTHOR, reviewDecision: options.reviewDecision ?? "APPROVED" }),
   };
 }

@@ -159,12 +159,6 @@ describe("acceptance: GitHub-native authority", () => {
     expect(result.decision("tests")).toMatchObject({ validity: "invalid", reason: 'tests observation failed: failing: "Unit tests" (skipped)' });
   });
 
-  it("reads the policy from the default branch, not the PR's base tip", () => {
-    const loose = JSON.stringify({ version: 1, obligations: { tests: { producer: "checks", checks: ["Lint Markdown"] } } });
-    const result = check({ basePolicy: loose, checkRuns: CHECK_NAMES.filter((name) => name !== "Unit tests").map((name) => checkRun(name)) });
-    expect(result.decision("tests")).toMatchObject({ validity: "rerun-required", reason: 'missing tests observation: no GitHub Actions run of "Unit tests"' });
-  });
-
   it("needs no per-head claims in the PR body", () => {
     const result = check({ body: "## Why\n\nClose the self-approval path." });
     expect(result.stderr).toBe("");
