@@ -46,7 +46,7 @@ as `ENG-123`.
    `https://linear.app/<workspace>/profiles/<displayName>`, taking
    `<workspace>` from any notification `url` in step 2. A comment body
    @-mentions the user only when it contains that profile URL or a mention
-   link to it. The user's name or `@<handle>` as plain text, without the
+   link to it. The user's name or `@<displayName>` as plain text, without the
    profile link, is not a mention, because Linear does not notify it as one.
 
 2. **Fetch every unread notification.** Call `get_notifications` with
