@@ -42,13 +42,11 @@ as `ENG-123`.
 ## Run
 
 1. **Identify the user.** Call `get_user` with `query: "me"`. Keep the user's
-   `id`, `name`, and `handle`. The result has no `handle` field, so read the
-   handle from `displayName`. Build the profile URL
-   `https://linear.app/<workspace>/profiles/<handle>`, taking `<workspace>`
-   from any notification `url`. A comment body
-   @-mentions the user when it contains that profile URL, a mention link to
-   it, or `@<handle>`. The user's name as plain text, without the profile
-   link, is not a mention.
+   `id`, `name`, and profile URL
+   (`https://linear.app/<workspace>/profiles/<handle>`). A comment body
+   @-mentions the user only when it contains that profile URL or a mention
+   link to it. The user's name or `@<handle>` as plain text, without the
+   profile link, is not a mention, because Linear does not notify it as one.
 
 2. **Fetch every unread notification.** Call `get_notifications` with
    `unreadOnly: true` and `limit: 250`. Follow `cursor` until `hasNextPage` is
