@@ -289,7 +289,8 @@ it as a label. For a public repository, write it on the synced Linear issue: the
 issue whose GitHub attachment URL equals the GitHub issue URL. `list_issues`
 returns no attachments, so confirm each candidate with `get_issue` and
 `fields: ["attachments", "priority"]`. A title match alone is not a match. When no synced Linear
-issue exists, write no priority and name the gap in the reply.
+issue exists, or it is archived, write no priority and name the gap in the
+reply.
 
 ## Tracker-agnostic operations
 
