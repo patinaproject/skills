@@ -43,7 +43,7 @@ Use lookups only: read files, search and count with `git grep`, trace calls, and
 
 ## 3. Rank by attention
 
-Put first the items that need the reviewer to decide. In that group, put hard-to-reverse items before others, and larger blast radius before smaller. Then put clear requests to the author. Collapse the FYI items. Include every item that deserves the reviewer's attention, and leave out what does not. Give each item a one-line headline. Keep the detail to three sentences, plus one visual when a shape explains it faster than words. Each ranked item is the only place that item appears: its explanation and its action sit together, and no separate list repeats it.
+Put first the items that need the reviewer to decide. In that group, put hard-to-reverse items before others, and larger blast radius before smaller. Then put clear requests to the author. Collapse the FYI items. Include every item that deserves the reviewer's attention, and leave out what does not. Give each item a one-line headline. Keep the detail to three sentences, plus one visual when a shape explains it faster than words. Each ranked item is the only place that item appears. Its explanation and its action sit together, and no separate list repeats it. A visual stays next to its item.
 
 ## 4. Give each item its action
 
@@ -56,7 +56,7 @@ Attach these fields to the ranked item:
 
 An FYI item has no comment and no control.
 
-Give every ranked item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored selection still finds it.
+Give every ranked item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored choice still finds it.
 
 ## 5. Write the artifact
 
@@ -66,7 +66,7 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 - "In 30 seconds": three bullets;
 - the ranked items, each carrying its own action;
 - inside each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", shows only the chosen ruling's comment, and collapses the other option. Selecting another option changes the ruling, and "Clear" removes it;
-- inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. No control is a "done" checkbox;
+- inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. There is no separate "done" checkbox;
 - the evidence ledger, and a short "Not looked at" list.
 
 For each visual, follow the bundled `show-me` skill. Read its installed [`SKILL.md`](../../show-me/SKILL.md) and do not invoke it, because it is not model-invocable. It picks the smallest view that makes the point. This brief still decides which items appear, their order, and the sections above. Put every view inside the artifact page, and write the page to your HTML output path. Never run `open` on it, because the coordinator publishes it with the Artifact tool.
@@ -106,4 +106,4 @@ tiers: decide <n>, comment <n>, fyi <n>
 ## Follow-ups
 
 - **Question:** answer from your context, and read more code if you need to. Return a short answer in plain words, with each `file:line` linked, and `html: changed` or `html: unchanged`.
-- **New head:** compare the new head with the last head you reviewed. Move addressed items to a collapsed "Done" list. It holds addressed items from earlier heads and is not a checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.
+- **New head:** compare the new head with the last head you reviewed. Move addressed items to a collapsed "Done" list. The list holds addressed items from earlier heads. It has no checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Return the block from section 6.
