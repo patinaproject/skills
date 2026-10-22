@@ -41,7 +41,7 @@ Account for every new or changed exported name, type, route, cache tag, environm
 
 ### Choose the contracts
 
-Read the installed [`design-by-contract`](../../design-by-contract/SKILL.md) and apply it to lens 3 to pick what the page shows. Keep a contract only when the PR sets it and it is hard to reverse, surprising without explanation, or based on a real trade-off. A PR that sets no such contract gets no contracts section and no contracts diagram.
+Read the installed [`design-by-contract`](../../design-by-contract/SKILL.md) and apply it to lens 3 to pick what the page shows. Keep a contract only when the PR sets it and it is hard to reverse, surprising without explanation, or based on a real trade-off. When no contract qualifies, omit the section and the diagram.
 
 For each kept contract, record these five fields, each with its `file:line`:
 
@@ -81,7 +81,7 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 - the ranked items, each carrying its own action;
 - inside each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", shows only the chosen ruling's comment, and collapses the other option. Selecting another option changes the ruling, and "Clear" removes it;
 - inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. There is no separate "done" checkbox;
-- "Contracts this PR sets", after the ranked items, when you kept any contract: a table with one row per contract and one column for each of the five fields above. Link every `file:line` in a cell by the link rule. Show `missing` as written, in its cell. Put a Mermaid diagram directly under the table row it explains only when a sequence, a state change, or a dependency is hard to follow in prose. Give it a caption whose `file:line` references are links;
+- "Contracts this PR sets", after the ranked items, when you kept any contract: a table with one row per contract. Its columns are "Caller and code", "Caller provides", "Code guarantees", "Must stay true", and "If broken". Link every `file:line` in a cell by the link rule. The table summarizes and does not repeat the text of a ranked item. Draw a Mermaid diagram only when a sequence, a state change, or a dependency is hard to follow in prose. Put it directly below the table, one whole diagram for each such contract, and name the contract in its caption. Make each `file:line` in the caption a link;
 - the evidence ledger, and a short "Not looked at" list.
 
 Draw each contracts diagram as a `<pre class="mermaid">` block. The artifact host renders it, so the page loads no Mermaid library. Keep every label on one line and never write `<br/>`, because the renderer drops it and joins the words.
