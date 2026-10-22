@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.19.1](https://github.com/patinaproject/skills/compare/v3.19.0...v3.19.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* [#744](https://github.com/patinaproject/skills/issues/744) record interactive priority choices and close triage priority gaps ([#747](https://github.com/patinaproject/skills/issues/747)) ([698e652](https://github.com/patinaproject/skills/commit/698e652cf9bf75e5c252f6eb3b3e8f300a417b58))
+
 ## [3.19.0](https://github.com/patinaproject/skills/compare/v3.18.1...v3.19.0) (2026-10-21)
 
 
