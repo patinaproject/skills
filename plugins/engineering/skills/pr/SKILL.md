@@ -174,7 +174,7 @@ Screenshots are S-tier - when the environment is set up for it and the change is
 
 Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.
 
-When attachments are used, follow [the upload guide](references/media.md).
+When the body includes uploaded images or video, follow [the upload guide](references/media.md).
 
 ### Happy Path
 
