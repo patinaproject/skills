@@ -89,7 +89,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 4. **Grill (if needed).** If the request needs fleshing out, or the readiness check ([READINESS.md](READINESS.md)) has gaps you can't close yourself, call the Skill tool twice, for "grilling" and "domain-modeling", and grill it into shape a round of questions at a time, sharpening domain terms and updating `GLOSSARY.md`/ADRs inline as decisions land.
 
-5. **Apply the outcome**, running the live-state check before each write, the priority write included. Set the priority the maintainer accepted or chose, unless the outcome closes the issue. See **Priority** below. Then:
+5. **Apply the outcome**, running the live-state check before each write, the priority write included. Set the priority the maintainer accepted or chose, and record it, unless the outcome closes the issue. See **Priority** below. Then:
    - `Ready for agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the label.
    - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
    - `Needs info`: write triage notes (template below).
@@ -101,7 +101,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 ## Priority
 
-Recommend the priority that the `## Priority rubric` section of the issue tracker config gives. A set priority that the latest `Priority: <value>, set by triage` line in the triage notes does not match was chosen by a person: show it and recommend keeping it. A priority the maintainer accepts or chooses is theirs and needs no record. A priority is never a readiness item. When the config has no rubric section, recommend Urgent only for a live fault affecting users, otherwise leave priority unset, and ask the maintainer to re-run `setup-team-skills` to configure priority.
+Recommend the priority that the `## Priority rubric` section of the issue tracker config gives. The latest `Priority:` line in the triage notes is authoritative. A set priority was chosen by a person when that line says `set by <person>`, or when it says `set by triage` with a different value: show it and recommend keeping it. When the maintainer accepts or chooses a priority, add `Priority: <value>, set by <maintainer>` to the triage notes through the issue tracker config's issue-artifact operation, even when the value matches the recommendation. For a public repository, the triage notes are the Document on the synced Linear issue. Without that line, a later automated triage pass reads the value as its own and can overwrite it. A priority is never a readiness item. When the config has no rubric section, recommend Urgent only for a live fault affecting users, otherwise leave priority unset, and ask the maintainer to re-run `setup-team-skills` to configure priority.
 
 ## Quick state override
 
