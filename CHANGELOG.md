@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.22.0](https://github.com/patinaproject/skills/compare/v3.21.0...v3.22.0) (2026-10-22)
+
+
+### Features
+
+* [#642](https://github.com/patinaproject/skills/issues/642) produce every pr-readiness obligation from forge-attributed evidence ([#649](https://github.com/patinaproject/skills/issues/649)) ([f232676](https://github.com/patinaproject/skills/commit/f232676245a311d05adc0a3a56535a8726ad26f4))
+
 ## [3.21.0](https://github.com/patinaproject/skills/compare/v3.20.0...v3.21.0) (2026-10-22)
 
 
