@@ -211,7 +211,7 @@
   },
   "plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md": {
     "kind": "policy",
-    "reason": "Patina hands titles to the project's commit conventions and PR bodies to the pr skill, adds GitHub-native stack and fetch-by-URL worktree steps, and replaces open-ready with the caller-selected mode and the /deslop, /no-comments, code-review, and pr-readiness publish gate.",
+    "reason": "Patina hands titles to the project's commit conventions and PR bodies to the pr skill, points demo media at the pr skill's upload guide, adds GitHub-native stack and fetch-by-URL worktree steps, and replaces open-ready with the caller-selected mode and the /deslop, /no-comments, code-review, and pr-readiness publish gate.",
     "upstream": {
       "status": "not-proposed"
     }
