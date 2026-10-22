@@ -23,6 +23,7 @@ Team plugin skills live under `plugins/team/skills/<name>/`.
 - `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
 - `plugins/team/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
 - `plugins/team/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
+- `plugins/team/skills/linear-inbox-cleanup/`: marks Linear inbox notifications read when they need no action
 - `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
@@ -108,6 +109,7 @@ Skills owned by this repository:
 | `email-inbox-triage` | `plugins/team/skills/email-inbox-triage/` | Provider-agnostic email inbox triage into four tagged buckets |
 | `cloud-storage-organization` | `plugins/team/skills/cloud-storage-organization/` | Storage-agnostic loop that files loose files by learned rules |
 | `draft-user-follow-ups` | `plugins/team/skills/draft-user-follow-ups/` | Post-release support loop that drafts proven replies to owed customers |
+| `linear-inbox-cleanup` | `plugins/team/skills/linear-inbox-cleanup/` | Marks Linear inbox notifications read when they need no action |
 | `gather-evidence` | `plugins/engineering/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/engineering/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `retro` | `plugins/team/skills/retro/` | Coding-session retrospective workflow |
