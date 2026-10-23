@@ -70,7 +70,7 @@ first.
 | Label | Meaning |
 | --- | --- |
 | `Needs triage` | Maintainer needs to evaluate this issue |
-| `Needs info` | Waiting on the reporter or the developers to answer open questions |
+| `Needs info` | Waiting on the reporter or a developer to answer open questions |
 | `Ready for agent` | Fully specified, ready for an AFK agent |
 | `Ready for human` | Requires human implementation |
 | `Won't fix` | Will not be actioned |
