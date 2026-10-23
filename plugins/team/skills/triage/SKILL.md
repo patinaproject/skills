@@ -33,7 +33,7 @@ At most one **Theme**, the first in the config's order that fits.
 One **Triage** label:
 
 - `Needs triage`: maintainer needs to evaluate
-- `Needs info`: waiting on reporter for more information
+- `Needs info`: waiting on the reporter or the developers to answer open questions
 - `Ready for agent`: fully specified, ready for an AFK agent
 - `Ready for human`: needs human implementation
 - `Won't fix`: will not be actioned
@@ -42,7 +42,7 @@ For a PR, the same Triage labels read against the attached code: `Ready for agen
 
 Every triaged issue should carry exactly one Type and one Triage label, and at most one Theme. If Triage labels conflict, flag it and ask the maintainer before doing anything else.
 
-State transitions: an unlabeled issue normally goes to `Needs triage` first; from there it moves to `Needs info`, `Ready for agent`, `Ready for human`, or `Won't fix`. `Needs info` returns to `Needs triage` once the reporter replies. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
+State transitions: an unlabeled issue normally goes to `Needs triage` first; from there it moves to `Needs info`, `Ready for agent`, `Ready for human`, or `Won't fix`. `Needs info` returns to `Needs triage` once the people it asked reply. An issue with an open question never gets a ready label. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
 
 ## Check live state before each write
 
@@ -73,7 +73,7 @@ Query the issue tracker and present three buckets, oldest first:
 
 1. **Unlabeled**: never triaged.
 2. **`Needs triage`**: evaluation in progress.
-3. **`Needs info` with reporter activity since the last triage notes**: needs re-evaluation.
+3. **`Needs info` with activity since the last triage notes from anyone it asked**: needs re-evaluation.
 
 When PRs are in scope, include external PRs in these buckets and tag each line `[PR]` or `[issue]`. Discovery surfaces only *external* PRs (the tracker config defines who counts as external), so a collaborator's in-flight PR is not triage work. This filter is discovery-only; an explicitly named PR is always triaged regardless of author.
 
@@ -91,7 +91,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 5. **Apply the outcome**, running the live-state check before each write, the priority write included. Set the priority the maintainer accepted or chose, and record it, unless the outcome closes the issue. See **Priority** below. Then:
    - `Ready for agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the label.
-   - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
+   - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing). An unanswered question is never that reason: apply `Needs info` instead.
    - `Needs info`: write triage notes (template below).
    - For `Won't fix`, close the issue, with the comment depending on *why*:
      - **Already implemented**: the change already exists in the codebase. Point to where it lives; do **not** write to `.out-of-scope/` (that KB is for *rejected* requests, not built ones).
@@ -119,10 +119,10 @@ A move to `Ready for agent` or `Ready for human` still runs the readiness check 
 - point 1
 - point 2
 
-**What we still need from you (@reporter):**
+**What we still need:**
 
-- question 1
-- question 2
+- @reporter: question 1
+- @developer: question 2
 
 **Readiness check:**
 
@@ -133,4 +133,4 @@ Capture everything resolved during grilling under "established so far" so the wo
 
 ## Resuming a previous session
 
-If prior triage notes exist on the issue or PR, read them, check whether the reporter has answered any outstanding questions, and present an updated picture before continuing. Don't re-ask resolved questions.
+If prior triage notes exist on the issue or PR, read them, check whether the people asked have answered any outstanding questions, and present an updated picture before continuing. Don't re-ask resolved questions.

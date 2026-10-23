@@ -104,7 +104,7 @@ A transition replaces it and preserves the Type and Theme.
 | Label | Meaning | GitHub | Linear |
 | --- | --- | --- | --- |
 | `Needs triage` | Maintainer evaluation is required | label, issue open | label, Triage |
-| `Needs info` | Waiting for information | label, issue open | label |
+| `Needs info` | Waiting on the reporter or the developers to answer open questions | label, issue open | label |
 | `Ready for agent` | Ready for an implementation agent | label, issue open | label, `Todo` |
 | `Ready for human` | Requires human implementation | label, issue open | label, `Todo` |
 | `Won't fix` | Deliberately declined | label, issue closed | label, Canceled |
@@ -398,15 +398,15 @@ Re-running triage updates both in place.
 Triage writes a comment only in these cases:
 
 - **`Needs info`:** one short comment that starts with the triage disclaimer,
-  @-mentions the reporter, and links the `Triage notes` Document. It mentions
-  nobody else.
+  @-mentions each person who must answer, the reporter or a developer, and
+  links the `Triage notes` Document. It mentions nobody else.
 - **`Won't fix`:** the explanation comment posted with the closure.
 
 `Ready for agent`, `Ready for human`, and `Needs triage` get no comment.
 
-"Reporter activity since the last triage notes" means a comment or an edit to
-the issue body by the reporter after the `Last updated:` time of the `Triage
-notes` Document. When a person has removed that line, use the Document's
+"Activity since the last triage notes" means a comment or an edit to the issue
+body, by a person the `Needs info` comment mentioned, after the `Last updated:`
+time of the `Triage notes` Document. When a person has removed that line, use the Document's
 `updatedAt` instead. When
 triage gathers context, it reads the `Triage notes` and `Agent brief` Documents
 and every older comment that starts with the triage disclaimer, so it does not
