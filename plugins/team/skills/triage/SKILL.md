@@ -91,7 +91,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
 
 5. **Apply the outcome**, running the live-state check before each write, the priority write included. Set the priority the maintainer accepted or chose, and record it, unless the outcome closes the issue. See **Priority** below. Then:
    - `Ready for agent`: run the readiness check ([READINESS.md](READINESS.md)). When it passes, write the agent brief ([AGENT-BRIEF.md](AGENT-BRIEF.md)) and apply the label.
-   - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing).
+   - `Ready for human`: same readiness check and brief, and the brief notes why it can't be delegated (judgment calls, external access, design decisions, manual testing). An open question is never that reason, so the issue gets `Needs info` instead.
    - `Needs info`: write triage notes (template below).
    - For `Won't fix`, close the issue, with the comment depending on *why*:
      - **Already implemented**: the change already exists in the codebase. Point to where it lives; do **not** write to `.out-of-scope/` (that KB is for *rejected* requests, not built ones).
