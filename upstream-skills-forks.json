@@ -610,7 +610,7 @@
   },
   "plugins/team/skills/setup-team-skills/triage-labels.md": {
     "kind": "policy",
-    "reason": "Patina seeds the Labels section of the issue tracker config with its per-repository Type sets and Theme labels, kept identical to docs/agents/issue-tracker.md by lint-label-vocabulary-parity (ADR-682).",
+    "reason": "Patina seeds the Labels section of the issue tracker config with its per-repository Type sets and Theme labels, kept identical to docs/agents/issue-tracker.md by lint-label-vocabulary-parity (ADR-682). Its Needs info meaning waits on the reporter or a developer, where upstream waits only on the reporter.",
     "upstream": {
       "status": "not-proposed"
     }
