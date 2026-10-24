@@ -540,7 +540,7 @@
   },
   "plugins/team/skills/triage/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Theme, and Triage labels instead of the upstream roles (ADR-682). It also recommends a priority from the issue tracker config's Priority rubric and records who set it (ADR-692). Patina also re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read.",
+    "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Theme, and Triage labels instead of the upstream roles (ADR-682). It also recommends a priority from the issue tracker config's Priority rubric and records who set it (ADR-692). Patina also re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read. Patina applies Needs info for an open question to the reporter or to the developers, where upstream waits only on the reporter, so an issue with an open question never gets a ready label.",
     "upstream": {
       "status": "not-proposed"
     }

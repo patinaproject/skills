@@ -11,7 +11,7 @@ Every item must hold:
 3. **Out of scope checked.** `.out-of-scope/*.md` was read, and any match is named and addressed. "None match" is a valid result.
 4. **Acceptance criteria and scope boundaries.** Concrete, independently verifiable acceptance criteria are written, and so is what is out of scope.
 5. **No open questions.** The triage notes list nothing still needed.
-6. **Reason it can't be delegated.** For `Ready for human` only: the notes say why an agent can't do it.
+6. **Reason it can't be delegated.** For `Ready for human` only: the notes say why an agent can't do it. An open question is never that reason. It fails item 5.
 7. **Decisions approved.** Every design or naming decision the brief depends on that meets all three ADR criteria is listed in the triage notes, with the person who approved it:
    - **Hard to reverse:** changing your mind later costs something meaningful.
    - **Surprising without context:** a future reader would wonder why it was done this way.
@@ -49,5 +49,5 @@ Write the triage notes and the agent brief through the issue-tracker config's is
 ## Outcome
 
 - **Every item holds:** write the agent brief from what the checklist established, then apply the label. When the Type needs no repository change, such as `Task`, the brief names the action to take and how to confirm it is done, not code changes.
-- **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the report, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes. If only the reporter can answer them, apply `Needs info`; otherwise leave `Needs triage`.
+- **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the report, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes, each with the person who must answer it: the reporter or a developer. Apply `Needs info` whenever a question remains, whoever must answer it.
 - **"Decisions approved" fails:** follow the bullet above, but never close this gap yourself. Ask each unapproved decision as a grilling question with your recommended answer. The item fails until a person answers it.
