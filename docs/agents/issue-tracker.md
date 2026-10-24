@@ -407,9 +407,10 @@ Triage writes a comment only in these cases:
 "Activity since the last triage notes" means a comment or an edit to the issue
 body, by a person the `Needs info` comment mentioned, after the `Last updated:`
 time of the `Triage notes` Document. When a person has removed that line, use
-the Document's `updatedAt` instead. When triage gathers context, it reads the `Triage notes` and `Agent brief` Documents
-and every older comment that starts with the triage disclaimer, so it does not
-ask a question that was already answered.
+the Document's `updatedAt` instead. When triage gathers context, it reads the
+`Triage notes` and `Agent brief` Documents and every older comment that starts
+with the triage disclaimer, so it does not ask a question that was already
+answered.
 
 ### Research on a Linear issue
 
