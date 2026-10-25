@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/patinaproject/skills/compare/v3.23.1...v4.0.0) (2026-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* the team and engineering plugins are now work and code. Install work@patinaproject-skills and code@patinaproject-skills instead.
+
+### Features
+
+* [#764](https://github.com/patinaproject/skills/issues/764) rename the Team and Engineering plugins to Work and Code ([#765](https://github.com/patinaproject/skills/issues/765)) ([992422c](https://github.com/patinaproject/skills/commit/992422cfd915c0a9599139a76a61463fb33b0ea2))
+
 ## [3.23.1](https://github.com/patinaproject/skills/compare/v3.23.0...v3.23.1) (2026-10-22)
 
 
