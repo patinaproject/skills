@@ -16,7 +16,7 @@ works in the most runtimes.
 ## Decision
 
 Engineering skills name other Engineering skills and agents by their bare names.
-`setup-engineering-skills` installs every Engineering agent, including the
+`setup-code-skills` installs every Engineering agent, including the
 `patina-agent-<level>` and `effort-<level>` effort agents, under its bare name in
 the repository's `.claude/agents/`, so the same names resolve in both install
 shapes. The upstream sync gains an `unprefix` transform beside ADR-570's renames
@@ -25,7 +25,7 @@ and the sync fails when a namespaced name survives the rewrite.
 
 ## Consequences
 
-A plugin install needs `setup-engineering-skills` for agent dispatch to resolve. The
+A plugin install needs `setup-code-skills` for agent dispatch to resolve. The
 skill-reference lint checks bare agent names in `subagent_type` and `agent_type`
 values, rejects a namespaced Engineering agent there, and checks that the
 SessionStart mandate names existing Engineering skills. The Team plugin's

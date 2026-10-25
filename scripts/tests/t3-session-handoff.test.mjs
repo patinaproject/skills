@@ -30,7 +30,7 @@ import { DatabaseSync } from 'node:sqlite';
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const helper = join(
   repoRoot,
-  'plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs'
+  'plugins/code/skills/move-session-here/scripts/session-handoff.mjs'
 );
 const fixtureRoot = realpathSync(
   mkdtempSync(join(tmpdir(), 't3-session-handoff-test.'))

@@ -114,7 +114,7 @@ fi
 
 # 3. The other half of the contract: this repo's own authored skills are
 # first-party markdown written against this config, so they must be linted.
-first_party="$(find plugins/team/skills/using-github -name '*.md' -type f -print -quit)"
+first_party="$(find plugins/work/skills/using-github -name '*.md' -type f -print -quit)"
 if [ -n "$first_party" ]; then
   first_party_output="$(pnpm exec markdownlint-cli2 "$first_party" 2>&1)" || {
     printf '%s\n' "$first_party_output" >&2
@@ -125,18 +125,18 @@ if [ -n "$first_party" ]; then
   fi
 fi
 
-assert_ignored "plugins/engineering/skills/code-review/SKILL.md" "upstream Engineering mirror code-review"
+assert_ignored "plugins/code/skills/code-review/SKILL.md" "upstream Code mirror code-review"
 for upstream_skill in to-spec to-tickets triage retro; do
-  upstream_file="plugins/team/skills/$upstream_skill/SKILL.md"
-  assert_ignored "$upstream_file" "upstream Team mirror $upstream_skill"
+  upstream_file="plugins/work/skills/$upstream_skill/SKILL.md"
+  assert_ignored "$upstream_file" "upstream Work mirror $upstream_skill"
 done
 
-engineering_output="$(pnpm exec markdownlint-cli2 "plugins/engineering/**/*.md" 2>&1)" || {
+engineering_output="$(pnpm exec markdownlint-cli2 "plugins/code/**/*.md" 2>&1)" || {
   printf '%s\n' "$engineering_output" >&2
-  fail "Engineering plugin Markdown must lint clean"
+  fail "Code plugin Markdown must lint clean"
 }
 if printf '%s\n' "$engineering_output" | grep -q "$NO_FILES_SELECTED_LINE"; then
-  fail "Engineering plugin Markdown must be linted, not excluded"
+  fail "Code plugin Markdown must be linted, not excluded"
 fi
 
 # 4. The exclusion above is load-bearing, not vacuous: a payload written against

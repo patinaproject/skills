@@ -3,8 +3,8 @@
 The Patina Project skills repo releases via `release-please` with a single root package
 (`release-type: simple`). Tag form: `v<X.Y.Z>` — no component prefix.
 
-Engineering skills live at `plugins/engineering/skills/<name>/` and Team skills
-at `plugins/team/skills/<name>/`. Both Patina plugins are versioned together
+Code skills live at `plugins/code/skills/<name>/` and Work skills
+at `plugins/work/skills/<name>/`. Both Patina plugins are versioned together
 as one marketplace release. On each release,
 `release-please` also bumps `metadata.version` in `.claude-plugin/marketplace.json` via the
 `extra-files` block in `release-please-config.json`. `find-skills` is no longer part of
@@ -44,7 +44,7 @@ build step is required.
 
 ## Lifecycle
 
-Upstream Engineering skills are maintained with `pnpm sync-upstream-skills`.
+Upstream Code skills are maintained with `pnpm sync-upstream-skills`.
 The command reads `upstream-skills.json`, applies each source's pinned commit
 with a regenerated three-way merge base, and stages the new pin and content.
 Run `pnpm sync-upstream-skills --dry-run` in CI to validate the forks registry.

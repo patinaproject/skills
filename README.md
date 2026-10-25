@@ -23,22 +23,25 @@ Claude Code:
 
 ```text
 /plugin marketplace add patinaproject/skills
-/plugin install engineering@patinaproject-skills
-/plugin install team@patinaproject-skills
+/plugin install code@patinaproject-skills
+/plugin install work@patinaproject-skills
 ```
 
-The `team` plugin carries the human-invoked skills: repository scaffolding,
+The `work` plugin carries the human-invoked skills: repository scaffolding,
 GitHub, install, system-design, spec, triage, and review skills.
 
 > **Migration:** the `patinaproject-skills` plugin is retired. Its skills now
-> ship in `team`. Uninstall `patinaproject-skills` and install `team` instead.
+> ship in `work`. Uninstall `patinaproject-skills` and install `work` instead.
+>
+> **Rename:** the `team` and `engineering` plugins are now `work` and `code`.
+> Uninstall the old plugins and install the new ones.
 
 Codex:
 
 ```text
 /marketplace add patinaproject/skills
-/install engineering
-/install team
+/install code
+/install work
 ```
 
 > **Security note:** For environments where you want to prevent install scripts
@@ -62,7 +65,7 @@ GitHub forge work — repository and pull-request operations — is repetitive a
 convention-sensitive. `using-github` keeps those forge mechanics consistent;
 tracker operations are deliberately delegated to `docs/issue-tracker.md`.
 
-See [./plugins/team/skills/using-github/](./plugins/team/skills/using-github/) for the full README and
+See [./plugins/work/skills/using-github/](./plugins/work/skills/using-github/) for the full README and
 skill contract.
 
 ### update-branch
@@ -72,7 +75,7 @@ default target when no pull request exists. It keeps remote branch updates
 opt-in, routes merge conflicts through the conflict workflow, and reports the
 exact local and remote state.
 
-See [./plugins/team/skills/update-branch/](./plugins/team/skills/update-branch/) for the skill contract.
+See [./plugins/work/skills/update-branch/](./plugins/work/skills/update-branch/) for the skill contract.
 
 ### install-skills
 
@@ -82,20 +85,20 @@ operator's global agent environment. `install-skills` gives agents a canonical
 install selected skills project-locally for all supported agent targets, and
 verify the resulting lockfile and overlay changes.
 
-See [./plugins/team/skills/install-skills/](./plugins/team/skills/install-skills/) for the skill contract.
+See [./plugins/work/skills/install-skills/](./plugins/work/skills/install-skills/) for the skill contract.
 
 ### working-on-issues
 
-Engineering uses `working-on-issues` for its stricter issue preflight. It
+Code uses `working-on-issues` for its stricter issue preflight. It
 resolves one issue, discovers the live tracker contract, and enforces the
 completed-issue, blocker, branch, and worktree gates before marking work
 started.
 
-See [./plugins/engineering/skills/working-on-issues/](./plugins/engineering/skills/working-on-issues/) for the skill contract.
+See [./plugins/code/skills/working-on-issues/](./plugins/code/skills/working-on-issues/) for the skill contract.
 
 ### Writing specs and issues
 
-The Team plugin exposes the upstream `/to-spec` workflow and
+The Work plugin exposes the upstream `/to-spec` workflow and
 uses the adapter for claiming, labels, lifecycle, relationships, and closure.
 Skills that need issue mechanics follow
 [`docs/issue-tracker.md`](./docs/issue-tracker.md), the sole adapter that
@@ -108,7 +111,7 @@ manual recovery strands work or drops review coverage. `move-branch-here`
 describes how to release the branch from that worktree, attach it to the
 current one, preserve its working state, and retain review coverage.
 
-See [the Engineering copy](./plugins/engineering/skills/move-branch-here/) for
+See [the Code copy](./plugins/code/skills/move-branch-here/) for
 the skill contract.
 
 ### design-by-contract
@@ -118,7 +121,7 @@ what each contract requires, ensures, and maintains. It compares changes and
 alternatives through precise clauses, with tables or Mermaid diagrams when a
 visual explanation materially improves clarity.
 
-See [./plugins/team/skills/design-by-contract/](./plugins/team/skills/design-by-contract/) for the skill
+See [./plugins/work/skills/design-by-contract/](./plugins/work/skills/design-by-contract/) for the skill
 contract.
 
 ### principle-offensive-programming
@@ -129,7 +132,7 @@ input, handles expected behavior at its owner, and makes internal defects fail
 close to their cause.
 
 See
-[./plugins/engineering/skills/principle-offensive-programming/](./plugins/engineering/skills/principle-offensive-programming/)
+[./plugins/code/skills/principle-offensive-programming/](./plugins/code/skills/principle-offensive-programming/)
 for the skill contract.
 
 ### grill-system-design
@@ -139,7 +142,7 @@ System design grilling should focus on choices that deserve durable context.
 hands a settled design to `to-spec`, and limits questions to hard-to-reverse,
 surprising trade-offs.
 
-See [./plugins/team/skills/grill-system-design/](./plugins/team/skills/grill-system-design/) for the skill
+See [./plugins/work/skills/grill-system-design/](./plugins/work/skills/grill-system-design/) for the skill
 contract.
 
 ### review-system-design
@@ -148,7 +151,7 @@ System design review needs an implementation-focused map of the contracts that
 changed. `review-system-design` presents those contracts in dependency-ordered
 rounds for a human reviewer.
 
-See [./plugins/team/skills/review-system-design/](./plugins/team/skills/review-system-design/) for the
+See [./plugins/work/skills/review-system-design/](./plugins/work/skills/review-system-design/) for the
 skill contract.
 
 ### writing-for-pstack
@@ -158,7 +161,7 @@ operator prompt. It selects one current `patina-mode` playbook, keeps the facts
 that only the operator can supply, and names the owner of each rule removed
 from a draft.
 
-See [./plugins/team/skills/writing-for-pstack/](./plugins/team/skills/writing-for-pstack/) for
+See [./plugins/work/skills/writing-for-pstack/](./plugins/work/skills/writing-for-pstack/) for
 the skill contract.
 
 ### email-inbox-triage
@@ -176,7 +179,7 @@ only writes are the four bucket tags, archiving or un-archiving a thread to
 match its bucket, and appends to `Learned`, and
 a second run converges on the same state.
 
-See [./plugins/team/skills/email-inbox-triage/](./plugins/team/skills/email-inbox-triage/) for the skill
+See [./plugins/work/skills/email-inbox-triage/](./plugins/work/skills/email-inbox-triage/) for the skill
 contract.
 
 ### cloud-storage-organization
@@ -192,7 +195,7 @@ correction, and a move that would change who can see a file waits for the
 user's yes. It works with any storage tools that can list, move, rename,
 trash, and edit a document in place.
 
-See [./plugins/team/skills/cloud-storage-organization/](./plugins/team/skills/cloud-storage-organization/)
+See [./plugins/work/skills/cloud-storage-organization/](./plugins/work/skills/cloud-storage-organization/)
 for the skill contract.
 
 ### draft-user-follow-ups
@@ -204,7 +207,7 @@ customer, then drafts the reply inside the customer's thread. Each owed reply
 ends as ready to send or blocked on a named check. It writes email drafts only,
 and reads repository-specific facts from a consumer config.
 
-See [./plugins/team/skills/draft-user-follow-ups/](./plugins/team/skills/draft-user-follow-ups/)
+See [./plugins/work/skills/draft-user-follow-ups/](./plugins/work/skills/draft-user-follow-ups/)
 for the skill contract.
 
 ### linear-inbox-cleanup
@@ -215,7 +218,7 @@ pull requests, status changes, Triage Rule assignments, and comment threads the
 user never joined and was never @-mentioned in. Every other notification stays
 unread. It uses only the Linear MCP tools and changes nothing but read state.
 
-See [./plugins/team/skills/linear-inbox-cleanup/](./plugins/team/skills/linear-inbox-cleanup/)
+See [./plugins/work/skills/linear-inbox-cleanup/](./plugins/work/skills/linear-inbox-cleanup/)
 for the skill contract.
 
 ### gather-evidence
@@ -225,7 +228,7 @@ target before the agent edits code or prepares a response. `gather-evidence`
 records a verdict for each claim and routes confirmed work back to patina-mode.
 It does not own implementation, replies, thread resolution, or review state.
 
-See [./plugins/engineering/skills/gather-evidence/](./plugins/engineering/skills/gather-evidence/)
+See [./plugins/code/skills/gather-evidence/](./plugins/code/skills/gather-evidence/)
 for the skill contract.
 
 ### pr-review-assistant
@@ -235,7 +238,7 @@ PR as an artifact (intent, hard-to-reverse changes, changed names and flows,
 blast radius) with a comment to leave on each item. The reviewer stays the
 judge. It writes nothing to GitHub or Linear until the reviewer asks.
 
-See [./plugins/team/skills/pr-review-assistant/](./plugins/team/skills/pr-review-assistant/)
+See [./plugins/work/skills/pr-review-assistant/](./plugins/work/skills/pr-review-assistant/)
 for the skill contract.
 
 ### running-mobile-simulators
@@ -245,7 +248,7 @@ automation processes. `running-mobile-simulators` binds one session to an exact
 device and limits readiness, recovery, evidence, and cleanup to that ownership
 boundary.
 
-See [the Engineering copy](./plugins/engineering/skills/running-mobile-simulators/)
+See [the Code copy](./plugins/code/skills/running-mobile-simulators/)
 for the skill contract.
 
 ### scaffold-repository
@@ -254,32 +257,32 @@ Teams spend disproportionate time on repo plumbing - commit conventions,
 markdown linting, PR templates, and Husky hooks. `scaffold-repository` emits the
 full Patina Project baseline and keeps it aligned on rerun.
 
-See [./plugins/team/skills/scaffold-repository/](./plugins/team/skills/scaffold-repository/) for the full
+See [./plugins/work/skills/scaffold-repository/](./plugins/work/skills/scaffold-repository/) for the full
 README and skill contract.
 
 ## Skills
 
 | Skill | Description |
 |---|---|
-| [using-github](./plugins/team/skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
-| [update-branch](./plugins/team/skills/update-branch/) | Merge a branch target locally with explicit remote-update opt-in |
-| [working-on-issues](./plugins/engineering/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
-| [move-branch-here](./plugins/engineering/skills/move-branch-here/) | Move an issue branch into the current worktree |
-| [install-skills](./plugins/team/skills/install-skills/) | Project-local skills CLI installation workflow |
-| [design-by-contract](./plugins/team/skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
-| [principle-offensive-programming](./plugins/engineering/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
-| [grill-system-design](./plugins/team/skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to an issue |
-| [grill-to-spec](./plugins/team/skills/grill-to-spec/) | Grill a design in a planning worktree and hand doc changes to `to-spec` as proposals |
-| [review-system-design](./plugins/team/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
-| [writing-for-pstack](./plugins/team/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
-| [email-inbox-triage](./plugins/team/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
-| [cloud-storage-organization](./plugins/team/skills/cloud-storage-organization/) | File loose files in any cloud storage by rules learned from your corrections |
-| [draft-user-follow-ups](./plugins/team/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
-| [linear-inbox-cleanup](./plugins/team/skills/linear-inbox-cleanup/) | Mark Linear inbox notifications read when they need no action |
-| [gather-evidence](./plugins/engineering/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
-| [pr-review-assistant](./plugins/team/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact with a comment on each item |
-| [running-mobile-simulators](./plugins/engineering/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
-| [scaffold-repository](./plugins/team/skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
+| [using-github](./plugins/work/skills/using-github/) | patinaproject GitHub forge and pull-request conventions |
+| [update-branch](./plugins/work/skills/update-branch/) | Merge a branch target locally with explicit remote-update opt-in |
+| [working-on-issues](./plugins/code/skills/working-on-issues/) | Align one issue with its live tracker, canonical branch, and isolated worktree |
+| [move-branch-here](./plugins/code/skills/move-branch-here/) | Move an issue branch into the current worktree |
+| [install-skills](./plugins/work/skills/install-skills/) | Project-local skills CLI installation workflow |
+| [design-by-contract](./plugins/work/skills/design-by-contract/) | Analyze and present consequential system design as client-supplier contracts |
+| [principle-offensive-programming](./plugins/code/skills/principle-offensive-programming/) | Decide whether a check validates a boundary, handles expected behavior, or hides a defect |
+| [grill-system-design](./plugins/work/skills/grill-system-design/) | Grill only durable system design trade-offs and hand them to an issue |
+| [grill-to-spec](./plugins/work/skills/grill-to-spec/) | Grill a design in a planning worktree and hand doc changes to `to-spec` as proposals |
+| [review-system-design](./plugins/work/skills/review-system-design/) | Present implementation contracts in dependency-ordered review rounds |
+| [writing-for-pstack](./plugins/work/skills/writing-for-pstack/) | Write a short operator prompt for one `patina-mode` playbook |
+| [email-inbox-triage](./plugins/work/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
+| [cloud-storage-organization](./plugins/work/skills/cloud-storage-organization/) | File loose files in any cloud storage by rules learned from your corrections |
+| [draft-user-follow-ups](./plugins/work/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
+| [linear-inbox-cleanup](./plugins/work/skills/linear-inbox-cleanup/) | Mark Linear inbox notifications read when they need no action |
+| [gather-evidence](./plugins/code/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
+| [pr-review-assistant](./plugins/work/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact with a comment on each item |
+| [running-mobile-simulators](./plugins/code/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
+| [scaffold-repository](./plugins/work/skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
 ## Local iteration
 
@@ -295,8 +298,8 @@ pnpm test
 ### Check a - CLI resolves skills from local paths
 
 ```sh
-npx skills@latest add ./plugins/team/skills/scaffold-repository --list
-npx skills@latest add ./plugins/team/skills/install-skills --list
+npx skills@latest add ./plugins/work/skills/scaffold-repository --list
+npx skills@latest add ./plugins/work/skills/install-skills --list
 ```
 
 ### Check b - scaffold-repository cleanup contract
@@ -314,7 +317,7 @@ bash scripts/tests/dogfood.test.sh
 ## Repository layout
 
 ```text
-plugins/engineering/
+plugins/code/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json
   agents/
@@ -329,7 +332,7 @@ plugins/engineering/
     principle-offensive-programming/
     gather-evidence/
     running-mobile-simulators/
-plugins/team/
+plugins/work/
   .claude-plugin/plugin.json
   .codex-plugin/plugin.json
   skills/
@@ -360,7 +363,7 @@ plugins/team/
     grilling/
     handoff/
     improve-codebase-architecture/
-    setup-team-skills/
+    setup-work-skills/
     teach/
     to-questionnaire/
     wait-what/

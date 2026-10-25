@@ -40,7 +40,7 @@ remain unchanged under the reference-vocabulary rule in
 
 This supersedes the sequential `0001`-increment numbering guidance still embedded
 in the vendored shared skills (e.g. `domain-modeling`,
-`setup-team-skills`). Those payloads are re-installed from
+`setup-work-skills`). Those payloads are re-installed from
 `skills-lock.json` and are not edited; this doc, and the `AGENTS.md` pointer to
 it, are the authority. Do not scan for the highest number and increment.
 

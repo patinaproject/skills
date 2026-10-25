@@ -11,7 +11,7 @@ force.
 
 ## Context
 
-`plugins/engineering/**` is a rebrand of an upstream pstack plugin. Its base is
+`plugins/code/**` is a rebrand of an upstream pstack plugin. Its base is
 moving from `pstack-claude` to `ericlitman/open-pstack`, and thereafter we need
 a repeatable way to pull open-pstack's changes in
 ([#429](https://github.com/patinaproject/skills/issues/429)). Patina edits the
@@ -20,7 +20,7 @@ changes and stop on a real merge conflict wherever an upstream change overlaps a
 local edit — not silently overwrite, and not skip files by an exclude list.
 
 The obstacle is that upstream and our tree share no ancestor for these files.
-The plugin is vendored at `plugins/engineering/**` (not upstream's
+The plugin is vendored at `plugins/code/**` (not upstream's
 `plugins/pstack/**`), and the transform renames `poteto-mode` → `patina-mode`
 and `poteto-agent` → `patina-agent` in both paths and content. A raw `git merge` of
 open-pstack against our tree therefore refuses (`fatal: refusing to merge

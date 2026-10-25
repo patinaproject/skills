@@ -12,9 +12,9 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
-VERIFIER="plugins/team/skills/scaffold-repository/scripts/verify-baseline.sh"
-MANIFEST="plugins/team/skills/scaffold-repository/core-baseline.txt"
-PR_TEMPLATE_SOURCE="plugins/team/skills/scaffold-repository/pr-body-template.md"
+VERIFIER="plugins/work/skills/scaffold-repository/scripts/verify-baseline.sh"
+MANIFEST="plugins/work/skills/scaffold-repository/core-baseline.txt"
+PR_TEMPLATE_SOURCE="plugins/work/skills/scaffold-repository/pr-body-template.md"
 
 fail() {
   echo "FAIL: $1" >&2

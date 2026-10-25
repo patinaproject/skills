@@ -73,7 +73,7 @@ if (stray.length) {
 }
 NODE
 
-if rg -n '"pr",[[:space:]]*"ready"|gh pr ready|origin pr ready' plugins/engineering/skills \
+if rg -n '"pr",[[:space:]]*"ready"|gh pr ready|origin pr ready' plugins/code/skills \
   --glob '*.ts' --glob '*.mjs' --glob '*.sh' --glob '*.md' \
   --glob '!**/pr-readiness/scripts/adapters.ts' --glob '!**/patina-mode/playbooks/opening-a-pr.md' >/dev/null 2>&1; then
   fail "direct forge ready transition found outside pr-readiness adapters"

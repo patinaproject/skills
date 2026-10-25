@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-HELPER="$REPO_ROOT/plugins/team/skills/update-branch/scripts/update-context.sh"
+HELPER="$REPO_ROOT/plugins/work/skills/update-branch/scripts/update-context.sh"
 GIT_ID=(-c user.email=test@example.com -c user.name=test)
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
