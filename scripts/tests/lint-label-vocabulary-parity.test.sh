@@ -7,7 +7,7 @@ root="$(mktemp -d)"
 trap 'rm -rf "$root"' EXIT
 
 adapter="docs/agents/issue-tracker.md"
-template="plugins/team/skills/setup-team-skills/triage-labels.md"
+template="plugins/work/skills/setup-work-skills/triage-labels.md"
 mkdir -p "$root/$(dirname "$adapter")" "$root/$(dirname "$template")"
 printf '# Adapter\n\n<!-- label-vocabulary:start -->\n**Type**\n<!-- label-vocabulary:end -->\n\nadapter only\n' >"$root/$adapter"
 printf '## Labels\n\ntemplate only\n\n<!-- label-vocabulary:start -->\n**Type**\n<!-- label-vocabulary:end -->\n' >"$root/$template"

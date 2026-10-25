@@ -1,0 +1,68 @@
+# scaffold-repository
+
+`scaffold-repository` sets up a new repository with the Patina Project standard
+files or compares an existing repository with the current Patina setup.
+
+It configures commit and pull request rules, pnpm, Husky, Markdown linting,
+agent instructions, GitHub workflows, issue tracking, and repository settings.
+It reads most live files from the root of
+[`patinaproject/skills`](https://github.com/patinaproject/skills) instead of
+shipping copied templates. The bundled `pr-body-template.md` reminds authors
+to include both GitHub and corresponding Linear references, each with its own
+closing keyword. The active workflow owns the rest of the body.
+
+## What it does
+
+- In a new repository, it copies the required files, installs dependencies,
+  stages the result, and leaves the first commit to the user.
+- In an existing repository, it runs `audit-checklist.md`, shows each proposed
+  diff, and waits for the user to accept, skip, or defer it.
+
+See [SKILL.md](./SKILL.md) for the procedure and
+[audit-checklist.md](./audit-checklist.md) for the complete file and settings
+checks.
+
+## Install
+
+Install this skill with:
+
+```bash
+npx skills@latest add patinaproject/skills --skill scaffold-repository
+```
+
+Or install the `work` plugin through the host marketplace:
+
+- Claude Code: `/plugin marketplace add patinaproject/skills`, then
+  `/plugin install work@patinaproject-skills`
+- Codex: `/marketplace add patinaproject/skills`, then
+  `/install work`
+
+The repository root `README.md` contains the full installation guide.
+
+## First use
+
+Run `scaffold-repository` from a cloned repository. It reads owner and
+repository name from `origin` when possible and asks for the description and
+public or private visibility. Author name, author email, and the public security
+contact default to `git config user.name` and `git config user.email`.
+
+## Development
+
+This repository is the reference implementation. Its `opening-a-pr` playbook
+owns body structure here. Consumers use their own active workflow and the
+closing-reference reminder in `pr-body-template.md`.
+
+```bash
+pnpm install
+pnpm lint:md
+echo "feat: #1 verify commitlint" | pnpm exec commitlint
+```
+
+Public repository commits use `type: #N short description`. Private repository
+commits use `type: PAT-N short description`. Choose the type by behavior, not
+file extension. Skill instructions and workflow behavior normally use `feat:`
+or `fix:`. Explanatory documentation uses `docs:`. Maintenance with no visible
+behavior change uses `chore:`.
+
+See the root `AGENTS.md`, `CONTRIBUTING.md`, and `docs/release-flow.md` before
+contributing.

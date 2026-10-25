@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const script = resolve('plugins/team/skills/triage/scripts/check-issue-state.mjs');
+const script = resolve('plugins/work/skills/triage/scripts/check-issue-state.mjs');
 const fixtures = await mkdtemp(join(tmpdir(), 'check-issue-state-'));
 
 const githubIssues = {

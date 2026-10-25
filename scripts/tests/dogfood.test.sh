@@ -23,9 +23,9 @@ for retired_path in \
   skills/resolve-qa-feedback \
   .claude/skills/resolve-qa-feedback \
   .agents/skills/resolve-qa-feedback \
-  plugins/engineering/skills/working-on-issue \
-  plugins/engineering/skills/offensive-programming \
-  plugins/engineering/skills/fix; do
+  plugins/code/skills/working-on-issue \
+  plugins/code/skills/offensive-programming \
+  plugins/code/skills/fix; do
   if [ -e "$retired_path" ] || [ -L "$retired_path" ]; then
     fail "$retired_path still exposes a retired skill"
   fi
@@ -110,36 +110,36 @@ assert_skill_overlay() {
   echo "OK: $name"
 }
 
-for skill_dir in plugins/engineering/skills/*; do
+for skill_dir in plugins/code/skills/*; do
   [ -d "$skill_dir" ] || continue
   assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
 done
 
-for skill_dir in plugins/team/skills/*; do
+for skill_dir in plugins/work/skills/*; do
   [ -d "$skill_dir" ] || continue
   assert_skill_overlay "$(basename "$skill_dir")" "$skill_dir"
 done
 
 begin_count="$(grep -cF '<!-- BEGIN engineering:patina-mode' AGENTS.md || true)"
 end_count="$(grep -cF '<!-- END engineering:patina-mode -->' AGENTS.md || true)"
-[ "$begin_count" -eq 0 ] || fail "AGENTS.md still contains $begin_count managed patina-mode mandate starts; the Engineering plugin hooks deliver the mandate"
-[ "$end_count" -eq 0 ] || fail "AGENTS.md still contains $end_count managed patina-mode mandate ends; the Engineering plugin hooks deliver the mandate"
+[ "$begin_count" -eq 0 ] || fail "AGENTS.md still contains $begin_count managed patina-mode mandate starts; the Code plugin hooks deliver the mandate"
+[ "$end_count" -eq 0 ] || fail "AGENTS.md still contains $end_count managed patina-mode mandate ends; the Code plugin hooks deliver the mandate"
 [ "$(grep -cF '<!-- BEGIN engineering:patina-mode' CLAUDE.md || true)" -eq 0 ] \
   || fail "CLAUDE.md still contains the managed patina-mode mandate"
-[ "$(jq -r '[.hooks.SessionStart[] | select(.matcher == "startup|resume|clear|compact") | .hooks[] | select(.command | contains("plugins/engineering/hooks/session-start.sh"))] | length' .claude/settings.json)" -eq 1 ] \
-  || fail ".claude/settings.json must register exactly one Engineering SessionStart hook"
+[ "$(jq -r '[.hooks.SessionStart[] | select(.matcher == "startup|resume|clear|compact") | .hooks[] | select(.command | contains("plugins/code/hooks/session-start.sh"))] | length' .claude/settings.json)" -eq 1 ] \
+  || fail ".claude/settings.json must register exactly one Code SessionStart hook"
 
 hook_tmp="$(mktemp -d)"
 mkdir -p "$hook_tmp/config"
-hook_output="$(CLAUDE_CONFIG_DIR="$hook_tmp/config" CLAUDE_PLUGIN_ROOT="$PWD/plugins/engineering" plugins/engineering/hooks/session-start.sh claude)"
-[ "$hook_output" = "$(cat plugins/engineering/hooks/session-start-context.md)" ] \
-  || fail "Engineering SessionStart hook did not emit the live context"
+hook_output="$(CLAUDE_CONFIG_DIR="$hook_tmp/config" CLAUDE_PLUGIN_ROOT="$PWD/plugins/code" plugins/code/hooks/session-start.sh claude)"
+[ "$hook_output" = "$(cat plugins/code/hooks/session-start-context.md)" ] \
+  || fail "Code SessionStart hook did not emit the live context"
 printf 'session hook: off\n' > "$hook_tmp/config/pstack-models.md"
-[ -z "$(CLAUDE_CONFIG_DIR="$hook_tmp/config" CLAUDE_PLUGIN_ROOT="$PWD/plugins/engineering" plugins/engineering/hooks/session-start.sh claude)" ] \
-  || fail "Engineering SessionStart hook ignored session hook: off"
+[ -z "$(CLAUDE_CONFIG_DIR="$hook_tmp/config" CLAUDE_PLUGIN_ROOT="$PWD/plugins/code" plugins/code/hooks/session-start.sh claude)" ] \
+  || fail "Code SessionStart hook ignored session hook: off"
 rm -rf "$hook_tmp"
 
-for canonical_agent in plugins/engineering/agents/*.md plugins/engineering/effort-agents/*.md; do
+for canonical_agent in plugins/code/agents/*.md plugins/code/effort-agents/*.md; do
   installed_agent=".claude/agents/$(basename "$canonical_agent")"
   [ -f "$installed_agent" ] || fail "$installed_agent missing"
   cmp -s "$canonical_agent" "$installed_agent" || fail "$installed_agent drifted from $canonical_agent"

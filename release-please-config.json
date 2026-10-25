@@ -14,22 +14,22 @@
         },
         {
           "type": "json",
-          "path": "plugins/engineering/.claude-plugin/plugin.json",
+          "path": "plugins/code/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
         },
         {
           "type": "json",
-          "path": "plugins/engineering/.codex-plugin/plugin.json",
+          "path": "plugins/code/.codex-plugin/plugin.json",
           "jsonpath": "$.version"
         },
         {
           "type": "json",
-          "path": "plugins/team/.claude-plugin/plugin.json",
+          "path": "plugins/work/.claude-plugin/plugin.json",
           "jsonpath": "$.version"
         },
         {
           "type": "json",
-          "path": "plugins/team/.codex-plugin/plugin.json",
+          "path": "plugins/work/.codex-plugin/plugin.json",
           "jsonpath": "$.version"
         }
       ]

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const copies = ['docs/agents/issue-tracker.md', 'plugins/team/skills/setup-team-skills/triage-labels.md'];
+const copies = ['docs/agents/issue-tracker.md', 'plugins/work/skills/setup-work-skills/triage-labels.md'];
 const start = '<!-- label-vocabulary:start -->';
 const end = '<!-- label-vocabulary:end -->';
 

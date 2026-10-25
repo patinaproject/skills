@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_PLUGIN_ROOT=\"$CLAUDE_PROJECT_DIR/plugins/engineering\" \"$CLAUDE_PROJECT_DIR/plugins/engineering/hooks/session-start.sh\" claude"
+            "command": "CLAUDE_PLUGIN_ROOT=\"$CLAUDE_PROJECT_DIR/plugins/code\" \"$CLAUDE_PROJECT_DIR/plugins/code/hooks/session-start.sh\" claude"
           }
         ]
       }

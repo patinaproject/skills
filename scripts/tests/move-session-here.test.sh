@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-HELPER="$REPO_ROOT/plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs"
+HELPER="$REPO_ROOT/plugins/code/skills/move-session-here/scripts/session-handoff.mjs"
 FIXTURE_ROOT="$(mktemp -d)"
 trap 'rm -rf "$FIXTURE_ROOT"' EXIT
 
@@ -28,7 +28,7 @@ cat >"$claude_file" <<JSONL
 {"type":"queue-operation","sessionId":"$claude_id","operation":"enqueue"}
 {"type":"user","sessionId":"$claude_id","uuid":"u1","parentUuid":null,"isSidechain":false,"cwd":"/work/project","gitBranch":"feature/session","message":{"content":"Build the handoff."}}
 {"type":"assistant","sessionId":"$claude_id","uuid":"ignored","parentUuid":"u1","isSidechain":true,"message":{"content":[{"type":"text","text":"sidechain noise"}]}}
-{"type":"assistant","sessionId":"$claude_id","uuid":"a1","parentUuid":"u1","isSidechain":false,"attributionSkill":"engineering:patina-mode","attributionPlugin":"engineering","message":{"content":[{"type":"text","text":"I will inspect it."},{"type":"tool_use","name":"Read","input":{"file_path":"src/main.js"}}]}}
+{"type":"assistant","sessionId":"$claude_id","uuid":"a1","parentUuid":"u1","isSidechain":false,"attributionSkill":"code:patina-mode","attributionPlugin":"code","message":{"content":[{"type":"text","text":"I will inspect it."},{"type":"tool_use","name":"Read","input":{"file_path":"src/main.js"}}]}}
 {"type":"user","sessionId":"$claude_id","uuid":"t1","parentUuid":"a1","isSidechain":false,"attributionMcpServer":"github","attributionMcpTool":"get_issue","message":{"content":[{"type":"tool_result","content":"file contents"}]},"toolUseResult":{"path":"src/main.js","status":"read"}}
 {"type":"last-prompt","sessionId":"$claude_id","leafUuid":"t1"}
 JSONL
@@ -47,7 +47,7 @@ test "$(jq -r '.metadata.gitBranch' <<<"$claude_output")" = "feature/session" ||
 test "$(jq -r '.tracks | length' <<<"$claude_output")" = "2" || fail "Claude sidecar missing"
 test "$(jq -r '[.tracks[].events[] | select(.uuid == "ignored")] | length' <<<"$claude_output")" = "0" || fail "Claude sidechain was retained"
 test "$(jq -r '.tracks[0].events | map(.uuid) | join(",")' <<<"$claude_output")" = "u1,a1,t1" || fail "Claude DAG order is wrong"
-test "$(jq -r '.metadata.skills | join(",")' <<<"$claude_output")" = "engineering:patina-mode" || fail "Claude skill attribution missing"
+test "$(jq -r '.metadata.skills | join(",")' <<<"$claude_output")" = "code:patina-mode" || fail "Claude skill attribution missing"
 test "$(jq -r '.metadata.mcp | map(.server + ":" + .tool) | join(",")' <<<"$claude_output")" = "github:get_issue" || fail "Claude MCP attribution missing"
 
 fallback_id="22222222-2222-4222-8222-222222222222"

@@ -26,7 +26,7 @@ bash scripts/tests/move-session-here.test.sh
 bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
-bash scripts/tests/setup-engineering-skills-machinery.test.sh
+bash scripts/tests/setup-code-skills-machinery.test.sh
 node scripts/tests/sheet-encodings.test.mjs
 node scripts/tests/sheet-decoder.test.mjs
 bash scripts/tests/sync-upstream-skills.test.sh
@@ -57,8 +57,8 @@ run_cli_canary() {
   fi
 }
 
-run_cli_canary ./plugins/team/skills/scaffold-repository
-run_cli_canary ./plugins/team/skills/install-skills
+run_cli_canary ./plugins/work/skills/scaffold-repository
+run_cli_canary ./plugins/work/skills/install-skills
 
 run_cli_install_canary() {
   local repo_root tmpdir status
@@ -91,9 +91,9 @@ run_cli_all_skill_canary() {
     set -e
     cd "$tmpdir"
     if command -v timeout >/dev/null 2>&1; then
-      timeout 60 env npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/team/skills/install-skills" --skill '*' --agent '*' --yes
+      timeout 60 env npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/work/skills/install-skills" --skill '*' --agent '*' --yes
     else
-      npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/team/skills/install-skills" --skill '*' --agent '*' --yes
+      npm_config_ignore_scripts=true npx --yes skills@latest add "$repo_root/plugins/work/skills/install-skills" --skill '*' --agent '*' --yes
     fi
     test -f .agents/skills/install-skills/SKILL.md
   )

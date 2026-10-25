@@ -52,7 +52,7 @@ assert_no_match() {
 
 require_command "rg"
 
-assert_absent_path "plugins/team/skills/scaffold-repository/templates"
+assert_absent_path "plugins/work/skills/scaffold-repository/templates"
 assert_absent_path "scripts/apply-scaffold-repository.js"
 assert_absent_path "scripts/verify-scaffold-agent-plugin-readme.js"
 assert_absent_path ".github/ISSUE_TEMPLATE/bug_report.md"
@@ -126,7 +126,7 @@ assert_no_match "apply:scaffold-repository|apply-scaffold-repository|scaffold-re
   package.json .github/workflows \
   "${test_files[@]}"
 
-assert_no_match "plugins/team/skills/scaffold-repository/templates|skills/bootstrap/templates|\\.tmpl" \
+assert_no_match "plugins/work/skills/scaffold-repository/templates|skills/bootstrap/templates|\\.tmpl" \
   package.json .github/workflows \
   "${test_files[@]}"
 

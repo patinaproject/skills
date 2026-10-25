@@ -4,66 +4,66 @@
 
 This repository is the marketplace surface for Patina Project plugins and related install documentation.
 
-- `plugins/team/skills/scaffold-repository/`: scaffold-repository skill
-- `plugins/team/skills/using-github/`: using-github skill
-- `plugins/team/skills/update-branch/`: local branch update skill
-- `plugins/team/skills/to-spec/`: upstream to-spec mirror
-- `plugins/team/skills/to-tickets/`: upstream to-tickets mirror
-- `plugins/engineering/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
-- `plugins/engineering/skills/move-branch-here/`: Engineering worktree branch handover skill
-- `plugins/engineering/skills/move-session-here/`: cross-agent session transcript handover skill
-- `plugins/team/skills/install-skills/`: project-local skills CLI installation skill
-- `plugins/team/skills/design-by-contract/`: consequential system contract design overlay
-- `plugins/engineering/skills/principle-offensive-programming/`: defensive-code classification principle
-- `plugins/team/skills/grill-system-design/`: focused system design grilling skill
-- `plugins/team/skills/review-system-design/`: contract dependency review skill
-- `plugins/team/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
-- `plugins/team/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
-- `plugins/team/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
-- `plugins/team/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
-- `plugins/team/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
-- `plugins/team/skills/linear-inbox-cleanup/`: marks Linear inbox notifications read when they need no action
-- `plugins/engineering/skills/gather-evidence/`: current-target evidence for human feedback
-- `plugins/team/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
-- `plugins/engineering/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
-- `plugins/engineering/skills/pr/`: local PR body contract adapted from Matt Pocock
-- `plugins/engineering/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
-- `plugins/team/skills/triage/`: upstream issue and PR triage workflow
-- `plugins/team/skills/retro/`: upstream coding-session retrospective workflow
-- `plugins/team/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
-- `plugins/team/skills/design-control-loop/`: upstream design-control-loop mirror from humanlayer (agentic control loop design)
-- `plugins/team/skills/ask-matt/`: upstream mirror (mattpocock)
-- `plugins/team/skills/codebase-design/`: upstream mirror (mattpocock)
-- `plugins/team/skills/domain-modeling/`: upstream mirror (mattpocock)
-- `plugins/team/skills/grill-me/`: upstream mirror (mattpocock)
-- `plugins/team/skills/grilling/`: upstream mirror (mattpocock)
-- `plugins/team/skills/handoff/`: upstream mirror (mattpocock)
-- `plugins/team/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
-- `plugins/team/skills/setup-team-skills/`: upstream mattpocock `setup-matt-pocock-skills` mirror, renamed and forked for Patina label setup
-- `plugins/team/skills/tutor/`: upstream mirror (mattpocock)
-- `plugins/team/skills/to-questionnaire/`: upstream mirror (mattpocock)
-- `plugins/team/skills/wait-what/`: upstream mirror (mattpocock)
-- `plugins/team/skills/diagnosing-bugs/`: upstream mirror (mattpocock)
-- `plugins/team/skills/implement/`: upstream mirror (mattpocock)
-- `plugins/team/skills/implement-spec/`: upstream mirror (mattpocock)
-- `plugins/team/skills/prototype/`: upstream mirror (mattpocock)
-- `plugins/team/skills/research/`: upstream mirror (mattpocock)
-- `plugins/team/skills/wayfinder/`: upstream mirror (mattpocock)
-- `plugins/team/skills/wizard/`: upstream mirror (mattpocock)
-- `plugins/team/skills/writing-for-agents/`: upstream mirror (mattpocock)
-- `plugins/team/.claude-plugin/plugin.json`: Claude Team plugin manifest
-- `plugins/team/.codex-plugin/plugin.json`: Codex Team plugin manifest
-- `plugins/engineering/agents/patina-agent.md`: Patina mode routing agent
-- `plugins/engineering/hooks/`: Engineering session-start integration
-- `plugins/engineering/.claude-plugin/plugin.json`: Claude Engineering plugin manifest
-- `plugins/engineering/.codex-plugin/plugin.json`: Codex Engineering plugin manifest
+- `plugins/work/skills/scaffold-repository/`: scaffold-repository skill
+- `plugins/work/skills/using-github/`: using-github skill
+- `plugins/work/skills/update-branch/`: local branch update skill
+- `plugins/work/skills/to-spec/`: upstream to-spec mirror
+- `plugins/work/skills/to-tickets/`: upstream to-tickets mirror
+- `plugins/code/skills/working-on-issues/`: shared issue preflight (resolve live tracker, align branch and worktree, mark started)
+- `plugins/code/skills/move-branch-here/`: Code worktree branch handover skill
+- `plugins/code/skills/move-session-here/`: cross-agent session transcript handover skill
+- `plugins/work/skills/install-skills/`: project-local skills CLI installation skill
+- `plugins/work/skills/design-by-contract/`: consequential system contract design overlay
+- `plugins/code/skills/principle-offensive-programming/`: defensive-code classification principle
+- `plugins/work/skills/grill-system-design/`: focused system design grilling skill
+- `plugins/work/skills/review-system-design/`: contract dependency review skill
+- `plugins/work/skills/grill-to-spec/`: user-invoked grilling that hands ADR and glossary changes to `to-spec` as proposals
+- `plugins/work/skills/writing-for-pstack/`: operator prompt authoring for `patina-mode`
+- `plugins/work/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
+- `plugins/work/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
+- `plugins/work/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
+- `plugins/work/skills/linear-inbox-cleanup/`: marks Linear inbox notifications read when they need no action
+- `plugins/code/skills/gather-evidence/`: current-target evidence for human feedback
+- `plugins/work/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
+- `plugins/code/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
+- `plugins/code/skills/pr/`: local PR body contract adapted from Matt Pocock
+- `plugins/code/skills/patina-mode/`: Patina Project's default engineering mode, forked from pstack
+- `plugins/work/skills/triage/`: upstream issue and PR triage workflow
+- `plugins/work/skills/retro/`: upstream coding-session retrospective workflow
+- `plugins/work/skills/show-me/`: upstream show-me mirror from humanlayer (visual explanation)
+- `plugins/work/skills/design-control-loop/`: upstream design-control-loop mirror from humanlayer (agentic control loop design)
+- `plugins/work/skills/ask-matt/`: upstream mirror (mattpocock)
+- `plugins/work/skills/codebase-design/`: upstream mirror (mattpocock)
+- `plugins/work/skills/domain-modeling/`: upstream mirror (mattpocock)
+- `plugins/work/skills/grill-me/`: upstream mirror (mattpocock)
+- `plugins/work/skills/grilling/`: upstream mirror (mattpocock)
+- `plugins/work/skills/handoff/`: upstream mirror (mattpocock)
+- `plugins/work/skills/improve-codebase-architecture/`: upstream mirror (mattpocock)
+- `plugins/work/skills/setup-work-skills/`: upstream mattpocock `setup-matt-pocock-skills` mirror, renamed and forked for Patina label setup
+- `plugins/work/skills/tutor/`: upstream mirror (mattpocock)
+- `plugins/work/skills/to-questionnaire/`: upstream mirror (mattpocock)
+- `plugins/work/skills/wait-what/`: upstream mirror (mattpocock)
+- `plugins/work/skills/diagnosing-bugs/`: upstream mirror (mattpocock)
+- `plugins/work/skills/implement/`: upstream mirror (mattpocock)
+- `plugins/work/skills/implement-spec/`: upstream mirror (mattpocock)
+- `plugins/work/skills/prototype/`: upstream mirror (mattpocock)
+- `plugins/work/skills/research/`: upstream mirror (mattpocock)
+- `plugins/work/skills/wayfinder/`: upstream mirror (mattpocock)
+- `plugins/work/skills/wizard/`: upstream mirror (mattpocock)
+- `plugins/work/skills/writing-for-agents/`: upstream mirror (mattpocock)
+- `plugins/work/.claude-plugin/plugin.json`: Claude manifest for the Work plugin
+- `plugins/work/.codex-plugin/plugin.json`: Codex manifest for the Work plugin
+- `plugins/code/agents/patina-agent.md`: Patina mode routing agent
+- `plugins/code/hooks/`: Code session-start integration
+- `plugins/code/.claude-plugin/plugin.json`: Claude manifest for the Code plugin
+- `plugins/code/.codex-plugin/plugin.json`: Codex manifest for the Code plugin
 - `.agents/skills/<name>/`: committed overlay. Repo-owned skills are symlinks
   into their owning plugin; vendored third-party skills are real
   directories restored by `pnpm skills:install`. All entries are tracked.
 - `.claude/skills/<name>/`: committed Claude Code overlay. Repo-owned skills
   symlink into their owning plugin; vendored third-party skills are
   relative symlinks into `../../.agents/skills/<name>`. All entries are tracked.
-- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth for the `engineering` and `team` plugins
+- `.claude-plugin/marketplace.json`: repo-local Claude marketplace source of truth for the `code` and `work` plugins
 - `.codex/environments/environment.toml`: Codex workspace setup for this repository
 - `docs/`: contributor docs such as `docs/file-structure.md` and
   `docs/release-flow.md`
@@ -88,7 +88,7 @@ Tracker operations are defined in the sole adapter. The real file is
 `docs/agents/issue-tracker.md`; `docs/issue-tracker.md` is a compatibility
 symlink to it, so either path reaches the same adapter.
 Follow it directly for claiming, labels, lifecycle, relationships, and closure;
-the Team plugin owns the `to-spec` skill. Use it for issue filing and
+the Work plugin owns the `to-spec` skill. Use it for issue filing and
 editing. `docs/issue-publishing.md` governs issue body framing, and the adapter
 owns readiness and priority.
 
@@ -120,7 +120,7 @@ This is a single-context repository; domain docs are optional and created lazily
 Name and write ADRs by [`docs/adr/README.md`](docs/adr/README.md), the
 single source of truth for ADR naming in this repository. It supersedes the
 sequential `0001`-increment guidance still embedded in the vendored shared
-skills (`domain-modeling`, `setup-team-skills`): name every ADR after its
+skills (`domain-modeling`, `setup-work-skills`): name every ADR after its
 originating GitHub issue (`ADR-N-<slug>.md`), never scan-and-increment, and
 do not edit the vendored payloads under `.agents/skills/**`.
 
@@ -200,7 +200,7 @@ skill, so a path is the honest reference and a link is a layout assumption.
 
 Relative links between sibling skills are fine and should stay links: skills
 remain siblings in both layouts, so `../../design-by-contract/references/...` from
-`plugins/team/skills/using-github/workflows/` resolves either way. Links to files bundled inside
+`plugins/work/skills/using-github/workflows/` resolves either way. Links to files bundled inside
 the same skill (`./audit-checklist.md`) are likewise unaffected.
 
 If `writing-for-agents` is not installed in the local agent environment, install
@@ -229,11 +229,11 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/worktree-setup.test.sh` after changing
   `scripts/worktree-setup.sh`.
 - Run `bash scripts/tests/move-session-here.test.sh` after changing
-  `plugins/engineering/skills/move-session-here/scripts/session-handoff.mjs`.
+  `plugins/code/skills/move-session-here/scripts/session-handoff.mjs`.
 - Run `bash scripts/tests/update-branch.test.sh` after changing
-  `plugins/team/skills/update-branch/**`.
+  `plugins/work/skills/update-branch/**`.
 - Run `node scripts/tests/triage-check-issue-state.test.mjs` after changing
-  `plugins/team/skills/triage/scripts/check-issue-state.mjs`.
+  `plugins/work/skills/triage/scripts/check-issue-state.mjs`.
 - Run `bash scripts/tests/dogfood.test.sh` to confirm in-repo skills pass the flat-layout check
 - Run `bash scripts/tests/esm-tooling.test.sh` after changing repo tooling configs or the package module type
 - Run `bash scripts/tests/markdown-lint-config.test.sh` after changing
@@ -245,17 +245,17 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
 - Run `bash scripts/tests/diff-hygiene.test.sh` after changing `scripts/check-diff-hygiene.sh`
 - Run `bash scripts/tests/workflow-cleanup.test.sh` after changing workflow cleanup behavior; it asserts only filesystem state and non-`.md` config targets
 - Run `bash scripts/tests/scaffold-baseline-manifest.test.sh` after changing
-  `plugins/team/skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`
+  `plugins/work/skills/scaffold-repository/core-baseline.txt` or its `verify-baseline.sh`
 - Run `bash scripts/tests/scaffold-cleanup.test.sh` after changing scaffold baseline cleanup behavior; it asserts only filesystem state and non-`.md` config/code targets
-- Run `bash scripts/tests/setup-engineering-skills-machinery.test.sh` after changing
-  `plugins/engineering/skills/setup-engineering-skills/scripts/install-machinery.sh` or
+- Run `bash scripts/tests/setup-code-skills-machinery.test.sh` after changing
+  `plugins/code/skills/setup-code-skills/scripts/install-machinery.sh` or
   its bundled `assets/`; it asserts installer idempotency, the no-clobber
   contract, and that the bundled payloads match their canonical plugin sources
 - Run `node scripts/tests/sheet-encodings.test.mjs` after changing a model-sheet
   decoder (`read-sheet.sh`, the `session-start` hooks, or `pi/sheet.ts`); it
   asserts that every decoder reads each sheet encoding the same way
 - Run `node scripts/tests/sheet-decoder.test.mjs` after changing
-  `plugins/engineering/pi/sheet.ts`, `setup-pstack/scripts/read-sheet.sh`, or the
+  `plugins/code/pi/sheet.ts`, `setup-pstack/scripts/read-sheet.sh`, or the
   session-start hooks; it feeds UTF-16LE, BOM, and CRLF sheets through every
   decoder and compares one literal role map
 - Run `bash scripts/tests/sync-upstream-skills.test.sh` after changing
@@ -276,7 +276,7 @@ gh label list --json name,description --jq '.[] | select(.description == "")'
 
 ## Writing pull requests
 
-Pull request bodies follow `plugins/engineering/skills/pr/SKILL.md`. Use its
+Pull request bodies follow `plugins/code/skills/pr/SKILL.md`. Use its
 section order and omit empty optional sections. Put one closing line in
 `## Merge Danger` for each completed issue, with both GitHub and corresponding
 Linear references and a closing keyword for each.
@@ -309,35 +309,35 @@ an action by tag or branch, giving a hard gate on top of the CI check.
 
 ## Skill Releases
 
-This repo owns skills in the Engineering and Team plugins:
+This repo owns skills in the Code and Work plugins:
 
 | Skill | Path |
 | --- | --- |
-| scaffold-repository | `plugins/team/skills/scaffold-repository/` |
-| using-github | `plugins/team/skills/using-github/` |
-| update-branch | `plugins/team/skills/update-branch/` |
-| install-skills | `plugins/team/skills/install-skills/` |
-| design-by-contract | `plugins/team/skills/design-by-contract/` |
-| grill-system-design | `plugins/team/skills/grill-system-design/` |
-| review-system-design | `plugins/team/skills/review-system-design/` |
-| writing-for-pstack | `plugins/team/skills/writing-for-pstack/` |
-| email-inbox-triage | `plugins/team/skills/email-inbox-triage/` |
-| cloud-storage-organization | `plugins/team/skills/cloud-storage-organization/` |
-| draft-user-follow-ups | `plugins/team/skills/draft-user-follow-ups/` |
-| linear-inbox-cleanup | `plugins/team/skills/linear-inbox-cleanup/` |
-| grill-to-spec | `plugins/team/skills/grill-to-spec/` |
-| working-on-issues | `plugins/engineering/skills/working-on-issues/` |
-| move-branch-here | `plugins/engineering/skills/move-branch-here/` |
-| move-session-here | `plugins/engineering/skills/move-session-here/` |
-| principle-offensive-programming | `plugins/engineering/skills/principle-offensive-programming/` |
-| pr | `plugins/engineering/skills/pr/` |
-| gather-evidence | `plugins/engineering/skills/gather-evidence/` |
-| pr-review-assistant | `plugins/team/skills/pr-review-assistant/` |
-| running-mobile-simulators | `plugins/engineering/skills/running-mobile-simulators/` |
-| retro | `plugins/team/skills/retro/` |
-| to-spec | `plugins/team/skills/to-spec/` |
-| to-tickets | `plugins/team/skills/to-tickets/` |
-| triage | `plugins/team/skills/triage/` |
+| scaffold-repository | `plugins/work/skills/scaffold-repository/` |
+| using-github | `plugins/work/skills/using-github/` |
+| update-branch | `plugins/work/skills/update-branch/` |
+| install-skills | `plugins/work/skills/install-skills/` |
+| design-by-contract | `plugins/work/skills/design-by-contract/` |
+| grill-system-design | `plugins/work/skills/grill-system-design/` |
+| review-system-design | `plugins/work/skills/review-system-design/` |
+| writing-for-pstack | `plugins/work/skills/writing-for-pstack/` |
+| email-inbox-triage | `plugins/work/skills/email-inbox-triage/` |
+| cloud-storage-organization | `plugins/work/skills/cloud-storage-organization/` |
+| draft-user-follow-ups | `plugins/work/skills/draft-user-follow-ups/` |
+| linear-inbox-cleanup | `plugins/work/skills/linear-inbox-cleanup/` |
+| grill-to-spec | `plugins/work/skills/grill-to-spec/` |
+| working-on-issues | `plugins/code/skills/working-on-issues/` |
+| move-branch-here | `plugins/code/skills/move-branch-here/` |
+| move-session-here | `plugins/code/skills/move-session-here/` |
+| principle-offensive-programming | `plugins/code/skills/principle-offensive-programming/` |
+| pr | `plugins/code/skills/pr/` |
+| gather-evidence | `plugins/code/skills/gather-evidence/` |
+| pr-review-assistant | `plugins/work/skills/pr-review-assistant/` |
+| running-mobile-simulators | `plugins/code/skills/running-mobile-simulators/` |
+| retro | `plugins/work/skills/retro/` |
+| to-spec | `plugins/work/skills/to-spec/` |
+| to-tickets | `plugins/work/skills/to-tickets/` |
+| triage | `plugins/work/skills/triage/` |
 
 `find-skills` is a third-party skill from `vercel-labs/skills` and is not
 a marketplace entry in this repo.

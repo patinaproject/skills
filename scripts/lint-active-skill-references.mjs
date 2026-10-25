@@ -17,18 +17,18 @@ const UNPUBLISHED_SKILLS = new Map([
   ['triage-issue-reports', 'upstream Benny skill named as attribution in NOTICE.md'],
   ['postinstall', 'npm script that the scaffold audit says must be absent, not a skill'],
 ]);
-const MANDATE = path.join('plugins', 'engineering', 'hooks', 'session-start-context.md');
+const MANDATE = path.join('plugins', 'code', 'hooks', 'session-start-context.md');
 
 function collectEngineeringAgents(repoRoot) {
   return ['agents', 'effort-agents'].flatMap((agentDir) =>
-    readdirSync(path.join(repoRoot, 'plugins', 'engineering', agentDir))
+    readdirSync(path.join(repoRoot, 'plugins', 'code', agentDir))
       .filter((name) => name.endsWith('.md'))
       .map((name) => name.slice(0, -3)));
 }
 
 function collectPublishedSkillFiles(repoRoot) {
   const published = new Map();
-  for (const plugin of ['engineering', 'team']) {
+  for (const plugin of ['code', 'work']) {
     const skillsRoot = path.join(repoRoot, 'plugins', plugin, 'skills');
     for (const entry of readdirSync(skillsRoot, { withFileTypes: true })) {
       if (entry.isDirectory()) {
@@ -38,9 +38,9 @@ function collectPublishedSkillFiles(repoRoot) {
   }
 
   for (const agentDir of ['agents', 'effort-agents']) {
-    const agentRoot = path.join(repoRoot, 'plugins', 'engineering', agentDir);
+    const agentRoot = path.join(repoRoot, 'plugins', 'code', agentDir);
     for (const entry of readdirSync(agentRoot, { withFileTypes: true })) {
-      if (entry.isFile() && entry.name.endsWith('.md')) published.set(`engineering/${entry.name.slice(0, -3)}`, path.join(agentRoot, entry.name));
+      if (entry.isFile() && entry.name.endsWith('.md')) published.set(`code/${entry.name.slice(0, -3)}`, path.join(agentRoot, entry.name));
     }
   }
 
@@ -58,7 +58,7 @@ function findExecutableSkillReferences(contents, plugin) {
   const references = [];
   for (const snippet of executableSnippets(contents)) {
     if (!/\bsubagent_type\s*:/i.test(snippet)) {
-      for (const match of snippet.matchAll(/\b(?:engineering|team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?![a-z0-9<-])/g)) {
+      for (const match of snippet.matchAll(/\b(?:code|work|engineering|team|patinaproject-skills):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?![a-z0-9<-])/g)) {
         const reference = match[0];
         references.push({ reference, target: `${reference.split(':', 1)[0]}/${match[1]}` });
       }
@@ -98,7 +98,7 @@ function findAgentDispatchErrors(contents, agents, file) {
   const errors = [];
   for (const snippet of executableSnippets(contents)) {
     for (const [, name] of snippet.matchAll(/\b(?:subagent_type|agent_type)\s*:\s*"([^"]+)"/g)) {
-      const namespaced = name.match(/^(?:engineering|pstack):(.+)$/);
+      const namespaced = name.match(/^(?:code|engineering|pstack):(.+)$/);
       if (namespaced) {
         errors.push(`FAIL: agent dispatch uses a namespaced name: ${name} in ${file}; use ${namespaced[1]}`);
         continue;
@@ -114,14 +114,14 @@ function findAgentDispatchErrors(contents, agents, file) {
 function findMandateErrors(repoRoot) {
   const contents = readFileSync(path.join(repoRoot, MANDATE), 'utf8');
   return [...contents.matchAll(/`([a-z][a-z0-9]*(?:-[a-z0-9]+)*)`/g)]
-    .filter(([, name]) => !existsSync(path.join(repoRoot, 'plugins', 'engineering', 'skills', name, 'SKILL.md')))
+    .filter(([, name]) => !existsSync(path.join(repoRoot, 'plugins', 'code', 'skills', name, 'SKILL.md')))
     .map(([, name]) => `FAIL: session-start mandate names an unavailable skill: ${name} in ${MANDATE}`);
 }
 
 // A prefixed name resolves only in a plugin install; an Agent Skills install
 // registers bare names.
 function findPluginPrefixErrors(contents, file) {
-  return [...contents.matchAll(/(?<![\w-])(\/?)(?:team|patinaproject-skills|engineering|pstack):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
+  return [...contents.matchAll(/(?<![\w-])(\/?)(?:work|team|patinaproject-skills|code|engineering|pstack):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)]
     .map(([reference, slash, skill]) => `FAIL: skill reference carries a plugin prefix: ${reference} in ${file}; use ${slash}${skill}`);
 }
 
@@ -167,14 +167,14 @@ function relativeLinkTargets(line) {
 function lintRelativeLinks(repoRoot) {
   const mirrors = collectMirrorDirs(repoRoot);
   const errors = [];
-  for (const plugin of ['engineering', 'team']) {
+  for (const plugin of ['code', 'work']) {
     const pluginRoot = path.join(repoRoot, 'plugins', plugin);
     for (const filePath of collectActiveSkillMarkdown(repoRoot, plugin, mirrors)) {
       const file = path.relative(repoRoot, filePath);
       const raw = readFileSync(filePath, 'utf8').split('\n');
       const prose = stripCode(raw.join('\n')).split('\n');
       for (const [index, line] of raw.entries()) {
-        const named = [...line.matchAll(/\b(engineering|team):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)];
+        const named = [...line.matchAll(/\b(code|work|engineering|team):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)];
         for (const { target, resolved } of relativeLinkTargets(prose[index] ?? '')) {
           const absolute = path.resolve(path.dirname(filePath), resolved);
           if (absolute !== pluginRoot && !absolute.startsWith(pluginRoot + path.sep)) {
@@ -203,7 +203,7 @@ function main(repoRoot = process.cwd()) {
   const agents = collectEngineeringAgents(repoRoot);
   const errors = [...lintRelativeLinks(repoRoot), ...findMandateErrors(repoRoot)];
   const mirrors = collectMirrorDirs(repoRoot);
-  const activeMarkdown = ['engineering', 'team'].flatMap((plugin) => collectActiveSkillMarkdown(repoRoot, plugin, mirrors));
+  const activeMarkdown = ['code', 'work'].flatMap((plugin) => collectActiveSkillMarkdown(repoRoot, plugin, mirrors));
   for (const filePath of activeMarkdown) {
     errors.push(...findPluginPrefixErrors(readFileSync(filePath, 'utf8'), path.relative(repoRoot, filePath)));
   }

@@ -62,7 +62,7 @@ done
 test ! -e docs/superpowers || fail "docs/superpowers should be removed after spec migration"
 
 assert_no_match "docs/superpowers/(specs|plans)" "${ACTIVE_CONFIG_PATHS[@]}"
-assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superteam@patinaproject-skills|<use-superteam>" \
+assert_no_match "obra/superpowers|superpowers@claude-plugins-official|superwork@patinaproject-skills|<use-superteam>" \
   .claude/settings.json
 assert_no_match "review-action|office-hours|plan-ceo-review|superteam-non-interactive|skills/superteam" \
   .claude-plugin/marketplace.json .agents/plugins/marketplace.json

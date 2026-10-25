@@ -17,7 +17,7 @@ repositories created by `scaffold-repository` do not receive that playbook
 The root `.github/pull_request_template.md` is a comment-only reminder, and
 this repository's instructions give `opening-a-pr` sole ownership of body
 structure. `scaffold-repository` copies its bundled
-`plugins/team/skills/scaffold-repository/pr-body-template.md` for consumers. This supersedes
+`plugins/work/skills/scaffold-repository/pr-body-template.md` for consumers. This supersedes
 ADR-257's single shared template.
 
 [#465](https://github.com/patinaproject/skills/issues/465) limits both templates
