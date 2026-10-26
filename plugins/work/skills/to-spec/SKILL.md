@@ -1,10 +1,10 @@
 ---
 name: to-spec
-description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
+description: "Turn the current conversation into a spec and publish it to the project issue tracker, applying a ready label only when the triage readiness check passes."
 disable-model-invocation: true
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know. The one exception is a decision the readiness check needs a person to approve: ask it as one question with your recommended answer.
 
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-work-skills`.
 
@@ -16,7 +16,13 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `Ready for agent` triage label and one Type label - no need for additional triage.
+3. Write the spec using the template below.
+
+4. Run the triage readiness check in [../triage/READINESS.md](../triage/READINESS.md) against the spec. Close each gap you can yourself, such as verifying the claim or reading `.out-of-scope/`. Ask the user each qualifying decision they have not approved in this conversation as one question with your recommended answer. Never approve a decision yourself.
+
+5. Publish the spec to the project issue tracker with one Type label. When every item holds, apply `Ready for agent` or `Ready for human` and move the issue to the ready state the issue-tracker config defines. When an item fails, apply `Needs triage` and list what is still needed in the triage notes.
+
+6. Record the checklist and the decisions list as READINESS.md's **Record it** section says, through the issue-tracker config's issue-artifact operation.
 
 <spec-template>
 
