@@ -2,9 +2,9 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
-checker="$repo_root/plugins/engineering/skills/running-mobile-simulators/scripts/check-readiness.sh"
-adb_reader="$repo_root/plugins/engineering/skills/running-mobile-simulators/scripts/adb-readonly.py"
-probe_runner="$repo_root/plugins/engineering/skills/running-mobile-simulators/scripts/probe-command.py"
+checker="$repo_root/plugins/code/skills/running-mobile-simulators/scripts/check-readiness.sh"
+adb_reader="$repo_root/plugins/code/skills/running-mobile-simulators/scripts/adb-readonly.py"
+probe_runner="$repo_root/plugins/code/skills/running-mobile-simulators/scripts/probe-command.py"
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/running-mobile-simulators-test.XXXXXX")"
 trap 'test -n "${adb_server_pid:-}" && kill "$adb_server_pid" 2>/dev/null || true; rm -rf "$tmp_dir"' EXIT
 

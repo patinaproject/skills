@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const copies = ['plugins/team/skills/triage/READINESS.md', 'plugins/engineering/skills/patina-mode/references/readiness.md'];
+const copies = ['plugins/work/skills/triage/READINESS.md', 'plugins/code/skills/patina-mode/references/readiness.md'];
 
 function main(repoRoot = process.cwd()) {
   const [first, second] = copies.map((file) => readFileSync(path.join(repoRoot, file), 'utf8'));

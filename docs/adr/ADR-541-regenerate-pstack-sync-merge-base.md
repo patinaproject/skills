@@ -27,7 +27,7 @@ No other clone could run the sync, which blocked an unattended weekly sync.
 
 ## Decision
 
-`plugins/engineering/upstream.json` records the last synced pstack-claude
+`plugins/code/upstream.json` records the last synced pstack-claude
 commit in its `commit` field. `pnpm sync-pstack` (`scripts/sync-pstack.sh`)
 reads it, fetches the current tip of pstack-claude's `main`, and stops with
 nothing to do when the two match.
@@ -37,9 +37,9 @@ so transforming the recorded commit reproduces the snapshot the last sync
 applied. The script builds two throwaway commits with a temporary index, leaving
 the operator's worktree and index alone:
 
-- The base is `HEAD`'s tree with `plugins/engineering/**` replaced by the
+- The base is `HEAD`'s tree with `plugins/code/**` replaced by the
   transformed recorded commit.
-- The tip is a child of the base with `plugins/engineering/**` replaced by the
+- The tip is a child of the base with `plugins/code/**` replaced by the
   transformed upstream tip.
 
 `git cherry-pick --no-commit` applies the tip onto `HEAD`. Only what upstream
@@ -50,7 +50,7 @@ unchanged. The script then writes the new tip into `upstream.json` and stages it
 It creates no commit and no branch. The operator commits the result with a
 normal `type: #N` message.
 
-With no recorded commit, the base holds an empty `plugins/engineering/**`, which
+With no recorded commit, the base holds an empty `plugins/code/**`, which
 imports upstream from scratch.
 
 ## Consequences

@@ -6,10 +6,10 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
-import { decodeSheet, readSheet } from '../../plugins/engineering/pi/sheet.ts';
+import { decodeSheet, readSheet } from '../../plugins/code/pi/sheet.ts';
 
 const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
-const pluginRoot = join(repoRoot, 'plugins/engineering');
+const pluginRoot = join(repoRoot, 'plugins/code');
 const readSheetScript = join(pluginRoot, 'skills/setup-pstack/scripts/read-sheet.sh');
 const claudeHook = join(pluginRoot, 'hooks/session-start.sh');
 const powershellHook = join(pluginRoot, 'hooks/session-start.ps1');

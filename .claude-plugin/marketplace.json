@@ -6,18 +6,18 @@
   },
   "metadata": {
     "description": "Skills used by the Patina Project team",
-    "version": "3.23.1"
+    "version": "4.0.0"
   },
   "plugins": [
     {
-      "name": "engineering",
+      "name": "code",
       "description": "Patina Project's owned engineering workflows, forked from pstack",
-      "source": "./plugins/engineering"
+      "source": "./plugins/code"
     },
     {
-      "name": "team",
-      "description": "Patina Project's human-invoked team skills for planning, review, specs, and visual explanation",
-      "source": "./plugins/team"
+      "name": "work",
+      "description": "Patina Project's human-invoked work skills for planning, review, specs, and visual explanation",
+      "source": "./plugins/work"
     }
   ]
 }

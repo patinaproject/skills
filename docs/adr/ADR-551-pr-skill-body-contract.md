@@ -16,7 +16,7 @@ and [PAT-4787](https://linear.app/patinaproject/issue/PAT-4787/install-matt-poco
 ## Decision
 
 The Engineering plugin owns a local copy at
-`plugins/engineering/skills/pr/SKILL.md`. Patina-mode delegates PR body
+`plugins/code/skills/pr/SKILL.md`. Patina-mode delegates PR body
 structure to that skill. The body uses `## Summary`, `## Evidence`,
 `## Happy Path`, and `## Merge Danger` in that order. Evidence follows the
 upstream S-tier and A-tier model. Screenshots are S-tier when the change is

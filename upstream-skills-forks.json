@@ -1,637 +1,637 @@
 {
-  "plugins/engineering/.claude-plugin/plugin.json": {
+  "plugins/code/.claude-plugin/plugin.json": {
     "kind": "policy",
-    "reason": "Patina publishes this manifest as the Engineering plugin, so it renames pstack to engineering, carries the release-please version, names Patina Project as author with the patinaproject/skills homepage, and keeps only the keywords that describe Engineering.",
+    "reason": "Patina publishes this manifest as the Code plugin, so it renames pstack to code, carries the release-please version, names Patina Project as author with the patinaproject/skills homepage, and keeps only the keywords that describe Code.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/.codex-plugin/plugin.json": {
+  "plugins/code/.codex-plugin/plugin.json": {
     "kind": "policy",
-    "reason": "Patina publishes this Codex manifest as the Engineering plugin, so it renames pstack to engineering, carries the release-please version, and points the author, interface text, and links at Patina Project and patinaproject/skills.",
+    "reason": "Patina publishes this Codex manifest as the Code plugin, so it renames pstack to code, carries the release-please version, and points the author, interface text, and links at Patina Project and patinaproject/skills.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/README.md": {
+  "plugins/code/README.md": {
     "kind": "policy",
-    "reason": "Patina rewrites the README for the Engineering plugin, with install commands from the patinaproject/skills marketplace, the Codex multi_agent requirement, and the sync-upstream-skills upgrade path, instead of the pstack-claude links and license section.",
+    "reason": "Patina rewrites the README for the Code plugin, with install commands from the patinaproject/skills marketplace, the Codex multi_agent requirement, and the sync-upstream-skills upgrade path, instead of the pstack-claude links and license section.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/agents/patina-agent.md": {
+  "plugins/code/agents/patina-agent.md": {
     "kind": "policy",
-    "reason": "Patina routes requests for Patina Project's engineering style to the agent instead of requests for poteto's style, because Engineering ships the style under its own name.",
+    "reason": "Patina routes requests for Patina Project's engineering style to the agent instead of requests for poteto's style, because Code ships the style under its own name.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/hooks/session-start-context.md": {
+  "plugins/code/hooks/session-start-context.md": {
     "kind": "policy",
-    "reason": "Patina's session mandate names the Patina Project Engineering plugin and its skills instead of pstack, because Engineering is the plugin that injects it.",
+    "reason": "Patina's session mandate names the Patina Project Code plugin and its skills instead of pstack, because Code is the plugin that injects it.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/hooks/session-start.ps1": {
+  "plugins/code/hooks/session-start.ps1": {
     "kind": "policy",
     "reason": "The Windows hook decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/hooks/session-start.sh": {
+  "plugins/code/hooks/session-start.sh": {
     "kind": "policy",
     "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet by running the read-sheet.sh that the installer copied beside it (the plugin uses setup-pstack/scripts/read-sheet.sh) instead of an inline copy, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/pi/agents.ts": {
+  "plugins/code/pi/agents.ts": {
     "kind": "policy",
     "reason": "It imports readSheet from pi/sheet.ts after the sheet decoder moved out of config.ts.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/pi/config.ts": {
+  "plugins/code/pi/config.ts": {
     "kind": "policy",
     "reason": "Patina moves parseSheet and readSheet to pi/sheet.ts so a Node test can load the sheet decoder without typebox, and imports the Sheet type from there. It also drops the agent-registration comment and the template literal that the unprefix transform leaves around the bare agent name (ADR-665).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/pi/prompt.ts": {
+  "plugins/code/pi/prompt.ts": {
     "kind": "policy",
     "reason": "It imports readSheet from pi/sheet.ts after the sheet decoder moved out of config.ts.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/automate-me/SKILL.md": {
+  "plugins/code/skills/automate-me/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before a list and drops the trailing blank line that MD012 rejects, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/babysit/SKILL.md": {
+  "plugins/code/skills/babysit/SKILL.md": {
     "kind": "policy",
     "reason": "Patina sends each failing-check repair through Repair from evidence and routes the ready transition through pr-readiness publish instead of gh pr ready, so babysitting follows the same evidence and readiness gates as patina-mode.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/code-review/SKILL.md": {
+  "plugins/code/skills/code-review/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds an Output contract section that fixes the Standards and Spec Markdown findings across runtimes and emits the review record that pr-readiness publish consumes as readiness evidence.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/create-verification-skill/SKILL.md": {
+  "plugins/code/skills/create-verification-skill/SKILL.md": {
     "kind": "policy",
     "reason": "Patina names the generated skill `patinaproject-verify` after its repository-local prefix, so it does not shadow the bundled `/verify`. Upstream named it `verify` to shadow the bundled one.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/fix-ci/SKILL.md": {
+  "plugins/code/skills/fix-ci/SKILL.md": {
     "kind": "policy",
     "reason": "Patina makes each fix-ci attempt follow Repair from evidence, wait for the current head's checks, and report the missing evidence when it stops before green, instead of looping on the smallest fix until green.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/fix-merge-conflicts/SKILL.md": {
+  "plugins/code/skills/fix-merge-conflicts/SKILL.md": {
     "kind": "policy",
     "reason": "Patina has conflict resolution trace each side to its commits, pull requests, and issues, check that no conflict marker remains, and finish the merge or rebase instead of only staging the files, so a resolution preserves both intents and leaves no operation half done.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/get-pr-comments/SKILL.md": {
+  "plugins/code/skills/get-pr-comments/SKILL.md": {
     "kind": "policy",
     "reason": "Patina ends the file with the single trailing newline that markdownlint MD047 requires, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/how/references/explainer-prompt.md": {
+  "plugins/code/skills/how/references/explainer-prompt.md": {
     "kind": "policy",
     "reason": "Patina adds the blank lines that markdownlint MD022 requires around headings, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/how/references/explorer-prompt.md": {
+  "plugins/code/skills/how/references/explorer-prompt.md": {
     "kind": "policy",
     "reason": "Patina adds the blank lines that markdownlint MD022 and MD032 require around headings and lists, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/interrogate/SKILL.md": {
+  "plugins/code/skills/interrogate/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank lines that markdownlint MD022 and MD032 require around the verdict template's headings and lists, plus an empty quote line under Intent, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/interrogate/references/lead-judgment.md": {
+  "plugins/code/skills/interrogate/references/lead-judgment.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/interrogate/references/reviewer-prompt.md": {
+  "plugins/code/skills/interrogate/references/reviewer-prompt.md": {
     "kind": "policy",
     "reason": "Patina tags the findings template fence as text for markdownlint MD040, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/make-pr-easy-to-review/SKILL.md": {
+  "plugins/code/skills/make-pr-easy-to-review/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina sends PR description edits through the pr skill's section contract and moves extra reviewer notes to a separate PR comment, so the description keeps one structure across Engineering.",
+    "reason": "Patina sends PR description edits through the pr skill's section contract and moves extra reviewer notes to a separate PR comment, so the description keeps one structure across Code.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/maintain-verification-skill/SKILL.md": {
+  "plugins/code/skills/maintain-verification-skill/SKILL.md": {
     "kind": "policy",
     "reason": "Patina locates the verification skill at .claude/skills/patinaproject-verify/, the name create-verification-skill generates here, instead of the upstream verify and verify-* paths.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-help/SKILL.md": {
+  "plugins/code/skills/patina-help/SKILL.md": {
     "kind": "policy",
     "reason": "Patina names its generated verification driver patinaproject-verify, so the verification check counts a patinaproject-verify skill, or a legacy verify skill, as the project driver.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/SKILL.md": {
+  "plugins/code/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adapts patina-mode to Engineering: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, and ### Principles headings for markdownlint MD036.",
+    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, and ### Principles headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/autopilot-full.md": {
+  "plugins/code/skills/patina-mode/playbooks/autopilot-full.md": {
     "kind": "policy",
     "reason": "Patina opens each owner's PR in the caller-selected mode and publishes readiness through /deslop, /no-comments, code-review, and pr-readiness publish, names patinaproject-verify or run as the verify driver, and gives the playbook path relative to the skill's base directory.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/autopilot-stack.md": {
+  "plugins/code/skills/patina-mode/playbooks/autopilot-stack.md": {
     "kind": "policy",
     "reason": "Patina opens each owner's PR in the caller-selected mode and publishes readiness through /deslop, /no-comments, code-review, and pr-readiness publish, posts each verifier verdict as a PR comment instead of in the body, and gives the playbook path relative to the skill's base directory.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/babysit.md": {
+  "plugins/code/skills/patina-mode/playbooks/babysit.md": {
     "kind": "policy",
     "reason": "Patina has babysitting publish readiness through pr-readiness publish, route CI repairs through Repair from evidence, run gather-evidence on human change requests without replying for the operator, and run watch-pr from the skill's base directory.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/multi-phase-plan.md": {
+  "plugins/code/skills/patina-mode/playbooks/multi-phase-plan.md": {
     "kind": "policy",
     "reason": "Patina names patinaproject-verify for UI lanes and run for CLI lanes, and opens each PR in the caller-selected mode with the /deslop, /no-comments, code-review, and pr-readiness publish gate instead of always opening it ready.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/opening-a-pr.md": {
+  "plugins/code/skills/patina-mode/playbooks/opening-a-pr.md": {
     "kind": "policy",
     "reason": "Patina hands titles to the project's commit conventions and PR bodies to the pr skill, points demo media at the pr skill's upload guide, adds GitHub-native stack and fetch-by-URL worktree steps, and replaces open-ready with the caller-selected mode and the /deslop, /no-comments, code-review, and pr-readiness publish gate.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/orchestrate.md": {
+  "plugins/code/skills/patina-mode/playbooks/orchestrate.md": {
     "kind": "policy",
     "reason": "Patina adds a PUBLICATION brief field and a PR publication section that hold every worker PR to the opening-a-pr readiness gate, names patinaproject-verify or run as the verify driver, records verification context in worker reports, tags the brief fence for markdownlint MD040, and resolves orch.ts from the skill's base directory.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/session-pickup.md": {
+  "plugins/code/skills/patina-mode/playbooks/session-pickup.md": {
     "kind": "policy",
     "reason": "Patina routes session IDs and thread links through move-session-here, keeps transcript reads inside the named workspace, and adds the issue-handoff step before state-changing work resumes.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/shipping.md": {
+  "plugins/code/skills/patina-mode/playbooks/shipping.md": {
     "kind": "policy",
     "reason": "Patina admits a PR to shipping only after pr-readiness publish has passed, names patinaproject-verify or run as the verifier driver, and runs watch-pr from the skill's base directory.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/playbooks/worktree-cleanup.md": {
+  "plugins/code/skills/patina-mode/playbooks/worktree-cleanup.md": {
     "kind": "policy",
     "reason": "Patina runs worktree-audit.mjs with node from the skill's base directory instead of a path under the installed plugin, which does not exist in an Agent Skills install.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/references/codex-tools.md": {
+  "plugins/code/skills/patina-mode/references/codex-tools.md": {
     "kind": "policy",
-    "reason": "Codex-specific mapping for Engineering: base-directory script paths, issue-routes, patinaproject-verify, engineering: addressing, and the code-review presentation section.",
+    "reason": "Codex-specific mapping for Code: base-directory script paths, issue-routes, patinaproject-verify, code: addressing, and the code-review presentation section.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/references/copilot-tools.md": {
+  "plugins/code/skills/patina-mode/references/copilot-tools.md": {
     "kind": "policy",
-    "reason": "Patina excludes the GitHub Copilot runtime from the sync, so a note states that the Copilot hook sections describe upstream pstack, not Engineering.",
+    "reason": "Patina excludes the GitHub Copilot runtime from the sync, so a note states that the Copilot hook sections describe upstream pstack, not Code.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/references/licenses/NOTICE.md": {
+  "plugins/code/skills/patina-mode/references/licenses/NOTICE.md": {
     "kind": "policy",
     "reason": "Patina credits the Benny triage-issue-reports skill that its triage playbook adapts.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/references/pi-tools.md": {
+  "plugins/code/skills/patina-mode/references/pi-tools.md": {
     "kind": "policy",
     "reason": "Patina maps the project verification skill to patinaproject-verify and notes that Pi loads it directly from .pi/skills/ or .agents/skills/, because create-verification-skill generates that name here.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/scripts/orch/orch.test.ts": {
+  "plugins/code/skills/patina-mode/scripts/orch/orch.test.ts": {
     "kind": "policy",
     "reason": "Patina's orch store fixtures use patina/u1 branch names instead of poteto/u1, so no upstream author name survives the rebrand.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/scripts/orch/store.ts": {
+  "plugins/code/skills/patina-mode/scripts/orch/store.ts": {
     "kind": "policy",
     "reason": "Patina strips terminal escapes with its own pattern instead of stripVTControlCharacters, because bun's version leaves colon-separated colour codes such as ESC[38:5:2m behind and breaks the gt log parsers.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/patina-mode/scripts/package.json": {
+  "plugins/code/skills/patina-mode/scripts/package.json": {
     "kind": "policy",
     "reason": "Patina renames the package to @patinaproject/patina-mode-tools, adds the issue-handoff, mark-ready, and pr-readiness suites to test and typecheck, and pins bun-types and typescript to exact versions instead of latest.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-attack-the-premise/SKILL.md": {
+  "plugins/code/skills/principle-attack-the-premise/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-boundary-discipline/SKILL.md": {
+  "plugins/code/skills/principle-boundary-discipline/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-encode-lessons-in-structure/SKILL.md": {
+  "plugins/code/skills/principle-encode-lessons-in-structure/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-exhaust-the-design-space/SKILL.md": {
+  "plugins/code/skills/principle-exhaust-the-design-space/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-fix-root-causes/SKILL.md": {
+  "plugins/code/skills/principle-fix-root-causes/SKILL.md": {
     "kind": "policy",
     "reason": "Patina makes the bold Restart bugs line a heading for markdownlint MD036 and adds the blank line that MD032 requires before a list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-guard-the-context-window/SKILL.md": {
+  "plugins/code/skills/principle-guard-the-context-window/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-make-operations-idempotent/SKILL.md": {
+  "plugins/code/skills/principle-make-operations-idempotent/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md": {
+  "plugins/code/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-minimize-reader-load/SKILL.md": {
+  "plugins/code/skills/principle-minimize-reader-load/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-never-block-on-the-human/SKILL.md": {
+  "plugins/code/skills/principle-never-block-on-the-human/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-outcome-oriented-execution/SKILL.md": {
+  "plugins/code/skills/principle-outcome-oriented-execution/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-prove-it-works/SKILL.md": {
+  "plugins/code/skills/principle-prove-it-works/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-separate-before-serializing-shared-state/SKILL.md": {
+  "plugins/code/skills/principle-separate-before-serializing-shared-state/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/principle-subtract-before-you-add/SKILL.md": {
+  "plugins/code/skills/principle-subtract-before-you-add/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/reflect/references/divergent-reviewer.md": {
+  "plugins/code/skills/reflect/references/divergent-reviewer.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/reflect/references/judgment-reviewer.md": {
+  "plugins/code/skills/reflect/references/judgment-reviewer.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/reflect/references/synthesizer.md": {
+  "plugins/code/skills/reflect/references/synthesizer.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/reflect/references/tooling-reviewer.md": {
+  "plugins/code/skills/reflect/references/tooling-reviewer.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/setup-pstack/SKILL.md": {
+  "plugins/code/skills/setup-pstack/SKILL.md": {
     "kind": "policy",
     "reason": "Patina excludes the GitHub Copilot runtime, so the Copilot runtime-table row and the session-hook applicability sentence name no Copilot plugin hook.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/setup-pstack/copilot.md": {
+  "plugins/code/skills/setup-pstack/copilot.md": {
     "kind": "policy",
     "reason": "Patina excludes the GitHub Copilot runtime from the sync, so Copilot setup reads the sheet with view and states that the session hook line has no effect, instead of relying on a plugin hook.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/setup-pstack/scripts/read-sheet.sh": {
+  "plugins/code/skills/setup-pstack/scripts/read-sheet.sh": {
     "kind": "policy",
     "reason": "The shared sheet reader decodes BOM-less UTF-16LE and non-UTF-8 model sheets the same way as the other sheet decoders.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/show-me-your-work/SKILL.md": {
+  "plugins/code/skills/show-me-your-work/SKILL.md": {
     "kind": "policy",
     "reason": "Patina tags the decision-log example fence as text for markdownlint MD040 and replaces its tabs with spaces for MD010, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/unslop/SKILL.md": {
+  "plugins/code/skills/unslop/SKILL.md": {
     "kind": "policy",
     "reason": "Patina wraps the rule list in markdownlint-disable MD029, because the rule numbers are stable ids with gaps that other skills cite and MD029 would demand sequential numbering.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/SKILL.md": {
+  "plugins/code/skills/why/SKILL.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/epistemics.md": {
+  "plugins/code/skills/why/references/epistemics.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/investigator-prompt.md": {
+  "plugins/code/skills/why/references/investigator-prompt.md": {
     "kind": "policy",
     "reason": "Patina adds the blank lines that markdownlint MD022 and MD032 require around headings and lists, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/code-archaeology.md": {
+  "plugins/code/skills/why/references/sources/code-archaeology.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/databricks.md": {
+  "plugins/code/skills/why/references/sources/databricks.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/datadog.md": {
+  "plugins/code/skills/why/references/sources/datadog.md": {
     "kind": "policy",
     "reason": "Patina tags the query fences as text for markdownlint MD040 and adds the blank line that MD032 requires before a list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/linear.md": {
+  "plugins/code/skills/why/references/sources/linear.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/notion.md": {
+  "plugins/code/skills/why/references/sources/notion.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/sentry.md": {
+  "plugins/code/skills/why/references/sources/sentry.md": {
     "kind": "policy",
     "reason": "Patina tags the query fences as text for markdownlint MD040 and adds the blank line that MD032 requires before a list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/engineering/skills/why/references/sources/slack.md": {
+  "plugins/code/skills/why/references/sources/slack.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/ask-matt/SKILL.md": {
+  "plugins/work/skills/ask-matt/SKILL.md": {
     "kind": "policy",
-    "reason": "The index points at the renamed tutor skill instead of /teach, which now resolves to the Engineering teach.",
+    "reason": "The index points at the renamed tutor skill instead of /teach, which now resolves to the Code teach.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/design-control-loop/references/workflow-template.yml": {
+  "plugins/work/skills/design-control-loop/references/workflow-template.yml": {
     "kind": "policy",
     "reason": "Patina pins the template's GitHub Actions to commit SHAs, because the patinaproject monorepo's Semgrep scan rejects mutable action tags in vendored skills.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/triage/SKILL.md": {
+  "plugins/work/skills/triage/SKILL.md": {
     "kind": "policy",
     "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Theme, and Triage labels instead of the upstream roles (ADR-682). It also recommends a priority from the issue tracker config's Priority rubric and records who set it (ADR-692). Patina also re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read. Patina applies Needs info for an open question to the reporter or to the developers, where upstream waits only on the reporter, so an issue with an open question never gets a ready label.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/tutor/SKILL.md": {
+  "plugins/work/skills/tutor/SKILL.md": {
     "kind": "policy",
-    "reason": "The Engineering plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
+    "reason": "The Code plugin ships pstack's teach, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's teach to tutor.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/to-spec/SKILL.md": {
-    "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
-    "upstream": {
-      "status": "not-proposed"
-    }
-  },
-  "plugins/team/skills/to-tickets/SKILL.md": {
+  "plugins/work/skills/to-spec/SKILL.md": {
     "kind": "policy",
     "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/triage/AGENT-BRIEF.md": {
+  "plugins/work/skills/to-tickets/SKILL.md": {
     "kind": "policy",
     "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/triage/OUT-OF-SCOPE.md": {
+  "plugins/work/skills/triage/AGENT-BRIEF.md": {
     "kind": "policy",
     "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/triage/agents/openai.yaml": {
+  "plugins/work/skills/triage/OUT-OF-SCOPE.md": {
+    "kind": "policy",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/work/skills/triage/agents/openai.yaml": {
     "kind": "policy",
     "reason": "Patina describes triage in terms of labels rather than upstream roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/setup-team-skills/SKILL.md": {
+  "plugins/work/skills/setup-work-skills/SKILL.md": {
     "kind": "policy",
     "reason": "Patina writes the Type, Theme, and Triage label vocabulary into the issue tracker config as its only definition, instead of a separate triage-labels.md mapped from upstream roles (ADR-682). It also seeds a Priority rubric section that triage assigns priority from (ADR-692).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/setup-team-skills/issue-tracker-github.md": {
+  "plugins/work/skills/setup-work-skills/issue-tracker-github.md": {
     "kind": "policy",
     "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/setup-team-skills/issue-tracker-gitlab.md": {
+  "plugins/work/skills/setup-work-skills/issue-tracker-gitlab.md": {
     "kind": "policy",
     "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/setup-team-skills/triage-labels.md": {
+  "plugins/work/skills/setup-work-skills/triage-labels.md": {
     "kind": "policy",
     "reason": "Patina seeds the Labels section of the issue tracker config with its per-repository Type sets and Theme labels, kept identical to docs/agents/issue-tracker.md by lint-label-vocabulary-parity (ADR-682). Its Needs info meaning waits on the reporter or a developer, where upstream waits only on the reporter.",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/wayfinder/SKILL.md": {
+  "plugins/work/skills/wayfinder/SKILL.md": {
     "kind": "policy",
     "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/setup-team-skills/issue-tracker-local.md": {
+  "plugins/work/skills/setup-work-skills/issue-tracker-local.md": {
     "kind": "policy",
     "reason": "Patina keeps label strings in the issue tracker config's Labels section and describes triage in terms of labels rather than upstream roles (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }
   },
-  "plugins/team/skills/setup-team-skills/agents/openai.yaml": {
+  "plugins/work/skills/setup-work-skills/agents/openai.yaml": {
     "kind": "policy",
-    "reason": "Patina names the skill setup-team-skills, so the display name drops the upstream author (ADR-682).",
+    "reason": "Patina names the skill setup-work-skills, so the display name drops the upstream author (ADR-682).",
     "upstream": {
       "status": "not-proposed"
     }

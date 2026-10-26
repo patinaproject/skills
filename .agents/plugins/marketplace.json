@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "engineering",
+      "name": "code",
       "source": {
         "source": "local",
-        "path": "./plugins/engineering"
+        "path": "./plugins/code"
       },
       "policy": {
         "installation": "AVAILABLE",
@@ -18,17 +18,17 @@
       "description": "Patina Project's owned engineering workflows, forked from pstack."
     },
     {
-      "name": "team",
+      "name": "work",
       "source": {
         "source": "local",
-        "path": "./plugins/team"
+        "path": "./plugins/work"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
       "category": "Productivity",
-      "description": "Patina Project's human-invoked team skills for planning, review, specs, and visual explanation."
+      "description": "Patina Project's human-invoked work skills for planning, review, specs, and visual explanation."
     }
   ]
 }

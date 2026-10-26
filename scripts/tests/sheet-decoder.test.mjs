@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 const repoRoot = new URL('../..', import.meta.url).pathname;
-const plugin = join(repoRoot, 'plugins/engineering');
+const plugin = join(repoRoot, 'plugins/code');
 const readSheetSh = join(plugin, 'skills/setup-pstack/scripts/read-sheet.sh');
 const pluginHook = join(plugin, 'hooks/session-start.sh');
 const powershellHook = join(plugin, 'hooks/session-start.ps1');
@@ -87,7 +87,7 @@ const projectRepo = join(scratch, 'project');
 const catalog = join(scratch, 'catalog');
 mkdirSync(catalog);
 cpSync(join(plugin, 'skills'), join(catalog, 'skills'), { recursive: true });
-run('bash', [join(catalog, 'skills/setup-engineering-skills/scripts/install-machinery.sh'), '--repo', projectRepo]);
+run('bash', [join(catalog, 'skills/setup-code-skills/scripts/install-machinery.sh'), '--repo', projectRepo]);
 rmSync(catalog, { recursive: true, force: true });
 const projectHook = join(projectRepo, '.claude/hooks/session-start.sh');
 assert.notEqual(run(projectHook, ['claude'], { CLAUDE_PROJECT_DIR: projectRepo, CLAUDE_CONFIG_DIR: emptyDir }, ['CLAUDE_PLUGIN_ROOT']), '', 'the installed hook must inject the mandate without a sheet');
@@ -150,5 +150,5 @@ test('a hook without its decoder names the missing file and keeps the mandate on
   const result = spawnSync('sh', [join(lonely, 'session-start.sh'), 'claude'], { encoding: 'utf8', env });
   assert.equal(result.status, 0);
   assert.notEqual(result.stdout, '');
-  assert.match(result.stderr, /missing .*read-sheet\.sh.*setup-engineering-skills/);
+  assert.match(result.stderr, /missing .*read-sheet\.sh.*setup-code-skills/);
 });

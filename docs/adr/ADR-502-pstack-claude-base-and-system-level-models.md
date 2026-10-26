@@ -61,7 +61,7 @@ the provenance prose move.
 A base swap is a start-over, not a merge. The carrier branch is deleted so the
 next run seeds from `HEAD`, which is the first-run path ADR-429 describes. The
 merge then takes the new base wholesale and removes the Patina-owned files under
-`plugins/engineering/**`, which the same pull request restores. That restore
+`plugins/code/**`, which the same pull request restores. That restore
 covers whole Patina-authored skills and Patina edits inside synced files alike,
 such as the pull request body contract in `playbooks/opening-a-pr.md` and the
 issue handoff step in `playbooks/session-pickup.md`. A wholesale merge cannot

@@ -10,8 +10,8 @@ yet live. Publishing them is tracked as part of issue [#58](https://github.com/p
 | --- | --- |
 | `Install-Claude-Code` | Step-by-step Claude Code install: `npx skills@latest add patinaproject/skills` (interactive selection). |
 | `Install-Codex` | Step-by-step Codex install: `npx skills@latest add patinaproject/skills` (interactive selection; CLI auto-detects agent). |
-| `Skill-scaffold-repository-usage` | Full usage walkthrough for `scaffold-repository`: new-repo scaffold mode, realignment mode, what each baseline file does, and how to add optional surfaces. Source: `plugins/team/skills/scaffold-repository/SKILL.md` and `plugins/team/skills/scaffold-repository/README.md` (now in-repo). |
-| `Skill-using-github-usage` | Full usage walkthrough for `using-github`: entry point, pull-request preparation, review threads, checks, and releases. Issue filing is out of scope; it runs through `/to-spec` and the tracker adapter. Source: `plugins/team/skills/using-github/SKILL.md` and `plugins/team/skills/using-github/README.md` (now in-repo). |
+| `Skill-scaffold-repository-usage` | Full usage walkthrough for `scaffold-repository`: new-repo scaffold mode, realignment mode, what each baseline file does, and how to add optional surfaces. Source: `plugins/work/skills/scaffold-repository/SKILL.md` and `plugins/work/skills/scaffold-repository/README.md` (now in-repo). |
+| `Skill-using-github-usage` | Full usage walkthrough for `using-github`: entry point, pull-request preparation, review threads, checks, and releases. Issue filing is out of scope; it runs through `/to-spec` and the tracker adapter. Source: `plugins/work/skills/using-github/SKILL.md` and `plugins/work/skills/using-github/README.md` (now in-repo). |
 | `Skill-find-skills-usage` | Usage walkthrough for the `find-skills` third-party skill (from `vercel-labs/skills`): how to ask the agent to discover and install skills, what the skill resolves against (the vercel-labs registry), and how to install results. Install: `npx skills@latest add vercel-labs/skills@find-skills`. |
 | `Troubleshooting` | Common failure modes: skills CLI cloning errors, broken symlinks in the overlay, `core.symlinks` false on Windows/WSL, and how to reset the overlay. |
 
@@ -22,8 +22,8 @@ merge:
 
 1. Clone `https://github.com/patinaproject/skills.wiki.git`.
 2. Create one `.md` file per page named exactly as listed above (e.g. `Install-Claude-Code.md`).
-3. Source content for each page from `plugins/team/skills/<name>/SKILL.md` (for skill usage
+3. Source content for each page from `plugins/work/skills/<name>/SKILL.md` (for skill usage
    pages) and from `README.md` (for install pages and troubleshooting). Per-skill READMEs
-   for the ex-plugin skills are maintained in-repo at `plugins/team/skills/<name>/README.md`.
+   for the ex-plugin skills are maintained in-repo at `plugins/work/skills/<name>/README.md`.
    Do not copy the full SKILL.md body — use description and trigger sections only.
 4. Push to the wiki repo default branch. GitHub renders the pages immediately.

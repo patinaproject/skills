@@ -20,7 +20,7 @@ Type, Theme, triage state and Wayfinder kind are each a Linear label group, so o
 
 Every label is in Sentence case: capitalize the first word only, keep proper nouns and acronyms, and capitalize the word after a `Prefix:`. The exception is release-please's `autorelease: pending` and `autorelease: tagged`.
 
-Skills name labels by these exact strings. The adapter no longer maps role IDs to labels. The tracker adapter, `docs/agents/issue-tracker.md`, is the only place that defines the Type and Theme labels. Skills and other docs point to it rather than listing them, and `setup-team-skills` writes the vocabulary into a consumer's adapter.
+Skills name labels by these exact strings. The adapter no longer maps role IDs to labels. The tracker adapter, `docs/agents/issue-tracker.md`, is the only place that defines the Type and Theme labels. Skills and other docs point to it rather than listing them, and `setup-work-skills` writes the vocabulary into a consumer's adapter.
 
 ## Alternatives considered
 

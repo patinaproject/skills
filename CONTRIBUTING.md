@@ -37,7 +37,7 @@ pnpm lint:md
 ## Pull requests
 
 - Keep the PR title in commitlint format.
-- Write the body with `plugins/engineering/skills/pr/SKILL.md`.
+- Write the body with `plugins/code/skills/pr/SKILL.md`.
 - Put one `Closes #N`, `Fixes #N`, or `Resolves #N` line in
   `## Merge Danger` for each completed issue. Include its corresponding Linear
   reference on the same line, with its own closing keyword.
