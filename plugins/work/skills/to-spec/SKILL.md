@@ -4,7 +4,7 @@ description: "Turn the current conversation into a spec and publish it to the pr
 disable-model-invocation: true
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know. The one exception is a decision the readiness check needs a person to approve: ask it as one question with your recommended answer.
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know. The one exception is a decision the readiness check needs a person to approve. Ask each one as a grilling question with your recommended answer.
 
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-work-skills`.
 
@@ -18,11 +18,9 @@ Check with the user that these seams match their expectations.
 
 3. Write the spec using the template below.
 
-4. Run the triage readiness check in [../triage/READINESS.md](../triage/READINESS.md) against the spec. Close each gap you can yourself, such as verifying the claim or reading `.out-of-scope/`. Ask the user each qualifying decision they have not approved in this conversation as one question with your recommended answer. Never approve a decision yourself.
+4. Run the triage readiness check in [../triage/READINESS.md](../triage/READINESS.md) against the spec. Before you publish, close the gaps you can and ask about unapproved decisions, as its **Outcome** section says.
 
-5. Publish the spec to the project issue tracker with one Type label. When every item holds, apply `Ready for agent` or `Ready for human` and move the issue to the ready state the issue-tracker config defines. When an item fails, apply `Needs triage` and list what is still needed in the triage notes.
-
-6. Record the checklist and the decisions list as READINESS.md's **Record it** section says, through the issue-tracker config's issue-artifact operation.
+5. Publish the spec to the project issue tracker with one Type label. Then follow READINESS.md's **Record it** and **Outcome** sections: record the checklist and decisions, write the agent brief when every item holds, and apply the Triage label the outcome names. With a ready label, also apply the ready state from the issue-tracker config's **When an issue becomes ready** section.
 
 <spec-template>
 
