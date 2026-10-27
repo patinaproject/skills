@@ -1,10 +1,10 @@
 ---
 name: to-spec
-description: "Turn the current conversation into a spec and publish it to the project issue tracker: no interview, just synthesis of what you've already discussed."
+description: "Turn the current conversation into a spec and publish it to the project issue tracker, applying a ready label only when the triage readiness check passes."
 disable-model-invocation: true
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know. The one exception is a decision the readiness check needs a person to approve. Ask each one as a grilling question with your recommended answer.
 
 The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-work-skills`.
 
@@ -16,7 +16,11 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `Ready for agent` triage label and one Type label - no need for additional triage.
+3. Write the spec using the template below.
+
+4. Run the triage readiness check in [../triage/READINESS.md](../triage/READINESS.md) against the spec. Before you publish, close the gaps you can and ask about unapproved decisions, as its **Outcome** section says.
+
+5. Publish the spec to the project issue tracker with one Type label. Then follow READINESS.md's **Record it** and **Outcome** sections: record the checklist and decisions, write the agent brief when every item holds, and apply the Triage label the outcome names. With a ready label, also apply the ready state from the issue-tracker config's **When an issue becomes ready** section.
 
 <spec-template>
 
