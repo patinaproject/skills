@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/patinaproject/skills/compare/v4.1.0...v4.2.0) (2026-10-27)
+
+
+### Features
+
+* [#761](https://github.com/patinaproject/skills/issues/761) apply Needs info to open questions for developers too ([#763](https://github.com/patinaproject/skills/issues/763)) ([55282c6](https://github.com/patinaproject/skills/commit/55282c64dd6ed0c3051bf11045c0181481069a45))
+
 ## [4.1.0](https://github.com/patinaproject/skills/compare/v4.0.0...v4.1.0) (2026-10-27)
 
 
