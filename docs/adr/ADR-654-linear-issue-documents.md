@@ -10,7 +10,7 @@ On private repositories the vendored `triage` skill posted triage notes and agen
 
 ## Decision
 
-On Linear-native issues, durable issue artifacts (triage notes, agent briefs, issue-scoped research, and proposed ADRs) are saved as Documents attached to the issue, one per kind and found by exact title (`Triage notes`, `Agent brief`, `Research`, `ADR-<id>: <title>`), and updated in place on re-runs. A comment is written only when a human must act: the `needs-info` comment that @-mentions the reporter, and the explanation posted with a `wontfix` closure. For proposed ADRs, the `ADR-<id>` Document replaces ADR-337's comment as the pre-merge home. `docs/adr/` remains the permanent record, and the implementing pull request copies the Document word for word. Public repositories keep GitHub comments, because GitHub is their source of issue truth and external reporters cannot see Linear Documents.
+On Linear-native issues, durable issue artifacts (triage notes, agent briefs, issue-scoped research, and proposed ADRs) are saved as Documents attached to the issue, one per kind and found by exact title (`Triage notes`, `Agent brief`, `Research`, `ADR-<id>: <title>`), and updated in place on re-runs. A comment is written only when a human must act: the `needs-info` comment that @-mentions each person who must answer (the reporter or a developer), and the explanation posted with a `wontfix` closure. For proposed ADRs, the `ADR-<id>` Document replaces ADR-337's comment as the pre-merge home. `docs/adr/` remains the permanent record, and the implementing pull request copies the Document word for word. Public repositories keep GitHub comments, because GitHub is their source of issue truth and external reporters cannot see Linear Documents.
 
 ## Consequences
 
