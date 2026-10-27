@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/patinaproject/skills/compare/v4.0.0...v4.1.0) (2026-10-27)
+
+
+### Features
+
+* [#768](https://github.com/patinaproject/skills/issues/768) make to-spec run the triage readiness check before a ready label ([#769](https://github.com/patinaproject/skills/issues/769)) ([4c72f1c](https://github.com/patinaproject/skills/commit/4c72f1cb0235b3e4967beff07509c8b6893011ef))
+
 ## [4.0.0](https://github.com/patinaproject/skills/compare/v3.23.1...v4.0.0) (2026-10-25)
 
 
