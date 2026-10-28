@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0](https://github.com/patinaproject/skills/compare/v4.2.0...v4.3.0) (2026-10-28)
+
+
+### Features
+
+* [#772](https://github.com/patinaproject/skills/issues/772) find superseding issues and write blocked-by relations in triage ([#775](https://github.com/patinaproject/skills/issues/775)) ([da4bb21](https://github.com/patinaproject/skills/commit/da4bb21c7c76f2b28db5bb1242cbf0b4b704d970))
+
 ## [4.2.0](https://github.com/patinaproject/skills/compare/v4.1.0...v4.2.0) (2026-10-27)
 
 
