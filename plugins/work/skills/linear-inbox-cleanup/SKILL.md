@@ -62,7 +62,8 @@ reason. A condition matches only the notification types listed for it. A
 condition that does not apply to a notification is a silent non-match. When a
 condition applies but a lookup it needs fails, or a field it needs is missing,
 keep the notification and list it under Unresolved. No later check runs on it,
-Idle included.
+Idle included. A field is missing when the response omits it. A field the
+response returns as `null` is present and empty.
 
 Compare timestamps as instants and dates in UTC.
 
@@ -75,8 +76,9 @@ Compare timestamps as instants and dates in UTC.
 - **Reviewed.** Types: `pullRequestReviewRequested` and
   `pullRequestReviewRerequested`, plus `pullRequestCommented`,
   `pullRequestCommentMention`, and `pullRequestMention` when `subtitle`
-  contains "ready for review", case-insensitive. Read `viewerReviewState` from
-  `get_diff`. Clear when either holds:
+  contains "ready for review", case-insensitive. The `url` is a `/review/`
+  URL. Read `viewerReviewState` from `get_diff`. A null `lastSubmittedAt` or
+  `lastSubmittedDecision` matches neither bullet. Clear when either holds:
   - `lastSubmittedAt` is later than the notification's `updatedAt` and
     `createdAt`, and `isAskedToReviewAgain` is false. Any decision counts,
     changes requested included.
@@ -93,13 +95,16 @@ Compare timestamps as instants and dates in UTC.
   `dueDate` is later than the date of the notification's `createdAt` and is
   today or later.
 - **Restated.** Types: the Answered types. Check this condition last, after
-  the others have run over every notification. A newer notification of the
-  same `type` is still unread after every earlier clear in this run, and its
-  notifying comment is in the same thread as this one's, with the same
-  `author.id`. Clear the older one. When either comment or its author cannot
-  be resolved, this condition does not match.
+  the others have run over every notification. Clear this notification when
+  another one with the same `type` and a later `createdAt` is still unread
+  after every earlier clear in this run, and its notifying comment is in the
+  same thread as this one's, with the same `author.id`. When either comment or
+  its author cannot be resolved, this condition does not match.
 
 ## Run
+
+Keep one cache for the whole run, keyed by issue identifier, review URL, and
+comment parent. Every step reads from it, so each is fetched at most once.
 
 1. **Identify the user.** Call `get_user` with `query: "me"`. Keep the user's
    `id` and `name`. `get_user` returns no profile URL, so build it as
@@ -127,11 +132,11 @@ Compare timestamps as instants and dates in UTC.
 
 5. **Clear the superseded ones** among the rest, by [Superseded](#superseded).
 
-6. **Find the idle candidates** among the notifications not yet cleared. A
-   candidate reports a new comment or reply: `category` is
-   `commentsAndReplies`, or `type` is a new-comment or reply type, such as
-   `issueNewComment`, `projectUpdateNewComment`, or a document or project
-   comment type. Keep every other notification without further checks,
+6. **Find the idle candidates** among the notifications not yet cleared or
+   listed under Unresolved. A candidate reports a new comment or reply:
+   `category` is `commentsAndReplies`, or `type` is a new-comment or reply
+   type, such as `issueNewComment`, `projectUpdateNewComment`, or a document or
+   project comment type. Keep every other notification without further checks,
    including:
 
    - any `type` containing `Mention`, such as `issueMention` or
@@ -152,9 +157,6 @@ Compare timestamps as instants and dates in UTC.
    3. Keep the notification when the notifying comment's body @-mentions the
       user.
    4. Otherwise, clear it.
-
-Keep one cache for the whole run, keyed by issue identifier, review URL, and
-comment parent. Every step reads from it, so each is fetched at most once.
 
 ## Report
 

@@ -216,9 +216,10 @@ for the skill contract.
 action. It marks as read the ones for completed or canceled issues and merged
 pull requests, status changes, and Triage Rule assignments. It also clears
 superseded ones, where a later event shows the user already acted or the work
-moved on, such as a review request the user has since reviewed. Last, it clears
-comment threads the user never joined and was never @-mentioned in. Every other notification stays
-unread. It uses only the Linear MCP tools and changes nothing but read state.
+moved on, such as a review request the user has since reviewed. Last, it
+clears comment threads the user never joined and was never @-mentioned in.
+Every other notification stays unread. It uses only the Linear MCP tools and
+changes nothing but read state.
 
 See [./plugins/work/skills/linear-inbox-cleanup/](./plugins/work/skills/linear-inbox-cleanup/)
 for the skill contract.
