@@ -207,6 +207,8 @@ Prefer the connected Linear tools in interactive sessions:
 | Create or update a Document | `save_document` |
 | List or create labels | `list_issue_labels` / `create_issue_label` |
 | Close, reopen, or change state | `save_issue` with `state` |
+| Read relations | `get_issue` with `includeRelations: true` |
+| Write a blocker | `save_issue` with `blockedBy` (append-only) |
 | Read projects and milestones | `get_project`, `list_milestones`, `get_milestone` |
 | Read releases and release notes | `list_releases`, `get_release`, `get_release_note` |
 | Create or update release notes | `save_release_note` |
