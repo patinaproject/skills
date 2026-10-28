@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0](https://github.com/patinaproject/skills/compare/v4.3.0...v4.4.0) (2026-10-28)
+
+
+### Features
+
+* [#773](https://github.com/patinaproject/skills/issues/773) settle triage design choices from documentation first ([#774](https://github.com/patinaproject/skills/issues/774)) ([e5e0b43](https://github.com/patinaproject/skills/commit/e5e0b43c5966cea8588c673a98cc466ab17e14d9))
+
 ## [4.3.0](https://github.com/patinaproject/skills/compare/v4.2.0...v4.3.0) (2026-10-28)
 
 
