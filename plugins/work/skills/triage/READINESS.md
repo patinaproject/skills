@@ -18,6 +18,7 @@ Every item must hold:
    - **The result of a real trade-off:** there were genuine alternatives.
 
    An agent's recommended answer counts only once a person accepts or overrides it. An agent never approves a decision. "None needed" is a valid result.
+8. **Blockers recorded.** Superseding and blocking issues were checked, and each blocker found is recorded as a native blocked-by relation, or recommended in the triage notes when the run may not write it.
 
 ## Record it
 
@@ -33,6 +34,7 @@ Keep the checklist in the triage notes, so the next session sees what passed and
 - [ ] No open questions: 1 open
 - [x] Reason it can't be delegated: n/a (Ready for agent)
 - [ ] Decisions approved: 1 awaiting approval
+- [x] Blockers recorded: blocked-by relation to PAT-123 written
 ```
 
 List each qualifying decision under the checklist with its answer and who approved it, or mark it awaiting approval. Record a qualifying decision only here, never under "still needed":
