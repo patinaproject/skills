@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.5.0](https://github.com/patinaproject/skills/compare/v4.4.0...v4.5.0) (2026-10-29)
+
+
+### Features
+
+* [#778](https://github.com/patinaproject/skills/issues/778) clear superseded notifications in linear-inbox-cleanup ([#779](https://github.com/patinaproject/skills/issues/779)) ([4ce94f0](https://github.com/patinaproject/skills/commit/4ce94f07df012b5aa6044dd17814e377921b9470))
+
 ## [4.4.0](https://github.com/patinaproject/skills/compare/v4.3.0...v4.4.0) (2026-10-28)
 
 
