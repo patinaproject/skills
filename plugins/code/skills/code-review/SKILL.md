@@ -14,8 +14,9 @@ The axes run as **parallel sub-agents** so they don't pollute each other's conte
 ## Output contract
 
 The review has one substance contract across runtimes. Report the separate
-`## Standards`, `## Spec`, and `## Evidence` axes, and write every finding as ordinary Markdown
-with its file and exact line or tight line range. Keep the Markdown findings in
+`## Standards`, `## Spec`, and `## Evidence` axes, and write every finding as ordinary Markdown.
+Give each Standards and Spec finding its file and exact line or tight line range,
+and each Evidence finding the claim it quotes. Keep the Markdown findings in
 the review so the result remains readable outside a review UI.
 
 The presentation layer may add runtime metadata, but it does not change the
