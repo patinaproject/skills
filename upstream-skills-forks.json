@@ -554,7 +554,7 @@
   },
   "plugins/work/skills/to-spec/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682), and applies a ready label only after the triage readiness check passes, asking the user to approve each qualifying decision.",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682), and applies a ready label only after the triage readiness check passes, asking the user to approve each qualifying decision. It also chooses the test seams without asking the user and records them, with the reason for each new seam, in Testing Decisions.",
     "upstream": {
       "status": "not-proposed"
     }
