@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.6.0](https://github.com/patinaproject/skills/compare/v4.5.0...v4.6.0) (2026-10-30)
+
+
+### Features
+
+* [#781](https://github.com/patinaproject/skills/issues/781) let the reviewer write every comment in pr-review-assistant ([#782](https://github.com/patinaproject/skills/issues/782)) ([26eb592](https://github.com/patinaproject/skills/commit/26eb592edbe846f33a87f7b5fe0d5c14aa31dfc1))
+
 ## [4.5.0](https://github.com/patinaproject/skills/compare/v4.4.0...v4.5.0) (2026-10-29)
 
 
