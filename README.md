@@ -237,9 +237,9 @@ for the skill contract.
 ### pr-review-assistant
 
 `pr-review-assistant` pair-reviews someone else's pull request. It presents the
-PR as an artifact (intent, hard-to-reverse changes, changed names and flows,
-blast radius) with a comment to leave on each item. The reviewer stays the
-judge. It writes nothing to GitHub or Linear until the reviewer asks.
+PR as an artifact that teaches the change (intent, hard-to-reverse changes,
+changed names and flows, blast radius). The reviewer stays the judge and writes
+every review comment. It never drafts or posts a comment to GitHub or Linear.
 
 See [./plugins/work/skills/pr-review-assistant/](./plugins/work/skills/pr-review-assistant/)
 for the skill contract.
@@ -283,7 +283,7 @@ README and skill contract.
 | [draft-user-follow-ups](./plugins/work/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
 | [linear-inbox-cleanup](./plugins/work/skills/linear-inbox-cleanup/) | Mark Linear inbox notifications read when they need no action |
 | [gather-evidence](./plugins/code/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
-| [pr-review-assistant](./plugins/work/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact with a comment on each item |
+| [pr-review-assistant](./plugins/work/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact that teaches the change |
 | [running-mobile-simulators](./plugins/code/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |
 | [scaffold-repository](./plugins/work/skills/scaffold-repository/) | Scaffold a new repository to the Patina Project baseline |
 
