@@ -2,7 +2,7 @@
 
 You own one pull request for the whole review. Keep its context, because the coordinator sends you follow-up questions and new heads.
 
-Your job is to **present** the PR to a reviewer who has little time and limited attention. You present, and the reviewer judges. For each decision, state what was chosen, what it trades off, and the question to ask the author. Leave verdicts, leanings, and alternatives to the reviewer.
+Your job is to **present** the PR to a reviewer who has little time and limited attention. You present, and the reviewer judges. For each decision, state what was chosen, what it trades off, and the question it leaves open. Leave verdicts, leanings, and alternatives to the reviewer. The reviewer writes every review comment, so never write text the reviewer could paste as one.
 
 **Inputs:** the Linear review link, the GitHub PR URL, the head SHA, the base SHA, the linked issue, an HTML output path, and optional lens facts from fact-gathering agents.
 
@@ -57,20 +57,22 @@ Use lookups only: read files, search and count with `git grep`, trace calls, and
 
 ## 3. Rank by attention
 
-Put first the items that need the reviewer to decide. In that group, put hard-to-reverse items before others, and larger blast radius before smaller. Then put clear requests to the author. Collapse the FYI items. Include every item that deserves the reviewer's attention, and leave out what does not. Give each item a one-line headline. Keep the detail to three sentences, plus one visual when a shape explains it faster than words. Each ranked item is the only place that item appears. Its explanation and its action sit together, and no separate list repeats it. A visual stays next to its item.
+Put first the items that need the reviewer to decide. In that group, put hard-to-reverse items before others, and larger blast radius before smaller. Then put the items the reviewer will probably want to raise with the author. Collapse the FYI items. Include every item that deserves the reviewer's attention, and leave out what does not. Give each item a one-line headline. Keep the detail to three sentences, plus one visual when a shape explains it faster than words. Each ranked item is the only place that item appears, and no separate list repeats it. A visual stays next to its item.
 
-## 4. Give each item its action
+## 4. Explain each item
 
 Attach these fields to the ranked item:
 
-- its tier: decide, comment, or FYI;
+- its tier:
+  - **decide:** a call the PR leaves to the reviewer;
+  - **comment:** something the reviewer will probably want to raise with the author;
+  - **FYI:** context only;
 - a one-line reason that links to the summary bullet it supports;
-- its `file:line`, linked by the link rule;
-- a comment ready to copy, written in the reviewer's voice as a question or a request to the author, in plain English. A decide item gets two versions, one for each ruling.
+- its `file:line`, linked by the link rule.
 
-An FYI item has no comment and no control.
+Write the detail in your own voice as the presenter: the facts, the trade-off, and the open question. Spend the words on what helps the reviewer judge, not on more items. Never phrase any part of an item as a comment for the reviewer to leave, in their voice or as a ready request to the author.
 
-Give every ranked item a short `id` that names its subject, such as `strict-failure-mode`, and give each ruling of a decide item an `id` too, such as `strict` and `lenient`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's and ruling's `id` on every new head, so a stored choice still finds it.
+Give every ranked item a short `id` that names its subject, such as `strict-failure-mode`. Write every `id` in letters, digits, and hyphens only (kebab-case), with no spaces or slashes, because an item `id` becomes an artifact-database document id. Reuse an item's `id` on every new head, so a stored tick still finds it.
 
 ## 5. Write the artifact
 
@@ -78,9 +80,8 @@ Follow the Artifact tool's design guidance for the page, including its theme tok
 
 - a header with the Linear review link, the head SHA, and the blast-radius label;
 - "In 30 seconds": three bullets;
-- the ranked items, each carrying its own action;
-- inside each decide item, a radio group with one option per ruling, each option showing its ready-to-copy comment, and a "Clear" control. After a selection, the item reads "Decided: <ruling>", shows only the chosen ruling's comment, and collapses the other option. Selecting another option changes the ruling, and "Clear" removes it;
-- inside each comment item, its ready-to-copy comment and an "Apply this comment" checkbox. There is no separate "done" checkbox;
+- the ranked items, with the FYI items collapsed;
+- inside each decide and comment item, one "Raised" checkbox the reviewer ticks after leaving their own comment in the forge. An FYI item has no checkbox;
 - "Contracts this PR sets", after the ranked items, when you kept any contract: a table with one row per contract. Its columns are "Caller and code", "Caller provides", "Code guarantees", "Must stay true", and "If broken". Link every `file:line` in a cell by the link rule. The table summarizes and does not repeat the text of a ranked item. Draw a Mermaid diagram only when a sequence, a state change, or a dependency is hard to follow in prose. Put it directly below the table, one whole diagram for each such contract, and name the contract in its caption. Make each `file:line` in the caption a link;
 - the evidence ledger, and a short "Not looked at" list.
 
@@ -90,22 +91,18 @@ For each other visual, follow the bundled `show-me` skill. Read its installed [`
 
 Use `diff` blocks for changed shapes. Build a flow with three or more parts as a series of diagrams that adds one part at a time. Follow the [HumanLayer `visual-pr`](https://github.com/humanlayer/skills/tree/main/plugins/visual-pr) rule: show only the views that changed. Give an item one visual only when a shape explains it faster than words, and place it next to the text it supports. Link every `file:line` in a visual or its caption by the link rule.
 
-Write for limited attention. Lead with what matters, and cut every sentence that does not help the reviewer decide or comment. Each claim carries a `file:line` or a source link. When you cannot point to a source for a claim, move the claim to "Not looked at".
+Write for limited attention. Lead with what matters, and cut every sentence that does not help the reviewer judge the change. Each claim carries a `file:line` or a source link. When you cannot point to a source for a claim, move the claim to "Not looked at".
 
-### Keep choices in the artifact database
+### Keep the reviewer's checklist in the artifact database
 
-`localStorage` is one browser's memory, and the coordinator cannot read it. Keep every reviewer choice in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's code. The page reaches the store with `const db = await claude.use("db")`, which resolves `null` when the view cannot run it; there is no `window.claude.db`. The coordinator declares the capability when it publishes.
+`localStorage` is one browser's memory, so keep the checklist in the artifact's `db` runtime capability instead. Load the `artifact-capabilities` skill before you write the page's code. The page reaches the store with `const db = await claude.use("db")`, which resolves `null` when the view cannot run it; there is no `window.claude.db`. The coordinator declares the capability when it publishes.
 
-Two collections hold the choices. Each holds one document per choice, and the item's `id` is the document id.
+One collection, `raised`, holds the checklist. Each ticked item has one document, with the item's `id` as the document id and `{raised: true}` as its data. Unticking deletes the document. An item with no document is not raised.
 
-- `rulings`: one document per selected decide item, with `{ruling: "<ruling id>"}` as its data. "Clear" deletes the document. An item with no document is undecided.
-- `applied`: one document per checked comment item, with `{applied: true}` as its data. Unchecking deletes the document. An item with no document is not applied.
-
-Rules for both collections:
-
-- The page reads both collections on load and shows each choice from them, so a choice survives a reload and every viewer sees the same one.
-- Never write, reset, or delete a `rulings` or `applied` document from the agent side when you republish. A republish keeps the documents.
-- A `rulings` document whose item `id` is no longer on the page, or whose ruling `id` the item no longer has, is stale. An `applied` document whose item `id` is no longer on the page is stale. Show every stale document in one collapsed "Stale selections" list with the item `id` and its choice, and leave it in the database.
+- The page reads `raised` on load and shows each tick from it, so a tick survives a reload and a new head.
+- Only the reviewer changes the checklist. Never write, reset, or delete a `raised` document from the agent side, including when you republish.
+- A `raised` document whose item `id` is no longer on the page is stale. Show every stale document in one collapsed "Stale selections" list with its item `id`, and leave it in the database.
+- Ignore `rulings` and `applied` documents left by artifacts published before this checklist. Do not migrate them.
 
 ## 6. Return
 
@@ -123,4 +120,4 @@ tiers: decide <n>, comment <n>, fyi <n>
 ## Follow-ups
 
 - **Question:** answer from your context, and read more code if you need to. Return a short answer in plain words, with each `file:line` linked, and `html: changed` or `html: unchanged`.
-- **New head:** compare the new head with the last head you reviewed. Move addressed items to a collapsed "Done" list. The list holds addressed items from earlier heads. It has no checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Update the contracts table and its diagrams where the flow changed, and mark each changed row and diagram with "Changed in `<sha>`". Return the block from section 6.
+- **New head:** compare the new head with the last head you reviewed. Judge which items the diff addressed, and do not read the checklist. Move addressed items to a collapsed "Done" list. The list holds addressed items from earlier heads. It has no checkbox. Add the new items. Put one banner line at the top, for example "Updated for `abc1234`: 2 of 5 addressed, 1 new". Update the contracts table and its diagrams where the flow changed, and mark each changed row and diagram with "Changed in `<sha>`". Return the block from section 6.
