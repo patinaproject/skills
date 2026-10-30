@@ -110,6 +110,8 @@ Then write the docs files using the seed templates in this skill folder as a sta
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
+Every `docs/agents/issue-tracker.md` defines an `## Attach an artifact` section, because `triage` and `to-spec` stop without one. For another tracker, ask where artifacts live and record the same location, line order, lookup, and save rules the templates give. When the file already exists without that section, add the one from the matching template.
+
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers, restart from scratch, or add a missing `## Priority rubric` section.
+Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers, restart from scratch, or add a missing `## Priority rubric` or `## Attach an artifact` section.
