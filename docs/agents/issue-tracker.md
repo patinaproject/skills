@@ -355,8 +355,9 @@ provider. See
   Documents attached to the synced Linear issue, as below. Post on GitHub only
   when a human must act there. When the synced Linear issue is archived or
   missing, write nothing and name the gap in the reply; never move the
-  artifact to GitHub. Post research and proposed ADRs
-  on the GitHub issue, as the producing skill describes.
+  artifact to GitHub. Post each research question as
+  `<identifier> Research: <question>`, and proposed ADRs, on the GitHub issue,
+  as the producing skill describes.
 - **Private repository:** save each artifact as a Linear Document attached to
   the issue. Post a comment only when a human must act.
 

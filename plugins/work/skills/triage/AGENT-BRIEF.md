@@ -1,6 +1,6 @@
 # Writing Agent Briefs
 
-An agent brief is an issue artifact titled `<identifier> Agent brief`, saved through the issue-tracker config's **Attach an artifact** operation when an issue or PR moves to `Ready for agent` or `Ready for human`. `<identifier>` is the tracker's issue reference, such as `PAT-123` or `#123`. It is the authoritative specification that an AFK agent will work from. The issue description is for people, and the discussion is context: the agent brief is the contract. Triage and `to-spec` both write it from the template below.
+An agent brief is an issue artifact titled `<identifier> Agent brief`, saved through the issue-tracker config's **Attach an artifact** operation when `to-spec` publishes a spec, or when triage moves an issue or PR to `Ready for agent` or `Ready for human`. `<identifier>` is the tracker's issue reference, such as `PAT-123` or `#123`. It is the authoritative specification that an AFK agent will work from. The issue description is for people, and the discussion is context: the agent brief is the contract. Triage and `to-spec` both write it from the template below.
 
 The brief states **what the agent should do**, which stretches to both surfaces: for an issue, that's building the change from nothing; for a PR, it's what's left to do *to the existing diff*: finish it, close gaps, address review points. Same principles either way; the PR example below shows the difference.
 

@@ -44,15 +44,16 @@ operator for one explicit issue URL.
 
 After the issue resolves, and before any branch, worktree, or file step, fetch
 `<identifier> Agent brief`. The **Attach an artifact** operation in the
-repository's issue-tracker adapter, `docs/issue-tracker.md`, names the
+repository's issue-tracker adapter, `docs/agents/issue-tracker.md`, names the
 identifier, where the brief lives, and how to find it. The brief is the agent
 contract. The issue description is for people.
 
 1. When the issue carries `Ready for agent` and has no brief, stop and report
    the missing brief. Any other issue with no brief continues.
 2. When the description was last edited before the brief's `Last updated:`
-   time, the brief already accounts for it. Continue. Treat an edit time you
-   cannot read as later than the brief.
+   time, the brief already accounts for it. Continue. Read the description's own
+   edit time, such as GitHub's `lastEditedAt`, not the issue's `updatedAt`.
+   Treat an edit time you cannot read as later than the brief.
 3. A newer decision stated outright is a description edited after the brief's
    `Last updated:` time that names a value replacing one the brief names, and
    that adds or removes no acceptance criterion and no scope. Continue, and

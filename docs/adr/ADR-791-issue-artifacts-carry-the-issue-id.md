@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted. Supersedes the Document titles and the single `Research` Document rule of [ADR-654](ADR-654-linear-issue-documents.md). Amends the wording of [ADR-675](ADR-675-automated-triage-playbook.md).
+Accepted. Supersedes the Document titles and the single `Research` Document rule of [ADR-654](ADR-654-linear-issue-documents.md). Amends the wording of [ADR-675](ADR-675-automated-triage-playbook.md). Its readiness copies drop the comment fallback and the example decision about storing briefs as Documents.
 
 ## Context
 
