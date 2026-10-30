@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.7.0](https://github.com/patinaproject/skills/compare/v4.6.0...v4.7.0) (2026-10-30)
+
+
+### Features
+
+* [#784](https://github.com/patinaproject/skills/issues/784) review pull request evidence in code-review ([#785](https://github.com/patinaproject/skills/issues/785)) ([91e3370](https://github.com/patinaproject/skills/commit/91e337054d8a8450b46fe09438e1eb9fff7d4a75))
+
 ## [4.6.0](https://github.com/patinaproject/skills/compare/v4.5.0...v4.6.0) (2026-10-30)
 
 
