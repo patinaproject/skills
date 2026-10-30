@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.8.0](https://github.com/patinaproject/skills/compare/v4.7.0...v4.8.0) (2026-10-30)
+
+
+### Features
+
+* [#787](https://github.com/patinaproject/skills/issues/787) let to-spec choose test seams without asking ([#789](https://github.com/patinaproject/skills/issues/789)) ([438909c](https://github.com/patinaproject/skills/commit/438909c63a71dfd45bfaff9115eb41cf2fb733f9))
+
 ## [4.7.0](https://github.com/patinaproject/skills/compare/v4.6.0...v4.7.0) (2026-10-30)
 
 
