@@ -80,7 +80,7 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Identify the evidence source
 
-The Evidence axis reviews a pull request body. When the review targets a pull request, fetch its body with `gh pr view <N> --json body`. Without a pull request, skip the Evidence sub-agent and report `Evidence: skipped, no pull request.`
+The Evidence axis reviews a pull request body. When the review targets a pull request, fetch its body with `gh pr view <N> --repo <owner>/<repo> --json body`. Without a pull request, skip the Evidence sub-agent and report `Evidence: skipped, no pull request.`
 
 The repository decides which kind of evidence a change needs. This axis checks only whether the evidence given shows what the pull request claims.
 
@@ -102,7 +102,7 @@ The repository decides which kind of evidence a change needs. This axis checks o
 
 - The diff command and commit list.
 - The pull request body.
-- The brief: "List each claim in the pull request body that names an observable result, such as a visible change, a fixed behaviour, or command output. For each claim, name the surface where a person would observe it, such as web, native app, CLI, or server. Take it from what the changed code affects, not only from where it lives: a server hook that revalidates a web cache is observed on web. For each claim, find the evidence item that is meant to show it and inspect it: download each image and view it, and read each recording through frames you extract. A private repository's attachment URLs do not download directly, so render the body with `gh api markdown -f mode=gfm -f context=<owner>/<repo> -f text=<body>` and download the signed media URLs in its output. Report (a) a claim whose evidence does not show the claimed property, naming what the item shows instead; (b) an evidence item from a different surface than the claim it supports, such as native screenshots for a web change; (c) an item you could not open, as unverified. When the body has no Evidence section, report that once and add no finding per claim. When every claim has evidence that shows it, report no finding. Quote the claim for each finding. Under 400 words."
+- The brief: "List each claim in the pull request body that names an observable result, such as a visible change, a fixed behaviour, or command output. For each claim, name the surface where a person would observe it, such as web, native app, CLI, or server. Take that surface from what the changed code affects, not only from where the code lives. A server hook that revalidates a web cache is observed on web. Find the evidence item meant to show each claim, and name the surface it comes from. Download each image and view it. Read each recording through frames you extract. A private repository's attachment URLs do not download directly. Render the body with `gh api markdown -f mode=gfm -f context=<owner>/<repo> -f text=<body>` and download the signed media URLs in its output. Report (a) a claim that no evidence item shows, as unsupported, naming what the nearest item shows instead; (b) an evidence item from a different surface than the claim it supports, such as native screenshots for a web change; (c) an item you could not open, as unverified. When the body has no Evidence section, report that once and add no finding per claim. When every claim has evidence that shows it, report no finding. Quote the claim for each finding. Under 400 words."
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
