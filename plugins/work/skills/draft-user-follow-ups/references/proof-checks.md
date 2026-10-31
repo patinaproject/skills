@@ -45,8 +45,19 @@ the page, the item, or the public API response the customer reported. Use only
 public reads. The check passes when the live surface shows the fixed behavior
 for that case.
 
-When no public surface can show the case, the check fails. Block the reply
-with "Clears when: the operator confirms the case in the live product".
+When no public surface can show the case and the case is an in-app
+interaction, the check passes as **inferred** when both of these hold:
+
+- The dependency's pull request or tracker issue records a reproduction of the
+  reported behavior.
+- The pull request adds or changes a test for that behavior.
+
+The reply must then ask the customer to try the action again, as `SKILL.md`
+step 5 describes.
+
+When no public surface can show the case and no reproduction is recorded, the
+check fails. Block the reply with "Clears when: the operator confirms the case
+in the live product".
 
 ## Evidence labels
 
