@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.1](https://github.com/patinaproject/skills/compare/v4.13.0...v4.13.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* [#806](https://github.com/patinaproject/skills/issues/806) attach operator drafts to follow-up candidates ([#811](https://github.com/patinaproject/skills/issues/811)) ([10ee11d](https://github.com/patinaproject/skills/commit/10ee11d3e45714e3d55455464b71cc42a26a9faa))
+
 ## [4.13.0](https://github.com/patinaproject/skills/compare/v4.12.0...v4.13.0) (2026-10-31)
 
 
