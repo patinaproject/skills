@@ -12,7 +12,8 @@ customer support.
 - **Set point.** By the morning after a release, every customer the operator
   owes a reply has one of two outcomes. The outcome is a **proven** reply that
   is ready to send, with a direct link to where to reply. Or the outcome is a
-  named **blocker**.
+  named **blocker**. A support conversation whose link cannot be built gives
+  "no direct link" and its conversation ID in place of the link.
 - **Sensor.** The releases in the **window**, and the **owed** replies found
   across every **touchpoint**.
 - **Controller.** The three proof checks for each owed reply.
@@ -51,7 +52,8 @@ draft listing, and draft creation for email; conversation and post reads for
 the feedback tool; issue and pull-request reads for the tracker; deploy history
 for the production pipeline. Draft listing for email is required. Reading
 feedback-tool drafts is optional. When the session cannot read them, continue.
-The response marks those drafts as not read.
+The response marks those drafts as not read. When `feedback_conversation_url`
+is set, use it to build each support conversation's link.
 
 Completion criterion: every required config key has a value, and every
 required operation maps to a session tool. Otherwise stop before any read of
@@ -89,7 +91,9 @@ each candidate **answered** or **owed**.
 Completion criterion: each touchpoint has a searched-and-counted result. Each
 candidate has a touchpoint, a reply location link, the full set of threads
 read, its operator drafts or none, and a mark of answered or owed with its
-reason.
+reason. Only a support conversation may give "no direct link" and its
+conversation ID in place of the link, under the
+[links rule](references/response-format.md#links).
 
 ### 4. Prove each owed reply
 
@@ -152,8 +156,9 @@ written.
   - Never create more than one new draft per thread.
 - **Feedback tool.** Write the reply text and the link to the post or
   conversation where the operator will paste it. This covers a support
-  conversation message and a post comment. When an operator draft exists
-  there, name it and say what differs.
+  conversation message and a post comment. A support conversation with no
+  buildable link gets "no direct link" and its conversation ID instead. When an
+  operator draft exists there, name it and say what differs.
 
 An operator draft passes the **reuse test** when all four hold. A draft with
 an older version or another date fails.
@@ -167,13 +172,15 @@ an older version or another date fails.
   and no cause sentence when the reply closes a promise.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
-reply location link. An operator draft that passed the reuse test counts as the
-draft link. Every proven reply about a shipped feature or fix contains the
-outcome line with its own recorded version and date, and the restart line only
-when that deploy is less than two days old. Every proven reply stays on the
-reported topic, and a reply for a fixed in-app interaction asks the customer to
-try again, with the steps and a link to their own item or page. Blocked replies
-get no new draft from the run.
+reply location link. Only a support conversation may give "no direct link" and
+its conversation ID instead, under the
+[links rule](references/response-format.md#links). An operator draft that
+passed the reuse test counts as the draft link. Every proven reply about a
+shipped feature or fix contains the outcome line with its own recorded version
+and date, and the restart line only when that deploy is less than two days old.
+Every proven reply stays on the reported topic, and a reply for a fixed in-app
+interaction asks the customer to try again, with the steps and a link to their
+own item or page. Blocked replies get no new draft from the run.
 
 ### 6. Respond
 
