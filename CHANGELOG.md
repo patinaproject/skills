@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.3](https://github.com/patinaproject/skills/compare/v4.13.2...v4.13.3) (2026-10-31)
+
+
+### Bug Fixes
+
+* [#809](https://github.com/patinaproject/skills/issues/809) check follow-up link text and add a no-direct-link fallback ([#813](https://github.com/patinaproject/skills/issues/813)) ([93aecae](https://github.com/patinaproject/skills/commit/93aecae03edf3fe587ba8737d758324cbc3de1b6))
+
 ## [4.13.2](https://github.com/patinaproject/skills/compare/v4.13.1...v4.13.2) (2026-10-31)
 
 
