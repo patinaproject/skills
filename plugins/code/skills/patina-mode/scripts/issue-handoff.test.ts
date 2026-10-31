@@ -153,7 +153,7 @@ describe("issue handoff policy", () => {
   it("refuses a pass from a non-canonical branch", () => {
     expect(
       decideContinuation(
-        request("direct", "edit"),
+        request("direct", "edit", null),
         { ...checkout, branch: "t3code/generated" },
         playbooks
       )
@@ -167,7 +167,7 @@ describe("issue handoff policy", () => {
   it("refuses a pass from another physical worktree", () => {
     expect(
       decideContinuation(
-        request("session-pickup", "commit"),
+        request("session-pickup", "commit", null),
         { ...checkout, worktreePath: "/worktrees/other" },
         playbooks
       )
