@@ -49,9 +49,9 @@ the steps where each one acts.
 Map each configured tool onto the session's tools: mail search, thread read,
 draft listing, and draft creation for email; conversation and post reads for
 the feedback tool; issue and pull-request reads for the tracker; deploy history
-for the production pipeline. Reading feedback-tool drafts is optional. When the
-session cannot read them, continue, and the response footer names that
-touchpoint.
+for the production pipeline. Draft listing for email is required. Reading
+feedback-tool drafts is optional. When the session cannot read them, continue.
+The response marks those drafts as not read.
 
 Completion criterion: every required config key has a value, and every
 required operation maps to a session tool. Otherwise stop before any read of
@@ -125,11 +125,13 @@ Take the version from this run's **shipped** check only. A version in an
 earlier reply, a thread, or the memory file names an older release. The
 support voice shapes the rest of the reply and leaves this sentence as written.
 
-- **Email.** An operator draft passes the **reuse test** when all three hold:
-  it is a reply inside the candidate's thread; it is addressed to the real
-  customer, the relayed address for a relay thread; and it contains the release
-  sentence exactly, with this run's **shipped** version. A draft with an older
-  version fails.
+- **Email.** An operator draft passes the **reuse test** when all three hold.
+  A draft with an older version fails.
+  - It is a reply inside the candidate's thread.
+  - It is addressed to the real customer. For a relay thread, that is the
+    relayed address.
+  - It contains the release sentence word for word, with this run's
+    **shipped** version.
   - When an operator draft passes, create no draft. That operator draft is the
     candidate's draft.
   - Otherwise create a draft as a reply inside the customer's existing thread.
@@ -137,7 +139,7 @@ support voice shapes the rest of the reply and leaves this sentence as written.
     to the real customer, whose address the relayed message carries. Record
     the draft link. When the thread holds an operator draft, say what differs
     from it, and name which draft to keep and which to delete.
-  - Never create more than one draft per thread.
+  - Never create more than one new draft per thread.
 - **Feedback tool.** Write the reply text and the link to the post or
   conversation where the operator will paste it. This covers a support
   conversation message and a post comment. When an operator draft exists

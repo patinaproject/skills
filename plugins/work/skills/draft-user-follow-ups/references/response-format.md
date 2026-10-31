@@ -13,9 +13,9 @@ new draft from this run.
 ### <Person> (<touchpoint>)
 
 - Reply here: <reply location link>
-- Existing drafts: <each operator draft link with its last-edited date>, or "none"
+- Existing drafts: <each operator draft link with its last-edited date>, "none", or "not read"
 - Draft: <new draft link>, or "operator draft" with its link, or the reply text in a quote block
-- Keep: <draft link>; delete: <draft link>
+- Keep: <draft link>; delete: <each other draft link>
 - Depends on: <issue and pull-request links>
 - Shipped: <evidence link> (measured | inferred)
 - Data: <evidence link, or "no data step" with the pull request read> (measured | inferred)
@@ -26,7 +26,7 @@ new draft from this run.
 ### <Person> (<touchpoint>)
 
 - Reply location: <link>
-- Existing drafts: <each operator draft link with its last-edited date>, or "none"
+- Existing drafts: <each operator draft link with its last-edited date>, "none", or "not read"
 - Blocker: <first failing check and what failed>
 - Evidence: <links, each measured | inferred>
 - Clears when: <the action or event that clears the blocker>
