@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.0](https://github.com/patinaproject/skills/compare/v4.13.3...v4.14.0) (2026-10-31)
+
+
+### Features
+
+* [#805](https://github.com/patinaproject/skills/issues/805) map replies through tracking issues and their blockers ([#819](https://github.com/patinaproject/skills/issues/819)) ([b435f5e](https://github.com/patinaproject/skills/commit/b435f5e695b89f202a1661f233294059dc4476f2))
+
 ## [4.13.3](https://github.com/patinaproject/skills/compare/v4.13.2...v4.13.3) (2026-10-31)
 
 
