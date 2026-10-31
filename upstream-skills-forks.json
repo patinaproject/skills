@@ -85,7 +85,7 @@
   },
   "plugins/code/skills/code-review/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adds an Output contract section that fixes the Standards, Spec, and Evidence Markdown findings across runtimes, adds the Evidence axis that compares each pull request claim with its evidence, and emits the review record that pr-readiness publish consumes as readiness evidence.",
+    "reason": "Patina adds an Output contract section that fixes the Standards, Spec, and Evidence Markdown findings across runtimes, adds the Evidence axis that compares each pull request claim with its evidence, and keeps the report in the agent's session instead of posting it on the pull request.",
     "upstream": {
       "status": "not-proposed"
     }
