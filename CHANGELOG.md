@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.12.0](https://github.com/patinaproject/skills/compare/v4.11.0...v4.12.0) (2026-10-31)
+
+
+### Features
+
+* [#798](https://github.com/patinaproject/skills/issues/798) require a chosen playbook in issue route requests ([#801](https://github.com/patinaproject/skills/issues/801)) ([a8307b8](https://github.com/patinaproject/skills/commit/a8307b896632347e45a5c022fca4a3dde812f7ee))
+
 ## [4.11.0](https://github.com/patinaproject/skills/compare/v4.10.0...v4.11.0) (2026-10-31)
 
 
