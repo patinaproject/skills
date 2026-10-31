@@ -22,10 +22,10 @@ The presentation layer may add runtime metadata, but it does not change the
 finding set. On Codex, follow the platform translation for actionable findings
 that belong to a changed line; on Claude, use the Markdown finding alone.
 
-Keep the report in your session. Never post it on the pull request, as a
+Keep the report in your session. Never post it on the pull request as a
 review, a comment, or body evidence. Resolve each finding on the reviewed head
-in one of three ways. Fix it, reply on the review thread the finding touches,
-or record why it stays open.
+by fixing it, replying on the review thread it touches, or recording why it
+stays open. A thread reply answers that thread and does not carry the report.
 
 A maintainer who is not the PR author approves or requests changes on GitHub,
 with `gh api repos/<owner>/<repo>/pulls/<N>/reviews -f commit_id=<head> -f event=APPROVE`
