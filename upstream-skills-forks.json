@@ -29,7 +29,7 @@
   },
   "plugins/code/hooks/session-start-context.md": {
     "kind": "policy",
-    "reason": "Patina's session mandate names the Patina Project Code plugin and its skills instead of pstack, because Code is the plugin that injects it.",
+    "reason": "Patina's session mandate names the Patina Project Code plugin and its skills instead of pstack, because Code is the plugin that injects it, and it states that the smaller-task exception does not apply to issue-linked work, which always enters patina-mode's issue gate with a chosen playbook.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -176,7 +176,7 @@
   },
   "plugins/code/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, and ### Principles headings for markdownlint MD036.",
+    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, every issue-run change including docs, tests, config, and dependency updates routed by its effect, and ### Principles headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -225,7 +225,7 @@
   },
   "plugins/code/skills/patina-mode/playbooks/session-pickup.md": {
     "kind": "policy",
-    "reason": "Patina routes session IDs and thread links through move-session-here, keeps transcript reads inside the named workspace, and adds the issue-handoff step before state-changing work resumes.",
+    "reason": "Patina routes session IDs and thread links through move-session-here, keeps transcript reads inside the named workspace, and adds the issue-handoff step before state-changing work resumes, sending the playbook the remaining work routes to.",
     "upstream": {
       "status": "not-proposed"
     }
