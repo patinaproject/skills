@@ -11,8 +11,9 @@ customer support.
 
 - **Set point.** By the morning after a release, every customer the operator
   owes a reply has one of two outcomes. The outcome is a **proven** reply that
-  is ready to send, with a direct link to where to reply. Or the outcome is a
-  named **blocker**.
+  is ready to send, with a direct link to where to reply, or "no direct link"
+  and the ID of a support conversation whose link cannot be built. Or the
+  outcome is a named **blocker**.
 - **Sensor.** The releases in the **window**, and the **owed** replies found
   across every **touchpoint**.
 - **Controller.** The three proof checks for each owed reply.
@@ -47,7 +48,8 @@ the steps where each one acts.
 Map each configured tool onto the session's tools: mail search, thread read,
 and draft creation for email; conversation and post reads for the feedback
 tool; issue and pull-request reads for the tracker; deploy history for the
-production pipeline.
+production pipeline. When `feedback_conversation_url` is set, use it to build
+each support conversation's link.
 
 Completion criterion: every required config key has a value, and every
 required operation maps to a session tool. Otherwise stop before any read of
@@ -81,7 +83,9 @@ touchpoint, sent mail included. Mark each candidate **answered** or **owed**.
 
 Completion criterion: each touchpoint has a searched-and-counted result. Each
 candidate has a touchpoint, a reply location link, the full set of threads
-read, and a mark of answered or owed with its reason.
+read, and a mark of answered or owed with its reason. A support conversation
+with no buildable link has "no direct link" and its conversation ID in place
+of the link. Every email thread and post has a link.
 
 ### 4. Prove each owed reply
 
@@ -126,7 +130,9 @@ support voice shapes the rest of the reply and leaves this sentence as written.
   conversation message and a post comment.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
-reply location link. Every proven reply about a shipped feature or fix
+reply location link. A reply to a support conversation with no buildable link
+has "no direct link" and its conversation ID instead. Email threads and posts
+still need a link. Every proven reply about a shipped feature or fix
 contains the release sentence with its own recorded version. Blocked replies
 have no draft.
 

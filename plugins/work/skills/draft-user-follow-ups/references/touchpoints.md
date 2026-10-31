@@ -22,7 +22,9 @@ The reply location is the thread link.
 
 Open conversations, and conversations closed within the `lookback`, in two
 cases. The last message is from the customer. Or an operator message promised
-a follow-up and no later operator message exists. The reply location is the conversation link.
+a follow-up and no later operator message exists. The reply location is the
+conversation link, or "no direct link" and the conversation ID when the
+[response format](response-format.md#links) allows it.
 
 ## Feedback tool: posts
 

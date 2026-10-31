@@ -10,7 +10,7 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 
 ### <Person> (<touchpoint>)
 
-- Reply here: <reply location link>
+- Reply here: <reply location link, or "no direct link" and the conversation ID>
 - Draft: <draft link>, or the reply text in a quote block
 - Depends on: <issue and pull-request links>
 - Shipped: <evidence link> (measured | inferred)
@@ -21,7 +21,7 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 
 ### <Person> (<touchpoint>)
 
-- Reply location: <link>
+- Reply location: <link, or "no direct link" and the conversation ID>
 - Blocker: <first failing check and what failed>
 - Evidence: <links, each measured | inferred>
 - Clears when: <the action or event that clears the blocker>
@@ -39,3 +39,16 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 
 The response gives a person's name and touchpoint. It holds no customer email
 address. The links carry the operator to the thread.
+
+## Links
+
+A link whose text names an identifier, such as a tracker issue key, a
+pull-request number, or a feedback-tool conversation ID, takes its text and its
+URL from the same tool result. Before you write the response, check each link:
+the identifier in its text must equal the identifier in its URL.
+
+A feedback-tool conversation links to the tool's own URL for that conversation.
+Build it from `feedback_conversation_url`, or take it from the tool's read.
+When neither gives one, write "no direct link" and the conversation ID. Never
+name a conversation without a link and without saying so. Email threads and
+posts always get a link.
