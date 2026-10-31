@@ -33,7 +33,9 @@ configures a state file, one line in that file. Every other surface ends the
 run exactly as it started. Messages stay unsent. The feedback tool keeps its
 posts, comments, statuses, and conversations. The tracker keeps its issues,
 production keeps its data, and the memory file keeps its text. Feedback-tool
-replies go into the response as text for the operator to paste.
+replies go into the response as text for the operator to paste. The
+operator's existing drafts end the run unchanged. The run never edits, sends,
+or deletes them.
 
 ## Run
 
@@ -45,9 +47,11 @@ the paths that contract names. Hold the memory file's standing corrections for
 the steps where each one acts.
 
 Map each configured tool onto the session's tools: mail search, thread read,
-and draft creation for email; conversation and post reads for the feedback
-tool; issue and pull-request reads for the tracker; deploy history for the
-production pipeline.
+draft listing, and draft creation for email; conversation and post reads for
+the feedback tool; issue and pull-request reads for the tracker; deploy history
+for the production pipeline. Draft listing for email is required. Reading
+feedback-tool drafts is optional. When the session cannot read them, continue.
+The response marks those drafts as not read.
 
 Completion criterion: every required config key has a value, and every
 required operation maps to a session tool. Otherwise stop before any read of
@@ -77,11 +81,15 @@ and the feedback tool's posts. Apply the standing corrections that change what
 counts as owed, such as an added promise phrase.
 
 Merge candidates by person, and read every thread each person has on every
-touchpoint, sent mail included. Mark each candidate **answered** or **owed**.
+touchpoint, sent mail included. Attach each person's **operator drafts** to
+the candidate. An operator draft is an unsent draft written from one of the
+`operator_addresses`, in any thread or conversation read for that person. Mark
+each candidate **answered** or **owed**.
 
 Completion criterion: each touchpoint has a searched-and-counted result. Each
 candidate has a touchpoint, a reply location link, the full set of threads
-read, and a mark of answered or owed with its reason.
+read, its operator drafts or none, and a mark of answered or owed with its
+reason.
 
 ### 4. Prove each owed reply
 
@@ -117,18 +125,35 @@ Take the version from this run's **shipped** check only. A version in an
 earlier reply, a thread, or the memory file names an older release. The
 support voice shapes the rest of the reply and leaves this sentence as written.
 
-- **Email.** Create a draft as a reply inside the customer's existing thread.
-  When the thread came from a feedback-tool relay sender, address the draft to
-  the real customer, whose address the relayed message carries. Record the
-  draft link.
+- **Email.** First apply the reuse test below to each operator draft in the
+  thread.
+  - When an operator draft passes, create no draft. That operator draft is the
+    candidate's draft.
+  - Otherwise create a draft as a reply inside the customer's existing thread.
+    When the thread came from a feedback-tool relay sender, address the draft
+    to the real customer, whose address the relayed message carries. Record
+    the draft link. When the thread holds an operator draft, say what differs
+    from it, and name which draft to keep and which to delete.
+  - Never create more than one new draft per thread.
 - **Feedback tool.** Write the reply text and the link to the post or
   conversation where the operator will paste it. This covers a support
-  conversation message and a post comment.
+  conversation message and a post comment. When an operator draft exists
+  there, name it and say what differs.
+
+An operator draft passes the **reuse test** when all three hold. A draft with
+an older version fails.
+
+- It is a reply inside the candidate's thread.
+- It is addressed to the real customer. For a relay thread, that is the
+  relayed address.
+- It contains the release sentence word for word, with this run's **shipped**
+  version.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
-reply location link. Every proven reply about a shipped feature or fix
-contains the release sentence with its own recorded version. Blocked replies
-have no draft.
+reply location link. An operator draft that passed the reuse test counts as the
+draft link. Every proven reply about a shipped feature or fix contains the
+release sentence with its own recorded version. Blocked replies get no new
+draft from the run.
 
 ### 6. Respond
 
