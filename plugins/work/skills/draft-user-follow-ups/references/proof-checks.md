@@ -31,6 +31,11 @@ carries the change. When several deploys pass, use the earliest one that
 carries every dependency. When that deploy names no version, the check fails
 with the blocker "no release version on the passing deploy".
 
+Record the date of the passing production deploy with the release version.
+Use the deploy or release that supplies the version. For a mobile change, that
+is the over-the-air update publish or the store release going live, whichever
+carries the version. Record its completion time.
+
 ### Data
 
 Every backfill, migration, or data job that the change needs ran in

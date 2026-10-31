@@ -120,17 +120,25 @@ When the fix is in an in-app interaction, ask the customer to try the action
 again: "Could you give it another try?" Give the steps, and link the
 customer's own item or page where the steps start.
 
-Every reply about a shipped feature or fix, on every touchpoint, contains this
-sentence exactly, with the release version that the **shipped** check recorded
-for this reply:
+Every reply about a shipped feature or fix, on every touchpoint, puts the
+release in its outcome line, with the version and date that the **shipped**
+check recorded for this reply:
 
 ```text
-This was fixed in the v<version> update! Close and reopen the app to get the fix.
+Good news! The <thing the customer reported> is fixed in the v<version> update on <Mon D>.
 ```
 
-Take the version from this run's **shipped** check only. A version in an
-earlier reply, a thread, or the memory file names an older release. The
-support voice shapes the rest of the reply and leaves this sentence as written.
+Take the date from the production deploy of that version, not from the merge
+or the tag. Write `<Mon D>`, such as `Oct 8`, in the `business_days` time
+zone, or the email account's time zone when that key is unset. When that
+deploy completed less than two days before this run, add: "Close and reopen
+the app to get the fix." Do not add a cause sentence in a reply that closes a
+promise.
+
+Take the version and date from this run's **shipped** check only. A version
+in an earlier reply, a thread, or the memory file names an older release. The
+support voice shapes the rest of the reply and leaves the outcome line as
+written.
 
 - **Email.** First apply the reuse test below to each operator draft in the
   thread.
@@ -147,19 +155,22 @@ support voice shapes the rest of the reply and leaves this sentence as written.
   conversation message and a post comment. When an operator draft exists
   there, name it and say what differs.
 
-An operator draft passes the **reuse test** when all three hold. A draft with
-an older version fails.
+An operator draft passes the **reuse test** when all four hold. A draft with
+an older version or another date fails.
 
 - It is a reply inside the candidate's thread.
 - It is addressed to the real customer. For a relay thread, that is the
   relayed address.
-- It contains the release sentence word for word, with this run's **shipped**
-  version.
+- It contains the outcome line, with the template's fixed words as written and
+  this run's **shipped** version and date.
+- It has the restart line exactly when that deploy is less than two days old,
+  and no cause sentence when the reply closes a promise.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
 reply location link. An operator draft that passed the reuse test counts as the
 draft link. Every proven reply about a shipped feature or fix contains the
-release sentence with its own recorded version. Every proven reply stays on the
+outcome line with its own recorded version and date, and the restart line only
+when that deploy is less than two days old. Every proven reply stays on the
 reported topic, and a reply for a fixed in-app interaction asks the customer to
 try again, with the steps and a link to their own item or page. Blocked replies
 get no new draft from the run.
