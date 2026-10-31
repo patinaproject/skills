@@ -108,7 +108,7 @@ changed and what they can do now, in their terms.
 Write only about what the customer reported. Leave out account, registration,
 or contest status that the customer did not ask about.
 
-When the fix is in an app interaction, ask the customer to try the action
+When the fix is in an in-app interaction, ask the customer to try the action
 again: "Could you give it another try?" Give the steps, and link the
 customer's own item or page where the steps start.
 
@@ -135,8 +135,8 @@ support voice shapes the rest of the reply and leaves this sentence as written.
 Completion criterion: every proven reply has a draft link or reply text, and a
 reply location link. Every proven reply about a shipped feature or fix
 contains the release sentence with its own recorded version. Every proven
-reply stays on the reported topic, and a reply for a fixed app interaction asks
-the customer to try again, with the steps and a link to their own item or
+reply stays on the reported topic, and a reply for a fixed in-app interaction
+asks the customer to try again, with the steps and a link to their own item or
 page. Blocked replies have no draft.
 
 ### 6. Respond

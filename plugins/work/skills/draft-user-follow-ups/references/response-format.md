@@ -15,7 +15,7 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 - Depends on: <issue and pull-request links>
 - Shipped: <evidence link> (measured | inferred)
 - Data: <evidence link, or "no data step" with the pull request read> (measured | inferred)
-- Works for this customer: <live surface link> (measured | inferred), or for an in-app case with no public surface: reproduction <link>, test <link> (inferred)
+- Works for this customer: <live surface link> (measured | inferred), or for an in-app interaction with no public surface: reproduction <link>, test <link> (inferred)
 
 ## Blocked
 
