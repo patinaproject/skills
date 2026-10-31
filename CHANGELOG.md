@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.10.0](https://github.com/patinaproject/skills/compare/v4.9.0...v4.10.0) (2026-10-31)
+
+
+### Features
+
+* [#788](https://github.com/patinaproject/skills/issues/788) diagram the end-to-end flow in pr-review-assistant artifacts ([#792](https://github.com/patinaproject/skills/issues/792)) ([adab065](https://github.com/patinaproject/skills/commit/adab065210c1bd9efb522b8aa62b3ebfc7ab3b59))
+
 ## [4.9.0](https://github.com/patinaproject/skills/compare/v4.8.0...v4.9.0) (2026-10-31)
 
 
