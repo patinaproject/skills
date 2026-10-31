@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.1](https://github.com/patinaproject/skills/compare/v4.14.0...v4.14.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* [#810](https://github.com/patinaproject/skills/issues/810) stop posting code-review reports on pull requests ([#816](https://github.com/patinaproject/skills/issues/816)) ([8403c82](https://github.com/patinaproject/skills/commit/8403c8296e834435fd460ff3419199c329d02fee))
+
 ## [4.14.0](https://github.com/patinaproject/skills/compare/v4.13.3...v4.14.0) (2026-10-31)
 
 
