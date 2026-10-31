@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.0](https://github.com/patinaproject/skills/compare/v4.14.1...v4.15.0) (2026-10-31)
+
+
+### Features
+
+* [#808](https://github.com/patinaproject/skills/issues/808) ask customers to retry fixed in-app actions ([#814](https://github.com/patinaproject/skills/issues/814)) ([686fbb2](https://github.com/patinaproject/skills/commit/686fbb2ea41fa5afaf37ae3d30a7451a57ea8720))
+
 ## [4.14.1](https://github.com/patinaproject/skills/compare/v4.14.0...v4.14.1) (2026-10-31)
 
 
