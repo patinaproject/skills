@@ -74,8 +74,8 @@ the rule.
 
 ## When `/to-spec` runs here
 
-Add a `## Proposed documentation changes` section after `Further Notes` in the
-published spec. This section is the one place the spec carries file paths and
+Add a `## Proposed documentation changes` section at the end of the spec's
+`<identifier> Agent brief`, after Further notes. This section is the one place the spec carries file paths and
 file contents, the exception to `to-spec`'s no-paths rule noted above. For
 each held item:
 

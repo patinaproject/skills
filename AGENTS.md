@@ -90,7 +90,10 @@ symlink to it, so either path reaches the same adapter.
 Follow it directly for claiming, labels, lifecycle, relationships, and closure;
 the Work plugin owns the `to-spec` skill. Use it for issue filing and
 editing. `docs/issue-publishing.md` governs issue body framing, and the adapter
-owns readiness and priority.
+owns readiness and priority. The `<identifier> Agent brief` is the agent
+contract, and the issue description is for people. Issue artifacts carry the
+issue ID in their titles, as the adapter's **Issue artifacts** section
+describes ([ADR-791](docs/adr/ADR-791-issue-artifacts-carry-the-issue-id.md)).
 
 ### Working an issue
 

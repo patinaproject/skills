@@ -22,7 +22,7 @@ Every item must hold:
 
 ## Record it
 
-Keep the checklist in the triage notes, so the next session sees what passed and what didn't:
+Keep the checklist in `<identifier> Triage notes`, so the next session sees what passed and what didn't:
 
 ```markdown
 **Readiness check:**
@@ -43,13 +43,13 @@ List each qualifying decision under the checklist with its answer and who approv
 **Decisions:**
 
 - Name the label `Ready for human`, not `Needs human`: approved by @person
-- Store briefs as issue Documents, not comments: awaiting approval
+- Remove the `--legacy` flag instead of deprecating it: awaiting approval
 ```
 
-Write the triage notes and the agent brief through the issue-tracker config's issue-artifact operation. When it defines none, post each as a comment.
+Save `<identifier> Triage notes` and `<identifier> Agent brief` only through the issue-tracker config's **Attach an artifact** operation. `<identifier>` is the tracker's issue reference, such as `PAT-123` or `#123`. When the config defines no such operation, stop before writing anything and ask for a `setup-work-skills` re-run.
 
 ## Outcome
 
-- **Every item holds:** write the agent brief from what the checklist established, then apply the label. When the Type needs no repository change, such as `Task`, the brief names the action to take and how to confirm it is done, not code changes.
+- **Every item holds:** write `<identifier> Agent brief` from what the checklist established, then apply the label. The brief has five core sections: Summary, Current behavior, Desired behavior, Acceptance criteria as a checklist of Given / When / Then items, and Out of scope. Add User stories, Key interfaces, Implementation decisions, Testing decisions, or Further notes only when they carry something the agent needs. It has no Type or Theme line. When the Type needs no repository change, such as `Task`, the brief names the action to take and how to confirm it is done, not code changes.
 - **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the report, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes, each with the person who must answer it: the reporter or a developer. Apply `Needs info` whenever a question remains, whoever must answer it.
 - **"Decisions approved" fails:** follow the bullet above, but never close this gap yourself. Ask each unapproved decision as a grilling question with your recommended answer. The item fails until a person answers it.
