@@ -34,8 +34,8 @@ run exactly as it started. Messages stay unsent. The feedback tool keeps its
 posts, comments, statuses, and conversations. The tracker keeps its issues,
 production keeps its data, and the memory file keeps its text. Feedback-tool
 replies go into the response as text for the operator to paste. The
-operator's existing drafts end the run unchanged: never edited, sent, or
-deleted.
+operator's existing drafts end the run unchanged. The run never edits, sends,
+or deletes them.
 
 ## Run
 
@@ -125,13 +125,8 @@ Take the version from this run's **shipped** check only. A version in an
 earlier reply, a thread, or the memory file names an older release. The
 support voice shapes the rest of the reply and leaves this sentence as written.
 
-- **Email.** An operator draft passes the **reuse test** when all three hold.
-  A draft with an older version fails.
-  - It is a reply inside the candidate's thread.
-  - It is addressed to the real customer. For a relay thread, that is the
-    relayed address.
-  - It contains the release sentence word for word, with this run's
-    **shipped** version.
+- **Email.** First apply the reuse test below to each operator draft in the
+  thread.
   - When an operator draft passes, create no draft. That operator draft is the
     candidate's draft.
   - Otherwise create a draft as a reply inside the customer's existing thread.
@@ -144,6 +139,15 @@ support voice shapes the rest of the reply and leaves this sentence as written.
   conversation where the operator will paste it. This covers a support
   conversation message and a post comment. When an operator draft exists
   there, name it and say what differs.
+
+An operator draft passes the **reuse test** when all three hold. A draft with
+an older version fails.
+
+- It is a reply inside the candidate's thread.
+- It is addressed to the real customer. For a relay thread, that is the
+  relayed address.
+- It contains the release sentence word for word, with this run's **shipped**
+  version.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
 reply location link. An operator draft that passed the reuse test counts as the
