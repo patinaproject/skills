@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.2](https://github.com/patinaproject/skills/compare/v4.13.1...v4.13.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* [#807](https://github.com/patinaproject/skills/issues/807) put the release version and deploy date in the outcome line ([#812](https://github.com/patinaproject/skills/issues/812)) ([2d7751e](https://github.com/patinaproject/skills/commit/2d7751e2601b932711d25402746d638b14ec6fa3))
+
 ## [4.13.1](https://github.com/patinaproject/skills/compare/v4.13.0...v4.13.1) (2026-10-31)
 
 
