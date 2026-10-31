@@ -115,9 +115,10 @@ Good news! The <thing the customer reported> is fixed in the v<version> update o
 
 Take the date from the production deploy of that version, not from the merge
 or the tag. Write `<Mon D>`, such as `Oct 8`, in the `business_days` time
-zone. When that deploy completed less than two days before this run, add:
-"Close and reopen the app to get the fix." Do not add a cause sentence in a
-reply that closes a promise.
+zone, or the email account's time zone when that key is unset. When that
+deploy completed less than two days before this run, add: "Close and reopen
+the app to get the fix." Do not add a cause sentence in a reply that closes a
+promise.
 
 Take the version and date from this run's **shipped** check only. A version
 in an earlier reply, a thread, or the memory file names an older release. The
