@@ -22,7 +22,7 @@ pr-readiness publish --repo OWNER/REPO --pr NUMBER
 | `checks` | Check runs on the head from the `github-actions` app with the names the policy lists. The newest run in each check suite counts, so a successful re-run replaces a failure. | A GitHub Actions workflow job |
 | `approval` | GitHub's `reviewDecision` for the PR, which must be `APPROVED`, plus an approving review whose commit is the head from a `User` with write or admin permission who is not the PR author. Each eligible reviewer's latest decisive review stands until it is dismissed, so a change request on an older commit still fails the obligation. | A `User` with write or admin permission who is not the PR author |
 
-One approval satisfies every obligation that names `approval`. A bot's review never counts. Every factory agent acts as one GitHub App that authors its PRs, so no agent can approve its own work. An agent's code-review result goes on the PR as a `COMMENT` review or as body evidence, and the PR waits for a maintainer's approval. Agents must never hold an operator's credentials, because an approval posted with them would count as the operator's.
+One approval satisfies every obligation that names `approval`. A bot's review never counts. Every factory agent acts as one GitHub App that authors its PRs, so no agent can approve its own work. An agent keeps its code-review result in its session, and resolves the findings. The result stays off the PR. The PR waits for a maintainer's approval. Agents must never hold an operator's credentials, because an approval posted with them would count as the operator's.
 
 ## Policy
 

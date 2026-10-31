@@ -16,22 +16,20 @@ The axes run as **parallel sub-agents** so they don't pollute each other's conte
 The review has one substance contract across runtimes. Report the separate
 `## Standards`, `## Spec`, and `## Evidence` axes, and write every finding as ordinary Markdown.
 Give each Standards and Spec finding its file and exact line or tight line range,
-and each Evidence finding the claim it quotes. Keep the Markdown findings in
-the review so the result remains readable outside a review UI.
+and each Evidence finding the claim it quotes.
 
 The presentation layer may add runtime metadata, but it does not change the
 finding set. On Codex, follow the platform translation for actionable findings
 that belong to a changed line; on Claude, use the Markdown finding alone.
 
-Post the result as a GitHub review pinned to the reviewed head, so it cannot
-land on a commit nobody reviewed:
-`gh api repos/<owner>/<repo>/pulls/<N>/reviews -f commit_id=<head> -f event=<EVENT> -f body=<report>`.
-An agent posts `event=COMMENT`, because readiness never counts a bot's
-approval and every factory agent acts as the App that authors the PR. The PR
-then waits for a maintainer. A maintainer who is not the PR author posts
-`event=APPROVE` when every axis passes with no open finding, and
-`event=REQUEST_CHANGES` otherwise. Readiness counts only that maintainer
-review.
+Keep the report in your session. Never post it on the pull request, as a
+review, a comment, or body evidence. Resolve each finding on the reviewed head
+in one of three ways. Fix it, reply on the review thread the finding touches,
+or record why it stays open.
+
+A maintainer who is not the PR author approves or requests changes on GitHub,
+with `gh api repos/<owner>/<repo>/pulls/<N>/reviews -f commit_id=<head> -f event=APPROVE`
+or `-f event=REQUEST_CHANGES`. Readiness counts only that maintainer review.
 
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-work-skills`.
 
