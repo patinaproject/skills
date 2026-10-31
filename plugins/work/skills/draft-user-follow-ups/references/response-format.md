@@ -2,6 +2,8 @@
 
 Write the run's final response in this shape. "Ready to send" lists the
 proven replies. Leave out a section that has no rows, and keep the footer.
+Write the `Keep:` line only when the thread holds both an operator draft and a
+new draft from this run.
 
 ```markdown
 # Draft user follow-ups: <window start> to <window end>
@@ -11,7 +13,9 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 ### <Person> (<touchpoint>)
 
 - Reply here: <reply location link>
-- Draft: <draft link>, or the reply text in a quote block
+- Existing drafts: <each operator draft link with its last-edited date>, or "none"
+- Draft: <new draft link>, or "operator draft" with its link, or the reply text in a quote block
+- Keep: <draft link>; delete: <draft link>
 - Depends on: <issue and pull-request links>
 - Shipped: <evidence link> (measured | inferred)
 - Data: <evidence link, or "no data step" with the pull request read> (measured | inferred)
@@ -22,6 +26,7 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 ### <Person> (<touchpoint>)
 
 - Reply location: <link>
+- Existing drafts: <each operator draft link with its last-edited date>, or "none"
 - Blocker: <first failing check and what failed>
 - Evidence: <links, each measured | inferred>
 - Clears when: <the action or event that clears the blocker>
@@ -34,6 +39,7 @@ proven replies. Leave out a section that has no rows, and keep the footer.
 - Dropped as no action: <person, touchpoint, and why>
 - Dropped by standing correction: <person, touchpoint, and the correction>
 - Config keys missing: <optional keys that turned off part of the method>
+- Drafts not read: <touchpoints whose drafts the session could not read>, or "none"
 - Count: <proven> proven + <blocked> blocked + <dropped> dropped = <candidates>
 ```
 
