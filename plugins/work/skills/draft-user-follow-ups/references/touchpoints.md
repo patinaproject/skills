@@ -53,7 +53,9 @@ For each person, read every thread on every touchpoint, sent mail included.
 For each person, also list the operator drafts on every touchpoint. Match each
 email draft to its thread by thread ID. List the feedback-tool drafts in each
 conversation or post when the session can read them. Attach each draft, with
-its link and last-edited date, to that person's candidate.
+its link and last-edited date, to that person's candidate. A draft in a support
+conversation with no direct link follows the
+[links rule](response-format.md#links).
 
 ## Answered
 
