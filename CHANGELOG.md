@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.0](https://github.com/patinaproject/skills/compare/v4.12.0...v4.13.0) (2026-10-31)
+
+
+### Features
+
+* [#796](https://github.com/patinaproject/skills/issues/796) realign patina-mode's How trigger with upstream pstack ([#800](https://github.com/patinaproject/skills/issues/800)) ([7f79c41](https://github.com/patinaproject/skills/commit/7f79c41630e887b6196efbc6544e0ef32e43c732))
+
 ## [4.12.0](https://github.com/patinaproject/skills/compare/v4.11.0...v4.12.0) (2026-10-31)
 
 
