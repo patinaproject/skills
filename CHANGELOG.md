@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.0](https://github.com/patinaproject/skills/compare/v4.8.0...v4.9.0) (2026-10-31)
+
+
+### Features
+
+* [#791](https://github.com/patinaproject/skills/issues/791) write the full agent contract into the agent brief ([#793](https://github.com/patinaproject/skills/issues/793)) ([4bb9fc2](https://github.com/patinaproject/skills/commit/4bb9fc2a467ef8e1d3948d868ad49c51b642f768))
+
 ## [4.8.0](https://github.com/patinaproject/skills/compare/v4.7.0...v4.8.0) (2026-10-30)
 
 
