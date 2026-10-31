@@ -23,5 +23,5 @@ section to change the rubric; triage reads no other.
   dependency bumps, cosmetic polish, and routine follow-ups.
 
 A confident duplicate gets no priority. Write priority to the tracker's
-priority field. When the tracker has none, the triage notes' `Priority:` line
-is the only record. Never encode it as a label.
+priority field. When the tracker has none, the `Priority:` line in
+`<identifier> Triage notes` is the only record. Never encode it as a label.

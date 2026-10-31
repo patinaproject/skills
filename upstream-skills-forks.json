@@ -540,7 +540,7 @@
   },
   "plugins/work/skills/triage/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Theme, and Triage labels instead of the upstream roles (ADR-682). It also recommends a priority from the issue tracker config's Priority rubric and records who set it (ADR-692). Patina also re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read. Patina applies Needs info for an open question to the reporter or to the developers, where upstream waits only on the reporter, so an issue with an open question never gets a ready label.",
+    "reason": "Patina gates Ready for agent and Ready for human on the readiness check in READINESS.md, including when the maintainer asks for the label directly, and applies Sentence case Type, Theme, and Triage labels instead of the upstream roles (ADR-682). It also recommends a priority from the issue tracker config's Priority rubric and records who set it (ADR-692). Patina also re-reads each issue's live state with scripts/check-issue-state.mjs before every triage write, so a pass never labels or comments on an issue that closed or changed state after it was read. Patina applies Needs info for an open question to the reporter or to the developers, where upstream waits only on the reporter, so an issue with an open question never gets a ready label. Patina also saves `<identifier> Triage notes` and `<identifier> Agent brief` only through the config's Attach an artifact operation, stops and asks for a setup-work-skills re-run when the config has none, never edits the issue description, and comments only for Needs info and Won't fix (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -554,7 +554,7 @@
   },
   "plugins/work/skills/to-spec/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682), and applies a ready label only after the triage readiness check passes, asking the user to approve each qualifying decision. It also chooses the test seams without asking the user and records them, with the reason for each new seam, in Testing Decisions.",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682), and applies a ready label only after the triage readiness check passes, asking the user to approve each qualifying decision. It also chooses the test seams without asking the user and records them, with the reason for each new seam, in Testing Decisions. Patina also writes a short description for people and the full spec into `<identifier> Agent brief` from the triage brief template, keeps an existing issue's text first above a `---` line, and stops before writing when the config has no Attach an artifact operation (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -568,7 +568,7 @@
   },
   "plugins/work/skills/triage/AGENT-BRIEF.md": {
     "kind": "policy",
-    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682).",
+    "reason": "Patina applies issue labels by their exact Sentence case strings, with a required Type and an optional Theme instead of the upstream bug and enhancement roles (ADR-682). Patina also makes the brief an issue artifact titled `<identifier> Agent brief` instead of a comment, drops the Type and Theme lines, adds the optional to-spec sections, and writes acceptance criteria as Given / When / Then items, so triage and to-spec share one template (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -589,21 +589,21 @@
   },
   "plugins/work/skills/setup-work-skills/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina writes the Type, Theme, and Triage label vocabulary into the issue tracker config as its only definition, instead of a separate triage-labels.md mapped from upstream roles (ADR-682). It also seeds a Priority rubric section that triage assigns priority from (ADR-692).",
+    "reason": "Patina writes the Type, Theme, and Triage label vocabulary into the issue tracker config as its only definition, instead of a separate triage-labels.md mapped from upstream roles (ADR-682). It also seeds a Priority rubric section that triage assigns priority from (ADR-692). It also requires every issue tracker config to define an Attach an artifact section (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/work/skills/setup-work-skills/issue-tracker-github.md": {
     "kind": "policy",
-    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682). Patina also defines an Attach an artifact operation that keeps each issue artifact in one comment edited in place (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/work/skills/setup-work-skills/issue-tracker-gitlab.md": {
     "kind": "policy",
-    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682).",
+    "reason": "Patina names Wayfinder labels Wayfinder: Map and Wayfinder: <Type> in Sentence case (ADR-682). Patina also defines an Attach an artifact operation that keeps each issue artifact in one note edited in place (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
@@ -624,7 +624,7 @@
   },
   "plugins/work/skills/setup-work-skills/issue-tracker-local.md": {
     "kind": "policy",
-    "reason": "Patina keeps label strings in the issue tracker config's Labels section and describes triage in terms of labels rather than upstream roles (ADR-682).",
+    "reason": "Patina keeps label strings in the issue tracker config's Labels section and describes triage in terms of labels rather than upstream roles (ADR-682). Patina also defines an Attach an artifact operation that writes each issue artifact to a file beside the issue file (#791, ADR-791).",
     "upstream": {
       "status": "not-proposed"
     }
