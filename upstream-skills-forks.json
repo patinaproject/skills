@@ -169,14 +169,14 @@
   },
   "plugins/code/skills/patina-help/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina names its generated verification driver patinaproject-verify, so the verification check counts a patinaproject-verify skill, or a legacy verify skill, as the project driver.",
+    "reason": "Patina names its generated verification driver patinaproject-verify, so the verification check counts a patinaproject-verify skill, or a legacy verify skill, as the project driver. It also maps continuing an issue that already has a branch or an open pull request to Session pickup, the continuation route.",
     "upstream": {
       "status": "not-proposed"
     }
   },
   "plugins/code/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, and ### Principles headings for markdownlint MD036.",
+    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, the patinaproject-verify driver, grounding reuse, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, a continuation route that sends issue-linked work with an open pull request or unmerged branch commits through Session pickup to Babysit or the rest of its build playbook, and ### Principles headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -225,7 +225,7 @@
   },
   "plugins/code/skills/patina-mode/playbooks/session-pickup.md": {
     "kind": "policy",
-    "reason": "Patina routes session IDs and thread links through move-session-here, keeps transcript reads inside the named workspace, and adds the issue-handoff step before state-changing work resumes.",
+    "reason": "Patina routes session IDs and thread links through move-session-here, keeps transcript reads inside the named workspace, adds the issue-handoff step before state-changing work resumes, and routes an issue's open pull request to Babysit and its branch commits without a pull request to the rest of the build playbook.",
     "upstream": {
       "status": "not-proposed"
     }
