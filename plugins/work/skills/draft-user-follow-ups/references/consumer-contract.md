@@ -30,6 +30,7 @@ name tools and places. A value never holds a credential.
 | `email_tool` | yes | The mail provider the session reaches. | Gmail, Outlook |
 | `feedback_tool` | yes | The feedback tool for support conversations and posts. | Canny, Featurebase, Intercom |
 | `feedback_relay_senders` | no | Sender addresses the feedback tool uses to relay a customer message by email. | the tool's notification address |
+| `feedback_conversation_url` | no | URL pattern for one support conversation, with an `<id>` placeholder. | `https://<host>/dashboard/conversations/<id>` |
 | `tracker` | yes | The issue tracker that feedback posts and replies link to. | GitHub Issues, Jira, Linear |
 | `tracker_link_pattern` | no | How a feedback post or message names its tracker issue, when the tool has no native link. | an issue key such as `ABC-123` in a comment |
 | `forge_repo` | yes | The source repository that holds the production branch. | `owner/repo` on GitHub |
@@ -48,6 +49,7 @@ this result, and the response footer names the key:
 | --- | --- |
 | `state_file` | Each window starts at the beginning of the previous business day, and the run writes no state. |
 | `feedback_relay_senders` | A relayed email counts as from the relay sender. Its reply goes into the feedback tool's reply text. |
+| `feedback_conversation_url` | A support conversation has a direct link only when the feedback tool's read returns one. Otherwise its row says "no direct link" and gives the conversation ID. |
 | `tracker_link_pattern` | Only the feedback tool's native issue links count. |
 | `mobile_delivery` | A change cannot be identified as mobile. A reply whose work touches the mobile app stays blocked on shipped until the key exists. |
 | `data_jobs` | A change that needs a data step stays blocked on data until the key exists. |
@@ -91,6 +93,7 @@ operator_addresses: <addresses and accounts>
 email_tool: <provider>
 feedback_tool: <tool>
 feedback_relay_senders: <sender addresses>
+feedback_conversation_url: https://<host>/<path>/<id>
 tracker: <tracker>
 tracker_link_pattern: <pattern>
 forge_repo: <owner/repo>
