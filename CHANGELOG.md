@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.1](https://github.com/patinaproject/skills/compare/v4.15.0...v4.15.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* [#823](https://github.com/patinaproject/skills/issues/823) end to-spec with a report instead of an implement offer ([#824](https://github.com/patinaproject/skills/issues/824)) ([2fce2a9](https://github.com/patinaproject/skills/commit/2fce2a9439f3c2ed23bb909ea375f81f61f8967d))
+
 ## [4.15.0](https://github.com/patinaproject/skills/compare/v4.14.1...v4.15.0) (2026-10-31)
 
 
