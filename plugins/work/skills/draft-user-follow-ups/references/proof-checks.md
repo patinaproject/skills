@@ -11,10 +11,12 @@ Then resolve each mapped issue against its relations and comments:
 1. **Read.** Read the issue's relations and comments before any check runs.
 2. **Tracking issue.** An issue that matches `tracker_reply_issue` tracks the
    reply, not the work. Do not read its status as the work's status, and do
-   not remap it as a duplicate. Replace it with every issue it is blocked by,
-   then apply steps 1 to 5 to those issues. Do not follow its child issues.
-   Report each child under Tracker cleanup as a relation to fix. A tracking
-   issue with no blockers has no work mapped.
+   not remap it as a duplicate. Replace it with every issue it is blocked by.
+   Read those issues, then apply steps 3 to 6 to them. Follow only blockers,
+   not child issues. When a child issue holds the work, report it under
+   Tracker cleanup as a child that should block the tracking issue. A
+   tracking issue with no blockers has no work mapped. List the tracking
+   issue under Tracker cleanup as Done after the reply is sent.
 3. **Duplicate signal.** An issue has a duplicate signal when either holds:
    - a `duplicate` relation in which the issue is the duplicate, not the
      original; or
@@ -22,9 +24,12 @@ Then resolve each mapped issue against its relations and comments:
      as the original, with no later comment withdrawing it. When comments
      conflict, the latest one wins.
 4. **Remap.** A duplicate signal replaces the issue with its original. Remap
-   in any state of the original except Canceled. With a Canceled original,
-   keep the issue. A remap from a relation is **measured**. A remap from a
-   comment is **inferred**.
+   in any state of the original except canceled, such as Linear's Canceled or
+   GitHub's closed as not planned. With a canceled original, keep the issue.
+   When the original is still open, **shipped** fails and names the original.
+   A remap from a relation is **measured**. A remap from a comment is
+   **inferred**. Show the label on the reply's Depends on line, and list the
+   remap under Tracker cleanup.
 5. **Blockers.** Add every issue that blocks the issue, or its original after
    a remap, as a dependency. The blocked issue stays a dependency.
 6. **One hop.** Do not read the relations or comments of an issue reached by

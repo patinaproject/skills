@@ -18,7 +18,7 @@ thread holds both an operator draft and a new draft from this run.
 - Draft: <new draft link>, or "operator draft" with its link, or the reply text in a quote block
 - Differs: <what the new draft or reply text changes from the operator draft>
 - Keep: <draft link>; delete: <each other draft link>
-- Depends on: <issue and pull-request links>
+- Depends on: <issue and pull-request links>; for a remap, <duplicate link> remapped to <original link> (measured | inferred)
 - Shipped: <evidence link> (measured | inferred)
 - Data: <evidence link, or "no data step" with the pull request read> (measured | inferred)
 - Works for this customer: <live surface link> (measured | inferred)
@@ -42,12 +42,11 @@ thread holds both an operator draft and a new draft from this run.
 - Dropped by standing correction: <person, touchpoint, and the correction>
 - Config keys missing: <optional keys that turned off part of the method>
 - Drafts not read: <touchpoints whose drafts the session could not read>, or "none"
-- Tracker cleanup: <each duplicate link> duplicates <original link> (<relation | comment link>); <each relation to fix>; <each tracking issue link>: Done after the reply is sent; or "none"
+- Tracker cleanup: duplicates: <duplicate link> duplicates <original link> (<relation | comment link>); child should block: <child link> under <tracking issue link>; Done after the reply is sent: <tracking issue link>; or "none"
 - Count: <proven> proven + <blocked> blocked + <dropped> dropped = <candidates>
 ```
 
-Tracker cleanup is text for the operator. Never write it to the tracker, and
-never list a tracking issue as a duplicate.
+Tracker cleanup is text for the operator. Leave the tracker unchanged.
 
 The response gives a person's name and touchpoint. It holds no customer email
 address. The links carry the operator to the thread, except where a support
