@@ -49,6 +49,5 @@ the identifier in its text must equal the identifier in its URL.
 
 A feedback-tool conversation links to the tool's own URL for that conversation.
 Build it from `feedback_conversation_url`, or take it from the tool's read.
-When neither gives one, write "no direct link" and the conversation ID. Never
-name a conversation without a link and without saying so. Email threads and
-posts always get a link.
+When neither gives one, write "no direct link" and the conversation ID. Email
+threads and posts always get a link.

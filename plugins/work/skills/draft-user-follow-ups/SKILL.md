@@ -11,9 +11,9 @@ customer support.
 
 - **Set point.** By the morning after a release, every customer the operator
   owes a reply has one of two outcomes. The outcome is a **proven** reply that
-  is ready to send, with a direct link to where to reply, or "no direct link"
-  and the ID of a support conversation whose link cannot be built. Or the
-  outcome is a named **blocker**.
+  is ready to send, with a direct link to where to reply. Or the outcome is a
+  named **blocker**. A support conversation whose link cannot be built gives
+  "no direct link" and its conversation ID in place of the link.
 - **Sensor.** The releases in the **window**, and the **owed** replies found
   across every **touchpoint**.
 - **Controller.** The three proof checks for each owed reply.
@@ -83,9 +83,9 @@ touchpoint, sent mail included. Mark each candidate **answered** or **owed**.
 
 Completion criterion: each touchpoint has a searched-and-counted result. Each
 candidate has a touchpoint, a reply location link, the full set of threads
-read, and a mark of answered or owed with its reason. A support conversation
-with no buildable link has "no direct link" and its conversation ID in place
-of the link. Every email thread and post has a link.
+read, and a mark of answered or owed with its reason. Only a support
+conversation may give "no direct link" and its conversation ID in place of the
+link, under the [links rule](references/response-format.md#links).
 
 ### 4. Prove each owed reply
 
@@ -127,14 +127,16 @@ support voice shapes the rest of the reply and leaves this sentence as written.
   draft link.
 - **Feedback tool.** Write the reply text and the link to the post or
   conversation where the operator will paste it. This covers a support
-  conversation message and a post comment.
+  conversation message and a post comment. A support conversation with no
+  buildable link gets "no direct link" and its conversation ID instead.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
-reply location link. A reply to a support conversation with no buildable link
-has "no direct link" and its conversation ID instead. Email threads and posts
-still need a link. Every proven reply about a shipped feature or fix
-contains the release sentence with its own recorded version. Blocked replies
-have no draft.
+reply location link. Only a support conversation may give "no direct link" and
+its conversation ID instead, under the
+[links rule](references/response-format.md#links).
+
+Every proven reply about a shipped feature or fix contains the release sentence
+with its own recorded version. Blocked replies have no draft.
 
 ### 6. Respond
 
