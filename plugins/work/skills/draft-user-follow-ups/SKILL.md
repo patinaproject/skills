@@ -148,13 +148,16 @@ written.
   conversation message and a post comment. When an operator draft exists
   there, name it and say what differs.
 
-An operator draft passes the **reuse test** when all three hold. A draft with
+An operator draft passes the **reuse test** when all four hold. A draft with
 an older version or another date fails.
 
 - It is a reply inside the candidate's thread.
 - It is addressed to the real customer. For a relay thread, that is the
   relayed address.
-- It contains the outcome line with this run's **shipped** version and date.
+- It contains the outcome line, with the template's fixed words as written and
+  this run's **shipped** version and date.
+- It has the restart line exactly when that deploy is less than two days old,
+  and no cause sentence when the reply closes a promise.
 
 Completion criterion: every proven reply has a draft link or reply text, and a
 reply location link. An operator draft that passed the reuse test counts as the
