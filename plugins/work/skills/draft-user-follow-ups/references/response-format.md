@@ -21,7 +21,7 @@ thread holds both an operator draft and a new draft from this run.
 - Depends on: <issue and pull-request links>; for a remap, <duplicate link> remapped to <original link> (measured | inferred)
 - Shipped: <evidence link> (measured | inferred)
 - Data: <evidence link, or "no data step" with the pull request read> (measured | inferred)
-- Works for this customer: <live surface link> (measured | inferred)
+- Works for this customer: <live surface link> (measured | inferred), or for an in-app interaction with no public surface: reproduction <link>, test <link> (inferred)
 
 ## Blocked
 

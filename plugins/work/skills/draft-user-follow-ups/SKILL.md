@@ -117,6 +117,13 @@ check result carries a link and a label of **measured** or **inferred**.
 Write each reply in the consumer's support voice. Tell the customer what
 changed and what they can do now, in their terms.
 
+Write only about what the customer reported. Leave out account, registration,
+or contest status that the customer did not ask about.
+
+When the fix is in an in-app interaction, ask the customer to try the action
+again: "Could you give it another try?" Give the steps, and link the
+customer's own item or page where the steps start.
+
 Every reply about a shipped feature or fix, on every touchpoint, puts the
 release in its outcome line, with the version and date that the **shipped**
 check recorded for this reply:
@@ -171,7 +178,9 @@ its conversation ID instead, under the
 passed the reuse test counts as the draft link. Every proven reply about a
 shipped feature or fix contains the outcome line with its own recorded version
 and date, and the restart line only when that deploy is less than two days old.
-Blocked replies get no new draft from the run.
+Every proven reply stays on the reported topic, and a reply for a fixed in-app
+interaction asks the customer to try again, with the steps and a link to their
+own item or page. Blocked replies get no new draft from the run.
 
 ### 6. Respond
 
