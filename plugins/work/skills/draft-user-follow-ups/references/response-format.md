@@ -42,8 +42,12 @@ thread holds both an operator draft and a new draft from this run.
 - Dropped by standing correction: <person, touchpoint, and the correction>
 - Config keys missing: <optional keys that turned off part of the method>
 - Drafts not read: <touchpoints whose drafts the session could not read>, or "none"
+- Tracker cleanup: <each duplicate link> duplicates <original link> (<relation | comment link>); <each relation to fix>; <each tracking issue link>: Done after the reply is sent; or "none"
 - Count: <proven> proven + <blocked> blocked + <dropped> dropped = <candidates>
 ```
+
+Tracker cleanup is text for the operator. Never write it to the tracker, and
+never list a tracking issue as a duplicate.
 
 The response gives a person's name and touchpoint. It holds no customer email
 address. The links carry the operator to the thread, except where a support
