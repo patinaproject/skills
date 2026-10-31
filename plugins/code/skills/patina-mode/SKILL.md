@@ -77,8 +77,6 @@ plausible and both fail. `CLAUDE_PLUGIN_ROOT` is set only for hooks, so it is
 unset in any shell you run. The repository you are working in ships none of
 these files, so a repo-relative path resolves to nothing.
 
-Choose the smallest workflow that can establish the required result. Gather a routine fact directly. Route to another skill only when its workflow adds needed evidence or resolves a decision.
-
 Remaining triggers:
 
 - Issue-linked work begins or resumes → follow
@@ -95,7 +93,7 @@ Remaining triggers:
   the bundled **move-session-here** skill, then route its recovered resume point
   through the Session pickup playbook. Session pickup enters the same issue
   handoff gate.
-- Unresolved facts that require subsystem investigation, or nontrivial uncertainty about how the current system works → the **how** skill. Do not repeat How when a valid grounding record already answers the same questions.
+- Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. Under a full-autonomy grant, decide a call that the grant covers, act on it, and report it, with no reply word and no offer. Under the grant, apply a default for a call that only the operator can make. Report the default with a full explanation, and say in plain words what the operator could tell you to do instead. The operator answers in their own words. Never give a shorthand token to type back. Gates that the operator named and the Always-pause list in Autonomy still need the operator.
 - Any code change → open its build playbook per **Playbooks** before the first source edit. Name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
 - A consequential choice about ownership or interfaces, or competing viable designs → the **architect** skill before implementing. A function boundary alone does not trigger Architect. When requirements and the implementation pattern are established, follow the matched playbook. Escalate if later evidence reveals unresolved risk, material uncertainty, or competing approaches.
@@ -136,17 +134,9 @@ Follow the selected skill's launch, doctor, affected-feature, evidence, and
 cleanup instructions. Use generic drivers only when no project skill exists,
 and record that coverage limitation.
 
-## Carry grounding through the route
+## Carry routing exceptions through the route
 
-Keep one compact grounding record through the task. Record established findings, evidence pointers, the scope and input identities they depend on, and unresolved questions. Before reusing investigation or verification, confirm that the relevant scope, inputs, and evidence remain current. Reuse the valid portion. Refresh only the findings or checks affected by a change. Record which requirement the reused evidence satisfies.
-
-Before launching any **How** or **Architect Ground** investigation, including a mandatory step in a routed child playbook, apply this check:
-
-1. Match the step's questions to the current grounding record. When valid findings answer them, mark that investigation requirement satisfied by the cited evidence and continue without launching another investigation lane. This satisfies the child's How or Ground requirement, including How in **Investigation**, **Feature**, and **Refactoring**, and Architect's request for How during Ground.
-2. Before repeating an investigation, name each missing or changed question and explain why the existing evidence no longer answers it. Investigate only those gaps. A child instruction to invoke How or produce a handoff is not itself a missing question. Gather routine facts directly. Run **Why** when consequential rationale remains unresolved.
-3. In each executor brief, name the child requirement satisfied, cite the findings and their current scope and inputs, and list any remaining questions. Explicitly instruct the executor to continue from the satisfied requirement without another lane for the same questions. Require this scoped discharge and any gaps to appear in onward briefs.
-
-Pass the relevant grounding and each other scoped routing exception in every executor brief. Require the executor to carry them into further delegation. Name the affected child requirement in the brief:
+Pass each scoped routing exception in every executor brief. Require the executor to carry them into further delegation. Name the affected child requirement in the brief:
 
 - Skip the **Feature** or **Refactoring** Architect step only when no consequential ownership, interface, or competing-design decision remains. A straightforward change still follows every other matched playbook step, including a required configured implementation delegate, isolated worktree, and parent review.
 - **Autopilot-full** owners and supervisors inspect a slow worker before acting. Inspect process state, output, and task-relevant progress. Elapsed time or the lack of a side effect alone does not prove failure. Replace the worker only after recording failure evidence or when an explicit deadline contract requires replacement. Do not invent a deadline.
