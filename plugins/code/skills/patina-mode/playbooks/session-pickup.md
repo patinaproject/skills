@@ -19,7 +19,7 @@
    when the recovered state resolves one issue. Record `no-issue` when it
    resolves none. The entry must return `continue` before the next playbook
    changes state.
-5. Route the remaining work to the matching playbook and pick the verdict: continue the execution, ship a finished recommendation, ratify or override a prior conclusion, or postmortem a failed run. The pickup playbook ends here. The routed playbook owns the rest.
+5. Route the remaining work to the matching playbook and pick the verdict: continue the execution, ship a finished recommendation, ratify or override a prior conclusion, or postmortem a failed run. When the issue's remote canonical branch has an open pull request, the matching playbook is Babysit, and its step 1 chooses the mode. When that branch has commits beyond the default branch and no open pull request, continue with the remaining steps of its build playbook, then **Opening a PR**. The pickup playbook ends here. The routed playbook owns the rest.
 6. Verify the inherited claims against the original goal on the real artifact (the **principle-prove-it-works** skill). A passing prior self-report is not the proof.
 
 **Reply:** where the prior agent stopped, what you inherited vs redid (ideally nothing redone), the resume point, and the outcome.
