@@ -19,7 +19,7 @@ Every item must hold:
 
    An agent's recommended answer counts only once a person accepts or overrides it. An agent never approves a decision. "None needed" is a valid result.
 8. **Blockers recorded.** Superseding and blocking issues were checked, and each blocker found is recorded as a native blocked-by relation, or recommended in the triage notes when the run may not write it.
-9. **Owning layer.** When the scope boundaries limit files, the notes or draft name the layer that owns the rule and cite the deciding ADR or domain doc, or name the inferred layer and the reason. Scope boundaries limit files when an out-of-scope or key-interfaces entry names a path, module, package, or layer that the fix must or must not touch. The scope boundaries do not exclude the owning layer. A conflict between the owning layer and the symptom's layer that the scope does not settle is an open question. It fails item 5. When the scope boundaries limit no files, record "n/a".
+9. **Owning layer.** When the scope boundaries limit files, the notes or draft name the layer that owns the rule and cite the deciding ADR or domain doc, or name the inferred layer and the reason. Scope boundaries limit files when an out-of-scope or key-interfaces entry names a path, module, package, or layer that the fix must or must not touch. The scope boundaries do not exclude the owning layer. When the owning layer differs from the layer where the symptom shows, either the scope covers the owning layer or the notes list the conflict as an open question, which fails item 5. Otherwise this item fails. When the scope boundaries limit no files, record "n/a".
 
 ## Record it
 
