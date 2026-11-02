@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.0](https://github.com/patinaproject/skills/compare/v4.15.1...v4.16.0) (2026-11-02)
+
+
+### Features
+
+* [#826](https://github.com/patinaproject/skills/issues/826) have triage briefs name the layer that owns a rule ([#827](https://github.com/patinaproject/skills/issues/827)) ([4b294dc](https://github.com/patinaproject/skills/commit/4b294dc9748ead38480075bfe94b7d1cd9df538b))
+
 ## [4.15.1](https://github.com/patinaproject/skills/compare/v4.15.0...v4.15.1) (2026-10-31)
 
 
