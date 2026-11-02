@@ -19,6 +19,7 @@ Every item must hold:
 
    An agent's recommended answer counts only once a person accepts or overrides it. An agent never approves a decision. "None needed" is a valid result.
 8. **Blockers recorded.** Superseding and blocking issues were checked, and each blocker found is recorded as a native blocked-by relation, or recommended in the triage notes when the run may not write it.
+9. **Owning layer.** When the scope boundaries limit files, the notes or draft name the layer that owns the rule and cite the deciding ADR or domain doc, or name the inferred layer and the reason. Scope boundaries limit files when an out-of-scope or key-interfaces entry names a path, module, package, or layer that the fix must or must not touch. The scope boundaries do not exclude the owning layer. When the owning layer differs from the layer where the symptom shows, either the scope covers the owning layer or the notes list the conflict as an open question, which fails item 5. Otherwise this item fails. When the scope boundaries limit no files, record "n/a".
 
 ## Record it
 
@@ -35,6 +36,7 @@ Keep the checklist in `<identifier> Triage notes`, so the next session sees what
 - [x] Reason it can't be delegated: n/a (Ready for agent)
 - [ ] Decisions approved: 1 awaiting approval
 - [x] Blockers recorded: blocked-by relation to PAT-123 written
+- [x] Owning layer: server, per `ADR-<id>`
 ```
 
 List each qualifying decision under the checklist with its answer and who approved it, or mark it awaiting approval. Record a qualifying decision only here, never under "still needed":
@@ -50,6 +52,6 @@ Save `<identifier> Triage notes` and `<identifier> Agent brief` only through the
 
 ## Outcome
 
-- **Every item holds:** write `<identifier> Agent brief` from what the checklist established, then apply the label. The brief has five core sections: Summary, Current behavior, Desired behavior, Acceptance criteria as a checklist of Given / When / Then items, and Out of scope. Add User stories, Key interfaces, Implementation decisions, Testing decisions, or Further notes only when they carry something the agent needs. It has no Type or Theme line. When the Type needs no repository change, such as `Task`, the brief names the action to take and how to confirm it is done, not code changes.
+- **Every item holds:** write `<identifier> Agent brief` from what the checklist established, then apply the label. The brief has five core sections: Summary, Current behavior, Desired behavior, Acceptance criteria as a checklist of Given / When / Then items, and Out of scope. Add Owning layer whenever the brief limits files. Add User stories, Key interfaces, Implementation decisions, Testing decisions, or Further notes only when they carry something the agent needs. It has no Type or Theme line. When the Type needs no repository change, such as `Task`, the brief names the action to take and how to confirm it is done, not code changes.
 - **An item fails:** do not apply the label. Close each gap you can yourself: reproduce the report, search the codebase, read `.out-of-scope/`. Grill only about the gaps that remain, in the grilling skill's usual format. Ask nothing the checklist already settled. Record the remaining questions under "still needed" in the triage notes, each with the person who must answer it: the reporter or a developer. Apply `Needs info` whenever a question remains, whoever must answer it.
 - **"Decisions approved" fails:** follow the bullet above, but never close this gap yourself. Ask each unapproved decision as a grilling question with your recommended answer. The item fails until a person answers it.
