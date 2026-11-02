@@ -36,6 +36,17 @@ The agent needs to know when it's done. Every agent brief must have concrete, te
 
 State what is out of scope. This prevents the agent from gold-plating or making assumptions about adjacent features.
 
+### Owning layer before scope boundaries
+
+A brief **limits files** when an **Out of scope** or **Key interfaces** entry names a path, module, package, or layer that the fix must or must not touch. An entry that excludes only behavior or features does not limit files.
+
+Before a brief limits files, find the layer that owns the rule the fix changes, such as the server, the client, or a shared package. Read the repository's domain decisions: the entry points its domain doc lists, such as the `docs/agents/domain.md` that `setup-work-skills` seeds, and its ADRs. Write the layer in the **Owning layer** section and cite the decision by ADR identifier or path. When no decision settles it, name the layer you inferred and the reason.
+
+When a decision gives the rule to a different layer than the one where the symptom shows, exactly two results are allowed:
+
+- Scope the fix to the owning layer, and keep that layer out of **Out of scope**.
+- Record the conflict in the triage notes as an open question for a person. This fails the readiness check.
+
 ## Template
 
 Write the core sections every time. Add an optional section only when it carries something the agent needs.
@@ -55,6 +66,10 @@ Be specific about edge cases and error conditions.
 
 **User stories:** (optional)
 1. As an <actor>, I want a <feature>, so that <benefit>
+
+**Owning layer:** (required when the brief limits files)
+The layer that owns the rule the fix changes, citing the deciding ADR or
+domain doc. With no deciding record, the inferred layer and the reason.
 
 **Key interfaces:** (optional)
 - `TypeName`: what needs to change and why
@@ -97,6 +112,11 @@ that end mid-word (e.g. "Use when the user wants to confi").
 Truncation should break at the last word boundary before 1024 characters
 and append "..." to indicate truncation.
 
+**Owning layer:**
+The shared skill-metadata package owns description processing, per
+`ADR-<id>`. The CLI and the web listing only display the stored value. The
+truncation shows up in the CLI, but the fix belongs in the shared package.
+
 **Key interfaces:**
 - The `SkillMetadata` type's `description` field: no type change needed,
   but the validation/processing logic that populates it needs to respect
@@ -114,6 +134,7 @@ and append "..." to indicate truncation.
 **Out of scope:**
 - Changing the 1024 char limit itself
 - Multi-line description support
+- Display-side truncation in the CLI or the web listing
 ```
 
 ### Good agent brief (Tools)
@@ -219,4 +240,5 @@ This is bad because:
 - References file paths and line numbers that will go stale
 - No acceptance criteria
 - No scope boundaries
+- Limits files without naming the layer that owns the rule
 - No description of current vs desired behavior
