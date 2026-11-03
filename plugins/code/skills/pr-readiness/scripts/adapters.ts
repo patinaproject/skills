@@ -122,19 +122,21 @@ export class GhForge implements Forge {
     if (!file || typeof file !== "object" || (file as { encoding?: unknown }).encoding !== "base64" || typeof (file as { content?: unknown }).content !== "string") throw new Error(`forge returned an unreadable ${POLICY_PATH}`);
     return Buffer.from((file as { content: string }).content, "base64").toString("utf8");
   }
-  private graphql(query: string, variables: Record<string, string | number>): Record<string, any> {
+  private graphql(query: string, variables: Record<string, string | number>): Record<string, unknown> {
     const args = ["api", "graphql", "-f", `query=${query}`, ...Object.entries(variables).flatMap(([key, v]) => [typeof v === "number" ? "-F" : "-f", `${key}=${v}`])];
     const parsed = jsonOutput(this.command, args);
     if (parsed.errors) throw new Error(`forge graphql failed: ${JSON.stringify(parsed.errors)}`);
-    return parsed.data as Record<string, any>;
+    return field(parsed, "data", isObject, "graphql response");
   }
   private readArmState(repository: string, number: number): { id: string; defaultBranch: string; armed?: { mergeMethod: string; head?: string } } {
     const [owner, name] = repository.split("/");
     const data = this.graphql(ARM_STATE_QUERY, { owner: owner!, name: name!, number });
-    const repo = data.repository, pr = repo?.pullRequest;
-    if (!pr || typeof pr.id !== "string" || typeof repo.defaultBranchRef?.name !== "string") throw new Error("forge returned a malformed pull request arm state");
+    const repo = field(data, "repository", isObject, "pull request arm state");
+    const pr = field(repo, "pullRequest", isObject, "pull request arm state");
+    const defaultBranch = field(field(repo, "defaultBranchRef", isObject, "pull request arm state"), "name", isString, "pull request arm state");
     const request = pr.autoMergeRequest;
-    return { id: pr.id, defaultBranch: repo.defaultBranchRef.name, armed: request ? { mergeMethod: String(request.mergeMethod), head: armedHeadFromTimeline(pr.timelineItems?.nodes ?? []) } : undefined };
+    const timeline = isObject(pr.timelineItems) && Array.isArray(pr.timelineItems.nodes) ? pr.timelineItems.nodes : [];
+    return { id: field(pr, "id", isString, "pull request arm state"), defaultBranch, armed: isObject(request) ? { mergeMethod: field(request, "mergeMethod", isString, "pull request arm state"), head: armedHeadFromTimeline(timeline) } : undefined };
   }
   readAutoMergeState(repository: string, number: number): AutoMergeState { const { defaultBranch, armed } = this.readArmState(repository, number); return { defaultBranch, armed }; }
   enableAutoMerge(repository: string, number: number, head: string): void {
