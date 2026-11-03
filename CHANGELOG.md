@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.18.0](https://github.com/patinaproject/skills/compare/v4.17.0...v4.18.0) (2026-11-03)
+
+
+### Features
+
+* [#833](https://github.com/patinaproject/skills/issues/833) start review and research subagents without CLAUDE.md ([#836](https://github.com/patinaproject/skills/issues/836)) ([95005c0](https://github.com/patinaproject/skills/commit/95005c0b871b7f5fb04b96b41ba9eb8a0684aa25))
+
 ## [4.17.0](https://github.com/patinaproject/skills/compare/v4.16.0...v4.17.0) (2026-11-03)
 
 
