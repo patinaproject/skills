@@ -28,9 +28,11 @@ cleared or archived.
 Use only these Linear MCP tools: `get_user`, `get_notifications`, `get_issue`,
 `get_diff`, `list_comments`, and `mark_notification`. Do not use a browser.
 
-The only other action is the shell `curl` call in [Archive](#archive). It sends
-`notificationArchive`, the only GraphQL operation this skill may send. Send no
-other GraphQL query or mutation.
+The only non-MCP actions are two shell commands: the key check in
+[Run](#run) step 3, which reaches no service, and the `curl` call in
+[Archive](#archive). The `curl` call sends `notificationArchive`, the only
+GraphQL operation this skill may send. Send no other GraphQL query or
+mutation.
 
 The only writes are clear, through `mark_notification`, and archive, through
 `notificationArchive`. Never snooze, delete, or unarchive a notification, and
@@ -79,8 +81,8 @@ reason. A condition matches only the notification types listed for it. A
 condition that does not apply to a notification is a silent non-match. When a
 condition applies but a lookup it needs fails, or a field it needs is missing,
 keep the notification and, when it is unread, list it under Unresolved. No
-later check runs on it, Idle included. A field is missing when the response omits it. A field the
-response returns as `null` is present and empty.
+later check runs on it, Idle included. A field is missing when the response
+omits it. A field the response returns as `null` is present and empty.
 
 Compare timestamps as instants and dates in UTC.
 
@@ -117,9 +119,9 @@ Compare timestamps as instants and dates in UTC.
   and its notifying comment is in the same thread as this one's, with the same
   `author.id`. For an unread notification, the later one is pending when it is
   still unread after every earlier clear in this run. For a read notification,
-  the later one is pending when it is still in the inbox, meaning it is not
-  archived in this run. When either comment or its author cannot be resolved,
-  this condition does not match.
+  the later one is pending when it is unread, or when it is read and no
+  earlier check matched it. When either comment or its author cannot be
+  resolved, this condition does not match.
 
 ## Run
 
@@ -194,8 +196,9 @@ comment parent. Every step reads from it, so each is fetched at most once.
 ## Archive
 
 Archive one notification with this shell command, replacing `<id>` with the
-notification `id`. It reads the key from the environment and prints only the
-response body and HTTP status, never the key.
+notification `id`. It reads the key from the environment and prints the
+response, which holds only `success` or `errors`, and the HTTP status. It never
+prints the key.
 
 ```sh
 case "$LINEAR_API_KEY" in lin_api_*) auth="$LINEAR_API_KEY" ;; *) auth="Bearer $LINEAR_API_KEY" ;; esac
@@ -208,7 +211,7 @@ curl -sS https://api.linear.app/graphql \
 An archive fails on a curl error, an HTTP status other than 200, an `errors`
 entry in the response, or `success` other than `true`. On the first failure,
 send no further `notificationArchive` in this run. Count the failed
-notification and every one not yet archived as kept read. A wrong key, a key
+notification and every one not yet sent as kept read. A wrong key, a key
 for another user, and a rate limit all fail this way.
 
 ## Report
@@ -237,7 +240,8 @@ End with a short summary.
   be resolved, with the reason: a failed lookup, no status type, a missing field
   a Superseded condition needs, no parent or comment prefix, or no matching
   comment. After an archive failure, add one line with the error message and
-  how many read notifications were not archived. List no other read
-  notification here.
+  the count of the failed notification plus those not yet sent. A read
+  notification that cannot be resolved is counted as kept read and is not
+  listed here.
 
 Render every Linear issue identifier as a Markdown link to its Linear URL.
