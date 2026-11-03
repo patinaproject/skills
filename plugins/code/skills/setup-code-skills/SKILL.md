@@ -35,7 +35,7 @@ What it materializes from `assets/`:
   The context names skills by their bare names.
 - The **Code agents** (from `assets/agents/`) into the repo's
   `.claude/agents/`, so `subagent_type: "patina-agent"` resolves, the effort
-  agents `patina-agent-<level>` and `effort-<level>` resolve, the read-only
+  agents `patina-agent-<level>` and `effort-<level>` resolve, the review agents
   `patina-reader` and `patina-reader-<level>` resolve, and no-comments
   can reach `comment-sicko`. `patina-reader` and `comment-sicko` set
   `omitClaudeMd`, so they start without the user, project, and local CLAUDE.md

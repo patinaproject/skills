@@ -54,7 +54,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/work/.claude-plugin/plugin.json`: Claude manifest for the Work plugin
 - `plugins/work/.codex-plugin/plugin.json`: Codex manifest for the Work plugin
 - `plugins/code/agents/patina-agent.md`: Patina mode routing agent
-- `plugins/code/agents/patina-reader.md`: read-only review and research agent that omits CLAUDE.md, with effort variants in `plugins/code/effort-agents/`
+- `plugins/code/agents/patina-reader.md`: review and research agent without edit tools that omits CLAUDE.md, with effort variants in `plugins/code/effort-agents/`
 - `plugins/code/hooks/`: Code session-start integration
 - `plugins/code/.claude-plugin/plugin.json`: Claude manifest for the Code plugin
 - `plugins/code/.codex-plugin/plugin.json`: Codex manifest for the Code plugin

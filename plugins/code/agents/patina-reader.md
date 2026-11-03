@@ -1,6 +1,6 @@
 ---
 name: patina-reader
-description: Read-only review and research subagent. It runs without the user, project, and local CLAUDE.md files and without the Edit, Write, and NotebookEdit tools. Dispatched by skills whose agents report findings and write nothing. The caller passes the model.
+description: Review and research subagent without edit tools. It runs without the user, project, and local CLAUDE.md files and without the Edit, Write, and NotebookEdit tools. Dispatched by skills whose agents report findings and write nothing. The caller passes the model.
 omitClaudeMd: true
 disallowedTools: Edit, Write, NotebookEdit
 ---
