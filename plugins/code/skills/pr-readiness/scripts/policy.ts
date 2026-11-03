@@ -1,4 +1,4 @@
-import type { PullRequestState } from "./adapters.ts";
+import type { AutoMergeState, PullRequestState } from "./adapters.ts";
 import { EVALUATOR_VERSION, OBLIGATIONS, isObligation, sha256, type Obligation, type ObligationRule, type ProducerSpec, type ReadinessPolicy } from "./domain.ts";
 
 export const POLICY_PATH = ".github/pr-readiness.json";
@@ -59,11 +59,11 @@ export function produceCommand(spec: ProducerSpec, ctx: ProduceContext): string 
 export type AutoMergePlan = { readonly kind: "off" } | { readonly kind: "skip"; readonly reason: string } | { readonly kind: "arm" };
 const guardedPath = (path: string): boolean => path.startsWith(".github/workflows/") || path === POLICY_PATH;
 /** Auto-merge is armed only for a default-branch PR that cannot rewrite the rules it is merged under. */
-export function autoMergePlan(policy: ReadinessPolicy, pr: Pick<PullRequestState, "baseRef" | "defaultBranch" | "changedPaths">): AutoMergePlan {
+export function autoMergePlan(policy: ReadinessPolicy, pr: Pick<PullRequestState, "baseRef" | "changedPaths">, defaultBranch: AutoMergeState["defaultBranch"] | undefined): AutoMergePlan {
   if (!policy.autoMerge) return { kind: "off" };
-  if (!pr.defaultBranch) throw new Error("cannot arm auto-merge: the forge did not report the default branch");
+  if (!defaultBranch) throw new Error("cannot arm auto-merge: the forge did not report the default branch");
   if (!pr.changedPaths?.length) throw new Error("cannot arm auto-merge: the forge did not report the changed paths");
-  if (pr.baseRef !== pr.defaultBranch) return { kind: "skip", reason: `base ${pr.baseRef || "(unknown)"} is not the default branch ${pr.defaultBranch}` };
+  if (pr.baseRef !== defaultBranch) return { kind: "skip", reason: `base ${pr.baseRef || "(unknown)"} is not the default branch ${defaultBranch}` };
   const guarded = pr.changedPaths.filter(guardedPath);
   return guarded.length ? { kind: "skip", reason: `the diff touches ${guarded.join(", ")}` } : { kind: "arm" };
 }

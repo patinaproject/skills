@@ -113,3 +113,20 @@ describe("GhForge.enableAutoMerge", () => {
     expect(replaced[1]).toContain("enablePullRequestAutoMerge");
   });
 });
+
+describe("GhForge.readAutoMergeState", () => {
+  it("returns the default branch and the armed request, and malformed data throws", () => {
+    const dir = mkdtempSync(join(tmpdir(), "stub-gh-"));
+    const enabled = { __typename: "AutoMergeEnabledEvent", createdAt: "2026-11-01T00:00:00Z" };
+    const nodes = [{ __typename: "PullRequestCommit", commit: { oid: "abc" } }, enabled];
+    const pr = JSON.stringify({ data: { repository: { defaultBranchRef: { name: "main" }, pullRequest: { id: "PR_1", autoMergeRequest: { mergeMethod: "SQUASH" }, timelineItems: { nodes } } } } });
+    writeFileSync(join(dir, "gh"), `#!/bin/sh\ncase "$*" in\n  *malformed*) echo '{"data":{"repository":null}}' ;;\n  *) echo '${pr}' ;;\nesac\n`);
+    chmodSync(join(dir, "gh"), 0o755);
+    const previous = process.env.PATH;
+    process.env.PATH = `${dir}:${previous}`;
+    try {
+      expect(new GhForge("gh").readAutoMergeState("o/r", 7)).toEqual({ defaultBranch: "main", armed: { mergeMethod: "SQUASH", head: "abc" } });
+      expect(() => new GhForge("gh").readAutoMergeState("malformed/r", 7)).toThrow("malformed pull request arm state");
+    } finally { process.env.PATH = previous; }
+  });
+});

@@ -40,6 +40,7 @@ export interface FakeForgeOptions {
   readonly reviewDecision?: ReviewDecision;
   readonly baseRef?: string;
   readonly defaultBranch?: string | null;
+  readonly autoMergeStateError?: string;
   readonly changedPaths?: readonly string[];
   readonly armed?: { readonly mergeMethod: string; readonly head?: string };
   readonly requiredChecks?: readonly string[];
@@ -50,6 +51,7 @@ export interface FakeForge extends Forge {
   readonly markReadyCalls: string[];
   readonly enableAutoMergeCalls: { head: string; method: "SQUASH" }[];
   readonly readRequiredChecksCalls: string[];
+  readonly readAutoMergeStateCalls: number[];
 }
 export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const heads = options.heads ?? [HEAD];
@@ -57,13 +59,15 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const pr = (): PullRequestState => ({
     repository: "o/r", number: 7, pullRequest: 7, base: "b".repeat(40), baseSha: "b".repeat(40), baseRef: options.baseRef ?? "main", mergeBase: "b".repeat(40),
     head: heads[Math.min(reads++, heads.length - 1)]!, patchId: "p", diffDigest: "d", behaviorApplicable: true, requirementsDigest: "rq", reviewContextDigest: "rv", isDraft: options.isDraft ?? true,
-    body: options.body ?? BODY, defaultBranch: options.defaultBranch === null ? undefined : options.defaultBranch ?? "main", changedPaths: options.changedPaths ?? ["src/index.ts"], autoMerge: options.armed,
+    body: options.body ?? BODY, changedPaths: options.changedPaths ?? ["src/index.ts"],
   });
   const markReadyCalls: string[] = [];
   const enableAutoMergeCalls: FakeForge["enableAutoMergeCalls"] = [];
   const readRequiredChecksCalls: string[] = [];
+  const readAutoMergeStateCalls: number[] = [];
   return {
-    markReadyCalls, enableAutoMergeCalls, readRequiredChecksCalls,
+    markReadyCalls, enableAutoMergeCalls, readRequiredChecksCalls, readAutoMergeStateCalls,
+    readAutoMergeState: (_repository, number) => { readAutoMergeStateCalls.push(number); if (options.autoMergeStateError) throw new Error(options.autoMergeStateError); return { defaultBranch: options.defaultBranch === null ? "" : options.defaultBranch ?? "main", armed: options.armed }; },
     enableAutoMerge: (_repository, _number, head) => { if (options.enableAutoMergeError) throw new Error(options.enableAutoMergeError); enableAutoMergeCalls.push({ head, method: "SQUASH" }); },
     readRequiredChecks: (_repository, baseRef) => { readRequiredChecksCalls.push(baseRef); if (options.requiredChecksError) throw new Error(options.requiredChecksError); return [...(options.requiredChecks ?? CHECK_NAMES)]; },
     readPullRequest: pr,

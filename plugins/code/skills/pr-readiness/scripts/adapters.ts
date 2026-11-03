@@ -5,7 +5,8 @@ import { sha256, verifyPacket, type CandidateIdentity, type ReadinessPacket } fr
 import { POLICY_PATH } from "./policy.ts";
 import type { CheckRunFact, ForgeEvidence, ReviewDecision, ReviewFact } from "./evidence.ts";
 
-export interface PullRequestState extends Omit<CandidateIdentity, "policyDigest"> { readonly number: number; readonly isDraft: boolean; readonly body?: string; readonly baseRef?: string; readonly headRef?: string; readonly defaultBranch?: string; readonly changedPaths?: readonly string[]; readonly autoMerge?: { readonly mergeMethod: string; readonly head?: string }; }
+export interface PullRequestState extends Omit<CandidateIdentity, "policyDigest"> { readonly number: number; readonly isDraft: boolean; readonly body?: string; readonly baseRef?: string; readonly headRef?: string; readonly changedPaths?: readonly string[]; }
+export interface AutoMergeState { readonly defaultBranch: string; readonly armed?: { readonly mergeMethod: string; readonly head?: string } }
 export interface Forge {
   readPullRequest(repository: string, number: number): PullRequestState;
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState;
@@ -15,6 +16,8 @@ export interface Forge {
   /** Replaces any existing auto-merge request with a squash request pinned to `head`. */
   enableAutoMerge(repository: string, number: number, head: string): void;
   readRequiredChecks(repository: string, baseRef: string): string[];
+  /** Read only when the policy opts in to auto-merge. Throws on a malformed or failed read. */
+  readAutoMergeState(repository: string, number: number): AutoMergeState;
 }
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
 
@@ -102,9 +105,8 @@ export class GhForge implements Forge {
     const diff = remoteDiff(this.command, repository, number);
     const mergeBase = baseSha && head ? (() => { try { return git("git", ["merge-base", baseSha, head]); } catch { return baseSha; } })() : baseSha;
     const changedPaths = [...new Set([...diff.matchAll(/^diff --git a\/(.+?) b\/(.+)$/gm)].flatMap((match) => [match[1]!, match[2]!]))];
-    const armed = this.readArmState(repository, number);
     const behaviorApplicable = changedPaths.length === 0 || changedPaths.some((path) => !/(^|\/)(docs?|documentation)\/|\.md$|\.mdx$|\.txt$/i.test(path));
-    return { repository, number, pullRequest: number, base: baseSha || baseRef, baseSha, baseRef, mergeBase, head, patchId: derivePatchId(diff), diffDigest: sha256(diff), behaviorApplicable, requirementsDigest: sha256({ repository, baseRef, baseSha }), reviewContextDigest: sha256({ repository, number, body: typeof row.body === "string" ? row.body : "" }), isDraft: row.isDraft === true, body: typeof row.body === "string" ? row.body : "", headRef: typeof row.headRefName === "string" ? row.headRefName : undefined, defaultBranch: armed.defaultBranch, changedPaths, autoMerge: armed.autoMerge };
+    return { repository, number, pullRequest: number, base: baseSha || baseRef, baseSha, baseRef, mergeBase, head, patchId: derivePatchId(diff), diffDigest: sha256(diff), behaviorApplicable, requirementsDigest: sha256({ repository, baseRef, baseSha }), reviewContextDigest: sha256({ repository, number, body: typeof row.body === "string" ? row.body : "" }), isDraft: row.isDraft === true, body: typeof row.body === "string" ? row.body : "", headRef: typeof row.headRefName === "string" ? row.headRefName : undefined, changedPaths };
   }
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState { const args = ["pr", "create", "--repo", input.repository, "--base", input.base, "--head", input.head, ...(input.draft === false ? [] : ["--draft"])]; const url = execFileSync(this.command, args, { encoding: "utf8" }).trim(); const number = Number(url.match(/(\d+)\s*$/)?.[1] ?? 0); if (!number) throw new Error("forge did not return a pull request number"); return this.readPullRequest(input.repository, number); }
   markReady(repository: string, number: number, expectedHead: string): void { markReadyIfCurrent(this.command, repository, number, expectedHead); }
@@ -126,17 +128,18 @@ export class GhForge implements Forge {
     if (parsed.errors) throw new Error(`forge graphql failed: ${JSON.stringify(parsed.errors)}`);
     return parsed.data as Record<string, any>;
   }
-  private readArmState(repository: string, number: number): { id: string; defaultBranch: string; autoMerge?: { mergeMethod: string; head?: string } } {
+  private readArmState(repository: string, number: number): { id: string; defaultBranch: string; armed?: { mergeMethod: string; head?: string } } {
     const [owner, name] = repository.split("/");
     const data = this.graphql(ARM_STATE_QUERY, { owner: owner!, name: name!, number });
     const repo = data.repository, pr = repo?.pullRequest;
     if (!pr || typeof pr.id !== "string" || typeof repo.defaultBranchRef?.name !== "string") throw new Error("forge returned a malformed pull request arm state");
     const request = pr.autoMergeRequest;
-    return { id: pr.id, defaultBranch: repo.defaultBranchRef.name, autoMerge: request ? { mergeMethod: String(request.mergeMethod), head: armedHeadFromTimeline(pr.timelineItems?.nodes ?? []) } : undefined };
+    return { id: pr.id, defaultBranch: repo.defaultBranchRef.name, armed: request ? { mergeMethod: String(request.mergeMethod), head: armedHeadFromTimeline(pr.timelineItems?.nodes ?? []) } : undefined };
   }
+  readAutoMergeState(repository: string, number: number): AutoMergeState { const { defaultBranch, armed } = this.readArmState(repository, number); return { defaultBranch, armed }; }
   enableAutoMerge(repository: string, number: number, head: string): void {
-    const { id, autoMerge } = this.readArmState(repository, number);
-    if (autoMerge) this.graphql("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}", { id });
+    const { id, armed } = this.readArmState(repository, number);
+    if (armed) this.graphql("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}", { id });
     this.graphql("mutation($id:ID!,$head:GitObjectID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH,expectedHeadOid:$head}){pullRequest{number}}}", { id, head });
   }
   readRequiredChecks(repository: string, baseRef: string): string[] {

@@ -88,6 +88,7 @@ describe("pr-readiness publish auto-merge", () => {
       expect(result.code).toBe(0);
       expect(forge.enableAutoMergeCalls).toEqual([]);
       expect(forge.readRequiredChecksCalls).toEqual([]);
+      expect(forge.readAutoMergeStateCalls).toEqual([]);
       expect(result.stdout).toBe(`PR #7 is ready at ${HEAD}\n`);
     }
   });
@@ -129,6 +130,15 @@ describe("pr-readiness publish auto-merge", () => {
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(result.stderr).toBe("pr-readiness: HTTP 502\n");
+    expect(forge.markReadyCalls).toEqual([]);
+    expect(forge.enableAutoMergeCalls).toEqual([]);
+  });
+  it("fails closed before the ready transition when the arm-state read throws", () => {
+    const forge = fakeForge({ policy: AUTO_MERGE_POLICY, autoMergeStateError: "forge graphql failed" });
+    const result = publish(forge);
+    expect(result.code).toBe(1);
+    expect(result.stderr).toBe("pr-readiness: forge graphql failed\n");
+    expect(forge.readAutoMergeStateCalls).toEqual([7]);
     expect(forge.markReadyCalls).toEqual([]);
     expect(forge.enableAutoMergeCalls).toEqual([]);
   });

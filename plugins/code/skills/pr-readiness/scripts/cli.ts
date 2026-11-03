@@ -51,7 +51,8 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     const final = assess(deps.forge, repository, number, undefined, now);
     if (!final.report.ready || !final.report.packet) throw new Error(`remote changed before publication: ${reportError(final.report)}`);
     if (JSON.stringify(initial.candidate) !== JSON.stringify(final.candidate) || initial.pr.body !== final.pr.body) throw new Error(`candidate/body race: assessed ${initial.candidate.head}, remote is ${final.candidate.head}`);
-    const plan = autoMergePlan(final.policy, final.pr);
+    const state = final.policy.autoMerge ? deps.forge.readAutoMergeState(repository, number) : undefined;
+    const plan = autoMergePlan(final.policy, final.pr, state?.defaultBranch);
     if (plan.kind === "arm") {
       const live = new Set(deps.forge.readRequiredChecks(repository, final.pr.baseRef!));
       const missing = requiredCheckNames(final.policy).filter((name) => !live.has(name));
@@ -62,7 +63,7 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     process.stdout.write(`PR #${number} is ${final.pr.isDraft ? "ready" : "already ready"} at ${final.candidate.head}\n`);
     if (plan.kind === "skip") process.stdout.write(`auto-merge skipped: ${plan.reason}\n`);
     if (plan.kind === "arm") {
-      const head = final.candidate.head, armed = final.pr.autoMerge;
+      const head = final.candidate.head, armed = state?.armed;
       if (armed?.mergeMethod === "SQUASH" && armed.head === head) process.stdout.write(`auto-merge already armed (squash) at ${head}\n`);
       else {
         try { deps.forge.enableAutoMerge(repository, number, head); } catch (error) { throw new Error(`PR #${number} is ready but auto-merge is not on: ${error instanceof Error ? error.message : String(error)}`); }
