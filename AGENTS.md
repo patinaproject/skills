@@ -54,6 +54,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/work/.claude-plugin/plugin.json`: Claude manifest for the Work plugin
 - `plugins/work/.codex-plugin/plugin.json`: Codex manifest for the Work plugin
 - `plugins/code/agents/patina-agent.md`: Patina mode routing agent
+- `plugins/code/agents/patina-reader.md`: review and research agent without edit tools that omits CLAUDE.md, with effort variants in `plugins/code/effort-agents/`
 - `plugins/code/hooks/`: Code session-start integration
 - `plugins/code/.claude-plugin/plugin.json`: Claude manifest for the Code plugin
 - `plugins/code/.codex-plugin/plugin.json`: Codex manifest for the Code plugin
@@ -261,6 +262,12 @@ npm_config_ignore_scripts=true npx skills@latest add mattpocock/skills@writing-f
   `plugins/code/pi/sheet.ts`, `setup-pstack/scripts/read-sheet.sh`, or the
   session-start hooks; it feeds UTF-16LE, BOM, and CRLF sheets through every
   decoder and compares one literal role map
+- Run `bash scripts/tests/agent-frontmatter.test.sh` after changing a
+  `patina-reader*` or `comment-sicko` agent file; it asserts their frontmatter
+  contracts and that the variants match the base
+- Run `node scripts/tests/pi-read-only.test.mjs` after changing
+  `plugins/code/pi/read-only.ts`; it asserts which Pi agent types lose the edit
+  and write tools
 - Run `bash scripts/tests/sync-upstream-skills.test.sh` after changing
   `scripts/sync-upstream-skills.mjs`; it exercises the manifest, fork registry,
   dry-run, idempotence, three-way merge, and argument-refusal contracts.
