@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.19.0](https://github.com/patinaproject/skills/compare/v4.18.0...v4.19.0) (2026-11-03)
+
+
+### Features
+
+* [#830](https://github.com/patinaproject/skills/issues/830) arm squash auto-merge from pr-readiness publish ([#835](https://github.com/patinaproject/skills/issues/835)) ([bf073c6](https://github.com/patinaproject/skills/commit/bf073c6c7e445bcaa7fb694cdfc205e6fe9cd3d7))
+
 ## [4.18.0](https://github.com/patinaproject/skills/compare/v4.17.0...v4.18.0) (2026-11-03)
 
 
