@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.17.0](https://github.com/patinaproject/skills/compare/v4.16.0...v4.17.0) (2026-11-03)
+
+
+### Features
+
+* [#829](https://github.com/patinaproject/skills/issues/829) archive read notifications that need no action ([#831](https://github.com/patinaproject/skills/issues/831)) ([23744fa](https://github.com/patinaproject/skills/commit/23744fa46e5dfabd15343b5eee252aae4133f02e))
+
 ## [4.16.0](https://github.com/patinaproject/skills/compare/v4.15.1...v4.16.0) (2026-11-02)
 
 
