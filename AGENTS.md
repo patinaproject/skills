@@ -22,7 +22,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/work/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
 - `plugins/work/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
 - `plugins/work/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
-- `plugins/work/skills/linear-inbox-cleanup/`: marks Linear inbox notifications read when they need no action
+- `plugins/work/skills/linear-inbox-cleanup/`: marks read or archives Linear inbox notifications that need no action
 - `plugins/code/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/work/skills/pr-review-assistant/`: user-invoked pair review of someone else's pull request
 - `plugins/code/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill

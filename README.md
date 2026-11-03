@@ -218,8 +218,10 @@ pull requests, status changes, and Triage Rule assignments. It also clears
 superseded ones, where a later event shows the user already acted or the work
 moved on, such as a review request the user has since reviewed. Last, it
 clears comment threads the user never joined and was never @-mentioned in.
-Every other notification stays unread. It uses only the Linear MCP tools and
-changes nothing but read state.
+Read notifications that need no action on the same rules are archived,
+whatever their age, through Linear's GraphQL `notificationArchive` mutation
+when `LINEAR_API_KEY` is set. Every other notification stays as it is. It
+changes nothing but read and archive state.
 
 See [./plugins/work/skills/linear-inbox-cleanup/](./plugins/work/skills/linear-inbox-cleanup/)
 for the skill contract.
@@ -281,7 +283,7 @@ README and skill contract.
 | [email-inbox-triage](./plugins/work/skills/email-inbox-triage/) | Tag and archive inbox threads into four triage buckets in any mail provider |
 | [cloud-storage-organization](./plugins/work/skills/cloud-storage-organization/) | File loose files in any cloud storage by rules learned from your corrections |
 | [draft-user-follow-ups](./plugins/work/skills/draft-user-follow-ups/) | Draft proven replies to every customer owed one after a production release |
-| [linear-inbox-cleanup](./plugins/work/skills/linear-inbox-cleanup/) | Mark Linear inbox notifications read when they need no action |
+| [linear-inbox-cleanup](./plugins/work/skills/linear-inbox-cleanup/) | Mark read or archive Linear inbox notifications that need no action |
 | [gather-evidence](./plugins/code/skills/gather-evidence/) | Gather current-target evidence for a human change request or QA finding |
 | [pr-review-assistant](./plugins/work/skills/pr-review-assistant/) | Pair-review someone else's pull request as an artifact that teaches the change |
 | [running-mobile-simulators](./plugins/code/skills/running-mobile-simulators/) | Bind one workspace to one owned or attached Android emulator or iOS simulator |

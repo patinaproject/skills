@@ -23,7 +23,7 @@ Work plugin skills live under `plugins/work/skills/<name>/`.
 - `plugins/work/skills/email-inbox-triage/`: provider-agnostic email inbox triage into four tagged buckets
 - `plugins/work/skills/cloud-storage-organization/`: storage-agnostic loop that files loose files by rules learned from the user's corrections
 - `plugins/work/skills/draft-user-follow-ups/`: post-release support loop that drafts proven replies to owed customers
-- `plugins/work/skills/linear-inbox-cleanup/`: marks Linear inbox notifications read when they need no action
+- `plugins/work/skills/linear-inbox-cleanup/`: marks read or archives Linear inbox notifications that need no action
 - `plugins/code/skills/gather-evidence/`: current-target evidence for human feedback
 - `plugins/code/skills/running-mobile-simulators/`: shared-host Android emulator and iOS simulator lifecycle skill
 - `plugins/code/skills/pr/`: local PR body contract adapted from Matt Pocock
@@ -109,7 +109,7 @@ Skills owned by this repository:
 | `email-inbox-triage` | `plugins/work/skills/email-inbox-triage/` | Provider-agnostic email inbox triage into four tagged buckets |
 | `cloud-storage-organization` | `plugins/work/skills/cloud-storage-organization/` | Storage-agnostic loop that files loose files by learned rules |
 | `draft-user-follow-ups` | `plugins/work/skills/draft-user-follow-ups/` | Post-release support loop that drafts proven replies to owed customers |
-| `linear-inbox-cleanup` | `plugins/work/skills/linear-inbox-cleanup/` | Marks Linear inbox notifications read when they need no action |
+| `linear-inbox-cleanup` | `plugins/work/skills/linear-inbox-cleanup/` | Marks read or archives Linear inbox notifications that need no action |
 | `gather-evidence` | `plugins/code/skills/gather-evidence/` | Current-target evidence for human feedback |
 | `running-mobile-simulators` | `plugins/code/skills/running-mobile-simulators/` | Shared-host Android emulator and iOS simulator lifecycle |
 | `retro` | `plugins/work/skills/retro/` | Coding-session retrospective workflow |
