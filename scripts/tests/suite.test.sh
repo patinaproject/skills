@@ -27,6 +27,8 @@ bash scripts/tests/scaffold-baseline-manifest.test.sh
 bash scripts/tests/scaffold-cleanup.test.sh
 bash scripts/tests/workflow-cleanup.test.sh
 bash scripts/tests/setup-code-skills-machinery.test.sh
+bash scripts/tests/agent-frontmatter.test.sh
+node scripts/tests/pi-read-only.test.mjs
 node scripts/tests/sheet-encodings.test.mjs
 node scripts/tests/sheet-decoder.test.mjs
 bash scripts/tests/sync-upstream-skills.test.sh

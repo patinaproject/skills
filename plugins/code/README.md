@@ -24,8 +24,12 @@ Project Skills plugin or pstack.
 ## What it contains
 
 - Skills are Markdown instructions that agents read at runtime.
-- Agents include `patina-agent` and `comment-sicko`, with effort-specific
-  variants for supported model settings.
+- Agents include `patina-agent`, `patina-reader`, and `comment-sicko`, with
+  effort-specific variants for supported model settings. `patina-reader` and
+  `comment-sicko` run without the user, project, and local CLAUDE.md files.
+  `patina-reader` also lacks the Edit, Write, and NotebookEdit tools. An
+  installation keeps machine-specific safety rules in a managed policy file,
+  which these agents still read.
 - Hooks and local scripts cover session setup, PR watching, orchestration, and
   worktree auditing.
 - The bundled Pi extension supplies subagent, question, and wake-up tools,

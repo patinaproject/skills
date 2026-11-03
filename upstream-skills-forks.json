@@ -20,6 +20,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/code/agents/comment-sicko.md": {
+    "kind": "policy",
+    "reason": "Patina sets omitClaudeMd so the comment-sicko subagent starts without the user, project, and local CLAUDE.md files.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/code/agents/patina-agent.md": {
     "kind": "policy",
     "reason": "Patina routes requests for Patina Project's engineering style to the agent instead of requests for poteto's style, because Code ships the style under its own name.",
@@ -44,6 +51,13 @@
   "plugins/code/hooks/session-start.sh": {
     "kind": "policy",
     "reason": "A project-level install copies this hook without the plugin root, so it falls back to its own directory, decodes the model sheet by running the read-sheet.sh that the installer copied beside it (the plugin uses setup-pstack/scripts/read-sheet.sh) instead of an inline copy, and skips injection when CLAUDE.md already carries the mandate. It serves the Claude and Codex runtimes only, because Patina excludes the GitHub Copilot runtime.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/code/pi/agent-tools.ts": {
+    "kind": "policy",
+    "reason": "Patina lists patina-reader and patina-reader-<level> among the agent types the Pi agent tool accepts, because Code adds those agents.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -118,6 +132,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/code/skills/how/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina dispatches this skill's read-only agents as patina-reader, which Code adds, so they start without the user, project, and local CLAUDE.md files.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/code/skills/how/references/explainer-prompt.md": {
     "kind": "policy",
     "reason": "Patina adds the blank lines that markdownlint MD022 requires around headings, so the file passes the repository's markdownlint run.",
@@ -134,7 +155,7 @@
   },
   "plugins/code/skills/interrogate/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adds the blank lines that markdownlint MD022 and MD032 require around the verdict template's headings and lists, plus an empty quote line under Intent, so the file passes the repository's markdownlint run.",
+    "reason": "Patina adds the blank lines that markdownlint MD022 and MD032 require around the verdict template's headings and lists, plus an empty quote line under Intent, so the file passes the repository's markdownlint run. Patina also dispatches its review agents as patina-reader, which Code adds, so they start without the user, project, and local CLAUDE.md files.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -176,7 +197,7 @@
   },
   "plugins/code/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, with the maintainer's approval required only in an approval-gated repository and pr-readiness publish as the only agent step that arms auto-merge, the patinaproject-verify driver, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, a continuation route that sends issue-linked work with an open pull request or unmerged branch commits through Session pickup to Babysit or the rest of its build playbook, every issue-run change including docs, tests, config, and dependency updates routed by its effect, and ### Principles headings for markdownlint MD036.",
+    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, with the maintainer's approval required only in an approval-gated repository and pr-readiness publish as the only agent step that arms auto-merge, the patinaproject-verify driver, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, a continuation route that sends issue-linked work with an open pull request or unmerged branch commits through Session pickup to Babysit or the rest of its build playbook, every issue-run change including docs, tests, config, and dependency updates routed by its effect, a patina-reader reasoning-effort mapping, and ### Principles headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -240,6 +261,13 @@
   "plugins/code/skills/patina-mode/playbooks/worktree-cleanup.md": {
     "kind": "policy",
     "reason": "Patina runs worktree-audit.mjs with node from the skill's base directory instead of a path under the installed plugin, which does not exist in an Agent Skills install.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/code/skills/patina-mode/references/agents/comment-sicko.md": {
+    "kind": "policy",
+    "reason": "Patina sets omitClaudeMd so the comment-sicko subagent starts without the user, project, and local CLAUDE.md files.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -391,6 +419,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/code/skills/reflect/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina dispatches this skill's read-only agents as patina-reader, which Code adds, so they start without the user, project, and local CLAUDE.md files.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/code/skills/reflect/references/divergent-reviewer.md": {
     "kind": "policy",
     "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
@@ -447,6 +482,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/code/skills/swarm/SKILL.md": {
+    "kind": "policy",
+    "reason": "Patina dispatches a swarm worker that writes nothing as patina-reader, which Code adds, so it starts without the user, project, and local CLAUDE.md files.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/code/skills/unslop/SKILL.md": {
     "kind": "policy",
     "reason": "Patina wraps the rule list in markdownlint-disable MD029, because the rule numbers are stable ids with gaps that other skills cite and MD029 would demand sequential numbering.",
@@ -456,7 +498,7 @@
   },
   "plugins/code/skills/why/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run.",
+    "reason": "Patina adds the blank line that markdownlint MD032 requires before each list, so the file passes the repository's markdownlint run. Patina also dispatches its review agents as patina-reader, which Code adds, so they start without the user, project, and local CLAUDE.md files.",
     "upstream": {
       "status": "not-proposed"
     }
