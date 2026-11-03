@@ -1,24 +1,41 @@
 ---
 name: linear-inbox-cleanup
-description: Mark as read every unread Linear inbox notification that needs no action, and keep the rest unread. Use when the user asks to clean up their Linear inbox, or on a schedule. Only changes read state, so answer read-only questions about the inbox directly instead.
+description: Mark as read every unread Linear inbox notification that needs no action, archive every read one that needs no action, and leave the rest unchanged. Use when the user asks to clean up their Linear inbox, or on a schedule. Changes read and archive state, so answer read-only questions about the inbox directly instead.
 ---
 
 # Linear Inbox Cleanup
 
-**Clear** every unread notification that is **done**, **status noise**,
-**triage-assigned**, **superseded**, or **idle**. **Keep** every other
-notification. When in doubt about a notification, keep it.
+A notification **needs no action** when it is **done**, **status noise**,
+**triage-assigned**, **superseded**, or **idle**. **Clear** every unread
+notification that needs no action. **Archive** every read notification that
+needs no action, whatever its age. **Keep** every other notification. When in
+doubt about a notification, keep it.
+
+A notification is read when its `readAt` is non-null. When the response omits
+`readAt`, treat the notification as unread.
 
 Clear means `mark_notification` with `id` set to the notification ID and
-`read: true`. Keep means leave it unread.
+`read: true`. Archive means the GraphQL `notificationArchive` mutation, sent as
+in [Archive](#archive). Keep means leave the notification unchanged: an unread
+one stays unread, and a read one stays read and in the inbox.
+
+In [Categories](#categories) and [Superseded](#superseded), "clear" means the
+notification needs no action. [Run](#run) step 8 decides whether it is
+cleared or archived.
 
 ## Scope
 
 Use only these Linear MCP tools: `get_user`, `get_notifications`, `get_issue`,
 `get_diff`, `list_comments`, and `mark_notification`. Do not use a browser.
 
-The only write is clear. Never archive or snooze a notification, and never
-comment on or change an issue, project, document, or pull request.
+The only other action is the shell `curl` call in [Archive](#archive). It sends
+`notificationArchive`, the only GraphQL operation this skill may send. Send no
+other GraphQL query or mutation.
+
+The only writes are clear, through `mark_notification`, and archive, through
+`notificationArchive`. Never snooze, delete, or unarchive a notification, and
+never comment on or change an issue, project, document, comment, or pull
+request.
 
 ## Categories
 
@@ -61,8 +78,8 @@ Check each condition in this order, and record the first that matches as the
 reason. A condition matches only the notification types listed for it. A
 condition that does not apply to a notification is a silent non-match. When a
 condition applies but a lookup it needs fails, or a field it needs is missing,
-keep the notification and list it under Unresolved. No later check runs on it,
-Idle included. A field is missing when the response omits it. A field the
+keep the notification and, when it is unread, list it under Unresolved. No
+later check runs on it, Idle included. A field is missing when the response omits it. A field the
 response returns as `null` is present and empty.
 
 Compare timestamps as instants and dates in UTC.
@@ -96,10 +113,13 @@ Compare timestamps as instants and dates in UTC.
   today or later.
 - **Restated.** Types: the Answered types. Check this condition last, after
   the others have run over every notification. Clear this notification when
-  another one with the same `type` and a later `createdAt` is still unread
-  after every earlier clear in this run, and its notifying comment is in the
-  same thread as this one's, with the same `author.id`. When either comment or
-  its author cannot be resolved, this condition does not match.
+  another one with the same `type` and a later `createdAt` is still pending,
+  and its notifying comment is in the same thread as this one's, with the same
+  `author.id`. For an unread notification, the later one is pending when it is
+  still unread after every earlier clear in this run. For a read notification,
+  the later one is pending when it is still in the inbox, meaning it is not
+  archived in this run. When either comment or its author cannot be resolved,
+  this condition does not match.
 
 ## Run
 
@@ -114,13 +134,20 @@ comment parent. Every step reads from it, so each is fetched at most once.
    link to it. The user's name or `@<displayName>` as plain text, without the
    profile link, is not a mention, because Linear does not notify it as one.
 
-2. **Fetch every unread notification.** Call `get_notifications` with
-   `unreadOnly: true` and `limit: 250`. Follow `cursor` until `hasNextPage` is
-   false.
+2. **Fetch every notification.** Call `get_notifications` with `limit: 250`
+   and without `unreadOnly`. Follow `cursor` until `hasNextPage` is false.
+   Split the result into unread and read notifications.
 
-3. **Clear status noise and triage-assigned.** Neither needs a lookup.
+3. **Set read notifications aside.** Check whether the key is set with
+   `[ -n "$LINEAR_API_KEY" ] && echo set || echo unset`, which never prints
+   the key. When it is unset, keep every read notification without lookups and
+   skip archiving for the run. Otherwise, keep without lookups each read
+   notification whose `snoozedUntilAt` is later than now. Steps 4 to 8 cover
+   the unread notifications and the remaining read ones.
 
-4. **Clear the done ones** among the rest. Look up each notification's status
+4. **Clear status noise and triage-assigned.** Neither needs a lookup.
+
+5. **Clear the done ones** among the rest. Look up each notification's status
    from its `url`:
 
    - `/issue/<KEY>-<N>/...`: call `get_issue` for `<KEY>-<N>` with `fields`
@@ -130,10 +157,10 @@ comment parent. Every step reads from it, so each is fetched at most once.
 
    A notification whose lookup fails, or shows no status type, is not done.
 
-5. **Clear the superseded ones** among the rest, by [Superseded](#superseded).
+6. **Clear the superseded ones** among the rest, by [Superseded](#superseded).
 
-6. **Find the idle candidates** among the notifications not yet cleared or
-   listed under Unresolved. A candidate reports a new comment or reply:
+7. **Find the idle candidates** among the notifications not yet cleared or
+   kept as unresolved. A candidate reports a new comment or reply:
    `category` is `commentsAndReplies`, or `type` is a new-comment or reply
    type, such as `issueNewComment`, `projectUpdateNewComment`, or a document or
    project comment type. Keep every other notification without further checks,
@@ -147,7 +174,7 @@ comment parent. Every step reads from it, so each is fetched at most once.
    - assignments not made by the Triage Rule, document content changes,
      project updates, and anything else that is not a comment
 
-7. **Check each candidate.**
+   Then check each candidate:
 
    1. Find the notifying comment and thread by
       [Notifying comment](#notifying-comment). Keep the notification when the
@@ -158,14 +185,43 @@ comment parent. Every step reads from it, so each is fetched at most once.
       user.
    4. Otherwise, clear it.
 
+8. **Write.** Steps 4 to 7 only decide. Write after every decision is made.
+   Clear each unread notification that needs no action with
+   `mark_notification`. Archive each read notification that needs no action,
+   one at a time, by [Archive](#archive). A notification cleared in this run is
+   never archived in this run. A later run archives it once it is read.
+
+## Archive
+
+Archive one notification with this shell command, replacing `<id>` with the
+notification `id`. It reads the key from the environment and prints only the
+response body and HTTP status, never the key.
+
+```sh
+case "$LINEAR_API_KEY" in lin_api_*) auth="$LINEAR_API_KEY" ;; *) auth="Bearer $LINEAR_API_KEY" ;; esac
+curl -sS https://api.linear.app/graphql \
+  -H "Authorization: $auth" -H 'Content-Type: application/json' \
+  -w '\nHTTP %{http_code}\n' \
+  -d '{"query":"mutation($id: String!) { notificationArchive(id: $id) { success } }","variables":{"id":"<id>"}}'
+```
+
+An archive fails on a curl error, an HTTP status other than 200, an `errors`
+entry in the response, or `success` other than `true`. On the first failure,
+send no further `notificationArchive` in this run. Count the failed
+notification and every one not yet archived as kept read. A wrong key, a key
+for another user, and a rate limit all fail this way.
+
 ## Report
 
 End with a short summary.
 
-- **Counts.** Unread notifications scanned, cleared as done, cleared as status
-  change, cleared as triage-assigned, cleared as superseded, idle candidates,
-  cleared as idle, and kept. Cleared and kept add up to scanned.
-- **Cleared.** One line per notification, in this form:
+- **Counts.** Unread scanned, read scanned, cleared per reason, archived per
+  reason, idle candidates, kept unread, and kept read. Unread scanned equals
+  cleared plus kept unread. Read scanned equals archived plus kept read. So
+  scanned equals cleared plus archived plus kept.
+- **Archiving skipped.** When `LINEAR_API_KEY` is unset, one line saying
+  archiving was skipped because `LINEAR_API_KEY` is not set.
+- **Cleared.** One line per cleared notification, in this form:
   `[<KEY>-<N>](issue url) — <title> — <author or notification type> (reason: <reason>)`.
   The reason is one of `issue completed`, `issue canceled`, `PR merged`,
   `status change`, `assigned by Triage Rule`, `superseded: answered`,
@@ -175,9 +231,13 @@ End with a short summary.
   title as the link text and link its Linear review page. For a document or
   project, use its title as the link text and link its Linear page. Never
   invent an issue identifier.
-- **Unresolved.** Every notification kept because something could not be
-  resolved, with the reason: a failed lookup, no status type, a missing field
+- **Archived.** One line per archived notification, in the Cleared form and
+  reason vocabulary, followed by the notification `id`.
+- **Unresolved.** Every unread notification kept because something could not
+  be resolved, with the reason: a failed lookup, no status type, a missing field
   a Superseded condition needs, no parent or comment prefix, or no matching
-  comment.
+  comment. After an archive failure, add one line with the error message and
+  how many read notifications were not archived. List no other read
+  notification here.
 
 Render every Linear issue identifier as a Markdown link to its Linear URL.
