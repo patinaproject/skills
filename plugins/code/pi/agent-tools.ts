@@ -12,7 +12,7 @@ const agentParams = Type.Object(
     subagent_type: Type.Optional(
       Type.String({
         description:
-          "Agent definition to run: general-purpose (default), patina-agent, comment-sicko, patina-agent-<level>, or effort-<level>.",
+          "Agent definition to run: general-purpose (default), patina-agent, patina-reader, comment-sicko, patina-agent-<level>, patina-reader-<level>, or effort-<level>.",
       }),
     ),
     model: Type.Optional(

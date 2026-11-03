@@ -10,6 +10,7 @@ import { noticeOf, OUTPUT_CAP_BYTES, truncateUtf8 } from "./agent-text.ts";
 import type { AgentParams } from "./agent-tools.ts";
 import { alive, type ChildExit, PiChild, terminateGroup } from "./child.ts";
 import { DEPTH_FLAG, GENERAL_PURPOSE, loadAgentTypes, PSTACK_STATE_DIR, resolveModel, type Settings } from "./config.ts";
+import { excludedTools, isReadOnlyType } from "./read-only.ts";
 import { readSheet } from "./sheet.ts";
 import { ensureWorktree, planWorktree, settleWorktree, type Worktree, worktreeSchema } from "./worktree.ts";
 
@@ -125,7 +126,7 @@ function childArgs(identity: AgentIdentity, depth: number): string[] {
   if (identity.thinking) args.push("--thinking", identity.thinking);
   if (identity.systemPromptFile) args.push("--append-system-prompt", identity.systemPromptFile);
   args.push(`--${DEPTH_FLAG}`, String(depth + 1));
-  const excluded = [...(identity.readonly ? ["edit", "write"] : []), ...(depth + 1 >= MAX_SPAWN_DEPTH ? ["agent"] : [])];
+  const excluded = excludedTools(identity.readonly === true, depth + 1 >= MAX_SPAWN_DEPTH);
   if (excluded.length) args.push("--exclude-tools", excluded.join(","));
   return args;
 }
@@ -210,7 +211,7 @@ export class AgentRunner {
       model,
       // Claude Code subagents without an effort run at the session's effort.
       thinking: def.effort ?? this.pi.getThinkingLevel(),
-      readonly: params.readonly || undefined,
+      readonly: params.readonly || isReadOnlyType(type) || undefined,
       sessionId: randomUUID(),
       sessionDir,
       systemPromptFile,
