@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { GhForge, armedHeadFromTimeline, parseReviewDecision, requiredContexts } from "./adapters.ts";
+import { GhForge, armedHeadFromTimeline, parseChangedPaths, parseReviewDecision, requiredContexts } from "./adapters.ts";
 
 const review = (id: number, login: string, type: string) => JSON.stringify({ id, user: { login, type }, author_association: "CONTRIBUTOR", state: "APPROVED", commit_id: "abc", submitted_at: "2026-10-01T00:00:00Z", html_url: `https://github.com/o/r/pull/7#pullrequestreview-${id}` });
 
@@ -120,13 +120,27 @@ describe("GhForge.readAutoMergeState", () => {
     const enabled = { __typename: "AutoMergeEnabledEvent", createdAt: "2026-11-01T00:00:00Z" };
     const nodes = [{ __typename: "PullRequestCommit", commit: { oid: "abc" } }, enabled];
     const pr = JSON.stringify({ data: { repository: { defaultBranchRef: { name: "main" }, pullRequest: { id: "PR_1", autoMergeRequest: { mergeMethod: "SQUASH" }, timelineItems: { nodes } } } } });
-    writeFileSync(join(dir, "gh"), `#!/bin/sh\ncase "$*" in\n  *malformed*) echo '{"data":{"repository":null}}' ;;\n  *) echo '${pr}' ;;\nesac\n`);
+    writeFileSync(join(dir, "gh"), `#!/bin/sh\ncase "$*" in\n  *pulls/7/files*) echo '{"filename":"a.ts"}' ;;\n  *malformed*) echo '{"data":{"repository":null}}' ;;\n  *) echo '${pr}' ;;\nesac\n`);
     chmodSync(join(dir, "gh"), 0o755);
     const previous = process.env.PATH;
     process.env.PATH = `${dir}:${previous}`;
     try {
-      expect(new GhForge("gh").readAutoMergeState("o/r", 7)).toEqual({ defaultBranch: "main", armed: { mergeMethod: "SQUASH", head: "abc" } });
+      expect(new GhForge("gh").readAutoMergeState("o/r", 7)).toEqual({ defaultBranch: "main", changedPaths: ["a.ts"], armed: { mergeMethod: "SQUASH", head: "abc" } });
       expect(() => new GhForge("gh").readAutoMergeState("malformed/r", 7)).toThrow("malformed pull request arm state");
     } finally { process.env.PATH = previous; }
+  });
+});
+
+describe("parseChangedPaths", () => {
+  it("collects filenames and rename sources, keeps non-ASCII paths verbatim, and rejects rows without a filename", () => {
+    const rows = [
+      { filename: "src/a.ts", status: "modified" },
+      { filename: "docs/new.md", previous_filename: ".github/workflows/old.yml", status: "renamed" },
+      { filename: ".github/workflows/\u00e9.yml", status: "added" },
+      { filename: "src/a.ts", status: "modified" },
+    ];
+    expect(parseChangedPaths(rows)).toEqual(["src/a.ts", "docs/new.md", ".github/workflows/old.yml", ".github/workflows/\u00e9.yml"]);
+    expect(() => parseChangedPaths([{ status: "added" }])).toThrow("malformed changed file: filename");
+    expect(() => parseChangedPaths(["x"])).toThrow("malformed changed file");
   });
 });

@@ -52,7 +52,7 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     if (!final.report.ready || !final.report.packet) throw new Error(`remote changed before publication: ${reportError(final.report)}`);
     if (JSON.stringify(initial.candidate) !== JSON.stringify(final.candidate) || initial.pr.body !== final.pr.body) throw new Error(`candidate/body race: assessed ${initial.candidate.head}, remote is ${final.candidate.head}`);
     const state = final.policy.autoMerge ? deps.forge.readAutoMergeState(repository, number) : undefined;
-    const plan = autoMergePlan(final.policy, final.pr, state?.defaultBranch);
+    const plan = autoMergePlan(final.policy, final.pr.baseRef, state);
     if (plan.kind === "arm") {
       const live = new Set(deps.forge.readRequiredChecks(repository, final.pr.baseRef!));
       const missing = requiredCheckNames(final.policy).filter((name) => !live.has(name));

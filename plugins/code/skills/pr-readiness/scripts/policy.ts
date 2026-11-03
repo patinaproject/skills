@@ -58,12 +58,12 @@ export function produceCommand(spec: ProducerSpec, ctx: ProduceContext): string 
 
 export type AutoMergePlan = { readonly kind: "off" } | { readonly kind: "skip"; readonly reason: string } | { readonly kind: "arm" };
 const guardedPath = (path: string): boolean => path.startsWith(".github/workflows/") || path === POLICY_PATH;
-export function autoMergePlan(policy: ReadinessPolicy, pr: Pick<PullRequestState, "baseRef" | "changedPaths">, defaultBranch: AutoMergeState["defaultBranch"] | undefined): AutoMergePlan {
+export function autoMergePlan(policy: ReadinessPolicy, baseRef: PullRequestState["baseRef"], state: AutoMergeState | undefined): AutoMergePlan {
   if (!policy.autoMerge) return { kind: "off" };
-  if (!defaultBranch) throw new Error("cannot arm auto-merge: the forge did not report the default branch");
-  if (!pr.changedPaths?.length) throw new Error("cannot arm auto-merge: the forge did not report the changed paths");
-  if (pr.baseRef !== defaultBranch) return { kind: "skip", reason: `base ${pr.baseRef || "(unknown)"} is not the default branch ${defaultBranch}` };
-  const guarded = pr.changedPaths.filter(guardedPath);
+  if (!state?.defaultBranch) throw new Error("cannot arm auto-merge: the forge did not report the default branch");
+  if (!state.changedPaths.length) throw new Error("cannot arm auto-merge: the forge did not report the changed paths");
+  if (baseRef !== state.defaultBranch) return { kind: "skip", reason: `base ${baseRef || "(unknown)"} is not the default branch ${state.defaultBranch}` };
+  const guarded = state.changedPaths.filter(guardedPath);
   return guarded.length ? { kind: "skip", reason: `the diff touches ${guarded.join(", ")}` } : { kind: "arm" };
 }
 export function requiredCheckNames(policy: ReadinessPolicy): string[] {

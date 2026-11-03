@@ -5,8 +5,8 @@ import { sha256, verifyPacket, type CandidateIdentity, type ReadinessPacket } fr
 import { POLICY_PATH } from "./policy.ts";
 import type { CheckRunFact, ForgeEvidence, ReviewDecision, ReviewFact } from "./evidence.ts";
 
-export interface PullRequestState extends Omit<CandidateIdentity, "policyDigest"> { readonly number: number; readonly isDraft: boolean; readonly body?: string; readonly baseRef?: string; readonly headRef?: string; readonly changedPaths?: readonly string[]; }
-export interface AutoMergeState { readonly defaultBranch: string; readonly armed?: { readonly mergeMethod: string; readonly head?: string } }
+export interface PullRequestState extends Omit<CandidateIdentity, "policyDigest"> { readonly number: number; readonly isDraft: boolean; readonly body?: string; readonly baseRef?: string; readonly headRef?: string; }
+export interface AutoMergeState { readonly defaultBranch: string; readonly changedPaths: readonly string[]; readonly armed?: { readonly mergeMethod: string; readonly head?: string } }
 export interface Forge {
   readPullRequest(repository: string, number: number): PullRequestState;
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState;
@@ -37,6 +37,14 @@ const isString = (value: unknown): value is string => typeof value === "string";
 const isId = (value: unknown): value is number => Number.isInteger(value) && (value as number) > 0;
 const isNullableString = (value: unknown): value is string | null | undefined => value === null || value === undefined || typeof value === "string";
 const isObject = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+export function parseChangedPaths(rows: readonly unknown[]): string[] {
+  const paths = rows.flatMap((row) => {
+    if (!isObject(row)) throw new Error("forge returned a malformed changed file");
+    const previous = row.previous_filename;
+    return [field(row, "filename", isString, "changed file"), ...(isString(previous) ? [previous] : [])];
+  });
+  return [...new Set(paths)];
+}
 export function parseCheckRun(value: unknown): CheckRunFact {
   if (!isObject(value)) throw new Error("forge returned a malformed check run");
   const app = field(value, "app", isObject, "check run");
@@ -103,9 +111,9 @@ export class GhForge implements Forge {
     const baseRef = typeof row.baseRefName === "string" ? row.baseRefName : "";
     const diff = remoteDiff(this.command, repository, number);
     const mergeBase = baseSha && head ? (() => { try { return git("git", ["merge-base", baseSha, head]); } catch { return baseSha; } })() : baseSha;
-    const changedPaths = [...new Set([...diff.matchAll(/^diff --git a\/(.+?) b\/(.+)$/gm)].flatMap((match) => [match[1]!, match[2]!]))];
+    const changedPaths = [...diff.matchAll(/^diff --git a\/(.+?) b\/(.+)$/gm)].map((match) => `${match[1]} ${match[2]}`);
     const behaviorApplicable = changedPaths.length === 0 || changedPaths.some((path) => !/(^|\/)(docs?|documentation)\/|\.md$|\.mdx$|\.txt$/i.test(path));
-    return { repository, number, pullRequest: number, base: baseSha || baseRef, baseSha, baseRef, mergeBase, head, patchId: derivePatchId(diff), diffDigest: sha256(diff), behaviorApplicable, requirementsDigest: sha256({ repository, baseRef, baseSha }), reviewContextDigest: sha256({ repository, number, body: typeof row.body === "string" ? row.body : "" }), isDraft: row.isDraft === true, body: typeof row.body === "string" ? row.body : "", headRef: typeof row.headRefName === "string" ? row.headRefName : undefined, changedPaths };
+    return { repository, number, pullRequest: number, base: baseSha || baseRef, baseSha, baseRef, mergeBase, head, patchId: derivePatchId(diff), diffDigest: sha256(diff), behaviorApplicable, requirementsDigest: sha256({ repository, baseRef, baseSha }), reviewContextDigest: sha256({ repository, number, body: typeof row.body === "string" ? row.body : "" }), isDraft: row.isDraft === true, body: typeof row.body === "string" ? row.body : "", headRef: typeof row.headRefName === "string" ? row.headRefName : undefined };
   }
   openPullRequest(input: { repository: string; base: string; head: string; draft?: boolean }): PullRequestState { const args = ["pr", "create", "--repo", input.repository, "--base", input.base, "--head", input.head, ...(input.draft === false ? [] : ["--draft"])]; const url = execFileSync(this.command, args, { encoding: "utf8" }).trim(); const number = Number(url.match(/(\d+)\s*$/)?.[1] ?? 0); if (!number) throw new Error("forge did not return a pull request number"); return this.readPullRequest(input.repository, number); }
   markReady(repository: string, number: number, expectedHead: string): void { markReadyIfCurrent(this.command, repository, number, expectedHead); }
@@ -137,7 +145,11 @@ export class GhForge implements Forge {
     const timeline = isObject(pr.timelineItems) && Array.isArray(pr.timelineItems.nodes) ? pr.timelineItems.nodes : [];
     return { id: field(pr, "id", isString, "pull request arm state"), defaultBranch, armed: isObject(request) ? { mergeMethod: field(request, "mergeMethod", isString, "pull request arm state"), head: armedHeadFromTimeline(timeline) } : undefined };
   }
-  readAutoMergeState(repository: string, number: number): AutoMergeState { const { defaultBranch, armed } = this.readArmState(repository, number); return { defaultBranch, armed }; }
+  readAutoMergeState(repository: string, number: number): AutoMergeState {
+    const { defaultBranch, armed } = this.readArmState(repository, number);
+    const changedPaths = parseChangedPaths(jsonLines(this.command, ["api", "--paginate", `repos/${repository}/pulls/${number}/files?per_page=100`, "--jq", ".[]"]));
+    return { defaultBranch, changedPaths, armed };
+  }
   enableAutoMerge(repository: string, number: number, head: string): void {
     const { id, armed } = this.readArmState(repository, number);
     if (armed) this.graphql("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}", { id });
