@@ -58,7 +58,6 @@ export function produceCommand(spec: ProducerSpec, ctx: ProduceContext): string 
 
 export type AutoMergePlan = { readonly kind: "off" } | { readonly kind: "skip"; readonly reason: string } | { readonly kind: "arm" };
 const guardedPath = (path: string): boolean => path.startsWith(".github/workflows/") || path === POLICY_PATH;
-/** Auto-merge is armed only for a default-branch PR that cannot rewrite the rules it is merged under. */
 export function autoMergePlan(policy: ReadinessPolicy, pr: Pick<PullRequestState, "baseRef" | "changedPaths">, defaultBranch: AutoMergeState["defaultBranch"] | undefined): AutoMergePlan {
   if (!policy.autoMerge) return { kind: "off" };
   if (!defaultBranch) throw new Error("cannot arm auto-merge: the forge did not report the default branch");

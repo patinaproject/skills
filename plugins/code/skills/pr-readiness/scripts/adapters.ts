@@ -16,7 +16,6 @@ export interface Forge {
   /** Replaces any existing auto-merge request with a squash request pinned to `head`. */
   enableAutoMerge(repository: string, number: number, head: string): void;
   readRequiredChecks(repository: string, baseRef: string): string[];
-  /** Read only when the policy opts in to auto-merge. Throws on a malformed or failed read. */
   readAutoMergeState(repository: string, number: number): AutoMergeState;
 }
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
