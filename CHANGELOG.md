@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.24.1](https://github.com/patinaproject/skills/compare/v4.24.0...v4.24.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* [#866](https://github.com/patinaproject/skills/issues/866) merge an already-mergeable PR from pr-readiness publish ([#868](https://github.com/patinaproject/skills/issues/868)) ([f3e2f31](https://github.com/patinaproject/skills/commit/f3e2f31675844973eccc983f96f17688794b75d7))
+
 ## [4.24.0](https://github.com/patinaproject/skills/compare/v4.23.0...v4.24.0) (2026-11-06)
 
 
