@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.22.0](https://github.com/patinaproject/skills/compare/v4.21.0...v4.22.0) (2026-11-06)
+
+
+### Features
+
+* [#842](https://github.com/patinaproject/skills/issues/842) lead design recommendations with the long-term option ([#845](https://github.com/patinaproject/skills/issues/845)) ([f85588a](https://github.com/patinaproject/skills/commit/f85588af9af02dc41d714d2ad7003e3bc21afaec))
+
 ## [4.21.0](https://github.com/patinaproject/skills/compare/v4.20.0...v4.21.0) (2026-11-06)
 
 

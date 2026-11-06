@@ -197,7 +197,7 @@
   },
   "plugins/code/skills/patina-mode/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, with the maintainer's approval required only in an approval-gated repository and pr-readiness publish as the only agent step that arms auto-merge, the patinaproject-verify driver, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, a continuation route that sends issue-linked work with an open pull request or unmerged branch commits through Session pickup to Babysit or the rest of its build playbook, every issue-run change including docs, tests, config, and dependency updates routed by its effect, a patina-reader reasoning-effort mapping, and ### Principles headings for markdownlint MD036.",
+    "reason": "Patina adapts patina-mode to Code: its own style name, the Codex multi_agent gate, bare skill names, base-directory script paths, issue-handoff, gather-evidence, simulator, PR-readiness, and fix-ci triggers, with the maintainer's approval required only in an approval-gated repository and pr-readiness publish as the only agent step that arms auto-merge, the patinaproject-verify driver, Repair from evidence, the Triage playbook, the Offensive Programming principle, a private task record for routing narration, playbook routing ahead of the triggers with code changes sent to their build playbook and its code-writing subagent, a continuation route that sends issue-linked work with an open pull request or unmerged branch commits through Session pickup to Babysit or the rest of its build playbook, every issue-run change including docs, tests, config, and dependency updates routed by its effect, a patina-reader reasoning-effort mapping, a design-option rule that leads recommendations with the best long-term solution and its cost and labels a quick fix optional, and ### Principles headings for markdownlint MD036.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -219,6 +219,13 @@
   "plugins/code/skills/patina-mode/playbooks/babysit.md": {
     "kind": "policy",
     "reason": "Patina has babysitting publish readiness through pr-readiness publish, which alone arms auto-merge under the repository's autoMerge opt-in, route CI repairs through Repair from evidence, run gather-evidence on human change requests without replying for the operator, and run watch-pr from the skill's base directory.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/code/skills/patina-mode/playbooks/feature.md": {
+    "kind": "policy",
+    "reason": "Patina has the Reply's design-alternatives table list the best long-term option first with its cost and mark a quick fix as optional.",
     "upstream": {
       "status": "not-proposed"
     }
