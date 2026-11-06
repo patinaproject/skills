@@ -94,11 +94,11 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 
 ### Code-review presentation
 
-The shared `code-review` contract stays runtime-neutral: every axis uses ordinary
-Markdown findings with exact file and line references, except Evidence findings
-and Spec findings anchored on a quoted claim or requirement, and both runtimes
-keep the report in the session. Every finding carries one severity tag,
-`Important`, `Nit`, or `Pre-existing`. Codex may add one inline directive
+The shared `code-review` contract stays runtime-neutral, and both runtimes keep
+the report in the session. Every axis uses ordinary Markdown findings with exact
+file and line references. Evidence findings and Spec findings that quote a claim
+or requirement are the exception, as the contract says. Every finding carries
+one severity tag, `Important`, `Nit`, or `Pre-existing`. Codex may add one inline directive
 for each discrete, actionable finding that belongs to a changed line:
 
 ```text
