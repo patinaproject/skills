@@ -28,7 +28,6 @@ export function checkRun(name: string, extra: Partial<CheckRunFact> & { runId?: 
 export function review(extra: Partial<ReviewFact> = {}): ReviewFact {
   return { id: 77, login: "ted", userType: "User", permission: "write", state: "APPROVED", commitId: HEAD, submittedAt: "2026-10-01T01:00:00Z", htmlUrl: "https://github.com/o/r/pull/7#pullrequestreview-77", ...extra };
 }
-/** A pull_request row of `repos/{repo}/rules/branches/{base}`, as GitHub returns it. */
 export function pullRequestRule(parameters: Record<string, unknown> = {}, meta: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     type: "pull_request",

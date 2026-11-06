@@ -84,9 +84,8 @@ function checksOutcome(names: readonly string[], allowSkipped: boolean, runs: re
   };
 }
 
-interface Standing { readonly ignored: string[]; readonly blocking: ReviewFact | undefined; readonly approvals: ReviewFact[]; }
+interface Standing { readonly ignored: string[]; readonly blocking: ReviewFact | undefined; readonly approvalsOnAnyCommit: ReviewFact[]; }
 
-/** Applies the reviewer filters; `approvals` holds every standing approval, on any commit, one per login. */
 function standingReviews(evidence: ForgeEvidence): Standing {
   const ignored: string[] = [];
   const latest = new Map<string, ReviewFact>();
@@ -101,11 +100,11 @@ function standingReviews(evidence: ForgeEvidence): Standing {
     if (!current || review.id > current.id) latest.set(review.login, review);
   }
   const standing = [...latest.values()].sort((a, b) => a.id - b.id);
-  return { ignored, blocking: standing.find((review) => review.state === "CHANGES_REQUESTED"), approvals: standing.filter((review) => review.state === "APPROVED") };
+  return { ignored, blocking: standing.find((review) => review.state === "CHANGES_REQUESTED"), approvalsOnAnyCommit: standing.filter((review) => review.state === "APPROVED") };
 }
 
 function approvalOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence): Outcome {
-  const { ignored, blocking, approvals } = standingReviews(evidence);
+  const { ignored, blocking, approvalsOnAnyCommit: approvals } = standingReviews(evidence);
   if (blocking) return { verdict: "fail", provenance: approvalProvenance(blocking), capturedAt: blocking.submittedAt!, note: `@${blocking.login} requested changes` };
   for (const stale of approvals) if (stale.commitId !== candidate.head) ignored.push(`review by @${stale.login} on older commit ${stale.commitId.slice(0, 12)} ignored`);
   const approved = approvals.find((review) => review.commitId === candidate.head);
@@ -141,7 +140,7 @@ function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, {
     return offBy.length ? [`${flag.name} is off in ${offBy.map(ruleName).join(", ")}`] : [];
   });
   if (off.length) return { note: off.join("; ") };
-  const { blocking, approvals } = standingReviews(evidence);
+  const { blocking, approvalsOnAnyCommit: approvals } = standingReviews(evidence);
   if (blocking) return { note: `@${blocking.login} requested changes` };
 
   const matches = matchEntries(rules, facts.changedPaths);
