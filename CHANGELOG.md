@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.20.0](https://github.com/patinaproject/skills/compare/v4.19.0...v4.20.0) (2026-11-06)
+
+
+### Features
+
+* [#847](https://github.com/patinaproject/skills/issues/847) add a Revert field to the pr skill's Merge Danger ([#850](https://github.com/patinaproject/skills/issues/850)) ([6a2253b](https://github.com/patinaproject/skills/commit/6a2253b517a498c753ce70405b8d4e5a4cba6314))
+
 ## [4.19.0](https://github.com/patinaproject/skills/compare/v4.18.0...v4.19.0) (2026-11-03)
 
 
