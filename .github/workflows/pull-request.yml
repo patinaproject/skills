@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}-${{ (github.event.action == 'edited' || github.event.action == 'reopened') && github.run_id || 'head' }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
@@ -11,7 +15,7 @@ permissions:
 jobs:
   lint:
     name: Validate pull request
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') && !(github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.event.pull_request.head.ref, 'release-please--')) }}"
     steps:
       - name: Enforce ASCII-only title
@@ -120,7 +124,7 @@ jobs:
 
   hygiene:
     name: Check diff hygiene
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     if: "${{ !contains(github.event.pull_request.labels.*.name, 'autorelease: pending') && !(github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.event.pull_request.head.ref, 'release-please--')) }}"
     steps:
       # actions/checkout@v4.3.1
