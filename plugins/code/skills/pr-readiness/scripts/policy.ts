@@ -3,6 +3,7 @@ import { EVALUATOR_VERSION, OBLIGATIONS, isObligation, sha256, type Obligation, 
 
 export const POLICY_PATH = ".github/pr-readiness.json";
 const APPROVAL: ProducerSpec = { producer: "approval" };
+const RULESET: ProducerSpec = { producer: "ruleset" };
 
 export function parsePolicy(raw: string | undefined): ReadinessPolicy {
   const obligations = Object.fromEntries(OBLIGATIONS.map((obligation) => [obligation, APPROVAL])) as Record<Obligation, ProducerSpec>;
@@ -28,6 +29,7 @@ export function parsePolicy(raw: string | undefined): ReadinessPolicy {
 function parseSpec(obligation: Obligation, value: unknown): ProducerSpec {
   const spec = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
   if (spec.producer === "approval") return APPROVAL;
+  if (spec.producer === "ruleset") return RULESET;
   if (spec.producer !== "checks") throw new Error(`${POLICY_PATH} ${obligation} names unknown producer: ${String(spec.producer)}`);
   const checks = spec.checks;
   if (!Array.isArray(checks) || checks.length === 0 || !checks.every((name) => typeof name === "string" && name.length > 0)) {
@@ -48,12 +50,18 @@ export function rulesFromPolicy(policy: ReadinessPolicy): ObligationRule[] {
 export interface ProduceContext { readonly repository: string; readonly pullRequest: number; readonly head: string; readonly author: string; readonly failedRunIds?: readonly number[]; }
 
 export function produceCommand(spec: ProducerSpec, ctx: ProduceContext): string {
-  if (spec.producer === "approval") {
-    return `a maintainer other than @${ctx.author} reviews ${ctx.head.slice(0, 12)} and approves it: gh api repos/${ctx.repository}/pulls/${ctx.pullRequest}/reviews -f commit_id=${ctx.head} -f event=APPROVE`;
+  switch (spec.producer) {
+    case "approval":
+      return `a maintainer other than @${ctx.author} reviews ${ctx.head.slice(0, 12)} and approves it: gh api repos/${ctx.repository}/pulls/${ctx.pullRequest}/reviews -f commit_id=${ctx.head} -f event=APPROVE`;
+    case "ruleset":
+      return `the reviewers the base ruleset requires approve ${ctx.head.slice(0, 12)}, after the cause above is fixed: gh api repos/${ctx.repository}/pulls/${ctx.pullRequest}/reviews -f commit_id=${ctx.head} -f event=APPROVE`;
+    case "checks": {
+      const names = spec.checks.map((name) => `"${name}"`).join(", ");
+      const reruns = (ctx.failedRunIds ?? []).map((runId) => `gh run rerun ${runId} --failed --repo ${ctx.repository}`);
+      return reruns.length ? `push the head so CI runs ${names}, or rerun it: ${reruns.join(" && ")}` : `push the head so CI runs ${names}`;
+    }
+    default: { const unreachable: never = spec; throw new Error(`unknown producer: ${JSON.stringify(unreachable)}`); }
   }
-  const names = spec.checks.map((name) => `"${name}"`).join(", ");
-  const reruns = (ctx.failedRunIds ?? []).map((runId) => `gh run rerun ${runId} --failed --repo ${ctx.repository}`);
-  return reruns.length ? `push the head so CI runs ${names}, or rerun it: ${reruns.join(" && ")}` : `push the head so CI runs ${names}`;
 }
 
 export type AutoMergePlan = { readonly kind: "off" } | { readonly kind: "skip"; readonly reason: string } | { readonly kind: "arm" };
@@ -67,5 +75,12 @@ export function autoMergePlan(policy: ReadinessPolicy, baseRef: PullRequestState
   return guarded.length ? { kind: "skip", reason: `the diff touches ${guarded.join(", ")}` } : { kind: "arm" };
 }
 export function requiredCheckNames(policy: ReadinessPolicy): string[] {
-  return [...new Set(Object.values(policy.obligations).flatMap((spec) => (spec.producer === "checks" ? spec.checks : [])))];
+  return [...new Set(Object.values(policy.obligations).flatMap((spec): readonly string[] => {
+    switch (spec.producer) {
+      case "checks": return spec.checks;
+      case "approval":
+      case "ruleset": return [];
+      default: { const unreachable: never = spec; throw new Error(`unknown producer: ${JSON.stringify(unreachable)}`); }
+    }
+  }))];
 }

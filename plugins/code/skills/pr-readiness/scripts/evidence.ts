@@ -1,3 +1,4 @@
+import { invalidPattern, matchEntries, matchName, printable, reviewerName, ruleName, type PullRequestRule, type ReviewerMatch, type RulesetFacts } from "./ruleset.ts";
 import { EVALUATOR_VERSION, OBLIGATIONS, provenanceUrls, sha256, type CandidateIdentity, type CheckProvenance, type Obligation, type Observation, type Provenance, type ReadinessPolicy } from "./domain.ts";
 
 export const ACTIONS_APP = "github-actions";
@@ -28,17 +29,22 @@ export interface Derivation { readonly observations: Observation[]; readonly not
 
 const WRITERS: readonly string[] = ["admin", "write"];
 const DECISIVE: readonly string[] = ["APPROVED", "CHANGES_REQUESTED", "DISMISSED"];
-type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly note?: string } | { readonly note: string; readonly skipped?: true };
+type Outcome = { readonly verdict: "pass" | "fail"; readonly provenance: Provenance; readonly capturedAt: string; readonly inputDigest?: string; readonly note?: string } | { readonly note: string; readonly skipped?: true };
 
-export function deriveObservations(candidate: CandidateIdentity, policy: ReadinessPolicy, evidence: ForgeEvidence): Derivation {
+export interface RulesetInput { readonly facts: RulesetFacts; readonly now: string; }
+
+export function deriveObservations(candidate: CandidateIdentity, policy: ReadinessPolicy, evidence: ForgeEvidence, ruleset?: RulesetInput): Derivation {
   const observations: Observation[] = [];
   const notes: Partial<Record<Obligation, string>> = {};
   const failedRunIds: Partial<Record<Obligation, readonly number[]>> = {};
   const notApplicable: Obligation[] = [];
   const approval = approvalOutcome(candidate, evidence);
+  let rulesetResult: Outcome | undefined;
   for (const obligation of OBLIGATIONS) {
     const spec = policy.obligations[obligation];
-    const outcome = spec.producer === "approval" ? approval : checksOutcome(spec.checks, spec.allowSkipped === true, evidence.checkRuns);
+    const outcome = spec.producer === "approval" ? approval
+      : spec.producer === "ruleset" ? (rulesetResult ??= rulesetOutcome(candidate, evidence, requireRuleset(ruleset)))
+      : checksOutcome(spec.checks, spec.allowSkipped === true, evidence.checkRuns);
     if (outcome.note) notes[obligation] = outcome.note;
     if (!("verdict" in outcome)) { if (outcome.skipped) notApplicable.push(obligation); continue; }
     observations.push(observation(candidate, obligation, outcome));
@@ -78,7 +84,9 @@ function checksOutcome(names: readonly string[], allowSkipped: boolean, runs: re
   };
 }
 
-function approvalOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence): Outcome {
+interface Standing { readonly ignored: string[]; readonly blocking: ReviewFact | undefined; readonly approvalsOnAnyCommit: ReviewFact[]; }
+
+function standingReviews(evidence: ForgeEvidence): Standing {
   const ignored: string[] = [];
   const latest = new Map<string, ReviewFact>();
   for (const review of evidence.reviews) {
@@ -92,9 +100,12 @@ function approvalOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence):
     if (!current || review.id > current.id) latest.set(review.login, review);
   }
   const standing = [...latest.values()].sort((a, b) => a.id - b.id);
-  const blocking = standing.find((review) => review.state === "CHANGES_REQUESTED");
+  return { ignored, blocking: standing.find((review) => review.state === "CHANGES_REQUESTED"), approvalsOnAnyCommit: standing.filter((review) => review.state === "APPROVED") };
+}
+
+function approvalOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence): Outcome {
+  const { ignored, blocking, approvalsOnAnyCommit: approvals } = standingReviews(evidence);
   if (blocking) return { verdict: "fail", provenance: approvalProvenance(blocking), capturedAt: blocking.submittedAt!, note: `@${blocking.login} requested changes` };
-  const approvals = standing.filter((review) => review.state === "APPROVED");
   for (const stale of approvals) if (stale.commitId !== candidate.head) ignored.push(`review by @${stale.login} on older commit ${stale.commitId.slice(0, 12)} ignored`);
   const approved = approvals.find((review) => review.commitId === candidate.head);
   if (!approved) return { note: [`no maintainer approval at ${candidate.head.slice(0, 12)}`, ...ignored].join("; ") };
@@ -104,16 +115,83 @@ function approvalOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence):
   return { verdict: "pass", provenance: approvalProvenance(approved), capturedAt: approved.submittedAt! };
 }
 
+function requireRuleset(ruleset: RulesetInput | undefined): RulesetInput {
+  if (!ruleset) throw new Error("a ruleset obligation needs the ruleset facts");
+  return ruleset;
+}
+
+const STALE_FLAGS: readonly { readonly name: string; readonly off: (rule: PullRequestRule) => boolean }[] = [
+  { name: "dismiss_stale_reviews_on_push", off: (rule) => !rule.dismissStaleReviewsOnPush },
+  { name: "require_last_push_approval", off: (rule) => !rule.requireLastPushApproval },
+];
+
+function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, { facts, now }: RulesetInput): Outcome {
+  if (facts.kind === "unreadable") return { note: facts.cause };
+  const rules = [...facts.rules].sort((a, b) => a.rulesetId - b.rulesetId);
+  if (rules.length === 0) return { note: `no pull_request rule applies to ${candidate.baseRef || candidate.base}` };
+  if (facts.truncated) return { note: "the changed-file list is truncated, so the required reviewers cannot be matched against every path" };
+  for (const rule of rules) {
+    for (const entry of [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId)) {
+      if (entry.filePatterns.length === 0) return { note: `required reviewer ${entry.reviewerType} ${entry.reviewerId} in ${ruleName(rule)} has no file_patterns` };
+      const invalid = invalidPattern(entry.filePatterns);
+      if (invalid !== undefined) return { note: `required reviewer ${reviewerName(entry)} in ${ruleName(rule)} has an invalid file pattern "${printable(invalid)}"` };
+    }
+  }
+  const off = STALE_FLAGS.flatMap((flag) => {
+    const offBy = rules.filter(flag.off);
+    return offBy.length ? [`${flag.name} is off in ${offBy.map(ruleName).join(", ")}`] : [];
+  });
+  if (off.length) return { note: off.join("; ") };
+  const { blocking, approvalsOnAnyCommit: approvals } = standingReviews(evidence);
+  if (blocking) return { note: `@${blocking.login} requested changes` };
+
+  const matches = matchEntries(rules, facts.changedPaths);
+  const baseCount = Math.max(...rules.map((rule) => rule.requiredApprovingReviewCount));
+  const required = Math.max(baseCount, ...matches.map((match) => match.minimumApprovals));
+  const applies = required > 0;
+  const atHead = approvals.filter((review) => review.commitId === candidate.head);
+  const decision = evidence.reviewDecision;
+  const matched = matches.length ? `matched ${matches.map(matchName).join(", ")}` : "no required reviewers matched";
+  if (!applies) {
+    if (decision === "REVIEW_REQUIRED" || decision === "CHANGES_REQUESTED") {
+      return { note: `no approval is required by ${rules.map(ruleName).join(", ")} and ${matched}, but GitHub review decision is ${decision}` };
+    }
+  } else if (decision !== "APPROVED" || atHead.length < required) {
+    return { note: `has ${atHead.length} of ${required} required approvals at ${candidate.head.slice(0, 12)} and GitHub review decision ${decision}; ${matched}` };
+  }
+  const sortedAtHead = [...atHead].sort((a, b) => a.id - b.id);
+  const provenance: Provenance = {
+    kind: "ruleset",
+    rules: rules.map((rule) => ({ rulesetId: rule.rulesetId, rulesetSource: rule.rulesetSource })),
+    changedPathsDigest: sha256([...facts.changedPaths].sort()),
+    matches: matches.map(provenanceMatch),
+    requiredApprovals: applies ? required : 0,
+    approvals: sortedAtHead.map((review) => ({ reviewer: review.login, reviewId: review.id, url: review.htmlUrl })),
+  };
+  const inputDigest = sha256({
+    rules: rules.map((rule) => ({ ...rule, requiredReviewers: [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId) })),
+    changedPaths: [...facts.changedPaths].sort(),
+    approvals: provenance.approvals,
+  });
+  const capturedAt = sortedAtHead.map((review) => review.submittedAt!).sort().at(-1) ?? now;
+  const need = applies ? `${required} ${required === 1 ? "approval" : "approvals"} required, ${atHead.length} at ${candidate.head.slice(0, 12)}` : "no approval required";
+  return { verdict: "pass", provenance, capturedAt, inputDigest, note: `rules ${rules.map(ruleName).join(", ")}; ${matched}; ${need}` };
+}
+
+function provenanceMatch(match: ReviewerMatch) { return { rulesetId: match.rulesetId, reviewerType: match.reviewerType, reviewerId: match.reviewerId, pattern: match.pattern, path: match.path }; }
+
 function approvalProvenance(review: ReviewFact): Provenance { return { kind: "approval", reviewer: review.login, reviewId: review.id, url: review.htmlUrl }; }
 
 function observation(candidate: CandidateIdentity, obligation: Obligation, outcome: Extract<Outcome, { verdict: unknown }>): Observation {
   const { provenance } = outcome;
-  const scope = provenance.kind === "checks" ? provenance.checks.map((check) => check.name).join(", ") : `review ${provenance.reviewId}`;
+  const scope = provenance.kind === "checks" ? provenance.checks.map((check) => check.name).join(", ")
+    : provenance.kind === "ruleset" ? `rules ${provenance.rules.map((rule) => rule.rulesetId).join(", ")}`
+    : `review ${provenance.reviewId}`;
   return {
     id: `${obligation}@${candidate.head}`,
     obligation,
     candidate,
-    inputDigest: sha256(provenance),
+    inputDigest: outcome.inputDigest ?? sha256(provenance),
     scope,
     artifactRefs: provenanceUrls(provenance),
     producerVersion: EVALUATOR_VERSION,
