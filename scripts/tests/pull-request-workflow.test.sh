@@ -249,7 +249,7 @@ NODE
 if [ -f "$WORKFLOW" ]; then
   assert_match "name: Pull Request" "$WORKFLOW"
   assert_match "pull_request:" "$WORKFLOW"
-  assert_match "runs-on: blacksmith-2vcpu-ubuntu-2404" "$WORKFLOW"
+  assert_match "runs-on: ubuntu-latest" "$WORKFLOW"
   assert_match "Validate conventional commits" "$WORKFLOW"
   assert_match 'subjectPattern:.*#\[1-9\]' "$WORKFLOW"
   assert_match 'Closes #N' "$WORKFLOW"
