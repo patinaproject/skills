@@ -65,7 +65,16 @@ export interface FakeForgeOptions {
   readonly changedFiles?: readonly unknown[];
   readonly changedFilesTotal?: number;
   readonly changedFilesError?: string;
+  /** Successive `mergeStateStatus` reads; the last value repeats. */
+  readonly mergeStates?: readonly string[];
+  readonly isMergeQueueEnabled?: boolean;
+  readonly mergeError?: string;
+  /** The `state` the merge mutation answers with when it does not fail. */
+  readonly mergeResponseState?: string;
+  /** The PR `state` a reread finds after a failed merge. */
+  readonly stateAfterMergeFailure?: string;
 }
+export const MERGE_OID = "fedcba9876543210fedcba9876543210fedcba98";
 export interface FakeForge extends Forge {
   readonly markReadyCalls: string[];
   readonly enableAutoMergeCalls: { head: string; method: "SQUASH" }[];
@@ -73,6 +82,9 @@ export interface FakeForge extends Forge {
   readonly readAutoMergeStateCalls: number[];
   readonly readBranchRulesCalls: string[];
   readonly readChangedFilesCalls: number[];
+  readonly readMergeStateCalls: number[];
+  readonly mergeCalls: { head: string; method: "SQUASH" }[];
+  readonly readMergeOutcomeCalls: number[];
 }
 export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const heads = options.heads ?? [HEAD];
@@ -88,7 +100,15 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const readAutoMergeStateCalls: number[] = [];
   const readBranchRulesCalls: string[] = [];
   const readChangedFilesCalls: number[] = [];
+  const readMergeStateCalls: number[] = [];
+  const mergeCalls: FakeForge["mergeCalls"] = [];
+  const readMergeOutcomeCalls: number[] = [];
+  const mergeStates = options.mergeStates ?? ["BLOCKED"];
   return {
+    readMergeStateCalls, mergeCalls, readMergeOutcomeCalls,
+    readMergeState: (_repository, number) => { const mergeStateStatus = mergeStates[Math.min(readMergeStateCalls.length, mergeStates.length - 1)]!; readMergeStateCalls.push(number); return { mergeStateStatus, isMergeQueueEnabled: options.isMergeQueueEnabled ?? false } as ReturnType<Forge["readMergeState"]>; },
+    mergePullRequest: (_repository, _number, head) => { mergeCalls.push({ head, method: "SQUASH" }); if (options.mergeError) throw new Error(options.mergeError); const state = options.mergeResponseState ?? "MERGED"; return { state, mergeCommitOid: state === "MERGED" ? MERGE_OID : undefined } as ReturnType<Forge["mergePullRequest"]>; },
+    readMergeOutcome: (_repository, number) => { readMergeOutcomeCalls.push(number); const state = options.stateAfterMergeFailure ?? "OPEN"; return { state, mergeCommitOid: state === "MERGED" ? MERGE_OID : undefined } as ReturnType<Forge["readMergeOutcome"]>; },
     readBranchRulesCalls, readChangedFilesCalls,
     readBranchRules: (_repository, baseRef) => { readBranchRulesCalls.push(baseRef); if (options.branchRulesError) throw new Error(options.branchRulesError); return [...(options.branchRules ?? BRANCH_RULES)]; },
     readChangedFiles: (_repository, number) => {
@@ -114,5 +134,5 @@ export function invoke(argv: readonly string[], forge: Forge, store: PacketStore
   let stdout = ""; let stderr = "";
   process.stdout.write = ((chunk: string) => { stdout += chunk; return true; }) as typeof process.stdout.write;
   process.stderr.write = ((chunk: string) => { stderr += chunk; return true; }) as typeof process.stderr.write;
-  try { return { code: operation(argv, { forge, store }), stdout, stderr }; } finally { process.stdout.write = out; process.stderr.write = err; }
+  try { return { code: operation(argv, { forge, store, mergeStateDelayMs: 0 }), stdout, stderr }; } finally { process.stdout.write = out; process.stderr.write = err; }
 }
