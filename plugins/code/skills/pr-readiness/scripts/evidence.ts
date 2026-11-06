@@ -1,4 +1,4 @@
-import { matchEntries, matchName, ruleName, type PullRequestRule, type ReviewerMatch, type RulesetFacts } from "./ruleset.ts";
+import { invalidPattern, matchEntries, matchName, printable, reviewerName, ruleName, type PullRequestRule, type ReviewerMatch, type RulesetFacts } from "./ruleset.ts";
 import { EVALUATOR_VERSION, OBLIGATIONS, provenanceUrls, sha256, type CandidateIdentity, type CheckProvenance, type Obligation, type Observation, type Provenance, type ReadinessPolicy } from "./domain.ts";
 
 export const ACTIONS_APP = "github-actions";
@@ -133,6 +133,8 @@ function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, {
   for (const rule of rules) {
     for (const entry of [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId)) {
       if (entry.filePatterns.length === 0) return { note: `required reviewer ${entry.reviewerType} ${entry.reviewerId} in ${ruleName(rule)} has no file_patterns` };
+      const invalid = invalidPattern(entry.filePatterns);
+      if (invalid !== undefined) return { note: `required reviewer ${reviewerName(entry)} in ${ruleName(rule)} has an invalid file pattern "${printable(invalid)}"` };
     }
   }
   const off = STALE_FLAGS.flatMap((flag) => {
@@ -167,7 +169,7 @@ function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, {
     approvals: sortedAtHead.map((review) => ({ reviewer: review.login, reviewId: review.id, url: review.htmlUrl })),
   };
   const inputDigest = sha256({
-    rules: rules.map((rule) => ({ ...rule, requiredReviewers: [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId).map((entry) => ({ ...entry, filePatterns: [...entry.filePatterns].sort() })) })),
+    rules: rules.map((rule) => ({ ...rule, requiredReviewers: [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId).map((entry) => ({ ...entry, filePatterns: entry.filePatterns })) })),
     changedPaths: [...facts.changedPaths].sort(),
     approvals: provenance.approvals,
   });

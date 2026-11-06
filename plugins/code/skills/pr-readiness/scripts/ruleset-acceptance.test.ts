@@ -65,9 +65,27 @@ describe("acceptance: ruleset producer", () => {
     expect(result.decision("standards").reason).toBe(`missing standards observation: has 0 of 2 required approvals at 0123456789ab and GitHub review decision APPROVED; matched Team 456 (pattern "src/**" matched src/old.ts)`);
   });
 
+  it("matches a rename by its new name", () => {
+    const result = check({ changedFiles: [{ filename: "src/new.ts", previous_filename: "docs/old.md" }], reviews: [] });
+    expect(result.decision("standards")).toMatchObject(missing('has 0 of 2 required approvals at 0123456789ab and GitHub review decision APPROVED; matched Team 456 (pattern "src/**" matched src/new.ts)'));
+  });
+
   it("matches a dotfile under a pattern", () => {
     const result = check({ changedPaths: ["src/.env"], reviews: [] });
-    expect(result.decision("standards").reason).toContain('(pattern "src/**" matched src/.env)');
+    expect(result.decision("standards")).toMatchObject(missing('has 0 of 2 required approvals at 0123456789ab and GitHub review decision APPROVED; matched Team 456 (pattern "src/**" matched src/.env)'));
+  });
+
+  it("escapes control characters in a path it echoes", () => {
+    const result = check({ changedPaths: ["src/a\nb.ts"], reviews: [] });
+    const reason = 'missing standards observation: has 0 of 2 required approvals at 0123456789ab and GitHub review decision APPROVED; matched Team 456 (pattern "src/**" matched src/a\\nb.ts)';
+    expect(result.decision("standards").reason).toBe(reason);
+    expect(result.stderr).toContain('matched src/a\\nb.ts)');
+    expect(result.stderr.split("\n").length).toBe(3);
+  });
+
+  it("fails closed on an entry with an invalid file pattern", () => {
+    const rules = [pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [{ ...SRC_REVIEWER, file_patterns: ["src/**", "[z-a]"] }] })];
+    expect(check({ branchRules: rules }).decision("standards").reason).toBe(`missing standards observation: required reviewer Team 456 in ${RULE} has an invalid file pattern "[z-a]"`);
   });
 
   it("applies a base count above zero without a matching entry", () => {
@@ -168,6 +186,16 @@ describe("ruleset observations", () => {
   const policy = parsePolicy(RULESET_POLICY);
   const standards = (paths: string[], now = "2026-11-01T00:00:00Z", reviews = evidence.reviews) =>
     deriveObservations(candidate, policy, { ...evidence, reviews }, { facts: facts(paths), now }).observations.find((o) => o.obligation === "standards")!;
+
+  it("hashes pattern order into the digest but not rule or path order", () => {
+    const withEntry = (patterns: string[], id = 15382168) => parsePullRequestRules([pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [{ ...SRC_REVIEWER, file_patterns: patterns }] }, { ruleset_id: id })]);
+    const digest = (found: ReturnType<typeof parsePullRequestRules>, paths: string[]) =>
+      deriveObservations(candidate, policy, evidence, { facts: { kind: "read", rules: found, changedPaths: paths, truncated: false }, now: "2026-11-01T00:00:00Z" }).observations.find((o) => o.obligation === "standards")!.inputDigest;
+    const base = digest(withEntry(["src/**", "!src/gen/"]), ["src/a.ts"]);
+    expect(digest(withEntry(["!src/gen/", "src/**"]), ["src/a.ts"])).not.toBe(base);
+    expect(digest([...withEntry(["src/**", "!src/gen/"]), ...withEntry(["docs/**"], 3)].reverse(), ["src/a.ts"])).toBe(digest([...withEntry(["src/**", "!src/gen/"]), ...withEntry(["docs/**"], 3)], ["src/a.ts"]));
+    expect(digest(withEntry(["src/**", "!src/gen/"]), ["src/a.ts", "src/b.ts"])).toBe(digest(withEntry(["src/**", "!src/gen/"]), ["src/b.ts", "src/a.ts"]));
+  });
 
   it("hashes the same input to the same digest whatever the order", () => {
     expect(standards(["src/a.ts", "src/b.ts"]).inputDigest).toBe(standards(["src/b.ts", "src/a.ts"], "2027-01-01T00:00:00Z", [...evidence.reviews].reverse()).inputDigest);
