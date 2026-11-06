@@ -169,7 +169,7 @@ function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, {
     approvals: sortedAtHead.map((review) => ({ reviewer: review.login, reviewId: review.id, url: review.htmlUrl })),
   };
   const inputDigest = sha256({
-    rules: rules.map((rule) => ({ ...rule, requiredReviewers: [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId).map((entry) => ({ ...entry, filePatterns: entry.filePatterns })) })),
+    rules: rules.map((rule) => ({ ...rule, requiredReviewers: [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId) })),
     changedPaths: [...facts.changedPaths].sort(),
     approvals: provenance.approvals,
   });
