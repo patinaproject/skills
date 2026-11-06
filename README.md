@@ -377,8 +377,8 @@ plugins/work/
     implement/
     implement-spec/
     prototype/
+    red-green/
     research/
-    tdd/
     wayfinder/
     wizard/
     writing-for-agents/
