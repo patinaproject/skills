@@ -145,23 +145,29 @@ function tokenize(glob: string): Token[] {
 
 const isSkippable = (token: Token): boolean => token.kind === "star" || token.kind === "anyStar" || token.kind === "dirs";
 
+let scratchA = new Uint8Array(0);
+let scratchB = new Uint8Array(0);
+
 /**
  * Matches without backtracking by tracking the set of live token positions, so the cost is tokens times text length.
  * Returns, for every length n, whether the first n characters of the text match the whole pattern.
  */
-function matchingPrefixes(tokens: readonly Token[], text: string): boolean[] {
-  const matches: boolean[] = new Array(text.length + 1).fill(false);
+function matchingPrefixes(tokens: readonly Token[], text: string): Uint8Array {
+  const matches = new Uint8Array(text.length + 1);
   const count = tokens.length;
-  let live = new Uint8Array(count + 1);
-  let next = new Uint8Array(count + 1);
+  if (scratchA.length < count + 1) { scratchA = new Uint8Array(count + 1); scratchB = new Uint8Array(count + 1); }
+  let live = scratchA;
+  let next = scratchB;
+  live.fill(0, 0, count + 1);
+  // A set value of 1 means the token can be skipped here; 2 means a `**/` is only looping on non-slash characters and has not yet matched a directory boundary, so `close` must not skip it.
   const close = (set: Uint8Array): void => { for (let p = 0; p < count; p++) if (set[p] === 1 && isSkippable(tokens[p]!)) set[p + 1] = 1; };
   live[0] = 1;
   close(live);
-  matches[0] = live[count] === 1;
+  matches[0] = live[count] === 0 ? 0 : 1;
   for (let j = 0; j < text.length; j++) {
     const char = text[j]!;
     const slash = char === "/";
-    next.fill(0);
+    next.fill(0, 0, count + 1);
     let any = false;
     for (let p = 0; p < count; p++) {
       if (live[p] === 0) continue;
@@ -173,18 +179,18 @@ function matchingPrefixes(tokens: readonly Token[], text: string): boolean[] {
         case "class": if (token.test(char)) { next[p + 1] = 1; any = true; } break;
         case "star": if (!slash) { next[p] = 1; any = true; } break;
         case "anyStar": next[p] = 1; any = true; break;
-        case "dirs": next[p] = 1; if (slash) next[p + 1] = 1; any = true; break;
+        case "dirs": if (next[p] === 0) next[p] = 2; if (slash) next[p + 1] = 1; any = true; break;
       }
     }
     if (!any) return matches;
     close(next);
     const swap = live; live = next; next = swap;
-    matches[j + 1] = live[count] === 1;
+    matches[j + 1] = live[count] === 0 ? 0 : 1;
   }
   return matches;
 }
 
-interface Compiled { readonly pattern: string; readonly negated: boolean; readonly directoryOnly: boolean; readonly tokens: readonly Token[]; }
+interface Compiled { readonly pattern: string; readonly negated: boolean; readonly directoryOnly: boolean; readonly tokens: readonly Token[]; readonly literals: readonly string[]; }
 function compile(line: string): Compiled | undefined {
   let text = line.replace(/(?<!\\) +$/, "");
   if (text === "" || text.startsWith("#")) return undefined;
@@ -196,17 +202,18 @@ function compile(line: string): Compiled | undefined {
   const anchored = text.includes("/");
   if (text.startsWith("/")) text = text.slice(1);
   const body = tokenize(text);
-  return { pattern: line, negated, directoryOnly, tokens: anchored ? body : [{ kind: "dirs" }, ...body] };
+  const literals = [...new Set(body.flatMap((token) => token.kind === "char" ? [token.char] : []))];
+  return { pattern: line, negated, directoryOnly, tokens: anchored ? body : [{ kind: "dirs" }, ...body], literals };
 }
 
 // GitHub documents file_patterns as .gitignore syntax, negation and ordering included.
 // https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#required-reviewers
 /** Last matching pattern wins. A directory-only pattern applies to directories only. `length` is how much of the path is the target. */
-function decide(patterns: readonly Compiled[], matched: readonly (readonly boolean[])[], length: number, isDirectory: boolean): Compiled | undefined {
+function decide(patterns: readonly Compiled[], matched: readonly Uint8Array[], length: number, isDirectory: boolean): Compiled | undefined {
   let decided: Compiled | undefined;
   patterns.forEach((compiled, index) => {
     if (compiled.directoryOnly && !isDirectory) return;
-    if (matched[index]![length]) decided = compiled.negated ? undefined : compiled;
+    if (matched[index]![length] === 1) decided = compiled.negated ? undefined : compiled;
   });
   return decided;
 }
@@ -222,8 +229,14 @@ export function invalidPattern(patterns: readonly string[]): string | undefined 
  * https://git-scm.com/docs/gitignore
  */
 export function matchPatterns(patterns: readonly string[], path: string): string | undefined {
-  const compiled = patterns.flatMap((line) => compile(line) ?? []);
-  const matched = compiled.map(({ tokens }) => matchingPrefixes(tokens, path));
+  return matchCompiled(compilePatterns(patterns), path);
+}
+
+const compilePatterns = (patterns: readonly string[]): Compiled[] => patterns.flatMap((line) => compile(line) ?? []);
+
+function matchCompiled(compiled: readonly Compiled[], path: string): string | undefined {
+  // Every literal character of a pattern consumes one path character, so a path missing one cannot match.
+  const matched = compiled.map(({ tokens, literals }) => literals.every((char) => path.includes(char)) ? matchingPrefixes(tokens, path) : new Uint8Array(path.length + 1));
   let length = 0;
   const parts = path.split("/");
   for (let depth = 1; depth < parts.length; depth++) {
@@ -239,8 +252,9 @@ export function matchEntries(rules: readonly PullRequestRule[], changedPaths: re
   const matches: ReviewerMatch[] = [];
   for (const rule of [...rules].sort((a, b) => a.rulesetId - b.rulesetId)) {
     for (const entry of [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId)) {
+      const compiled = compilePatterns(entry.filePatterns);
       for (const path of paths) {
-        const pattern = matchPatterns(entry.filePatterns, path);
+        const pattern = matchCompiled(compiled, path);
         if (pattern === undefined) continue;
         matches.push({ rulesetId: rule.rulesetId, rulesetSource: rule.rulesetSource, reviewerId: entry.reviewerId, reviewerType: entry.reviewerType, minimumApprovals: entry.minimumApprovals, pattern, path });
         break;
