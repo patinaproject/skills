@@ -181,3 +181,13 @@ describe("GhForge branch rules and changed files", () => {
     try { expect(() => stub.forge.readChangedFiles("o/r", 7)).toThrow("forge returned a pull request without changed_files"); } finally { stub.restore(); }
   });
 });
+
+describe("matchPatterns on deep paths", () => {
+  it("rejects 50 non-matching patterns on 2000 nested directories quickly", () => {
+    const patterns = Array.from({ length: 50 }, (_, i) => `**/*q${i}*z*`);
+    const path = `${"a/".repeat(2000)}file`;
+    const start = performance.now();
+    expect(matchPatterns(patterns, path)).toBeUndefined();
+    expect(performance.now() - start).toBeLessThan(250);
+  });
+});

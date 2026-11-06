@@ -209,11 +209,11 @@ function compile(line: string): Compiled | undefined {
 // GitHub documents file_patterns as .gitignore syntax, negation and ordering included.
 // https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#required-reviewers
 /** Last matching pattern wins. A directory-only pattern applies to directories only. `length` is how much of the path is the target. */
-function decide(patterns: readonly Compiled[], matched: readonly Uint8Array[], length: number, isDirectory: boolean): Compiled | undefined {
+function decide(patterns: readonly Compiled[], matched: readonly (Uint8Array | undefined)[], length: number, isDirectory: boolean): Compiled | undefined {
   let decided: Compiled | undefined;
   patterns.forEach((compiled, index) => {
     if (compiled.directoryOnly && !isDirectory) return;
-    if (matched[index]![length] === 1) decided = compiled.negated ? undefined : compiled;
+    if (matched[index]?.[length] === 1) decided = compiled.negated ? undefined : compiled;
   });
   return decided;
 }
@@ -236,11 +236,14 @@ const compilePatterns = (patterns: readonly string[]): Compiled[] => patterns.fl
 
 function matchCompiled(compiled: readonly Compiled[], path: string): string | undefined {
   // Every literal character of a pattern consumes one path character, so a path missing one cannot match.
-  const matched = compiled.map(({ tokens, literals }) => literals.every((char) => path.includes(char)) ? matchingPrefixes(tokens, path) : new Uint8Array(path.length + 1));
+  const matched = compiled.map(({ tokens, literals }) => literals.every((char) => path.includes(char)) ? matchingPrefixes(tokens, path) : undefined);
+  const anyMatched = new Uint8Array(path.length + 1);
+  for (const prefixes of matched) if (prefixes !== undefined) for (let n = 0; n < prefixes.length; n++) if (prefixes[n] === 1) anyMatched[n] = 1;
   let length = 0;
   const parts = path.split("/");
   for (let depth = 1; depth < parts.length; depth++) {
     length += parts[depth - 1]!.length + (depth > 1 ? 1 : 0);
+    if (anyMatched[length] === 0) continue;
     const excluding = decide(compiled, matched, length, true);
     if (excluding) return excluding.pattern;
   }
