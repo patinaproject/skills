@@ -3,6 +3,7 @@ set -euo pipefail
 
 dir=${1:?usage: make-fixture.sh <new-dir>}
 mkdir "$dir"
+findings="$(cd "$dir/.." && pwd)/$(basename "$dir")-earlier-findings.json"
 cd "$dir"
 git init -q -b main
 git config user.name fixture
@@ -75,7 +76,7 @@ export function formatCents(n) {
 JS
 git add . && git commit -qm "fix: greet a missing user and add formatCents"
 
-cat > earlier-findings.json <<'JSON'
+cat > "$findings" <<'JSON'
 [
   {"id": "E1", "axis": "Bugs", "severity": "Important", "location": "src/discount.js:3", "text": "`if (code = \"HALF\")` assigns instead of compares, so every code gets 50% off.", "state": "open"},
   {"id": "E2", "axis": "Bugs", "severity": "Important", "location": "src/greet.js:2", "text": "`greet()` throws when `user` is undefined; the spec asks for `Hello, guest`.", "state": "open"},

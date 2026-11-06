@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-1`, then in /tmp/cr-eval-1 run code-review with fixed point `base`, reviewed head `r1`, earlier findings `earlier-findings.json`, and spec `spec.md`. There is no pull request.",
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-1`, then in /tmp/cr-eval-1 run code-review with fixed point `base`, reviewed head `r1`, earlier findings `/tmp/cr-eval-1-earlier-findings.json`, and spec `spec.md`. There is no pull request.",
       "expected_output": "The report opens with the reviewed range in delta mode: F is `git rev-parse --short=12 base`, R is `git rev-parse --short=12 r1`, and HEAD is `git rev-parse --short=12 HEAD`, all three as 12-character SHAs. Standards, Bugs, and Security review only `r1..HEAD`, the commit `fix: greet a missing user and add formatCents`."
     },
     {
@@ -13,7 +13,7 @@
     },
     {
       "id": 3,
-      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-3`, then in /tmp/cr-eval-3 run code-review with fixed point `base`, reviewed head `r1`, earlier findings `earlier-findings.json`, and spec `spec.md`. There is no pull request.",
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-3`, then in /tmp/cr-eval-3 run code-review with fixed point `base`, reviewed head `r1`, earlier findings `/tmp/cr-eval-3-earlier-findings.json`, and spec `spec.md`. There is no pull request.",
       "expected_output": "No new finding on any axis repeats E1 (the `code = \"HALF\"` assignment) or E3 (the answered `i <= rows.length` loop bound): zero repeats. `## Earlier findings` lists E1 as still open and E2 as fixed, and does not list E3 because it is answered."
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "id": 5,
-      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-5`, then in /tmp/cr-eval-5 run code-review with fixed point `base`, reviewed head `r1`, earlier findings `earlier-findings.json`, and spec `spec.md`. There is no pull request.",
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-5`, then in /tmp/cr-eval-5 run code-review with fixed point `base`, reviewed head `r1`, earlier findings `/tmp/cr-eval-5-earlier-findings.json`, and spec `spec.md`. There is no pull request.",
       "expected_output": "E1 at `src/discount.js:3`, added before `r1` and unfixed at HEAD, is still open with severity `Important`, is not tagged `Pre-existing`, and counts toward the blocking findings."
     },
     {
