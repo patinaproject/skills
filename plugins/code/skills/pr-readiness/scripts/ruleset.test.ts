@@ -68,6 +68,9 @@ describe("matchPatterns follows .gitignore", () => {
     ["[:punct:] does not match a letter", ["a[[:punct:]]b"], "aab", undefined],
     ["[:blank:] matches a space", ["a[[:blank:]]b"], "a b", "a[[:blank:]]b"],
     ["[:space:] matches a space", ["a[[:space:]]b"], "a b", "a[[:space:]]b"],
+    ["[:space:] matches a tab", ["a[[:space:]]b"], "a\tb", "a[[:space:]]b"],
+    ["[:space:] does not match a vertical tab", ["x[[:space:]]y"], "x\vy", undefined],
+    ["[:space:] does not match a form feed", ["x[[:space:]]y"], "x\fy", undefined],
     ["[:graph:] does not match a space", ["a[[:graph:]]b"], "a b", undefined],
     ["[:print:] matches a space", ["a[[:print:]]b"], "a b", "a[[:print:]]b"],
     ["[:cntrl:] does not match a space", ["a[[:cntrl:]]b"], "a b", undefined],
@@ -88,6 +91,21 @@ describe("invalidPattern", () => {
   it("accepts every known POSIX class", () => {
     const names = ["alnum", "alpha", "blank", "cntrl", "digit", "graph", "lower", "print", "punct", "space", "upper", "xdigit"];
     expect(invalidPattern(names.map((name) => `[[:${name}:]]`))).toBeUndefined();
+  });
+});
+
+describe("star limit", () => {
+  it("reports a segment with four stars", () => { expect(invalidPattern(["src/**", "*a*a*a*b"])).toBe("*a*a*a*b"); });
+  it("reports four stars in a later segment", () => { expect(invalidPattern(["src/*a*a*a*b/x"])).toBe("src/*a*a*a*b/x"); });
+  it("accepts three stars in a segment", () => { expect(invalidPattern(["*a*b*c"])).toBeUndefined(); });
+  it("counts stars per segment", () => { expect(invalidPattern(["*a*b*c/*a*b*c/**/*d*e"])).toBeUndefined(); });
+  it("ignores escaped stars and stars in a class", () => { expect(invalidPattern(["\\*a*b*c*d*e[*]"])).toBe("\\*a*b*c*d*e[*]"); expect(invalidPattern(["\\*a\\*b*c*d[*]"])).toBeUndefined(); });
+  it("matches three stars against a long path in bounded time", () => {
+    const start = performance.now();
+    expect(matchPatterns(["*a*a*b"], "a".repeat(255))).toBeUndefined();
+    const elapsed = performance.now() - start;
+    console.log(`three-star guard took ${elapsed.toFixed(1)} ms`);
+    expect(elapsed).toBeLessThan(1000);
   });
 });
 

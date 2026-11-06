@@ -58,7 +58,7 @@ const escapeRegex = (char: string): string => char.replace(/[.*+?^${}()|[\]\\\/]
 
 const POSIX_CLASSES: Readonly<Record<string, string>> = {
   alnum: "a-zA-Z0-9", alpha: "a-zA-Z", blank: " \\t", cntrl: "\\x00-\\x1f\\x7f", digit: "0-9", graph: "\\x21-\\x7e",
-  lower: "a-z", print: "\\x20-\\x7e", punct: "!-\\/:-@\\[-`{-~", space: " \\t\\n\\v\\f\\r", upper: "A-Z", xdigit: "0-9A-Fa-f",
+  lower: "a-z", print: "\\x20-\\x7e", punct: "!-\\/:-@\\[-`{-~", space: " \\t\\n\\r", upper: "A-Z", xdigit: "0-9A-Fa-f",
 };
 const classChar = (char: string): string => char.replace(/[\\\]\[^-]/g, "\\$&");
 
@@ -103,9 +103,13 @@ function bracketSource(glob: string, start: number): { source: string; end: numb
   return undefined;
 }
 
+const MAX_STARS_PER_SEGMENT = 3;
+
+/** Throws on an unknown [:name:] or on a path segment with more than three wildcard runs, whose regex backtracks without bound. */
 function globSource(glob: string): string {
   let out = "";
   let i = 0;
+  let stars = 0;
   while (i < glob.length) {
     const char = glob[i]!;
     if (char === "*") {
@@ -114,6 +118,7 @@ function globSource(glob: string): string {
       const afterSlashOrStart = i === 0 || glob[i - 1] === "/";
       if (end - i >= 2 && afterSlashOrStart && glob[end] === "/") { out += "(?:.*/)?"; i = end + 1; continue; }
       if (end - i >= 2 && afterSlashOrStart && end === glob.length) { out += ".*"; i = end; continue; }
+      if (++stars > MAX_STARS_PER_SEGMENT) throw new Error(`more than ${MAX_STARS_PER_SEGMENT} * in one path segment`);
       out += "[^/]*";
       i = end;
     } else if (char === "?") { out += "[^/]"; i++; }
@@ -123,7 +128,11 @@ function globSource(glob: string): string {
       if (bracket === undefined) { out += "\\["; i++; continue; }
       out += bracket.source;
       i = bracket.end;
-    } else { out += escapeRegex(char); i++; }
+    } else {
+      if (char === "/") stars = 0;
+      out += escapeRegex(char);
+      i++;
+    }
   }
   return out;
 }
