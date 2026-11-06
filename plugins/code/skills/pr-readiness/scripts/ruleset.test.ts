@@ -104,7 +104,6 @@ describe("star limit", () => {
     const start = performance.now();
     expect(matchPatterns(["*a*a*b"], "a".repeat(255))).toBeUndefined();
     const elapsed = performance.now() - start;
-    console.log(`three-star guard took ${elapsed.toFixed(1)} ms`);
     expect(elapsed).toBeLessThan(1000);
   });
 });
