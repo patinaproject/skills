@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.23.0](https://github.com/patinaproject/skills/compare/v4.22.0...v4.23.0) (2026-11-06)
+
+
+### Features
+
+* [#840](https://github.com/patinaproject/skills/issues/840) make repeated code-review runs converge ([#854](https://github.com/patinaproject/skills/issues/854)) ([dc51599](https://github.com/patinaproject/skills/commit/dc51599e54821eff916763380e78c416f6e58d46))
+
 ## [4.22.0](https://github.com/patinaproject/skills/compare/v4.21.0...v4.22.0) (2026-11-06)
 
 
