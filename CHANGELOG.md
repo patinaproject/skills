@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.21.0](https://github.com/patinaproject/skills/compare/v4.20.0...v4.21.0) (2026-11-06)
+
+
+### Features
+
+* [#839](https://github.com/patinaproject/skills/issues/839) add bugs and security axes with severity tags to code-review ([#844](https://github.com/patinaproject/skills/issues/844)) ([85f0317](https://github.com/patinaproject/skills/commit/85f0317d3f829de96c8aaa6dc5a9ee6873b369a5))
+
 ## [4.20.0](https://github.com/patinaproject/skills/compare/v4.19.0...v4.20.0) (2026-11-06)
 
 
