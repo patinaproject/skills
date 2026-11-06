@@ -32,6 +32,7 @@
     "plugins/work/skills/implement/**",
     "plugins/work/skills/improve-codebase-architecture/**",
     "plugins/work/skills/prototype/**",
+    "plugins/work/skills/red-green/**",
     "plugins/work/skills/research/**",
     "plugins/work/skills/retro/**",
     "plugins/work/skills/setup-work-skills/**",
