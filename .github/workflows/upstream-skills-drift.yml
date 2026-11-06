@@ -25,7 +25,8 @@ jobs:
       - name: Run upstream dry run
         id: sync
         continue-on-error: true
-        run: npx -y pnpm@10 sync-upstream-skills --dry-run 2>&1 | tee upstream-drift.txt
+        shell: bash
+        run: npx -y pnpm@10 sync-upstream-skills --dry-run 2>&1 | tee "$RUNNER_TEMP/upstream-drift.txt"
       - name: Update the tracking issue
         if: steps.sync.outcome == 'failure'
         env:
@@ -38,7 +39,7 @@ jobs:
             echo 'The scheduled upstream skills dry run needs attention.'
             echo
             echo '```text'
-            cat upstream-drift.txt
+            cat "$RUNNER_TEMP/upstream-drift.txt"
             echo '```'
           } > "$body_file"
           issue_number="$(gh issue list --state open --search "$title in:title" --json number,title --jq '.[] | select(.title == "Upstream skills drift") | .number' | head -n 1)"
