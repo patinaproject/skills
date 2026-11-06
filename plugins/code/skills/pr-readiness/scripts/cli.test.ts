@@ -171,8 +171,7 @@ describe("pr-readiness publish auto-merge", () => {
   });
   it("reads again while the merge state is UNKNOWN, then merges", () => {
     const forge = fakeForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["UNKNOWN", "UNKNOWN", "CLEAN"] });
-    const result = publish(forge);
-    expect(result.stdout).toBe(merged());
+    expect(publish(forge)).toEqual({ code: 0, stdout: merged(), stderr: "" });
     expect(forge.readMergeStateCalls).toHaveLength(3);
     expect(forge.mergeCalls).toHaveLength(1);
   });
@@ -186,25 +185,32 @@ describe("pr-readiness publish auto-merge", () => {
   it("arms every state that is not immediately mergeable", () => {
     for (const status of ["BLOCKED", "BEHIND", "DIRTY", "DRAFT"]) {
       const forge = fakeForge({ policy: AUTO_MERGE_POLICY, mergeStates: [status] });
-      expect(publish(forge).stdout).toBe(armedOut);
+      expect(publish(forge)).toEqual({ code: 0, stdout: armedOut, stderr: "" });
       expect(forge.readMergeStateCalls).toHaveLength(1);
       expect(forge.mergeCalls).toEqual([]);
     }
   });
   it("arms a CLEAN PR on a base with a merge queue", () => {
     const forge = fakeForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], isMergeQueueEnabled: true });
-    expect(publish(forge).stdout).toBe(armedOut);
+    expect(publish(forge)).toEqual({ code: 0, stdout: armedOut, stderr: "" });
     expect(forge.mergeCalls).toEqual([]);
     expect(forge.enableAutoMergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
   });
   it("merges a CLEAN PR that is already armed at the head", () => {
     const forge = fakeForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD }, mergeStates: ["CLEAN"] });
-    expect(publish(forge).stdout).toBe(merged("already ready"));
+    expect(publish(forge)).toEqual({ code: 0, stdout: merged("already ready"), stderr: "" });
+    expect(forge.mergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
     expect(forge.enableAutoMergeCalls).toEqual([]);
   });
   it("keeps an armed PR armed when it is not mergeable", () => {
     const forge = fakeForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD } });
-    expect(publish(forge).stdout).toBe(`PR #7 is already ready at ${HEAD}\nauto-merge already armed (squash) at ${HEAD}\n`);
+    expect(publish(forge)).toEqual({ code: 0, stdout: `PR #7 is already ready at ${HEAD}\nauto-merge already armed (squash) at ${HEAD}\n`, stderr: "" });
+    expect(forge.mergeCalls).toEqual([]);
+  });
+  it("exits 1 when the arm replacing an older-head arm is refused and the PR is not mergeable", () => {
+    const forge = fakeForge({ policy: AUTO_MERGE_POLICY, armed: { mergeMethod: "SQUASH", head: "e".repeat(40) }, enableAutoMergeError: "Pull request is in clean status" });
+    const result = publish(forge);
+    expect(result).toEqual({ code: 1, stdout: `PR #7 is ready at ${HEAD}\n`, stderr: "pr-readiness: PR #7 is ready but auto-merge is not on: Pull request is in clean status\n" });
     expect(forge.mergeCalls).toEqual([]);
   });
   it("merges when the arm is refused and the PR then reads CLEAN", () => {
