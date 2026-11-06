@@ -104,6 +104,13 @@
       "status": "not-proposed"
     }
   },
+  "plugins/code/skills/code-review/agents/openai.yaml": {
+    "kind": "policy",
+    "reason": "Patina describes code-review as reviewing a diff on five axes, or only the commits after an earlier reviewed head, to match its SKILL.md fork.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
   "plugins/code/skills/create-verification-skill/SKILL.md": {
     "kind": "policy",
     "reason": "Patina names the generated skill `patinaproject-verify` after its repository-local prefix, so it does not shadow the bundled `/verify`. Upstream named it `verify` to shadow the bundled one.",
