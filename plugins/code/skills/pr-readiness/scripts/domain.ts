@@ -24,10 +24,25 @@ export interface CandidateIdentity {
 export interface CheckProvenance { readonly name: string; readonly checkRunId: number; readonly runId?: number; readonly conclusion: string; readonly url: string; }
 export type Provenance =
   | { readonly kind: "checks"; readonly checks: readonly CheckProvenance[] }
-  | { readonly kind: "approval"; readonly reviewer: string; readonly reviewId: number; readonly url: string };
+  | { readonly kind: "approval"; readonly reviewer: string; readonly reviewId: number; readonly url: string }
+  | RulesetProvenance;
+export interface RulesetProvenance {
+  readonly kind: "ruleset";
+  readonly rules: readonly { readonly rulesetId: number; readonly rulesetSource: string }[];
+  readonly changedPathsDigest: string;
+  readonly matches: readonly { readonly rulesetId: number; readonly reviewerType: string; readonly reviewerId: number; readonly pattern: string; readonly path: string }[];
+  readonly requiredApprovals: number;
+  readonly approvals: readonly { readonly reviewer: string; readonly reviewId: number; readonly url: string }[];
+}
 export const EVALUATOR_VERSION = "pr-readiness/4";
-export function provenanceUrls(provenance: Provenance): string[] { return provenance.kind === "approval" ? [provenance.url] : provenance.checks.map((check) => check.url); }
-export type ProducerSpec = { readonly producer: "checks"; readonly checks: readonly string[]; readonly allowSkipped?: boolean } | { readonly producer: "approval" };
+export function provenanceUrls(provenance: Provenance): string[] {
+  switch (provenance.kind) {
+    case "approval": return [provenance.url];
+    case "checks": return provenance.checks.map((check) => check.url);
+    case "ruleset": return provenance.approvals.map((approval) => approval.url);
+  }
+}
+export type ProducerSpec = { readonly producer: "checks"; readonly checks: readonly string[]; readonly allowSkipped?: boolean } | { readonly producer: "approval" } | { readonly producer: "ruleset" };
 export interface ReadinessPolicy { readonly version: 1; readonly obligations: Readonly<Record<Obligation, ProducerSpec>>; readonly autoMerge: boolean; readonly digest: string; }
 export interface Observation {
   readonly id: string;
