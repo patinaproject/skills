@@ -56,6 +56,53 @@ export function parsePullRequestRules(raw: readonly unknown[]): PullRequestRule[
 
 const escapeRegex = (char: string): string => char.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&");
 
+const POSIX_CLASSES: Readonly<Record<string, string>> = {
+  alnum: "a-zA-Z0-9", alpha: "a-zA-Z", blank: " \\t", cntrl: "\\x00-\\x1f\\x7f", digit: "0-9", graph: "\\x21-\\x7e",
+  lower: "a-z", print: "\\x20-\\x7e", punct: "!-\\/:-@\\[-`{-~", space: " \\t\\n\\v\\f\\r", upper: "A-Z", xdigit: "0-9A-Fa-f",
+};
+const classChar = (char: string): string => char.replace(/[\\\]\[^-]/g, "\\$&");
+
+/** Reads a wildmatch bracket class at `start`. Returns undefined when it never closes, and throws on an unknown [:name:]. A class never matches a slash. */
+function bracketSource(glob: string, start: number): { source: string; end: number } | undefined {
+  const negated = glob[start + 1] === "!" || glob[start + 1] === "^";
+  let i = start + (negated ? 2 : 1);
+  const first = i;
+  let body = "";
+  while (i < glob.length) {
+    const char = glob[i]!;
+    if (char === "]" && i > first) {
+      return { source: negated ? `[^${body}/]` : `(?!/)[${body}]`, end: i + 1 };
+    }
+    if (char === "[" && glob[i + 1] === ":") {
+      const close = glob.indexOf(":]", i + 2);
+      if (close !== -1) {
+        const name = glob.slice(i + 2, close);
+        const set = POSIX_CLASSES[name];
+        if (set === undefined) throw new Error(`unknown character class [:${name}:]`);
+        body += set;
+        i = close + 2;
+        continue;
+      }
+    }
+    let low = char;
+    if (char === "\\") {
+      if (i + 1 >= glob.length) return undefined;
+      low = glob[++i]!;
+    }
+    i++;
+    if (glob[i] === "-" && i + 1 < glob.length && glob[i + 1] !== "]") {
+      let high = glob[i + 1]!;
+      i += 2;
+      if (high === "\\") {
+        if (i >= glob.length) return undefined;
+        high = glob[i++]!;
+      }
+      body += `${classChar(low)}-${classChar(high)}`;
+    } else body += classChar(low);
+  }
+  return undefined;
+}
+
 function globSource(glob: string): string {
   let out = "";
   let i = 0;
@@ -72,12 +119,10 @@ function globSource(glob: string): string {
     } else if (char === "?") { out += "[^/]"; i++; }
     else if (char === "\\" && i + 1 < glob.length) { out += escapeRegex(glob[i + 1]!); i += 2; }
     else if (char === "[") {
-      const negated = glob[i + 1] === "!" || glob[i + 1] === "^";
-      const start = i + (negated ? 2 : 1);
-      const close = glob.indexOf("]", start + 1);
-      if (close === -1) { out += "\\["; i++; continue; }
-      out += `[${negated ? "^" : ""}${glob.slice(start, close).replace(/[\\\]\[]/g, "\\$&")}]`;
-      i = close + 1;
+      const bracket = bracketSource(glob, i);
+      if (bracket === undefined) { out += "\\["; i++; continue; }
+      out += bracket.source;
+      i = bracket.end;
     } else { out += escapeRegex(char); i++; }
   }
   return out;
@@ -148,8 +193,18 @@ export function matchEntries(rules: readonly PullRequestRule[], changedPaths: re
 
 export const ruleName = (rule: { readonly rulesetId: number; readonly rulesetSource: string }): string => `ruleset ${rule.rulesetId} (${rule.rulesetSource})`;
 export const reviewerName = (entry: { readonly reviewerType: string; readonly reviewerId: number }): string => `${entry.reviewerType} ${entry.reviewerId}`;
-/** Escapes control characters so a path or pattern cannot forge lines in a note or stderr. */
-export const printable = (text: string): string => /[\u0000-\u001f\u007f]/.test(text) ? JSON.stringify(text).slice(1, -1) : text;
+const UNSAFE = /[\p{Cc}\p{Cf}\u2028\u2029]/u;
+const MAX_PRINTED = 200;
+/** Escapes control, format, and separator characters and truncates long text, so a path or pattern cannot forge lines or flood a note or stderr. */
+export function printable(text: string): string {
+  const characters = [...text];
+  const shown = characters.length > MAX_PRINTED ? `${characters.slice(0, MAX_PRINTED).join("")}…(${characters.length - MAX_PRINTED} more)` : text;
+  if (!UNSAFE.test(shown)) return shown;
+  return JSON.stringify(shown).slice(1, -1).replace(/[\p{Cc}\p{Cf}\u2028\u2029]/gu, (char) => {
+    const code = char.codePointAt(0)!;
+    return code > 0xffff ? `\\u{${code.toString(16)}}` : `\\u${code.toString(16).padStart(4, "0")}`;
+  });
+}
 export const matchName = (match: ReviewerMatch): string => `${reviewerName(match)} (pattern "${printable(match.pattern)}" matched ${printable(match.path)})`;
 
 function cause(error: unknown): string { return error instanceof Error ? error.message : String(error); }

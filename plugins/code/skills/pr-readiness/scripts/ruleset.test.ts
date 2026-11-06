@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { GhForge } from "./adapters.ts";
 import { BRANCH_RULES, SRC_REVIEWER, pullRequestRule } from "./fake-forge.ts";
-import { matchEntries, matchPatterns, parsePullRequestRules } from "./ruleset.ts";
+import { invalidPattern, matchEntries, matchPatterns, parsePullRequestRules, printable } from "./ruleset.ts";
 
 describe("matchPatterns follows .gitignore", () => {
   const table: [string, string[], string, string | undefined][] = [
@@ -48,8 +48,56 @@ describe("matchPatterns follows .gitignore", () => {
     ["a comment matches nothing", ["# src/**"], "# src/a", undefined],
     ["a blank line matches nothing", ["", "  "], "a", undefined],
     ["an escaped hash matches a literal", ["\\#note"], "#note", "\\#note"],
+    ["a negated class never matches a slash", ["a[!b]c"], "a/c", undefined],
+    ["a negated class matches another character", ["a[!b]c"], "axc", "a[!b]c"],
+    ["a caret negated class never matches a slash", ["a[^b]c"], "a/c", undefined],
+    ["a class holding a slash never matches a slash", ["a[/]b"], "a/b", undefined],
+    ["a range class never matches a slash", ["a[--0]c"], "a/c", undefined],
+    ["[:digit:] matches a digit", ["[[:digit:]].ts"], "5.ts", "[[:digit:]].ts"],
+    ["[:digit:] does not match a letter", ["[[:digit:]].ts"], "a.ts", undefined],
+    ["[:alpha:] matches a letter", ["[[:alpha:]].ts"], "a.ts", "[[:alpha:]].ts"],
+    ["[:alpha:] does not match a digit", ["[[:alpha:]].ts"], "5.ts", undefined],
+    ["[:alnum:] matches a digit", ["[[:alnum:]].ts"], "5.ts", "[[:alnum:]].ts"],
+    ["[:upper:] does not match lowercase", ["[[:upper:]].ts"], "a.ts", undefined],
+    ["[:upper:] matches uppercase", ["[[:upper:]].ts"], "A.ts", "[[:upper:]].ts"],
+    ["[:lower:] matches lowercase", ["[[:lower:]].ts"], "a.ts", "[[:lower:]].ts"],
+    ["[:xdigit:] matches f", ["[[:xdigit:]].ts"], "f.ts", "[[:xdigit:]].ts"],
+    ["[:xdigit:] does not match g", ["[[:xdigit:]].ts"], "g.ts", undefined],
+    ["[:punct:] matches a hyphen", ["a[[:punct:]]b"], "a-b", "a[[:punct:]]b"],
+    ["[:punct:] does not match a slash", ["a[[:punct:]]b"], "a/b", undefined],
+    ["[:punct:] does not match a letter", ["a[[:punct:]]b"], "aab", undefined],
+    ["[:blank:] matches a space", ["a[[:blank:]]b"], "a b", "a[[:blank:]]b"],
+    ["[:space:] matches a space", ["a[[:space:]]b"], "a b", "a[[:space:]]b"],
+    ["[:graph:] does not match a space", ["a[[:graph:]]b"], "a b", undefined],
+    ["[:print:] matches a space", ["a[[:print:]]b"], "a b", "a[[:print:]]b"],
+    ["[:cntrl:] does not match a space", ["a[[:cntrl:]]b"], "a b", undefined],
+    ["a negated [:digit:] matches a letter", ["[![:digit:]].ts"], "a.ts", "[![:digit:]].ts"],
+    ["a negated [:digit:] does not match a digit", ["[![:digit:]].ts"], "5.ts", undefined],
+    ["a POSIX class mixes with a literal", ["[[:digit:]a].ts"], "a.ts", "[[:digit:]a].ts"],
+    ["an escaped ] in a class is a literal ]", ["[\\]]x"], "]x", "[\\]]x"],
+    ["an escaped ] in a class does not close it", ["[\\]]x"], "ax", undefined],
+    ["an escaped ] after a member is a literal ]", ["[a\\]]x"], "]x", "[a\\]]x"],
+    ["a negated class with an escaped ] excludes ]", ["[!\\]]x"], "]x", undefined],
+    ["a negated class with an escaped ] matches another character", ["[!\\]]x"], "ax", "[!\\]]x"],
   ];
   for (const [name, patterns, path, expected] of table) it(name, () => { expect(matchPatterns(patterns, path)).toBe(expected); });
+});
+
+describe("invalidPattern", () => {
+  it("reports a pattern with an unknown POSIX class", () => { expect(invalidPattern(["src/**", "[[:foo:]].ts"])).toBe("[[:foo:]].ts"); });
+  it("accepts every known POSIX class", () => {
+    const names = ["alnum", "alpha", "blank", "cntrl", "digit", "graph", "lower", "print", "punct", "space", "upper", "xdigit"];
+    expect(invalidPattern(names.map((name) => `[[:${name}:]]`))).toBeUndefined();
+  });
+});
+
+describe("printable", () => {
+  it("leaves plain text unchanged", () => { expect(printable("src/a b.ts")).toBe("src/a b.ts"); });
+  it("escapes a control character", () => { expect(printable("a\nb")).toBe("a\\nb"); });
+  it("escapes a right-to-left override", () => { expect(printable("a\u202eb")).toBe("a\\u202eb"); });
+  it("escapes a line separator", () => { expect(printable("a\u2028b")).toBe("a\\u2028b"); });
+  it("truncates text over 200 characters", () => { expect(printable(`src/${"x".repeat(246)}`)).toBe(`src/${"x".repeat(196)}…(50 more)`); });
+  it("keeps text of exactly 200 characters", () => { expect(printable("y".repeat(200))).toBe("y".repeat(200)); });
 });
 
 describe("matchEntries", () => {
