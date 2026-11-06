@@ -21,6 +21,7 @@ pr-readiness publish --repo OWNER/REPO --pr NUMBER
 | --- | --- | --- |
 | `checks` | Check runs on the head from the `github-actions` app with the names the policy lists. The newest run in each check suite counts, so a successful re-run replaces a failure. | A GitHub Actions workflow job |
 | `approval` | GitHub's `reviewDecision` for the PR, which must be `APPROVED`, plus an approving review whose commit is the head from a `User` with write or admin permission who is not the PR author. Each eligible reviewer's latest decisive review stands until it is dismissed, so a change request on an older commit still fails the obligation. | A `User` with write or admin permission who is not the PR author |
+| `ruleset` | The base branch's live `pull_request` rules from `repos/{repo}/rules/branches/{base}`, the PR's changed paths (a rename counts under its old and new name), GitHub's `reviewDecision`, and the eligible approvals at the head. The obligation passes when no approval is required, or when `reviewDecision` is `APPROVED` and enough eligible approvals stand at the head. | A `User` with write or admin permission who is not the PR author, and whatever team members GitHub counts toward `reviewDecision` |
 
 One approval satisfies every obligation that names `approval`. A bot's review never counts. Every factory agent acts as one GitHub App that authors its PRs, so no agent can approve its own work. An agent keeps its code-review result in its session, and resolves the findings. The result stays off the PR. In an approval-gated repository the PR waits for a maintainer's approval at the head. Agents must never hold an operator's credentials, because an approval posted with them would count as the operator's.
 
@@ -32,7 +33,7 @@ The policy is `.github/pr-readiness.json`, read through the forge from the defau
 { "version": 1, "obligations": { "hygiene": { "producer": "checks", "checks": ["Check diff hygiene"], "allowSkipped": true }, "standards": { "producer": "approval" } } }
 ```
 
-A repository without the file, and any obligation the file omits, requires `approval`. A malformed file, an unknown obligation, or an unknown producer fails the evaluation. `allowSkipped` makes a check that concluded `skipped` count as not run, and an obligation whose checks all skipped is not applicable. Use it only for jobs whose workflow skips them on purpose, such as the release-please PR. `behavior` does not apply to a documentation-only change, and its evidence from another head is never reused.
+A repository without the file, and any obligation the file omits, requires `approval`. A malformed file, an unknown obligation, or an unknown producer fails the evaluation. The `ruleset` producer is opt-in and takes no options. [The `ruleset` producer](#the-ruleset-producer) describes it. `allowSkipped` makes a check that concluded `skipped` count as not run, and an obligation whose checks all skipped is not applicable. Use it only for jobs whose workflow skips them on purpose, such as the release-please PR. `behavior` does not apply to a documentation-only change, and its evidence from another head is never reused.
 
 The optional top-level `autoMerge` boolean turns on auto-merge arming. A missing key means off. A value that is not a boolean fails the evaluation.
 
@@ -40,6 +41,24 @@ The policy puts the repository in one of two modes:
 
 - **Approval-gated.** The default. Each obligation without a `checks` mapping requires a maintainer's approval at the head.
 - **Checks-only.** Every obligation, `standards` and `spec` included, maps to `checks`. No approval is needed. With `autoMerge: true`, the PR merges once every required check passes.
+
+### The `ruleset` producer
+
+Use `{ "producer": "ruleset" }` for a repository whose ruleset sets `required_approving_review_count` to 0 and requires approvals by path through `required_reviewers`. A PR that matches no entry needs no review. A PR that matches needs the approvals the matched entries require.
+
+The producer reads the rules of the PR's base branch from the forge. It never reads the PR's files for rules. It collects every rule of type `pull_request`. The base count is the highest `required_approving_review_count` among them. An entry matches when any of its `file_patterns` matches a changed path. GitHub documents the patterns as `.gitignore` syntax, so a `!` pattern unmatches earlier ones and the last matching pattern decides. See [Required reviewers](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#required-reviewers).
+
+The count is the largest of the base count and every matched entry's `minimum_approvals`. A requirement applies only when that count is above 0. An entry with `minimum_approvals` 0 adds the team for visibility only and creates no requirement. Then the obligation passes only when `reviewDecision` is `APPROVED` and at least that many distinct eligible reviewers approved the head. The eligibility filters are the `approval` producer's. The producer trusts GitHub's `reviewDecision` for team membership and never reads teams.
+
+It fails closed, and names the cause, when any of these holds.
+
+- The rules or the changed files cannot be read, the base has no `pull_request` rule, or the file list is truncated at GitHub's 3000-file cap.
+- A `required_reviewers` entry has empty or missing `file_patterns`.
+- `dismiss_stale_reviews_on_push` or `require_last_push_approval` is off on any collected rule. Only this producer guards the flags. The `approval` producer is unchanged.
+- An eligible reviewer's latest decisive review is a change request.
+- No requirement applies by our match, yet `reviewDecision` is `REVIEW_REQUIRED` or `CHANGES_REQUESTED`. The disagreement means a pattern bug could otherwise pass silently.
+
+A passing decision carries the rules, the matches, and the required count in its `reason`. A `ruleset` observation is current-head only. It is never reused across heads, because rules change without the patch changing.
 
 ## Auto-merge
 
@@ -60,6 +79,7 @@ No other agent path arms auto-merge. Only `publish` arms it, and only under this
 The evaluator fails closed until the default-branch ruleset requires what the mode needs. Only an operator changes the ruleset.
 
 - **Pull request rule.** In an approval-gated repository, set `required_approving_review_count` to at least 1, and turn on `dismiss_stale_reviews_on_push` and `require_last_push_approval`. Without a required review GitHub computes no `reviewDecision`, and `check` reports that.
+- **Path-based approvals.** For the `ruleset` producer, turn on `dismiss_stale_reviews_on_push` and `require_last_push_approval` on every `pull_request` rule. `required_approving_review_count` may be 0 when `required_reviewers` carries the approvals. The producer relies on GitHub's `reviewDecision` to wait for a matched team's approvals, and it fails closed if GitHub reports otherwise. It cannot read team membership, so the team entries are trusted through GitHub alone.
 - **Required checks.** Require each check the policy names, each pinned to the GitHub Actions integration (`integration_id` 15368). A checks-only repository rests on this rule, and `publish` refuses to arm auto-merge until the live rules require every named check.
 - **Actions approvals off.** Keep "Allow GitHub Actions to create and approve pull requests" disabled, so `github-actions[bot]` cannot satisfy the required review.
 
