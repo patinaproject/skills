@@ -1,7 +1,8 @@
-import type { CandidateIdentity, ReadinessPolicy, ValidityDecision } from "./domain.ts";
+import { OBLIGATIONS, type CandidateIdentity, type ReadinessPolicy, type ValidityDecision } from "./domain.ts";
 import { ACCEPTED, evaluateReadiness, type EvaluationReport } from "./evaluator.ts";
 import { deriveObservations } from "./evidence.ts";
 import { autoMergePlan, parsePolicy, produceCommand, requiredCheckNames, rulesFromPolicy } from "./policy.ts";
+import { readRulesetFacts } from "./ruleset.ts";
 import { GhForge, FilePacketStore, candidateFromPullRequest, packetKey, type Forge, type PacketStore, type PullRequestState } from "./adapters.ts";
 
 export interface ReadinessDependencies { readonly forge: Forge; readonly store: PacketStore; }
@@ -17,13 +18,16 @@ function assess(forge: Forge, repository: string, number: number, bodyOverride: 
   const policy = parsePolicy(forge.readPolicy(repository));
   const candidate = candidateFromPullRequest(pr, policy.digest);
   const evidence = forge.readEvidence(repository, number, candidate.head);
-  const { observations, notApplicable, notes, failedRunIds } = deriveObservations(candidate, policy, evidence);
+  const ruleset = OBLIGATIONS.some((obligation) => policy.obligations[obligation].producer === "ruleset")
+    ? { facts: readRulesetFacts(forge, repository, pr.baseRef ?? "", number), now: now ?? new Date().toISOString() }
+    : undefined;
+  const { observations, notApplicable, notes, failedRunIds } = deriveObservations(candidate, policy, evidence, ruleset);
   const rules = rulesFromPolicy(policy).map((rule) => notApplicable.includes(rule.obligation) ? { ...rule, applies: () => false } : rule);
   const evaluated = evaluateReadiness({ candidate, observations, body: bodyOverride ?? pr.body, now, rules });
   const decisions = evaluated.decisions.map((decision): ValidityDecision => {
-    if (ACCEPTED.includes(decision.validity)) return decision;
     const spec = policy.obligations[decision.obligation];
     const note = notes[decision.obligation];
+    if (ACCEPTED.includes(decision.validity)) return spec.producer === "ruleset" && note ? { ...decision, reason: `${decision.reason}: ${note}` } : decision;
     return { ...decision, reason: note ? `${decision.reason}: ${note}` : decision.reason, produce: produceCommand(spec, { repository, pullRequest: number, head: candidate.head, author: evidence.author, failedRunIds: failedRunIds[decision.obligation] }) };
   });
   return { pr, candidate, policy, report: { ...evaluated, decisions } };
