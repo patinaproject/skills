@@ -94,9 +94,11 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 
 ### Code-review presentation
 
-The shared `code-review` contract stays runtime-neutral: every axis uses ordinary
-Markdown findings with exact file and line references, and both runtimes keep
-the report in the session. Codex may add one inline directive
+The shared `code-review` contract stays runtime-neutral, and both runtimes keep
+the report in the session. Every axis uses ordinary Markdown findings with exact
+file and line references. Evidence findings and Spec findings that quote a claim
+or requirement are the exception, as the contract says. Every finding carries
+one severity tag, `Important`, `Nit`, or `Pre-existing`. Codex may add one inline directive
 for each discrete, actionable finding that belongs to a changed line:
 
 ```text
@@ -104,10 +106,12 @@ for each discrete, actionable finding that belongs to a changed line:
 ```
 
 Keep the Markdown finding beside the directive. Use the active worktree path
-for `file`, keep `start` and `end` tight, and omit directives when there are no
-actionable changed-line findings. A directive is UI presentation metadata; it
-does not replace the separate Standards, Spec, and Evidence results, finding
-dispositions, or current-head validation.
+for `file`, keep `start` and `end` tight, and set `priority` from the severity
+tag: `Important` and every blocking Security finding map to 1, and a
+non-blocking `Nit` or `Pre-existing` finding maps to 3. Omit directives when
+there are no actionable changed-line findings. A directive is UI presentation
+metadata; it does not replace the separate Standards, Spec, Evidence, Bugs, and
+Security results, finding dispositions, or current-head validation.
 Claude emits the Markdown finding without Codex directives.
 
 ## Vendored scripts
