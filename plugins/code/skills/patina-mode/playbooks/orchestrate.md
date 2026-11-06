@@ -111,8 +111,8 @@ and `code-review` in that order, and resolves every finding against the current
 head. The code-review result stays off the PR. In an approval-gated
 repository the PR waits for a maintainer's approval at the head, and
 `pr-readiness publish`, the only ready transition, runs after it. A checks-only
-repository needs no approval. Only `publish` arms auto-merge, under the
-repository's `autoMerge` opt-in. The completion report includes the current head SHA and the resolved
+repository needs no approval. Only `publish` arms auto-merge, or merges a PR
+GitHub already reports as mergeable, under the repository's `autoMerge` opt-in. The completion report includes the current head SHA and the resolved
 code-review result for that head. A worker cannot report a ready PR while that
 result is missing or covers an older head. Return the unit to repair when the
 head changes.

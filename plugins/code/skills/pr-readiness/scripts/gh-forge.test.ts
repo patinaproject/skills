@@ -144,3 +144,39 @@ describe("parseChangedPaths", () => {
     expect(() => parseChangedPaths(["x"])).toThrow("malformed changed file");
   });
 });
+
+describe("GhForge merge", () => {
+  function stub(reply: (kind: string) => string, call: (forge: GhForge) => unknown): { result: unknown; calls: string[] } {
+    const dir = mkdtempSync(join(tmpdir(), "stub-gh-"));
+    writeFileSync(join(dir, "gh"), `#!/bin/sh\necho "$*" >> "${dir}/calls"\ncase "$*" in\n  *mergePullRequest*) echo '${reply("merge")}' ;;\n  *mergeStateStatus*) echo '${reply("state")}' ;;\n  *mergeCommit*) echo '${reply("outcome")}' ;;\n  *) echo '{"data":{"repository":{"defaultBranchRef":{"name":"main"},"pullRequest":{"id":"PR_1","autoMergeRequest":null,"timelineItems":{"nodes":[]}}}}}' ;;\nesac\n`);
+    chmodSync(join(dir, "gh"), 0o755);
+    const previous = process.env.PATH;
+    process.env.PATH = `${dir}:${previous}`;
+    try { const result = call(new GhForge("gh")); return { result, calls: readFileSync(join(dir, "calls"), "utf8").split("\n").filter(Boolean) }; } finally { process.env.PATH = previous; }
+  }
+  const data = (pullRequest: unknown) => JSON.stringify({ data: { repository: { pullRequest } } });
+  it("reads mergeStateStatus and isMergeQueueEnabled in one query", () => {
+    const { result, calls } = stub(() => data({ mergeStateStatus: "CLEAN", isMergeQueueEnabled: false }), (forge) => forge.readMergeState("o/r", 7));
+    expect(result).toEqual({ mergeStateStatus: "CLEAN", isMergeQueueEnabled: false });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toContain("query=query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){mergeStateStatus isMergeQueueEnabled}}}");
+  });
+  it("throws on an unknown or missing merge state field", () => {
+    for (const pullRequest of [{ mergeStateStatus: "SOON", isMergeQueueEnabled: false }, { mergeStateStatus: "CLEAN" }, { isMergeQueueEnabled: false }]) {
+      expect(() => stub(() => data(pullRequest), (forge) => forge.readMergeState("o/r", 7))).toThrow("malformed pull request merge state");
+    }
+  });
+  it("merges with squash pinned to the expected head and returns the merge commit", () => {
+    const { result, calls } = stub((kind) => kind === "merge" ? JSON.stringify({ data: { mergePullRequest: { pullRequest: { state: "MERGED", mergeCommit: { oid: "m1" } } } } }) : "", (forge) => forge.mergePullRequest("o/r", 7, "abc"));
+    expect(result).toEqual({ state: "MERGED", mergeCommitOid: "m1" });
+    const mutation = calls.find((call) => call.includes("mergePullRequest"))!;
+    expect(mutation).toContain("mutation($id:ID!,$head:GitObjectID!){mergePullRequest(input:{pullRequestId:$id,mergeMethod:SQUASH,expectedHeadOid:$head}){pullRequest{state mergeCommit{oid}}}}");
+    expect(mutation).toContain("id=PR_1");
+    expect(mutation).toContain("head=abc");
+  });
+  it("rereads the PR state and merge commit", () => {
+    const { result } = stub(() => data({ state: "MERGED", mergeCommit: { oid: "m2" } }), (forge) => forge.readMergeOutcome("o/r", 7));
+    expect(result).toEqual({ state: "MERGED", mergeCommitOid: "m2" });
+    expect(stub(() => data({ state: "OPEN", mergeCommit: null }), (forge) => forge.readMergeOutcome("o/r", 7)).result).toEqual({ state: "OPEN", mergeCommitOid: undefined });
+  });
+});

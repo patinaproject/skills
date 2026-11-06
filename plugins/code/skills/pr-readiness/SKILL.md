@@ -5,7 +5,7 @@ description: Evaluate pull-request evidence against the current candidate and pu
 
 # PR readiness
 
-`pr-readiness` is the single owner of readiness evaluation and publication. It reads GitHub's own signals for the PR and never accepts an observation from a file, a flag, a status, or the PR author. It is an agent's pre-flight, not merge authority. GitHub enforces merge authority through the repository ruleset in [Operator setup](#operator-setup). Under the [auto-merge](#auto-merge) opt-in, `publish` asks GitHub to merge once that ruleset passes. It never merges directly.
+`pr-readiness` is the single owner of readiness evaluation and publication. It reads GitHub's own signals for the PR and never accepts an observation from a file, a flag, a status, or the PR author. It is an agent's pre-flight, not merge authority. GitHub enforces merge authority through the repository ruleset in [Operator setup](#operator-setup). Under the [auto-merge](#auto-merge) opt-in, `publish` asks GitHub to merge once that ruleset passes, or merges a PR that GitHub already reports as mergeable.
 
 ```sh
 pr-readiness open --repo OWNER/REPO --base BASE --head BRANCH --mode draft|ready
@@ -13,7 +13,7 @@ pr-readiness check --repo OWNER/REPO --pr NUMBER
 pr-readiness publish --repo OWNER/REPO --pr NUMBER
 ```
 
-`open` passes the caller's selected creation mode to the forge. `check` is read-only. It prints the JSON report and writes one line per unmet obligation to stderr, naming the command that produces the missing evidence. `publish` evaluates even when the PR is already ready, reads the remote candidate and body again, rejects a race, writes an immutable packet with put-if-absent semantics, and performs the forge ready transition with an expected head. Publishing a draft requires `--takeover=true` (or the trusted automation environment). Neither command posts a status or a check. With `autoMerge: true`, `publish` then arms auto-merge as [Auto-merge](#auto-merge) describes.
+`open` passes the caller's selected creation mode to the forge. `check` is read-only. It prints the JSON report and writes one line per unmet obligation to stderr, naming the command that produces the missing evidence. `publish` evaluates even when the PR is already ready, reads the remote candidate and body again, rejects a race, writes an immutable packet with put-if-absent semantics, and performs the forge ready transition with an expected head. Publishing a draft requires `--takeover=true` (or the trusted automation environment). Neither command posts a status or a check. With `autoMerge: true`, `publish` then merges or arms auto-merge as [Auto-merge](#auto-merge) describes.
 
 ## Producers
 
@@ -62,17 +62,22 @@ A passing decision carries the rules, the matches, and the required count in its
 
 ## Auto-merge
 
-With `autoMerge: true`, `publish` arms GitHub squash auto-merge after a successful ready transition. It calls the GraphQL `enablePullRequestAutoMerge` mutation with `expectedHeadOid` pinned to the published head. It never merges directly.
+With `autoMerge: true`, `publish` reads the PR's `mergeStateStatus` and `isMergeQueueEnabled` after a successful ready transition. It reads again while the state is `UNKNOWN`, up to 5 reads, 2 seconds apart.
+
+- **Merge now.** When the state is `CLEAN`, `HAS_HOOKS`, or `UNSTABLE` and the base has no merge queue, `publish` squash-merges the PR with the GraphQL `mergePullRequest` mutation, `expectedHeadOid` pinned to the published head. It confirms the PR is `MERGED` and prints the merge commit. GitHub refuses to arm auto-merge on such a PR.
+- **Arm.** In every other state, or with a merge queue, `publish` arms GitHub squash auto-merge with the GraphQL `enablePullRequestAutoMerge` mutation, `expectedHeadOid` pinned to the published head.
+
+The choice reads only those two fields, never an error message. The rules below apply to both paths.
 
 - **Live rules.** When `publish` will arm, it first reads the base branch's live rules from `repos/{repo}/rules/branches/{base}`, before the ready transition. If a check the policy names is not a required status check there, or the read fails, `publish` fails and leaves the PR unchanged.
 - **Default branch only.** It arms only when the PR's base is the default branch. A stacked child publishes without arming.
 - **Workflow and policy paths.** It does not arm when the diff touches `.github/workflows/**` or `.github/pr-readiness.json`. It publishes, prints that it skipped auto-merge and why, and exits 0. A person merges that PR.
-- **Re-runs.** A PR already armed for squash at the same head is a no-op success. An arm at an older head or with another merge method is replaced. The factory worker hook may already have armed the PR at creation.
-- **Arm failure.** If arming fails after the ready transition, `publish` exits non-zero and reports that the PR is ready but auto-merge is not on.
+- **Re-runs.** A PR already armed for squash at the same head is a no-op success, unless it is already mergeable, which `publish` merges. An arm at an older head or with another merge method is replaced. The factory worker hook may already have armed the PR at creation.
+- **Arm or merge failure.** If GitHub refuses the arm, `publish` reads the merge state once more and merges when the PR has become mergeable. Otherwise it exits non-zero and reports that the PR is ready but auto-merge is not on. If the first state read fails, or the merge fails and a reread does not show the PR `MERGED`, `publish` exits non-zero and reports that the PR is ready but not merged. A failed merge never falls back to arming.
 
-A later push by a writer likely keeps auto-merge on, and GitHub then merges the new head once its required checks pass. Strict up-to-date checks stall auto-merge when the base moves. Babysit or the operator updates the branch, because nothing here does.
+On the arm path, a later push by a writer likely keeps auto-merge on, and GitHub then merges the new head once its required checks pass. Strict up-to-date checks stall auto-merge when the base moves. Babysit or the operator updates the branch, because nothing here does.
 
-No other agent path arms auto-merge. Only `publish` arms it, and only under this opt-in.
+No other agent path arms auto-merge or merges. Only `publish` does, and only under this opt-in.
 
 ## Operator setup
 
@@ -80,9 +85,9 @@ The evaluator fails closed until the default-branch ruleset requires what the mo
 
 - **Pull request rule.** In an approval-gated repository, set `required_approving_review_count` to at least 1, and turn on `dismiss_stale_reviews_on_push` and `require_last_push_approval`. Without a required review GitHub computes no `reviewDecision`, and `check` reports that.
 - **Path-based approvals.** For the `ruleset` producer, turn on `dismiss_stale_reviews_on_push` and `require_last_push_approval` on every `pull_request` rule. `required_approving_review_count` may be 0 when `required_reviewers` carries the approvals. The producer relies on GitHub's `reviewDecision` to wait for a matched team's approvals, and it fails closed if GitHub reports otherwise. It cannot read team membership, so the team entries are trusted through GitHub alone.
-- **Required checks.** Require each check the policy names, each pinned to the GitHub Actions integration (`integration_id` 15368). A checks-only repository rests on this rule, and `publish` refuses to arm auto-merge until the live rules require every named check.
+- **Required checks.** Require each check the policy names, each pinned to the GitHub Actions integration (`integration_id` 15368). A checks-only repository rests on this rule, and `publish` refuses to arm auto-merge or merge until the live rules require every named check.
 - **Actions approvals off.** Keep "Allow GitHub Actions to create and approve pull requests" disabled, so `github-actions[bot]` cannot satisfy the required review.
 
-A same-repo PR can still add a workflow job that reports a passing check under a required name, because GitHub runs the PR's own `pull_request` workflows. In an approval-gated repository the required human approval at the head is the control for that, so a reviewer reads workflow changes before approving. Checks-only mode removes that control. So `publish` never arms auto-merge on a diff that touches `.github/workflows/**` or `.github/pr-readiness.json`, and a person merges it.
+A same-repo PR can still add a workflow job that reports a passing check under a required name, because GitHub runs the PR's own `pull_request` workflows. In an approval-gated repository the required human approval at the head is the control for that, so a reviewer reads workflow changes before approving. Checks-only mode removes that control. So `publish` never arms auto-merge or merges on a diff that touches `.github/workflows/**` or `.github/pr-readiness.json`, and a person merges it.
 
 The executable and pure evaluator live under `scripts/`. Forge and packet-store adapters are explicit seams. Production uses the `gh`/`origin` forge adapter and durable filesystem packet store, and tests inject a fake forge.

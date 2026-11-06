@@ -1,6 +1,6 @@
 # Merge and restack safety
 
-Use this reference with [Shipping](../playbooks/shipping.md) and before topology changes in [Autopilot-stack](../playbooks/autopilot-stack.md). Keep the existing watcher responsible for CI and blocker classification. These operations add revision and destination checks; they do not grant merge authority.
+Use this reference with [Shipping](../playbooks/shipping.md) and before topology changes in [Autopilot-stack](../playbooks/autopilot-stack.md). Keep the existing watcher responsible for CI and blocker classification. These operations add revision and destination checks; they do not grant merge authority. `pr-readiness publish` is separate. Under the repository's `autoMerge` opt-in it arms auto-merge, or merges a PR that GitHub already reports as mergeable.
 
 ## Read both pending mechanisms
 
