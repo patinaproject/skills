@@ -5,7 +5,29 @@ import { autoMergePlan, parsePolicy, produceCommand, requiredCheckNames, rulesFr
 import { readRulesetFacts } from "./ruleset.ts";
 import { GhForge, FilePacketStore, candidateFromPullRequest, packetKey, type Forge, type PacketStore, type PullRequestState } from "./adapters.ts";
 
-export interface ReadinessDependencies { readonly forge: Forge; readonly store: PacketStore; }
+export interface ReadinessDependencies { readonly forge: Forge; readonly store: PacketStore; readonly mergeStateReads?: number; readonly mergeStateDelayMs?: number; }
+const sleep = (ms: number): void => { if (ms > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); };
+const message = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+/** The states `gh pr merge --auto` merges at once. A merge queue takes the PR instead. */
+function mergeableNow(deps: ReadinessDependencies, repository: string, number: number): boolean {
+  const reads = deps.mergeStateReads ?? 5;
+  for (let read = 1; ; read++) {
+    const { mergeStateStatus, isMergeQueueEnabled } = deps.forge.readMergeState(repository, number);
+    if (mergeStateStatus === "UNKNOWN" && read < reads) { sleep(deps.mergeStateDelayMs ?? 2000); continue; }
+    return !isMergeQueueEnabled && (mergeStateStatus === "CLEAN" || mergeStateStatus === "HAS_HOOKS" || mergeStateStatus === "UNSTABLE");
+  }
+}
+function squashMerge(deps: ReadinessDependencies, repository: string, number: number, head: string): void {
+  const done = (oid: string) => process.stdout.write(`PR #${number} merged (squash) at ${head} as ${oid}\n`);
+  try {
+    const result = deps.forge.mergePullRequest(repository, number, head);
+    if (result.state !== "MERGED" || !result.mergeCommitOid) throw new Error(`merge answered with state ${result.state}`);
+    return done(result.mergeCommitOid);
+  } catch (error) {
+    try { const now = deps.forge.readMergeOutcome(repository, number); if (now.state === "MERGED" && now.mergeCommitOid) return done(now.mergeCommitOid); } catch { /* the original merge error is the one to report */ }
+    throw new Error(`PR #${number} is ready but not merged: ${message(error)}`);
+  }
+}
 interface Assessment { readonly pr: PullRequestState; readonly candidate: CandidateIdentity; readonly policy: ReadinessPolicy; readonly report: EvaluationReport; }
 
 function value(argv: readonly string[], name: string): string | undefined { const i = argv.indexOf(name); return i >= 0 && i + 1 < argv.length ? argv[i + 1] : undefined; }
@@ -68,9 +90,18 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
     if (plan.kind === "skip") process.stdout.write(`auto-merge skipped: ${plan.reason}\n`);
     if (plan.kind === "arm") {
       const head = final.candidate.head, armed = state?.armed;
-      if (armed?.mergeMethod === "SQUASH" && armed.head === head) process.stdout.write(`auto-merge already armed (squash) at ${head}\n`);
+      let mergeable: boolean;
+      try { mergeable = mergeableNow(deps, repository, number); } catch (error) { throw new Error(`PR #${number} is ready but not merged: ${message(error)}`); }
+      if (mergeable) squashMerge(deps, repository, number, head);
+      else if (armed?.mergeMethod === "SQUASH" && armed.head === head) process.stdout.write(`auto-merge already armed (squash) at ${head}\n`);
       else {
-        try { deps.forge.enableAutoMerge(repository, number, head); } catch (error) { throw new Error(`PR #${number} is ready but auto-merge is not on: ${error instanceof Error ? error.message : String(error)}`); }
+        try { deps.forge.enableAutoMerge(repository, number, head); } catch (error) {
+          let nowMergeable = false;
+          try { nowMergeable = mergeableNow(deps, repository, number); } catch { /* the arm error is the one to report */ }
+          if (!nowMergeable) throw new Error(`PR #${number} is ready but auto-merge is not on: ${message(error)}`);
+          squashMerge(deps, repository, number, head);
+          return 0;
+        }
         process.stdout.write(`auto-merge (squash) armed at ${head}\n`);
       }
     }

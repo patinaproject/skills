@@ -15,6 +15,12 @@ export interface Forge {
   readEvidence(repository: string, number: number, head: string): ForgeEvidence;
   /** Replaces any existing auto-merge request with a squash request pinned to `head`. */
   enableAutoMerge(repository: string, number: number, head: string): void;
+  /** Reads `mergeStateStatus` and `isMergeQueueEnabled` in one query; throws on a malformed answer. */
+  readMergeState(repository: string, number: number): MergeState;
+  /** Squash-merges the pull request, pinned to `head`. */
+  mergePullRequest(repository: string, number: number, head: string): MergeOutcome;
+  /** Rereads the pull request's `state` and `mergeCommit`. */
+  readMergeOutcome(repository: string, number: number): MergeOutcome;
   readRequiredChecks(repository: string, baseRef: string): string[];
   readAutoMergeState(repository: string, number: number): AutoMergeState;
   /** Raw rows of `repos/{repo}/rules/branches/{baseRef}`. */
@@ -22,6 +28,10 @@ export interface Forge {
   /** Raw pull request file rows and the `changed_files` total GitHub reports. */
   readChangedFiles(repository: string, number: number): { rows: unknown[]; total: number };
 }
+export const MERGE_STATES = ["BEHIND", "BLOCKED", "CLEAN", "DIRTY", "DRAFT", "HAS_HOOKS", "UNKNOWN", "UNSTABLE"] as const;
+export type MergeStateStatus = (typeof MERGE_STATES)[number];
+export interface MergeState { readonly mergeStateStatus: MergeStateStatus; readonly isMergeQueueEnabled: boolean }
+export interface MergeOutcome { readonly state: string; readonly mergeCommitOid?: string }
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
 
 export function candidateFromPullRequest(pr: PullRequestState, policyDigest: string): CandidateIdentity {
@@ -105,6 +115,11 @@ export function requiredContexts(rules: readonly unknown[]): string[] {
   return [...new Set(contexts)];
 }
 
+function mergeOutcome(pr: Record<string, unknown>, what: string): MergeOutcome {
+  const commit = pr.mergeCommit;
+  return { state: field(pr, "state", isString, what), mergeCommitOid: isObject(commit) ? field(commit, "oid", isString, what) : undefined };
+}
+
 /** Production adapter. It only reads forge metadata and patch text; it never executes PR-head code. */
 export class GhForge implements Forge {
   constructor(readonly command: "gh" | "origin" = "gh") {}
@@ -158,6 +173,24 @@ export class GhForge implements Forge {
     const { id, armed } = this.readArmState(repository, number);
     if (armed) this.graphql("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}", { id });
     this.graphql("mutation($id:ID!,$head:GitObjectID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH,expectedHeadOid:$head}){pullRequest{number}}}", { id, head });
+  }
+  private readPullRequestFields(repository: string, number: number, selection: string, what: string): Record<string, unknown> {
+    const [owner, name] = repository.split("/");
+    const data = this.graphql(`query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){${selection}}}}`, { owner: owner!, name: name!, number });
+    return field(field(data, "repository", isObject, what), "pullRequest", isObject, what);
+  }
+  readMergeState(repository: string, number: number): MergeState {
+    const pr = this.readPullRequestFields(repository, number, "mergeStateStatus isMergeQueueEnabled", "pull request merge state");
+    const mergeStateStatus = field(pr, "mergeStateStatus", (v): v is MergeStateStatus => MERGE_STATES.includes(v as MergeStateStatus), "pull request merge state");
+    return { mergeStateStatus, isMergeQueueEnabled: field(pr, "isMergeQueueEnabled", (v): v is boolean => typeof v === "boolean", "pull request merge state") };
+  }
+  mergePullRequest(repository: string, number: number, head: string): MergeOutcome {
+    const { id } = this.readArmState(repository, number);
+    const data = this.graphql("mutation($id:ID!,$head:GitObjectID!){mergePullRequest(input:{pullRequestId:$id,mergeMethod:SQUASH,expectedHeadOid:$head}){pullRequest{state mergeCommit{oid}}}}", { id, head });
+    return mergeOutcome(field(field(data, "mergePullRequest", isObject, "merge response"), "pullRequest", isObject, "merge response"), "merge response");
+  }
+  readMergeOutcome(repository: string, number: number): MergeOutcome {
+    return mergeOutcome(this.readPullRequestFields(repository, number, "state mergeCommit{oid}", "pull request merge outcome"), "pull request merge outcome");
   }
   readRequiredChecks(repository: string, baseRef: string): string[] {
     return requiredContexts(this.readBranchRules(repository, baseRef));
