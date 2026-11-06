@@ -17,6 +17,10 @@ export interface Forge {
   enableAutoMerge(repository: string, number: number, head: string): void;
   readRequiredChecks(repository: string, baseRef: string): string[];
   readAutoMergeState(repository: string, number: number): AutoMergeState;
+  /** Raw rows of `repos/{repo}/rules/branches/{baseRef}`. */
+  readBranchRules(repository: string, baseRef: string): unknown[];
+  /** Raw pull request file rows and the `changed_files` total GitHub reports. */
+  readChangedFiles(repository: string, number: number): { rows: unknown[]; total: number };
 }
 export interface PacketStore { get(key: string): ReadinessPacket | undefined; putIfAbsent(key: string, packet: ReadinessPacket): ReadinessPacket; }
 
@@ -156,7 +160,16 @@ export class GhForge implements Forge {
     this.graphql("mutation($id:ID!,$head:GitObjectID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH,expectedHeadOid:$head}){pullRequest{number}}}", { id, head });
   }
   readRequiredChecks(repository: string, baseRef: string): string[] {
-    return requiredContexts(jsonLines(this.command, ["api", "--paginate", `repos/${repository}/rules/branches/${encodeURIComponent(baseRef)}?per_page=100`, "--jq", ".[]"]));
+    return requiredContexts(this.readBranchRules(repository, baseRef));
+  }
+  readBranchRules(repository: string, baseRef: string): unknown[] {
+    return jsonLines(this.command, ["api", "--paginate", `repos/${repository}/rules/branches/${encodeURIComponent(baseRef)}?per_page=100`, "--jq", ".[]"]);
+  }
+  readChangedFiles(repository: string, number: number): { rows: unknown[]; total: number } {
+    const rows = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/pulls/${number}/files?per_page=100`, "--jq", ".[]"]);
+    const total = jsonOutput(this.command, ["api", `repos/${repository}/pulls/${number}`]).changed_files;
+    if (!Number.isInteger(total) || (total as number) < 0) throw new Error("forge returned a pull request without changed_files");
+    return { rows, total: total as number };
   }
   readEvidence(repository: string, number: number, head: string): ForgeEvidence {
     const checkRuns = jsonLines(this.command, ["api", "--paginate", `repos/${repository}/commits/${head}/check-runs?per_page=100`, "--jq", ".check_runs[]"]).map(parseCheckRun);

@@ -37,6 +37,13 @@ function validProvenance(value: unknown): value is Provenance {
   if (!value || typeof value !== "object") return false;
   const p = value as Partial<Record<string, unknown>>;
   if (p.kind === "approval") return typeof p.reviewer === "string" && Number.isInteger(p.reviewId) && typeof p.url === "string";
+  if (p.kind === "ruleset") {
+    const list = (v: unknown, each: (item: Record<string, unknown>) => boolean): boolean => Array.isArray(v) && v.every((item) => !!item && typeof item === "object" && each(item as Record<string, unknown>));
+    return typeof p.changedPathsDigest === "string" && Number.isInteger(p.requiredApprovals) && (p.requiredApprovals as number) >= 0 &&
+      list(p.rules, (r) => Number.isInteger(r.rulesetId) && typeof r.rulesetSource === "string") &&
+      list(p.matches, (m) => Number.isInteger(m.rulesetId) && typeof m.reviewerType === "string" && Number.isInteger(m.reviewerId) && typeof m.pattern === "string" && typeof m.path === "string") &&
+      list(p.approvals, (a) => typeof a.reviewer === "string" && Number.isInteger(a.reviewId) && typeof a.url === "string");
+  }
   return p.kind === "checks" && Array.isArray(p.checks) && p.checks.length > 0 && p.checks.every((c: Partial<CheckProvenance>) =>
     !!c && typeof c.name === "string" && Number.isInteger(c.checkRunId) && (c.runId === undefined || Number.isInteger(c.runId)) && typeof c.conclusion === "string" && typeof c.url === "string");
 }
@@ -45,6 +52,7 @@ function equalCandidate(a: CandidateIdentity, b: CandidateIdentity): boolean {
     .every((k) => (a as unknown as Record<string, unknown>)[k] === (b as unknown as Record<string, unknown>)[k]);
 }
 function equivalent(obligation: Obligation, current: CandidateIdentity, captured: CandidateIdentity, o: Observation): boolean {
+  if (o.provenance.kind === "ruleset") return false;
   if (obligation === "standards" || obligation === "spec") {
     return current.patchId === captured.patchId && current.requirementsDigest === captured.requirementsDigest && current.policyDigest === captured.policyDigest &&
       (current.reviewContextDigest ?? o.reviewContextDigest) === (captured.reviewContextDigest ?? o.reviewContextDigest);

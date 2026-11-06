@@ -47,6 +47,7 @@ This repository is the marketplace surface for Patina Project plugins and relate
 - `plugins/work/skills/implement/`: upstream mirror (mattpocock)
 - `plugins/work/skills/implement-spec/`: upstream mirror (mattpocock)
 - `plugins/work/skills/prototype/`: upstream mirror (mattpocock)
+- `plugins/work/skills/red-green/`: upstream mirror (mattpocock)
 - `plugins/work/skills/research/`: upstream mirror (mattpocock)
 - `plugins/work/skills/wayfinder/`: upstream mirror (mattpocock)
 - `plugins/work/skills/wizard/`: upstream mirror (mattpocock)

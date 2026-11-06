@@ -582,7 +582,7 @@
   },
   "plugins/work/skills/ask-matt/SKILL.md": {
     "kind": "policy",
-    "reason": "The index points at the renamed tutor skill instead of /teach, which now resolves to the Code teach.",
+    "reason": "The index points at the renamed tutor skill instead of /teach, which now resolves to the Code teach, and at the renamed red-green skill instead of /tdd, which now resolves to the Code tdd.",
     "upstream": {
       "status": "not-proposed"
     }
@@ -590,6 +590,27 @@
   "plugins/work/skills/design-control-loop/references/workflow-template.yml": {
     "kind": "policy",
     "reason": "Patina pins the template's GitHub Actions to commit SHAs, because the patinaproject monorepo's Semgrep scan rejects mutable action tags in vendored skills.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/work/skills/implement-spec/SKILL.md": {
+    "kind": "policy",
+    "reason": "Implementers call the renamed red-green skill instead of tdd, which now resolves to the Code tdd.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/work/skills/implement/SKILL.md": {
+    "kind": "policy",
+    "reason": "The skill points at the renamed red-green skill instead of /tdd, which now resolves to the Code tdd.",
+    "upstream": {
+      "status": "not-proposed"
+    }
+  },
+  "plugins/work/skills/red-green/SKILL.md": {
+    "kind": "policy",
+    "reason": "The Code plugin ships pstack's tdd, and a plugin release must keep skill names unique across plugins, so Patina renames mattpocock's tdd to red-green.",
     "upstream": {
       "status": "not-proposed"
     }

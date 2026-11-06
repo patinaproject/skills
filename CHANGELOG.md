@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.24.0](https://github.com/patinaproject/skills/compare/v4.23.0...v4.24.0) (2026-11-06)
+
+
+### Features
+
+* [#846](https://github.com/patinaproject/skills/issues/846) let pr-readiness follow path-based required reviewers ([#860](https://github.com/patinaproject/skills/issues/860)) ([6e48dd9](https://github.com/patinaproject/skills/commit/6e48dd9735dec83e9f3faa1e4f276625c6ff797e))
+
+
+### Bug Fixes
+
+* [#856](https://github.com/patinaproject/skills/issues/856) point work's implement skills at red-green ([#865](https://github.com/patinaproject/skills/issues/865)) ([6b3010e](https://github.com/patinaproject/skills/commit/6b3010e05041c9501500923fdaa9de6821ae3219))
+
 ## [4.23.0](https://github.com/patinaproject/skills/compare/v4.22.0...v4.23.0) (2026-11-06)
 
 

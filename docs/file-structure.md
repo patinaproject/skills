@@ -51,6 +51,7 @@ Work plugin skills live under `plugins/work/skills/<name>/`.
 - `plugins/work/skills/implement/`: upstream mirror (mattpocock)
 - `plugins/work/skills/implement-spec/`: upstream mirror (mattpocock)
 - `plugins/work/skills/prototype/`: upstream mirror (mattpocock)
+- `plugins/work/skills/red-green/`: upstream mirror (mattpocock)
 - `plugins/work/skills/research/`: upstream mirror (mattpocock)
 - `plugins/work/skills/wayfinder/`: upstream mirror (mattpocock)
 - `plugins/work/skills/wizard/`: upstream mirror (mattpocock)
@@ -134,6 +135,7 @@ Skills owned by this repository:
 | `implement` | `plugins/work/skills/implement/` | Upstream mattpocock mirror in the Work plugin |
 | `implement-spec` | `plugins/work/skills/implement-spec/` | Upstream mattpocock mirror in the Work plugin |
 | `prototype` | `plugins/work/skills/prototype/` | Upstream mattpocock mirror in the Work plugin |
+| `red-green` | `plugins/work/skills/red-green/` | Upstream mattpocock `tdd` mirror, renamed so skill names stay unique across plugins |
 | `research` | `plugins/work/skills/research/` | Upstream mattpocock mirror in the Work plugin |
 | `wayfinder` | `plugins/work/skills/wayfinder/` | Upstream mattpocock mirror in the Work plugin |
 | `wizard` | `plugins/work/skills/wizard/` | Upstream mattpocock mirror in the Work plugin |

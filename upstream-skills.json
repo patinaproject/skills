@@ -162,6 +162,11 @@
         },
         {
           "kind": "skill",
+          "source": "skills/engineering/tdd",
+          "destination": "plugins/work/skills/red-green"
+        },
+        {
+          "kind": "skill",
           "source": "skills/engineering/research",
           "destination": "plugins/work/skills/research"
         },

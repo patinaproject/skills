@@ -15,6 +15,7 @@ export const POLICY = JSON.stringify({
     behavior: { producer: "checks", checks: ["Verify skill overlay"] },
   },
 });
+export const RULESET_POLICY = JSON.stringify({ ...JSON.parse(POLICY), obligations: { ...JSON.parse(POLICY).obligations, standards: { producer: "ruleset" }, spec: { producer: "ruleset" } } });
 export const AUTO_MERGE_POLICY = JSON.stringify({ ...JSON.parse(POLICY), autoMerge: true });
 export const CHECK_NAMES = ["Validate pull request", "Check diff hygiene", "Unit tests", "Lint Actions workflows", "Lint Markdown", "Verify skill overlay"];
 
@@ -27,6 +28,19 @@ export function checkRun(name: string, extra: Partial<CheckRunFact> & { runId?: 
 export function review(extra: Partial<ReviewFact> = {}): ReviewFact {
   return { id: 77, login: "ted", userType: "User", permission: "write", state: "APPROVED", commitId: HEAD, submittedAt: "2026-10-01T01:00:00Z", htmlUrl: "https://github.com/o/r/pull/7#pullrequestreview-77", ...extra };
 }
+export function pullRequestRule(parameters: Record<string, unknown> = {}, meta: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    type: "pull_request",
+    parameters: { required_approving_review_count: 0, dismiss_stale_reviews_on_push: false, required_reviewers: [], require_code_owner_review: false, require_last_push_approval: false, required_review_thread_resolution: true, require_extra_approval_for_unattributed_changes: true, allowed_merge_methods: ["squash", "merge"], ...parameters },
+    ruleset_source_type: "Organization", ruleset_source: "patinaproject", ruleset_id: 15382168,
+    ...meta,
+  };
+}
+export const SRC_REVIEWER = { reviewer: { id: 456, type: "Team" }, file_patterns: ["src/**"], minimum_approvals: 2 };
+export const BRANCH_RULES: readonly unknown[] = [
+  { type: "required_status_checks", parameters: { required_status_checks: [{ context: "Unit tests", integration_id: 15368 }] }, ruleset_source_type: "Organization", ruleset_source: "patinaproject", ruleset_id: 15382168 },
+  pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [SRC_REVIEWER] }),
+];
 export const BODY = "## Why\n\nClose the self-approval path.\n\n## Evidence\n\nCI and a maintainer approval at the head.";
 
 export interface FakeForgeOptions {
@@ -46,12 +60,19 @@ export interface FakeForgeOptions {
   readonly requiredChecks?: readonly string[];
   readonly requiredChecksError?: string;
   readonly enableAutoMergeError?: string;
+  readonly branchRules?: readonly unknown[];
+  readonly branchRulesError?: string;
+  readonly changedFiles?: readonly unknown[];
+  readonly changedFilesTotal?: number;
+  readonly changedFilesError?: string;
 }
 export interface FakeForge extends Forge {
   readonly markReadyCalls: string[];
   readonly enableAutoMergeCalls: { head: string; method: "SQUASH" }[];
   readonly readRequiredChecksCalls: string[];
   readonly readAutoMergeStateCalls: number[];
+  readonly readBranchRulesCalls: string[];
+  readonly readChangedFilesCalls: number[];
 }
 export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const heads = options.heads ?? [HEAD];
@@ -65,7 +86,17 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   const enableAutoMergeCalls: FakeForge["enableAutoMergeCalls"] = [];
   const readRequiredChecksCalls: string[] = [];
   const readAutoMergeStateCalls: number[] = [];
+  const readBranchRulesCalls: string[] = [];
+  const readChangedFilesCalls: number[] = [];
   return {
+    readBranchRulesCalls, readChangedFilesCalls,
+    readBranchRules: (_repository, baseRef) => { readBranchRulesCalls.push(baseRef); if (options.branchRulesError) throw new Error(options.branchRulesError); return [...(options.branchRules ?? BRANCH_RULES)]; },
+    readChangedFiles: (_repository, number) => {
+      readChangedFilesCalls.push(number);
+      if (options.changedFilesError) throw new Error(options.changedFilesError);
+      const rows = [...(options.changedFiles ?? (options.changedPaths ?? ["src/index.ts"]).map((filename) => ({ filename })))];
+      return { rows, total: options.changedFilesTotal ?? rows.length };
+    },
     markReadyCalls, enableAutoMergeCalls, readRequiredChecksCalls, readAutoMergeStateCalls,
     readAutoMergeState: (_repository, number) => { readAutoMergeStateCalls.push(number); if (options.autoMergeStateError) throw new Error(options.autoMergeStateError); return { defaultBranch: options.defaultBranch === null ? "" : options.defaultBranch ?? "main", changedPaths: options.changedPaths ?? ["src/index.ts"], armed: options.armed }; },
     enableAutoMerge: (_repository, _number, head) => { if (options.enableAutoMergeError) throw new Error(options.enableAutoMergeError); enableAutoMergeCalls.push({ head, method: "SQUASH" }); },
