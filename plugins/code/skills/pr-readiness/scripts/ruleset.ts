@@ -72,11 +72,11 @@ function globSource(glob: string): string {
     } else if (char === "?") { out += "[^/]"; i++; }
     else if (char === "\\" && i + 1 < glob.length) { out += escapeRegex(glob[i + 1]!); i += 2; }
     else if (char === "[") {
-      const close = glob.indexOf("]", i + 2);
+      const negated = glob[i + 1] === "!" || glob[i + 1] === "^";
+      const start = i + (negated ? 2 : 1);
+      const close = glob.indexOf("]", start + 1);
       if (close === -1) { out += "\\["; i++; continue; }
-      const body = glob.slice(i + 1, close);
-      const negated = body[0] === "!" || body[0] === "^";
-      out += `[${negated ? "^" : ""}${(negated ? body.slice(1) : body).replace(/\\/g, "\\\\")}]`;
+      out += `[${negated ? "^" : ""}${glob.slice(start, close).replace(/[\\\]\[]/g, "\\$&")}]`;
       i = close + 1;
     } else { out += escapeRegex(char); i++; }
   }
@@ -85,7 +85,7 @@ function globSource(glob: string): string {
 
 interface Compiled { readonly pattern: string; readonly negated: boolean; readonly directoryOnly: boolean; readonly regex: RegExp; }
 function compile(line: string): Compiled | undefined {
-  let text = line.replace(/(?<!\\)\s+$/, "");
+  let text = line.replace(/(?<!\\) +$/, "");
   if (text === "" || text.startsWith("#")) return undefined;
   const negated = text.startsWith("!");
   if (negated) text = text.slice(1);
@@ -95,23 +95,39 @@ function compile(line: string): Compiled | undefined {
   const anchored = text.includes("/");
   if (text.startsWith("/")) text = text.slice(1);
   const body = globSource(text);
-  return { pattern: line, negated, directoryOnly, regex: new RegExp(anchored ? `^${body}$` : `^(?:.*/)?${body}$`) };
+  return { pattern: line, negated, directoryOnly, regex: new RegExp(anchored ? `^${body}$` : `^(?:.*/)?${body}$`, "s") };
 }
 
 // GitHub documents file_patterns as .gitignore syntax, negation and ordering included.
 // https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#required-reviewers
-/** Returns the positive pattern whose match survives every later negation, or undefined. */
-export function matchPatterns(patterns: readonly string[], path: string): string | undefined {
-  const parts = path.split("/");
-  const directories = parts.slice(0, -1).map((_, index) => parts.slice(0, index + 1).join("/"));
-  let decided: string | undefined;
-  for (const line of patterns) {
-    const compiled = compile(line);
-    if (!compiled) continue;
-    const targets = compiled.directoryOnly ? directories : [...directories, path];
-    if (targets.some((target) => compiled.regex.test(target))) decided = compiled.negated ? undefined : line;
+/** Last matching pattern wins. A directory-only pattern applies to directories only. */
+function decide(patterns: readonly Compiled[], target: string, isDirectory: boolean): Compiled | undefined {
+  let decided: Compiled | undefined;
+  for (const compiled of patterns) {
+    if (compiled.directoryOnly && !isDirectory) continue;
+    if (compiled.regex.test(target)) decided = compiled.negated ? undefined : compiled;
   }
   return decided;
+}
+
+/** Returns the first pattern that cannot be compiled, or undefined when every pattern is valid. */
+export function invalidPattern(patterns: readonly string[]): string | undefined {
+  return patterns.find((line) => { try { compile(line); return false; } catch { return true; } });
+}
+
+/**
+ * Returns the pattern that excludes the path under git's walk: from the shallowest parent directory down,
+ * a directory the patterns exclude excludes everything under it, so a later negation cannot re-include a file.
+ * https://git-scm.com/docs/gitignore
+ */
+export function matchPatterns(patterns: readonly string[], path: string): string | undefined {
+  const compiled = patterns.flatMap((line) => compile(line) ?? []);
+  const parts = path.split("/");
+  for (let depth = 1; depth < parts.length; depth++) {
+    const excluding = decide(compiled, parts.slice(0, depth).join("/"), true);
+    if (excluding) return excluding.pattern;
+  }
+  return decide(compiled, path, false)?.pattern;
 }
 
 export function matchEntries(rules: readonly PullRequestRule[], changedPaths: readonly string[]): ReviewerMatch[] {
@@ -132,7 +148,9 @@ export function matchEntries(rules: readonly PullRequestRule[], changedPaths: re
 
 export const ruleName = (rule: { readonly rulesetId: number; readonly rulesetSource: string }): string => `ruleset ${rule.rulesetId} (${rule.rulesetSource})`;
 export const reviewerName = (entry: { readonly reviewerType: string; readonly reviewerId: number }): string => `${entry.reviewerType} ${entry.reviewerId}`;
-export const matchName = (match: ReviewerMatch): string => `${reviewerName(match)} (pattern "${match.pattern}" matched ${match.path})`;
+/** Escapes control characters so a path or pattern cannot forge lines in a note or stderr. */
+export const printable = (text: string): string => /[\u0000-\u001f\u007f]/.test(text) ? JSON.stringify(text).slice(1, -1) : text;
+export const matchName = (match: ReviewerMatch): string => `${reviewerName(match)} (pattern "${printable(match.pattern)}" matched ${printable(match.path)})`;
 
 function cause(error: unknown): string { return error instanceof Error ? error.message : String(error); }
 
