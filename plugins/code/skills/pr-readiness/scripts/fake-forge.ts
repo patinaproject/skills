@@ -65,13 +65,10 @@ export interface FakeForgeOptions {
   readonly changedFiles?: readonly unknown[];
   readonly changedFilesTotal?: number;
   readonly changedFilesError?: string;
-  /** Successive `mergeStateStatus` reads; the last value repeats. */
   readonly mergeStates?: readonly string[];
   readonly isMergeQueueEnabled?: boolean;
   readonly mergeError?: string;
-  /** The `state` the merge mutation answers with when it does not fail. */
   readonly mergeResponseState?: string;
-  /** The PR `state` a reread finds after a failed merge. */
   readonly stateAfterMergeFailure?: string;
 }
 export const MERGE_OID = "fedcba9876543210fedcba9876543210fedcba98";

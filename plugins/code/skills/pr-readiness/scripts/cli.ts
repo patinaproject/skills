@@ -3,18 +3,19 @@ import { ACCEPTED, evaluateReadiness, type EvaluationReport } from "./evaluator.
 import { deriveObservations } from "./evidence.ts";
 import { autoMergePlan, parsePolicy, produceCommand, requiredCheckNames, rulesFromPolicy } from "./policy.ts";
 import { readRulesetFacts } from "./ruleset.ts";
-import { GhForge, FilePacketStore, candidateFromPullRequest, packetKey, type Forge, type PacketStore, type PullRequestState } from "./adapters.ts";
+import { GhForge, FilePacketStore, candidateFromPullRequest, packetKey, type Forge, type MergeStateStatus, type PacketStore, type PullRequestState } from "./adapters.ts";
 
 export interface ReadinessDependencies { readonly forge: Forge; readonly store: PacketStore; readonly mergeStateReads?: number; readonly mergeStateDelayMs?: number; }
 const sleep = (ms: number): void => { if (ms > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); };
 const message = (error: unknown): string => (error instanceof Error ? error.message : String(error));
-/** The states `gh pr merge --auto` merges at once. A merge queue takes the PR instead. */
+const orUndefined = <T>(read: () => T): T | undefined => { try { return read(); } catch { return undefined; } };
+const MERGEABLE_NOW: readonly MergeStateStatus[] = ["CLEAN", "HAS_HOOKS", "UNSTABLE"];
 function mergeableNow(deps: ReadinessDependencies, repository: string, number: number): boolean {
   const reads = deps.mergeStateReads ?? 5;
   for (let read = 1; ; read++) {
     const { mergeStateStatus, isMergeQueueEnabled } = deps.forge.readMergeState(repository, number);
     if (mergeStateStatus === "UNKNOWN" && read < reads) { sleep(deps.mergeStateDelayMs ?? 2000); continue; }
-    return !isMergeQueueEnabled && (mergeStateStatus === "CLEAN" || mergeStateStatus === "HAS_HOOKS" || mergeStateStatus === "UNSTABLE");
+    return !isMergeQueueEnabled && MERGEABLE_NOW.includes(mergeStateStatus);
   }
 }
 function squashMerge(deps: ReadinessDependencies, repository: string, number: number, head: string): void {
@@ -24,7 +25,8 @@ function squashMerge(deps: ReadinessDependencies, repository: string, number: nu
     if (result.state !== "MERGED" || !result.mergeCommitOid) throw new Error(`merge answered with state ${result.state}`);
     return done(result.mergeCommitOid);
   } catch (error) {
-    try { const now = deps.forge.readMergeOutcome(repository, number); if (now.state === "MERGED" && now.mergeCommitOid) return done(now.mergeCommitOid); } catch { /* the original merge error is the one to report */ }
+    const now = orUndefined(() => deps.forge.readMergeOutcome(repository, number));
+    if (now?.state === "MERGED" && now.mergeCommitOid) return done(now.mergeCommitOid);
     throw new Error(`PR #${number} is ready but not merged: ${message(error)}`);
   }
 }
@@ -96,9 +98,7 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
       else if (armed?.mergeMethod === "SQUASH" && armed.head === head) process.stdout.write(`auto-merge already armed (squash) at ${head}\n`);
       else {
         try { deps.forge.enableAutoMerge(repository, number, head); } catch (error) {
-          let nowMergeable = false;
-          try { nowMergeable = mergeableNow(deps, repository, number); } catch { /* the arm error is the one to report */ }
-          if (!nowMergeable) throw new Error(`PR #${number} is ready but auto-merge is not on: ${message(error)}`);
+          if (!orUndefined(() => mergeableNow(deps, repository, number))) throw new Error(`PR #${number} is ready but auto-merge is not on: ${message(error)}`);
           squashMerge(deps, repository, number, head);
           return 0;
         }
