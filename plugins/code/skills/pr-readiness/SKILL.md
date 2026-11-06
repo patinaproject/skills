@@ -53,7 +53,7 @@ The count is the largest of the base count and every matched entry's `minimum_ap
 It fails closed, and names the cause, when any of these holds.
 
 - The rules or the changed files cannot be read, the base has no `pull_request` rule, or the file list is truncated at GitHub's 3000-file cap.
-- A `required_reviewers` entry has empty or missing `file_patterns`. An entry with an invalid pattern, or with more than three `*` in one path segment, fails closed.
+- A `required_reviewers` entry has empty or missing `file_patterns`. An entry with an invalid pattern fails closed.
 - `dismiss_stale_reviews_on_push` or `require_last_push_approval` is off on any collected rule. Only this producer guards the flags. The `approval` producer is unchanged.
 - An eligible reviewer's latest decisive review is a change request.
 - No requirement applies by our match, yet `reviewDecision` is `REVIEW_REQUIRED` or `CHANGES_REQUESTED`. The disagreement means a pattern bug could otherwise pass silently.

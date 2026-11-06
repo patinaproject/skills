@@ -54,24 +54,36 @@ export function parsePullRequestRules(raw: readonly unknown[]): PullRequestRule[
   });
 }
 
-const escapeRegex = (char: string): string => char.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&");
-
-const POSIX_CLASSES: Readonly<Record<string, string>> = {
-  alnum: "a-zA-Z0-9", alpha: "a-zA-Z", blank: " \\t", cntrl: "\\x00-\\x1f\\x7f", digit: "0-9", graph: "\\x21-\\x7e",
-  lower: "a-z", print: "\\x20-\\x7e", punct: "!-\\/:-@\\[-`{-~", space: " \\t\\n\\r", upper: "A-Z", xdigit: "0-9A-Fa-f",
+type Range = readonly [number, number];
+const POSIX_CLASSES: Readonly<Record<string, readonly Range[]>> = {
+  alnum: [[48, 57], [65, 90], [97, 122]], alpha: [[65, 90], [97, 122]], blank: [[32, 32], [9, 9]], cntrl: [[0, 31], [127, 127]], digit: [[48, 57]], graph: [[33, 126]],
+  lower: [[97, 122]], print: [[32, 126]], punct: [[33, 47], [58, 64], [91, 96], [123, 126]], space: [[32, 32], [9, 10], [13, 13]], upper: [[65, 90]], xdigit: [[48, 57], [65, 70], [97, 102]],
 };
-const classChar = (char: string): string => char.replace(/[\\\]\[^-]/g, "\\$&");
 
-/** Reads a wildmatch bracket class at `start`. Returns undefined when it never closes, and throws on an unknown [:name:]. A class never matches a slash. */
-function bracketSource(glob: string, start: number): { source: string; end: number } | undefined {
+type Token =
+  | { readonly kind: "char"; readonly char: string }
+  | { readonly kind: "one" }
+  | { readonly kind: "any" }
+  | { readonly kind: "class"; readonly test: (char: string) => boolean }
+  | { readonly kind: "star" }
+  | { readonly kind: "anyStar" }
+  | { readonly kind: "dirs" };
+
+/** Reads a wildmatch bracket class at `start`. Returns undefined when it never closes, and throws on an unknown [:name:]. A class never matches a slash. A reversed range matches nothing. */
+function bracketToken(glob: string, start: number): { token: Token; end: number } | undefined {
   const negated = glob[start + 1] === "!" || glob[start + 1] === "^";
   let i = start + (negated ? 2 : 1);
   const first = i;
-  let body = "";
+  const ranges: Range[] = [];
   while (i < glob.length) {
     const char = glob[i]!;
     if (char === "]" && i > first) {
-      return { source: negated ? `[^${body}/]` : `(?!/)[${body}]`, end: i + 1 };
+      const test = (c: string): boolean => {
+        if (c === "/") return false;
+        const code = c.charCodeAt(0);
+        return ranges.some(([low, high]) => code >= low && code <= high) !== negated;
+      };
+      return { token: { kind: "class", test }, end: i + 1 };
     }
     if (char === "[" && glob[i + 1] === ":") {
       const close = glob.indexOf(":]", i + 2);
@@ -79,7 +91,7 @@ function bracketSource(glob: string, start: number): { source: string; end: numb
         const name = glob.slice(i + 2, close);
         const set = POSIX_CLASSES[name];
         if (set === undefined) throw new Error(`unknown character class [:${name}:]`);
-        body += set;
+        ranges.push(...set);
         i = close + 2;
         continue;
       }
@@ -97,47 +109,82 @@ function bracketSource(glob: string, start: number): { source: string; end: numb
         if (i >= glob.length) return undefined;
         high = glob[i++]!;
       }
-      body += `${classChar(low)}-${classChar(high)}`;
-    } else body += classChar(low);
+      ranges.push([low.charCodeAt(0), high.charCodeAt(0)]);
+    } else ranges.push([low.charCodeAt(0), low.charCodeAt(0)]);
   }
   return undefined;
 }
 
-const MAX_STARS_PER_SEGMENT = 3;
-
-/** Throws on an unknown [:name:] or on a path segment with more than three wildcard runs, whose regex backtracks without bound. */
-function globSource(glob: string): string {
-  let out = "";
+/** Tokenizes a glob once. Throws on an unknown [:name:]. */
+function tokenize(glob: string): Token[] {
+  const tokens: Token[] = [];
   let i = 0;
-  let stars = 0;
   while (i < glob.length) {
     const char = glob[i]!;
     if (char === "*") {
       let end = i;
       while (glob[end] === "*") end++;
       const afterSlashOrStart = i === 0 || glob[i - 1] === "/";
-      if (end - i >= 2 && afterSlashOrStart && glob[end] === "/") { out += "(?:.*/)?"; i = end + 1; continue; }
-      if (end - i >= 2 && afterSlashOrStart && end === glob.length) { out += ".*"; i = end; continue; }
-      if (++stars > MAX_STARS_PER_SEGMENT) throw new Error(`more than ${MAX_STARS_PER_SEGMENT} * in one path segment`);
-      out += "[^/]*";
-      i = end;
-    } else if (char === "?") { out += "[^/]"; i++; }
-    else if (char === "\\" && i + 1 < glob.length) { out += escapeRegex(glob[i + 1]!); i += 2; }
+      if (end - i >= 2 && afterSlashOrStart && glob[end] === "/") tokens.push({ kind: "dirs" });
+      else if (end - i >= 2 && afterSlashOrStart && end === glob.length) {
+        if (i > 0) tokens.push({ kind: "any" });
+        tokens.push({ kind: "anyStar" });
+      } else tokens.push({ kind: "star" });
+      i = tokens[tokens.length - 1]!.kind === "dirs" ? end + 1 : end;
+    } else if (char === "?") { tokens.push({ kind: "one" }); i++; }
+    else if (char === "\\" && i + 1 < glob.length) { tokens.push({ kind: "char", char: glob[i + 1]! }); i += 2; }
     else if (char === "[") {
-      const bracket = bracketSource(glob, i);
-      if (bracket === undefined) { out += "\\["; i++; continue; }
-      out += bracket.source;
+      const bracket = bracketToken(glob, i);
+      if (bracket === undefined) { tokens.push({ kind: "char", char }); i++; continue; }
+      tokens.push(bracket.token);
       i = bracket.end;
-    } else {
-      if (char === "/") stars = 0;
-      out += escapeRegex(char);
-      i++;
-    }
+    } else { tokens.push({ kind: "char", char }); i++; }
   }
-  return out;
+  return tokens;
 }
 
-interface Compiled { readonly pattern: string; readonly negated: boolean; readonly directoryOnly: boolean; readonly regex: RegExp; }
+const isSkippable = (token: Token): boolean => token.kind === "star" || token.kind === "anyStar" || token.kind === "dirs";
+
+/**
+ * Matches without backtracking by tracking the set of live token positions, so the cost is tokens times text length.
+ * Returns, for every length n, whether the first n characters of the text match the whole pattern.
+ */
+function matchingPrefixes(tokens: readonly Token[], text: string): boolean[] {
+  const matches: boolean[] = new Array(text.length + 1).fill(false);
+  const count = tokens.length;
+  let live = new Uint8Array(count + 1);
+  let next = new Uint8Array(count + 1);
+  const close = (set: Uint8Array): void => { for (let p = 0; p < count; p++) if (set[p] === 1 && isSkippable(tokens[p]!)) set[p + 1] = 1; };
+  live[0] = 1;
+  close(live);
+  matches[0] = live[count] === 1;
+  for (let j = 0; j < text.length; j++) {
+    const char = text[j]!;
+    const slash = char === "/";
+    next.fill(0);
+    let any = false;
+    for (let p = 0; p < count; p++) {
+      if (live[p] === 0) continue;
+      const token = tokens[p]!;
+      switch (token.kind) {
+        case "char": if (char === token.char) { next[p + 1] = 1; any = true; } break;
+        case "one": if (!slash) { next[p + 1] = 1; any = true; } break;
+        case "any": next[p + 1] = 1; any = true; break;
+        case "class": if (token.test(char)) { next[p + 1] = 1; any = true; } break;
+        case "star": if (!slash) { next[p] = 1; any = true; } break;
+        case "anyStar": next[p] = 1; any = true; break;
+        case "dirs": next[p] = 1; if (slash) next[p + 1] = 1; any = true; break;
+      }
+    }
+    if (!any) return matches;
+    close(next);
+    const swap = live; live = next; next = swap;
+    matches[j + 1] = live[count] === 1;
+  }
+  return matches;
+}
+
+interface Compiled { readonly pattern: string; readonly negated: boolean; readonly directoryOnly: boolean; readonly tokens: readonly Token[]; }
 function compile(line: string): Compiled | undefined {
   let text = line.replace(/(?<!\\) +$/, "");
   if (text === "" || text.startsWith("#")) return undefined;
@@ -148,19 +195,19 @@ function compile(line: string): Compiled | undefined {
   if (text === "") return undefined;
   const anchored = text.includes("/");
   if (text.startsWith("/")) text = text.slice(1);
-  const body = globSource(text);
-  return { pattern: line, negated, directoryOnly, regex: new RegExp(anchored ? `^${body}$` : `^(?:.*/)?${body}$`, "s") };
+  const body = tokenize(text);
+  return { pattern: line, negated, directoryOnly, tokens: anchored ? body : [{ kind: "dirs" }, ...body] };
 }
 
 // GitHub documents file_patterns as .gitignore syntax, negation and ordering included.
 // https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#required-reviewers
-/** Last matching pattern wins. A directory-only pattern applies to directories only. */
-function decide(patterns: readonly Compiled[], target: string, isDirectory: boolean): Compiled | undefined {
+/** Last matching pattern wins. A directory-only pattern applies to directories only. `length` is how much of the path is the target. */
+function decide(patterns: readonly Compiled[], matched: readonly (readonly boolean[])[], length: number, isDirectory: boolean): Compiled | undefined {
   let decided: Compiled | undefined;
-  for (const compiled of patterns) {
-    if (compiled.directoryOnly && !isDirectory) continue;
-    if (compiled.regex.test(target)) decided = compiled.negated ? undefined : compiled;
-  }
+  patterns.forEach((compiled, index) => {
+    if (compiled.directoryOnly && !isDirectory) return;
+    if (matched[index]![length]) decided = compiled.negated ? undefined : compiled;
+  });
   return decided;
 }
 
@@ -176,12 +223,15 @@ export function invalidPattern(patterns: readonly string[]): string | undefined 
  */
 export function matchPatterns(patterns: readonly string[], path: string): string | undefined {
   const compiled = patterns.flatMap((line) => compile(line) ?? []);
+  const matched = compiled.map(({ tokens }) => matchingPrefixes(tokens, path));
+  let length = 0;
   const parts = path.split("/");
   for (let depth = 1; depth < parts.length; depth++) {
-    const excluding = decide(compiled, parts.slice(0, depth).join("/"), true);
+    length += parts[depth - 1]!.length + (depth > 1 ? 1 : 0);
+    const excluding = decide(compiled, matched, length, true);
     if (excluding) return excluding.pattern;
   }
-  return decide(compiled, path, false)?.pattern;
+  return decide(compiled, matched, path.length, false)?.pattern;
 }
 
 export function matchEntries(rules: readonly PullRequestRule[], changedPaths: readonly string[]): ReviewerMatch[] {

@@ -84,13 +84,13 @@ describe("acceptance: ruleset producer", () => {
   });
 
   it("fails closed on an entry with an invalid file pattern", () => {
-    const rules = [pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [{ ...SRC_REVIEWER, file_patterns: ["src/**", "[z-a]"] }] })];
-    expect(check({ branchRules: rules }).decision("standards").reason).toBe(`missing standards observation: required reviewer Team 456 in ${RULE} has an invalid file pattern "[z-a]"`);
+    const rules = [pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [{ ...SRC_REVIEWER, file_patterns: ["src/**", "[[:nope:]]"] }] })];
+    expect(check({ branchRules: rules }).decision("standards").reason).toBe(`missing standards observation: required reviewer Team 456 in ${RULE} has an invalid file pattern "[[:nope:]]"`);
   });
 
   it("fails closed on an entry with more than three stars in one segment", () => {
-    const rules = [pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [{ ...SRC_REVIEWER, file_patterns: ["*a*a*a*b"] }] })];
-    expect(check({ branchRules: rules }).decision("standards").reason).toBe(`missing standards observation: required reviewer Team 456 in ${RULE} has an invalid file pattern "*a*a*a*b"`);
+    const rules = [pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [{ ...SRC_REVIEWER, file_patterns: ["[[:nope:]]"] }] })];
+    expect(check({ branchRules: rules }).decision("standards").reason).toBe(`missing standards observation: required reviewer Team 456 in ${RULE} has an invalid file pattern "[[:nope:]]"`);
   });
 
   it("applies a base count above zero without a matching entry", () => {

@@ -94,18 +94,20 @@ describe("invalidPattern", () => {
   });
 });
 
-describe("star limit", () => {
-  it("reports a segment with four stars", () => { expect(invalidPattern(["src/**", "*a*a*a*b"])).toBe("*a*a*a*b"); });
-  it("reports four stars in a later segment", () => { expect(invalidPattern(["src/*a*a*a*b/x"])).toBe("src/*a*a*a*b/x"); });
-  it("accepts three stars in a segment", () => { expect(invalidPattern(["*a*b*c"])).toBeUndefined(); });
-  it("counts stars per segment", () => { expect(invalidPattern(["*a*b*c/*a*b*c/**/*d*e"])).toBeUndefined(); });
-  it("ignores escaped stars and stars in a class", () => { expect(invalidPattern(["\\*a*b*c*d*e[*]"])).toBe("\\*a*b*c*d*e[*]"); expect(invalidPattern(["\\*a\\*b*c*d[*]"])).toBeUndefined(); });
-  it("matches three stars against a long path in bounded time", () => {
-    const start = performance.now();
-    expect(matchPatterns(["*a*a*b"], "a".repeat(255))).toBeUndefined();
-    const elapsed = performance.now() - start;
-    expect(elapsed).toBeLessThan(1000);
-  });
+describe("wildcard runs", () => {
+  it("accepts four stars in a segment", () => { expect(invalidPattern(["*a*a*a*b"])).toBeUndefined(); expect(matchPatterns(["*a*a*a*b"], "xaxaxaxb")).toBe("*a*a*a*b"); });
+  it("accepts stars either side of a slash", () => { expect(invalidPattern(["*a*a*/*b*b"])).toBeUndefined(); expect(matchPatterns(["*a*a*/*b*b"], "xaxa/ybyb")).toBe("*a*a*/*b*b"); });
+  it("matches nothing for a reversed range", () => { expect(invalidPattern(["[z-a]"])).toBeUndefined(); expect(matchPatterns(["[z-a]"], "m")).toBeUndefined(); expect(matchPatterns(["[z-a]"], "a")).toBeUndefined(); });
+  const timed = (name: string, pattern: string, path: string): void => {
+    it(name, () => {
+      const start = performance.now();
+      expect(matchPatterns([pattern], path)).toBeUndefined();
+      expect(performance.now() - start).toBeLessThan(250);
+    });
+  };
+  timed("matches two ** segments against a deep path in bounded time", "**/a/**/a/**/b", `${"a/".repeat(500)}c`);
+  timed("matches five stars against a long segment in bounded time", "*a*a*a*a*b", "a".repeat(255));
+  timed("matches ** with stars against long segments in bounded time", "**/*a*a*b", Array.from({ length: 4 }, () => "a".repeat(249)).join("/"));
 });
 
 describe("printable", () => {
