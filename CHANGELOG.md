@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.26.0](https://github.com/patinaproject/skills/compare/v4.25.0...v4.26.0) (2026-11-07)
+
+
+### Features
+
+* [#841](https://github.com/patinaproject/skills/issues/841) read the repository's REVIEW.md in code-review ([#873](https://github.com/patinaproject/skills/issues/873)) ([2840e5e](https://github.com/patinaproject/skills/commit/2840e5e48cc57a0d1c20af33d8da362b3d4bd0c3))
+
 ## [4.25.0](https://github.com/patinaproject/skills/compare/v4.24.1...v4.25.0) (2026-11-07)
 
 
