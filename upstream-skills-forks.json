@@ -99,7 +99,7 @@
   },
   "plugins/code/skills/code-review/SKILL.md": {
     "kind": "policy",
-    "reason": "Patina adds an Output contract section that fixes the Standards, Spec, Evidence, Bugs, and Security Markdown findings across runtimes, adds the Evidence axis that compares each pull request claim with its evidence, adds the Bugs and Security axes, tags every finding Important, Nit, or Pre-existing with a blocking rule, reports one finding per cause with every location, prints the reviewed range, reviews only the commits after an earlier reviewed head while rechecking and never repeating that round's findings, and keeps the report in the agent's session instead of posting it on the pull request.",
+    "reason": "Patina adds an Output contract section that fixes the Standards, Spec, Evidence, Bugs, and Security Markdown findings across runtimes, adds the Evidence axis that compares each pull request claim with its evidence, adds the Bugs and Security axes, tags every finding Important, Nit, or Pre-existing with a blocking rule, reports one finding per cause with every location, prints the reviewed range, reviews only the commits after an earlier reviewed head while rechecking and never repeating that round's findings, applies the repository's root REVIEW.md as of the fixed point (severity rules, skip paths, count limits, and extra checks, with Security findings exempt), and keeps the report in the agent's session instead of posting it on the pull request.",
     "upstream": {
       "status": "not-proposed"
     }
