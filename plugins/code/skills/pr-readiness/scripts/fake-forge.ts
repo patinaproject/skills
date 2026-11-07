@@ -17,6 +17,7 @@ export const POLICY = JSON.stringify({
 });
 export const RULESET_POLICY = JSON.stringify({ ...JSON.parse(POLICY), obligations: { ...JSON.parse(POLICY).obligations, standards: { producer: "ruleset" }, spec: { producer: "ruleset" } } });
 export const AUTO_MERGE_POLICY = JSON.stringify({ ...JSON.parse(POLICY), autoMerge: true });
+export const CHECKS_ONLY_POLICY = JSON.stringify({ ...JSON.parse(POLICY), autoMerge: true, obligations: { ...JSON.parse(POLICY).obligations, standards: { producer: "checks", checks: ["Lint Markdown"] }, spec: { producer: "checks", checks: ["Validate pull request"] } } });
 export const CHECK_NAMES = ["Validate pull request", "Check diff hygiene", "Unit tests", "Lint Actions workflows", "Lint Markdown", "Verify skill overlay"];
 
 let nextId = 1000;
@@ -75,6 +76,7 @@ export const MERGE_OID = "fedcba9876543210fedcba9876543210fedcba98";
 export interface FakeForge extends Forge {
   readonly markReadyCalls: string[];
   readonly enableAutoMergeCalls: { head: string; method: "SQUASH" }[];
+  readonly disableAutoMergeCalls: number[];
   readonly readRequiredChecksCalls: string[];
   readonly readAutoMergeStateCalls: number[];
   readonly readBranchRulesCalls: string[];
@@ -93,6 +95,7 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
   });
   const markReadyCalls: string[] = [];
   const enableAutoMergeCalls: FakeForge["enableAutoMergeCalls"] = [];
+  const disableAutoMergeCalls: number[] = [];
   const readRequiredChecksCalls: string[] = [];
   const readAutoMergeStateCalls: number[] = [];
   const readBranchRulesCalls: string[] = [];
@@ -114,6 +117,8 @@ export function fakeForge(options: FakeForgeOptions = {}): FakeForge {
       const rows = [...(options.changedFiles ?? (options.changedPaths ?? ["src/index.ts"]).map((filename) => ({ filename })))];
       return { rows, total: options.changedFilesTotal ?? rows.length };
     },
+    disableAutoMergeCalls,
+    disableAutoMerge: (_repository, number) => { disableAutoMergeCalls.push(number); },
     markReadyCalls, enableAutoMergeCalls, readRequiredChecksCalls, readAutoMergeStateCalls,
     readAutoMergeState: (_repository, number) => { readAutoMergeStateCalls.push(number); if (options.autoMergeStateError) throw new Error(options.autoMergeStateError); return { defaultBranch: options.defaultBranch === null ? "" : options.defaultBranch ?? "main", changedPaths: options.changedPaths ?? ["src/index.ts"], armed: options.armed }; },
     enableAutoMerge: (_repository, _number, head) => { if (options.enableAutoMergeError) throw new Error(options.enableAutoMergeError); enableAutoMergeCalls.push({ head, method: "SQUASH" }); },
