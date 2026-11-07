@@ -30,6 +30,36 @@
       "id": 6,
       "prompt": "Run `bash plugins/code/skills/code-review/evals/make-fixture.sh /tmp/cr-eval-6`, then in /tmp/cr-eval-6 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
       "expected_output": "The `items[items.length]` bug in `last()` at `src/list.js:2`, a line the branch did not change, is tagged `Pre-existing`, does not count as blocking, and appears in the `Follow-up candidates` list."
+    },
+    {
+      "id": 7,
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-review-rules-fixture.sh /tmp/cr-eval-7 nit-control`, then in /tmp/cr-eval-7 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
+      "expected_output": "With no `REVIEW.md`, the report has at least 3 findings tagged `Nit` for `src/pad.js` and does not mention `REVIEW.md`."
+    },
+    {
+      "id": 8,
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-review-rules-fixture.sh /tmp/cr-eval-8 nit`, then in /tmp/cr-eval-8 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
+      "expected_output": "The base `REVIEW.md` says \"Report at most 2 nits per review.\" The report has at most 2 findings tagged `Nit` and an `Omitted by REVIEW.md` line with a nonzero count for that rule."
+    },
+    {
+      "id": 9,
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-review-rules-fixture.sh /tmp/cr-eval-9 skip`, then in /tmp/cr-eval-9 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
+      "expected_output": "The base `REVIEW.md` skips `generated/**`. No Standards, Spec, Evidence, or Bugs finding cites `generated/x.js`, and the Bugs axis reports the `i <= rows.length` bound at `src/x.js:3`. The Security axis still reports the hard-coded key in `generated/y.js` as a blocking finding. The Spec axis still reports that `exportCsv(rows)` is missing."
+    },
+    {
+      "id": 10,
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-review-rules-fixture.sh /tmp/cr-eval-10 severity`, then in /tmp/cr-eval-10 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
+      "expected_output": "The base `REVIEW.md` makes missing JSDoc on an exported function `Important`. The report has an `Important` finding on `src/area.js` for the undocumented `area` export that cites `REVIEW.md`."
+    },
+    {
+      "id": 11,
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-review-rules-fixture.sh /tmp/cr-eval-11 head-only`, then in /tmp/cr-eval-11 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
+      "expected_output": "The base has no `REVIEW.md`; the diff adds one that skips `src/**`. The Bugs axis still reports the `i <= rows.length` bound at `src/x.js:3`, and the report header says the diff changes `REVIEW.md`."
+    },
+    {
+      "id": 12,
+      "prompt": "Run `bash plugins/code/skills/code-review/evals/make-review-rules-fixture.sh /tmp/cr-eval-12 none`, then in /tmp/cr-eval-12 run code-review with fixed point `base` and spec `spec.md`. Pass no reviewed head and no earlier findings. There is no pull request.",
+      "expected_output": "The base has no root `REVIEW.md`, only `docs/REVIEW.md` holding `ZQX-REVIEW-MARKER`. The marker appears in no transcript file of the run and not in the report. The report has the `## Standards`, `## Spec`, `## Evidence`, `## Bugs`, and `## Security` headings, tags every finding `Important`, `Nit`, or `Pre-existing`, and the Bugs axis reports the `i <= rows.length` bound at `src/x.js:3`."
     }
   ]
 }
