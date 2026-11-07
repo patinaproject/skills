@@ -73,10 +73,9 @@ describe("pr-readiness run", () => {
 
 describe("pr-readiness publish auto-merge", () => {
   const publish = (forge: FakeForge) => invoke(["publish", "--repo", "o/r", "--pr", "7", "--takeover", "true"], forge);
-  // This repository's live main rule: no approval required, no reviewers, both stale-review flags off.
-  const autoForge = (options: FakeForgeOptions = {}) => fakeForge({ branchRules: [pullRequestRule()], ...options });
+  const liveMainRuleForge = (options: FakeForgeOptions = {}) => fakeForge({ branchRules: [pullRequestRule()], ...options });
   it("arms one squash auto-merge at the published head after the ready transition", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY });
     const result = publish(forge);
     expect(result.code).toBe(0);
     expect(forge.markReadyCalls).toEqual([HEAD]);
@@ -95,7 +94,7 @@ describe("pr-readiness publish auto-merge", () => {
     }
   });
   it("skips a stacked child whose base is not the default branch", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, baseRef: "feature/parent" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, baseRef: "feature/parent" });
     const result = publish(forge);
     expect(result.code).toBe(0);
     expect(forge.markReadyCalls).toEqual([HEAD]);
@@ -104,14 +103,14 @@ describe("pr-readiness publish auto-merge", () => {
     expect(result.stdout).toContain("auto-merge skipped: base feature/parent is not the default branch main\n");
   });
   it("skips a diff that touches workflows or the policy file, naming the paths", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, changedPaths: ["src/a.ts", ".github/workflows/x.yml", ".github/pr-readiness.json"] });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, changedPaths: ["src/a.ts", ".github/workflows/x.yml", ".github/pr-readiness.json"] });
     const result = publish(forge);
     expect(result.code).toBe(0);
     expect(forge.enableAutoMergeCalls).toEqual([]);
     expect(result.stdout).toContain("auto-merge skipped: the diff touches .github/workflows/x.yml, .github/pr-readiness.json\n");
   });
   it("fails closed without marking ready when the default branch is unknown", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, defaultBranch: null });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, defaultBranch: null });
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(result.stderr).toContain("default branch");
@@ -119,7 +118,7 @@ describe("pr-readiness publish auto-merge", () => {
   });
   it("refuses, leaving the PR untouched, when the base does not require a policy check", () => {
     const store = new MemoryPacketStore();
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, requiredChecks: CHECK_NAMES.filter((name) => name !== "Unit tests" && name !== "Lint Markdown") });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, requiredChecks: CHECK_NAMES.filter((name) => name !== "Unit tests" && name !== "Lint Markdown") });
     const result = invoke(["publish", "--repo", "o/r", "--pr", "7", "--takeover", "true"], forge, store);
     expect(result.code).toBe(1);
     expect(result.stderr).toBe('pr-readiness: cannot arm auto-merge: main does not require "Unit tests", "Lint Markdown"\n');
@@ -128,7 +127,7 @@ describe("pr-readiness publish auto-merge", () => {
     expect(store.packets.size).toBe(0);
   });
   it("fails closed when the rules read throws", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, requiredChecksError: "HTTP 502" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, requiredChecksError: "HTTP 502" });
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(result.stderr).toBe("pr-readiness: HTTP 502\n");
@@ -136,7 +135,7 @@ describe("pr-readiness publish auto-merge", () => {
     expect(forge.enableAutoMergeCalls).toEqual([]);
   });
   it("fails closed before the ready transition when the arm-state read throws", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, autoMergeStateError: "forge graphql failed" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, autoMergeStateError: "forge graphql failed" });
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(result.stderr).toBe("pr-readiness: forge graphql failed\n");
@@ -145,7 +144,7 @@ describe("pr-readiness publish auto-merge", () => {
     expect(forge.enableAutoMergeCalls).toEqual([]);
   });
   it("does nothing when already armed with squash at the published head", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD } });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD } });
     const result = publish(forge);
     expect(result.code).toBe(0);
     expect(forge.enableAutoMergeCalls).toEqual([]);
@@ -153,7 +152,7 @@ describe("pr-readiness publish auto-merge", () => {
   });
   it("replaces an arm at an older head, an unknown head, or another method", () => {
     for (const armed of [{ mergeMethod: "SQUASH", head: "e".repeat(40) }, { mergeMethod: "SQUASH" }, { mergeMethod: "MERGE", head: HEAD }]) {
-      const forge = autoForge({ policy: AUTO_MERGE_POLICY, armed });
+      const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, armed });
       expect(publish(forge).code).toBe(0);
       expect(forge.enableAutoMergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
     }
@@ -162,7 +161,7 @@ describe("pr-readiness publish auto-merge", () => {
   const armedOut = `PR #7 is ready at ${HEAD}\nauto-merge (squash) armed at ${HEAD}\n`;
   it("squash-merges a PR that is already mergeable instead of arming it", () => {
     for (const status of ["CLEAN", "HAS_HOOKS", "UNSTABLE"]) {
-      const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: [status] });
+      const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: [status] });
       const result = publish(forge);
       expect(result).toEqual({ code: 0, stdout: merged(), stderr: "" });
       expect(forge.markReadyCalls).toEqual([HEAD]);
@@ -172,13 +171,13 @@ describe("pr-readiness publish auto-merge", () => {
     }
   });
   it("reads again while the merge state is UNKNOWN, then merges", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["UNKNOWN", "UNKNOWN", "CLEAN"] });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["UNKNOWN", "UNKNOWN", "CLEAN"] });
     expect(publish(forge)).toEqual({ code: 0, stdout: merged(), stderr: "" });
     expect(forge.readMergeStateCalls).toHaveLength(3);
     expect(forge.mergeCalls).toHaveLength(1);
   });
   it("arms after five UNKNOWN reads", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["UNKNOWN"] });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["UNKNOWN"] });
     const result = publish(forge);
     expect(result).toEqual({ code: 0, stdout: armedOut, stderr: "" });
     expect(forge.readMergeStateCalls).toHaveLength(5);
@@ -186,37 +185,37 @@ describe("pr-readiness publish auto-merge", () => {
   });
   it("arms every state that is not immediately mergeable", () => {
     for (const status of ["BLOCKED", "BEHIND", "DIRTY", "DRAFT"]) {
-      const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: [status] });
+      const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: [status] });
       expect(publish(forge)).toEqual({ code: 0, stdout: armedOut, stderr: "" });
       expect(forge.readMergeStateCalls).toHaveLength(1);
       expect(forge.mergeCalls).toEqual([]);
     }
   });
   it("arms a CLEAN PR on a base with a merge queue", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], isMergeQueueEnabled: true });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], isMergeQueueEnabled: true });
     expect(publish(forge)).toEqual({ code: 0, stdout: armedOut, stderr: "" });
     expect(forge.mergeCalls).toEqual([]);
     expect(forge.enableAutoMergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
   });
   it("merges a CLEAN PR that is already armed at the head", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD }, mergeStates: ["CLEAN"] });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD }, mergeStates: ["CLEAN"] });
     expect(publish(forge)).toEqual({ code: 0, stdout: merged("already ready"), stderr: "" });
     expect(forge.mergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
     expect(forge.enableAutoMergeCalls).toEqual([]);
   });
   it("keeps an armed PR armed when it is not mergeable", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD } });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD } });
     expect(publish(forge)).toEqual({ code: 0, stdout: `PR #7 is already ready at ${HEAD}\nauto-merge already armed (squash) at ${HEAD}\n`, stderr: "" });
     expect(forge.mergeCalls).toEqual([]);
   });
   it("exits 1 when the arm replacing an older-head arm is refused and the PR is not mergeable", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, armed: { mergeMethod: "SQUASH", head: "e".repeat(40) }, enableAutoMergeError: "Pull request is in clean status" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, armed: { mergeMethod: "SQUASH", head: "e".repeat(40) }, enableAutoMergeError: "Pull request is in clean status" });
     const result = publish(forge);
     expect(result).toEqual({ code: 1, stdout: `PR #7 is ready at ${HEAD}\n`, stderr: "pr-readiness: PR #7 is ready but auto-merge is not on: Pull request is in clean status\n" });
     expect(forge.mergeCalls).toEqual([]);
   });
   it("merges when the arm is refused and the PR then reads CLEAN", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, enableAutoMergeError: "Pull request is in clean status", mergeStates: ["BLOCKED", "CLEAN"] });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, enableAutoMergeError: "Pull request is in clean status", mergeStates: ["BLOCKED", "CLEAN"] });
     const result = publish(forge);
     expect(result).toEqual({ code: 0, stdout: merged(), stderr: "" });
     expect(forge.readMergeStateCalls).toHaveLength(2);
@@ -224,7 +223,7 @@ describe("pr-readiness publish auto-merge", () => {
     expect(forge.mergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
   });
   it("reports a ready PR without auto-merge when the forge refuses to arm and the PR is not mergeable", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, enableAutoMergeError: "Auto merge is not allowed for this repository" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, enableAutoMergeError: "Auto merge is not allowed for this repository" });
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(forge.markReadyCalls).toEqual([HEAD]);
@@ -233,7 +232,7 @@ describe("pr-readiness publish auto-merge", () => {
     expect(result.stderr).toBe("pr-readiness: PR #7 is ready but auto-merge is not on: Auto merge is not allowed for this repository\n");
   });
   it("fails closed when the merge-state read is malformed", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY });
     forge.readMergeState = () => { throw new Error("malformed pull request merge state: mergeStateStatus"); };
     const result = publish(forge);
     expect(result.code).toBe(1);
@@ -242,13 +241,13 @@ describe("pr-readiness publish auto-merge", () => {
     expect(forge.mergeCalls).toEqual([]);
   });
   it("accepts a failed merge call when a reread finds the PR merged", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], mergeError: "socket hang up", stateAfterMergeFailure: "MERGED" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], mergeError: "socket hang up", stateAfterMergeFailure: "MERGED" });
     expect(publish(forge)).toEqual({ code: 0, stdout: merged(), stderr: "" });
     expect(forge.mergeCalls).toHaveLength(1);
     expect(forge.readMergeOutcomeCalls).toEqual([7]);
   });
   it("fails closed, without retry or arming, when the merge fails and the PR is still open", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], mergeError: "Squash merges are not allowed" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], mergeError: "Squash merges are not allowed" });
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(result.stderr).toBe("pr-readiness: PR #7 is ready but not merged: Squash merges are not allowed\n");
@@ -257,21 +256,21 @@ describe("pr-readiness publish auto-merge", () => {
     expect(forge.readMergeOutcomeCalls).toEqual([7]);
   });
   it("treats a merge response without state MERGED as a failure", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], mergeResponseState: "OPEN" });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], mergeResponseState: "OPEN" });
     const result = publish(forge);
     expect(result.code).toBe(1);
     expect(result.stderr).toBe("pr-readiness: PR #7 is ready but not merged: merge answered with state OPEN\n");
     expect(forge.readMergeOutcomeCalls).toEqual([7]);
   });
   it("never merges a PR whose policy checks the base does not require", () => {
-    const forge = autoForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], requiredChecks: ["Unit tests"] });
+    const forge = liveMainRuleForge({ policy: AUTO_MERGE_POLICY, mergeStates: ["CLEAN"], requiredChecks: ["Unit tests"] });
     expect(publish(forge).code).toBe(1);
     expect(forge.markReadyCalls).toEqual([]);
     expect(forge.mergeCalls).toEqual([]);
     expect(forge.readMergeStateCalls).toEqual([]);
   });
   it("reads no merge state on the skip and off paths", () => {
-    for (const forge of [autoForge({ policy: AUTO_MERGE_POLICY, baseRef: "feature/parent", mergeStates: ["CLEAN"] }), autoForge({ policy: AUTO_MERGE_POLICY, changedPaths: [".github/workflows/x.yml"], mergeStates: ["CLEAN"] }), fakeForge({ policy: POLICY, mergeStates: ["CLEAN"] })]) {
+    for (const forge of [liveMainRuleForge({ policy: AUTO_MERGE_POLICY, baseRef: "feature/parent", mergeStates: ["CLEAN"] }), liveMainRuleForge({ policy: AUTO_MERGE_POLICY, changedPaths: [".github/workflows/x.yml"], mergeStates: ["CLEAN"] }), fakeForge({ policy: POLICY, mergeStates: ["CLEAN"] })]) {
       expect(publish(forge).code).toBe(0);
       expect(forge.readMergeStateCalls).toEqual([]);
       expect(forge.mergeCalls).toEqual([]);

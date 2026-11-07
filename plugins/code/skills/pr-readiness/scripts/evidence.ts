@@ -140,7 +140,6 @@ export type ApprovalRequirement =
     readonly decision: ReviewDecision;
   };
 
-/** The one reader of a pull request's live approval requirement. Callers decide what a stale-review flag or a missing approval means for them. */
 export function approvalRequirement(head: string, evidence: ForgeEvidence, facts: RulesetFacts): ApprovalRequirement {
   if (facts.kind === "unreadable") return { kind: "unreadable", cause: facts.cause };
   const rules = [...facts.rules].sort((a, b) => a.rulesetId - b.rulesetId);
@@ -175,7 +174,6 @@ export type MergeGate =
   | { readonly kind: "closed"; readonly reason: string }
   | { readonly kind: "unreadable"; readonly cause: string };
 
-/** Whether `publish` may arm or merge. Stale-review flags matter only while an approval is required. */
 export function mergeGate(head: string, requirement: ApprovalRequirement): MergeGate {
   if (requirement.kind === "unreadable") return { kind: "unreadable", cause: requirement.cause };
   if (requirement.kind === "no-rule") {
