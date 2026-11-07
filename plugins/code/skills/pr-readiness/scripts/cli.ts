@@ -1,8 +1,8 @@
 import { OBLIGATIONS, type CandidateIdentity, type ReadinessPolicy, type ValidityDecision } from "./domain.ts";
 import { ACCEPTED, evaluateReadiness, type EvaluationReport } from "./evaluator.ts";
-import { deriveObservations } from "./evidence.ts";
+import { approvalRequirement, deriveObservations, mergeGate, type ForgeEvidence } from "./evidence.ts";
 import { autoMergePlan, parsePolicy, produceCommand, requiredCheckNames, rulesFromPolicy } from "./policy.ts";
-import { readRulesetFacts } from "./ruleset.ts";
+import { readRulesetFacts, type RulesetFacts } from "./ruleset.ts";
 import { GhForge, FilePacketStore, candidateFromPullRequest, packetKey, type Forge, type MergeStateStatus, type PacketStore, type PullRequestState } from "./adapters.ts";
 
 export interface ReadinessDependencies { readonly forge: Forge; readonly store: PacketStore; readonly mergeStateReads?: number; readonly mergeStateDelayMs?: number; }
@@ -30,7 +30,7 @@ function squashMerge(deps: ReadinessDependencies, repository: string, number: nu
     throw new Error(`PR #${number} is ready but not merged: ${message(error)}`);
   }
 }
-interface Assessment { readonly pr: PullRequestState; readonly candidate: CandidateIdentity; readonly policy: ReadinessPolicy; readonly report: EvaluationReport; }
+interface Assessment { readonly pr: PullRequestState; readonly candidate: CandidateIdentity; readonly policy: ReadinessPolicy; readonly report: EvaluationReport; readonly evidence: ForgeEvidence; readonly facts: RulesetFacts | undefined; }
 
 function value(argv: readonly string[], name: string): string | undefined { const i = argv.indexOf(name); return i >= 0 && i + 1 < argv.length ? argv[i + 1] : undefined; }
 function required(argv: readonly string[], name: string): string { const result = value(argv, name); if (!result || result.startsWith("--")) throw new Error(`${name} is required`); return result; }
@@ -42,10 +42,10 @@ function assess(forge: Forge, repository: string, number: number, bodyOverride: 
   const policy = parsePolicy(forge.readPolicy(repository));
   const candidate = candidateFromPullRequest(pr, policy.digest);
   const evidence = forge.readEvidence(repository, number, candidate.head);
-  const ruleset = OBLIGATIONS.some((obligation) => policy.obligations[obligation].producer === "ruleset")
-    ? { facts: readRulesetFacts(forge, repository, pr.baseRef ?? "", number), now: now ?? new Date().toISOString() }
+  const facts = OBLIGATIONS.some((obligation) => policy.obligations[obligation].producer === "ruleset")
+    ? readRulesetFacts(forge, repository, pr.baseRef ?? "", number)
     : undefined;
-  const { observations, notApplicable, notes, failedRunIds } = deriveObservations(candidate, policy, evidence, ruleset);
+  const { observations, notApplicable, notes, failedRunIds } = deriveObservations(candidate, policy, evidence, facts && { facts, now: now ?? new Date().toISOString() });
   const rules = rulesFromPolicy(policy).map((rule) => notApplicable.includes(rule.obligation) ? { ...rule, applies: () => false } : rule);
   const evaluated = evaluateReadiness({ candidate, observations, body: bodyOverride ?? pr.body, now, rules });
   const decisions = evaluated.decisions.map((decision): ValidityDecision => {
@@ -54,7 +54,7 @@ function assess(forge: Forge, repository: string, number: number, bodyOverride: 
     if (ACCEPTED.includes(decision.validity)) return spec.producer === "ruleset" && note ? { ...decision, reason: `${decision.reason}: ${note}` } : decision;
     return { ...decision, reason: note ? `${decision.reason}: ${note}` : decision.reason, produce: produceCommand(spec, { repository, pullRequest: number, head: candidate.head, author: evidence.author, failedRunIds: failedRunIds[decision.obligation] }) };
   });
-  return { pr, candidate, policy, report: { ...evaluated, decisions } };
+  return { pr, candidate, policy, evidence, facts, report: { ...evaluated, decisions } };
 }
 
 export function operation(argv: readonly string[], deps: ReadinessDependencies): number {
@@ -86,11 +86,22 @@ export function operation(argv: readonly string[], deps: ReadinessDependencies):
       const missing = requiredCheckNames(final.policy).filter((name) => !live.has(name));
       if (missing.length) throw new Error(`cannot arm auto-merge: ${final.pr.baseRef} does not require ${missing.map((name) => `"${name}"`).join(", ")}`);
     }
+    let gateReason: string | undefined;
+    if (plan.kind === "arm") {
+      const facts = final.facts ?? readRulesetFacts(deps.forge, repository, final.pr.baseRef ?? "", number);
+      const gate = mergeGate(final.candidate.head, approvalRequirement(final.candidate.head, final.evidence, facts));
+      if (gate.kind === "unreadable") throw new Error(`cannot arm auto-merge: ${gate.cause}`);
+      if (gate.kind === "closed") {
+        gateReason = gate.reason;
+        if (state?.armed) deps.forge.disableAutoMerge(repository, number);
+      }
+    }
     deps.store.putIfAbsent(packetKey(final.candidate, final.report.packet.bodyDigest), final.report.packet);
     deps.forge.markReady(repository, number, final.candidate.head);
     process.stdout.write(`PR #${number} is ${final.pr.isDraft ? "ready" : "already ready"} at ${final.candidate.head}\n`);
     if (plan.kind === "skip") process.stdout.write(`auto-merge skipped: ${plan.reason}\n`);
-    if (plan.kind === "arm") {
+    if (gateReason !== undefined) process.stdout.write(`auto-merge skipped: ${gateReason}\n`);
+    else if (plan.kind === "arm") {
       const head = final.candidate.head, armed = state?.armed;
       let mergeable: boolean;
       try { mergeable = mergeableNow(deps, repository, number); } catch (error) { throw new Error(`PR #${number} is ready but not merged: ${message(error)}`); }

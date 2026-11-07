@@ -15,6 +15,8 @@ export interface Forge {
   readEvidence(repository: string, number: number, head: string): ForgeEvidence;
   /** Replaces any existing auto-merge request with a squash request pinned to `head`. */
   enableAutoMerge(repository: string, number: number, head: string): void;
+  /** Removes any auto-merge request. */
+  disableAutoMerge(repository: string, number: number): void;
   /** Reads `mergeStateStatus` and `isMergeQueueEnabled` in one query; throws on a malformed answer. */
   readMergeState(repository: string, number: number): MergeState;
   /** Squash-merges the pull request, pinned to `head`. */
@@ -173,6 +175,10 @@ export class GhForge implements Forge {
     const { id, armed } = this.readArmState(repository, number);
     if (armed) this.graphql("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}", { id });
     this.graphql("mutation($id:ID!,$head:GitObjectID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH,expectedHeadOid:$head}){pullRequest{number}}}", { id, head });
+  }
+  disableAutoMerge(repository: string, number: number): void {
+    const { id } = this.readArmState(repository, number);
+    this.graphql("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}", { id });
   }
   private readPullRequestFields(repository: string, number: number, selection: string, what: string): Record<string, unknown> {
     const [owner, name] = repository.split("/");
