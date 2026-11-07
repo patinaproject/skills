@@ -278,3 +278,119 @@ describe("pr-readiness publish auto-merge", () => {
     }
   });
 });
+
+describe("pr-readiness publish approval gate", () => {
+  const publish = (forge: FakeForge) => invoke(["publish", "--repo", "o/r", "--pr", "7", "--takeover", "true"], forge);
+  const RULE = "ruleset 15382168 (patinaproject)";
+  const gated = (parameters: Record<string, unknown>) => pullRequestRule({ dismiss_stale_reviews_on_push: true, require_last_push_approval: true, ...parameters });
+  const reviewer = (file_patterns: string[], minimum_approvals = 1) => ({ reviewer: { id: 456, type: "Team" }, file_patterns, minimum_approvals });
+  const ready = `PR #7 is ready at ${HEAD}\n`;
+  const armed = `${ready}auto-merge (squash) armed at ${HEAD}\n`;
+  const skipped = (reason: string) => `${ready}auto-merge skipped: ${reason}\n`;
+  const nothing = (forge: FakeForge) => { expect(forge.enableAutoMergeCalls).toEqual([]); expect(forge.mergeCalls).toEqual([]); };
+  const unapproved = (options: FakeForgeOptions) => fakeForge({ policy: CHECKS_ONLY_POLICY, reviews: [], reviewDecision: "REVIEW_REQUIRED", ...options });
+
+  it("arms for this repository's live shape whatever the review decision", () => {
+    for (const reviewDecision of ["none", "APPROVED"] as const) {
+      const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [pullRequestRule()], reviewDecision });
+      expect(publish(forge)).toEqual({ code: 0, stdout: armed, stderr: "" });
+      expect(forge.readBranchRulesCalls).toEqual(["main"]);
+      expect(forge.enableAutoMergeCalls).toEqual([{ head: HEAD, method: "SQUASH" }]);
+    }
+  });
+  it("arms with no pull_request rule at all", () => {
+    const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [], reviewDecision: "none" });
+    expect(publish(forge)).toEqual({ code: 0, stdout: armed, stderr: "" });
+  });
+  it("skips a required approval the head lacks", () => {
+    const forge = unapproved({ branchRules: [gated({ required_approving_review_count: 1 })] });
+    expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`1 required approval under ${RULE}, 0 at ${HEAD.slice(0, 12)}, GitHub review decision REVIEW_REQUIRED; no required reviewers matched`), stderr: "" });
+    expect(forge.markReadyCalls).toEqual([HEAD]);
+    nothing(forge);
+  });
+  it("skips naming the rule and the file when a required_reviewers pattern matches", () => {
+    const cases: [string, string[], string, FakeForgeOptions][] = [
+      ["docs/**", ["docs/a/b.md"], "docs/a/b.md", {}],
+      ["*", [".env"], ".env", {}],
+      ["secrets/**", ["docs/new.md"], "secrets/old.txt", { changedFiles: [{ filename: "docs/new.md", previous_filename: "secrets/old.txt", status: "renamed" }] }],
+    ];
+    for (const [pattern, changedPaths, path, extra] of cases) {
+      const forge = unapproved({ branchRules: [gated({ required_reviewers: [reviewer([pattern])] })], changedPaths, ...extra });
+      expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`1 required approval under ${RULE}, 0 at ${HEAD.slice(0, 12)}, GitHub review decision REVIEW_REQUIRED; matched ${RULE} Team 456 (pattern "${pattern}" matched ${path})`), stderr: "" });
+      expect(forge.markReadyCalls).toEqual([HEAD]);
+      nothing(forge);
+    }
+  });
+  it("arms when no required_reviewers pattern matches a changed file", () => {
+    const forge = unapproved({ branchRules: [gated({ required_reviewers: [reviewer(["docs/**"])] })], reviewDecision: "none" });
+    expect(publish(forge)).toEqual({ code: 0, stdout: armed, stderr: "" });
+  });
+  it("skips when an approval is required and a stale-review flag is off, even with an approval at the head", () => {
+    for (const flag of ["dismiss_stale_reviews_on_push", "require_last_push_approval"]) {
+      const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [gated({ required_approving_review_count: 1, [flag]: false })] });
+      expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`1 required approval under ${RULE}, 1 at ${HEAD.slice(0, 12)}, GitHub review decision APPROVED; no required reviewers matched; ${flag} is off in ${RULE}`), stderr: "" });
+      nothing(forge);
+    }
+  });
+  it("skips on REVIEW_REQUIRED or CHANGES_REQUESTED when nothing is required", () => {
+    for (const reviewDecision of ["REVIEW_REQUIRED", "CHANGES_REQUESTED"] as const) {
+      const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [pullRequestRule()], reviewDecision, reviews: [] });
+      expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`no approval is required by ${RULE} and no required reviewers matched, but GitHub review decision is ${reviewDecision}`), stderr: "" });
+      nothing(forge);
+    }
+  });
+  it("skips on a standing change request", () => {
+    const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [pullRequestRule()], reviews: [review({ state: "CHANGES_REQUESTED", login: "hill" })] });
+    expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`@hill requested changes under ${RULE}`), stderr: "" });
+    nothing(forge);
+  });
+  it("exits 1 before the ready transition when the rules read fails", () => {
+    const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRulesError: "HTTP 502" });
+    expect(publish(forge)).toEqual({ code: 1, stdout: "", stderr: "pr-readiness: cannot arm auto-merge: cannot read the rules of main: HTTP 502\n" });
+    expect(forge.markReadyCalls).toEqual([]);
+    nothing(forge);
+  });
+  it("exits 1 before the ready transition on a malformed rule, a failed file read, or an unreadable reviewer entry", () => {
+    const cases: [FakeForgeOptions, string][] = [
+      [{ branchRules: [{ type: "pull_request", parameters: {}, ruleset_id: 1, ruleset_source: "x" }] }, "cannot read the rules of main: forge returned a malformed pull_request rule: required_approving_review_count"],
+      [{ branchRules: [pullRequestRule()], changedFilesError: "HTTP 500" }, "cannot read the changed files: HTTP 500"],
+      [{ branchRules: [pullRequestRule()], changedFilesTotal: 5 }, "the changed-file list is truncated, so the required reviewers cannot be matched against every path"],
+      [{ branchRules: [gated({ required_reviewers: [reviewer([])] })] }, `required reviewer Team 456 in ${RULE} has no file_patterns`],
+    ];
+    for (const [options, cause] of cases) {
+      const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, ...options });
+      expect(publish(forge)).toEqual({ code: 1, stdout: "", stderr: `pr-readiness: cannot arm auto-merge: ${cause}\n` });
+      expect(forge.markReadyCalls).toEqual([]);
+      nothing(forge);
+    }
+  });
+  it("arms an approval-gated policy once the head has its required approval", () => {
+    const forge = fakeForge({ policy: AUTO_MERGE_POLICY, branchRules: [gated({ required_approving_review_count: 1 })] });
+    expect(publish(forge)).toEqual({ code: 0, stdout: armed, stderr: "" });
+    expect(forge.readBranchRulesCalls).toEqual(["main"]);
+  });
+  it("disarms an existing arm and skips when the required approval is gone", () => {
+    for (const armedState of [{ mergeMethod: "SQUASH", head: HEAD }, { mergeMethod: "MERGE" }]) {
+      const forge = unapproved({ isDraft: false, armed: armedState, branchRules: [gated({ required_approving_review_count: 1 })] });
+      expect(publish(forge)).toEqual({ code: 0, stdout: `PR #7 is already ready at ${HEAD}\nauto-merge skipped: 1 required approval under ${RULE}, 0 at ${HEAD.slice(0, 12)}, GitHub review decision REVIEW_REQUIRED; no required reviewers matched\n`, stderr: "" });
+      expect(forge.disableAutoMergeCalls).toEqual([7]);
+      nothing(forge);
+    }
+  });
+  it("does not disarm when the gate is open", () => {
+    const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [pullRequestRule()], isDraft: false, armed: { mergeMethod: "SQUASH", head: HEAD } });
+    expect(publish(forge).code).toBe(0);
+    expect(forge.disableAutoMergeCalls).toEqual([]);
+  });
+  it("reads no rules when autoMerge is false", () => {
+    const forge = fakeForge({ policy: POLICY, branchRules: [gated({ required_approving_review_count: 1 })] });
+    expect(publish(forge).code).toBe(0);
+    expect(forge.readBranchRulesCalls).toEqual([]);
+    expect(forge.readChangedFilesCalls).toEqual([]);
+  });
+  it("keeps the base-branch skip without reading rules", () => {
+    const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, baseRef: "feature/parent", branchRules: [gated({ required_approving_review_count: 1 })], reviews: [] });
+    expect(publish(forge).code).toBe(0);
+    expect(forge.readBranchRulesCalls).toEqual([]);
+  });
+});
