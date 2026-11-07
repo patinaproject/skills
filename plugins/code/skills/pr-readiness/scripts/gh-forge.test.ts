@@ -2,6 +2,8 @@ import { describe, expect, it } from "bun:test";
 import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { approvalRequirement, mergeGate } from "./evidence.ts";
+import { readRulesetFacts } from "./ruleset.ts";
 import { GhForge, armedHeadFromTimeline, parseChangedPaths, parseReviewDecision, requiredContexts } from "./adapters.ts";
 
 const review = (id: number, login: string, type: string) => JSON.stringify({ id, user: { login, type }, author_association: "CONTRIBUTOR", state: "APPROVED", commit_id: "abc", submitted_at: "2026-10-01T00:00:00Z", html_url: `https://github.com/o/r/pull/7#pullrequestreview-${id}` });
@@ -178,5 +180,61 @@ describe("GhForge merge", () => {
     const { result } = stub(() => data({ state: "MERGED", mergeCommit: { oid: "m2" } }), (forge) => forge.readMergeOutcome("o/r", 7));
     expect(result).toEqual({ state: "MERGED", mergeCommitOid: "m2" });
     expect(stub(() => data({ state: "OPEN", mergeCommit: null }), (forge) => forge.readMergeOutcome("o/r", 7)).result).toEqual({ state: "OPEN", mergeCommitOid: undefined });
+  });
+});
+
+describe("GhForge.disableAutoMerge", () => {
+  it("reads the pull request id, then disables auto-merge once", () => {
+    const dir = mkdtempSync(join(tmpdir(), "stub-gh-"));
+    const pr = JSON.stringify({ data: { repository: { defaultBranchRef: { name: "main" }, pullRequest: { id: "PR_1", autoMergeRequest: { mergeMethod: "SQUASH" }, timelineItems: { nodes: [] } } } } });
+    writeFileSync(join(dir, "gh"), `#!/bin/sh\necho "$*" >> "${dir}/calls"\ncase "$*" in\n  *mutation*) echo '{"data":{}}' ;;\n  *) echo '${pr}' ;;\nesac\n`);
+    chmodSync(join(dir, "gh"), 0o755);
+    const previous = process.env.PATH;
+    process.env.PATH = `${dir}:${previous}`;
+    try { new GhForge("gh").disableAutoMerge("o/r", 7); } finally { process.env.PATH = previous; }
+    const mutations = readFileSync(join(dir, "calls"), "utf8").split("\n").filter((call) => call.includes("mutation"));
+    expect(mutations).toHaveLength(1);
+    expect(mutations[0]).toContain("mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){pullRequest{number}}}");
+    expect(mutations[0]).toContain("id=PR_1");
+  });
+});
+
+describe("the publish approval gate's reads", () => {
+  it("touch only the base branch rules, the pull request files and reviews, and the review decision", () => {
+    const dir = mkdtempSync(join(tmpdir(), "stub-gh-"));
+    const rule = JSON.stringify({ type: "pull_request", ruleset_id: 1, ruleset_source: "o", parameters: { required_approving_review_count: 1, dismiss_stale_reviews_on_push: true, require_last_push_approval: true, required_reviewers: [] } });
+    const script = `#!/bin/sh
+echo "$*" >> "${dir}/calls"
+case "$*" in
+  *rules/branches/main*) echo '${rule}' ;;
+  *pulls/7/files*) echo '{"filename":"src/a.ts"}' ;;
+  *check-runs*) exit 0 ;;
+  *pulls/7/reviews*) exit 0 ;;
+  *reviewDecision*) echo '{"reviewDecision":"REVIEW_REQUIRED"}' ;;
+  *pulls/7) echo '{"user":{"login":"author"},"changed_files":1}' ;;
+  *) echo "unexpected: $*" >&2; exit 2 ;;
+esac
+`;
+    writeFileSync(join(dir, "gh"), script);
+    chmodSync(join(dir, "gh"), 0o755);
+    const previous = process.env.PATH;
+    process.env.PATH = `${dir}:${previous}`;
+    let gate;
+    try {
+      const forge = new GhForge("gh");
+      const evidence = forge.readEvidence("o/r", 7, "abc");
+      gate = mergeGate("abc", approvalRequirement("abc", evidence, readRulesetFacts(forge, "o/r", "main", 7)));
+    } finally { process.env.PATH = previous; }
+    expect(gate).toEqual({ kind: "closed", reason: "1 required approval under ruleset 1 (o), 0 at abc, GitHub review decision REVIEW_REQUIRED; no required reviewers matched" });
+    const calls = readFileSync(join(dir, "calls"), "utf8").split("\n").filter(Boolean);
+    expect(calls.sort()).toEqual([
+      "api --paginate repos/o/r/commits/abc/check-runs?per_page=100 --jq .check_runs[]",
+      "api --paginate repos/o/r/pulls/7/files?per_page=100 --jq .[]",
+      "api --paginate repos/o/r/pulls/7/reviews?per_page=100 --jq .[]",
+      "api --paginate repos/o/r/rules/branches/main?per_page=100 --jq .[]",
+      "api repos/o/r/pulls/7",
+      "api repos/o/r/pulls/7",
+      "pr view 7 --repo o/r --json reviewDecision",
+    ]);
   });
 });

@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.25.0](https://github.com/patinaproject/skills/compare/v4.24.1...v4.25.0) (2026-11-07)
+
+
+### Features
+
+* [#848](https://github.com/patinaproject/skills/issues/848) hold the publish arm while the live ruleset needs an approval ([#871](https://github.com/patinaproject/skills/issues/871)) ([7939403](https://github.com/patinaproject/skills/commit/7939403d3b48f2222902ffefbfb143254811199e))
+
 ## [4.24.1](https://github.com/patinaproject/skills/compare/v4.24.0...v4.24.1) (2026-11-06)
 
 

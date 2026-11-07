@@ -125,33 +125,85 @@ const STALE_FLAGS: readonly { readonly name: string; readonly off: (rule: PullRe
   { name: "require_last_push_approval", off: (rule) => !rule.requireLastPushApproval },
 ];
 
-function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, { facts, now }: RulesetInput): Outcome {
-  if (facts.kind === "unreadable") return { note: facts.cause };
+export type ApprovalRequirement =
+  | { readonly kind: "unreadable"; readonly cause: string }
+  | { readonly kind: "no-rule"; readonly decision: ReviewDecision }
+  | {
+    readonly kind: "rules";
+    readonly rules: readonly PullRequestRule[];
+    readonly changedPaths: readonly string[];
+    readonly matches: readonly ReviewerMatch[];
+    readonly staleFlagsOff: readonly string[];
+    readonly blocking: ReviewFact | undefined;
+    readonly required: number;
+    readonly atHead: readonly ReviewFact[];
+    readonly decision: ReviewDecision;
+  };
+
+export function approvalRequirement(head: string, evidence: ForgeEvidence, facts: RulesetFacts): ApprovalRequirement {
+  if (facts.kind === "unreadable") return { kind: "unreadable", cause: facts.cause };
   const rules = [...facts.rules].sort((a, b) => a.rulesetId - b.rulesetId);
-  if (rules.length === 0) return { note: `no pull_request rule applies to ${candidate.baseRef || candidate.base}` };
-  if (facts.truncated) return { note: "the changed-file list is truncated, so the required reviewers cannot be matched against every path" };
+  if (rules.length === 0) return { kind: "no-rule", decision: evidence.reviewDecision };
+  if (facts.truncated) return { kind: "unreadable", cause: "the changed-file list is truncated, so the required reviewers cannot be matched against every path" };
   for (const rule of rules) {
     for (const entry of [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId)) {
-      if (entry.filePatterns.length === 0) return { note: `required reviewer ${entry.reviewerType} ${entry.reviewerId} in ${ruleName(rule)} has no file_patterns` };
+      if (entry.filePatterns.length === 0) return { kind: "unreadable", cause: `required reviewer ${entry.reviewerType} ${entry.reviewerId} in ${ruleName(rule)} has no file_patterns` };
       const invalid = invalidPattern(entry.filePatterns);
-      if (invalid !== undefined) return { note: `required reviewer ${reviewerName(entry)} in ${ruleName(rule)} has an invalid file pattern "${printable(invalid)}"` };
+      if (invalid !== undefined) return { kind: "unreadable", cause: `required reviewer ${reviewerName(entry)} in ${ruleName(rule)} has an invalid file pattern "${printable(invalid)}"` };
     }
   }
-  const off = STALE_FLAGS.flatMap((flag) => {
+  const staleFlagsOff = STALE_FLAGS.flatMap((flag) => {
     const offBy = rules.filter(flag.off);
     return offBy.length ? [`${flag.name} is off in ${offBy.map(ruleName).join(", ")}`] : [];
   });
-  if (off.length) return { note: off.join("; ") };
-  const { blocking, approvalsOnAnyCommit: approvals } = standingReviews(evidence);
-  if (blocking) return { note: `@${blocking.login} requested changes` };
-
+  const { blocking, approvalsOnAnyCommit } = standingReviews(evidence);
   const matches = matchEntries(rules, facts.changedPaths);
   const baseCount = Math.max(...rules.map((rule) => rule.requiredApprovingReviewCount));
-  const required = Math.max(baseCount, ...matches.map((match) => match.minimumApprovals));
+  return {
+    kind: "rules", rules, changedPaths: facts.changedPaths, matches, staleFlagsOff, blocking,
+    required: Math.max(baseCount, ...matches.map((match) => match.minimumApprovals)),
+    atHead: approvalsOnAnyCommit.filter((review) => review.commitId === head),
+    decision: evidence.reviewDecision,
+  };
+}
+
+const matchedText = (matches: readonly ReviewerMatch[]): string => matches.length ? `matched ${matches.map(matchName).join(", ")}` : "no required reviewers matched";
+
+export type MergeGate =
+  | { readonly kind: "open" }
+  | { readonly kind: "closed"; readonly reason: string }
+  | { readonly kind: "unreadable"; readonly cause: string };
+
+export function mergeGate(head: string, requirement: ApprovalRequirement): MergeGate {
+  if (requirement.kind === "unreadable") return { kind: "unreadable", cause: requirement.cause };
+  if (requirement.kind === "no-rule") {
+    return requirement.decision === "REVIEW_REQUIRED" || requirement.decision === "CHANGES_REQUESTED"
+      ? { kind: "closed", reason: `no pull_request rule applies, but GitHub review decision is ${requirement.decision}` }
+      : { kind: "open" };
+  }
+  const { rules, matches, staleFlagsOff, blocking, required, atHead, decision } = requirement;
+  const names = rules.map(ruleName).join(", ");
+  if (blocking) return { kind: "closed", reason: `@${blocking.login} requested changes under ${names}` };
+  if (required === 0) {
+    return decision === "REVIEW_REQUIRED" || decision === "CHANGES_REQUESTED"
+      ? { kind: "closed", reason: `no approval is required by ${names} and ${matchedText(matches)}, but GitHub review decision is ${decision}` }
+      : { kind: "open" };
+  }
+  if (atHead.length >= required && decision === "APPROVED" && staleFlagsOff.length === 0) return { kind: "open" };
+  const matched = matches.length ? `matched ${matches.map((match) => `${ruleName(match)} ${matchName(match)}`).join(", ")}` : "no required reviewers matched";
+  const flags = staleFlagsOff.length ? `; ${staleFlagsOff.join("; ")}` : "";
+  return { kind: "closed", reason: `${required} required ${required === 1 ? "approval" : "approvals"} under ${names}, ${atHead.length} at ${head.slice(0, 12)}, GitHub review decision ${decision}; ${matched}${flags}` };
+}
+
+function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, { facts, now }: RulesetInput): Outcome {
+  const requirement = approvalRequirement(candidate.head, evidence, facts);
+  if (requirement.kind === "unreadable") return { note: requirement.cause };
+  if (requirement.kind === "no-rule") return { note: `no pull_request rule applies to ${candidate.baseRef || candidate.base}` };
+  const { rules, matches, staleFlagsOff, blocking, required, atHead, decision } = requirement;
+  if (staleFlagsOff.length) return { note: staleFlagsOff.join("; ") };
+  if (blocking) return { note: `@${blocking.login} requested changes` };
   const applies = required > 0;
-  const atHead = approvals.filter((review) => review.commitId === candidate.head);
-  const decision = evidence.reviewDecision;
-  const matched = matches.length ? `matched ${matches.map(matchName).join(", ")}` : "no required reviewers matched";
+  const matched = matchedText(matches);
   if (!applies) {
     if (decision === "REVIEW_REQUIRED" || decision === "CHANGES_REQUESTED") {
       return { note: `no approval is required by ${rules.map(ruleName).join(", ")} and ${matched}, but GitHub review decision is ${decision}` };
@@ -163,14 +215,14 @@ function rulesetOutcome(candidate: CandidateIdentity, evidence: ForgeEvidence, {
   const provenance: Provenance = {
     kind: "ruleset",
     rules: rules.map((rule) => ({ rulesetId: rule.rulesetId, rulesetSource: rule.rulesetSource })),
-    changedPathsDigest: sha256([...facts.changedPaths].sort()),
+    changedPathsDigest: sha256([...requirement.changedPaths].sort()),
     matches: matches.map(provenanceMatch),
     requiredApprovals: applies ? required : 0,
     approvals: sortedAtHead.map((review) => ({ reviewer: review.login, reviewId: review.id, url: review.htmlUrl })),
   };
   const inputDigest = sha256({
     rules: rules.map((rule) => ({ ...rule, requiredReviewers: [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId) })),
-    changedPaths: [...facts.changedPaths].sort(),
+    changedPaths: [...requirement.changedPaths].sort(),
     approvals: provenance.approvals,
   });
   const capturedAt = sortedAtHead.map((review) => review.submittedAt!).sort().at(-1) ?? now;
