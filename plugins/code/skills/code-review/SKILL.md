@@ -142,7 +142,8 @@ its extra checks come only from the copy at `F`.
 
 After `## Security` and before the summary line, add one
 `Omitted by REVIEW.md: <rule>: <count>` line for each rule that removed
-findings or locations, counting both.
+findings or locations. Count each removed location once; a finding removed
+whole counts as its locations, and a finding with no location counts as one.
 
 When `F` has no root `REVIEW.md`, no sub-agent brief carries review rules, and
 the report never mentions `REVIEW.md`. Do not note its absence or a nested
@@ -254,7 +255,7 @@ If the spec is missing, skip the Spec sub-agent and note this in the final repor
 
 ### 6. Aggregate
 
-Open with the reviewed range from the output contract. Present the reports under `## Standards`, `## Spec`, `## Evidence`, `## Bugs`, and `## Security` headings, verbatim or lightly cleaned. When earlier findings were passed, add `## Earlier findings` with each `open` one's `id`, axis, severity, and `fixed` or `still open`. Drop any new finding that repeats an earlier finding, unless the **Earlier round** exception applies. Every finding keeps its severity tag. Tag a finding a sub-agent left untagged by the Severity rules. When there are review rules, apply them again here: drop skipped locations except on Security, then apply count limits as **Review rules** says, then add the `Omitted by REVIEW.md` lines, counting what the sub-agents listed as dropped and what this step removed. Do **not** merge or rerank findings across axes, because the axes are deliberately separate (see _Why separate axes_).
+Open with the reviewed range from the output contract. Present the reports under `## Standards`, `## Spec`, `## Evidence`, `## Bugs`, and `## Security` headings, verbatim or lightly cleaned. When earlier findings were passed, add `## Earlier findings` with each `open` one's `id`, axis, severity, and `fixed` or `still open`. Drop any new finding that repeats an earlier finding, unless the **Earlier round** exception applies. Every finding keeps its severity tag. Tag a finding a sub-agent left untagged by the Severity rules. When there are review rules, apply them again here: drop skipped locations except on Security, then apply count limits as **Review rules** says, then add the `Omitted by REVIEW.md` lines, counting what the sub-agents listed as dropped plus what this step removed that they did not list. Do **not** merge or rerank findings across axes, because the axes are deliberately separate (see _Why separate axes_).
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Then the blocking sentence from the output contract, followed by the count of blocking findings, `still open` earlier findings included. Then the `Follow-up candidates` list. Don't pick a single winner across axes: that's the reranking the separation exists to prevent.
 
