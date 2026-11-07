@@ -127,7 +127,7 @@ const STALE_FLAGS: readonly { readonly name: string; readonly off: (rule: PullRe
 
 export type ApprovalRequirement =
   | { readonly kind: "unreadable"; readonly cause: string }
-  | { readonly kind: "no-rule" }
+  | { readonly kind: "no-rule"; readonly decision: ReviewDecision }
   | {
     readonly kind: "rules";
     readonly rules: readonly PullRequestRule[];
@@ -144,7 +144,7 @@ export type ApprovalRequirement =
 export function approvalRequirement(head: string, evidence: ForgeEvidence, facts: RulesetFacts): ApprovalRequirement {
   if (facts.kind === "unreadable") return { kind: "unreadable", cause: facts.cause };
   const rules = [...facts.rules].sort((a, b) => a.rulesetId - b.rulesetId);
-  if (rules.length === 0) return { kind: "no-rule" };
+  if (rules.length === 0) return { kind: "no-rule", decision: evidence.reviewDecision };
   if (facts.truncated) return { kind: "unreadable", cause: "the changed-file list is truncated, so the required reviewers cannot be matched against every path" };
   for (const rule of rules) {
     for (const entry of [...rule.requiredReviewers].sort((a, b) => a.reviewerId - b.reviewerId)) {
@@ -178,7 +178,11 @@ export type MergeGate =
 /** Whether `publish` may arm or merge. Stale-review flags matter only while an approval is required. */
 export function mergeGate(head: string, requirement: ApprovalRequirement): MergeGate {
   if (requirement.kind === "unreadable") return { kind: "unreadable", cause: requirement.cause };
-  if (requirement.kind === "no-rule") return { kind: "open" };
+  if (requirement.kind === "no-rule") {
+    return requirement.decision === "REVIEW_REQUIRED" || requirement.decision === "CHANGES_REQUESTED"
+      ? { kind: "closed", reason: `no pull_request rule applies, but GitHub review decision is ${requirement.decision}` }
+      : { kind: "open" };
+  }
   const { rules, matches, staleFlagsOff, blocking, required, atHead, decision } = requirement;
   const names = rules.map(ruleName).join(", ");
   if (blocking) return { kind: "closed", reason: `@${blocking.login} requested changes under ${names}` };

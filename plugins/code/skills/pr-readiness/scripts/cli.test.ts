@@ -302,6 +302,14 @@ describe("pr-readiness publish approval gate", () => {
     const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [], reviewDecision: "none" });
     expect(publish(forge)).toEqual({ code: 0, stdout: armed, stderr: "" });
   });
+  it("skips with no pull_request rule while GitHub still requires a review", () => {
+    for (const reviewDecision of ["REVIEW_REQUIRED", "CHANGES_REQUESTED"] as const) {
+      const forge = fakeForge({ policy: CHECKS_ONLY_POLICY, branchRules: [], reviewDecision });
+      expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`no pull_request rule applies, but GitHub review decision is ${reviewDecision}`), stderr: "" });
+      expect(forge.markReadyCalls).toEqual([HEAD]);
+      nothing(forge);
+    }
+  });
   it("skips a required approval the head lacks", () => {
     const forge = unapproved({ branchRules: [gated({ required_approving_review_count: 1 })] });
     expect(publish(forge)).toEqual({ code: 0, stdout: skipped(`1 required approval under ${RULE}, 0 at ${HEAD.slice(0, 12)}, GitHub review decision REVIEW_REQUIRED; no required reviewers matched`), stderr: "" });
